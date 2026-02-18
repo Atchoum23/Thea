@@ -158,11 +158,17 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
     private func handleAnalyzeContent(_ content: String, completion: @escaping ([String: Any]) -> Void) {
         // Save analysis request for main app
-        saveRequest([
-            "type": "analyze",
-            "content": String(content.prefix(10000)), // Limit content size
-            "timestamp": Date().timeIntervalSince1970
-        ])
+        do {
+            try saveRequest([
+                "type": "analyze",
+                "content": String(content.prefix(10000)), // Limit content size
+                "timestamp": Date().timeIntervalSince1970
+            ])
+        } catch {
+            logger.error("Failed to save analyze request: \(error)")
+            completion(["error": "Failed to queue analysis: \(error.localizedDescription)"])
+            return
+        }
 
         // Return quick response - full analysis via main app
         completion([
@@ -173,11 +179,17 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
     }
 
     private func handleSaveToMemory(_ data: [String: Any], completion: @escaping ([String: Any]) -> Void) {
-        saveRequest([
-            "type": "memory",
-            "data": data,
-            "timestamp": Date().timeIntervalSince1970
-        ])
+        do {
+            try saveRequest([
+                "type": "memory",
+                "data": data,
+                "timestamp": Date().timeIntervalSince1970
+            ])
+        } catch {
+            logger.error("Failed to save memory request: \(error)")
+            completion(["error": "Failed to save to memory: \(error.localizedDescription)"])
+            return
+        }
 
         // Notify main app via Darwin notification
         notifyMainApp("SavedToMemory")
@@ -212,12 +224,18 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
     }
 
     private func handleExecuteAction(_ actionId: String, params: [String: Any], completion: @escaping ([String: Any]) -> Void) {
-        saveRequest([
-            "type": "action",
-            "actionId": actionId,
-            "params": params,
-            "timestamp": Date().timeIntervalSince1970
-        ])
+        do {
+            try saveRequest([
+                "type": "action",
+                "actionId": actionId,
+                "params": params,
+                "timestamp": Date().timeIntervalSince1970
+            ])
+        } catch {
+            logger.error("Failed to save action request: \(error)")
+            completion(["error": "Failed to queue action: \(error.localizedDescription)"])
+            return
+        }
 
         notifyMainApp("ActionExecuted")
 
@@ -226,34 +244,49 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
     private func handleTrackBrowsing(url: String, title: String, completion: @escaping ([String: Any]) -> Void) {
         // Privacy-conscious tracking - only store if user enabled
-        if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) {
-            let prefsPath = containerURL.appendingPathComponent("safari_prefs.json")
-            if let data = try? Data(contentsOf: prefsPath),
-               let prefs = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let trackingEnabled = prefs["trackBrowsing"] as? Bool,
-               trackingEnabled
-            {
-                // Store visit
-                let historyPath = containerURL.appendingPathComponent("browse_history.jsonl")
-                let entry: [String: Any] = [
-                    "url": url,
-                    "title": title,
-                    "timestamp": Date().timeIntervalSince1970
-                ]
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
+            completion(["success": true]) // Tracking is best-effort
+            return
+        }
 
-                if let entryData = try? JSONSerialization.data(withJSONObject: entry),
-                   let line = String(data: entryData, encoding: .utf8)
-                {
-                    let handle = try? FileHandle(forWritingTo: historyPath)
-                    if let handle {
-                        handle.seekToEndOfFile()
-                        handle.write((line + "\n").data(using: .utf8)!)
-                        try? handle.close()
-                    } else {
-                        try? (line + "\n").write(to: historyPath, atomically: true, encoding: .utf8)
-                    }
-                }
+        let prefsPath = containerURL.appendingPathComponent("safari_prefs.json")
+        // Reading prefs is best-effort; if prefs unreadable, tracking is off
+        guard let data = try? Data(contentsOf: prefsPath),
+              let prefs = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let trackingEnabled = prefs["trackBrowsing"] as? Bool,
+              trackingEnabled
+        else {
+            completion(["success": true])
+            return
+        }
+
+        // Store visit
+        let historyPath = containerURL.appendingPathComponent("browse_history.jsonl")
+        let entry: [String: Any] = [
+            "url": url,
+            "title": title,
+            "timestamp": Date().timeIntervalSince1970
+        ]
+
+        do {
+            let entryData = try JSONSerialization.data(withJSONObject: entry)
+            guard let line = String(data: entryData, encoding: .utf8) else {
+                completion(["success": false, "error": "Failed to encode browse entry as UTF-8"])
+                return
             }
+
+            if let handle = try? FileHandle(forWritingTo: historyPath) {
+                handle.seekToEndOfFile()
+                handle.write((line + "\n").data(using: .utf8)!)
+                try handle.close()
+            } else {
+                try (line + "\n").write(to: historyPath, atomically: true, encoding: .utf8)
+            }
+        } catch {
+            logger.error("Failed to write browse history: \(error)")
+            // Browsing tracking is non-critical; report but don't block
+            completion(["success": false, "error": "Failed to store browse history: \(error.localizedDescription)"])
+            return
         }
 
         completion(["success": true])
@@ -296,19 +329,52 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         return String(content.prefix(200)) + (content.count > 200 ? "..." : "")
     }
 
-    func saveRequest(_ request: [String: Any]) {
+    enum SaveRequestError: Error, LocalizedError {
+        case noAppGroupContainer
+        case directoryCreationFailed(Error)
+        case serializationFailed(Error)
+        case writeFailed(Error)
+
+        var errorDescription: String? {
+            switch self {
+            case .noAppGroupContainer:
+                "App group container unavailable"
+            case .directoryCreationFailed(let error):
+                "Failed to create requests directory: \(error.localizedDescription)"
+            case .serializationFailed(let error):
+                "Failed to serialize request: \(error.localizedDescription)"
+            case .writeFailed(let error):
+                "Failed to write request to disk: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    func saveRequest(_ request: [String: Any]) throws {
         guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
-            return
+            throw SaveRequestError.noAppGroupContainer
         }
 
         let requestsDir = containerURL.appendingPathComponent("SafariRequests", isDirectory: true)
-        try? FileManager.default.createDirectory(at: requestsDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: requestsDir, withIntermediateDirectories: true)
+        } catch {
+            throw SaveRequestError.directoryCreationFailed(error)
+        }
 
         let filename = "\(UUID().uuidString).json"
         let filePath = requestsDir.appendingPathComponent(filename)
 
-        if let data = try? JSONSerialization.data(withJSONObject: request) {
-            try? data.write(to: filePath)
+        let data: Data
+        do {
+            data = try JSONSerialization.data(withJSONObject: request)
+        } catch {
+            throw SaveRequestError.serializationFailed(error)
+        }
+
+        do {
+            try data.write(to: filePath)
+        } catch {
+            throw SaveRequestError.writeFailed(error)
         }
     }
 

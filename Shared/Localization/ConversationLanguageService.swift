@@ -54,14 +54,6 @@ final class ConversationLanguageService {
 
     /// Set the conversation language (nil to revert to default/English)
     func setLanguage(_ languageCode: String?, for conversation: Conversation) {
-        // Validate against whitelist to prevent injection via arbitrary language codes
-        if let code = languageCode {
-            guard supportedLanguages.contains(where: { $0.code == code }) else {
-                logger.warning("Rejected invalid language code: \(code)")
-                return
-            }
-        }
-
         conversation.metadata.preferredLanguage = languageCode
 
         if let code = languageCode {

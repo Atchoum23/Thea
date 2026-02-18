@@ -1,5 +1,6 @@
 #if os(macOS)
     import Foundation
+    import OSLog
     import Observation
 
     // MARK: - Swift Validator
@@ -10,6 +11,8 @@
     @Observable
     final class SwiftValidator {
         static let shared = SwiftValidator()
+
+        private let logger = Logger(subsystem: "ai.thea.app", category: "SwiftValidator")
 
         private(set) var isValidating: Bool = false
         private(set) var lastValidationResult: SwiftValidationResult?
@@ -35,13 +38,21 @@
                 let result = try await runSwiftCompiler(on: tempFile)
 
                 // Clean up
-                try? FileManager.default.removeItem(at: tempFile)
+                do {
+                    try FileManager.default.removeItem(at: tempFile)
+                } catch {
+                    logger.error("Failed to remove temp validation file: \(error)")
+                }
 
                 lastValidationResult = result
                 return result
             } catch {
                 // Clean up on error
-                try? FileManager.default.removeItem(at: tempFile)
+                do {
+                    try FileManager.default.removeItem(at: tempFile)
+                } catch {
+                    logger.error("Failed to remove temp validation file after error: \(error)")
+                }
                 throw error
             }
         }

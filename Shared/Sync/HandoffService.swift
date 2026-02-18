@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import OSLog
 #if os(macOS)
     import AppKit
 #else
@@ -38,6 +39,8 @@ public final class HandoffService {
     // MARK: - Configuration
 
     private var configuration: HandoffConfiguration
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "HandoffService")
 
     // MARK: - Initialization
 
@@ -236,7 +239,6 @@ public final class HandoffService {
         isEnabled = config.handoffEnabled
     }
 
-    /// Returns the current Handoff configuration, including per-activity-type enable flags and network requirements.
     public func getConfiguration() -> HandoffConfiguration {
         configuration
     }
@@ -320,18 +322,25 @@ public struct HandoffConfiguration: Codable, Sendable {
     private static let configKey = "HandoffService.configuration"
 
     public static func load() -> HandoffConfiguration {
-        if let data = UserDefaults.standard.data(forKey: configKey),
-           let config = try? JSONDecoder().decode(HandoffConfiguration.self, from: data)
-        {
-            return config
+        if let data = UserDefaults.standard.data(forKey: configKey) {
+            do {
+                let config = try JSONDecoder().decode(HandoffConfiguration.self, from: data)
+                return config
+            } catch {
+                Logger(subsystem: "ai.thea.app", category: "HandoffService")
+                    .debug("Failed to decode HandoffConfiguration: \(error.localizedDescription)")
+            }
         }
         return HandoffConfiguration()
     }
 
-    /// Persists the current Handoff configuration to UserDefaults as JSON.
     public func save() {
-        if let data = try? JSONEncoder().encode(self) {
+        do {
+            let data = try JSONEncoder().encode(self)
             UserDefaults.standard.set(data, forKey: HandoffConfiguration.configKey)
+        } catch {
+            Logger(subsystem: "ai.thea.app", category: "HandoffService")
+                .debug("Failed to encode HandoffConfiguration: \(error.localizedDescription)")
         }
     }
 }
@@ -366,7 +375,11 @@ public actor PresenceMonitor {
         presenceTask = Task {
             while !Task.isCancelled, isMonitoring {
                 await updatePresence()
-                try? await Task.sleep(for: .seconds(updateInterval))
+                do {
+                    try await Task.sleep(nanoseconds: UInt64(updateInterval * 1_000_000_000))
+                } catch {
+                    break
+                }
             }
         }
     }

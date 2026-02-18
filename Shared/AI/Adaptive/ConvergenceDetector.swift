@@ -511,14 +511,21 @@ public final class ConvergenceDetector: ObservableObject {
             lastConvergedAt: lastConvergedAt
         )
 
-        if let data = try? JSONEncoder().encode(state) {
+        do {
+            let data = try JSONEncoder().encode(state)
             UserDefaults.standard.set(data, forKey: persistenceKey)
+        } catch {
+            logger.error("Failed to encode DetectorState: \(error.localizedDescription)")
         }
     }
 
     private func loadState() {
-        guard let data = UserDefaults.standard.data(forKey: persistenceKey),
-              let state = try? JSONDecoder().decode(DetectorState.self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: persistenceKey) else { return }
+        let state: DetectorState
+        do {
+            state = try JSONDecoder().decode(DetectorState.self, from: data)
+        } catch {
+            logger.error("Failed to decode DetectorState: \(error.localizedDescription)")
             return
         }
 

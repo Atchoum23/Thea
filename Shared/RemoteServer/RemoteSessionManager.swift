@@ -9,12 +9,17 @@
 import Combine
 import Foundation
 import Network
+import OSLog
 
 // MARK: - Remote Session Manager
 
 /// Manages active remote client sessions
 @MainActor
 public class RemoteSessionManager: ObservableObject {
+    // MARK: - Private
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "RemoteSessionManager")
+
     // MARK: - Published State
 
     @Published public private(set) var activeSessions: [RemoteSession] = []
@@ -114,7 +119,11 @@ public class RemoteSessionManager: ObservableObject {
             }
 
             // Wait for heartbeat interval
-            try? await Task.sleep(for: .seconds(heartbeatInterval))
+            do {
+                try await Task.sleep(nanoseconds: UInt64(heartbeatInterval * 1_000_000_000))
+            } catch {
+                break
+            }
 
             // Update activity timestamp if connection is alive
             if sessions[session.id] != nil {
@@ -158,16 +167,21 @@ public class RemoteSessionManager: ObservableObject {
     }
 
     private func loadSessionHistory() {
-        if let data = UserDefaults.standard.data(forKey: "thea.remote.sessionhistory"),
-           let history = try? JSONDecoder().decode([SessionRecord].self, from: data)
-        {
-            sessionHistory = history
+        if let data = UserDefaults.standard.data(forKey: "thea.remote.sessionhistory") {
+            do {
+                sessionHistory = try JSONDecoder().decode([SessionRecord].self, from: data)
+            } catch {
+                logger.error("Failed to decode session history: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveSessionHistory() {
-        if let data = try? JSONEncoder().encode(sessionHistory) {
+        do {
+            let data = try JSONEncoder().encode(sessionHistory)
             UserDefaults.standard.set(data, forKey: "thea.remote.sessionhistory")
+        } catch {
+            logger.error("Failed to encode session history: \(error.localizedDescription)")
         }
     }
 
@@ -191,9 +205,6 @@ public class RemoteSessionManager: ObservableObject {
 
 // MARK: - Remote Session
 
-/// Represents an active remote connection session, wrapping the network connection,
-/// authentication state, permissions, and message send/receive capabilities.
-// @unchecked Sendable: contains NWConnection (non-Sendable); managed by @MainActor RemoteSessionManager
 public struct RemoteSession: Identifiable, @unchecked Sendable {
     public let id: String
     public let connection: NWConnection
@@ -244,20 +255,12 @@ public struct RemoteSession: Identifiable, @unchecked Sendable {
 
     // MARK: - Permission Check
 
-    /// Checks whether this session has been granted a specific permission.
-    /// - Parameter permission: The ``RemotePermission`` to check.
-    /// - Returns: `true` if the session's permission set contains the specified permission.
     public func hasPermission(for permission: RemotePermission) -> Bool {
         permissions.contains(permission)
     }
 
     // MARK: - Message Sending
 
-    /// Sends a message to the remote client over the session's network connection.
-    ///
-    /// The message is encoded and framed with a 4-byte big-endian length prefix before transmission.
-    /// - Parameter message: The ``RemoteMessage`` to send.
-    /// - Throws: An `NWError` if the underlying network send fails, or an encoding error if the message cannot be serialized.
     public func send(message: RemoteMessage) async throws {
         let data = try message.encode()
 
@@ -279,13 +282,6 @@ public struct RemoteSession: Identifiable, @unchecked Sendable {
 
     // MARK: - Message Receiving
 
-    /// Waits for a message from the remote client, failing if none arrives within the specified timeout.
-    ///
-    /// Uses a task group to race the receive operation against a sleep timer.
-    /// - Parameter timeout: Maximum number of seconds to wait for a message.
-    /// - Returns: The received ``RemoteMessage``.
-    /// - Throws: ``RemoteServerError/timeout`` if no message arrives before the deadline.
-    /// - Throws: An `NWError` or decoding error if the receive or deserialization fails.
     public func receiveWithTimeout(timeout: TimeInterval) async throws -> RemoteMessage {
         try await withThrowingTaskGroup(of: RemoteMessage.self) { group in
             group.addTask {
@@ -293,7 +289,7 @@ public struct RemoteSession: Identifiable, @unchecked Sendable {
             }
 
             group.addTask {
-                try await Task.sleep(for: .seconds(timeout))
+                try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
                 throw RemoteServerError.timeout
             }
 
@@ -342,7 +338,6 @@ public struct RemoteSession: Identifiable, @unchecked Sendable {
 
 // MARK: - Session Record
 
-/// Historical record of a remote session including client info, timestamps, and disconnect reason.
 public struct SessionRecord: Identifiable, Codable, Sendable {
     public let id: String
     public let clientName: String

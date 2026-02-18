@@ -6,6 +6,7 @@
 // Tracks ADHD/IQ/EQ tests, medication efficacy, and overall wellness
 
 import Foundation
+import OSLog
 #if canImport(HealthKit)
 import HealthKit
 #endif
@@ -329,6 +330,7 @@ public actor HealthIntelligence {
     }
 
     private var configuration: Configuration
+    private let logger = Logger(subsystem: "ai.thea.app", category: "HealthIntelligence")
 
     // MARK: - Initialization
 
@@ -598,7 +600,11 @@ public actor HealthIntelligence {
         Task { [weak self] in
             while await (self?.checkIsRunning() ?? false) {
                 await self?.checkMedicationReminders()
-                try? await Task.sleep(for: .seconds(60)) // Check every minute
+                do {
+                    try await Task.sleep(nanoseconds: 60_000_000_000) // Check every minute
+                } catch {
+                    break // Task cancelled
+                }
             }
         }
 
@@ -606,7 +612,11 @@ public actor HealthIntelligence {
         Task { [weak self] in
             while await (self?.checkIsRunning() ?? false) {
                 await self?.checkAssessmentReminders()
-                try? await Task.sleep(for: .seconds(3600)) // Check every hour
+                do {
+                    try await Task.sleep(nanoseconds: 3600_000_000_000) // Check every hour
+                } catch {
+                    break // Task cancelled
+                }
             }
         }
 
@@ -614,7 +624,11 @@ public actor HealthIntelligence {
         Task { [weak self] in
             while await (self?.checkIsRunning() ?? false) {
                 await self?.syncHealthData()
-                try? await Task.sleep(for: .seconds(1800)) // Sync every 30 min
+                do {
+                    try await Task.sleep(nanoseconds: 1800_000_000_000) // Sync every 30 min
+                } catch {
+                    break // Task cancelled
+                }
             }
         }
     }
@@ -696,29 +710,37 @@ public actor HealthIntelligence {
 
         // Query step count
         if let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) {
-            if let steps = try? await querySumStatistics(store: store, type: stepType, predicate: predicate, unit: .count()) {
-                data["steps"] = steps
+            do {
+                data["steps"] = try await querySumStatistics(store: store, type: stepType, predicate: predicate, unit: .count())
+            } catch {
+                logger.error("Failed to query step count: \(error.localizedDescription)")
             }
         }
 
         // Query active energy burned
         if let energyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) {
-            if let energy = try? await querySumStatistics(store: store, type: energyType, predicate: predicate, unit: .kilocalorie()) {
-                data["activeCalories"] = energy
+            do {
+                data["activeCalories"] = try await querySumStatistics(store: store, type: energyType, predicate: predicate, unit: .kilocalorie())
+            } catch {
+                logger.error("Failed to query active energy burned: \(error.localizedDescription)")
             }
         }
 
         // Query heart rate (latest)
         if let hrType = HKQuantityType.quantityType(forIdentifier: .heartRate) {
-            if let hr = try? await queryLatestSample(store: store, type: hrType, unit: HKUnit.count().unitDivided(by: .minute())) {
-                data["heartRate"] = hr
+            do {
+                data["heartRate"] = try await queryLatestSample(store: store, type: hrType, unit: HKUnit.count().unitDivided(by: .minute()))
+            } catch {
+                logger.error("Failed to query heart rate: \(error.localizedDescription)")
             }
         }
 
         // Query distance walked/run
         if let distType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning) {
-            if let dist = try? await querySumStatistics(store: store, type: distType, predicate: predicate, unit: .meter()) {
-                data["distanceMeters"] = dist
+            do {
+                data["distanceMeters"] = try await querySumStatistics(store: store, type: distType, predicate: predicate, unit: .meter())
+            } catch {
+                logger.error("Failed to query walking/running distance: \(error.localizedDescription)")
             }
         }
         #endif

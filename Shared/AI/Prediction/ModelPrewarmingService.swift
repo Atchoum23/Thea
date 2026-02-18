@@ -283,17 +283,23 @@ public actor ModelPrewarmingService {
     // MARK: - Persistence
 
     private func loadPersistedState() {
-        if let data = UserDefaults.standard.data(forKey: warmModelsKey),
-           let decoded = try? JSONDecoder().decode(Set<String>.self, from: data) {
-            warmModelIDs = decoded
+        if let data = UserDefaults.standard.data(forKey: warmModelsKey) {
+            do {
+                warmModelIDs = try JSONDecoder().decode(Set<String>.self, from: data)
+            } catch {
+                logger.error("Failed to decode warm model IDs: \(error.localizedDescription)")
+            }
         }
 
         logger.debug("Loaded \(self.warmModelIDs.count) warm models from persistence")
     }
 
     private func persistState() {
-        if let data = try? JSONEncoder().encode(warmModelIDs) {
+        do {
+            let data = try JSONEncoder().encode(warmModelIDs)
             UserDefaults.standard.set(data, forKey: warmModelsKey)
+        } catch {
+            logger.error("Failed to encode warm model IDs: \(error.localizedDescription)")
         }
     }
 }

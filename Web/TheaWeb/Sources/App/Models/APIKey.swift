@@ -5,7 +5,6 @@ import Fluent
 import Vapor
 
 /// API key for programmatic access to Thea
-// @unchecked Sendable: Fluent Model — thread safety managed by database layer
 final class APIKey: Model, Content, @unchecked Sendable {
     static let schema = "api_keys"
 

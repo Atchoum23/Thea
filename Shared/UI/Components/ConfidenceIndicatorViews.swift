@@ -33,7 +33,7 @@ public struct ConfidenceBadge: View {
                 if result.decomposition.hasConflicts {
                     Image(systemName: "exclamationmark.2")
                         .font(.caption2)
-                        .foregroundStyle(.theaWarning)
+                        .foregroundStyle(.orange)
                 }
             }
             .padding(.horizontal, 8)
@@ -61,9 +61,9 @@ public struct ConfidenceBadge: View {
 
     private var levelColor: Color {
         switch result.level {
-        case .high: return .theaSuccess
-        case .medium: return .theaWarning
-        case .low: return .theaError
+        case .high: return .green
+        case .medium: return .orange
+        case .low: return .red
         case .unverified: return .gray
         }
     }
@@ -176,7 +176,7 @@ public struct ConfidenceDetailView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.theaWarning)
+                    .foregroundStyle(.orange)
                 Text("Conflicts Detected")
                     .font(.subheadline)
                     .fontWeight(.semibold)
@@ -189,7 +189,7 @@ public struct ConfidenceDetailView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(.theaWarning.opacity(0.1))
+                .fill(.orange.opacity(0.1))
         )
     }
 
@@ -203,7 +203,7 @@ public struct ConfidenceDetailView: View {
             ForEach(result.decomposition.suggestions, id: \.self) { suggestion in
                 HStack(alignment: .top, spacing: 8) {
                     Image(systemName: "lightbulb")
-                        .foregroundStyle(.theaWarning)
+                        .foregroundStyle(.yellow)
                         .font(.caption)
                     Text(suggestion)
                         .font(.caption)
@@ -224,7 +224,7 @@ struct SourceConfidenceRow: View {
             // Source icon
             Image(systemName: source.icon)
                 .frame(width: 20)
-                .foregroundStyle(source.verified ? .theaSuccess : .secondary)
+                .foregroundStyle(source.verified ? .green : .secondary)
 
             // Source info
             VStack(alignment: .leading, spacing: 2) {
@@ -236,7 +236,7 @@ struct SourceConfidenceRow: View {
                     if source.verified {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.caption2)
-                            .foregroundStyle(.theaSuccess)
+                            .foregroundStyle(.green)
                     }
                 }
 
@@ -264,9 +264,9 @@ struct SourceConfidenceRow: View {
 
     private func colorForConfidence(_ confidence: Double) -> Color {
         switch confidence {
-        case 0.85...1.0: return .theaSuccess
-        case 0.60..<0.85: return .theaWarning
-        default: return .theaError
+        case 0.85...1.0: return .green
+        case 0.60..<0.85: return .orange
+        default: return .red
         }
     }
 }
@@ -280,7 +280,7 @@ struct ConfidenceFactorRow: View {
         HStack(spacing: 8) {
             // Contribution indicator
             Image(systemName: factor.contribution >= 0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
-                .foregroundStyle(factor.contribution >= 0 ? .theaSuccess : .theaError)
+                .foregroundStyle(factor.contribution >= 0 ? .green : .red)
                 .font(.caption)
 
             VStack(alignment: .leading, spacing: 2) {
@@ -299,7 +299,7 @@ struct ConfidenceFactorRow: View {
             Text(String(format: "%+.0f%%", factor.contribution * 50))
                 .font(.caption)
                 .fontWeight(.semibold)
-                .foregroundStyle(factor.contribution >= 0 ? .theaSuccess : .theaError)
+                .foregroundStyle(factor.contribution >= 0 ? .green : .red)
         }
         .padding(.vertical, 2)
     }
@@ -337,9 +337,9 @@ struct ConflictRow: View {
 
     private var severityColor: Color {
         switch conflict.severity {
-        case .minor: return .theaWarning
-        case .moderate: return .theaWarning
-        case .major: return .theaError
+        case .minor: return .yellow
+        case .moderate: return .orange
+        case .major: return .red
         }
     }
 }
@@ -364,9 +364,9 @@ public struct ConfidenceGauge: View {
 
     private var color: Color {
         switch level {
-        case .high: return .theaSuccess
-        case .medium: return .theaWarning
-        case .low: return .theaError
+        case .high: return .green
+        case .medium: return .orange
+        case .low: return .red
         case .unverified: return .gray
         }
     }
@@ -424,9 +424,9 @@ public struct ConfidenceMiniBar: View {
 
     private var color: Color {
         switch confidence {
-        case 0.85...1.0: return .theaSuccess
-        case 0.60..<0.85: return .theaWarning
-        default: return .theaError
+        case 0.85...1.0: return .green
+        case 0.60..<0.85: return .orange
+        default: return .red
         }
     }
 
@@ -465,9 +465,9 @@ public struct ConfidenceIndicatorSmall: View {
 
     private var color: Color {
         switch level {
-        case .high: return .theaSuccess
-        case .medium: return .theaWarning
-        case .low: return .theaError
+        case .high: return .green
+        case .medium: return .orange
+        case .low: return .red
         case .unverified: return .gray
         }
     }

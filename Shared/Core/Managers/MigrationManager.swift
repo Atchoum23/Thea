@@ -27,7 +27,7 @@ final class MigrationManager {
         migrationProgress = 0.1
 
         // Implementation for ChatGPT migration
-        try await Task.sleep(for: .milliseconds(500))
+        try await Task.sleep(nanoseconds: 500_000_000)
 
         migrationProgress = 1.0
         migrationStatus = "Migration complete"
@@ -40,7 +40,7 @@ final class MigrationManager {
         migrationProgress = 0.1
 
         // Implementation for Claude migration
-        try await Task.sleep(for: .milliseconds(500))
+        try await Task.sleep(nanoseconds: 500_000_000)
 
         migrationProgress = 1.0
         migrationStatus = "Migration complete"
@@ -53,7 +53,7 @@ final class MigrationManager {
         migrationProgress = 0.1
 
         // Implementation for Nexus migration
-        try await Task.sleep(for: .milliseconds(500))
+        try await Task.sleep(nanoseconds: 500_000_000)
 
         migrationProgress = 1.0
         migrationStatus = "Migration complete"

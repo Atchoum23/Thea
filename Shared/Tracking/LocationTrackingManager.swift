@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import Observation
 @preconcurrency import SwiftData
 
@@ -14,6 +15,7 @@ import Observation
     final class LocationTrackingManager: NSObject, CLLocationManagerDelegate {
         static let shared = LocationTrackingManager()
 
+        private let logger = Logger(subsystem: "ai.thea.app", category: "LocationTrackingManager")
         private var modelContext: ModelContext?
         private let locationManager = CLLocationManager()
 
@@ -145,7 +147,11 @@ import Observation
             )
 
             context.insert(record)
-            try? context.save()
+            do {
+                try context.save()
+            } catch {
+                logger.error("Failed to save location visit: \(error.localizedDescription)")
+            }
         }
 
         // MARK: - Historical Data
@@ -159,7 +165,13 @@ import Observation
 
             // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
             let descriptor = FetchDescriptor<LocationVisitRecord>()
-            let allRecords = (try? context.fetch(descriptor)) ?? []
+            let allRecords: [LocationVisitRecord]
+            do {
+                allRecords = try context.fetch(descriptor)
+            } catch {
+                logger.error("Failed to fetch location visits for date: \(error.localizedDescription)")
+                return []
+            }
             let records = allRecords
                 .filter { $0.arrivalTime >= startOfDay && $0.arrivalTime < endOfDay }
                 .sorted { $0.arrivalTime > $1.arrivalTime }
@@ -180,7 +192,13 @@ import Observation
 
             // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
             let descriptor = FetchDescriptor<LocationVisitRecord>()
-            let allRecords = (try? context.fetch(descriptor)) ?? []
+            let allRecords: [LocationVisitRecord]
+            do {
+                allRecords = try context.fetch(descriptor)
+            } catch {
+                logger.error("Failed to fetch location visits for range: \(error.localizedDescription)")
+                return []
+            }
             return allRecords
                 .filter { $0.arrivalTime >= start && $0.arrivalTime <= end }
                 .sorted { $0.arrivalTime > $1.arrivalTime }

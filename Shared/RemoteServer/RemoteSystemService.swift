@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import OSLog
 #if os(macOS)
     import AppKit
     import IOKit
@@ -14,6 +15,8 @@ import Foundation
 #else
     import UIKit
 #endif
+
+private let rssLogger = Logger(subsystem: "ai.thea.app", category: "RemoteSystemService")
 
 // MARK: - Remote System Service
 
@@ -135,9 +138,12 @@ extension RemoteSystemService {
             var totalDisk: UInt64 = 0
             var freeDisk: UInt64 = 0
 
-            if let attrs = try? fileManager.attributesOfFileSystem(forPath: "/") {
+            do {
+                let attrs = try fileManager.attributesOfFileSystem(forPath: "/")
                 totalDisk = attrs[.systemSize] as? UInt64 ?? 0
                 freeDisk = attrs[.systemFreeSize] as? UInt64 ?? 0
+            } catch {
+                rssLogger.debug("Could not get disk attributes: \(error.localizedDescription)")
             }
 
             // Get battery info
@@ -168,9 +174,12 @@ extension RemoteSystemService {
             var totalDisk: UInt64 = 0
             var freeDisk: UInt64 = 0
 
-            if let attrs = try? fileManager.attributesOfFileSystem(forPath: NSHomeDirectory()) {
+            do {
+                let attrs = try fileManager.attributesOfFileSystem(forPath: NSHomeDirectory())
                 totalDisk = attrs[.systemSize] as? UInt64 ?? 0
                 freeDisk = attrs[.systemFreeSize] as? UInt64 ?? 0
+            } catch {
+                rssLogger.debug("Could not get home disk attributes: \(error.localizedDescription)")
             }
 
             device.isBatteryMonitoringEnabled = true
@@ -337,11 +346,14 @@ extension RemoteSystemService {
         ]
 
         for pattern in blockedPatterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
+            do {
+                let regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
                 let range = NSRange(command.startIndex..., in: command)
                 if regex.firstMatch(in: command, range: range) != nil {
                     return false
                 }
+            } catch {
+                rssLogger.debug("Invalid security pattern: \(error.localizedDescription)")
             }
         }
 
@@ -367,7 +379,7 @@ extension RemoteSystemService {
             try task.run()
 
             let timeoutTask = Task {
-                try await Task.sleep(for: .seconds(timeout))
+                try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
                 if task.isRunning {
                     task.terminate()
                 }
@@ -548,7 +560,11 @@ extension RemoteSystemService {
         }
 
         // Auto-timeout after 60 seconds
-        try? await Task.sleep(for: .seconds(60))
+        do {
+            try await Task.sleep(nanoseconds: 60_000_000_000)
+        } catch {
+            // Task cancelled — proceed with cleanup
+        }
         pendingConfirmations.removeAll { $0.id == confirmationId }
         return false
     }

@@ -214,8 +214,14 @@ extension TaskClassifier {
         for record in records {
             guard record.key.hasPrefix("prototype_"),
                   let data = record.value.data(using: .utf8),
-                  let embedding = try? JSONDecoder().decode([Float].self, from: data),
                   let taskType = TaskType(rawValue: String(record.key.dropFirst(10))) else {
+                continue
+            }
+            let embedding: [Float]
+            do {
+                embedding = try JSONDecoder().decode([Float].self, from: data)
+            } catch {
+                logger.error("Failed to decode prototype embedding for \(record.key): \(error.localizedDescription)")
                 continue
             }
 
@@ -228,8 +234,14 @@ extension TaskClassifier {
     /// Persist prototype embeddings to MemoryManager
     func persistPrototypeEmbeddings() async {
         for (taskType, embedding) in taskTypePrototypes {
-            guard let data = try? JSONEncoder().encode(embedding),
-                  let value = String(data: data, encoding: .utf8) else {
+            let data: Data
+            do {
+                data = try JSONEncoder().encode(embedding)
+            } catch {
+                logger.error("Failed to encode prototype embedding for \(taskType.rawValue): \(error.localizedDescription)")
+                continue
+            }
+            guard let value = String(data: data, encoding: .utf8) else {
                 continue
             }
 

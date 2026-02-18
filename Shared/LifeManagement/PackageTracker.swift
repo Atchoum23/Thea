@@ -163,7 +163,7 @@ struct TrackedPackage: Codable, Sendable, Identifiable {
     }
 
     var latestEvent: PackageTrackingEvent? {
-        events.max { $0.timestamp < $1.timestamp }
+        events.sorted { $0.timestamp > $1.timestamp }.first
     }
 
     var trackingURL: URL? {
@@ -264,7 +264,13 @@ struct TrackingNumberDetection: Sendable {
         carrier: PackageCarrier,
         confidence: Double
     ) -> [TrackingNumberDetection] {
-        guard let regex = try? NSRegularExpression(pattern: pattern) else { return [] }
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern)
+        } catch {
+            ptLogger.debug("Invalid tracking regex pattern '\(pattern)': \(error.localizedDescription)")
+            return []
+        }
         let range = NSRange(text.startIndex..., in: text)
         let matches = regex.matches(in: text, range: range)
         return matches.compactMap { match in
@@ -291,7 +297,11 @@ final class PackageTracker: ObservableObject {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         let dir = appSupport.appendingPathComponent("Thea/PackageTracker", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            // Non-fatal: directory may already exist
+        }
         self.storageURL = dir.appendingPathComponent("packages.json")
         loadPackages()
     }
@@ -414,7 +424,15 @@ final class PackageTracker: ObservableObject {
     private func parseCarrierResponse(data: Data, carrier: PackageCarrier) -> [PackageTrackingEvent] {
         // Generic JSON parsing — each carrier returns different formats
         // This handles the most common structure: array of events with timestamp, status, description
-        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+        let json: [String: Any]
+        do {
+            guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                logger.debug("Carrier response is not a JSON object")
+                return []
+            }
+            json = parsed
+        } catch {
+            logger.debug("Failed to parse carrier response JSON: \(error.localizedDescription)")
             return []
         }
 

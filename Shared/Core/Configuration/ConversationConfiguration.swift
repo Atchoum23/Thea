@@ -1,6 +1,9 @@
 // ConversationConfiguration.swift
 import Foundation
+import OSLog
 import SwiftUI
+
+private let conversationConfigurationLogger = Logger(subsystem: "ai.thea.app", category: "ConversationConfiguration")
 
 /// Configuration for conversation context and history management.
 /// Enables unlimited conversations with maximum context window utilization.
@@ -117,17 +120,25 @@ public struct ConversationConfiguration: Codable, Sendable, Equatable {
     private static let storageKey = "com.thea.conversation.configuration"
 
     public static func load() -> ConversationConfiguration {
-        guard let data = UserDefaults.standard.data(forKey: storageKey),
-              let config = try? JSONDecoder().decode(ConversationConfiguration.self, from: data)
-        else {
+        guard let data = UserDefaults.standard.data(forKey: storageKey) else {
             return ConversationConfiguration()
         }
-        return config
+        let decoder = JSONDecoder()
+        do {
+            return try decoder.decode(ConversationConfiguration.self, from: data)
+        } catch {
+            conversationConfigurationLogger.error("Failed to decode ConversationConfiguration: \(error)")
+            return ConversationConfiguration()
+        }
     }
 
     public func save() {
-        if let data = try? JSONEncoder().encode(self) {
+        let encoder = JSONEncoder()
+        do {
+            let data = try encoder.encode(self)
             UserDefaults.standard.set(data, forKey: Self.storageKey)
+        } catch {
+            conversationConfigurationLogger.error("Failed to encode ConversationConfiguration: \(error)")
         }
     }
 

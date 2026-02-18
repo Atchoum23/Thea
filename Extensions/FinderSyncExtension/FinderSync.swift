@@ -8,6 +8,7 @@
 #if os(macOS)
     import Cocoa
     import FinderSync
+    import os.log
 
     /// Finder Sync Extension for Thea
     /// Adds Thea context menu items to Finder
@@ -15,6 +16,7 @@
         // MARK: - Properties
 
         private let appGroupID = "group.app.theathe"
+        private let logger = Logger(subsystem: "app.thea.findersync", category: "FinderSync")
 
         // Watched folders
         private var monitoredDirectories: Set<URL> = []
@@ -260,11 +262,17 @@
 
         private func sendToThea(action: String, url: URL) {
             guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
+                logger.error("App group container unavailable for action '\(action)'")
                 return
             }
 
             let requestDir = containerURL.appendingPathComponent("FinderRequests", isDirectory: true)
-            try? FileManager.default.createDirectory(at: requestDir, withIntermediateDirectories: true)
+            do {
+                try FileManager.default.createDirectory(at: requestDir, withIntermediateDirectories: true)
+            } catch {
+                logger.error("Failed to create FinderRequests directory: \(error.localizedDescription)")
+                return
+            }
 
             let request: [String: Any] = [
                 "action": action,
@@ -273,8 +281,12 @@
             ]
 
             let requestPath = requestDir.appendingPathComponent("\(UUID().uuidString).json")
-            if let data = try? JSONSerialization.data(withJSONObject: request) {
-                try? data.write(to: requestPath)
+            do {
+                let data = try JSONSerialization.data(withJSONObject: request)
+                try data.write(to: requestPath)
+            } catch {
+                logger.error("Failed to write Finder request for action '\(action)': \(error.localizedDescription)")
+                return
             }
 
             // Notify main app
@@ -331,12 +343,14 @@
 
         private func addToTrackedFiles(url: URL) {
             guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
+                logger.error("App group container unavailable for tracking file")
                 return
             }
 
             let trackedPath = containerURL.appendingPathComponent("tracked_files.json")
             var tracked: [String] = []
 
+            // Reading existing list is best-effort; start fresh if unreadable
             if let data = try? Data(contentsOf: trackedPath),
                let existing = try? JSONSerialization.jsonObject(with: data) as? [String]
             {
@@ -345,8 +359,11 @@
 
             if !tracked.contains(url.path) {
                 tracked.append(url.path)
-                if let data = try? JSONSerialization.data(withJSONObject: tracked) {
-                    try? data.write(to: trackedPath)
+                do {
+                    let data = try JSONSerialization.data(withJSONObject: tracked)
+                    try data.write(to: trackedPath)
+                } catch {
+                    logger.error("Failed to save tracked files list: \(error.localizedDescription)")
                 }
             }
         }
@@ -371,12 +388,14 @@
 
         private func addToMonitoredDirectories(url: URL) {
             guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
+                logger.error("App group container unavailable for monitoring directory")
                 return
             }
 
             let monitorsPath = containerURL.appendingPathComponent("monitored_directories.json")
             var paths: [String] = []
 
+            // Reading existing list is best-effort; start fresh if unreadable
             if let data = try? Data(contentsOf: monitorsPath),
                let existing = try? JSONSerialization.jsonObject(with: data) as? [String]
             {
@@ -385,8 +404,11 @@
 
             if !paths.contains(url.path) {
                 paths.append(url.path)
-                if let data = try? JSONSerialization.data(withJSONObject: paths) {
-                    try? data.write(to: monitorsPath)
+                do {
+                    let data = try JSONSerialization.data(withJSONObject: paths)
+                    try data.write(to: monitorsPath)
+                } catch {
+                    logger.error("Failed to save monitored directories list: \(error.localizedDescription)")
                 }
             }
         }

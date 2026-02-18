@@ -131,21 +131,21 @@ struct OrchestratorSettingsView: View {
                     title: "Status",
                     value: config.orchestratorEnabled ? "Active" : "Disabled",
                     icon: config.orchestratorEnabled ? "checkmark.circle.fill" : "xmark.circle.fill",
-                    color: config.orchestratorEnabled ? .theaSuccess : .theaError
+                    color: config.orchestratorEnabled ? .green : .red
                 )
 
                 overviewCard(
                     title: "Mode",
                     value: config.localModelPreference.rawValue,
                     icon: modeIcon(for: config.localModelPreference),
-                    color: .theaInfo
+                    color: .blue
                 )
 
                 overviewCard(
                     title: "Routing Rules",
                     value: "\(config.taskRoutingRules.count)",
                     icon: "arrow.triangle.branch",
-                    color: .theaWarning
+                    color: .orange
                 )
 
                 overviewCard(
@@ -161,21 +161,21 @@ struct OrchestratorSettingsView: View {
                     title: "Status",
                     value: config.orchestratorEnabled ? "Active" : "Disabled",
                     icon: config.orchestratorEnabled ? "checkmark.circle.fill" : "xmark.circle.fill",
-                    color: config.orchestratorEnabled ? .theaSuccess : .theaError
+                    color: config.orchestratorEnabled ? .green : .red
                 )
 
                 overviewCard(
                     title: "Mode",
                     value: config.localModelPreference.rawValue,
                     icon: modeIcon(for: config.localModelPreference),
-                    color: .theaInfo
+                    color: .blue
                 )
 
                 overviewCard(
                     title: "Routing Rules",
                     value: "\(config.taskRoutingRules.count)",
                     icon: "arrow.triangle.branch",
-                    color: .theaWarning
+                    color: .orange
                 )
 
                 overviewCard(
@@ -317,7 +317,7 @@ struct OrchestratorSettingsView: View {
                         } else {
                             Text("Never updated")
                                 .font(.caption)
-                                .foregroundStyle(.theaWarning)
+                                .foregroundStyle(.orange)
                         }
                     }
 
@@ -369,7 +369,7 @@ struct OrchestratorSettingsView: View {
                 if let error = benchmarkService.updateError {
                     HStack {
                         Image(systemName: "exclamationmark.triangle")
-                            .foregroundStyle(.theaWarning)
+                            .foregroundStyle(.orange)
                         Text("Update failed: \(error.localizedDescription)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -493,8 +493,8 @@ struct OrchestratorSettingsView: View {
                         .font(.caption2)
                         .padding(.horizontal, 4)
                         .padding(.vertical, 2)
-                        .background(model.hasPrefix("local-") ? Color.theaSuccess.opacity(0.2) : Color.theaInfo.opacity(0.2))
-                        .foregroundStyle(model.hasPrefix("local-") ? .theaSuccess : .theaInfo)
+                        .background(model.hasPrefix("local-") ? Color.green.opacity(0.2) : Color.blue.opacity(0.2))
+                        .foregroundStyle(model.hasPrefix("local-") ? .green : .blue)
                         .cornerRadius(4)
                 }
                 if models.count > 2 {
@@ -540,7 +540,7 @@ extension OrchestratorSettingsView {
 
             HStack {
                 Image(systemName: config.preferCheaperModels ? "leaf.fill" : "bolt.fill")
-                    .foregroundStyle(config.preferCheaperModels ? .theaSuccess : .theaWarning)
+                    .foregroundStyle(config.preferCheaperModels ? .green : .orange)
                 Text(config.preferCheaperModels
                     ? "Optimizing for cost - local and cheaper models preferred"
                     : "Optimizing for performance - best model for each task")

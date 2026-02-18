@@ -8,6 +8,7 @@
 
 import Combine
 import Foundation
+import os.log
 
 // MARK: - Server Configuration (macOS)
 
@@ -105,17 +106,25 @@ import Foundation
         private static let storageKey = "RemoteServerConfiguration"
 
         public static func load() -> RemoteServerConfiguration {
-            if let data = UserDefaults.standard.data(forKey: storageKey),
-               let config = try? JSONDecoder().decode(RemoteServerConfiguration.self, from: data)
-            {
-                return config
+            guard let data = UserDefaults.standard.data(forKey: storageKey) else {
+                return RemoteServerConfiguration()
             }
-            return RemoteServerConfiguration()
+            do {
+                return try JSONDecoder().decode(RemoteServerConfiguration.self, from: data)
+            } catch {
+                let logger = Logger(subsystem: "ai.thea.app", category: "TheaRemoteServer")
+                logger.error("RemoteServerConfiguration: failed to decode configuration: \(error.localizedDescription)")
+                return RemoteServerConfiguration()
+            }
         }
 
         public func save() {
-            if let data = try? JSONEncoder().encode(self) {
+            do {
+                let data = try JSONEncoder().encode(self)
                 UserDefaults.standard.set(data, forKey: RemoteServerConfiguration.storageKey)
+            } catch {
+                let logger = Logger(subsystem: "ai.thea.app", category: "TheaRemoteServer")
+                logger.error("RemoteServerConfiguration: failed to encode configuration: \(error.localizedDescription)")
             }
         }
     }

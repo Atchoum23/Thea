@@ -215,7 +215,12 @@ final class ClipboardIntelligence {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard (trimmed.hasPrefix("{") && trimmed.hasSuffix("}"))
             || (trimmed.hasPrefix("[") && trimmed.hasSuffix("]")) else { return false }
-        return (try? JSONSerialization.jsonObject(with: Data(trimmed.utf8))) != nil
+        do {
+            try JSONSerialization.jsonObject(with: Data(trimmed.utf8))
+            return true
+        } catch {
+            return false
+        }
     }
 
     private func isCommand(_ text: String, sourceApp: String?) -> Bool {

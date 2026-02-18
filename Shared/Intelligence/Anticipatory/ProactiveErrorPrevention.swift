@@ -119,7 +119,7 @@ public final class ProactiveErrorPrevention {
         }
 
         return InputValidationResult(
-            isValid: !issues.contains { $0.severity >= .warning },
+            isValid: issues.filter { $0.severity >= .warning }.isEmpty,
             issues: issues
         )
     }
@@ -357,15 +357,21 @@ public final class ProactiveErrorPrevention {
     }
 
     private func loadErrorPatterns() {
-        if let data = UserDefaults.standard.data(forKey: "ErrorPatterns"),
-           let decoded = try? JSONDecoder().decode([ErrorPattern].self, from: data) {
-            errorPatterns = decoded
+        if let data = UserDefaults.standard.data(forKey: "ErrorPatterns") {
+            do {
+                errorPatterns = try JSONDecoder().decode([ErrorPattern].self, from: data)
+            } catch {
+                logger.error("Failed to decode error patterns: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveErrorPatterns() {
-        if let encoded = try? JSONEncoder().encode(errorPatterns) {
+        do {
+            let encoded = try JSONEncoder().encode(errorPatterns)
             UserDefaults.standard.set(encoded, forKey: "ErrorPatterns")
+        } catch {
+            logger.error("Failed to encode error patterns: \(error.localizedDescription)")
         }
     }
 

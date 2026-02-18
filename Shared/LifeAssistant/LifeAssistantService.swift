@@ -456,7 +456,6 @@ public final class LifeAssistantService {
             switch response.type {
             case .delta(let text):
                 result += text
-            case .thinkingDelta: break
             case .complete(let msg):
                 result = msg.content.textValue
             case .error(let error):

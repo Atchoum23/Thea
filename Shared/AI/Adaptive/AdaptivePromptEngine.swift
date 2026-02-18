@@ -3,6 +3,7 @@
 // Creates compounding intelligence through pattern recognition and prediction
 
 import Foundation
+import OSLog
 
 // MARK: - Adaptive Prompt Engine
 
@@ -36,6 +37,8 @@ final class AdaptivePromptEngine {
     }
 
     // MARK: - Initialization
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "AdaptivePromptEngine")
 
     private init() {
         loadProfile()
@@ -530,29 +533,41 @@ final class AdaptivePromptEngine {
     // MARK: - Persistence
 
     private func loadProfile() {
-        if let data = UserDefaults.standard.data(forKey: "AdaptivePrompt.profile"),
-           let profile = try? JSONDecoder().decode(UserPromptProfile.self, from: data) {
-            userPromptProfile = profile
+        if let data = UserDefaults.standard.data(forKey: "AdaptivePrompt.profile") {
+            do {
+                userPromptProfile = try JSONDecoder().decode(UserPromptProfile.self, from: data)
+            } catch {
+                logger.error("Failed to decode AdaptivePrompt.profile: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveProfile() {
-        if let data = try? JSONEncoder().encode(userPromptProfile) {
+        do {
+            let data = try JSONEncoder().encode(userPromptProfile)
             UserDefaults.standard.set(data, forKey: "AdaptivePrompt.profile")
+        } catch {
+            logger.error("Failed to encode AdaptivePrompt.profile: \(error.localizedDescription)")
         }
     }
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "AdaptivePrompt.config"),
-           let config = try? JSONDecoder().decode(Configuration.self, from: data) {
-            configuration = config
+        if let data = UserDefaults.standard.data(forKey: "AdaptivePrompt.config") {
+            do {
+                configuration = try JSONDecoder().decode(Configuration.self, from: data)
+            } catch {
+                logger.error("Failed to decode AdaptivePrompt.config: \(error.localizedDescription)")
+            }
         }
     }
 
     func updateConfiguration(_ config: Configuration) {
         configuration = config
-        if let data = try? JSONEncoder().encode(config) {
+        do {
+            let data = try JSONEncoder().encode(config)
             UserDefaults.standard.set(data, forKey: "AdaptivePrompt.config")
+        } catch {
+            logger.error("Failed to encode AdaptivePrompt.config: \(error.localizedDescription)")
         }
     }
 

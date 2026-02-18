@@ -178,7 +178,11 @@ final class SystemCleaner {
     private init() {
         let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         let theaDir = appSupport.appendingPathComponent("Thea/Cleaner")
-        try? fileManager.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        do {
+            try fileManager.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        } catch {
+            scLogger.error("Failed to create SystemCleaner directory: \(error.localizedDescription)")
+        }
         self.historyFile = theaDir.appendingPathComponent("cleanup_history.json")
         loadHistory()
     }
@@ -200,7 +204,7 @@ final class SystemCleaner {
             scanProgress = Double(index + 1) * step
         }
 
-        let breakdown = Dictionary(grouping: allItems) { $0.category }
+        let breakdown = Dictionary(grouping: allItems, by: { $0.category })
             .mapValues { $0.reduce(0 as UInt64) { $0 + $1.sizeBytes } }
         let total = allItems.reduce(0 as UInt64) { $0 + $1.sizeBytes }
 
@@ -224,7 +228,13 @@ final class SystemCleaner {
             } else {
                 let size = directorySize(atPath: expanded)
                 if size > 0 {
-                    let accessed = try? fileManager.attributesOfItem(atPath: expanded)[.modificationDate] as? Date
+                    let accessed: Date? = {
+                        do {
+                            return try fileManager.attributesOfItem(atPath: expanded)[.modificationDate] as? Date
+                        } catch {
+                            return nil
+                        }
+                    }()
                     items.append(CleanableItem(
                         path: expanded,
                         category: category,
@@ -271,7 +281,13 @@ final class SystemCleaner {
 
     private func scanXcodeDerivedData(at path: String) -> [CleanableItem] {
         var items: [CleanableItem] = []
-        guard let contents = try? fileManager.contentsOfDirectory(atPath: path) else { return items }
+        let contents: [String]
+        do {
+            contents = try fileManager.contentsOfDirectory(atPath: path)
+        } catch {
+            scLogger.error("Cannot read Xcode DerivedData: \(error.localizedDescription)")
+            return items
+        }
 
         for entry in contents {
             let fullPath = (path as NSString).appendingPathComponent(entry)
@@ -280,7 +296,13 @@ final class SystemCleaner {
 
             let size = directorySize(atPath: fullPath)
             if size > 0 {
-                let accessed = try? fileManager.attributesOfItem(atPath: fullPath)[.modificationDate] as? Date
+                let accessed: Date? = {
+                    do {
+                        return try fileManager.attributesOfItem(atPath: fullPath)[.modificationDate] as? Date
+                    } catch {
+                        return nil
+                    }
+                }()
                 items.append(CleanableItem(
                     path: fullPath,
                     category: .xcodeCache,
@@ -296,12 +318,23 @@ final class SystemCleaner {
 
     private func scanOldDownloads(at path: String) -> [CleanableItem] {
         var items: [CleanableItem] = []
-        guard let contents = try? fileManager.contentsOfDirectory(atPath: path) else { return items }
+        let contents: [String]
+        do {
+            contents = try fileManager.contentsOfDirectory(atPath: path)
+        } catch {
+            scLogger.error("Cannot read Downloads: \(error.localizedDescription)")
+            return items
+        }
         let cutoffDate = Calendar.current.date(byAdding: .day, value: -downloadsAgeDays, to: Date()) ?? Date()
 
         for entry in contents where !entry.hasPrefix(".") {
             let fullPath = (path as NSString).appendingPathComponent(entry)
-            guard let attrs = try? fileManager.attributesOfItem(atPath: fullPath) else { continue }
+            let attrs: [FileAttributeKey: Any]
+            do {
+                attrs = try fileManager.attributesOfItem(atPath: fullPath)
+            } catch {
+                continue
+            }
 
             let modDate = attrs[.modificationDate] as? Date ?? Date()
             if modDate < cutoffDate {
@@ -404,15 +437,23 @@ final class SystemCleaner {
     // MARK: - Disk Space Info
 
     var availableDiskSpace: UInt64 {
-        guard let attrs = try? fileManager.attributesOfFileSystem(forPath: NSHomeDirectory()),
-              let freeSpace = attrs[.systemFreeSize] as? UInt64 else { return 0 }
-        return freeSpace
+        do {
+            let attrs = try fileManager.attributesOfFileSystem(forPath: NSHomeDirectory())
+            return attrs[.systemFreeSize] as? UInt64 ?? 0
+        } catch {
+            scLogger.error("Cannot read disk space: \(error.localizedDescription)")
+            return 0
+        }
     }
 
     var totalDiskSpace: UInt64 {
-        guard let attrs = try? fileManager.attributesOfFileSystem(forPath: NSHomeDirectory()),
-              let total = attrs[.systemSize] as? UInt64 else { return 0 }
-        return total
+        do {
+            let attrs = try fileManager.attributesOfFileSystem(forPath: NSHomeDirectory())
+            return attrs[.systemSize] as? UInt64 ?? 0
+        } catch {
+            scLogger.error("Cannot read total disk space: \(error.localizedDescription)")
+            return 0
+        }
     }
 
     var usedDiskSpace: UInt64 {
@@ -439,15 +480,26 @@ final class SystemCleaner {
     // MARK: - Persistence
 
     private func loadHistory() {
-        guard let data = try? Data(contentsOf: historyFile),
-              let history = try? JSONDecoder().decode([CleanupResult].self, from: data) else { return }
-        self.cleanupHistory = history
-        self.totalBytesFreed = history.reduce(0) { $0 + $1.bytesFreed }
+        do {
+            let data = try Data(contentsOf: historyFile)
+            let history = try JSONDecoder().decode([CleanupResult].self, from: data)
+            self.cleanupHistory = history
+            self.totalBytesFreed = history.reduce(0) { $0 + $1.bytesFreed }
+        } catch CocoaError.fileReadNoSuchFile {
+            // File doesn't exist yet - expected on first run
+            return
+        } catch {
+            scLogger.error("Failed to load cleanup history: \(error.localizedDescription)")
+        }
     }
 
     private func saveHistory() {
-        guard let data = try? JSONEncoder().encode(cleanupHistory) else { return }
-        try? data.write(to: historyFile)
+        do {
+            let data = try JSONEncoder().encode(cleanupHistory)
+            try data.write(to: historyFile)
+        } catch {
+            scLogger.error("Failed to save cleanup history: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Utilities
@@ -458,9 +510,14 @@ final class SystemCleaner {
 
         while let file = enumerator.nextObject() as? String {
             let fullPath = (path as NSString).appendingPathComponent(file)
-            if let attrs = try? fileManager.attributesOfItem(atPath: fullPath),
-               let size = attrs[.size] as? UInt64 {
-                totalSize += size
+            do {
+                let attrs = try fileManager.attributesOfItem(atPath: fullPath)
+                if let size = attrs[.size] as? UInt64 {
+                    totalSize += size
+                }
+            } catch {
+                // Skip files we can't read
+                continue
             }
         }
 

@@ -273,23 +273,35 @@ public final class IntelligentAutoComplete {
     }
 
     private func loadUserData() {
-        if let data = UserDefaults.standard.data(forKey: "AutoCompletePhrases"),
-           let decoded = try? JSONDecoder().decode([UsedPhrase].self, from: data) {
-            recentPhrases = decoded
+        if let data = UserDefaults.standard.data(forKey: "AutoCompletePhrases") {
+            do {
+                recentPhrases = try JSONDecoder().decode([UsedPhrase].self, from: data)
+            } catch {
+                logger.error("Failed to decode auto-complete phrases: \(error.localizedDescription)")
+            }
         }
 
-        if let data = UserDefaults.standard.data(forKey: "AutoCompleteVocabulary"),
-           let decoded = try? JSONDecoder().decode([VocabularyEntry].self, from: data) {
-            userVocabulary = decoded
+        if let data = UserDefaults.standard.data(forKey: "AutoCompleteVocabulary") {
+            do {
+                userVocabulary = try JSONDecoder().decode([VocabularyEntry].self, from: data)
+            } catch {
+                logger.error("Failed to decode auto-complete vocabulary: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveUserData() {
-        if let encoded = try? JSONEncoder().encode(recentPhrases) {
+        do {
+            let encoded = try JSONEncoder().encode(recentPhrases)
             UserDefaults.standard.set(encoded, forKey: "AutoCompletePhrases")
+        } catch {
+            logger.error("Failed to encode auto-complete phrases: \(error.localizedDescription)")
         }
-        if let encoded = try? JSONEncoder().encode(userVocabulary) {
+        do {
+            let encoded = try JSONEncoder().encode(userVocabulary)
             UserDefaults.standard.set(encoded, forKey: "AutoCompleteVocabulary")
+        } catch {
+            logger.error("Failed to encode auto-complete vocabulary: \(error.localizedDescription)")
         }
     }
 }

@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import Observation
 @preconcurrency import SwiftData
 
@@ -18,6 +19,8 @@ final class PromptTemplateLibrary {
     private var config: PromptEngineeringConfiguration {
         AppConfiguration.shared.promptEngineeringConfig
     }
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "PromptTemplateLibrary")
 
     private init() {}
 
@@ -85,7 +88,13 @@ final class PromptTemplateLibrary {
 
         // Check if templates already exist
         let descriptor = FetchDescriptor<PromptTemplate>()
-        let existingCount = (try? context.fetchCount(descriptor)) ?? 0
+        let existingCount: Int
+        do {
+            existingCount = try context.fetchCount(descriptor)
+        } catch {
+            logger.error("Failed to fetch template count: \(error.localizedDescription)")
+            existingCount = 0
+        }
 
         if existingCount > 0 {
             return // Templates already initialized
@@ -98,7 +107,11 @@ final class PromptTemplateLibrary {
             context.insert(template)
         }
 
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            logger.error("Failed to save default templates: \(error.localizedDescription)")
+        }
     }
 
     private func createDefaultTemplates() -> [PromptTemplate] {
@@ -417,7 +430,13 @@ final class PromptTemplateLibrary {
 
         // Fetch all and sort in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<PromptTemplate>()
-        let allTemplates = (try? context.fetch(descriptor)) ?? []
+        let allTemplates: [PromptTemplate]
+        do {
+            allTemplates = try context.fetch(descriptor)
+        } catch {
+            logger.error("Failed to fetch all templates: \(error.localizedDescription)")
+            allTemplates = []
+        }
         return allTemplates.sorted { ($0.category, $1.successRate) < ($1.category, $0.successRate) }
     }
 
@@ -426,7 +445,13 @@ final class PromptTemplateLibrary {
 
         // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<PromptTemplate>()
-        let allTemplates = (try? context.fetch(descriptor)) ?? []
+        let allTemplates: [PromptTemplate]
+        do {
+            allTemplates = try context.fetch(descriptor)
+        } catch {
+            logger.error("Failed to fetch templates for category: \(error.localizedDescription)")
+            allTemplates = []
+        }
         return allTemplates
             .filter { $0.category == category }
             .sorted { $0.successRate > $1.successRate }
@@ -446,7 +471,11 @@ final class PromptTemplateLibrary {
         )
 
         context.insert(template)
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            logger.error("Failed to save new template: \(error.localizedDescription)")
+        }
 
         // Invalidate cache
         await refreshCache()
@@ -468,7 +497,11 @@ final class PromptTemplateLibrary {
             template.templateText = newText
         }
 
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            logger.error("Failed to save template deletion: \(error.localizedDescription)")
+        }
 
         // Invalidate cache
         await refreshCache()
@@ -478,7 +511,11 @@ final class PromptTemplateLibrary {
         guard let context = modelContext else { return }
 
         template.isActive = false
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            logger.error("Failed to save template deletion: \(error.localizedDescription)")
+        }
 
         // Invalidate cache
         await refreshCache()

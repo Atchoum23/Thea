@@ -2,6 +2,9 @@
 // User-configurable system prompts for different task types
 
 import Foundation
+import OSLog
+
+private let systemPromptConfigurationLogger = Logger(subsystem: "ai.thea.app", category: "SystemPromptConfiguration")
 
 /// Configuration for user-editable system prompts
 public struct SystemPromptConfiguration: Codable, Sendable {
@@ -183,16 +186,25 @@ public struct SystemPromptConfiguration: Codable, Sendable {
     // MARK: - Persistence
 
     public static func load() -> SystemPromptConfiguration {
-        guard let data = UserDefaults.standard.data(forKey: storageKey),
-              let config = try? JSONDecoder().decode(SystemPromptConfiguration.self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: storageKey) else {
             return defaults()
         }
-        return config
+        let decoder = JSONDecoder()
+        do {
+            return try decoder.decode(SystemPromptConfiguration.self, from: data)
+        } catch {
+            systemPromptConfigurationLogger.error("Failed to decode SystemPromptConfiguration: \(error)")
+            return defaults()
+        }
     }
 
     public func save() {
-        if let data = try? JSONEncoder().encode(self) {
+        let encoder = JSONEncoder()
+        do {
+            let data = try encoder.encode(self)
             UserDefaults.standard.set(data, forKey: Self.storageKey)
+        } catch {
+            systemPromptConfigurationLogger.error("Failed to encode SystemPromptConfiguration: \(error)")
         }
     }
 }

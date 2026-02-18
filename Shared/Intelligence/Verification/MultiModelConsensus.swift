@@ -138,8 +138,6 @@ public final class MultiModelConsensus {
                 switch chunk.type {
                 case let .delta(text):
                     responseText += text
-                case .thinkingDelta:
-                    break
                 case let .complete(msg):
                     responseText = msg.content.textValue
                 case .error:
@@ -193,8 +191,33 @@ public final class MultiModelConsensus {
         }
 
         let jsonStr = String(response[jsonStart...jsonEnd])
-        guard let data = jsonStr.data(using: .utf8),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+        guard let data = jsonStr.data(using: .utf8) else {
+            return ModelResponse(
+                modelId: modelId,
+                agrees: true,
+                accuracy: 0.5,
+                completeness: 0.5,
+                quality: 0.5,
+                factualErrors: [],
+                reasoning: "JSON parse failed"
+            )
+        }
+        let json: [String: Any]
+        do {
+            guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                return ModelResponse(
+                    modelId: modelId,
+                    agrees: true,
+                    accuracy: 0.5,
+                    completeness: 0.5,
+                    quality: 0.5,
+                    factualErrors: [],
+                    reasoning: "JSON parse failed"
+                )
+            }
+            json = parsed
+        } catch {
+            logger.error("Failed to parse model response JSON: \(error.localizedDescription)")
             return ModelResponse(
                 modelId: modelId,
                 agrees: true,

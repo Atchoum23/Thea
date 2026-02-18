@@ -1,6 +1,9 @@
 import Foundation
+import OSLog
 
 final class PerplexityProvider: AIProvider, Sendable {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "PerplexityProvider")
+
     let metadata = ProviderMetadata(
         name: "perplexity",
         displayName: "Perplexity",
@@ -126,10 +129,16 @@ final class PerplexityProvider: AIProvider, Sendable {
                                     break
                                 }
 
-                                guard let data = jsonString.data(using: .utf8),
-                                      // try? OK: SSE line may be malformed; skip and continue
-                                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                                      let choices = json["choices"] as? [[String: Any]],
+                                guard let data = jsonString.data(using: .utf8) else { continue }
+                                let json: [String: Any]
+                                do {
+                                    guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { continue }
+                                    json = parsed
+                                } catch {
+                                    logger.debug("Skipped malformed SSE line: \(error.localizedDescription)")
+                                    continue
+                                }
+                                guard let choices = json["choices"] as? [[String: Any]],
                                       let delta = choices.first?["delta"] as? [String: Any],
                                       let content = delta["content"] as? String
                                 else {

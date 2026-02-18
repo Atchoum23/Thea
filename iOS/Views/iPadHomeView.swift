@@ -20,6 +20,8 @@ struct IPadHomeView: View {
 
     @State private var showingNewConversation = false
     @State private var showingNewProject = false
+    @State private var errorMessage: String?
+    @State private var showError = false
 
     enum SidebarSection: String, CaseIterable, Identifiable {
         case chat = "Chat"
@@ -65,6 +67,13 @@ struct IPadHomeView: View {
         }
         .sheet(isPresented: $showingNewProject) {
             IPadNewProjectView()
+        }
+        .alert("Error", isPresented: $showError, presenting: errorMessage) { _ in
+            Button("OK") {
+                errorMessage = nil
+            }
+        } message: { message in
+            Text(message)
         }
         .onAppear {
             setupManagers()
@@ -219,7 +228,12 @@ struct IPadHomeView: View {
                     let conversation = chatManager.createConversation(title: "New Conversation")
                     selectedConversation = conversation
                     Task {
-                        try? await chatManager.sendMessage(prompt, in: conversation)
+                        do {
+                            try await chatManager.sendMessage(prompt, in: conversation)
+                        } catch {
+                            errorMessage = "Failed to send message: \(error.localizedDescription)"
+                            showError = true
+                        }
                     }
                 }
             }
@@ -241,7 +255,12 @@ struct IPadHomeView: View {
                 let conversation = chatManager.createConversation(title: "New Conversation")
                 selectedConversation = conversation
                 Task {
-                    try? await chatManager.sendMessage(prompt, in: conversation)
+                    do {
+                        try await chatManager.sendMessage(prompt, in: conversation)
+                    } catch {
+                        errorMessage = "Failed to send message: \(error.localizedDescription)"
+                        showError = true
+                    }
                 }
             }
         }
@@ -257,8 +276,13 @@ struct IPadHomeView: View {
 
         if voiceManager.isEnabled {
             Task {
-                try? await voiceManager.requestPermissions()
-                try? voiceManager.startWakeWordDetection()
+                do {
+                    try await voiceManager.requestPermissions()
+                    try voiceManager.startWakeWordDetection()
+                } catch {
+                    errorMessage = "Failed to initialize voice manager: \(error.localizedDescription)"
+                    showError = true
+                }
             }
         }
     }

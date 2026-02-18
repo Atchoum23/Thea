@@ -241,12 +241,24 @@ actor ImageIntelligence {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         let theaDir = appSupport.appendingPathComponent("Thea/ImageIntelligence")
-        try? FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        } catch {
+            iiLogger.debug("Could not create ImageIntelligence directory: \(error.localizedDescription)")
+        }
         let file = theaDir.appendingPathComponent("history.json")
         self.historyFile = file
         // Inline loadHistory to avoid calling actor-isolated method from init
-        if let data = try? Data(contentsOf: file) {
-            self.processingHistory = (try? JSONDecoder().decode([ImageProcessingRecord].self, from: data)) ?? []
+        do {
+            let data = try Data(contentsOf: file)
+            self.processingHistory = ErrorLogger.tryOrDefault(
+                [],
+                context: "ImageIntelligence.init.decodeHistory"
+            ) {
+                try JSONDecoder().decode([ImageProcessingRecord].self, from: data)
+            }
+        } catch {
+            iiLogger.debug("Could not load image processing history: \(error.localizedDescription)")
         }
     }
 
@@ -265,7 +277,11 @@ actor ImageIntelligence {
 
         #if canImport(Vision)
         // OCR
-        textContent = try? await extractTextFromData(data)
+        do {
+            textContent = try await extractTextFromData(data)
+        } catch {
+            iiLogger.debug("Text extraction failed: \(error.localizedDescription)")
+        }
 
         // Face detection
         faceCount = try await detectFaces(in: data)
@@ -701,13 +717,29 @@ actor ImageIntelligence {
     // MARK: - Persistence
 
     private func loadHistory() {
-        guard let data = try? Data(contentsOf: historyFile) else { return }
-        processingHistory = (try? JSONDecoder().decode([ImageProcessingRecord].self, from: data)) ?? []
+        guard FileManager.default.fileExists(atPath: historyFile.path) else { return }
+        let data: Data
+        do {
+            data = try Data(contentsOf: historyFile)
+        } catch {
+            iiLogger.debug("Could not load image history: \(error.localizedDescription)")
+            return
+        }
+        processingHistory = ErrorLogger.tryOrDefault(
+            [],
+            context: "ImageIntelligence.loadHistory.decode"
+        ) {
+            try JSONDecoder().decode([ImageProcessingRecord].self, from: data)
+        }
     }
 
     private func saveHistory() {
-        guard let data = try? JSONEncoder().encode(processingHistory) else { return }
-        try? data.write(to: historyFile, options: .atomic)
+        do {
+            let data = try JSONEncoder().encode(processingHistory)
+            try data.write(to: historyFile, options: .atomic)
+        } catch {
+            ErrorLogger.log(error, context: "ImageIntelligence.saveHistory")
+        }
     }
 }
 

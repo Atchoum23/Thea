@@ -88,7 +88,11 @@ public final class ApprovalManager {
 
             // Set up timeout
             Task {
-                try? await Task.sleep(for: .seconds(approvalTimeout))
+                do {
+                    try await Task.sleep(nanoseconds: UInt64(approvalTimeout * 1_000_000_000))
+                } catch {
+                    // Task cancelled — approval timeout cancelled
+                }
 
                 // If still pending after timeout, reject
                 if self.continuations[request.id] != nil {

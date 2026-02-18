@@ -8,12 +8,15 @@
 
 import CryptoKit
 import Foundation
+import OSLog
 
 // MARK: - Activity Logger
 
 /// Logs and stores activity data with encryption support
 public actor ActivityLogger {
     public static let shared = ActivityLogger()
+
+    private let logger = Logger(subsystem: "app.thea.Thea", category: "ActivityLogger")
 
     // MARK: - Storage
 
@@ -45,7 +48,11 @@ public actor ActivityLogger {
     }
 
     private func ensureLogsDirectory() {
-        try? fileManager.createDirectory(at: logsDirectory, withIntermediateDirectories: true)
+        do {
+            try fileManager.createDirectory(at: logsDirectory, withIntermediateDirectories: true)
+        } catch {
+            logger.error("Failed to create logs directory: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Logging
@@ -107,19 +114,25 @@ public actor ActivityLogger {
 
             // Load existing entries
             var existingEntries: [ActivityLogEntry] = []
-            if let data = try? Data(contentsOf: filePath) {
+            do {
+                let data = try Data(contentsOf: filePath)
                 let decodedData = encryptionEnabled ? await decrypt(data) : data
-                if let decoded = try? JSONDecoder().decode([ActivityLogEntry].self, from: decodedData ?? data) {
-                    existingEntries = decoded
-                }
+                existingEntries = try JSONDecoder().decode([ActivityLogEntry].self, from: decodedData ?? data)
+            } catch CocoaError.fileReadNoSuchFile {
+                // File doesn't exist yet - expected on first write
+            } catch {
+                logger.error("Failed to load existing log entries: \(error.localizedDescription)")
             }
 
             // Merge and save
             existingEntries.append(contentsOf: dayEntries)
 
-            if let encoded = try? JSONEncoder().encode(existingEntries) {
+            do {
+                let encoded = try JSONEncoder().encode(existingEntries)
                 let dataToWrite = encryptionEnabled ? await encrypt(encoded) : encoded
-                try? dataToWrite?.write(to: filePath)
+                try dataToWrite?.write(to: filePath)
+            } catch {
+                logger.error("Failed to write log entries: \(error.localizedDescription)")
             }
         }
     }
@@ -174,16 +187,16 @@ public actor ActivityLogger {
 
         let filePath = logsDirectory.appendingPathComponent("\(dayKey).json")
 
-        guard let data = try? Data(contentsOf: filePath) else {
+        do {
+            let data = try Data(contentsOf: filePath)
+            let decodedData = encryptionEnabled ? await decrypt(data) : data
+            return try JSONDecoder().decode([ActivityLogEntry].self, from: decodedData ?? data)
+        } catch CocoaError.fileReadNoSuchFile {
+            return []
+        } catch {
+            logger.error("Failed to load log entries for \(dayKey): \(error.localizedDescription)")
             return []
         }
-
-        let decodedData = encryptionEnabled ? await decrypt(data) : data
-        guard let decoded = try? JSONDecoder().decode([ActivityLogEntry].self, from: decodedData ?? data) else {
-            return []
-        }
-
-        return decoded
     }
 
     /// Get entries for a date range
@@ -258,10 +271,14 @@ public actor ActivityLogger {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
 
-        guard let files = try? fileManager.contentsOfDirectory(
-            at: logsDirectory,
-            includingPropertiesForKeys: nil
-        ) else {
+        let files: [URL]
+        do {
+            files = try fileManager.contentsOfDirectory(
+                at: logsDirectory,
+                includingPropertiesForKeys: nil
+            )
+        } catch {
+            logger.error("Failed to read logs directory for cleanup: \(error.localizedDescription)")
             return
         }
 
@@ -270,14 +287,22 @@ public actor ActivityLogger {
             if let fileDate = dateFormatter.date(from: filename),
                fileDate < cutoffDate
             {
-                try? fileManager.removeItem(at: file)
+                do {
+                    try fileManager.removeItem(at: file)
+                } catch {
+                    logger.error("Failed to remove old log file \(filename): \(error.localizedDescription)")
+                }
             }
         }
     }
 
     /// Delete all logs
     public func deleteAllLogs() async {
-        try? fileManager.removeItem(at: logsDirectory)
+        do {
+            try fileManager.removeItem(at: logsDirectory)
+        } catch {
+            logger.error("Failed to delete logs directory: \(error.localizedDescription)")
+        }
         ensureLogsDirectory()
         inMemoryBuffer.removeAll()
     }
@@ -433,21 +458,44 @@ public enum ActivityAnyCodable: Codable, Sendable, Equatable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
-        if let intValue = try? container.decode(Int.self) {
-            self = .int(intValue)
-        } else if let doubleValue = try? container.decode(Double.self) {
-            self = .double(doubleValue)
-        } else if let stringValue = try? container.decode(String.self) {
-            self = .string(stringValue)
-        } else if let boolValue = try? container.decode(Bool.self) {
-            self = .bool(boolValue)
-        } else if let dateValue = try? container.decode(Date.self) {
-            self = .date(dateValue)
-        } else if container.decodeNil() {
+        // Try decoding as different types (polymorphic decode)
+        if container.decodeNil() {
             self = .null
-        } else {
-            self = .null
+            return
         }
+
+        // Try Int first
+        do {
+            self = .int(try container.decode(Int.self))
+            return
+        } catch {}
+
+        // Try Double
+        do {
+            self = .double(try container.decode(Double.self))
+            return
+        } catch {}
+
+        // Try Bool
+        do {
+            self = .bool(try container.decode(Bool.self))
+            return
+        } catch {}
+
+        // Try Date
+        do {
+            self = .date(try container.decode(Date.self))
+            return
+        } catch {}
+
+        // Try String (most permissive)
+        do {
+            self = .string(try container.decode(String.self))
+            return
+        } catch {}
+
+        // Fallback to null if all types fail
+        self = .null
     }
 
     public func encode(to encoder: Encoder) throws {

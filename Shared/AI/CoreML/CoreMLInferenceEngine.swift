@@ -1,5 +1,6 @@
 import CoreML
 import Foundation
+import OSLog
 
 // MARK: - CoreML Inference Engine
 // Enables on-device LLM inference via CoreML on all Apple platforms
@@ -10,6 +11,8 @@ import Foundation
 final class CoreMLInferenceEngine {
     static let shared = CoreMLInferenceEngine()
 
+    private let logger = Logger(subsystem: "ai.thea.app", category: "CoreMLInferenceEngine")
+
     // MARK: - State
 
     private(set) var loadedModel: MLModel?
@@ -17,24 +20,7 @@ final class CoreMLInferenceEngine {
     private(set) var isLoading = false
     private(set) var lastError: Error?
 
-    private var memoryPressureSource: DispatchSourceMemoryPressure?
-
-    private init() {
-        setupMemoryPressureHandler()
-    }
-
-    private func setupMemoryPressureHandler() {
-        let source = DispatchSource.makeMemoryPressureSource(eventMask: [.warning, .critical], queue: .main)
-        source.setEventHandler { [weak self] in
-            Task { @MainActor in
-                guard let self, !self.isLoading else { return }
-                print("⚠️ CoreMLInferenceEngine: Memory pressure detected, unloading model")
-                self.unloadModel()
-            }
-        }
-        source.resume()
-        memoryPressureSource = source
-    }
+    private init() {}
 
     // MARK: - Model Discovery
 
@@ -64,15 +50,26 @@ final class CoreMLInferenceEngine {
     }
 
     private func scanForModels(in directory: URL, source: ModelSource) -> [DiscoveredCoreMLModel] {
-        guard let contents = try? FileManager.default.contentsOfDirectory(
-            at: directory, includingPropertiesForKeys: [.fileSizeKey], options: [.skipsHiddenFiles]
-        ) else { return [] }
+        let contents: [URL]
+        do {
+            contents = try FileManager.default.contentsOfDirectory(
+                at: directory, includingPropertiesForKeys: [.fileSizeKey], options: [.skipsHiddenFiles]
+            )
+        } catch {
+            logger.debug("Could not scan directory \(directory.path): \(error.localizedDescription)")
+            return []
+        }
 
         return contents.compactMap { item in
             let ext = item.pathExtension
             guard ext == "mlmodelc" || ext == "mlpackage" else { return nil }
             let name = item.deletingPathExtension().lastPathComponent
-            let size = (try? item.resourceValues(forKeys: [.totalFileSizeKey]).totalFileSize) ?? 0
+            let size: Int
+            do {
+                size = (try item.resourceValues(forKeys: [.totalFileSizeKey]).totalFileSize) ?? 0
+            } catch {
+                size = 0
+            }
             return DiscoveredCoreMLModel(id: name, name: name, path: item, source: source, sizeBytes: Int64(size))
         }
     }

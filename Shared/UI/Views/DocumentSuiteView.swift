@@ -270,9 +270,13 @@ struct DocumentSuiteView: View {
             ForEach(DocumentSuiteService.shared.templates) { template in
                 Button {
                     Task {
-                        if let doc = try? await DocumentSuiteService.shared.createFromTemplate(template.name) {
+                        do {
+                            let doc = try await DocumentSuiteService.shared.createFromTemplate(template.name)
                             selectDocument(doc)
                             await loadDocuments()
+                        } catch {
+                            errorMessage = "Failed to create document: \(error.localizedDescription)"
+                            showError = true
                         }
                         showTemplates = false
                     }

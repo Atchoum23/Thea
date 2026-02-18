@@ -49,7 +49,9 @@ public final class AnalyticsManager: ObservableObject {
 
     private func loadSettings() {
         isEnabled = UserDefaults.standard.bool(forKey: "analytics.enabled")
-        // Default to disabled (opt-in, not opt-out) for privacy
+        if UserDefaults.standard.object(forKey: "analytics.enabled") == nil {
+            isEnabled = true // Default to enabled
+        }
     }
 
     // MARK: - Configuration
@@ -324,7 +326,11 @@ public final class AnalyticsManager: ObservableObject {
     private func setupPeriodicSync() {
         Task {
             while true {
-                try? await Task.sleep(for: .seconds(60)) // Every minute
+                do {
+                    try await Task.sleep(nanoseconds: 60_000_000_000) // Every minute
+                } catch {
+                    break // Task cancelled - stop periodic sync
+                }
                 await syncEvents()
             }
         }
@@ -491,21 +497,15 @@ public struct AnyCodable: Codable {
 
         if container.decodeNil() {
             value = NSNull()
-        } else if let bool = try? container.decode(Bool.self) {
-            value = bool
-        } else if let int = try? container.decode(Int.self) {
-            value = int
-        } else if let double = try? container.decode(Double.self) {
-            value = double
-        } else if let string = try? container.decode(String.self) {
-            value = string
-        } else if let array = try? container.decode([AnyCodable].self) {
-            value = array.map(\.value)
-        } else if let dict = try? container.decode([String: AnyCodable].self) {
-            value = dict.mapValues { $0.value }
-        } else {
-            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Unable to decode value")
+            return
         }
+        do { value = try container.decode(Bool.self); return } catch {}
+        do { value = try container.decode(Int.self); return } catch {}
+        do { value = try container.decode(Double.self); return } catch {}
+        do { value = try container.decode(String.self); return } catch {}
+        do { value = (try container.decode([AnyCodable].self)).map(\.value); return } catch {}
+        do { value = (try container.decode([String: AnyCodable].self)).mapValues { $0.value }; return } catch {}
+        throw DecodingError.dataCorruptedError(in: container, debugDescription: "Unable to decode value")
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -534,7 +534,6 @@ public struct AnyCodable: Codable {
 
 // MARK: - Analytics Provider Protocol
 
-/// Backend provider for analytics event tracking and user property management.
 public protocol AnalyticsProvider: Sendable {
     func track(_ event: AnalyticsEvent)
     func setUserProperty(_ key: String, value: Any)
@@ -544,7 +543,6 @@ public protocol AnalyticsProvider: Sendable {
 
 // MARK: - Local Analytics Provider
 
-// @unchecked Sendable: all stored properties are immutable lets; no mutable state
 public final class LocalAnalyticsProvider: AnalyticsProvider, @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.app", category: "Analytics.Local")
     private let fileURL: URL
@@ -585,7 +583,6 @@ public final class LocalAnalyticsProvider: AnalyticsProvider, @unchecked Sendabl
 
 // MARK: - Console Analytics Provider (Debug)
 
-// @unchecked Sendable: stateless — only stored property is immutable Logger
 public final class ConsoleAnalyticsProvider: AnalyticsProvider, @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.app", category: "Analytics.Console")
 

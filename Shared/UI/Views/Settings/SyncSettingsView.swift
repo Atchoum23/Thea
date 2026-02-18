@@ -174,7 +174,7 @@ struct SyncSettingsContentView: View {
             title: "iCloud",
             value: syncEngine.isCloudAvailable ? "Connected" : "Unavailable",
             icon: "icloud.fill",
-            color: syncEngine.isCloudAvailable ? .theaSuccess : .theaError
+            color: syncEngine.isCloudAvailable ? .green : .red
         )
 
         overviewCard(
@@ -188,7 +188,7 @@ struct SyncSettingsContentView: View {
             title: "Devices",
             value: "\(syncEngine.registeredDevices.count)",
             icon: "laptopcomputer.and.iphone",
-            color: syncEngine.registeredDevices.count > 1 ? .theaInfo : .secondary
+            color: syncEngine.registeredDevices.count > 1 ? .blue : .secondary
         )
 
         overviewCard(
@@ -301,11 +301,11 @@ struct SyncSettingsContentView: View {
                     if syncEngine.isCloudAvailable {
                         Label("Connected", systemImage: "checkmark.circle.fill")
                             .font(.caption)
-                            .foregroundStyle(Color.theaSuccess)
+                            .foregroundStyle(.green)
                     } else {
                         Label("Not Available", systemImage: "exclamationmark.triangle.fill")
                             .font(.caption)
-                            .foregroundStyle(Color.theaWarning)
+                            .foregroundStyle(.orange)
                     }
                 }
 
@@ -345,7 +345,7 @@ struct SyncSettingsContentView: View {
                     if cloudKitService.pendingChanges > 0 {
                         Text("\(cloudKitService.pendingChanges) pending")
                             .font(.caption)
-                            .foregroundStyle(Color.theaWarning)
+                            .foregroundStyle(.orange)
                     }
                 }
             }
@@ -353,12 +353,12 @@ struct SyncSettingsContentView: View {
             if let error = lastSyncError {
                 HStack {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(Color.theaError)
+                        .foregroundStyle(.red)
                         .accessibilityHidden(true)
 
                     Text(error)
                         .font(.caption)
-                        .foregroundStyle(Color.theaError)
+                        .foregroundStyle(.red)
                 }
             }
 
@@ -514,7 +514,7 @@ extension SyncSettingsContentView {
         return HStack(spacing: 12) {
             Image(systemName: device.deviceClass.systemImage)
                 .font(.title3)
-                .foregroundStyle(Color.theaInfo)
+                .foregroundStyle(.blue)
                 .frame(width: 30)
                 .accessibilityHidden(true)
 
@@ -529,8 +529,8 @@ extension SyncSettingsContentView {
                             .font(.caption2)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.theaSuccess.opacity(0.2))
-                            .foregroundStyle(Color.theaSuccess)
+                            .background(Color.green.opacity(0.2))
+                            .foregroundStyle(.green)
                             .cornerRadius(4)
                     }
                 }

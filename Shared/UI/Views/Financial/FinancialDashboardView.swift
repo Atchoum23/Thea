@@ -623,7 +623,7 @@ struct ConnectAccountSheet: View {
                 print("✅ Successfully connected account: \(account.name)")
 
                 // Store credentials in Keychain via SecureStorage
-                try? SecureStorage.shared.saveAPIKey(apiKey, for: "financial_\(account.id.uuidString)")
+                try SecureStorage.shared.saveAPIKey(apiKey, for: "financial_\(account.id.uuidString)")
 
                 isConnecting = false
                 dismiss()

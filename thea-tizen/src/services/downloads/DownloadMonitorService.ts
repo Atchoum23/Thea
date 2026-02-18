@@ -167,8 +167,7 @@ class DownloadMonitorService {
 
     for (const torrent of torrents) {
       const previousState = this.previousStates.get(torrent.hash);
-      // previousTorrent reserved for future state comparison logic
-      void this.knownTorrents.get(torrent.hash);
+      const previousTorrent = this.knownTorrents.get(torrent.hash);
 
       // Detect completion
       if (previousState && this.isDownloading(previousState) && this.isComplete(torrent.state)) {

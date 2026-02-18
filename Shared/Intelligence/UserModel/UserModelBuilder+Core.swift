@@ -327,7 +327,11 @@ public final class UserModelBuilder {
     private func startPeriodicAnalysis() {
         Task.detached { [weak self] in
             while true {
-                try? await Task.sleep(for: .seconds(300)) // Every 5 minutes
+                do {
+                    try await Task.sleep(for: .seconds(300)) // Every 5 minutes
+                } catch {
+                    break
+                }
                 await self?.performPeriodicAnalysis()
             }
         }

@@ -177,24 +177,4 @@ extension ShapeStyle where Self == Color {
     static var theaGold: Color {
         Color.theaGoldDefault
     }
-
-    /// Success semantic color for Thea
-    static var theaSuccess: Color {
-        Color.theaSuccess
-    }
-
-    /// Warning semantic color for Thea
-    static var theaWarning: Color {
-        Color.theaWarning
-    }
-
-    /// Error semantic color for Thea
-    static var theaError: Color {
-        Color.theaError
-    }
-
-    /// Info semantic color for Thea
-    static var theaInfo: Color {
-        Color.theaInfo
-    }
 }

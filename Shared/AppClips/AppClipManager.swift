@@ -297,7 +297,11 @@ public final class AppClipManager: ObservableObject {
             let data = try JSONDecoder().decode(AppClipData.self, from: jsonData)
 
             // Clean up migration file
-            try? FileManager.default.removeItem(at: migrationURL)
+            do {
+                try FileManager.default.removeItem(at: migrationURL)
+            } catch {
+                logger.error("Failed to remove migration file: \(error.localizedDescription)")
+            }
 
             logger.info("Migration data imported")
             return data

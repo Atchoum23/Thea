@@ -271,7 +271,11 @@ public final class UnifiedContextEngine: ObservableObject {
     private func startPeriodicUpdates() {
         updateTask = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(self?.updateInterval ?? 1.0))
+                do {
+                    try await Task.sleep(for: .seconds(self?.updateInterval ?? 1.0))
+                } catch {
+                    break // Task cancelled — stop periodic updates
+                }
                 guard !Task.isCancelled else { break }
                 await self?.aggregateContext()
             }

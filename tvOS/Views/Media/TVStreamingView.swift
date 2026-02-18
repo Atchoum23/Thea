@@ -45,7 +45,7 @@ struct TVStreamingView: View {
         VStack(alignment: .leading, spacing: 20) {
             HStack {
                 Image(systemName: "star.fill")
-                    .foregroundStyle(.theaWarning)
+                    .foregroundStyle(.yellow)
                 Text("Your Swiss Streaming Bundle")
                     .font(.title3)
                     .fontWeight(.bold)
@@ -58,7 +58,7 @@ struct TVStreamingView: View {
             HStack(spacing: 30) {
                 BundledServiceBadge(name: "Canal+", icon: "tv.fill", color: .black)
                 BundledServiceBadge(name: "HBO Max", icon: "film.fill", color: .purple)
-                BundledServiceBadge(name: "Paramount+", icon: "mountain.2.fill", color: .theaInfo)
+                BundledServiceBadge(name: "Paramount+", icon: "mountain.2.fill", color: .blue)
             }
 
             Text("All content accessible through the Canal+ app")
@@ -69,7 +69,7 @@ struct TVStreamingView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             LinearGradient(
-                colors: [Color.theaInfo.opacity(0.3), .purple.opacity(0.2)],
+                colors: [.blue.opacity(0.3), .purple.opacity(0.2)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -192,7 +192,7 @@ struct AccountCard: View {
 
                     if account.isActive {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.theaSuccess)
+                            .foregroundStyle(.green)
                     }
                 }
 
@@ -208,7 +208,7 @@ struct AccountCard: View {
                         .font(.caption)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.theaInfo.opacity(0.2))
+                        .background(.blue.opacity(0.2))
                         .clipShape(Capsule())
 
                     Text(account.features.maxQuality.rawValue)
@@ -229,12 +229,12 @@ struct AccountCard: View {
 
     private var appColor: Color {
         switch account.appID {
-        case .netflix: .theaError
-        case .prime: .theaInfo
+        case .netflix: .red
+        case .prime: .blue
         case .disney: .indigo
         case .apple: .gray
         case .hbo: .purple
-        case .paramount: .theaInfo
+        case .paramount: .blue
         case .canalCH, .canal: .black
         default: .secondary
         }
@@ -268,19 +268,19 @@ struct StreamingAppButton: View {
 
     private var appColor: Color {
         switch app {
-        case .netflix: .theaError
-        case .prime: .theaInfo
+        case .netflix: .red
+        case .prime: .blue
         case .disney: .indigo
         case .apple: .gray
         case .hbo: .purple
-        case .paramount: .theaInfo
-        case .peacock: .theaSuccess
-        case .hulu: .theaSuccess
+        case .paramount: .blue
+        case .peacock: .green
+        case .hulu: .green
         case .canalCH, .canal: .black
-        case .plex: .theaWarning
-        case .youtube: .theaError
-        case .crunchyroll: .theaWarning
-        case .swisscom: .theaInfo
+        case .plex: .orange
+        case .youtube: .red
+        case .crunchyroll: .orange
+        case .swisscom: .blue
         case .other: .secondary
         }
     }

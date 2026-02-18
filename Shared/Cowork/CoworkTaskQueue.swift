@@ -1,10 +1,13 @@
 #if os(macOS)
     import Foundation
+    import OSLog
 
     /// Task queue for managing multiple Cowork tasks
     @MainActor
     @Observable
     final class CoworkTaskQueue {
+        private let logger = Logger(subsystem: "ai.thea.app", category: "CoworkTaskQueue")
+
         var tasks: [CoworkTask] = []
         var maxConcurrentTasks: Int = 3
         var isProcessing: Bool = false
@@ -58,7 +61,11 @@
                 // Get next tasks up to concurrent limit
                 let availableSlots = maxConcurrentTasks - activeTasks.count
                 guard availableSlots > 0 else {
-                    try? await Task.sleep(for: .milliseconds(100)) // 0.1s
+                    do {
+                        try await Task.sleep(nanoseconds: 100_000_000) // 0.1s
+                    } catch {
+                        break // Task cancelled
+                    }
                     continue
                 }
 
@@ -69,7 +76,11 @@
                     if activeTasks.isEmpty {
                         break // All done
                     }
-                    try? await Task.sleep(for: .milliseconds(100))
+                    do {
+                        try await Task.sleep(nanoseconds: 100_000_000)
+                    } catch {
+                        break // Task cancelled
+                    }
                     continue
                 }
 

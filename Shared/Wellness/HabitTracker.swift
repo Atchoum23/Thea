@@ -6,8 +6,11 @@
 // Replaces: Liven, Try Dry, NOMO apps.
 
 import Foundation
+import OSLog
 import SwiftData
 import UserNotifications
+
+private let habitLogger = Logger(subsystem: "ai.thea.app", category: "HabitTracker")
 
 // MARK: - Data Models
 
@@ -256,7 +259,18 @@ final class HabitManager {
     private(set) var entries: [TheaHabitEntry] = []
     private var modelContext: ModelContext?
 
+    // MARK: - Error State (observable for UI alerts)
+    var errorMessage: String?
+    var showError: Bool = false
+
     private init() {}
+
+    private func handleSaveError(_ error: Error, context: String) {
+        let message = "Failed to save: \(error.localizedDescription)"
+        errorMessage = message
+        showError = true
+        habitLogger.error("[\(context)] \(message)")
+    }
 
     func setModelContext(_ context: ModelContext) {
         modelContext = context
@@ -267,7 +281,11 @@ final class HabitManager {
 
     func addHabit(_ habit: TheaHabit) {
         modelContext?.insert(habit)
-        try? modelContext?.save()
+        do {
+            try modelContext?.save()
+        } catch {
+            handleSaveError(error, context: "HabitManager.addHabit(\(habit.name))")
+        }
         loadData()
         if habit.reminderEnabled {
             scheduleReminder(for: habit)
@@ -304,7 +322,11 @@ final class HabitManager {
 
     func updateHabit(_ habit: TheaHabit) {
         habit.updatedDate = Date()
-        try? modelContext?.save()
+        do {
+            try modelContext?.save()
+        } catch {
+            handleSaveError(error, context: "HabitManager.updateHabit(\(habit.name))")
+        }
         loadData()
         if habit.reminderEnabled {
             scheduleReminder(for: habit)
@@ -321,7 +343,11 @@ final class HabitManager {
             modelContext?.delete(entry)
         }
         modelContext?.delete(habit)
-        try? modelContext?.save()
+        do {
+            try modelContext?.save()
+        } catch {
+            handleSaveError(error, context: "HabitManager.deleteHabit(\(habit.name))")
+        }
         loadData()
     }
 
@@ -329,7 +355,11 @@ final class HabitManager {
         habit.isArchived = true
         habit.isActive = false
         habit.updatedDate = Date()
-        try? modelContext?.save()
+        do {
+            try modelContext?.save()
+        } catch {
+            handleSaveError(error, context: "HabitManager.archiveHabit(\(habit.name))")
+        }
         cancelReminder(for: habit)
         loadData()
     }
@@ -363,7 +393,11 @@ final class HabitManager {
         habit.totalCompletions += 1
         habit.updatedDate = Date()
         recalculateStreak(for: habit)
-        try? modelContext?.save()
+        do {
+            try modelContext?.save()
+        } catch {
+            handleSaveError(error, context: "HabitManager.completeHabit(\(habit.name))")
+        }
         loadData()
     }
 
@@ -383,7 +417,11 @@ final class HabitManager {
             habit.totalCompletions = max(0, habit.totalCompletions - 1)
             habit.updatedDate = Date()
             recalculateStreak(for: habit)
-            try? modelContext?.save()
+            do {
+                try modelContext?.save()
+            } catch {
+                handleSaveError(error, context: "HabitManager.uncompleteHabit(\(habit.name))")
+            }
             loadData()
         }
     }
@@ -564,11 +602,15 @@ final class HabitManager {
         let habitDescriptor = FetchDescriptor<TheaHabit>(
             sortBy: [SortDescriptor(\.createdDate, order: .reverse)]
         )
-        habits = (try? modelContext.fetch(habitDescriptor)) ?? []
+        habits = ErrorLogger.tryOrDefault([], context: "HabitManager.loadData.fetchHabits") {
+            try modelContext.fetch(habitDescriptor)
+        }
 
         let entryDescriptor = FetchDescriptor<TheaHabitEntry>(
             sortBy: [SortDescriptor(\.completedDate, order: .reverse)]
         )
-        entries = (try? modelContext.fetch(entryDescriptor)) ?? []
+        entries = ErrorLogger.tryOrDefault([], context: "HabitManager.loadData.fetchEntries") {
+            try modelContext.fetch(entryDescriptor)
+        }
     }
 }

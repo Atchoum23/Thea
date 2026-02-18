@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import Observation
 @preconcurrency import SwiftData
 
@@ -11,6 +12,7 @@ import Observation
 final class BrowserHistoryTracker {
     static let shared = BrowserHistoryTracker()
 
+    private let logger = Logger(subsystem: "ai.thea.app", category: "BrowserHistoryTracker")
     private var modelContext: ModelContext?
     private(set) var isTracking = false
     private(set) var browsingHistory: [BrowsingSession] = []
@@ -132,7 +134,11 @@ final class BrowserHistoryTracker {
         )
 
         context.insert(record)
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            logger.error("Failed to save browsing record: \(error.localizedDescription)")
+        }
     }
 
     // SECURITY FIX (FINDING-009): Remove sensitive query parameters from URLs
@@ -208,7 +214,13 @@ final class BrowserHistoryTracker {
 
         // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<BrowsingRecord>()
-        let allRecords = (try? context.fetch(descriptor)) ?? []
+        let allRecords: [BrowsingRecord]
+        do {
+            allRecords = try context.fetch(descriptor)
+        } catch {
+            logger.error("Failed to fetch browsing records for date: \(error.localizedDescription)")
+            return []
+        }
         return allRecords
             .filter { $0.timestamp >= startOfDay && $0.timestamp < endOfDay }
             .sorted { $0.timestamp > $1.timestamp }
@@ -219,7 +231,13 @@ final class BrowserHistoryTracker {
 
         // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<BrowsingRecord>()
-        let allRecords = (try? context.fetch(descriptor)) ?? []
+        let allRecords: [BrowsingRecord]
+        do {
+            allRecords = try context.fetch(descriptor)
+        } catch {
+            logger.error("Failed to fetch browsing records for range: \(error.localizedDescription)")
+            return []
+        }
         return allRecords
             .filter { $0.timestamp >= start && $0.timestamp <= end }
             .sorted { $0.timestamp > $1.timestamp }

@@ -65,16 +65,22 @@ public final class ExtensionSyncBridge: ObservableObject {
     // Server cleanup should be handled explicitly via stopServer() before deallocation
 
     private func loadSettings() {
-        if let data = UserDefaults.standard.data(forKey: "extensionSync.settings"),
-           let loaded = try? JSONDecoder().decode(SyncSettings.self, from: data)
-        {
-            settings = loaded
+        if let data = UserDefaults.standard.data(forKey: "extensionSync.settings") {
+            do {
+                let loaded = try JSONDecoder().decode(SyncSettings.self, from: data)
+                settings = loaded
+            } catch {
+                logger.debug("Could not decode extension sync settings: \(error.localizedDescription)")
+            }
         }
     }
 
     public func saveSettings() {
-        if let data = try? JSONEncoder().encode(settings) {
+        do {
+            let data = try JSONEncoder().encode(settings)
             UserDefaults.standard.set(data, forKey: "extensionSync.settings")
+        } catch {
+            logger.error("Failed to save extension sync settings: \(error.localizedDescription)")
         }
     }
 

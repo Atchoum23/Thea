@@ -39,9 +39,6 @@ struct TheaAgentRowView: View {
                 .stroke(isSelected ? Color.accentColor.opacity(0.3) : .clear, lineWidth: 1)
         )
         .onHover { isHovered = $0 }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(session.name), \(session.state.rawValue). \(session.taskDescription)")
-        .accessibilityHint("Tap to view agent details")
     }
 
     // MARK: - State Indicator

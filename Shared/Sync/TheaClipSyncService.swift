@@ -413,17 +413,22 @@ final class TheaClipSyncService: ObservableObject {
 
     private func loadChangeToken() {
         guard let data = UserDefaults.standard.data(forKey: tokenKey) else { return }
-        // try? OK: missing token just triggers full sync
-        changeToken = try? NSKeyedUnarchiver.unarchivedObject(
-            ofClass: CKServerChangeToken.self,
-            from: data
-        )
+        // Missing token just triggers full sync on failure
+        do {
+            changeToken = try NSKeyedUnarchiver.unarchivedObject(ofClass: CKServerChangeToken.self, from: data)
+        } catch {
+            syncLogger.debug("Could not decode change token, will do full sync: \(error.localizedDescription)")
+        }
     }
 
     private func saveChangeToken() {
         guard let token = changeToken else { return }
-        // try? OK: token will be re-fetched on next sync if save fails
-        let data = try? NSKeyedArchiver.archivedData(withRootObject: token, requiringSecureCoding: true)
-        UserDefaults.standard.set(data, forKey: tokenKey)
+        // Token will be re-fetched on next sync if save fails
+        do {
+            let data = try NSKeyedArchiver.archivedData(withRootObject: token, requiringSecureCoding: true)
+            UserDefaults.standard.set(data, forKey: tokenKey)
+        } catch {
+            syncLogger.debug("Could not save change token: \(error.localizedDescription)")
+        }
     }
 }

@@ -27,7 +27,14 @@ extension BackupManager {
 
         while let fileURL = enumerator?.nextObject() as? URL {
             let relativePath = fileURL.path.replacingOccurrences(of: directory.path + "/", with: "")
-            let isDirectory = (try? fileURL.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
+            let isDirectory: Bool
+            do {
+                let resourceValues = try fileURL.resourceValues(forKeys: [.isDirectoryKey])
+                isDirectory = resourceValues.isDirectory ?? false
+            } catch {
+                logger.debug("Could not read directory attribute for \(relativePath): \(error.localizedDescription)")
+                isDirectory = false
+            }
 
             if !isDirectory {
                 let data = try Data(contentsOf: fileURL)

@@ -4,6 +4,9 @@
 // Supporting types for MemoryManager: records, enums, metadata, and search results.
 
 import Foundation
+import OSLog
+
+private let memTypeLogger = Logger(subsystem: "com.thea.app", category: "MemoryManagerTypes")
 
 // MARK: - Memory Record (File-based, not SwiftData)
 
@@ -105,9 +108,6 @@ public enum MemoryTriggerCondition: Codable, CustomStringConvertible {
         }
     }
 
-    /// Checks whether this trigger condition is satisfied by the given context snapshot.
-    /// - Parameter context: The current context snapshot to evaluate against.
-    /// - Returns: `true` if the condition is met (e.g., time reached, keyword matched, activity detected).
     public func isSatisfied(by context: MemoryContextSnapshot) -> Bool {
         switch self {
         case .time(let date):
@@ -196,12 +196,18 @@ struct OmniEpisodicMetadata: Codable {
     let emotionalValence: Double
 
     func encoded() -> Data? {
-        try? JSONEncoder().encode(self)
+        do { return try JSONEncoder().encode(self) } catch {
+            memTypeLogger.debug("Failed to encode OmniEpisodicMetadata: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     static func decode(_ data: Data?) -> OmniEpisodicMetadata? {
         guard let data else { return nil }
-        return try? JSONDecoder().decode(OmniEpisodicMetadata.self, from: data)
+        do { return try JSONDecoder().decode(OmniEpisodicMetadata.self, from: data) } catch {
+            memTypeLogger.debug("Failed to decode OmniEpisodicMetadata: \(error.localizedDescription)")
+            return nil
+        }
     }
 }
 
@@ -211,12 +217,18 @@ struct OmniProceduralMetadata: Codable {
     var executionCount: Int
 
     func encoded() -> Data? {
-        try? JSONEncoder().encode(self)
+        do { return try JSONEncoder().encode(self) } catch {
+            memTypeLogger.debug("Failed to encode OmniProceduralMetadata: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     static func decode(_ data: Data?) -> OmniProceduralMetadata? {
         guard let data else { return nil }
-        return try? JSONDecoder().decode(OmniProceduralMetadata.self, from: data)
+        do { return try JSONDecoder().decode(OmniProceduralMetadata.self, from: data) } catch {
+            memTypeLogger.debug("Failed to decode OmniProceduralMetadata: \(error.localizedDescription)")
+            return nil
+        }
     }
 }
 
@@ -225,12 +237,18 @@ struct OmniProspectiveMetadata: Codable {
     var isTriggered: Bool
 
     func encoded() -> Data? {
-        try? JSONEncoder().encode(self)
+        do { return try JSONEncoder().encode(self) } catch {
+            memTypeLogger.debug("Failed to encode OmniProspectiveMetadata: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     static func decode(_ data: Data?) -> OmniProspectiveMetadata? {
         guard let data else { return nil }
-        return try? JSONDecoder().decode(OmniProspectiveMetadata.self, from: data)
+        do { return try JSONDecoder().decode(OmniProspectiveMetadata.self, from: data) } catch {
+            memTypeLogger.debug("Failed to decode OmniProspectiveMetadata: \(error.localizedDescription)")
+            return nil
+        }
     }
 }
 

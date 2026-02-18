@@ -6,7 +6,6 @@ import OSLog
 
 // MARK: - Session Delegate
 
-// @unchecked Sendable: URLSession serializes all delegate callbacks on its internal queue
 class NetworkSessionDelegate: NSObject, URLSessionDelegate, URLSessionDataDelegate, URLSessionDownloadDelegate, @unchecked Sendable {
     private var streamHandlers: [URLSessionTask: (onData: (Data) -> Void, onComplete: (Error?) -> Void)] = [:]
 
@@ -34,7 +33,6 @@ class NetworkSessionDelegate: NSObject, URLSessionDelegate, URLSessionDataDelega
 
 // MARK: - WebSocket Connection
 
-// @unchecked Sendable: URLSessionWebSocketTask wrapper — task is thread-safe, isConnected set from delegate
 public final class WebSocketConnection: ObservableObject, @unchecked Sendable {
     private let task: URLSessionWebSocketTask
     @Published public private(set) var isConnected = false
@@ -96,12 +94,10 @@ public final class WebSocketConnection: ObservableObject, @unchecked Sendable {
 
 // MARK: - Interceptors
 
-/// Intercepts outgoing URL requests before they are sent, allowing header injection or request modification.
 public protocol RequestInterceptor: Sendable {
     func intercept(_ request: URLRequest) async -> URLRequest
 }
 
-/// Intercepts incoming response data before it reaches the caller, allowing transformation or logging.
 public protocol ResponseInterceptor: Sendable {
     func intercept(_ data: Data, response: URLResponse) async -> Data
 }
@@ -155,7 +151,7 @@ actor NetworkRateLimiter {
             let elapsed = Date().timeIntervalSince(lastTime)
             if elapsed < minInterval {
                 let delay = minInterval - elapsed
-                try await Task.sleep(for: .seconds(delay))
+                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
             }
         }
         lastRequestTime = Date()

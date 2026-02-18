@@ -239,13 +239,21 @@
 
                         // Wait until user stops
                         while detector.isUserActive && !Task.isCancelled {
-                            try? await Task.sleep(for: .milliseconds(200))
+                            do {
+                                try await Task.sleep(for: .milliseconds(200))
+                            } catch {
+                                break
+                            }
                         }
 
                         isUserActive = false
 
                         // Brief extra pause to let screen settle after user action
-                        try? await Task.sleep(for: .milliseconds(500))
+                        do {
+                            try await Task.sleep(for: .milliseconds(500))
+                        } catch {
+                            break
+                        }
                         logger.info("User inactive — resuming automation")
                     }
                 }
@@ -314,7 +322,11 @@
                 }
 
                 // --- Wait between cycles ---
-                try? await Task.sleep(for: .milliseconds(Int(config.captureInterval * 1000)))
+                do {
+                    try await Task.sleep(for: .milliseconds(Int(config.captureInterval * 1000)))
+                } catch {
+                    break
+                }
             }
 
             // Cleanup

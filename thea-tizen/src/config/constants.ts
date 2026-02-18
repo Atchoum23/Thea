@@ -39,7 +39,7 @@ export const TRAKT_CONFIG = {
 
 // API Versions
 export const API_VERSIONS = {
-  ANTHROPIC: '2025-01-01',
+  ANTHROPIC: '2024-01-01',
   TRAKT: '2',
 } as const;
 
@@ -128,5 +128,5 @@ export const APP_INFO = {
   NAME: 'THEA',
   VERSION: '1.0.0',
   PLATFORM: 'samsung-tizen',
-  BUILD: import.meta.env.PROD ? 'release' : 'debug',
+  BUILD: process.env.NODE_ENV === 'production' ? 'release' : 'debug',
 } as const;

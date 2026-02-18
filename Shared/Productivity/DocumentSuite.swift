@@ -281,12 +281,25 @@ actor DocumentSuiteService {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         let theaDir = appSupport.appendingPathComponent("Thea/DocumentSuite")
-        try? FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        } catch {
+            dsLogger.error("Failed to create DocumentSuite directory: \(error.localizedDescription, privacy: .public)")
+        }
         let file = theaDir.appendingPathComponent("documents.json")
         self.storageFile = file
 
-        if let data = try? Data(contentsOf: file) {
-            self.documents = (try? JSONDecoder().decode([TheaDocument].self, from: data)) ?? []
+        do {
+            let data = try Data(contentsOf: file)
+            do {
+                self.documents = try JSONDecoder().decode([TheaDocument].self, from: data)
+            } catch {
+                dsLogger.error("Failed to decode documents: \(error.localizedDescription, privacy: .public)")
+                self.documents = []
+            }
+        } catch {
+            // File not yet created — start with empty documents
+            self.documents = []
         }
     }
 
@@ -394,10 +407,16 @@ actor DocumentSuiteService {
     // MARK: - Markdown Processing
 
     private func multilineReplace(_ text: String, pattern: String, template: String) -> String {
-        guard let regex = try? NSRegularExpression(
-            pattern: pattern,
-            options: [.anchorsMatchLines]
-        ) else { return text }
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(
+                pattern: pattern,
+                options: [.anchorsMatchLines]
+            )
+        } catch {
+            dsLogger.error("Invalid regex pattern '\(pattern, privacy: .public)': \(error.localizedDescription, privacy: .public)")
+            return text
+        }
         return regex.stringByReplacingMatches(
             in: text,
             range: NSRange(text.startIndex..., in: text),
@@ -499,7 +518,7 @@ actor DocumentSuiteService {
 
     private func generatePDF(from content: String, title: String) throws -> Data {
         #if os(macOS)
-        _ = markdownToHTML(content, title: title)
+        let html = markdownToHTML(content, title: title)
         // Use simple text-based PDF as fallback
         return try generateSimplePDF(content: content, title: title)
         #else
@@ -592,7 +611,15 @@ actor DocumentSuiteService {
     // MARK: - Persistence
 
     private func save() {
-        guard let data = try? JSONEncoder().encode(documents) else { return }
-        try? data.write(to: storageFile, options: .atomic)
+        do {
+            let data = try JSONEncoder().encode(documents)
+            do {
+                try data.write(to: storageFile, options: .atomic)
+            } catch {
+                dsLogger.error("Failed to write documents to disk: \(error.localizedDescription, privacy: .public)")
+            }
+        } catch {
+            dsLogger.error("Failed to encode documents: \(error.localizedDescription, privacy: .public)")
+        }
     }
 }

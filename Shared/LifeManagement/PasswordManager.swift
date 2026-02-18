@@ -123,7 +123,7 @@ enum PasswordAnalyzer {
         let hasUpper = password.contains(where: \.isUppercase)
         let hasLower = password.contains(where: \.isLowercase)
         let hasDigit = password.contains(where: \.isNumber)
-        let hasSpecial = password.contains { !$0.isLetter && !$0.isNumber }
+        let hasSpecial = password.contains(where: { !$0.isLetter && !$0.isNumber })
 
         let variety = [hasUpper, hasLower, hasDigit, hasSpecial].filter { $0 }.count
         score += variety
@@ -185,7 +185,7 @@ private enum KeychainHelper {
             kSecAttrService as String: service,
             kSecAttrAccount as String: key,
             kSecValueData as String: data,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
         ]
         let status = SecItemAdd(query as CFDictionary, nil)
         return status == errSecSuccess
@@ -197,7 +197,7 @@ private enum KeychainHelper {
             kSecAttrService as String: service,
             kSecAttrAccount as String: key,
             kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne
+            kSecMatchLimit as String: kSecMatchLimitOne,
         ]
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
@@ -209,7 +209,7 @@ private enum KeychainHelper {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: key
+            kSecAttrAccount as String: key,
         ]
         return SecItemDelete(query as CFDictionary) == errSecSuccess
     }
@@ -230,7 +230,11 @@ final class PasswordManager: ObservableObject {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         let dir = appSupport.appendingPathComponent("Thea/LifeManagement", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            pwLogger.error("Failed to create storage directory: \(error.localizedDescription)")
+        }
         metadataURL = dir.appendingPathComponent("passwords_meta.json")
         loadMetadata()
     }
@@ -297,23 +301,34 @@ final class PasswordManager: ObservableObject {
 
     private func storePassword(_ password: String, for id: UUID) {
         guard let data = password.data(using: .utf8) else { return }
-        _ = KeychainHelper.save(key: keychainPrefix + id.uuidString, data: data)
+        KeychainHelper.save(key: keychainPrefix + id.uuidString, data: data)
     }
 
     private func saveMetadata() {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        if let data = try? encoder.encode(entries) {
-            try? data.write(to: metadataURL, options: .atomic)
+        do {
+            let data = try encoder.encode(entries)
+            try data.write(to: metadataURL, options: .atomic)
+        } catch {
+            pwLogger.error("Failed to save password metadata: \(error.localizedDescription)")
         }
     }
 
     private func loadMetadata() {
-        guard let data = try? Data(contentsOf: metadataURL) else { return }
+        let data: Data
+        do {
+            data = try Data(contentsOf: metadataURL)
+        } catch {
+            pwLogger.error("Failed to read password metadata: \(error.localizedDescription)")
+            return
+        }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        if let loaded = try? decoder.decode([PasswordEntry].self, from: data) {
-            entries = loaded
+        do {
+            entries = try decoder.decode([PasswordEntry].self, from: data)
+        } catch {
+            pwLogger.error("Failed to decode password metadata: \(error.localizedDescription)")
         }
     }
 }

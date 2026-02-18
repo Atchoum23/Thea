@@ -1,9 +1,12 @@
 #if os(macOS)
     import Foundation
+    import OSLog
     import SwiftUI
 
     /// Parser for terminal output including ANSI codes and structured data
     enum TerminalOutputParser {
+        private static let logger = Logger(subsystem: "ai.thea.app", category: "TerminalOutputParser")
+
         // MARK: - ANSI Color Parsing
 
         /// Parse ANSI escape codes and return attributed string segments
@@ -13,7 +16,11 @@
             _ = ""
 
             let pattern = "\u{001B}\\[([0-9;]*)m"
-            guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+            let regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: pattern, options: [])
+            } catch {
+                logger.error("Failed to compile ANSI regex: \(error)")
                 return [ANSISegment(text: text, style: currentStyle)]
             }
 
@@ -50,7 +57,11 @@
         /// Strip all ANSI codes from text
         static func stripANSI(_ text: String) -> String {
             let pattern = "\u{001B}\\[[0-9;]*m"
-            guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+            let regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: pattern, options: [])
+            } catch {
+                logger.error("Failed to compile ANSI regex: \(error)")
                 return text
             }
             let range = NSRange(text.startIndex..., in: text)
@@ -69,7 +80,12 @@
         /// Parse JSON output
         static func parseJSON(_ text: String) -> Any? {
             guard let data = text.data(using: .utf8) else { return nil }
-            return try? JSONSerialization.jsonObject(with: data, options: [])
+            do {
+                return try JSONSerialization.jsonObject(with: data, options: [])
+            } catch {
+                logger.error("Failed to parse JSON: \(error)")
+                return nil
+            }
         }
 
         /// Detect if output looks like a table (columns aligned with spaces)
@@ -143,9 +159,12 @@
             ]
 
             for (pattern, replacement) in redactionPatterns {
-                if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
+                do {
+                    let regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
                     let range = NSRange(result.startIndex..., in: result)
                     result = regex.stringByReplacingMatches(in: result, options: [], range: range, withTemplate: replacement)
+                } catch {
+                    logger.error("Failed to compile redaction regex '\(pattern)': \(error)")
                 }
             }
 

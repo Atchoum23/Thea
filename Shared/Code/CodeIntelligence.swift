@@ -1,5 +1,6 @@
 #if os(macOS)
     import Foundation
+    import OSLog
 
     // MARK: - Code Intelligence
 
@@ -9,6 +10,8 @@
     @Observable
     final class CodeIntelligence {
         static let shared = CodeIntelligence()
+
+        private let logger = Logger(subsystem: "com.thea.app", category: "CodeIntelligence")
 
         private(set) var activeProjects: [CodeProject] = []
         private(set) var recentEdits: [CodeEdit] = []
@@ -128,38 +131,34 @@
 
             // Extract classes
             let classPattern = #"class\s+(\w+)"#
-            if let regex = try? NSRegularExpression(pattern: classPattern) {
-                let matches = regex.matches(in: content, range: NSRange(content.startIndex..., in: content))
-
+            let classRegex: NSRegularExpression
+            do {
+                classRegex = try NSRegularExpression(pattern: classPattern)
+                let matches = classRegex.matches(in: content, range: NSRange(content.startIndex..., in: content))
                 for match in matches {
                     if let range = Range(match.range(at: 1), in: content) {
                         let name = String(content[range])
-                        symbols.append(CodeSymbol(
-                            name: name,
-                            type: .class,
-                            fileURL: fileURL,
-                            line: 0
-                        ))
+                        symbols.append(CodeSymbol(name: name, type: .class, fileURL: fileURL, line: 0))
                     }
                 }
+            } catch {
+                logger.debug("Failed to compile Swift class regex: \(error.localizedDescription)")
             }
 
             // Extract functions
             let funcPattern = #"func\s+(\w+)"#
-            if let regex = try? NSRegularExpression(pattern: funcPattern) {
-                let matches = regex.matches(in: content, range: NSRange(content.startIndex..., in: content))
-
+            let funcRegex: NSRegularExpression
+            do {
+                funcRegex = try NSRegularExpression(pattern: funcPattern)
+                let matches = funcRegex.matches(in: content, range: NSRange(content.startIndex..., in: content))
                 for match in matches {
                     if let range = Range(match.range(at: 1), in: content) {
                         let name = String(content[range])
-                        symbols.append(CodeSymbol(
-                            name: name,
-                            type: .function,
-                            fileURL: fileURL,
-                            line: 0
-                        ))
+                        symbols.append(CodeSymbol(name: name, type: .function, fileURL: fileURL, line: 0))
                     }
                 }
+            } catch {
+                logger.debug("Failed to compile Swift func regex: \(error.localizedDescription)")
             }
 
             return symbols
@@ -170,20 +169,18 @@
 
             // Extract classes
             let classPattern = #"class\s+(\w+)"#
-            if let regex = try? NSRegularExpression(pattern: classPattern) {
-                let matches = regex.matches(in: content, range: NSRange(content.startIndex..., in: content))
-
+            let classRegex: NSRegularExpression
+            do {
+                classRegex = try NSRegularExpression(pattern: classPattern)
+                let matches = classRegex.matches(in: content, range: NSRange(content.startIndex..., in: content))
                 for match in matches {
                     if let range = Range(match.range(at: 1), in: content) {
                         let name = String(content[range])
-                        symbols.append(CodeSymbol(
-                            name: name,
-                            type: .class,
-                            fileURL: fileURL,
-                            line: 0
-                        ))
+                        symbols.append(CodeSymbol(name: name, type: .class, fileURL: fileURL, line: 0))
                     }
                 }
+            } catch {
+                logger.debug("Failed to compile Python class regex: \(error.localizedDescription)")
             }
 
             return symbols
@@ -194,20 +191,18 @@
 
             // Extract functions
             let funcPattern = #"function\s+(\w+)"#
-            if let regex = try? NSRegularExpression(pattern: funcPattern) {
-                let matches = regex.matches(in: content, range: NSRange(content.startIndex..., in: content))
-
+            let funcRegex: NSRegularExpression
+            do {
+                funcRegex = try NSRegularExpression(pattern: funcPattern)
+                let matches = funcRegex.matches(in: content, range: NSRange(content.startIndex..., in: content))
                 for match in matches {
                     if let range = Range(match.range(at: 1), in: content) {
                         let name = String(content[range])
-                        symbols.append(CodeSymbol(
-                            name: name,
-                            type: .function,
-                            fileURL: fileURL,
-                            line: 0
-                        ))
+                        symbols.append(CodeSymbol(name: name, type: .function, fileURL: fileURL, line: 0))
                     }
                 }
+            } catch {
+                logger.debug("Failed to compile JS function regex: \(error.localizedDescription)")
             }
 
             return symbols
@@ -249,7 +244,6 @@
                 switch chunk.type {
                 case let .delta(text):
                     response += text
-                case .thinkingDelta: break
                 case .complete:
                     break
                 case let .error(error):
@@ -258,10 +252,12 @@
             }
 
             // Parse JSON response
-            if let data = response.data(using: .utf8),
-               let completions = try? JSONDecoder().decode([CodeCompletion].self, from: data)
-            {
-                return completions
+            if let data = response.data(using: .utf8) {
+                do {
+                    return try JSONDecoder().decode([CodeCompletion].self, from: data)
+                } catch {
+                    logger.debug("Failed to decode code completions: \(error.localizedDescription)")
+                }
             }
 
             return []
@@ -300,7 +296,6 @@
                 switch chunk.type {
                 case let .delta(text):
                     response += text
-                case .thinkingDelta: break
                 case .complete:
                     break
                 case let .error(error):
@@ -356,7 +351,6 @@
                 switch chunk.type {
                 case let .delta(text):
                     response += text
-                case .thinkingDelta: break
                 case .complete:
                     break
                 case let .error(error):
@@ -365,10 +359,12 @@
             }
 
             // Parse JSON response
-            if let data = response.data(using: .utf8),
-               let review = try? JSONDecoder().decode(CodeReview.self, from: data)
-            {
-                return review
+            if let data = response.data(using: .utf8) {
+                do {
+                    return try JSONDecoder().decode(CodeReview.self, from: data)
+                } catch {
+                    logger.debug("Failed to decode code review: \(error.localizedDescription)")
+                }
             }
 
             return CodeReview(issues: [], suggestions: [], rating: 5)

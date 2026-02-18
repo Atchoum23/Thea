@@ -131,7 +131,7 @@ private enum TestPasswordAnalyzer {
         let hasUpper = password.contains(where: \.isUppercase)
         let hasLower = password.contains(where: \.isLowercase)
         let hasDigit = password.contains(where: \.isNumber)
-        let hasSpecial = password.contains { !$0.isLetter && !$0.isNumber }
+        let hasSpecial = password.contains(where: { !$0.isLetter && !$0.isNumber })
         let variety = [hasUpper, hasLower, hasDigit, hasSpecial].filter { $0 }.count
         score += variety
         let lower = password.lowercased()
@@ -151,8 +151,8 @@ private enum TestPasswordAnalyzer {
     }
 
     static func generatePassword(length: Int = 16, includeUppercase: Bool = true,
-                                 includeLowercase: Bool = true, includeDigits: Bool = true,
-                                 includeSpecial: Bool = true) -> String {
+                                  includeLowercase: Bool = true, includeDigits: Bool = true,
+                                  includeSpecial: Bool = true) -> String {
         var chars = ""
         if includeLowercase { chars += "abcdefghijkmnpqrstuvwxyz" }
         if includeUppercase { chars += "ABCDEFGHJKLMNPQRSTUVWXYZ" }
@@ -635,7 +635,7 @@ struct StreakCalculationTests {
         let yesterday = cal.date(byAdding: .day, value: -1, to: Date())!
         let sessions = [
             TestStudySession(date: Date(), durationMinutes: 30),
-            TestStudySession(date: yesterday, durationMinutes: 30)
+            TestStudySession(date: yesterday, durationMinutes: 30),
         ]
         let streak = calculateStreak(sessions)
         #expect(streak == 2)
@@ -647,7 +647,7 @@ struct StreakCalculationTests {
         let threeDaysAgo = cal.date(byAdding: .day, value: -3, to: Date())!
         let sessions = [
             TestStudySession(date: Date(), durationMinutes: 30),
-            TestStudySession(date: threeDaysAgo, durationMinutes: 30)
+            TestStudySession(date: threeDaysAgo, durationMinutes: 30),
         ]
         let streak = calculateStreak(sessions)
         #expect(streak == 1)

@@ -28,6 +28,9 @@ public final class BackupManager: ObservableObject {
     @Published public var availableBackups: [BackupInfo] = []
     @Published public private(set) var lastBackupDate: Date?
     @Published public private(set) var autoBackupEnabled = true
+    @Published public var lastAutoBackupError: String?
+    @Published public var lastCleanupError: String?
+    @Published public var lastDeleteAllError: String?
 
     // MARK: - Configuration
 
@@ -64,7 +67,11 @@ public final class BackupManager: ObservableObject {
 
     private func createBackupDirectoryIfNeeded() {
         if !fileManager.fileExists(atPath: backupDirectory.path) {
-            try? fileManager.createDirectory(at: backupDirectory, withIntermediateDirectories: true)
+            do {
+                try fileManager.createDirectory(at: backupDirectory, withIntermediateDirectories: true)
+            } catch {
+                logger.error("Failed to create backup directory: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -83,16 +90,28 @@ public final class BackupManager: ObservableObject {
 
         Task {
             while true {
-                try? await Task.sleep(for: .seconds(autoBackupInterval))
+                do {
+                    try await Task.sleep(nanoseconds: UInt64(autoBackupInterval * 1_000_000_000))
+                } catch {
+                    // Task cancelled - stop auto backup
+                    break
+                }
 
                 if autoBackupEnabled {
+                    let shouldBackup: Bool
                     if let lastDate = lastBackupDate {
-                        let timeSinceLastBackup = Date().timeIntervalSince(lastDate)
-                        if timeSinceLastBackup >= autoBackupInterval {
-                            _ = try? await createBackup(type: .automatic)
-                        }
+                        shouldBackup = Date().timeIntervalSince(lastDate) >= autoBackupInterval
                     } else {
-                        _ = try? await createBackup(type: .automatic)
+                        shouldBackup = true
+                    }
+                    if shouldBackup {
+                        do {
+                            _ = try await createBackup(type: .automatic)
+                            lastAutoBackupError = nil
+                        } catch {
+                            lastAutoBackupError = "Auto-backup failed: \(error.localizedDescription)"
+                            logger.error("Auto-backup failed: \(error.localizedDescription)")
+                        }
                     }
                 }
             }
@@ -132,7 +151,11 @@ public final class BackupManager: ObservableObject {
         try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
 
         defer {
-            try? fileManager.removeItem(at: tempDir)
+            do {
+                try fileManager.removeItem(at: tempDir)
+            } catch {
+                logger.debug("Could not clean up temp directory: \(error.localizedDescription)")
+            }
         }
 
         // Backup data categories and user defaults
@@ -276,24 +299,48 @@ public final class BackupManager: ObservableObject {
 
     /// Delete all backups
     public func deleteAllBackups() throws {
+        var failedDeletions: [(String, Error)] = []
         for backup in availableBackups {
-            try? fileManager.removeItem(at: backup.path)
+            do {
+                try fileManager.removeItem(at: backup.path)
+            } catch {
+                failedDeletions.append((backup.name, error))
+                logger.warning("Failed to delete backup \(backup.name): \(error.localizedDescription)")
+            }
         }
-        availableBackups.removeAll()
-        logger.info("Deleted all backups")
+        // Remove successfully deleted backups from list
+        let failedNames = Set(failedDeletions.map(\.0))
+        availableBackups.removeAll { !failedNames.contains($0.name) }
+        if !failedDeletions.isEmpty {
+            let summary = failedDeletions.map { "\($0.0): \($0.1.localizedDescription)" }.joined(separator: "; ")
+            lastDeleteAllError = "Some backups could not be deleted: \(summary)"
+            logger.error("Failed to delete \(failedDeletions.count) backup(s)")
+        } else {
+            lastDeleteAllError = nil
+            logger.info("Deleted all backups")
+        }
     }
 
     // MARK: - Helpers
 
     func loadAvailableBackups() {
-        guard let contents = try? fileManager.contentsOfDirectory(at: backupDirectory, includingPropertiesForKeys: [.contentModificationDateKey, .fileSizeKey]) else {
+        let contents: [URL]
+        do {
+            contents = try fileManager.contentsOfDirectory(at: backupDirectory, includingPropertiesForKeys: [.contentModificationDateKey, .fileSizeKey])
+        } catch {
+            logger.error("Cannot read backup directory: \(error.localizedDescription)")
             return
         }
 
         availableBackups = contents
             .filter { $0.pathExtension == "theabackup" }
             .compactMap { url -> BackupInfo? in
-                let attributes = try? fileManager.attributesOfItem(atPath: url.path)
+                let attributes: [FileAttributeKey: Any]?
+                do {
+                    attributes = try fileManager.attributesOfItem(atPath: url.path)
+                } catch {
+                    attributes = nil
+                }
                 let modDate = attributes?[.modificationDate] as? Date ?? Date()
                 let size = attributes?[.size] as? Int64 ?? 0
 
@@ -322,7 +369,12 @@ public final class BackupManager: ObservableObject {
         if autoBackups.count > maxBackupCount {
             let toDelete = autoBackups.suffix(from: maxBackupCount)
             for backup in toDelete {
-                try? deleteBackup(backup)
+                do {
+                    try deleteBackup(backup)
+                } catch {
+                    lastCleanupError = "Failed to clean up old backup \(backup.name): \(error.localizedDescription)"
+                    logger.warning("Cleanup: failed to delete old backup \(backup.name): \(error.localizedDescription)")
+                }
             }
         }
     }
@@ -392,7 +444,12 @@ public final class BackupManager: ObservableObject {
             }
         }
 
-        return (try? PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)) ?? Data()
+        do {
+            return try PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)
+        } catch {
+            logger.error("Failed to serialize metadata: \(error.localizedDescription)")
+            return Data()
+        }
     }
 
     func restoreUserDefaults(from path: URL) throws {

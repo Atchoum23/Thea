@@ -1,9 +1,15 @@
 // PrivacySettingsViewSections.swift
 // Supporting types and section views for PrivacySettingsView
 
+import OSLog
+import OSLog
 import SwiftUI
 
 // MARK: - Supporting Types
+
+private let privacySettingsLogger = Logger(subsystem: "ai.thea.app", category: "PrivacySettings")
+
+private let privacySettingsLogger = Logger(subsystem: "ai.thea.app", category: "PrivacySettings")
 
 struct PrivacySettingsConfiguration: Equatable, Codable {
     // Data Collection
@@ -45,17 +51,23 @@ struct PrivacySettingsConfiguration: Equatable, Codable {
     private static let storageKey = "com.thea.privacyConfiguration"
 
     static func load() -> PrivacySettingsConfiguration {
-        if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(PrivacySettingsConfiguration.self, from: data)
-        {
-            return config
+        if let data = UserDefaults.standard.data(forKey: storageKey) {
+            do {
+                let config = try JSONDecoder().decode(PrivacySettingsConfiguration.self, from: data)
+                return config
+            } catch {
+                privacySettingsLogger.error("Failed to decode privacy configuration: \(error.localizedDescription)")
+            }
         }
         return PrivacySettingsConfiguration()
     }
 
     func save() {
-        if let data = try? JSONEncoder().encode(self) {
+        do {
+            let data = try JSONEncoder().encode(self)
             UserDefaults.standard.set(data, forKey: Self.storageKey)
+        } catch {
+            privacySettingsLogger.error("Failed to encode privacy configuration: \(error.localizedDescription)")
         }
     }
 }
@@ -348,7 +360,7 @@ extension PrivacySettingsView {
     // MARK: - Custom Pattern Editor Sheet
 
     var customPatternEditorSheet: some View {
-        CustomPatternEditorView { showingCustomPatternSheet = false }
+        CustomPatternEditorView(onDismiss: { showingCustomPatternSheet = false })
     }
 
     // MARK: - Export Options Sheet
@@ -654,7 +666,10 @@ struct CustomPatternEditorView: View {
 
     private func addPattern() {
         // Validate regex
-        guard (try? NSRegularExpression(pattern: newPatternRegex)) != nil else {
+        do {
+            _ = try NSRegularExpression(pattern: newPatternRegex)
+        } catch {
+            privacySettingsLogger.debug("Invalid regex pattern '\(newPatternRegex)': \(error.localizedDescription)")
             validationError = "Invalid regex pattern"
             return
         }

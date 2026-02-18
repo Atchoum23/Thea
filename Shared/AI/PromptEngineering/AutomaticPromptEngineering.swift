@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import SwiftData
 
 // MARK: - Automatic Prompt Engineering System
@@ -55,6 +56,7 @@ final class AutomaticPromptEngineering {
 
     // Cache for frequently used patterns
     private var patternCache: [String: CachedPattern] = [:]
+    private let logger = Logger(subsystem: "ai.thea.app", category: "AutomaticPromptEngineering")
     private let patternCacheLimit = 100
 
     private init() {
@@ -78,10 +80,14 @@ final class AutomaticPromptEngineering {
         let classification: TaskType
         if let providedType = taskType {
             classification = providedType
-        } else if let classifiedResult = try? await TaskClassifier.shared.classify(userInput) {
-            classification = classifiedResult.primaryType
         } else {
-            classification = .simpleQA
+            do {
+                let classifiedResult = try await TaskClassifier.shared.classify(userInput)
+                classification = classifiedResult.primaryType
+            } catch {
+                logger.error("Task classification failed: \(error.localizedDescription)")
+                classification = .simpleQA
+            }
         }
 
         // 2. Gather context
@@ -271,7 +277,13 @@ final class AutomaticPromptEngineering {
         guard let context = modelContext else { return nil }
 
         let descriptor = FetchDescriptor<UserPromptPreference>()
-        let allPreferences = (try? context.fetch(descriptor)) ?? []
+        let allPreferences: [UserPromptPreference]
+        do {
+            allPreferences = try context.fetch(descriptor)
+        } catch {
+            logger.error("Failed to fetch user preferences: \(error.localizedDescription)")
+            return nil
+        }
 
         let filtered = allPreferences
             .filter { $0.category == taskType.rawValue && $0.confidence > 0.5 }
@@ -286,7 +298,13 @@ final class AutomaticPromptEngineering {
         guard let context = modelContext else { return [] }
 
         let descriptor = FetchDescriptor<CodeFewShotExample>()
-        let allExamples = (try? context.fetch(descriptor)) ?? []
+        let allExamples: [CodeFewShotExample]
+        do {
+            allExamples = try context.fetch(descriptor)
+        } catch {
+            logger.error("Failed to fetch few-shot examples: \(error.localizedDescription)")
+            return []
+        }
 
         // Simple keyword matching for relevance
         let inputWords = Set(input.lowercased().split(separator: " ").map(String.init))
@@ -321,7 +339,13 @@ final class AutomaticPromptEngineering {
         guard let context = modelContext else { return [] }
 
         let descriptor = FetchDescriptor<CodeErrorRecord>()
-        let allRecords = (try? context.fetch(descriptor)) ?? []
+        let allRecords: [CodeErrorRecord]
+        do {
+            allRecords = try context.fetch(descriptor)
+        } catch {
+            logger.error("Failed to fetch error records: \(error.localizedDescription)")
+            return []
+        }
 
         // Filter by language if task type is code-related
         let isCodeTask = taskType == .codeGeneration || taskType == .debugging || taskType == .appDevelopment
@@ -621,16 +645,21 @@ final class AutomaticPromptEngineering {
     }
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "AutomaticPromptEngineering.config"),
-           let config = try? JSONDecoder().decode(Configuration.self, from: data)
-        {
-            configuration = config
+        if let data = UserDefaults.standard.data(forKey: "AutomaticPromptEngineering.config") {
+            do {
+                configuration = try JSONDecoder().decode(Configuration.self, from: data)
+            } catch {
+                logger.error("Failed to decode APE configuration: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             UserDefaults.standard.set(data, forKey: "AutomaticPromptEngineering.config")
+        } catch {
+            logger.error("Failed to encode APE configuration: \(error.localizedDescription)")
         }
     }
 

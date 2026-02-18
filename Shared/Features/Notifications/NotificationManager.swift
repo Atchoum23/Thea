@@ -13,7 +13,7 @@ import UserNotifications
 public final class NotificationManager: ObservableObject {
     public static let shared = NotificationManager()
 
-    private let logger = Logger(subsystem: "com.thea.app", category: "Notifications")
+    private let logger = Logger(subsystem: "ai.thea.app", category: "NotificationManager")
 
     // MARK: - Published State
 
@@ -52,16 +52,20 @@ public final class NotificationManager: ObservableObject {
     }
 
     private func loadSettings() {
-        if let data = UserDefaults.standard.data(forKey: "notifications.settings"),
-           let loadedSettings = try? JSONDecoder().decode(NotificationSettings.self, from: data)
-        {
-            settings = loadedSettings
+        guard let data = UserDefaults.standard.data(forKey: "notifications.settings") else { return }
+        do {
+            settings = try JSONDecoder().decode(NotificationSettings.self, from: data)
+        } catch {
+            logger.error("Failed to decode notification settings: \(error.localizedDescription)")
         }
     }
 
     public func saveSettings() {
-        if let data = try? JSONEncoder().encode(settings) {
+        do {
+            let data = try JSONEncoder().encode(settings)
             UserDefaults.standard.set(data, forKey: "notifications.settings")
+        } catch {
+            logger.error("Failed to encode notification settings: \(error.localizedDescription)")
         }
     }
 

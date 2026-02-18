@@ -408,7 +408,11 @@ extension UnifiedIntelligenceHub {
     private func startBackgroundProcessing() {
         Task.detached { [weak self] in
             while true {
-                try? await Task.sleep(for: .seconds(60))
+                do {
+                    try await Task.sleep(for: .seconds(60)
+                } catch {
+                    break
+                })
                 await self?.performPeriodicMaintenance()
             }
         }

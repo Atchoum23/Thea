@@ -3,8 +3,9 @@
 // Handles processing, previews, and AI-compatible formatting
 
 import Foundation
-import UniformTypeIdentifiers
+import OSLog
 import SwiftUI
+import UniformTypeIdentifiers
 #if os(macOS)
 import AppKit
 #elseif os(iOS) || os(tvOS)
@@ -18,6 +19,7 @@ import UIKit
 @Observable
 final class FileAttachmentManager {
     static let shared = FileAttachmentManager()
+    private let logger = Logger(subsystem: "com.thea.app", category: "FileAttachmentManager")
 
     // MARK: - State
 
@@ -302,12 +304,15 @@ final class FileAttachmentManager {
 
         // For .docx, .rtf, etc. - basic text extraction
         if attachment.name.hasSuffix(".rtf") {
-            if let attributedString = try? NSAttributedString(
-                data: data,
-                options: [.documentType: NSAttributedString.DocumentType.rtf],
-                documentAttributes: nil
-            ) {
+            do {
+                let attributedString = try NSAttributedString(
+                    data: data,
+                    options: [.documentType: NSAttributedString.DocumentType.rtf],
+                    documentAttributes: nil
+                )
                 result.extractedText = attributedString.string
+            } catch {
+                logger.debug("Could not parse RTF document: \(error.localizedDescription)")
             }
         }
 
@@ -363,10 +368,13 @@ final class FileAttachmentManager {
         var result = attachment
 
         // Try JSON
-        if let json = try? JSONSerialization.jsonObject(with: data) {
-            let jsonData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
-            result.extractedText = jsonData.flatMap { String(data: $0, encoding: .utf8) }
+        do {
+            let json = try JSONSerialization.jsonObject(with: data)
+            let jsonData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
+            result.extractedText = String(data: jsonData, encoding: .utf8)
             result.extractedMetadata = ["format": "JSON"]
+        } catch {
+            logger.debug("Could not parse JSON data file: \(error.localizedDescription)")
         }
 
         return result
@@ -494,15 +502,20 @@ final class FileAttachmentManager {
     }
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "FileAttachment.config"),
-           let config = try? JSONDecoder().decode(Configuration.self, from: data) {
-            configuration = config
+        guard let data = UserDefaults.standard.data(forKey: "FileAttachment.config") else { return }
+        do {
+            configuration = try JSONDecoder().decode(Configuration.self, from: data)
+        } catch {
+            logger.debug("Could not load FileAttachment configuration: \(error.localizedDescription)")
         }
     }
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             UserDefaults.standard.set(data, forKey: "FileAttachment.config")
+        } catch {
+            logger.debug("Could not save FileAttachment configuration: \(error.localizedDescription)")
         }
     }
 }

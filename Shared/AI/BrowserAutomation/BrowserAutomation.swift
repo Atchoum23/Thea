@@ -273,8 +273,16 @@ public final class BrowserAutomationEngine: ObservableObject {
 
         var screenshotData: Data?
         if FileManager.default.fileExists(atPath: tempPath) {
-            screenshotData = try? Data(contentsOf: URL(fileURLWithPath: tempPath))
-            try? FileManager.default.removeItem(atPath: tempPath)
+            do {
+                screenshotData = try Data(contentsOf: URL(fileURLWithPath: tempPath))
+            } catch {
+                logger.error("Failed to read screenshot data from \(tempPath): \(error.localizedDescription)")
+            }
+            do {
+                try FileManager.default.removeItem(atPath: tempPath)
+            } catch {
+                logger.debug("Failed to remove temp screenshot file \(tempPath): \(error.localizedDescription)")
+            }
         }
 
         let duration = Date().timeIntervalSince(startTime)
@@ -382,7 +390,7 @@ public final class BrowserAutomationEngine: ObservableObject {
 
             case "wait":
                 if let duration = step.parameters["duration"] as? Double {
-                    try await Task.sleep(for: .seconds(duration))
+                    try await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
                 }
 
             default:
@@ -461,13 +469,19 @@ public final class BrowserAutomationEngine: ObservableObject {
 
         // Handle simple tag extraction
         if selector.hasPrefix("//") {
-            // XPath selectors require a full XML parser — use CSS tag selectors instead
+            // XPath - not implemented in this simple version
             return results
         }
 
         // Simple tag matching
         let tagPattern = "<\(selector)[^>]*>(.*?)</\(selector)>"
-        if let regex = try? NSRegularExpression(pattern: tagPattern, options: [.caseInsensitive, .dotMatchesLineSeparators]) {
+        var regex: NSRegularExpression?
+        do {
+            regex = try NSRegularExpression(pattern: tagPattern, options: [.caseInsensitive, .dotMatchesLineSeparators])
+        } catch {
+            logger.debug("Failed to compile tag regex pattern '\(tagPattern)': \(error.localizedDescription)")
+        }
+        if let regex = regex {
             let range = NSRange(html.startIndex..., in: html)
             let matches = regex.matches(in: html, options: [], range: range)
 
@@ -603,7 +617,7 @@ public final class AIWebScraper: ObservableObject {
                         lastContent = content
                     }
 
-                    try await Task.sleep(for: .seconds(interval))
+                    try await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
                 } catch {
                     logger.error("Monitor error: \(error.localizedDescription)")
                 }

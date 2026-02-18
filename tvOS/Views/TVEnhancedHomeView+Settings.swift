@@ -12,19 +12,19 @@ struct TVEnhancedSettingsView: View {
                     NavigationLink {
                         TVTraktSettingsView()
                     } label: {
-                        SettingsRow(icon: "play.tv", color: .theaError, title: "Trakt", subtitle: "Calendar, watchlist, scrobbling")
+                        SettingsRow(icon: "play.tv", color: .red, title: "Trakt", subtitle: "Calendar, watchlist, scrobbling")
                     }
 
                     NavigationLink {
                         Text("Plex Settings")
                     } label: {
-                        SettingsRow(icon: "server.rack", color: .theaWarning, title: "Plex", subtitle: "Media server connection")
+                        SettingsRow(icon: "server.rack", color: .orange, title: "Plex", subtitle: "Media server connection")
                     }
 
                     NavigationLink {
                         Text("qBittorrent Settings")
                     } label: {
-                        SettingsRow(icon: "arrow.down.circle", color: .theaInfo, title: "qBittorrent", subtitle: "Download client")
+                        SettingsRow(icon: "arrow.down.circle", color: .blue, title: "qBittorrent", subtitle: "Download client")
                     }
                 }
 
@@ -53,7 +53,7 @@ struct TVEnhancedSettingsView: View {
                     } label: {
                         SettingsRow(
                             icon: "slider.horizontal.3",
-                            color: .theaSuccess,
+                            color: .green,
                             title: "Quality Profiles",
                             subtitle: "TRaSH Guides presets"
                         )
@@ -62,7 +62,7 @@ struct TVEnhancedSettingsView: View {
                     NavigationLink {
                         Text("Indexers")
                     } label: {
-                        SettingsRow(icon: "magnifyingglass", color: .theaWarning, title: "Indexers", subtitle: "Torrent sources")
+                        SettingsRow(icon: "magnifyingglass", color: .orange, title: "Indexers", subtitle: "Torrent sources")
                     }
                 }
 
@@ -85,13 +85,13 @@ struct TVEnhancedSettingsView: View {
                     NavigationLink {
                         TVHealthSettingsView()
                     } label: {
-                        SettingsRow(icon: "heart.fill", color: .theaError, title: "Health Monitor", subtitle: "Service status & alerts")
+                        SettingsRow(icon: "heart.fill", color: .red, title: "Health Monitor", subtitle: "Service status & alerts")
                     }
 
                     NavigationLink {
                         Text("iCloud Sync")
                     } label: {
-                        SettingsRow(icon: "icloud.fill", color: .theaInfo, title: "iCloud Sync", subtitle: "Sync across devices")
+                        SettingsRow(icon: "icloud.fill", color: .blue, title: "iCloud Sync", subtitle: "Sync across devices")
                     }
                 }
             }
@@ -142,7 +142,7 @@ struct TVTraktSettingsView: View {
                 if traktService.isAuthenticated {
                     HStack {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(Color.theaSuccess)
+                            .foregroundStyle(.green)
                         Text("Connected to Trakt")
                     }
 
@@ -191,7 +191,7 @@ struct TVStreamingSettingsView: View {
                 ForEach(streamingService.accounts) { account in
                     HStack {
                         Image(systemName: account.appID.iconName)
-                            .foregroundStyle(.theaInfo)
+                            .foregroundStyle(.blue)
                         VStack(alignment: .leading) {
                             Text(account.appID.displayName)
                             Text(account.accountName)
@@ -201,7 +201,7 @@ struct TVStreamingSettingsView: View {
                         Spacer()
                         if account.isActive {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(Color.theaSuccess)
+                                .foregroundStyle(.green)
                         }
                     }
                 }
@@ -257,7 +257,7 @@ struct TVHealthSettingsView: View {
                         ForEach(healthService.alerts.filter { !$0.isAcknowledged }) { alert in
                             HStack {
                                 Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(alert.severity == .critical ? Color.theaError : Color.theaWarning)
+                                    .foregroundStyle(alert.severity == .critical ? .red : .orange)
                                 VStack(alignment: .leading) {
                                     Text(alert.title)
                                     Text(alert.message)
@@ -283,10 +283,10 @@ struct TVHealthSettingsView: View {
 
     private func statusColor(_ status: HealthStatus) -> Color {
         switch status {
-        case .healthy: Color.theaSuccess
-        case .degraded: Color.theaWarning
-        case .unhealthy: Color.theaError
-        case .unknown: .secondary
+        case .healthy: .green
+        case .degraded: .yellow
+        case .unhealthy: .red
+        case .unknown: .gray
         }
     }
 }

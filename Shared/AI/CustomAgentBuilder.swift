@@ -9,6 +9,7 @@
 
 import CloudKit
 import Foundation
+import OSLog
 
 // MARK: - Custom Agent Builder
 
@@ -23,6 +24,10 @@ public class CustomAgentBuilder: ObservableObject {
     @Published public private(set) var agents: [CustomAgent] = []
     @Published public private(set) var currentAgent: CustomAgent?
     @Published public private(set) var isLoading = false
+
+    // MARK: - Logging
+
+    private let logger = Logger(subsystem: "com.thea.app", category: "CustomAgentBuilder")
 
     // MARK: - CloudKit
 
@@ -41,7 +46,11 @@ public class CustomAgentBuilder: ObservableObject {
             ?? FileManager.default.temporaryDirectory
         agentsDirectory = documentsPath.appendingPathComponent("CustomAgents", isDirectory: true)
 
-        try? FileManager.default.createDirectory(at: agentsDirectory, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: agentsDirectory, withIntermediateDirectories: true)
+        } catch {
+            logger.debug("Could not create agents directory: \(error.localizedDescription)")
+        }
 
         loadAgents()
         createDefaultAgents()
@@ -50,10 +59,12 @@ public class CustomAgentBuilder: ObservableObject {
     // MARK: - Load/Save
 
     private func loadAgents() {
-        if let data = UserDefaults.standard.data(forKey: storageKey),
-           let decoded = try? JSONDecoder().decode([CustomAgent].self, from: data)
-        {
-            agents = decoded
+        if let data = UserDefaults.standard.data(forKey: storageKey) {
+            do {
+                agents = try JSONDecoder().decode([CustomAgent].self, from: data)
+            } catch {
+                logger.debug("Could not decode custom agents: \(error.localizedDescription)")
+            }
         }
 
         Task {
@@ -62,8 +73,11 @@ public class CustomAgentBuilder: ObservableObject {
     }
 
     private func saveAgents() {
-        if let data = try? JSONEncoder().encode(agents) {
+        do {
+            let data = try JSONEncoder().encode(agents)
             UserDefaults.standard.set(data, forKey: storageKey)
+        } catch {
+            logger.error("Failed to save custom agents: \(error.localizedDescription)")
         }
     }
 
@@ -162,13 +176,16 @@ public class CustomAgentBuilder: ObservableObject {
         // Process knowledge files
         var knowledgeBase: [KnowledgeItem] = []
         for fileURL in knowledgeFiles {
-            if let content = try? String(contentsOf: fileURL, encoding: .utf8) {
+            do {
+                let content = try String(contentsOf: fileURL, encoding: .utf8)
                 knowledgeBase.append(KnowledgeItem(
                     id: UUID(),
                     filename: fileURL.lastPathComponent,
                     content: content,
                     addedAt: Date()
                 ))
+            } catch {
+                logger.debug("Could not read knowledge file \(fileURL.lastPathComponent): \(error.localizedDescription)")
             }
         }
 
@@ -192,7 +209,7 @@ public class CustomAgentBuilder: ObservableObject {
         saveAgents()
 
         Task {
-            try? await saveToCloud(agent)
+            do { try await saveToCloud(agent) } catch { logger.warning("Failed to save agent to cloud: \(error.localizedDescription)") }
         }
 
         return agent
@@ -246,7 +263,7 @@ public class CustomAgentBuilder: ObservableObject {
         saveAgents()
 
         Task {
-            try? await saveToCloud(updated)
+            do { try await saveToCloud(updated) } catch { logger.warning("Failed to update agent in cloud: \(error.localizedDescription)") }
         }
 
         return updated
@@ -294,7 +311,7 @@ public class CustomAgentBuilder: ObservableObject {
         saveAgents()
 
         Task {
-            try? await deleteFromCloud(agent)
+            do { try await deleteFromCloud(agent) } catch { logger.warning("Failed to delete agent from cloud: \(error.localizedDescription)") }
         }
     }
 

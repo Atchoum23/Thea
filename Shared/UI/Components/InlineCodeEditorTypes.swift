@@ -82,7 +82,6 @@ public struct EditableCodeBlock: Identifiable, Sendable {
     public var editHistory: [CodeEditVersion]
     public let originalCode: String
 
-    /// A snapshot version of an inline code edit, recording the code state, edit type, and timestamp.
     public struct CodeEditVersion: Identifiable, Sendable {
         public let id: UUID
         public let code: String
@@ -174,7 +173,6 @@ public struct InlineCodeEditRequest: Sendable {
 
 // MARK: - Errors
 
-/// Errors that can occur during inline code editing operations.
 public enum InlineEditError: LocalizedError {
     case noHandler
     case editFailed(String)

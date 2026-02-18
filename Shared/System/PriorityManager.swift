@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 
 // MARK: - Priority Manager
 
@@ -14,6 +15,7 @@ import Foundation
 @MainActor
 @Observable
 public final class PriorityManager {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "PriorityManager")
     public static let shared = PriorityManager()
 
     private let defaults = UserDefaults.standard
@@ -30,10 +32,13 @@ public final class PriorityManager {
     // MARK: - Initialization
 
     private init() {
-        if let data = defaults.data(forKey: configKey),
-           let config = try? JSONDecoder().decode(PriorityConfiguration.self, from: data)
-        {
-            configuration = config
+        if let data = defaults.data(forKey: configKey) {
+            do {
+                configuration = try JSONDecoder().decode(PriorityConfiguration.self, from: data)
+            } catch {
+                logger.error("PriorityManager: failed to decode priority configuration: \(error.localizedDescription)")
+                configuration = PriorityConfiguration()
+            }
         } else {
             configuration = PriorityConfiguration()
         }
@@ -42,8 +47,11 @@ public final class PriorityManager {
     // MARK: - Persistence
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             defaults.set(data, forKey: configKey)
+        } catch {
+            logger.error("PriorityManager: failed to encode priority configuration: \(error.localizedDescription)")
         }
     }
 

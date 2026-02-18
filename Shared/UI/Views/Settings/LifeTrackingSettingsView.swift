@@ -3,6 +3,8 @@ import SwiftUI
 struct LifeTrackingSettingsView: View {
     @State private var config = AppConfiguration.shared.lifeTrackingConfig
     @State private var showingDeleteConfirmation = false
+    @State private var errorMessage: String?
+    @State private var showError = false
 
     var body: some View {
         Form {
@@ -20,7 +22,12 @@ struct LifeTrackingSettingsView: View {
                         .onChange(of: config.healthTrackingEnabled) { _, enabled in
                             if enabled {
                                 Task {
-                                    try? await HealthTrackingManager.shared.requestAuthorization()
+                                    do {
+                                        try await HealthTrackingManager.shared.requestAuthorization()
+                                    } catch {
+                                        errorMessage = "Failed to request HealthKit authorization: \(error.localizedDescription)"
+                                        showError = true
+                                    }
                                 }
                             }
                         }
@@ -85,6 +92,11 @@ struct LifeTrackingSettingsView: View {
             Button("Delete", role: .destructive) {
                 // Delete all tracking data
             }
+        }
+        .alert("Error", isPresented: $showError, presenting: errorMessage) { _ in
+            Button("OK") { }
+        } message: { message in
+            Text(message)
         } message: {
             Text("This will permanently delete all tracked life data. This action cannot be undone.")
         }

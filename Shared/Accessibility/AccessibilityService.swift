@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 import SwiftUI
+import OSLog
 #if canImport(UIKit)
     import UIKit
 #endif
@@ -203,7 +204,11 @@ public class AccessibilityService: ObservableObject {
         announce(message)
 
         Task {
-            try? await Task.sleep(for: .seconds(2)) // 2 second delay
+            do {
+                try await Task.sleep(nanoseconds: 2_000_000_000) // 2 second delay
+            } catch {
+                // Task cancelled — announcement queue processing interrupted
+            }
             isProcessingAnnouncements = false
             processAnnouncementQueue()
         }

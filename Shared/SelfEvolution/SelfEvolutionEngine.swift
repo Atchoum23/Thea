@@ -365,7 +365,7 @@ public final class SelfEvolutionEngine: ObservableObject {
         }
 
         // Simulate implementation time
-        try await Task.sleep(for: .milliseconds(100)) // 0.1 seconds
+        try await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
     }
 
     private func createFile(at path: String, for task: EvolutionTask) async throws {
@@ -491,10 +491,7 @@ public final class SelfEvolutionEngine: ObservableObject {
                 logger.info("\(fileName) initialized")
             }
 
-            /// Execute the feature's primary action for: \(task.request)
-            public func execute() async throws {
-                logger.info("Executing \(fileName)")
-            }
+            // TODO: Implement feature logic
         }
         """
     }
@@ -631,7 +628,7 @@ public final class SelfEvolutionEngine: ObservableObject {
 
             // Simulate build progress
             for i in 0 ... 10 {
-                try await Task.sleep(for: .milliseconds(50))
+                try await Task.sleep(nanoseconds: 50_000_000)
                 buildProgress = BuildProgress(phase: phase, progress: Double(i) / 10.0)
             }
         }
@@ -679,7 +676,11 @@ public final class SelfEvolutionEngine: ObservableObject {
             let outputPath = buildDirectory.appendingPathComponent("Thea.app")
 
             // Create build directory
-            try? fileManager.createDirectory(at: buildDirectory, withIntermediateDirectories: true)
+            do {
+                try fileManager.createDirectory(at: buildDirectory, withIntermediateDirectories: true)
+            } catch {
+                logger.error("Failed to create build directory: \(error.localizedDescription)")
+            }
 
             // Execute xcodebuild
             let process = Process()
@@ -785,7 +786,11 @@ public final class SelfEvolutionEngine: ObservableObject {
 
         // Backup existing app
         if fileManager.fileExists(atPath: applicationsPath.path) {
-            try? fileManager.removeItem(at: backupPath)
+            do {
+                try fileManager.removeItem(at: backupPath)
+            } catch {
+                logger.error("Failed to remove old backup: \(error.localizedDescription)")
+            }
             try fileManager.moveItem(at: applicationsPath, to: backupPath)
         }
 
@@ -794,7 +799,11 @@ public final class SelfEvolutionEngine: ObservableObject {
             try fileManager.copyItem(at: update.buildPath, to: applicationsPath)
 
             // Remove backup on success
-            try? fileManager.removeItem(at: backupPath)
+            do {
+                try fileManager.removeItem(at: backupPath)
+            } catch {
+                logger.error("Failed to remove backup after install: \(error.localizedDescription)")
+            }
 
             // Update task status
             update.task.status = .installed
@@ -808,8 +817,16 @@ public final class SelfEvolutionEngine: ObservableObject {
         } catch {
             // Restore backup on failure
             if fileManager.fileExists(atPath: backupPath.path) {
-                try? fileManager.removeItem(at: applicationsPath)
-                try? fileManager.moveItem(at: backupPath, to: applicationsPath)
+                do {
+                    try fileManager.removeItem(at: applicationsPath)
+                } catch {
+                    logger.error("Failed to remove broken install during rollback: \(error.localizedDescription)")
+                }
+                do {
+                    try fileManager.moveItem(at: backupPath, to: applicationsPath)
+                } catch {
+                    logger.error("Failed to restore backup during rollback: \(error.localizedDescription)")
+                }
             }
 
             throw EvolutionError.installFailed(error.localizedDescription)
@@ -825,16 +842,21 @@ public final class SelfEvolutionEngine: ObservableObject {
     }
 
     private func loadTaskHistory() {
-        if let data = UserDefaults.standard.data(forKey: "evolution.taskHistory"),
-           let history = try? JSONDecoder().decode([EvolutionTask].self, from: data)
-        {
-            taskHistory = history
+        if let data = UserDefaults.standard.data(forKey: "evolution.taskHistory") {
+            do {
+                taskHistory = try JSONDecoder().decode([EvolutionTask].self, from: data)
+            } catch {
+                logger.error("Failed to decode task history: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveTaskHistory() {
-        if let data = try? JSONEncoder().encode(taskHistory) {
+        do {
+            let data = try JSONEncoder().encode(taskHistory)
             UserDefaults.standard.set(data, forKey: "evolution.taskHistory")
+        } catch {
+            logger.error("Failed to encode task history: \(error.localizedDescription)")
         }
     }
 }

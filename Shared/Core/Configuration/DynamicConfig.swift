@@ -55,24 +55,20 @@ public final class DynamicConfig {
         return optimal
     }
 
-    /// Get recommended temperature for a task.
-    /// Maps AITaskCategory to the canonical TaskType.recommendedTemperature.
+    /// Get recommended temperature for a task
     public func temperature(for task: AITaskCategory) -> Double {
-        let taskType: TaskType
         switch task {
-        case .codeGeneration:   taskType = .codeGeneration
-        case .codeReview:       taskType = .codeAnalysis
-        case .bugFix:           taskType = .codeDebugging
-        case .creative:         taskType = .creative
-        case .brainstorming:    taskType = .creative
-        case .conversation:     taskType = .conversation
-        case .assistance:       taskType = .conversation
-        case .analysis:         taskType = .analysis
-        case .classification:   taskType = .factual
-        case .translation:      taskType = .translation
-        case .correction:       taskType = .factual
+        case .codeGeneration, .codeReview, .bugFix:
+            return 0.1 // Low for deterministic code
+        case .creative, .brainstorming:
+            return 0.9 // High for creativity
+        case .conversation, .assistance:
+            return 0.7 // Balanced
+        case .analysis, .classification:
+            return 0.3 // Lower for accuracy
+        case .translation, .correction:
+            return 0.2 // Low for precision
         }
-        return taskType.recommendedTemperature
     }
 
     // MARK: - Timing Configuration
@@ -99,10 +95,19 @@ public final class DynamicConfig {
 
     // MARK: - Resource Limits
 
-    /// Get optimal cache size based on available memory.
-    /// Delegates to SystemCapabilityService for hardware-aware scaling.
+    /// Get optimal cache size based on available memory
     public var optimalCacheSize: Int {
-        SystemCapabilityService.shared.optimalCacheSize
+        let availableMemory = ProcessInfo.processInfo.physicalMemory
+        let memoryGB = Double(availableMemory) / 1_073_741_824
+
+        // Scale cache with available memory
+        if memoryGB >= 16 {
+            return 500
+        } else if memoryGB >= 8 {
+            return 200
+        } else {
+            return 100
+        }
     }
 
     /// Get optimal log retention count
@@ -157,52 +162,53 @@ public final class DynamicConfig {
     // MARK: - Private Implementation
 
     private func determineOptimalModel(for task: AITaskCategory) async -> String {
-        // Map AITaskCategory to TaskType for capability lookup
-        let taskType: TaskType
+        // Check what providers are available
+        let providers = ProviderRegistry.shared.availableProviders
+
+        // Prefer local models for privacy-sensitive tasks
+        let hasLocalModel = providers.contains { $0.id.contains("mlx") || $0.id.contains("local") }
+
         switch task {
-        case .codeGeneration:   taskType = .codeGeneration
-        case .codeReview:       taskType = .codeAnalysis
-        case .bugFix:           taskType = .codeDebugging
-        case .creative:         taskType = .creative
-        case .brainstorming:    taskType = .creative
-        case .conversation:     taskType = .conversation
-        case .assistance:       taskType = .conversation
-        case .analysis:         taskType = .analysis
-        case .classification:   taskType = .factual
-        case .translation:      taskType = .translation
-        case .correction:       taskType = .factual
+        case .codeGeneration, .codeReview, .bugFix:
+            // Need high capability
+            if providers.contains(where: { $0.id.contains("anthropic") }) {
+                return "claude-sonnet-4-20250514"
+            }
+            return "gpt-4o"
+
+        case .classification, .correction:
+            // Can use faster/cheaper models
+            return "gpt-4o-mini"
+
+        case .creative, .brainstorming:
+            // Benefit from larger models
+            if providers.contains(where: { $0.id.contains("anthropic") }) {
+                return "claude-sonnet-4-20250514"
+            }
+            return "gpt-4o"
+
+        case .conversation, .assistance:
+            // Balance speed and quality
+            if hasLocalModel {
+                return "mlx-community/Llama-3.2-3B-Instruct-4bit" // Fast local
+            }
+            return "gpt-4o-mini"
+
+        case .analysis:
+            return "gpt-4o"
+
+        case .translation:
+            return "gpt-4o-mini" // Good at translation
         }
-
-        let required = taskType.preferredCapabilities
-        let preferLocal = SystemCapabilityService.shared.physicalMemoryGB >= 16
-
-        // Prefer cheap cloud models for simple tasks
-        let maxCost: Decimal? = taskType.isSimple ? Decimal(string: "0.005") : nil
-
-        if let best = AIModel.bestModel(
-            capabilities: required,
-            maxCostPer1KOutput: maxCost,
-            preferLocal: preferLocal && taskType.isSimple
-        ) {
-            return best.id
-        }
-
-        return defaultModel(for: task)
     }
 
     private func defaultModel(for task: AITaskCategory) -> String {
-        let required: Set<ModelCapability>
         switch task {
-        case .codeGeneration, .codeReview, .bugFix:
-            required = [.codeGeneration, .chat]
-        case .creative, .brainstorming:
-            required = [.chat]
-        case .analysis:
-            required = [.analysis, .chat]
+        case .codeGeneration, .codeReview, .bugFix, .creative, .analysis:
+            return "gpt-4o"
         default:
-            required = [.chat]
+            return "gpt-4o-mini"
         }
-        return AIModel.bestModel(capabilities: required)?.id ?? "gpt-4o-mini"
     }
 
     private func determineOptimalInterval(for task: PeriodicTask) async -> TimeInterval {
@@ -284,7 +290,11 @@ public final class DynamicConfig {
         // Schedule periodic optimization
         Task {
             while true {
-                try? await Task.sleep(for: .seconds(3600))
+                do {
+                    try await Task.sleep(for: .seconds(3600))
+                } catch {
+                    // Task cancelled — optimization loop ending
+                }
                 await optimize()
             }
         }

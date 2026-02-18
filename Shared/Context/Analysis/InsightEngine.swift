@@ -56,7 +56,11 @@ public final class InsightEngine: ObservableObject {
         analysisTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.generateInsights()
-                try? await Task.sleep(for: .seconds(self?.insightGenerationInterval ?? 300))
+                do {
+                    try await Task.sleep(nanoseconds: UInt64(self?.insightGenerationInterval ?? 300) * 1_000_000_000)
+                } catch {
+                    break
+                }
             }
         }
     }
@@ -158,7 +162,11 @@ public final class InsightEngine: ObservableObject {
         case let .openApp(bundleId):
             #if os(macOS)
                 if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) {
-                    _ = try? await NSWorkspace.shared.openApplication(at: url, configuration: .init())
+                    do {
+                        _ = try await NSWorkspace.shared.openApplication(at: url, configuration: .init())
+                    } catch {
+                        logger.error("Failed to open app \(bundleId): \(error.localizedDescription)")
+                    }
                 }
             #elseif os(iOS)
                 // Use URL schemes or shortcuts
@@ -174,7 +182,11 @@ public final class InsightEngine: ObservableObject {
             break
 
         case let .sendNotification(title, body):
-            try? await CrossDeviceNotificationRouter.shared.sendNotification(title: title, body: body)
+            do {
+                try await CrossDeviceNotificationRouter.shared.sendNotification(title: title, body: body)
+            } catch {
+                logger.error("Failed to send notification '\(title)': \(error.localizedDescription)")
+            }
 
         case let .navigate(url):
             #if os(macOS)

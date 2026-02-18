@@ -8,7 +8,6 @@ public actor TaskBreakdownService: TaskBreakdownServiceProtocol {
 
     // MARK: - Task Breakdown
 
-    /// Analyzes a task description and returns a structured breakdown with subtasks and time estimates.
     public func breakdownTask(_ task: String) async throws -> TaskBreakdown {
         // In production, this would call an AI service (like PromptOptimizer)
         // For now, we'll create a structured breakdown based on task complexity
@@ -29,12 +28,10 @@ public actor TaskBreakdownService: TaskBreakdownServiceProtocol {
         return breakdown
     }
 
-    /// Returns the most recent task breakdowns up to the given limit.
     public func getBreakdownHistory(limit: Int = 20) async -> [TaskBreakdown] {
         Array(breakdownHistory.prefix(limit))
     }
 
-    /// Marks a subtask as completed within the specified breakdown.
     public func completeSubtask(breakdownId: UUID, subtaskId: UUID) async throws {
         guard let index = breakdownHistory.firstIndex(where: { $0.id == breakdownId }) else {
             throw CognitiveError.taskBreakdownFailed("Breakdown not found")

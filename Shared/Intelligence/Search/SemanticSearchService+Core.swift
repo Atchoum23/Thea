@@ -30,10 +30,8 @@ public final class SemanticSearchService: ObservableObject {
     /// Enable automatic indexing of new messages
     public var autoIndexEnabled: Bool = true
 
-    /// Batch size for embedding requests.
-    /// Initialized from SystemCapabilityService for hardware-aware scaling:
-    /// more RAM → larger batches → faster indexing (10–50 depending on machine).
-    public var batchSize: Int = SystemCapabilityService.shared.embeddingBatchSize
+    /// Batch size for embedding requests
+    public var batchSize: Int = 20
 
     // MARK: - Published State
 
@@ -274,7 +272,11 @@ public final class SemanticSearchService: ObservableObject {
             indexingProgress = Double(batchIndex + 1) / Double(totalBatches)
 
             // Allow UI updates
-            try? await Task.sleep(for: .milliseconds(10)) // 10ms
+            do {
+                try await Task.sleep(nanoseconds: 10_000_000) // 10ms
+            } catch {
+                break
+            }
         }
 
         // Save to disk
@@ -619,7 +621,12 @@ extension SemanticSearchService {
 
     private func getOpenAIKey() -> String? {
         // Try THEA-prefixed key first
-        try? SecureStorage.shared.loadAPIKey(for: "openai")
+        do {
+            return try SecureStorage.shared.loadAPIKey(for: "openai")
+        } catch {
+            searchLogger.debug("Failed to load OpenAI API key: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     // MARK: - Background Tasks
@@ -627,7 +634,11 @@ extension SemanticSearchService {
     private func schedulePeriodicSave() {
         saveTask = Task.detached { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(60)) // 60 seconds
+                do {
+                    try await Task.sleep(nanoseconds: 60_000_000_000) // 60 seconds
+                } catch {
+                    break
+                }
                 await self?.embeddingIndex.saveIfNeeded()
             }
         }

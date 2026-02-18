@@ -37,7 +37,11 @@ public final class ReliabilityMonitor: ObservableObject {
         healthCheckTask = Task {
             while !Task.isCancelled {
                 await performHealthCheck()
-                try? await Task.sleep(for: .seconds(healthCheckInterval))
+                do {
+                    try await Task.sleep(for: .seconds(healthCheckInterval))
+                } catch {
+                    break
+                }
             }
         }
         logger.info("Reliability monitoring started")

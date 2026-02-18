@@ -68,7 +68,7 @@ public final class MissionOrchestrator: ObservableObject {
         for (phaseIndex, phase) in mission.phases.enumerated() {
             try Task.checkCancellation()
             while isPaused {
-                try await Task.sleep(for: .milliseconds(100))
+                try await Task.sleep(nanoseconds: 100_000_000)
             }
 
             currentPhase = phase
@@ -80,7 +80,7 @@ public final class MissionOrchestrator: ObservableObject {
             for step in phase.steps {
                 try Task.checkCancellation()
                 while isPaused {
-                    try await Task.sleep(for: .milliseconds(100))
+                    try await Task.sleep(nanoseconds: 100_000_000)
                 }
 
                 currentStep = step
@@ -201,9 +201,17 @@ public final class MissionOrchestrator: ObservableObject {
 
     /// Restore from checkpoint
     public func restoreFromCheckpoint(missionId: UUID) async throws -> Mission? {
-        guard let data = UserDefaults.standard.data(forKey: "mission.checkpoint.\(missionId)"),
-              let checkpoint = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        else {
+        guard let data = UserDefaults.standard.data(forKey: "mission.checkpoint.\(missionId)") else {
+            return nil
+        }
+        let checkpoint: [String: Any]
+        do {
+            guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                return nil
+            }
+            checkpoint = parsed
+        } catch {
+            logger.error("Failed to deserialize mission checkpoint: \(error.localizedDescription)")
             return nil
         }
 

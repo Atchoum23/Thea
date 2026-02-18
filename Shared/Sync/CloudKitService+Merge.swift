@@ -5,7 +5,7 @@
 //  Merge operations, conflict resolution, local storage helpers, and sharing
 //
 
-@preconcurrency import CloudKit
+import CloudKit
 import Foundation
 
 // MARK: - Merge Operations
@@ -26,7 +26,7 @@ extension CloudKitService {
             }
             if hasLocalOnlyMessages || local.modifiedAt > remote.modifiedAt {
                 do {
-                    try await saveConversation(merged, retryCount: 0)
+                    try await saveConversation(merged)
                 } catch {
                     logger.error("Failed to push merged conversation \(merged.id): \(error.localizedDescription)")
                 }
@@ -103,10 +103,10 @@ extension CloudKitService {
     // MARK: - Local Storage Helpers
 
     /// Thread-safe local conversation fetch via notification.
+    /// Uses nonisolated(unsafe) flag to track whether the continuation has already resumed.
     func getLocalConversation(_ id: UUID) async -> CloudConversation? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
-
             let observer = NotificationCenter.default.addObserver(
                 forName: .cloudKitLocalConversationResponse,
                 object: nil,
@@ -148,7 +148,6 @@ extension CloudKitService {
     func getLocalKnowledgeItem(_ id: UUID) async -> CloudKnowledgeItem? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
-
             let observer = NotificationCenter.default.addObserver(
                 forName: .cloudKitLocalKnowledgeItemResponse,
                 object: nil,
@@ -189,7 +188,6 @@ extension CloudKitService {
     func getLocalProject(_ id: UUID) async -> CloudProject? {
         await withCheckedContinuation { continuation in
             nonisolated(unsafe) var hasResumed = false
-
             let observer = NotificationCenter.default.addObserver(
                 forName: .cloudKitLocalProjectResponse,
                 object: nil,
@@ -235,12 +233,6 @@ extension CloudKitService {
         case merge
     }
 
-    /// Resolves a CloudKit sync conflict between local and remote conversation records using the specified strategy.
-    /// - Parameters:
-    ///   - local: The local version of the conversation.
-    ///   - remote: The remote version of the conversation from CloudKit.
-    ///   - resolution: The conflict resolution strategy to apply (keep local, keep remote, or merge).
-    /// - Returns: The resolved conversation after applying the chosen strategy.
     public func resolveConflict(
         local: CloudConversation,
         remote: CloudConversation,
@@ -304,7 +296,7 @@ extension CloudKitService {
     /// Share a conversation with another user
     public func shareConversation(_ conversationId: UUID, with participants: [CKShare.Participant]) async throws -> CKShare {
         guard let privateDatabase else { throw CloudKitError.notAuthenticated }
-        let recordID = CKRecord.ID(recordName: "conversation-\(conversationId.uuidString)", zoneID: Self.theaZoneID)
+        let recordID = CKRecord.ID(recordName: "conversation-\(conversationId.uuidString)")
         let record = try await privateDatabase.record(for: recordID)
 
         let share = CKShare(rootRecord: record)

@@ -189,7 +189,11 @@ public final class DocumentIntelligence: ObservableObject {
 
     private func analyzeJSON(data: Data) async throws -> DocumentAnalysis {
         // Validate JSON
-        guard let json = try? JSONSerialization.jsonObject(with: data, options: []) else {
+        let json: Any
+        do {
+            json = try JSONSerialization.jsonObject(with: data, options: [])
+        } catch {
+            logger.error("Failed to parse JSON document: \(error.localizedDescription)")
             throw DocumentError.invalidDocument("Invalid JSON")
         }
 

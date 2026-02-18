@@ -233,7 +233,7 @@ public final class NetworkConditionMonitor {
     }
 
     /// Measure latency to remote Mac
-    public nonisolated func measureMacLatency(host: String, port: Int) async -> TimeInterval? {
+    public func measureMacLatency(host: String, port: Int) async -> TimeInterval? {
         let start = Date()
 
         let connection = NWConnection(
@@ -242,37 +242,27 @@ public final class NetworkConditionMonitor {
             using: .tcp
         )
 
-        // Serial queue ensures hasResumed is thread-safe (state handler + timeout both run here)
-        let probeQueue = DispatchQueue(label: "ai.thea.latency-probe")
-
         return await withCheckedContinuation { continuation in
-            // nonisolated(unsafe): safe because probeQueue is serial and all accesses happen on it
-            nonisolated(unsafe) var hasResumed = false
-
             connection.stateUpdateHandler = { state in
-                guard !hasResumed else { return }
                 switch state {
                 case .ready:
-                    hasResumed = true
                     let latency = Date().timeIntervalSince(start)
                     connection.cancel()
                     continuation.resume(returning: latency)
                 case .failed, .cancelled:
-                    hasResumed = true
                     continuation.resume(returning: nil)
                 default:
                     break
                 }
             }
 
-            connection.start(queue: probeQueue)
+            connection.start(queue: self.monitorQueue)
 
-            // Timeout after 3 seconds (same serial queue for thread safety)
-            probeQueue.asyncAfter(deadline: .now() + 3) {
-                guard !hasResumed else { return }
-                hasResumed = true
-                connection.cancel()
-                continuation.resume(returning: nil)
+            // Timeout after 3 seconds
+            DispatchQueue.global().asyncAfter(deadline: .now() + 3) {
+                if connection.state != .ready {
+                    connection.cancel()
+                }
             }
         }
     }

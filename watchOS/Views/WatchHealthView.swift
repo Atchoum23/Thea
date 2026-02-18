@@ -49,7 +49,7 @@ struct WatchHealthView: View {
         VStack(spacing: 12) {
             Image(systemName: "heart.text.square.fill")
                 .font(.system(size: 40))
-                .foregroundStyle(.theaError)
+                .foregroundStyle(.red)
 
             Text("Health Access")
                 .font(.headline)
@@ -63,7 +63,7 @@ struct WatchHealthView: View {
                 Task { await viewModel.requestAuthorization() }
             }
             .buttonStyle(.borderedProminent)
-            .tint(.theaError)
+            .tint(.red)
         }
         .padding()
     }
@@ -77,13 +77,13 @@ struct WatchHealthView: View {
                     icon: "figure.walk",
                     value: viewModel.formattedSteps,
                     label: "Steps",
-                    color: .theaSuccess
+                    color: .green
                 )
                 metricCard(
                     icon: "heart.fill",
                     value: viewModel.formattedHeartRate,
                     label: "BPM",
-                    color: .theaError
+                    color: .red
                 )
             }
 
@@ -92,7 +92,7 @@ struct WatchHealthView: View {
                     icon: "flame.fill",
                     value: viewModel.formattedActiveEnergy,
                     label: "kcal",
-                    color: .theaWarning
+                    color: .orange
                 )
                 metricCard(
                     icon: "bed.double.fill",
@@ -157,7 +157,7 @@ struct WatchHealthView: View {
             if let calories = workout.caloriesBurned {
                 Text("\(Int(calories)) kcal")
                     .font(.caption2.bold())
-                    .foregroundStyle(.theaWarning)
+                    .foregroundStyle(.orange)
             }
         }
         .padding(8)
@@ -443,7 +443,7 @@ final class WatchHealthViewModel {
                     activityName: Self.activityName(for: workout.workoutActivityType),
                     icon: Self.activityIcon(for: workout.workoutActivityType),
                     duration: workout.duration,
-                    caloriesBurned: workout.statistics(for: HKQuantityType(.activeEnergyBurned))?.sumQuantity()?.doubleValue(for: .kilocalorie()),
+                    caloriesBurned: workout.totalEnergyBurned?.doubleValue(for: .kilocalorie()),
                     startDate: workout.startDate
                 )
                 continuation.resume(returning: summary)
@@ -454,7 +454,7 @@ final class WatchHealthViewModel {
 
     // MARK: - Workout Helpers
 
-    nonisolated private static func activityName(for type: HKWorkoutActivityType) -> String {
+    private static func activityName(for type: HKWorkoutActivityType) -> String {
         switch type {
         case .running: "Running"
         case .walking: "Walking"
@@ -474,7 +474,7 @@ final class WatchHealthViewModel {
         }
     }
 
-    nonisolated private static func activityIcon(for type: HKWorkoutActivityType) -> String {
+    private static func activityIcon(for type: HKWorkoutActivityType) -> String {
         switch type {
         case .running: "figure.run"
         case .walking: "figure.walk"

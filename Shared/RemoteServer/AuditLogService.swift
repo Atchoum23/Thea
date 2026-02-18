@@ -13,9 +13,9 @@ import OSLog
 /// Persistent audit logging for all remote access actions
 @MainActor
 public class AuditLogService: ObservableObject {
-    // MARK: - Published State
+    private let logger = Logger(subsystem: "com.thea.app", category: "AuditLogService")
 
-    private let logger = Logger(subsystem: "ai.thea.app", category: "AuditLogService")
+    // MARK: - Published State
 
     @Published public private(set) var recentEntries: [AuditEntry] = []
     @Published public private(set) var totalEntryCount: Int = 0
@@ -42,7 +42,7 @@ public class AuditLogService: ObservableObject {
         do {
             try FileManager.default.createDirectory(at: storageDirectory, withIntermediateDirectories: true)
         } catch {
-            logger.error("Failed to create audit log directory: \(error.localizedDescription)")
+            logger.debug("Could not create audit log directory: \(error.localizedDescription)")
         }
         loadEntries()
         purgeExpiredEntries()
@@ -197,7 +197,7 @@ public class AuditLogService: ObservableObject {
         do {
             return try encoder.encode(allEntries)
         } catch {
-            logger.error("Failed to encode audit log as JSON: \(error.localizedDescription)")
+            logger.error("Failed to export audit log as JSON: \(error.localizedDescription)")
             return nil
         }
     }
@@ -224,7 +224,7 @@ public class AuditLogService: ObservableObject {
         do {
             try data.write(to: fileURL)
         } catch {
-            logger.error("Failed to write audit export to \(fileURL.lastPathComponent): \(error.localizedDescription)")
+            logger.error("Failed to write audit log export: \(error.localizedDescription)")
             return nil
         }
         return fileURL
@@ -281,11 +281,12 @@ public class AuditLogService: ObservableObject {
         guard FileManager.default.fileExists(atPath: entriesFileURL.path) else { return }
         do {
             let data = try Data(contentsOf: entriesFileURL)
-            allEntries = try JSONDecoder().decode([AuditEntry].self, from: data)
+            let decoded = try JSONDecoder().decode([AuditEntry].self, from: data)
+            allEntries = decoded
             recentEntries = Array(allEntries.prefix(maxInMemoryEntries))
             totalEntryCount = allEntries.count
         } catch {
-            logger.error("Failed to load audit entries: \(error.localizedDescription)")
+            logger.debug("Could not load audit entries: \(error.localizedDescription)")
         }
     }
 

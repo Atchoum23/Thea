@@ -141,7 +141,7 @@ struct VehicleMaintenanceView: View {
                     Text("No service records yet")
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(vehicle.serviceRecords.sorted { $0.date > $1.date }) { record in
+                    ForEach(vehicle.serviceRecords.sorted(by: { $0.date > $1.date })) { record in
                         HStack {
                             VStack(alignment: .leading) {
                                 Text(record.type.displayName)
@@ -163,7 +163,7 @@ struct VehicleMaintenanceView: View {
                     Text("No fuel logs yet")
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(vehicle.fuelLogs.sorted { $0.date > $1.date }.prefix(10)) { log in
+                    ForEach(vehicle.fuelLogs.sorted(by: { $0.date > $1.date }).prefix(10)) { log in
                         HStack {
                             VStack(alignment: .leading) {
                                 Text("\(log.liters, specifier: "%.1f") L")

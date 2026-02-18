@@ -287,35 +287,47 @@ final class ConversationMemory {
         var patterns: [(FactCategory, NSRegularExpression)] = []
 
         // "My name is..." pattern
-        if let regex = try? NSRegularExpression(
-            pattern: #"(?:my name is|I'm|I am)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)"#,
-            options: .caseInsensitive
-        ) {
+        do {
+            let regex = try NSRegularExpression(
+                pattern: #"(?:my name is|I'm|I am)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)"#,
+                options: .caseInsensitive
+            )
             patterns.append((.userInfo, regex))
+        } catch {
+            logger.error("Failed to create name pattern regex: \(error.localizedDescription)")
         }
 
         // "I prefer..." pattern
-        if let regex = try? NSRegularExpression(
-            pattern: #"I (?:prefer|like|want|need)\s+(.+?)(?:\.|$)"#,
-            options: .caseInsensitive
-        ) {
+        do {
+            let regex = try NSRegularExpression(
+                pattern: #"I (?:prefer|like|want|need)\s+(.+?)(?:\.|$)"#,
+                options: .caseInsensitive
+            )
             patterns.append((.userPreference, regex))
+        } catch {
+            logger.error("Failed to create preference pattern regex: \(error.localizedDescription)")
         }
 
         // Tech stack patterns
-        if let regex = try? NSRegularExpression(
-            pattern: #"(?:using|work with|develop in|coding in)\s+(Swift|Python|JavaScript|TypeScript|Rust|Go|Ruby|Java|Kotlin|C\+\+)"#,
-            options: .caseInsensitive
-        ) {
+        do {
+            let regex = try NSRegularExpression(
+                pattern: #"(?:using|work with|develop in|coding in)\s+(Swift|Python|JavaScript|TypeScript|Rust|Go|Ruby|Java|Kotlin|C\+\+)"#,
+                options: .caseInsensitive
+            )
             patterns.append((.technicalContext, regex))
+        } catch {
+            logger.error("Failed to create tech stack pattern regex: \(error.localizedDescription)")
         }
 
         // Project patterns
-        if let regex = try? NSRegularExpression(
-            pattern: #"(?:project|app|application)\s+(?:called|named)\s+([A-Za-z0-9]+)"#,
-            options: .caseInsensitive
-        ) {
+        do {
+            let regex = try NSRegularExpression(
+                pattern: #"(?:project|app|application)\s+(?:called|named)\s+([A-Za-z0-9]+)"#,
+                options: .caseInsensitive
+            )
             patterns.append((.projectDetails, regex))
+        } catch {
+            logger.error("Failed to create project pattern regex: \(error.localizedDescription)")
         }
 
         return patterns
@@ -496,28 +508,40 @@ final class ConversationMemory {
     // MARK: - Persistence
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.config"),
-           let config = try? JSONDecoder().decode(Configuration.self, from: data) {
-            configuration = config
+        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.config") {
+            do {
+                configuration = try JSONDecoder().decode(Configuration.self, from: data)
+            } catch {
+                logger.error("Failed to decode ConversationMemory configuration: \(error.localizedDescription)")
+            }
         }
     }
 
     private func loadMemory() {
         let decoder = JSONDecoder()
 
-        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.summaries"),
-           let summaries = try? decoder.decode([ConversationSummary].self, from: data) {
-            conversationSummaries = summaries
+        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.summaries") {
+            do {
+                conversationSummaries = try decoder.decode([ConversationSummary].self, from: data)
+            } catch {
+                logger.error("Failed to decode conversation summaries: \(error.localizedDescription)")
+            }
         }
 
-        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.facts"),
-           let facts = try? decoder.decode([LearnedFact].self, from: data) {
-            learnedFacts = facts
+        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.facts") {
+            do {
+                learnedFacts = try decoder.decode([LearnedFact].self, from: data)
+            } catch {
+                logger.error("Failed to decode learned facts: \(error.localizedDescription)")
+            }
         }
 
-        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.prefs"),
-           let prefs = try? decoder.decode([String: String].self, from: data) {
-            userPreferences = prefs
+        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.prefs") {
+            do {
+                userPreferences = try decoder.decode([String: String].self, from: data)
+            } catch {
+                logger.error("Failed to decode user preferences: \(error.localizedDescription)")
+            }
         }
     }
 

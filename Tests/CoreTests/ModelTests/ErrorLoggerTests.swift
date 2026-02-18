@@ -10,9 +10,10 @@ import XCTest
 
 // MARK: - Test Double
 
-private final class TestErrorLogger: @unchecked Sendable {
-    nonisolated(unsafe) static var lastLoggedError: (any Error, String)?
-    nonisolated(unsafe) static var lastWarning: String?
+@MainActor
+private final class TestErrorLogger {
+    static var lastLoggedError: (any Error, String)?
+    static var lastWarning: String?
 
     static func reset() {
         lastLoggedError = nil
@@ -36,7 +37,7 @@ private final class TestErrorLogger: @unchecked Sendable {
         }
     }
 
-    static func tryOrNilAsync<T>(context: String, _ body: @Sendable () async throws -> T) async -> T? {
+    static func tryOrNilAsync<T>(context: String, _ body: () async throws -> T) async -> T? {
         do {
             return try await body()
         } catch {

@@ -234,9 +234,13 @@ public final class CrossDeviceNotificationPreferences: ObservableObject {
         }
 
         // Sync complex types
-        if let data = cloudKeyValueStore.data(forKey: StorageKey.enabledCategories),
-           let categories = try? JSONDecoder().decode(Set<String>.self, from: data) {
-            enabledCategories = Set(categories.compactMap { CrossDeviceNotificationCategory(rawValue: $0) })
+        if let data = cloudKeyValueStore.data(forKey: StorageKey.enabledCategories) {
+            do {
+                let categories = try JSONDecoder().decode(Set<String>.self, from: data)
+                enabledCategories = Set(categories.compactMap { CrossDeviceNotificationCategory(rawValue: $0) })
+            } catch {
+                logger.error("Failed to decode categories from iCloud: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -255,8 +259,11 @@ public final class CrossDeviceNotificationPreferences: ObservableObject {
         cloudKeyValueStore.set(Date(), forKey: StorageKey.lastModified)
 
         // Sync complex types
-        if let data = try? JSONEncoder().encode(Set(enabledCategories.map(\.rawValue))) {
+        do {
+            let data = try JSONEncoder().encode(Set(enabledCategories.map(\.rawValue)))
             cloudKeyValueStore.set(data, forKey: StorageKey.enabledCategories)
+        } catch {
+            logger.error("Failed to encode categories for iCloud: \(error.localizedDescription)")
         }
 
         cloudKeyValueStore.synchronize()
@@ -275,103 +282,135 @@ public final class CrossDeviceNotificationPreferences: ObservableObject {
 
     private func saveDeviceIds() {
         let ids = enabledDeviceIds.map(\.uuidString)
-        if let data = try? JSONEncoder().encode(ids) {
+        do {
+            let data = try JSONEncoder().encode(ids)
             defaults.set(data, forKey: StorageKey.enabledDevices)
+        } catch {
+            logger.error("Failed to encode device IDs: \(error.localizedDescription)")
         }
     }
 
     private func loadDeviceIds() -> Set<UUID> {
-        guard let data = defaults.data(forKey: StorageKey.enabledDevices),
-              let ids = try? JSONDecoder().decode([String].self, from: data)
-        else { return [] }
-        return Set(ids.compactMap { UUID(uuidString: $0) })
+        guard let data = defaults.data(forKey: StorageKey.enabledDevices) else { return [] }
+        do {
+            let ids = try JSONDecoder().decode([String].self, from: data)
+            return Set(ids.compactMap { UUID(uuidString: $0) })
+        } catch {
+            logger.error("Failed to decode device IDs: \(error.localizedDescription)")
+            return []
+        }
     }
 
     private func saveCategories() {
         let rawValues = enabledCategories.map(\.rawValue)
-        if let data = try? JSONEncoder().encode(rawValues) {
+        do {
+            let data = try JSONEncoder().encode(rawValues)
             defaults.set(data, forKey: StorageKey.enabledCategories)
             if syncWithiCloud {
                 cloudKeyValueStore.set(data, forKey: StorageKey.enabledCategories)
                 syncToiCloud()
             }
+        } catch {
+            logger.error("Failed to encode categories: \(error.localizedDescription)")
         }
     }
 
     private func loadCategories() -> Set<CrossDeviceNotificationCategory> {
-        guard let data = defaults.data(forKey: StorageKey.enabledCategories),
-              let rawValues = try? JSONDecoder().decode([String].self, from: data)
-        else {
+        guard let data = defaults.data(forKey: StorageKey.enabledCategories) else {
             // Default: all categories enabled
             return Set(CrossDeviceNotificationCategory.allCases)
         }
-        return Set(rawValues.compactMap { CrossDeviceNotificationCategory(rawValue: $0) })
+        do {
+            let rawValues = try JSONDecoder().decode([String].self, from: data)
+            return Set(rawValues.compactMap { CrossDeviceNotificationCategory(rawValue: $0) })
+        } catch {
+            logger.error("Failed to decode categories: \(error.localizedDescription)")
+            return Set(CrossDeviceNotificationCategory.allCases)
+        }
     }
 
     private func saveCategoryPriorities() {
         let dict = Dictionary(uniqueKeysWithValues: categoryPriorities.map { ($0.key.rawValue, $0.value.rawValue) })
-        if let data = try? JSONEncoder().encode(dict) {
+        do {
+            let data = try JSONEncoder().encode(dict)
             defaults.set(data, forKey: StorageKey.categoryPriorities)
+        } catch {
+            logger.error("Failed to encode category priorities: \(error.localizedDescription)")
         }
     }
 
     private func loadCategoryPriorities() -> [CrossDeviceNotificationCategory: CrossDeviceNotificationPriority] {
-        guard let data = defaults.data(forKey: StorageKey.categoryPriorities),
-              let dict = try? JSONDecoder().decode([String: String].self, from: data)
-        else { return [:] }
-
-        var result: [CrossDeviceNotificationCategory: CrossDeviceNotificationPriority] = [:]
-        for (key, value) in dict {
-            if let category = CrossDeviceNotificationCategory(rawValue: key),
-               let priority = CrossDeviceNotificationPriority(rawValue: value) {
-                result[category] = priority
+        guard let data = defaults.data(forKey: StorageKey.categoryPriorities) else { return [:] }
+        do {
+            let dict = try JSONDecoder().decode([String: String].self, from: data)
+            var result: [CrossDeviceNotificationCategory: CrossDeviceNotificationPriority] = [:]
+            for (key, value) in dict {
+                if let category = CrossDeviceNotificationCategory(rawValue: key),
+                   let priority = CrossDeviceNotificationPriority(rawValue: value) {
+                    result[category] = priority
+                }
             }
+            return result
+        } catch {
+            logger.error("Failed to decode category priorities: \(error.localizedDescription)")
+            return [:]
         }
-        return result
     }
 
     private func saveCategorySounds() {
         let dict = Dictionary(uniqueKeysWithValues: categorySounds.map { ($0.key.rawValue, $0.value.rawValue) })
-        if let data = try? JSONEncoder().encode(dict) {
+        do {
+            let data = try JSONEncoder().encode(dict)
             defaults.set(data, forKey: StorageKey.categorySounds)
+        } catch {
+            logger.error("Failed to encode category sounds: \(error.localizedDescription)")
         }
     }
 
     private func loadCategorySounds() -> [CrossDeviceNotificationCategory: CrossDeviceNotificationSound] {
-        guard let data = defaults.data(forKey: StorageKey.categorySounds),
-              let dict = try? JSONDecoder().decode([String: String].self, from: data)
-        else { return [:] }
-
-        var result: [CrossDeviceNotificationCategory: CrossDeviceNotificationSound] = [:]
-        for (key, value) in dict {
-            if let category = CrossDeviceNotificationCategory(rawValue: key),
-               let sound = CrossDeviceNotificationSound(rawValue: value) {
-                result[category] = sound
+        guard let data = defaults.data(forKey: StorageKey.categorySounds) else { return [:] }
+        do {
+            let dict = try JSONDecoder().decode([String: String].self, from: data)
+            var result: [CrossDeviceNotificationCategory: CrossDeviceNotificationSound] = [:]
+            for (key, value) in dict {
+                if let category = CrossDeviceNotificationCategory(rawValue: key),
+                   let sound = CrossDeviceNotificationSound(rawValue: value) {
+                    result[category] = sound
+                }
             }
+            return result
+        } catch {
+            logger.error("Failed to decode category sounds: \(error.localizedDescription)")
+            return [:]
         }
-        return result
     }
 
     private func saveCategoryHaptics() {
         let dict = Dictionary(uniqueKeysWithValues: categoryHaptics.map { ($0.key.rawValue, $0.value.rawValue) })
-        if let data = try? JSONEncoder().encode(dict) {
+        do {
+            let data = try JSONEncoder().encode(dict)
             defaults.set(data, forKey: StorageKey.categoryHaptics)
+        } catch {
+            logger.error("Failed to encode category haptics: \(error.localizedDescription)")
         }
     }
 
     private func loadCategoryHaptics() -> [CrossDeviceNotificationCategory: CrossDeviceNotificationHaptic] {
-        guard let data = defaults.data(forKey: StorageKey.categoryHaptics),
-              let dict = try? JSONDecoder().decode([String: String].self, from: data)
-        else { return [:] }
-
-        var result: [CrossDeviceNotificationCategory: CrossDeviceNotificationHaptic] = [:]
-        for (key, value) in dict {
-            if let category = CrossDeviceNotificationCategory(rawValue: key),
-               let haptic = CrossDeviceNotificationHaptic(rawValue: value) {
-                result[category] = haptic
+        guard let data = defaults.data(forKey: StorageKey.categoryHaptics) else { return [:] }
+        do {
+            let dict = try JSONDecoder().decode([String: String].self, from: data)
+            var result: [CrossDeviceNotificationCategory: CrossDeviceNotificationHaptic] = [:]
+            for (key, value) in dict {
+                if let category = CrossDeviceNotificationCategory(rawValue: key),
+                   let haptic = CrossDeviceNotificationHaptic(rawValue: value) {
+                    result[category] = haptic
+                }
             }
+            return result
+        } catch {
+            logger.error("Failed to decode category haptics: \(error.localizedDescription)")
+            return [:]
         }
-        return result
     }
 
     private func saveQuietHoursStart() {
@@ -379,19 +418,26 @@ public final class CrossDeviceNotificationPreferences: ObservableObject {
             "hour": quietHoursStart.hour ?? 22,
             "minute": quietHoursStart.minute ?? 0
         ]
-        if let data = try? JSONEncoder().encode(dict) {
+        do {
+            let data = try JSONEncoder().encode(dict)
             defaults.set(data, forKey: StorageKey.quietHoursStart)
+        } catch {
+            logger.error("Failed to encode quiet hours start: \(error.localizedDescription)")
         }
     }
 
     private func loadQuietHoursStart() -> DateComponents {
-        guard let data = defaults.data(forKey: StorageKey.quietHoursStart),
-              let dict = try? JSONDecoder().decode([String: Int].self, from: data)
-        else {
+        guard let data = defaults.data(forKey: StorageKey.quietHoursStart) else {
             // Default: 10 PM
             return DateComponents(hour: 22, minute: 0)
         }
-        return DateComponents(hour: dict["hour"], minute: dict["minute"])
+        do {
+            let dict = try JSONDecoder().decode([String: Int].self, from: data)
+            return DateComponents(hour: dict["hour"], minute: dict["minute"])
+        } catch {
+            logger.error("Failed to decode quiet hours start: \(error.localizedDescription)")
+            return DateComponents(hour: 22, minute: 0)
+        }
     }
 
     private func saveQuietHoursEnd() {
@@ -399,19 +445,26 @@ public final class CrossDeviceNotificationPreferences: ObservableObject {
             "hour": quietHoursEnd.hour ?? 7,
             "minute": quietHoursEnd.minute ?? 0
         ]
-        if let data = try? JSONEncoder().encode(dict) {
+        do {
+            let data = try JSONEncoder().encode(dict)
             defaults.set(data, forKey: StorageKey.quietHoursEnd)
+        } catch {
+            logger.error("Failed to encode quiet hours end: \(error.localizedDescription)")
         }
     }
 
     private func loadQuietHoursEnd() -> DateComponents {
-        guard let data = defaults.data(forKey: StorageKey.quietHoursEnd),
-              let dict = try? JSONDecoder().decode([String: Int].self, from: data)
-        else {
+        guard let data = defaults.data(forKey: StorageKey.quietHoursEnd) else {
             // Default: 7 AM
             return DateComponents(hour: 7, minute: 0)
         }
-        return DateComponents(hour: dict["hour"], minute: dict["minute"])
+        do {
+            let dict = try JSONDecoder().decode([String: Int].self, from: data)
+            return DateComponents(hour: dict["hour"], minute: dict["minute"])
+        } catch {
+            logger.error("Failed to decode quiet hours end: \(error.localizedDescription)")
+            return DateComponents(hour: 7, minute: 0)
+        }
     }
 
     // MARK: - Public API

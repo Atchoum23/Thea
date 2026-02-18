@@ -425,7 +425,13 @@ public final class ProactiveResourceMatcher: ObservableObject {
         }
 
         // Pattern: URLs or API references
-        let urlPattern = try? NSRegularExpression(pattern: "https?://[\\w\\-._~:/?#\\[\\]@!$&'()*+,;=]+", options: [])
+        let urlPattern: NSRegularExpression?
+        do {
+            urlPattern = try NSRegularExpression(pattern: "https?://[\\w\\-._~:/?#\\[\\]@!$&'()*+,;=]+", options: [])
+        } catch {
+            logger.debug("Could not compile URL pattern: \(error.localizedDescription)")
+            urlPattern = nil
+        }
         if urlPattern?.firstMatch(in: text, options: [], range: NSRange(text.startIndex..., in: text)) != nil {
             let webResources = discoveryEngine.findByCapability(.web)
             for resource in webResources.prefix(2) {
@@ -537,28 +543,38 @@ public final class ProactiveResourceMatcher: ObservableObject {
     private let historyKey = "thea.resource_matcher.history"
 
     private func saveUserPreferences() {
-        if let data = try? JSONEncoder().encode(userPreferences) {
+        do {
+            let data = try JSONEncoder().encode(userPreferences)
             UserDefaults.standard.set(data, forKey: preferencesKey)
+        } catch {
+            logger.debug("Could not save user preferences: \(error.localizedDescription)")
         }
     }
 
     private func loadUserPreferences() {
-        if let data = UserDefaults.standard.data(forKey: preferencesKey),
-           let prefs = try? JSONDecoder().decode(UserResourcePreferences.self, from: data) {
-            userPreferences = prefs
+        guard let data = UserDefaults.standard.data(forKey: preferencesKey) else { return }
+        do {
+            userPreferences = try JSONDecoder().decode(UserResourcePreferences.self, from: data)
+        } catch {
+            logger.debug("Could not load user preferences: \(error.localizedDescription)")
         }
     }
 
     private func saveUsageHistory() {
-        if let data = try? JSONEncoder().encode(usageHistory) {
+        do {
+            let data = try JSONEncoder().encode(usageHistory)
             UserDefaults.standard.set(data, forKey: historyKey)
+        } catch {
+            logger.debug("Could not save usage history: \(error.localizedDescription)")
         }
     }
 
     private func loadUsageHistory() {
-        if let data = UserDefaults.standard.data(forKey: historyKey),
-           let history = try? JSONDecoder().decode([UUID: ResourceUsageStats].self, from: data) {
-            usageHistory = history
+        guard let data = UserDefaults.standard.data(forKey: historyKey) else { return }
+        do {
+            usageHistory = try JSONDecoder().decode([UUID: ResourceUsageStats].self, from: data)
+        } catch {
+            logger.debug("Could not load usage history: \(error.localizedDescription)")
         }
     }
 }

@@ -10,6 +10,7 @@
 
 import Foundation
 import Combine
+import OSLog
 #if os(macOS)
 import IOKit.ps
 import IOKit
@@ -42,6 +43,7 @@ final class DynamicResourceAllocator {
 
     // MARK: - Initialization
 
+    private let logger = Logger(subsystem: "ai.thea.app", category: "DynamicResourceAllocator")
     private var monitoringTask: Task<Void, Never>?
     private var memoryPressureSource: DispatchSourceMemoryPressure?
 
@@ -430,7 +432,11 @@ extension DynamicResourceAllocator {
 
         monitoringTask = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(configuration.updateIntervalSeconds))
+                do {
+                    try await Task.sleep(for: .seconds(configuration.updateIntervalSeconds))
+                } catch {
+                    break
+                }
                 await collectMetricsAndAdjust()
             }
         }
@@ -653,15 +659,20 @@ extension DynamicResourceAllocator {
     }
 
     func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "DynamicResourceAllocator.config"),
-           let config = try? JSONDecoder().decode(Configuration.self, from: data) {
-            configuration = config
+        guard let data = UserDefaults.standard.data(forKey: "DynamicResourceAllocator.config") else { return }
+        do {
+            configuration = try JSONDecoder().decode(Configuration.self, from: data)
+        } catch {
+            logger.error("Failed to decode DynamicResourceAllocator configuration: \(error.localizedDescription)")
         }
     }
 
     func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             UserDefaults.standard.set(data, forKey: "DynamicResourceAllocator.config")
+        } catch {
+            logger.error("Failed to encode DynamicResourceAllocator configuration: \(error.localizedDescription)")
         }
     }
 }

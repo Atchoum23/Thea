@@ -156,11 +156,14 @@ public struct NetworkPolicy: Codable, Sendable {
             if blocked.contains("*") {
                 // Wildcard matching
                 let pattern = blocked.replacingOccurrences(of: "*", with: ".*")
-                if let regex = try? NSRegularExpression(pattern: "^\(pattern)$", options: []) {
+                do {
+                    let regex = try NSRegularExpression(pattern: "^\(pattern)$", options: [])
                     let range = NSRange(lowercaseHost.startIndex..., in: lowercaseHost)
                     if regex.firstMatch(in: lowercaseHost, options: [], range: range) != nil {
                         return true
                     }
+                } catch {
+                    agentSecPolicyLogger.error("Invalid host wildcard pattern '\(blocked)': \(error)")
                 }
             } else if lowercaseHost == blocked.lowercased() || lowercaseHost.contains(blocked.lowercased()) {
                 return true
@@ -346,13 +349,17 @@ public struct TerminalPolicy: Codable, Sendable {
 
         // Check blocked patterns
         for pattern in blockedPatterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) {
+            do {
+                let regex = try NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
                 let range = NSRange(command.startIndex..., in: command)
                 if regex.firstMatch(in: command, options: [], range: range) != nil {
                     return (true, "Command matches blocked pattern: \(pattern)")
                 }
-            } else if lowercaseCommand.contains(pattern.lowercased()) {
-                return (true, "Command contains blocked pattern: \(pattern)")
+            } catch {
+                agentSecPolicyLogger.error("Invalid terminal blocked pattern '\(pattern)': \(error)")
+                if lowercaseCommand.contains(pattern.lowercased()) {
+                    return (true, "Command contains blocked pattern: \(pattern)")
+                }
             }
         }
 

@@ -184,7 +184,7 @@
 
             // Set up timeout
             let timeoutTask = Task {
-                try await Task.sleep(for: .seconds(timeout))
+                try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
                 if process.isRunning {
                     logger.warning("Build timeout reached, terminating process")
                     process.terminate()
@@ -247,7 +247,11 @@
 
             let errorPattern = #"^(.+?):(\d+):(\d+):\s*(error|note):\s*(.+)$"#
 
-            guard let regex = try? NSRegularExpression(pattern: errorPattern, options: .anchorsMatchLines) else {
+            let regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: errorPattern, options: .anchorsMatchLines)
+            } catch {
+                logger.error("XcodeBuildRunner: invalid error regex pattern: \(error.localizedDescription)")
                 return []
             }
 
@@ -292,7 +296,11 @@
 
             let warningPattern = #"^(.+?):(\d+):(\d+):\s*warning:\s*(.+)$"#
 
-            guard let regex = try? NSRegularExpression(pattern: warningPattern, options: .anchorsMatchLines) else {
+            let regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: warningPattern, options: .anchorsMatchLines)
+            } catch {
+                logger.error("XcodeBuildRunner: invalid warning regex pattern: \(error.localizedDescription)")
                 return []
             }
 

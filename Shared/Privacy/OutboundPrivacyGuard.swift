@@ -363,9 +363,13 @@ actor OutboundPrivacyGuard {
         var modified: Bool { !redactions.isEmpty }
     }
 
-    /// Pre-compiled credential regex patterns — compiled once, reused per invocation
-    private static let credentialPatterns: [(NSRegularExpression, String)] = {
+    /// Detect and redact API keys, tokens, and secrets
+    private func redactCredentials(in text: String) -> LayerResult {
+        var result = text
+        var redactions: [Redaction] = []
+
         let patterns: [(String, String)] = [
+            // API keys
             ("sk-[a-zA-Z0-9]{20,}", "API key (sk-)"),
             ("key-[a-zA-Z0-9]{20,}", "API key (key-)"),
             ("anthropic-[a-zA-Z0-9]{20,}", "Anthropic key"),
@@ -374,33 +378,33 @@ actor OutboundPrivacyGuard {
             ("gho_[a-zA-Z0-9]{36}", "GitHub OAuth token"),
             ("xoxb-[a-zA-Z0-9-]+", "Slack bot token"),
             ("xoxp-[a-zA-Z0-9-]+", "Slack user token"),
+            // Bearer tokens
             ("Bearer [a-zA-Z0-9_\\-.~+/]+=*", "Bearer token"),
+            // Base64 secrets (long base64 strings that look like keys)
             ("(?<![a-zA-Z0-9/+])[A-Za-z0-9+/]{40,}={0,2}(?![a-zA-Z0-9/+=])", "Base64 secret"),
+            // AWS keys
             ("AKIA[0-9A-Z]{16}", "AWS access key"),
+            // SSH keys
             ("ssh-rsa\\s+[A-Za-z0-9+/=]{100,}", "SSH public key"),
             ("ssh-ed25519\\s+[A-Za-z0-9+/=]{40,}", "SSH ED25519 key"),
+            // PEM private keys
             ("-----BEGIN[A-Z ]*PRIVATE KEY-----", "PEM private key"),
+            // JWT tokens
             ("eyJ[a-zA-Z0-9_-]{10,}\\.eyJ[a-zA-Z0-9_-]{10,}\\.[a-zA-Z0-9_-]+", "JWT token"),
+            // Firebase keys
             ("AIzaSy[a-zA-Z0-9_-]{33}", "Firebase API key"),
-            ("(?i)(?:secret|password|passwd|pwd)\\s*[:=]\\s*[\"']?[^\\s\"']{8,}", "Secret value"),
-            // 2026 additions: Supabase, Stripe, Vercel tokens
-            ("sbp_[a-zA-Z0-9]{40,}", "Supabase token"),
-            ("sk_live_[a-zA-Z0-9]{24,}", "Stripe live key"),
-            ("rk_live_[a-zA-Z0-9]{24,}", "Stripe restricted key"),
-            ("vercel_[a-zA-Z0-9]{24,}", "Vercel token")
+            // Generic secret patterns
+            ("(?i)(?:secret|password|passwd|pwd)\\s*[:=]\\s*[\"']?[^\\s\"']{8,}", "Secret value")
         ]
-        return patterns.compactMap { pattern, desc in
-            guard let regex = try? NSRegularExpression(pattern: pattern) else { return nil }
-            return (regex, desc)
-        }
-    }()
 
-    /// Detect and redact API keys, tokens, and secrets
-    private func redactCredentials(in text: String) -> LayerResult {
-        var result = text
-        var redactions: [Redaction] = []
-
-        for (regex, description) in Self.credentialPatterns {
+        for (pattern, description) in patterns {
+            let regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: pattern)
+            } catch {
+                logger.debug("Invalid regex pattern \(pattern): \(error.localizedDescription)")
+                continue
+            }
             let range = NSRange(result.startIndex..<result.endIndex, in: result)
             let matches = regex.matches(in: result, range: range)
 
@@ -461,7 +465,13 @@ actor OutboundPrivacyGuard {
         ]
 
         for pattern in patterns {
-            guard let regex = try? NSRegularExpression(pattern: pattern) else { continue }
+            let regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: pattern)
+            } catch {
+                logger.debug("Invalid regex pattern \(pattern): \(error.localizedDescription)")
+                continue
+            }
             let range = NSRange(result.startIndex..<result.endIndex, in: result)
             let matches = regex.matches(in: result, range: range)
 
@@ -527,7 +537,13 @@ actor OutboundPrivacyGuard {
     private func matchesAny(_ text: String, patterns: [String]) -> Bool {
         let range = NSRange(text.startIndex..<text.endIndex, in: text)
         for pattern in patterns {
-            guard let regex = try? NSRegularExpression(pattern: pattern) else { continue }
+            let regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: pattern)
+            } catch {
+                logger.debug("Invalid regex pattern \(pattern): \(error.localizedDescription)")
+                continue
+            }
             if regex.firstMatch(in: text, range: range) != nil { return true }
         }
         return false

@@ -26,6 +26,11 @@ struct DownloadManagerView: View {
         }
         .navigationTitle("Downloads")
         .task { await refresh() }
+        .alert("Error", isPresented: $showError, presenting: errorMessage) { _ in
+            Button("OK") { }
+        } message: { message in
+            Text(message)
+        }
         #else
         NavigationStack {
             List {
@@ -309,8 +314,13 @@ struct DownloadManagerView: View {
         if item.status == .paused || item.status == .queued {
             Button {
                 Task {
-                    try? await TheaDownloadManager.shared.startDownload(item.id)
-                    await refresh()
+                    do {
+                        try await TheaDownloadManager.shared.startDownload(item.id)
+                        await refresh()
+                    } catch {
+                        errorMessage = "Failed to start download: \(error.localizedDescription)"
+                        showError = true
+                    }
                 }
             } label: {
                 Label("Resume", systemImage: "play.circle")
@@ -320,8 +330,13 @@ struct DownloadManagerView: View {
         if item.status == .failed {
             Button {
                 Task {
-                    try? await TheaDownloadManager.shared.retryDownload(item.id)
-                    await refresh()
+                    do {
+                        try await TheaDownloadManager.shared.retryDownload(item.id)
+                        await refresh()
+                    } catch {
+                        errorMessage = "Failed to retry download: \(error.localizedDescription)"
+                        showError = true
+                    }
                 }
             } label: {
                 Label("Retry", systemImage: "arrow.clockwise")

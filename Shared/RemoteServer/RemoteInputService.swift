@@ -62,8 +62,6 @@ public class RemoteInputService: ObservableObject {
             isEnabled = trusted
         }
 
-        /// Requests macOS Accessibility permission, prompting the user if not already granted.
-        /// - Returns: `true` if the process is trusted for accessibility access, `false` otherwise.
         public func requestAccessibilityPermission() -> Bool {
             // Request accessibility permission with prompt option
             let trusted = checkAccessibilityTrustedWithPrompt()
@@ -74,15 +72,6 @@ public class RemoteInputService: ObservableObject {
 
     // MARK: - Request Handling
 
-    /// Processes an incoming remote input request by dispatching it to the appropriate handler.
-    ///
-    /// Supports mouse operations (move, click, down, up, drag, scroll), keyboard operations
-    /// (key press, key down, key up, text typing), and clipboard operations.
-    /// Increments the input counter and updates ``lastInputTime`` on success.
-    ///
-    /// - Parameter request: The ``InputRequest`` describing the input event to simulate.
-    /// - Throws: ``RemoteInputError/accessibilityNotEnabled`` if Accessibility permission has not been granted (macOS).
-    /// - Throws: ``RemoteInputError/notSupportedOnPlatform`` on non-macOS platforms.
     public func handleRequest(_ request: InputRequest) async throws {
         #if os(macOS)
             guard isEnabled else {
@@ -137,8 +126,6 @@ public class RemoteInputService: ObservableObject {
 
     // MARK: - Clipboard
 
-    /// Retrieves the current plain-text content from the system clipboard.
-    /// - Returns: The clipboard string, or an empty string if no text is available.
     public func getClipboardContent() async throws -> String {
         #if os(macOS)
             let pasteboard = NSPasteboard.general
@@ -167,14 +154,14 @@ public class RemoteInputService: ObservableObject {
                 downEvent?.setIntegerValueField(.mouseEventClickState, value: Int64(clickCount))
                 downEvent?.post(tap: .cghidEventTap)
 
-                try await Task.sleep(for: .milliseconds(50)) // 50ms
+                try await Task.sleep(nanoseconds: 50_000_000) // 50ms
 
                 let upEvent = CGEvent(mouseEventSource: nil, mouseType: upType, mouseCursorPosition: point, mouseButton: cgButton)
                 upEvent?.setIntegerValueField(.mouseEventClickState, value: Int64(clickCount))
                 upEvent?.post(tap: .cghidEventTap)
 
                 if clickCount > 1 {
-                    try await Task.sleep(for: .milliseconds(100)) // 100ms between clicks
+                    try await Task.sleep(nanoseconds: 100_000_000) // 100ms between clicks
                 }
             }
         }
@@ -204,7 +191,7 @@ public class RemoteInputService: ObservableObject {
             let downEvent = CGEvent(mouseEventSource: nil, mouseType: downType, mouseCursorPosition: fromPoint, mouseButton: cgButton)
             downEvent?.post(tap: .cghidEventTap)
 
-            try await Task.sleep(for: .milliseconds(50))
+            try await Task.sleep(nanoseconds: 50_000_000)
 
             // Drag to destination
             let dragType: CGEventType = button == .left ? .leftMouseDragged : button == .right ? .rightMouseDragged : .otherMouseDragged
@@ -218,7 +205,7 @@ public class RemoteInputService: ObservableObject {
                 let dragEvent = CGEvent(mouseEventSource: nil, mouseType: dragType, mouseCursorPosition: CGPoint(x: x, y: y), mouseButton: cgButton)
                 dragEvent?.post(tap: .cghidEventTap)
 
-                try await Task.sleep(for: .milliseconds(10)) // 10ms between drag points
+                try await Task.sleep(nanoseconds: 10_000_000) // 10ms between drag points
             }
 
             // Mouse up at end
@@ -252,7 +239,7 @@ public class RemoteInputService: ObservableObject {
     #if os(macOS)
         private func keyPress(keyCode: UInt16, modifiers: KeyModifiers) async throws {
             try await keyDown(keyCode: keyCode, modifiers: modifiers)
-            try await Task.sleep(for: .seconds(keyboardDelay))
+            try await Task.sleep(nanoseconds: UInt64(keyboardDelay * 1_000_000_000))
             try await keyUp(keyCode: keyCode, modifiers: modifiers)
         }
 
@@ -275,7 +262,7 @@ public class RemoteInputService: ObservableObject {
                     let modifiers: KeyModifiers = needsShift ? .shift : []
 
                     try await keyPress(keyCode: keyCode, modifiers: modifiers)
-                    try await Task.sleep(for: .seconds(keyboardDelay))
+                    try await Task.sleep(nanoseconds: UInt64(keyboardDelay * 1_000_000_000))
                 } else {
                     // For special characters, use Unicode input
                     try await typeUnicode(character)
@@ -354,7 +341,6 @@ public class RemoteInputService: ObservableObject {
 
 // MARK: - Remote Input Error
 
-/// Errors that can occur when processing remote keyboard and mouse input events.
 public enum RemoteInputError: Error, LocalizedError, Sendable {
     case accessibilityNotEnabled
     case notSupportedOnPlatform

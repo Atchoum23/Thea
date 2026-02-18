@@ -107,7 +107,11 @@ public final class SemanticCodeIndexer: ObservableObject {
 
             // Persist to disk in background
             Task.detached { [weak self] in
-                try? await self?.persistToDisk()
+                do {
+                    try await self?.persistToDisk()
+                } catch {
+                    self?.logger.error("Background persist failed: \(error.localizedDescription)")
+                }
             }
 
         } catch {
@@ -291,7 +295,13 @@ extension SemanticCodeIndexer {
             }
 
             while let fileURL = enumerator.nextObject() as? URL {
-                let resourceValues = try? fileURL.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
+                let resourceValues: URLResourceValues?
+                do {
+                    resourceValues = try fileURL.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
+                } catch {
+                    logger.debug("Failed to read resource values for \(fileURL.path): \(error.localizedDescription)")
+                    continue
+                }
 
                 guard resourceValues?.isRegularFile == true else { continue }
 
@@ -628,7 +638,11 @@ extension SemanticCodeIndexer {
             .replacingOccurrences(of: "**/", with: "(.*/)?")
             .replacingOccurrences(of: "*", with: "[^/]*")
 
-        guard let regex = try? NSRegularExpression(pattern: "^" + regexPattern + "$", options: []) else {
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: "^" + regexPattern + "$", options: [])
+        } catch {
+            logger.debug("Invalid glob pattern '\(pattern)': \(error.localizedDescription)")
             return false
         }
 

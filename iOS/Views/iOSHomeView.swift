@@ -1,3 +1,4 @@
+import OSLog
 @preconcurrency import SwiftData
 import SwiftUI
 
@@ -54,7 +55,6 @@ struct iOSHomeView: View {
                     Label(tab.rawValue, systemImage: tab.icon)
                 }
                 .tag(tab)
-                .accessibilityIdentifier("tab_\(tab.rawValue)")
             }
         }
         .sheet(isPresented: $showingNewConversation) {
@@ -124,8 +124,13 @@ struct iOSHomeView: View {
 
         if voiceManager.isEnabled {
             Task {
-                try? await voiceManager.requestPermissions()
-                try? voiceManager.startWakeWordDetection()
+                do {
+                    try await voiceManager.requestPermissions()
+                    try voiceManager.startWakeWordDetection()
+                } catch {
+                    Logger(subsystem: "app.thea", category: "iOSHome")
+                        .error("Voice setup failed: \(error.localizedDescription)")
+                }
             }
         }
     }
@@ -168,11 +173,6 @@ struct iOSChatListView: View {
 
     private var conversationList: some View {
         List {
-            if filteredConversations.isEmpty && !searchText.isEmpty {
-                ContentUnavailableView.search(text: searchText)
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-            }
             let pinned = filteredConversations.filter(\.isPinned)
             if !pinned.isEmpty {
                 Section("Pinned") {

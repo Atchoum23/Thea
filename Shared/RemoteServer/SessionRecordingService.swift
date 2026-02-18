@@ -6,11 +6,14 @@
 //
 
 import Foundation
+import OSLog
 #if os(macOS)
     import AVFoundation
     import CoreMedia
     import CoreVideo
 #endif
+
+private let srsLogger = Logger(subsystem: "ai.thea.app", category: "SessionRecording")
 
 // MARK: - Session Recording Service
 
@@ -24,6 +27,7 @@ public class SessionRecordingService: ObservableObject {
     @Published public private(set) var recordingDuration: TimeInterval = 0
     @Published public private(set) var recordingFileSize: Int64 = 0
     @Published public private(set) var recordings: [RecordingMetadata] = []
+    @Published public var lastError: String?
 
     // MARK: - Recording State
 
@@ -43,7 +47,11 @@ public class SessionRecordingService: ObservableObject {
     public var recordingsDirectory: URL {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             .appendingPathComponent("Thea/Recordings", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            srsLogger.debug("Could not create recordings directory: \(error.localizedDescription)")
+        }
         return dir
     }
 
@@ -111,7 +119,11 @@ public class SessionRecordingService: ObservableObject {
         // Start duration timer
         durationTimer = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(1))
+                do {
+                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                } catch {
+                    break
+                }
                 await MainActor.run {
                     if let start = self.recordingStartTime {
                         self.recordingDuration = Date().timeIntervalSince(start)
@@ -199,7 +211,11 @@ public class SessionRecordingService: ObservableObject {
                 await writer.finishWriting()
 
                 let outputURL = writer.outputURL
-                fileSize = (try? FileManager.default.attributesOfItem(atPath: outputURL.path)[.size] as? Int64) ?? 0
+                do {
+                    fileSize = (try FileManager.default.attributesOfItem(atPath: outputURL.path)[.size] as? Int64) ?? 0
+                } catch {
+                    srsLogger.debug("Could not get recording file size: \(error.localizedDescription)")
+                }
             }
 
             assetWriter = nil
@@ -233,22 +249,37 @@ public class SessionRecordingService: ObservableObject {
     // MARK: - Recording Management
 
     /// Delete a recording
-    public func deleteRecording(id: String) {
-        if let index = recordings.firstIndex(where: { $0.id == id }) {
-            let recording = recordings[index]
-            try? FileManager.default.removeItem(atPath: recording.filePath)
-            recordings.remove(at: index)
-            saveRecordings()
+    public func deleteRecording(id: String) throws {
+        guard let index = recordings.firstIndex(where: { $0.id == id }) else { return }
+        let recording = recordings[index]
+        do {
+            try FileManager.default.removeItem(atPath: recording.filePath)
+        } catch {
+            srsLogger.error("Failed to delete recording file \(recording.filePath): \(error.localizedDescription)")
+            lastError = "Failed to delete recording: \(error.localizedDescription)"
+            throw error
         }
+        recordings.remove(at: index)
+        saveRecordings()
     }
 
     /// Delete recordings older than a given date
     public func deleteRecordingsOlderThan(_ date: Date) {
         let toDelete = recordings.filter { $0.startTime < date }
+        var failedIds: Set<String> = []
         for recording in toDelete {
-            try? FileManager.default.removeItem(atPath: recording.filePath)
+            do {
+                try FileManager.default.removeItem(atPath: recording.filePath)
+            } catch {
+                failedIds.insert(recording.id)
+                srsLogger.warning("Failed to delete recording file \(recording.filePath): \(error.localizedDescription)")
+            }
         }
-        recordings.removeAll { $0.startTime < date }
+        // Only remove entries whose files were successfully deleted
+        recordings.removeAll { $0.startTime < date && !failedIds.contains($0.id) }
+        if !failedIds.isEmpty {
+            lastError = "Failed to delete \(failedIds.count) recording(s) — files may be locked or missing"
+        }
         saveRecordings()
     }
 
@@ -261,16 +292,24 @@ public class SessionRecordingService: ObservableObject {
 
     private func loadRecordings() {
         let metadataURL = recordingsDirectory.appendingPathComponent("recordings.json")
-        guard let data = try? Data(contentsOf: metadataURL),
-              let decoded = try? JSONDecoder().decode([RecordingMetadata].self, from: data)
-        else { return }
-        recordings = decoded
+        guard FileManager.default.fileExists(atPath: metadataURL.path) else { return }
+        do {
+            let data = try Data(contentsOf: metadataURL)
+            recordings = try JSONDecoder().decode([RecordingMetadata].self, from: data)
+        } catch {
+            srsLogger.debug("Could not load recordings metadata: \(error.localizedDescription)")
+        }
     }
 
     private func saveRecordings() {
         let metadataURL = recordingsDirectory.appendingPathComponent("recordings.json")
-        guard let data = try? JSONEncoder().encode(recordings) else { return }
-        try? data.write(to: metadataURL)
+        do {
+            let data = try JSONEncoder().encode(recordings)
+            try data.write(to: metadataURL, options: .atomic)
+        } catch {
+            srsLogger.error("Failed to save recordings metadata: \(error.localizedDescription)")
+            lastError = "Failed to save recording metadata: \(error.localizedDescription)"
+        }
     }
 }
 

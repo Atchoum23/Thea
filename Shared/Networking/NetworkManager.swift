@@ -326,7 +326,7 @@ public final class NetworkManager: ObservableObject {
                     if httpResponse.statusCode == 429 {
                         // Rate limited - wait and retry
                         let retryAfter = httpResponse.value(forHTTPHeaderField: "Retry-After").flatMap { Double($0) } ?? 60
-                        try await Task.sleep(for: .seconds(retryAfter))
+                        try await Task.sleep(nanoseconds: UInt64(retryAfter * 1_000_000_000))
                         attempt += 1
                         continue
                     }
@@ -346,7 +346,7 @@ public final class NetworkManager: ObservableObject {
 
                 if attempt <= retryPolicy.maxRetries, shouldRetry(error: error, policy: retryPolicy) {
                     let delay = retryPolicy.delay(for: attempt)
-                    try await Task.sleep(for: .seconds(delay))
+                    try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
                     logger.info("Retrying request (attempt \(attempt)/\(retryPolicy.maxRetries))")
                 }
             }

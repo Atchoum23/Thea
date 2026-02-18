@@ -51,7 +51,6 @@ public final class CognitiveDashboardViewModel {
 
     // MARK: - Task Breakdown Methods
 
-    /// Sends the current task input to the breakdown service and refreshes the history.
     public func breakdownTask() async {
         guard !taskInput.isEmpty else { return }
 
@@ -69,12 +68,10 @@ public final class CognitiveDashboardViewModel {
         isLoading = false
     }
 
-    /// Fetches the most recent task breakdowns from the service.
     public func loadBreakdownHistory() async {
         breakdownHistory = await taskBreakdownService.getBreakdownHistory(limit: 10)
     }
 
-    /// Marks a subtask as completed and refreshes the breakdown state.
     public func completeSubtask(breakdownId: UUID, subtaskId: UUID) async {
         do {
             try await taskBreakdownService.completeSubtask(breakdownId: breakdownId, subtaskId: subtaskId)
@@ -91,7 +88,6 @@ public final class CognitiveDashboardViewModel {
 
     // MARK: - Pomodoro Methods
 
-    /// Starts a Pomodoro session and plants a focus tree for work sessions.
     public func startPomodoro(type: PomodoroSession.SessionType, taskName: String? = nil) async {
         errorMessage = nil
 
@@ -113,7 +109,6 @@ public final class CognitiveDashboardViewModel {
         }
     }
 
-    /// Ends the active Pomodoro session and updates the focus forest accordingly.
     public func endPomodoro(completed: Bool) async {
         errorMessage = nil
 
@@ -123,10 +118,14 @@ public final class CognitiveDashboardViewModel {
 
             // Update forest if work session
             if session.type == .work, let minutes = session.actualMinutes {
-                if completed {
-                    try? await forestService.updateTreeGrowth(minutes: minutes)
-                } else {
-                    try? await forestService.killCurrentTree()
+                do {
+                    if completed {
+                        try await forestService.updateTreeGrowth(minutes: minutes)
+                    } else {
+                        try await forestService.killCurrentTree()
+                    }
+                } catch {
+                    errorMessage = "Forest update failed: \(error.localizedDescription)"
                 }
             }
 
@@ -137,7 +136,6 @@ public final class CognitiveDashboardViewModel {
         }
     }
 
-    /// Refreshes the active session, history, and today's stats from the timer service.
     public func loadPomodoroData() async {
         activePomodoro = await timerService.getActiveSession()
         pomodoroHistory = await timerService.getSessionHistory(limit: 10)
@@ -146,14 +144,12 @@ public final class CognitiveDashboardViewModel {
 
     // MARK: - Focus Forest Methods
 
-    /// Refreshes the forest, current tree, and forest statistics.
     public func loadForestData() async {
         forest = await forestService.getForest()
         currentTree = await forestService.getCurrentTree()
         forestStats = await forestService.getForestStats()
     }
 
-    /// Plants a new focus tree of the given type.
     public func plantTree(type: FocusTree.TreeType) async {
         errorMessage = nil
 
@@ -167,7 +163,6 @@ public final class CognitiveDashboardViewModel {
 
     // MARK: - Timeline Methods
 
-    /// Loads today's timeline events for the daily schedule view.
     public func loadTimelineEvents() async {
         // Generate timeline events for today
         let calendar = Calendar.current
@@ -204,7 +199,6 @@ public final class CognitiveDashboardViewModel {
 
     // MARK: - Refresh All Data
 
-    /// Reloads all dashboard data: breakdowns, Pomodoro, forest, and timeline.
     public func refreshData() async {
         isLoading = true
 

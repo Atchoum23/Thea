@@ -254,7 +254,7 @@ private struct WatchActionRow: View {
 private struct WatchActionRowLabel: View {
     let icon: String
     let label: String
-    var color = Color.watchPrimary
+    var color: Color = Color.watchPrimary
 
     var body: some View {
         HStack(spacing: WatchSpacing.sm) {

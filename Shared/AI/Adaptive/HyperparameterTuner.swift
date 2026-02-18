@@ -617,14 +617,21 @@ public final class HyperparameterTuner: ObservableObject {
             lastUpdate: lastGlobalUpdate
         )
 
-        if let data = try? JSONEncoder().encode(state) {
+        do {
+            let data = try JSONEncoder().encode(state)
             UserDefaults.standard.set(data, forKey: persistenceKey)
+        } catch {
+            logger.error("Failed to encode PersistentState: \(error.localizedDescription)")
         }
     }
 
     private func loadState() {
-        guard let data = UserDefaults.standard.data(forKey: persistenceKey),
-              let state = try? JSONDecoder().decode(PersistentState.self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: persistenceKey) else { return }
+        let state: PersistentState
+        do {
+            state = try JSONDecoder().decode(PersistentState.self, from: data)
+        } catch {
+            logger.error("Failed to decode PersistentState: \(error.localizedDescription)")
             return
         }
 

@@ -33,37 +33,13 @@ final class MLXInferenceEngine {
     /// Last error encountered
     private(set) var lastError: Error?
 
-    /// Active chat sessions with KV cache for multi-turn conversations (LRU eviction at maxCachedSessions)
+    /// Active chat sessions with KV cache for multi-turn conversations
     private var chatSessions: [UUID: ChatSession] = [:]
-
-    /// Tracks session access order for LRU eviction
-    private var sessionAccessOrder: [UUID] = []
-
-    /// Maximum cached chat sessions before LRU eviction.
-    /// Initialized from SystemCapabilityService for hardware-aware scaling.
-    private let maxCachedSessions = SystemCapabilityService.shared.maxMLXCachedSessions
 
     /// Model factory for loading models
     private let modelFactory = LLMModelFactory.shared
 
-    private var memoryPressureSource: DispatchSourceMemoryPressure?
-
-    private init() {
-        setupMemoryPressureHandler()
-    }
-
-    private func setupMemoryPressureHandler() {
-        let source = DispatchSource.makeMemoryPressureSource(eventMask: [.warning, .critical], queue: .main)
-        source.setEventHandler { [weak self] in
-            Task { @MainActor in
-                guard let self, !self.isLoading else { return }
-                print("⚠️ MLXInferenceEngine: Memory pressure detected, unloading model and clearing sessions")
-                self.unloadModel()
-            }
-        }
-        source.resume()
-        memoryPressureSource = source
-    }
+    private init() {}
 
     // MARK: - Model Loading
 
@@ -380,9 +356,6 @@ final class MLXInferenceEngine {
     ///   - systemPrompt: Optional custom system prompt (uses default if nil)
     func getChatSession(for conversationID: UUID, systemPrompt: String? = nil) async throws -> ChatSession {
         if let session = chatSessions[conversationID] {
-            // Update LRU access order
-            sessionAccessOrder.removeAll { $0 == conversationID }
-            sessionAccessOrder.append(conversationID)
             return session
         }
 
@@ -390,18 +363,10 @@ final class MLXInferenceEngine {
             throw MLXInferenceError.noModelLoaded
         }
 
-        // LRU eviction: remove least recently used session if at capacity
-        if chatSessions.count >= maxCachedSessions, let oldest = sessionAccessOrder.first {
-            chatSessions.removeValue(forKey: oldest)
-            sessionAccessOrder.removeFirst()
-            print("♻️ MLXInferenceEngine: Evicted LRU chat session")
-        }
-
         // Create session with system instructions
         let instructions = systemPrompt ?? Self.defaultSystemPrompt
         let session = ChatSession(model, instructions: instructions)
         chatSessions[conversationID] = session
-        sessionAccessOrder.append(conversationID)
         return session
     }
 
@@ -476,13 +441,11 @@ final class MLXInferenceEngine {
     /// Clear the chat history for a conversation (resets KV cache)
     func clearChatSession(for conversationID: UUID) {
         chatSessions.removeValue(forKey: conversationID)
-        sessionAccessOrder.removeAll { $0 == conversationID }
     }
 
     /// Clear all chat sessions
     func clearAllChatSessions() {
         chatSessions.removeAll()
-        sessionAccessOrder.removeAll()
     }
 
     // MARK: - Model Information
@@ -529,62 +492,31 @@ enum MLXInferenceError: LocalizedError {
 // MARK: - Generation Parameters Extension
 
 extension GenerateParameters {
-    /// Create parameters optimized for chat/assistant use.
-    /// - Parameter taskType: Optional task type to use `recommendedTemperature`. Defaults to 0.7.
-    static func chat(taskType: TaskType? = nil) -> GenerateParameters {
-        let temperature = taskType?.recommendedTemperature ?? 0.7
-        return GenerateParameters(
+    /// Create parameters optimized for chat/assistant use
+    static var chat: GenerateParameters {
+        GenerateParameters(
             maxTokens: 2048,
-            temperature: Float(temperature),
+            temperature: 0.7,
             topP: 0.9
         )
     }
 
-    /// Backward-compatible static property: chat with default temperature.
-    static var chat: GenerateParameters { chat(taskType: nil) }
-
-    /// Create parameters for deterministic/factual responses.
-    /// - Parameters:
-    ///   - model: Optional model to scale maxTokens via `ResponseLength.scaledMaxTokens(for:)`.
-    ///   - taskType: Task type for temperature (defaults to 0.15 for deterministic output).
-    static func deterministic(model: AIModel? = nil, taskType: TaskType? = nil) -> GenerateParameters {
-        let temperature = taskType?.recommendedTemperature ?? 0.15
-        let maxTokens: Int
-        if let model = model {
-            maxTokens = ResponseLength.medium.scaledMaxTokens(for: model)
-        } else {
-            maxTokens = 2048
-        }
-        return GenerateParameters(
-            maxTokens: maxTokens,
-            temperature: Float(temperature)
+    /// Create parameters for deterministic/factual responses
+    static var deterministic: GenerateParameters {
+        GenerateParameters(
+            maxTokens: 2048,
+            temperature: 0.0
         )
     }
 
-    /// Backward-compatible static property: deterministic with default parameters.
-    static var deterministic: GenerateParameters { deterministic(model: nil, taskType: nil) }
-
-    /// Create parameters for creative/diverse responses.
-    /// - Parameters:
-    ///   - model: Optional model to scale maxTokens.
-    ///   - taskType: Task type for temperature (defaults to 0.85).
-    static func creative(model: AIModel? = nil, taskType: TaskType? = nil) -> GenerateParameters {
-        let temperature = taskType?.recommendedTemperature ?? 0.85
-        let maxTokens: Int
-        if let model = model {
-            maxTokens = ResponseLength.long.scaledMaxTokens(for: model)
-        } else {
-            maxTokens = 4096
-        }
-        return GenerateParameters(
-            maxTokens: maxTokens,
-            temperature: Float(temperature),
+    /// Create parameters for creative/diverse responses
+    static var creative: GenerateParameters {
+        GenerateParameters(
+            maxTokens: 4096,
+            temperature: 1.0,
             topP: 0.95
         )
     }
-
-    /// Backward-compatible static property: creative with default parameters.
-    static var creative: GenerateParameters { creative(model: nil, taskType: nil) }
 }
 
 #endif // os(macOS)

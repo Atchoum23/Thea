@@ -18,13 +18,9 @@ public final class IntegrationsManager {
     public var visualTimerService: VisualTimerService?
     public var focusForestService: FocusForestService?
     public var careerService: CareerService?
-    public var nutritionImportCoordinator: NutritionImportCoordinator?
-    public var assessmentExportCoordinator: AssessmentExportCoordinator?
-    public var incomeAnalyticsCoordinator: IncomeAnalyticsCoordinator?
     #if os(macOS)
         public var automationEngine: AutomationEngine?
         public var browserAutomationService: BrowserAutomationService?
-        public var displayViewModel: DisplayViewModel?
     #endif
     public var taskScheduler: TaskScheduler?
     public var permissionManager: PermissionManager?
@@ -70,37 +66,6 @@ public final class IntegrationsManager {
         if featureFlags.careerEnabled {
             careerService = CareerService()
             enabledModules.insert(.career)
-        }
-
-        // Financial Module
-        if featureFlags.financialEnabled {
-            enabledModules.insert(.financial)
-        }
-
-        // Assessment Module
-        if featureFlags.assessmentEnabled {
-            assessmentExportCoordinator = AssessmentExportCoordinator()
-            enabledModules.insert(.assessment)
-        }
-
-        // Nutrition Module
-        if featureFlags.nutritionEnabled {
-            nutritionImportCoordinator = NutritionImportCoordinator()
-            enabledModules.insert(.nutrition)
-        }
-
-        // Display Module (macOS only)
-        if featureFlags.displayEnabled {
-            #if os(macOS)
-                displayViewModel = DisplayViewModel()
-                enabledModules.insert(.display)
-            #endif
-        }
-
-        // Income Module
-        if featureFlags.incomeEnabled {
-            incomeAnalyticsCoordinator = IncomeAnalyticsCoordinator()
-            enabledModules.insert(.income)
         }
 
         // Automation (ChatGPT Agent Parity)
@@ -152,26 +117,9 @@ public final class IntegrationsManager {
             permissionManager = PermissionManager()
             enabledModules.insert(.automation)
 
-        case .financial:
-            enabledModules.insert(.financial)
-
-        case .assessment:
-            assessmentExportCoordinator = AssessmentExportCoordinator()
-            enabledModules.insert(.assessment)
-
-        case .nutrition:
-            nutritionImportCoordinator = NutritionImportCoordinator()
-            enabledModules.insert(.nutrition)
-
-        case .display:
-            #if os(macOS)
-                displayViewModel = DisplayViewModel()
-                enabledModules.insert(.display)
-            #endif
-
-        case .income:
-            incomeAnalyticsCoordinator = IncomeAnalyticsCoordinator()
-            enabledModules.insert(.income)
+        case .financial, .assessment, .nutrition, .display, .income:
+            // Placeholder for future modules
+            break
         }
     }
 
@@ -208,26 +156,9 @@ public final class IntegrationsManager {
             permissionManager = nil
             enabledModules.remove(.automation)
 
-        case .financial:
-            enabledModules.remove(.financial)
-
-        case .assessment:
-            assessmentExportCoordinator = nil
-            enabledModules.remove(.assessment)
-
-        case .nutrition:
-            nutritionImportCoordinator = nil
-            enabledModules.remove(.nutrition)
-
-        case .display:
-            #if os(macOS)
-                displayViewModel = nil
-            #endif
-            enabledModules.remove(.display)
-
-        case .income:
-            incomeAnalyticsCoordinator = nil
-            enabledModules.remove(.income)
+        case .financial, .assessment, .nutrition, .display, .income:
+            // Placeholder for future modules
+            break
         }
     }
 

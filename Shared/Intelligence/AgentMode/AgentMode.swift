@@ -105,32 +105,16 @@ public final class AgentExecutionState: ObservableObject {
 
     public init() {}
 
-    /// Valid phase transitions — enforces DAG ordering to prevent invalid state jumps
-    private static let validTransitions: [AgentPhase: Set<AgentPhase>] = [
-        .gatherContext: [.takeAction, .userIntervention, .done],
-        .takeAction: [.verifyResults, .gatherContext, .userIntervention, .done],
-        .verifyResults: [.done, .takeAction, .gatherContext, .userIntervention],
-        .done: [.gatherContext], // Reset for new task only
-        .userIntervention: [.gatherContext, .takeAction, .verifyResults, .done]
-    ]
-
-    /// Transition to next phase with validation
-    public func transition(to newPhase: AgentPhase) {
-        let allowed = Self.validTransitions[phase] ?? []
-        guard allowed.contains(newPhase) else {
-            logger.warning("Invalid phase transition \(self.phase.rawValue) → \(newPhase.rawValue) — blocked")
-            return
-        }
-
-        let previousPhase = phase
-        self.phase = newPhase
-        logger.debug("Agent transitioned to phase: \(newPhase.rawValue)")
+    /// Transition to next phase
+    public func transition(to phase: AgentPhase) {
+        self.phase = phase
+        logger.debug("Agent transitioned to phase: \(phase.rawValue)")
 
         EventBus.shared.publish(StateEvent(
             source: .system,
             component: "AgentExecution",
-            previousState: previousPhase.rawValue,
-            newState: newPhase.rawValue,
+            previousState: self.phase.rawValue,
+            newState: phase.rawValue,
             reason: "Phase transition"
         ))
     }

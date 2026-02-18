@@ -79,7 +79,6 @@ public final class InferenceRelayHandler {
                     ))
                     chunkIndex += 1
 
-                case .thinkingDelta: break
                 case let .complete(message):
                     try await sendChunk(.streamComplete(
                         InferenceStreamComplete(
@@ -110,12 +109,16 @@ public final class InferenceRelayHandler {
 
         } catch {
             logger.error("Inference relay error: \(error.localizedDescription)")
-            try? await sendChunk(.streamError(
-                InferenceStreamError(
-                    requestId: request.requestId,
-                    errorDescription: error.localizedDescription
-                )
-            ))
+            do {
+                try await sendChunk(.streamError(
+                    InferenceStreamError(
+                        requestId: request.requestId,
+                        errorDescription: error.localizedDescription
+                    )
+                ))
+            } catch {
+                logger.error("Failed to send stream error chunk: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -186,7 +189,13 @@ public final class InferenceRelayHandler {
 
             // Try all providers
             for (_, provider) in ProviderRegistry.shared.allProviders {
-                let models = (try? await provider.listModels()) ?? []
+                let models: [AIModel]
+                do {
+                    models = try await provider.listModels()
+                } catch {
+                    logger.warning("Failed to list models for provider: \(error.localizedDescription)")
+                    continue
+                }
                 if models.contains(where: { $0.id == preferred }) {
                     return (provider, preferred)
                 }

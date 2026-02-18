@@ -46,8 +46,6 @@ struct WebClipperView: View {
                     }
                 }
                 .disabled(urlInput.isEmpty || clipper.isClipping)
-                .accessibilityLabel(clipper.isClipping ? "Clipping article" : "Clip article from URL")
-                .accessibilityHint("Saves the web article for offline reading")
             }
             .padding()
 
@@ -82,11 +80,7 @@ struct WebClipperView: View {
                     articleRow(article)
                         .tag(article.id)
                         .contextMenu {
-                            Button {
-                                clipper.toggleFavorite(article.id)
-                            } label: {
-                                Label(article.isFavorite ? "Remove from favorites" : "Add to favorites", systemImage: article.isFavorite ? "star.slash" : "star")
-                            }
+                            Button("Toggle Favorite") { clipper.toggleFavorite(article.id) }
                             Divider()
                             Button("Delete", role: .destructive) { clipper.deleteArticle(article) }
                         }
@@ -252,6 +246,9 @@ private struct FlowLayoutView<Data: RandomAccessCollection, Content: View>: View
     let content: (Data.Element) -> Content
 
     var body: some View {
+        var width: CGFloat = 0
+        var rows: [[Data.Element]] = [[]]
+
         // Simple horizontal wrapping
         HStack(alignment: .top, spacing: 4) {
             ForEach(Array(items.enumerated()), id: \.element) { _, item in

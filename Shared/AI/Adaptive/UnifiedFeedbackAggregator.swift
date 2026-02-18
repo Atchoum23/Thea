@@ -556,14 +556,21 @@ public final class UnifiedFeedbackAggregator: ObservableObject {
             totalEventsProcessed: totalEventsProcessed
         )
 
-        if let data = try? JSONEncoder().encode(state) {
+        do {
+            let data = try JSONEncoder().encode(state)
             UserDefaults.standard.set(data, forKey: persistenceKey)
+        } catch {
+            logger.error("Failed to encode AggregatorState: \(error.localizedDescription)")
         }
     }
 
     private func loadState() {
-        guard let data = UserDefaults.standard.data(forKey: persistenceKey),
-              let state = try? JSONDecoder().decode(AggregatorState.self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: persistenceKey) else { return }
+        let state: AggregatorState
+        do {
+            state = try JSONDecoder().decode(AggregatorState.self, from: data)
+        } catch {
+            logger.error("Failed to decode AggregatorState: \(error.localizedDescription)")
             return
         }
 

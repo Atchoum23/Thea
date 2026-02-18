@@ -458,7 +458,11 @@ public final class SmartSuggestionEngine: ObservableObject {
         // Pattern evaluation every 15 minutes
         patternMonitorTask = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(900))
+                do {
+                    try await Task.sleep(for: .seconds(900))
+                } catch {
+                    break
+                }
                 await MainActor.run {
                     self.evaluatePatternsForSuggestions()
                     self.evaluateTimeBasedSuggestions()
@@ -543,15 +547,22 @@ public final class SmartSuggestionEngine: ObservableObject {
     // MARK: - Persistence
 
     private func loadPatterns() {
-        if let data = UserDefaults.standard.data(forKey: "thea.proactive.patterns"),
-           let decoded = try? JSONDecoder().decode([LearnedUserPattern].self, from: data) {
-            patterns = decoded
+        if let data = UserDefaults.standard.data(forKey: "thea.proactive.patterns") {
+            do {
+                let decoded = try JSONDecoder().decode([LearnedUserPattern].self, from: data)
+                patterns = decoded
+            } catch {
+                logger.error("Failed to decode learned user patterns: \(error.localizedDescription)")
+            }
         }
     }
 
     private func savePatterns() {
-        if let encoded = try? JSONEncoder().encode(patterns) {
+        do {
+            let encoded = try JSONEncoder().encode(patterns)
             UserDefaults.standard.set(encoded, forKey: "thea.proactive.patterns")
+        } catch {
+            logger.error("Failed to encode learned user patterns: \(error.localizedDescription)")
         }
     }
 
@@ -574,15 +585,22 @@ public final class SmartSuggestionEngine: ObservableObject {
     }
 
     private func loadSuggestionHistory() {
-        if let data = UserDefaults.standard.data(forKey: "thea.proactive.history"),
-           let decoded = try? JSONDecoder().decode([SmartSuggestion].self, from: data) {
-            suggestionHistory = decoded
+        if let data = UserDefaults.standard.data(forKey: "thea.proactive.history") {
+            do {
+                let decoded = try JSONDecoder().decode([SmartSuggestion].self, from: data)
+                suggestionHistory = decoded
+            } catch {
+                logger.error("Failed to decode suggestion history: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveSuggestionHistory() {
-        if let encoded = try? JSONEncoder().encode(suggestionHistory) {
+        do {
+            let encoded = try JSONEncoder().encode(suggestionHistory)
             UserDefaults.standard.set(encoded, forKey: "thea.proactive.history")
+        } catch {
+            logger.error("Failed to encode suggestion history: \(error.localizedDescription)")
         }
     }
 }

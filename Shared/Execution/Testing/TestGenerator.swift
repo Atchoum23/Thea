@@ -144,7 +144,6 @@ public final class TestGenerator {
             switch chunk.type {
             case .delta(let text):
                 aiResponse += text
-            case .thinkingDelta: break
             case .complete:
                 break
             case .error(let error):

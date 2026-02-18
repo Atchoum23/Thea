@@ -22,7 +22,8 @@ import OSLog
 @MainActor
 public class ArtifactManager: ObservableObject {
     public static let shared = ArtifactManager()
-    private let logger = Logger(subsystem: "ai.thea.app", category: "ArtifactManager")
+
+    private let logger = Logger(subsystem: "com.thea.app", category: "ArtifactManager")
 
     // MARK: - Published State
 
@@ -55,7 +56,7 @@ public class ArtifactManager: ObservableObject {
         do {
             try FileManager.default.createDirectory(at: artifactsDirectory, withIntermediateDirectories: true)
         } catch {
-            logger.error("Failed to create artifacts directory: \(error.localizedDescription)")
+            logger.debug("Could not create artifacts directory: \(error.localizedDescription)")
         }
 
         loadArtifacts()
@@ -64,11 +65,12 @@ public class ArtifactManager: ObservableObject {
     // MARK: - Load/Save
 
     private func loadArtifacts() {
-        guard let data = UserDefaults.standard.data(forKey: storageKey) else { return }
-        do {
-            artifacts = try JSONDecoder().decode([Artifact].self, from: data)
-        } catch {
-            logger.error("Failed to decode artifacts from local storage: \(error.localizedDescription)")
+        if let data = UserDefaults.standard.data(forKey: storageKey) {
+            do {
+                artifacts = try JSONDecoder().decode([Artifact].self, from: data)
+            } catch {
+                logger.debug("Could not decode artifacts: \(error.localizedDescription)")
+            }
         }
 
         // Sync with cloud in background
@@ -82,7 +84,7 @@ public class ArtifactManager: ObservableObject {
             let data = try JSONEncoder().encode(artifacts)
             UserDefaults.standard.set(data, forKey: storageKey)
         } catch {
-            logger.error("Failed to encode artifacts for local storage: \(error.localizedDescription)")
+            logger.error("Failed to save artifacts: \(error.localizedDescription)")
         }
     }
 
@@ -200,11 +202,11 @@ public class ArtifactManager: ObservableObject {
         saveArtifacts()
 
         // Sync to cloud
-        Task { [weak self] in
+        Task {
             do {
-                try await self?.saveToCloud(savedArtifact)
+                try await saveToCloud(savedArtifact)
             } catch {
-                self?.logger.error("Failed to sync artifact to iCloud: \(error.localizedDescription)")
+                logger.debug("Failed to sync artifact to cloud: \(error.localizedDescription)")
             }
         }
 
@@ -232,11 +234,11 @@ public class ArtifactManager: ObservableObject {
         artifacts[index] = updated
         saveArtifacts()
 
-        Task { [weak self] in
+        Task {
             do {
-                try await self?.saveToCloud(updated)
+                try await saveToCloud(updated)
             } catch {
-                self?.logger.error("Failed to sync updated artifact to iCloud: \(error.localizedDescription)")
+                logger.debug("Failed to sync updated artifact to cloud: \(error.localizedDescription)")
             }
         }
 
@@ -277,17 +279,17 @@ public class ArtifactManager: ObservableObject {
             do {
                 try FileManager.default.removeItem(atPath: contentPath)
             } catch {
-                logger.warning("Failed to delete artifact file at \(contentPath): \(error.localizedDescription)")
+                logger.debug("Could not delete artifact file: \(error.localizedDescription)")
             }
         }
 
         saveArtifacts()
 
-        Task { [weak self] in
+        Task {
             do {
-                try await self?.deleteFromCloud(artifact)
+                try await deleteFromCloud(artifact)
             } catch {
-                self?.logger.error("Failed to delete artifact from iCloud: \(error.localizedDescription)")
+                logger.debug("Failed to delete artifact from cloud: \(error.localizedDescription)")
             }
         }
     }

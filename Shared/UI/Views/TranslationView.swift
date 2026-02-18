@@ -3,6 +3,9 @@
 // Replaces: DeepL, Google Translate, Auto Translate
 
 import SwiftUI
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "TranslationView")
 
 // MARK: - Translation View
 
@@ -333,7 +336,11 @@ struct TranslationView: View {
                 showCopiedFeedback = true
             }
             Task {
-                try? await Task.sleep(for: .seconds(2))
+                do {
+                    try await Task.sleep(for: .seconds(2))
+                } catch {
+                    logger.error("Task sleep interrupted: \(error.localizedDescription)")
+                }
                 withAnimation {
                     showCopiedFeedback = false
                 }

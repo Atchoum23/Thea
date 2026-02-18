@@ -237,12 +237,10 @@ public final class MemoryAugmentedChat {
 
     // MARK: - Statistics
 
-    /// Returns the current memory augmentation statistics, including total augmentations, injection count, and average latency.
     public func getStatistics() -> AugmentationStatistics {
         stats
     }
 
-    /// Resets all augmentation statistics to their default zero values.
     public func resetStatistics() {
         stats = AugmentationStatistics()
     }

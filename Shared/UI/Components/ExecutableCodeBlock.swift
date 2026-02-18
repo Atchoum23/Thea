@@ -9,6 +9,9 @@
 //
 
 import SwiftUI
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "ExecutableCodeBlock")
 
 // MARK: - Executable Code Block
 
@@ -129,7 +132,7 @@ public struct ExecutableCodeBlock: View {
                         Text(showCopied ? "Copied" : "Copy")
                     }
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(showCopied ? .theaSuccess : .secondary)
+                    .foregroundStyle(showCopied ? .green : .secondary)
                 }
                 .buttonStyle(.plain)
             }
@@ -159,11 +162,11 @@ public struct ExecutableCodeBlock: View {
             // Result header
             HStack {
                 Image(systemName: result.success ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundStyle(result.success ? .theaSuccess : .theaError)
+                    .foregroundStyle(result.success ? .green : .red)
 
                 Text(result.success ? "Success" : "Failed")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(result.success ? .theaSuccess : .theaError)
+                    .foregroundStyle(result.success ? .green : .red)
 
                 Spacer()
 
@@ -203,11 +206,11 @@ public struct ExecutableCodeBlock: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Error:")
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(.theaError)
+                        .foregroundStyle(.red)
 
                     Text(error)
                         .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(.theaError.opacity(0.8))
+                        .foregroundStyle(.red.opacity(0.8))
                         .textSelection(.enabled)
                 }
             }
@@ -231,7 +234,11 @@ public struct ExecutableCodeBlock: View {
         }
 
         Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(1500))
+            do {
+                try await Task.sleep(nanoseconds: 1_500_000_000)
+            } catch {
+                return
+            }
             withAnimation { showCopied = false }
         }
     }
@@ -286,12 +293,12 @@ public struct ExecutableCodeBlock: View {
     private func resultBackground(_ success: Bool) -> Color {
         if success {
             return colorScheme == .dark
-                ? Color.theaSuccess.opacity(0.1)
-                : Color.theaSuccess.opacity(0.05)
+                ? Color.green.opacity(0.1)
+                : Color.green.opacity(0.05)
         } else {
             return colorScheme == .dark
-                ? Color.theaError.opacity(0.1)
-                : Color.theaError.opacity(0.05)
+                ? Color.red.opacity(0.1)
+                : Color.red.opacity(0.05)
         }
     }
 }

@@ -35,8 +35,7 @@ public class SpotlightService: ObservableObject {
 
     // MARK: - Private Properties
 
-    // nonisolated(unsafe): CSSearchableIndex is thread-safe internally but not marked as Sendable;
-    // initialized once before concurrent access and used via actor-isolated methods
+    // CSSearchableIndex is thread-safe internally but not marked as Sendable
     nonisolated(unsafe) private let searchableIndex: CSSearchableIndex
     private let domainIdentifier = "app.thea"
 

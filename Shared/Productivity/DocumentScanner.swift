@@ -209,8 +209,16 @@ final class DocumentScanner {
         imagesDir = storageDir.appendingPathComponent("Images", isDirectory: true)
         documentsFile = storageDir.appendingPathComponent("scanned_documents.json")
 
-        try? FileManager.default.createDirectory(at: storageDir, withIntermediateDirectories: true)
-        try? FileManager.default.createDirectory(at: imagesDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: storageDir, withIntermediateDirectories: true)
+        } catch {
+            dsLogger.debug("Could not create storage directory: \(error.localizedDescription)")
+        }
+        do {
+            try FileManager.default.createDirectory(at: imagesDir, withIntermediateDirectories: true)
+        } catch {
+            dsLogger.debug("Could not create images directory: \(error.localizedDescription)")
+        }
 
         loadDocuments()
     }
@@ -433,7 +441,13 @@ final class DocumentScanner {
         ]
 
         for (pattern, currency) in patterns {
-            guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { continue }
+            let regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: pattern, options: [])
+            } catch {
+                dsLogger.debug("Invalid amount pattern: \(error.localizedDescription)")
+                continue
+            }
             let matches = regex.matches(in: text, range: NSRange(text.startIndex..., in: text))
             for match in matches {
                 guard match.numberOfRanges > 1,
@@ -485,8 +499,14 @@ final class DocumentScanner {
         ]
 
         for (pattern, format) in patterns {
-            guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
-                  let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
+            let regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+            } catch {
+                dsLogger.debug("Invalid date pattern: \(error.localizedDescription)")
+                continue
+            }
+            guard let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
                   let range = Range(match.range, in: text) else { continue }
 
             let dateStr = String(text[range])
@@ -686,7 +706,11 @@ final class DocumentScanner {
         // Clean up stored files
         for path in doc.imagePaths {
             let fileURL = imagesDir.appendingPathComponent(path)
-            try? FileManager.default.removeItem(at: fileURL)
+            do {
+                try FileManager.default.removeItem(at: fileURL)
+            } catch {
+                dsLogger.error("Failed to remove document file '\(path)': \(error.localizedDescription)")
+            }
         }
         documents.remove(at: index)
         saveDocuments()
@@ -707,7 +731,7 @@ final class DocumentScanner {
             doc.title.lowercased().contains(lower) ||
             doc.extractedText.lowercased().contains(lower) ||
             doc.category.rawValue.lowercased().contains(lower) ||
-            doc.tags.contains { $0.contains(lower) } ||
+            doc.tags.contains(where: { $0.contains(lower) }) ||
             (doc.sender?.lowercased().contains(lower) ?? false)
         }
     }

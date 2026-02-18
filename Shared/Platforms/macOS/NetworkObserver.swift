@@ -20,13 +20,11 @@
         private let pathMonitor: NWPathMonitor
         private let monitorQueue = DispatchQueue(label: "app.thea.network.monitor")
 
-        // Callbacks — written only from @MainActor context (start/stop), read from monitorQueue callback
-        // nonisolated(unsafe): set once before monitoring starts, effectively read-only during monitoring
+        // Callbacks
         nonisolated(unsafe) public var onNetworkStateChanged: ((NetworkState) -> Void)?
         nonisolated(unsafe) public var onInterfaceChanged: ((NetworkInterface) -> Void)?
 
-        // Current state — updated via handlePathUpdate which posts to @MainActor via Task
-        // nonisolated(unsafe): state is only mutated from handlePathUpdate's Task @MainActor block
+        // Current state
         nonisolated(unsafe) public private(set) var currentState: NetworkState = .unknown
         nonisolated(unsafe) public private(set) var activeInterfaces: [NetworkInterface] = []
 

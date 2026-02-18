@@ -54,15 +54,6 @@ struct iOSProjectsView: View {
 
     private var projectList: some View {
         List {
-            if projectManager.projects.isEmpty {
-                ContentUnavailableView(
-                    "No Projects",
-                    systemImage: "folder",
-                    description: Text("Create a project to organize your conversations.")
-                )
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            }
             ForEach(projectManager.projects) { project in
                 Button {
                     selectedProject = project

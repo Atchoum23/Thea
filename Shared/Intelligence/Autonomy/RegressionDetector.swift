@@ -196,12 +196,20 @@ actor RegressionDetector {
     }
 
     func loadHistory() -> [Snapshot] {
-        guard let data = try? Data(contentsOf: storagePath),
-              let snapshots = try? JSONDecoder().decode([Snapshot].self, from: data)
-        else {
+        let data: Data
+        do {
+            data = try Data(contentsOf: storagePath)
+        } catch {
+            // File may not exist yet — not an error on first run
+            logger.debug("No regression snapshot history found: \(error.localizedDescription)")
             return []
         }
-        return snapshots
+        do {
+            return try JSONDecoder().decode([Snapshot].self, from: data)
+        } catch {
+            logger.error("Failed to decode regression snapshots: \(error.localizedDescription)")
+            return []
+        }
     }
 
     func lastSnapshot() -> Snapshot? {

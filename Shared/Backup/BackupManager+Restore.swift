@@ -27,7 +27,11 @@ extension BackupManager {
         try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
 
         defer {
-            try? fileManager.removeItem(at: tempDir)
+            do {
+                try fileManager.removeItem(at: tempDir)
+            } catch {
+                logger.debug("Could not clean up temp directory: \(error.localizedDescription)")
+            }
         }
 
         // Decompress backup
@@ -48,7 +52,11 @@ extension BackupManager {
         // Backup current data before restore (safety measure)
         if options.contains(.createSafetyBackup) {
             restoreProgress = 0.3
-            _ = try? await createBackup(type: .preRestore, name: "Pre-restore safety backup")
+            do {
+                _ = try await createBackup(type: .preRestore, name: "Pre-restore safety backup")
+            } catch {
+                logger.warning("Failed to create safety backup before restore: \(error.localizedDescription)")
+            }
         }
 
         // Restore data categories

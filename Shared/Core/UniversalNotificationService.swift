@@ -8,6 +8,7 @@
 
 import CloudKit
 import Foundation
+import OSLog
 @preconcurrency import UserNotifications
 #if os(macOS)
     import AppKit
@@ -37,6 +38,8 @@ public actor UniversalNotificationService {
 
     private let recordType = "UniversalNotification"
     private let subscriptionID = "universal-notification-subscription"
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "UniversalNotificationService")
 
     // MARK: - Initialization
 
@@ -132,7 +135,11 @@ public actor UniversalNotificationService {
         record["originDevice"] = await MainActor.run { DeviceRegistry.shared.currentDevice.id }
         // Convert SendableValue dict to string dict for JSON serialization
         let stringDict = userInfo.compactMapValues { $0.stringValue }
-        record["userInfo"] = try? JSONSerialization.data(withJSONObject: stringDict)
+        do {
+            record["userInfo"] = try JSONSerialization.data(withJSONObject: stringDict)
+        } catch {
+            logger.error("Failed to serialize userInfo: \(error)")
+        }
 
         // Save to CloudKit - will trigger subscription on all devices
         _ = try await privateDatabase.save(record)
@@ -274,11 +281,15 @@ public actor UniversalNotificationService {
         _ = NotificationCategory(rawValue: categoryId) ?? .general
         _ = NotificationSound(rawValue: soundName) ?? .default
 
-        try? await deliverLocalNotificationImmediate(
-            title: title,
-            body: body,
-            category: .general
-        )
+        do {
+            try await deliverLocalNotificationImmediate(
+                title: title,
+                body: body,
+                category: .general
+            )
+        } catch {
+            logger.error("Failed to deliver local notification: \(error)")
+        }
     }
 
     // MARK: - Device Management

@@ -127,7 +127,17 @@ actor OpenClawClient {
     }
 
     private func parseGatewayMessage(_ data: Data) {
-        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return }
+        let json: [String: Any]
+        do {
+            guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                logger.error("Gateway message is not a JSON object")
+                return
+            }
+            json = parsed
+        } catch {
+            logger.error("Failed to parse gateway message: \(error.localizedDescription)")
+            return
+        }
 
         // Handle JSON-RPC notification (no id = event push)
         if let method = json["method"] as? String {
@@ -171,7 +181,11 @@ actor OpenClawClient {
         let delay = min(pow(2.0, Double(reconnectAttempts - 1)), 30.0)
         logger.info("Reconnecting in \(delay)s (attempt \(self.reconnectAttempts)/\(self.maxReconnectAttempts))")
 
-        try? await Task.sleep(for: .seconds(delay))
+        do {
+            try await Task.sleep(for: .seconds(delay))
+        } catch {
+            logger.debug("Reconnect sleep cancelled: \(error.localizedDescription)")
+        }
         startConnection()
     }
 

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 
 // MARK: - Battery Optimizer
 
@@ -14,6 +15,7 @@ import Foundation
 @MainActor
 @Observable
 public final class BatteryOptimizer {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "BatteryOptimizer")
     public static let shared = BatteryOptimizer()
 
     // MARK: - Dependencies
@@ -45,10 +47,13 @@ public final class BatteryOptimizer {
     // MARK: - Initialization
 
     private init() {
-        if let data = defaults.data(forKey: configKey),
-           let config = try? JSONDecoder().decode(BatteryOptimizerConfiguration.self, from: data)
-        {
-            configuration = config
+        if let data = defaults.data(forKey: configKey) {
+            do {
+                configuration = try JSONDecoder().decode(BatteryOptimizerConfiguration.self, from: data)
+            } catch {
+                logger.error("BatteryOptimizer: failed to decode battery optimizer configuration: \(error.localizedDescription)")
+                configuration = BatteryOptimizerConfiguration()
+            }
         } else {
             configuration = BatteryOptimizerConfiguration()
         }
@@ -58,8 +63,11 @@ public final class BatteryOptimizer {
     }
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             defaults.set(data, forKey: configKey)
+        } catch {
+            logger.error("BatteryOptimizer: failed to encode battery optimizer configuration: \(error.localizedDescription)")
         }
     }
 

@@ -350,16 +350,27 @@ public final class VisionIntelligence: ObservableObject {
         isProcessing = true
         defer { isProcessing = false }
 
-        // Run multiple analyses in parallel
-        async let textResult = try? recognizeText(from: imageData)
-        async let objectsResult = try? detectObjects(from: imageData)
-        async let facesResult = try? detectFaces(from: imageData)
-        async let barcodesResult = try? detectBarcodes(from: imageData)
-
-        let text = await textResult
-        let objects = await objectsResult ?? []
-        let faces = await facesResult ?? []
-        let barcodes = await barcodesResult ?? []
+        // Run analyses (sequentially to allow proper error logging)
+        let text: TextRecognitionResult?
+        do { text = try await recognizeText(from: imageData) } catch {
+            logger.debug("Text recognition failed: \(error.localizedDescription)")
+            text = nil
+        }
+        let objects: [DetectedObject]
+        do { objects = try await detectObjects(from: imageData) } catch {
+            logger.debug("Object detection failed: \(error.localizedDescription)")
+            objects = []
+        }
+        let faces: [DetectedFace]
+        do { faces = try await detectFaces(from: imageData) } catch {
+            logger.debug("Face detection failed: \(error.localizedDescription)")
+            faces = []
+        }
+        let barcodes: [DetectedBarcode]
+        do { barcodes = try await detectBarcodes(from: imageData) } catch {
+            logger.debug("Barcode detection failed: \(error.localizedDescription)")
+            barcodes = []
+        }
 
         // Build analysis summary
         var summary = ""

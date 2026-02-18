@@ -235,19 +235,25 @@ public final class ShareExtensionManager: ObservableObject {
         var existing: [SharedContent] = []
 
         // Load existing content
-        if FileManager.default.fileExists(atPath: sharedDataURL.path),
-           let data = try? Data(contentsOf: sharedDataURL),
-           let decoded = try? JSONDecoder().decode([SharedContent].self, from: data)
-        {
-            existing = decoded
+        if FileManager.default.fileExists(atPath: sharedDataURL.path) {
+            do {
+                let data = try Data(contentsOf: sharedDataURL)
+                let decoded = try JSONDecoder().decode([SharedContent].self, from: data)
+                existing = decoded
+            } catch {
+                // Silent failure for extension context - can't log in nonisolated context
+            }
         }
 
         // Add new content
         existing.append(content)
 
         // Save
-        if let data = try? JSONEncoder().encode(existing) {
-            try? data.write(to: sharedDataURL)
+        do {
+            let data = try JSONEncoder().encode(existing)
+            try data.write(to: sharedDataURL)
+        } catch {
+            // Silent failure for extension context - can't log in nonisolated context
         }
     }
 
@@ -544,14 +550,22 @@ public class ActionExtensionHandler {
 
         // Handle different content types
         if provider.hasItemConformingToTypeIdentifier("public.plain-text") {
-            if let text = try? await provider.loadItem(forTypeIdentifier: "public.plain-text") as? String {
-                return SharedContent(type: .text, text: text)
+            do {
+                if let text = try await provider.loadItem(forTypeIdentifier: "public.plain-text") as? String {
+                    return SharedContent(type: .text, text: text)
+                }
+            } catch {
+                // Silent failure - extension context
             }
         }
 
         if provider.hasItemConformingToTypeIdentifier("public.url") {
-            if let url = try? await provider.loadItem(forTypeIdentifier: "public.url") as? URL {
-                return SharedContent(type: .url, url: url.absoluteString)
+            do {
+                if let url = try await provider.loadItem(forTypeIdentifier: "public.url") as? URL {
+                    return SharedContent(type: .url, url: url.absoluteString)
+                }
+            } catch {
+                // Silent failure - extension context
             }
         }
 

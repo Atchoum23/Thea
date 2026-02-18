@@ -12,7 +12,7 @@
  * TV-optimized with spatial navigation.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useFocusable, FocusContext } from '@noriginmedia/norigin-spatial-navigation';
 import { theaOrchestrator, OrchestratorState, TheaNotification } from '../../services/core/TheaOrchestrator';
 import { traktCalendarService, TraktCalendarItem } from '../../services/trakt/TraktCalendarService';

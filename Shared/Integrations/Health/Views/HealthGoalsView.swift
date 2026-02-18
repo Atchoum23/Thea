@@ -1,4 +1,5 @@
 import Charts
+import OSLog
 import SwiftUI
 
 /// Health goal setting and tracking view
@@ -53,7 +54,7 @@ public struct HealthGoalsView: View {
                 VStack(spacing: 4) {
                     Text("\(viewModel.totalGoals)")
                         .font(.system(size: 36, weight: .bold))
-                        .foregroundStyle(Color.theaInfo)
+                        .foregroundStyle(.blue)
 
                     Text("Total Goals")
                         .font(.caption)
@@ -66,7 +67,7 @@ public struct HealthGoalsView: View {
                 VStack(spacing: 4) {
                     Text("\(viewModel.activeGoals.count)")
                         .font(.system(size: 36, weight: .bold))
-                        .foregroundStyle(Color.theaSuccess)
+                        .foregroundStyle(.green)
 
                     Text("Active")
                         .font(.caption)
@@ -79,7 +80,7 @@ public struct HealthGoalsView: View {
                 VStack(spacing: 4) {
                     Text("\(Int(viewModel.completionRate))%")
                         .font(.system(size: 36, weight: .bold))
-                        .foregroundStyle(Color.theaWarning)
+                        .foregroundStyle(.orange)
 
                     Text("Completion")
                         .font(.caption)
@@ -110,7 +111,7 @@ public struct HealthGoalsView: View {
                         RoundedRectangle(cornerRadius: 4)
                             .fill(
                                 LinearGradient(
-                                    colors: [Color.theaInfo, Color.theaSuccess],
+                                    colors: [.blue, .green],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
@@ -168,7 +169,7 @@ public struct HealthGoalsView: View {
                     // Would navigate to full list
                 }
                 .font(.caption)
-                .foregroundStyle(Color.theaInfo)
+                .foregroundStyle(.blue)
                 .padding(.horizontal)
             }
         }
@@ -308,7 +309,7 @@ private struct GoalCard: View {
                             systemImage: deadline.timeIntervalSinceNow > 0 ? "calendar" : "exclamationmark.triangle"
                         )
                         .font(.caption)
-                        .foregroundStyle(deadline.timeIntervalSinceNow > 0 ? Color.secondary : Color.theaError)
+                        .foregroundStyle(deadline.timeIntervalSinceNow > 0 ? Color.secondary : Color.red)
                     }
                 }
             }
@@ -353,7 +354,7 @@ private struct MilestoneRow: View {
         HStack(spacing: 8) {
             Image(systemName: milestone.isCompleted ? "checkmark.circle.fill" : "circle")
                 .font(.caption)
-                .foregroundStyle(milestone.isCompleted ? Color.theaSuccess : .secondary)
+                .foregroundStyle(milestone.isCompleted ? .green : .secondary)
 
             Text(milestone.title)
                 .font(.caption)
@@ -380,7 +381,7 @@ private struct CompletedGoalCard: View {
         HStack(spacing: 12) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.title2)
-                .foregroundStyle(Color.theaSuccess)
+                .foregroundStyle(.green)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(goal.title)
@@ -442,7 +443,7 @@ private struct SuggestionCard: View {
             } label: {
                 Image(systemName: "plus.circle.fill")
                     .font(.title2)
-                    .foregroundStyle(Color.theaInfo)
+                    .foregroundStyle(.blue)
             }
         }
         .padding()
@@ -557,10 +558,10 @@ public struct HealthGoal: Identifiable, Sendable, Codable {
     }
 
     public var progressColor: Color {
-        if progress >= 1.0 { return .theaSuccess }
-        if progress >= 0.75 { return .theaInfo }
-        if progress >= 0.5 { return .theaWarning }
-        return .theaWarning
+        if progress >= 1.0 { return .green }
+        if progress >= 0.75 { return .blue }
+        if progress >= 0.5 { return .yellow }
+        return .orange
     }
 
     public init(
@@ -619,11 +620,11 @@ public enum GoalCategory: String, CaseIterable, Sendable, Codable {
 
     public var color: Color {
         switch self {
-        case .sleep: .theaInfo
-        case .activity: .theaSuccess
-        case .nutrition: .theaWarning
+        case .sleep: .blue
+        case .activity: .green
+        case .nutrition: .orange
         case .weight: .purple
-        case .heart: .theaError
+        case .heart: .red
         case .mindfulness: .indigo
         case .general: .pink
         }
@@ -676,6 +677,7 @@ public struct GoalSuggestion: Identifiable, Sendable {
 @MainActor
 @Observable
 final class HealthGoalsViewModel {
+    private let logger = Logger(subsystem: "com.thea.app", category: "HealthGoalsViewModel")
     var activeGoals: [HealthGoal] = []
     var completedGoals: [HealthGoal] = []
     var suggestions: [GoalSuggestion] = []
@@ -734,15 +736,19 @@ final class HealthGoalsViewModel {
 
     private func loadPersistedGoalsAndRefresh() async {
         // Load persisted goals from UserDefaults
-        if let data = UserDefaults.standard.data(forKey: Self.goalsKey),
-           let saved = try? JSONDecoder().decode([HealthGoal].self, from: data)
-        {
-            activeGoals = saved
+        if let data = UserDefaults.standard.data(forKey: Self.goalsKey) {
+            do {
+                activeGoals = try JSONDecoder().decode([HealthGoal].self, from: data)
+            } catch {
+                logger.debug("Could not load active goals: \(error.localizedDescription)")
+            }
         }
-        if let data = UserDefaults.standard.data(forKey: Self.completedGoalsKey),
-           let saved = try? JSONDecoder().decode([HealthGoal].self, from: data)
-        {
-            completedGoals = saved
+        if let data = UserDefaults.standard.data(forKey: Self.completedGoalsKey) {
+            do {
+                completedGoals = try JSONDecoder().decode([HealthGoal].self, from: data)
+            } catch {
+                logger.debug("Could not load completed goals: \(error.localizedDescription)")
+            }
         }
 
         // Update current values from HealthKit if available
@@ -763,11 +769,14 @@ final class HealthGoalsViewModel {
                     let sleepStart = Calendar.current.date(byAdding: .hour, value: -30, to: Calendar.current.startOfDay(for: today)) ?? today
                     let sleepEnd = Calendar.current.date(byAdding: .hour, value: 12, to: Calendar.current.startOfDay(for: today)) ?? today
                     let sleepRange = DateInterval(start: sleepStart, end: sleepEnd)
-                    if let records = try? await healthKitService.fetchSleepData(for: sleepRange),
-                       let lastRecord = records.last
-                    {
-                        let hours = Int(lastRecord.endDate.timeIntervalSince(lastRecord.startDate) / 3600)
-                        activeGoals[index].currentValue = hours
+                    do {
+                        let records = try await healthKitService.fetchSleepData(for: sleepRange)
+                        if let lastRecord = records.last {
+                            let hours = Int(lastRecord.endDate.timeIntervalSince(lastRecord.startDate) / 3600)
+                            activeGoals[index].currentValue = hours
+                        }
+                    } catch {
+                        logger.debug("Could not fetch sleep data: \(error.localizedDescription)")
                     }
                 default:
                     break
@@ -834,11 +843,17 @@ final class HealthGoalsViewModel {
     }
 
     private func persistGoals() {
-        if let data = try? JSONEncoder().encode(activeGoals) {
+        do {
+            let data = try JSONEncoder().encode(activeGoals)
             UserDefaults.standard.set(data, forKey: Self.goalsKey)
+        } catch {
+            logger.debug("Could not persist active goals: \(error.localizedDescription)")
         }
-        if let data = try? JSONEncoder().encode(completedGoals) {
+        do {
+            let data = try JSONEncoder().encode(completedGoals)
             UserDefaults.standard.set(data, forKey: Self.completedGoalsKey)
+        } catch {
+            logger.debug("Could not persist completed goals: \(error.localizedDescription)")
         }
     }
 }

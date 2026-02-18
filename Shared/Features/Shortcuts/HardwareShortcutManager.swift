@@ -3,8 +3,9 @@
 // macOS: Function keys (F5/Microphone), global hotkeys
 // iOS: Action button integration via ActionButtonHandler
 
-import Foundation
 import Combine
+import Foundation
+import OSLog
 #if os(macOS)
 import AppKit
 import Carbon.HIToolbox
@@ -108,6 +109,8 @@ struct ShortcutConfig: Identifiable, Codable, Sendable {
 @Observable
 final class HardwareShortcutManager {
     static let shared = HardwareShortcutManager()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "HardwareShortcutManager")
 
     // State
     private(set) var isMonitoring = false
@@ -276,18 +279,24 @@ final class HardwareShortcutManager {
     // MARK: - Persistence
 
     private func loadShortcuts() {
-        guard let data = UserDefaults.standard.data(forKey: "hardwareShortcuts"),
-              let shortcuts = try? JSONDecoder().decode([ShortcutConfig].self, from: data) else {
-            // Load defaults
+        guard let data = UserDefaults.standard.data(forKey: "hardwareShortcuts") else {
             registeredShortcuts = getDefaultShortcuts()
             return
         }
-        registeredShortcuts = shortcuts
+        do {
+            registeredShortcuts = try JSONDecoder().decode([ShortcutConfig].self, from: data)
+        } catch {
+            logger.error("Failed to decode hardware shortcuts: \(error.localizedDescription)")
+            registeredShortcuts = getDefaultShortcuts()
+        }
     }
 
     private func saveShortcuts() {
-        if let data = try? JSONEncoder().encode(registeredShortcuts) {
+        do {
+            let data = try JSONEncoder().encode(registeredShortcuts)
             UserDefaults.standard.set(data, forKey: "hardwareShortcuts")
+        } catch {
+            logger.error("Failed to encode hardware shortcuts: \(error.localizedDescription)")
         }
     }
 }

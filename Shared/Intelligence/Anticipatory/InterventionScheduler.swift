@@ -134,15 +134,21 @@ public final class InterventionScheduler {
     }
 
     private func loadLearnedTimes() {
-        if let data = UserDefaults.standard.data(forKey: "InterventionOptimalTimes"),
-           let decoded = try? JSONDecoder().decode([String: [Int]].self, from: data) {
-            learnedOptimalTimes = decoded
+        if let data = UserDefaults.standard.data(forKey: "InterventionOptimalTimes") {
+            do {
+                learnedOptimalTimes = try JSONDecoder().decode([String: [Int]].self, from: data)
+            } catch {
+                logger.error("Failed to decode intervention optimal times: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveLearnedTimes() {
-        if let encoded = try? JSONEncoder().encode(learnedOptimalTimes) {
+        do {
+            let encoded = try JSONEncoder().encode(learnedOptimalTimes)
             UserDefaults.standard.set(encoded, forKey: "InterventionOptimalTimes")
+        } catch {
+            logger.error("Failed to encode intervention optimal times: \(error.localizedDescription)")
         }
     }
 }

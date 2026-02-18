@@ -11,7 +11,6 @@
 #if os(iOS)
 import UIKit
 import Combine
-import NaturalLanguage
 import os.log
 
 // MARK: - Keyboard State
@@ -197,43 +196,21 @@ public final class TheaKeyboardController: ObservableObject {
         }
     }
 
-    /// Perform AI action on selected text via App Group shared container
+    /// Perform AI action on selected text
     public func performAIAction(_ action: KeyboardAIAction) async -> String? {
         guard let selectedText = textDocumentProxy?.selectedText,
               !selectedText.isEmpty else {
+            // If no selection, use current paragraph or all text
             return nil
         }
 
         showingAIActions = false
+
+        // This would connect to Thea's AI providers
+        // For now, return placeholder
         logger.info("AI action requested: \(action.rawValue) on text: \(selectedText.prefix(50))...")
 
-        // Queue the AI request via shared App Group UserDefaults
-        // The main Thea app processes queued requests on next launch
-        guard let sharedDefaults = UserDefaults(suiteName: "group.app.theathe") else {
-            logger.warning("Could not access shared App Group defaults")
-            return nil
-        }
-
-        let requestId = UUID().uuidString
-        let request: [String: String] = [
-            "id": requestId,
-            "action": action.rawValue,
-            "text": String(selectedText.prefix(5000)),
-            "timestamp": ISO8601DateFormatter().string(from: Date())
-        ]
-
-        // Store the request for the main app to process
-        var pending = sharedDefaults.array(forKey: "keyboard.ai.pendingRequests") as? [[String: String]] ?? []
-        pending.append(request)
-        sharedDefaults.set(pending, forKey: "keyboard.ai.pendingRequests")
-
-        // Check if a previous result is available for this action+text combo
-        let cacheKey = "keyboard.ai.cache.\(action.rawValue).\(selectedText.hashValue)"
-        if let cached = sharedDefaults.string(forKey: cacheKey) {
-            return cached
-        }
-
-        return nil
+        return nil // AI integration would happen here
     }
 
     /// Get current layout rows
@@ -498,49 +475,25 @@ actor KeyboardPredictionEngine {
         self.secondaryLanguage = secondaryLanguage
     }
 
-    func getPredictions(for input: String, context _: String?, maxResults: Int) async -> [String] {
+    func getPredictions(for input: String, context: String?, maxResults: Int) async -> [String] {
         guard !input.isEmpty else { return [] }
 
-        let checker = UITextChecker()
-        let languageCode = primaryLanguage.rawValue
-        let range = NSRange(location: 0, length: input.utf16.count)
+        // This would integrate with:
+        // 1. Local word frequency dictionary
+        // 2. User's learned words
+        // 3. Contextual ML model
+        // 4. Thea's AI for smart completions
 
-        // Get completions from UITextChecker (Apple's built-in autocomplete)
-        let completions = checker.completions(
-            forPartialWordRange: range,
-            in: input,
-            language: languageCode
-        ) ?? []
-
-        var results = Array(completions.prefix(maxResults))
-
-        // Also check secondary language completions
-        if let secondary = secondaryLanguage {
-            let secondaryCompletions = checker.completions(
-                forPartialWordRange: range,
-                in: input,
-                language: secondary.rawValue
-            ) ?? []
-            for completion in secondaryCompletions.prefix(max(1, maxResults - results.count)) {
-                if !results.contains(completion) {
-                    results.append(completion)
-                }
-            }
-        }
-
-        return Array(results.prefix(maxResults))
+        // Placeholder implementation
+        return []
     }
 
     func detectLanguage(text: String) async -> KeyboardLanguage? {
         guard !text.isEmpty else { return nil }
 
-        // Use rawValue mapping: KeyboardLanguage cases match BCP-47 language codes
-        let recognizer = NLLanguageRecognizer()
-        recognizer.processString(text)
-        guard let dominant = recognizer.dominantLanguage else { return nil }
-
-        // Map NLLanguage raw value to KeyboardLanguage
-        return KeyboardLanguage.allCases.first { $0.rawValue == dominant.rawValue }
+        // Use NLLanguageRecognizer for language detection
+        // This would be more sophisticated in production
+        return nil
     }
 
     func updateLanguages(primary: KeyboardLanguage, secondary: KeyboardLanguage?) {

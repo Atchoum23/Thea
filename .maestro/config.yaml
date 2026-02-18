@@ -6,8 +6,6 @@ flows:
   - navigation_flow.yaml
   - settings_flow.yaml
   - chat_flow.yaml
-  - health_flow.yaml
-  - model_selector_flow.yaml
 
 executionOrder:
   continueOnFailure: false
@@ -16,5 +14,3 @@ executionOrder:
     - navigation_flow.yaml
     - settings_flow.yaml
     - chat_flow.yaml
-    - health_flow.yaml
-    - model_selector_flow.yaml

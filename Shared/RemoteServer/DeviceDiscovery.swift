@@ -5,6 +5,7 @@
 import Foundation
 import Network
 import Combine
+import OSLog
 #if os(iOS)
 import UIKit
 #endif
@@ -65,6 +66,8 @@ struct BonjourDiscoveredDevice: Identifiable, Codable, Sendable, Hashable {
 @Observable
 final class DeviceDiscoveryService {
     static let shared = DeviceDiscoveryService()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "DeviceDiscovery")
 
     // Service type for Thea discovery
     static let serviceType = "_thea._tcp"
@@ -282,7 +285,11 @@ final class DeviceDiscoveryService {
 
         // Timeout after 5 seconds
         Task {
-            try? await Task.sleep(for: .seconds(5))
+            do {
+                try await Task.sleep(for: .seconds(5))
+            } catch {
+                // Cancellation is expected
+            }
             connection.cancel()
         }
     }
@@ -316,7 +323,11 @@ final class DeviceDiscoveryService {
 
         // Set new timeout - mark offline after 60 seconds without update
         deviceTimeouts[device.id] = Task {
-            try? await Task.sleep(for: .seconds(60))
+            do {
+                try await Task.sleep(for: .seconds(60))
+            } catch {
+                return // Task was cancelled
+            }
             if let index = discoveredDevices.firstIndex(where: { $0.id == device.id }) {
                 var updated = discoveredDevices[index]
                 updated = BonjourDiscoveredDevice(

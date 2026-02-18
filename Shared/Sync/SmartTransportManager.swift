@@ -160,7 +160,11 @@ actor SmartTransportManager {
 
             // Continuous monitoring loop
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(15))
+                do {
+                    try await Task.sleep(for: .seconds(15))
+                } catch {
+                    break
+                }
                 guard !Task.isCancelled else { break }
 
                 await self.healthCheck()
@@ -530,7 +534,11 @@ actor SmartTransportManager {
 
             // Schedule timeout on a detached task
             Task.detached { [guard_] in
-                try? await Task.sleep(for: .seconds(timeout))
+                do {
+                    try await Task.sleep(for: .seconds(timeout))
+                } catch {
+                    // Sleep cancelled — connection resolved before timeout
+                }
                 guard guard_.tryResume() else { return }
                 connection.cancel()
                 continuation.resume(returning: nil)
@@ -541,7 +549,6 @@ actor SmartTransportManager {
     }
 
     /// Thread-safe one-shot guard for continuation resumption
-    // @unchecked Sendable: thread-safe via NSLock — single-shot guard for continuation resumption
     private final class ContinuationGuard: @unchecked Sendable {
         private let lock = NSLock()
         private var resumed = false
@@ -585,7 +592,7 @@ actor SmartTransportManager {
                                    &hostname, socklen_t(hostname.count),
                                    nil, 0, NI_NUMERICHOST) == 0 {
                         let ip = hostname.withUnsafeBufferPointer { buf in
-                            String(decoding: buf.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }, as: UTF8.self)
+                            String(decoding: buf.prefix(while: { $0 != 0 }).map { UInt8(bitPattern: $0) }, as: UTF8.self)
                         }
                         address = ip
                         isLinkLocal = ip.hasPrefix("169.254.")

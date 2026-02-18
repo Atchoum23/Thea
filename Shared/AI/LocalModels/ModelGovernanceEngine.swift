@@ -441,11 +441,15 @@ final class ModelGovernanceEngine {
         // Get disk space
         var availableDiskGB: Double = 50.0
         var totalDiskGB: Double = 500.0
-        if let attributes = try? fileManager.attributesOfFileSystem(forPath: NSHomeDirectory()),
-           let freeSpace = attributes[.systemFreeSize] as? Int64,
-           let totalSpace = attributes[.systemSize] as? Int64 {
-            availableDiskGB = Double(freeSpace) / 1_000_000_000
-            totalDiskGB = Double(totalSpace) / 1_000_000_000
+        do {
+            let attributes = try fileManager.attributesOfFileSystem(forPath: NSHomeDirectory())
+            if let freeSpace = attributes[.systemFreeSize] as? Int64,
+               let totalSpace = attributes[.systemSize] as? Int64 {
+                availableDiskGB = Double(freeSpace) / 1_000_000_000
+                totalDiskGB = Double(totalSpace) / 1_000_000_000
+            }
+        } catch {
+            logger.error("Failed to read file system attributes: \(error.localizedDescription)")
         }
 
         // Get thermal state
@@ -508,7 +512,11 @@ final class ModelGovernanceEngine {
                 let interval = await adaptiveOrchestrator.recommendedInterval()
                 logger.debug("Next governance cycle in \(Int(interval)) seconds (adaptive)")
 
-                try? await Task.sleep(for: .seconds(interval))
+                do {
+                    try await Task.sleep(for: .seconds(interval))
+                } catch {
+                    break
+                }
 
                 await performGovernanceCycle()
             }
@@ -658,38 +666,56 @@ final class ModelGovernanceEngine {
 
     private func loadPersistedState() {
         // Load Supra-Model state
-        if let data = UserDefaults.standard.data(forKey: supraModelKey),
-           let state = try? JSONDecoder().decode(SupraModelState.self, from: data) {
-            supraModel = state
+        if let data = UserDefaults.standard.data(forKey: supraModelKey) {
+            do {
+                supraModel = try JSONDecoder().decode(SupraModelState.self, from: data)
+            } catch {
+                logger.error("Failed to decode SupraModelState: \(error.localizedDescription)")
+            }
         }
 
         // Load fleet state
-        if let data = UserDefaults.standard.data(forKey: fleetStateKey),
-           let fleet = try? JSONDecoder().decode(ModelFleet.self, from: data) {
-            modelFleet = fleet
+        if let data = UserDefaults.standard.data(forKey: fleetStateKey) {
+            do {
+                modelFleet = try JSONDecoder().decode(ModelFleet.self, from: data)
+            } catch {
+                logger.error("Failed to decode ModelFleet: \(error.localizedDescription)")
+            }
         }
 
         // Load policy
-        if let data = UserDefaults.standard.data(forKey: policyKey),
-           let loadedPolicy = try? JSONDecoder().decode(GovernanceEnginePolicy.self, from: data) {
-            policy = loadedPolicy
+        if let data = UserDefaults.standard.data(forKey: policyKey) {
+            do {
+                policy = try JSONDecoder().decode(GovernanceEnginePolicy.self, from: data)
+            } catch {
+                logger.error("Failed to decode GovernanceEnginePolicy: \(error.localizedDescription)")
+            }
         }
     }
 
     private func persistState() {
         // Save Supra-Model state
-        if let data = try? JSONEncoder().encode(supraModel) {
+        do {
+            let data = try JSONEncoder().encode(supraModel)
             UserDefaults.standard.set(data, forKey: supraModelKey)
+        } catch {
+            logger.error("Failed to encode SupraModelState: \(error.localizedDescription)")
         }
 
         // Save fleet state
-        if let data = try? JSONEncoder().encode(modelFleet) {
+        do {
+            let data = try JSONEncoder().encode(modelFleet)
             UserDefaults.standard.set(data, forKey: fleetStateKey)
+        } catch {
+            logger.error("Failed to encode ModelFleet: \(error.localizedDescription)")
         }
 
         // Save policy
-        if let data = try? JSONEncoder().encode(policy) {
+        do {
+            let data = try JSONEncoder().encode(policy)
             UserDefaults.standard.set(data, forKey: policyKey)
+        } catch {
+            logger.error("Failed to encode GovernanceEnginePolicy: \(error.localizedDescription)")
         }
     }
 

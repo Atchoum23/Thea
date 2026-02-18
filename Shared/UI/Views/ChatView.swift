@@ -1,6 +1,5 @@
 @preconcurrency import SwiftData
 import SwiftUI
-import UniformTypeIdentifiers
 
 // MARK: - Unified Chat View
 
@@ -13,7 +12,6 @@ struct ChatView: View {
     @State var chatManager = ChatManager.shared
     @State private var planManager = PlanManager.shared
     @State var orchestrator = TheaAgentOrchestrator.shared
-    @State private var offlineQueue = OfflineQueueService.shared
     @State var inputText = ""
     @State var selectedProvider: AIProvider?
     @State var showingError: Error?
@@ -101,24 +99,6 @@ struct ChatView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Offline banner — shown when device has no network connectivity
-            if !offlineQueue.isOnline {
-                HStack(spacing: 8) {
-                    Image(systemName: "wifi.slash")
-                        .foregroundStyle(.orange)
-                    Text("Offline — messages will be sent when connected")
-                        .font(.subheadline)
-                        .foregroundStyle(.primary)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .frame(maxWidth: .infinity)
-                .background(.orange.opacity(0.15))
-                .cornerRadius(8)
-                .padding(.horizontal, 12)
-                .padding(.top, 4)
-                .transition(.move(edge: .top).combined(with: .opacity))
-            }
             #if os(macOS)
             if isSearching {
                 chatSearchBar
@@ -160,7 +140,6 @@ struct ChatView: View {
         .navigationTitle(conversation.title)
         #if os(macOS)
             .navigationSubtitle("\(messages.count) messages")
-            .glassToolbar()
         #endif
             .toolbar {
                 ToolbarItem {
@@ -273,9 +252,7 @@ struct ChatView: View {
             .alert(error: $showingError)
             .sheet(item: $syncConflictManager.activeConflict) { conflict in
                 SyncConflictResolutionView(conflict: conflict) { resolution in
-                    Task { @MainActor in
-                        syncConflictManager.resolveActiveConflict(with: resolution)
-                    }
+                    syncConflictManager.resolveActiveConflict(with: resolution)
                 }
             }
             .task {
@@ -472,7 +449,7 @@ struct ChatView: View {
         #else
             HStack(spacing: TheaSpacing.md) {
                 TextField("Message Thea...", text: $inputText, axis: .vertical)
-                    .textFieldStyle(.roundedBorder)
+                    .textFieldStyle(.plain)
                     .lineLimit(1 ... 6)
                     .disabled(chatManager.isStreaming)
                     .onSubmit {
@@ -480,8 +457,10 @@ struct ChatView: View {
                             sendMessage()
                         }
                     }
-                    .padding(.horizontal, TheaSpacing.sm)
-                    .padding(.vertical, TheaSpacing.xs)
+                    .padding(.horizontal, TheaSpacing.lg)
+                    .padding(.vertical, TheaSpacing.md)
+                    .background(.ultraThinMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.xl))
 
                 Button {
                     if chatManager.isStreaming {

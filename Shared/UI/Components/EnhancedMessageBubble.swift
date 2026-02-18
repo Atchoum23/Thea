@@ -14,6 +14,9 @@ import SwiftUI
 
 #if canImport(Highlightr)
 import Highlightr
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "EnhancedMessageBubble")
 #endif
 
 // Supporting types (IconActionButton, ConfidenceDot, EnhancedCodeBlock, ParsedBlock,
@@ -250,25 +253,25 @@ public struct EnhancedMessageBubble: View {
     private func warningBlock(_ block: ParsedBlock) -> some View {
         HStack(spacing: TheaSpacing.sm) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.theaWarning)
+                .foregroundStyle(.orange)
             Text(block.content)
                 .font(.theaBody)
         }
         .padding(.horizontal, TheaSpacing.lg)
         .padding(.vertical, TheaSpacing.md)
-        .frostedGlass(cornerRadius: TheaRadius.lg, tint: .theaWarning)
+        .frostedGlass(cornerRadius: TheaRadius.lg, tint: .orange)
     }
 
     private func successBlock(_ block: ParsedBlock) -> some View {
         HStack(spacing: TheaSpacing.sm) {
             Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(.theaSuccess)
+                .foregroundStyle(.green)
             Text(block.content)
                 .font(.theaBody)
         }
         .padding(.horizontal, TheaSpacing.lg)
         .padding(.vertical, TheaSpacing.md)
-        .frostedGlass(cornerRadius: TheaRadius.lg, tint: .theaSuccess)
+        .frostedGlass(cornerRadius: TheaRadius.lg, tint: .green)
     }
 
     // MARK: - Quick Actions
@@ -301,7 +304,7 @@ public struct EnhancedMessageBubble: View {
 
     private var hoverActions: some View {
         HStack(spacing: TheaSpacing.xs) {
-            IconActionButton(icon: showCopiedFeedback ? "checkmark" : "doc.on.doc", color: showCopiedFeedback ? .theaSuccess : .secondary) {
+            IconActionButton(icon: showCopiedFeedback ? "checkmark" : "doc.on.doc", color: showCopiedFeedback ? .green : .secondary) {
                 copyToClipboard()
             }
 
@@ -373,7 +376,11 @@ public struct EnhancedMessageBubble: View {
         }
 
         Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(1500))
+            do {
+                try await Task.sleep(nanoseconds: 1_500_000_000)
+            } catch {
+                return
+            }
             withAnimation {
                 showCopiedFeedback = false
             }
@@ -427,10 +434,10 @@ public struct EnhancedMessageBubble: View {
 
     private func confidenceColor(for confidence: Double) -> Color {
         switch confidence {
-        case 0.9...: return .theaSuccess
-        case 0.7..<0.9: return .theaInfo
-        case 0.5..<0.7: return .theaWarning
-        default: return .theaError
+        case 0.9...: return .green
+        case 0.7..<0.9: return .blue
+        case 0.5..<0.7: return .orange
+        default: return .red
         }
     }
 }

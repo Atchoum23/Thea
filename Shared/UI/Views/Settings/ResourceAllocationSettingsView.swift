@@ -34,8 +34,8 @@ struct ResourceAllocationSettingsView: View {
                             .font(.caption2)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.theaSuccess.opacity(0.2))
-                            .foregroundStyle(.theaSuccess)
+                            .background(Color.green.opacity(0.2))
+                            .foregroundStyle(.green)
                             .clipShape(Capsule())
                     }
                 }
@@ -422,9 +422,9 @@ extension ResourceAllocationSettingsView {
 
     var memoryColor: Color {
         switch allocator.systemMetrics.memoryPressure {
-        case .nominal: .theaSuccess
-        case .warning: .theaWarning
-        case .critical: .theaError
+        case .nominal: .green
+        case .warning: .orange
+        case .critical: .red
         }
     }
 
@@ -439,10 +439,10 @@ extension ResourceAllocationSettingsView {
 
     var thermalColor: Color {
         switch allocator.systemMetrics.thermalState {
-        case .nominal: .theaSuccess
+        case .nominal: .green
         case .fair: .yellow
-        case .serious: .theaWarning
-        case .critical: .theaError
+        case .serious: .orange
+        case .critical: .red
         }
     }
 
@@ -457,10 +457,10 @@ extension ResourceAllocationSettingsView {
 
     var throttleColor: Color {
         switch allocator.currentAllocation.throttleLevel {
-        case .none: .theaSuccess
+        case .none: .green
         case .light: .yellow
-        case .moderate: .theaWarning
-        case .heavy, .severe: .theaError
+        case .moderate: .orange
+        case .heavy, .severe: .red
         }
     }
 
@@ -478,12 +478,12 @@ extension ResourceAllocationSettingsView {
     }
 
     var batteryColor: Color {
-        if allocator.systemMetrics.isCharging { return .theaSuccess }
+        if allocator.systemMetrics.isCharging { return .green }
         let level = allocator.systemMetrics.batteryLevel
         return switch level {
-        case 0.5...: .theaSuccess
+        case 0.5...: .green
         case 0.2..<0.5: .yellow
-        default: .theaError
+        default: .red
         }
     }
 
@@ -498,10 +498,10 @@ extension ResourceAllocationSettingsView {
 
     func impactColor(_ impact: DynamicResourceAllocator.ResourceRecommendation.ImpactLevel) -> Color {
         switch impact {
-        case .low: .theaInfo
+        case .low: .blue
         case .medium: .yellow
-        case .high: .theaWarning
-        case .critical: .theaError
+        case .high: .orange
+        case .critical: .red
         }
     }
 

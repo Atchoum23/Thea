@@ -282,19 +282,19 @@ public struct CognitiveDashboardView: View {
                 PomodoroStatCard(
                     title: "Sessions",
                     value: "\(stats.totalSessions)",
-                    color: .theaInfo
+                    color: .blue
                 )
 
                 PomodoroStatCard(
                     title: "Completed",
                     value: "\(stats.completedSessions)",
-                    color: .theaSuccess
+                    color: .green
                 )
 
                 PomodoroStatCard(
                     title: "Minutes",
                     value: "\(stats.totalMinutes)",
-                    color: .theaWarning
+                    color: .orange
                 )
             }
         }
@@ -346,13 +346,13 @@ public struct CognitiveDashboardView: View {
 
                 Circle()
                     .trim(from: 0, to: viewModel.treeGrowthProgress / 100)
-                    .stroke(Color.theaSuccess, style: StrokeStyle(lineWidth: 15, lineCap: .round))
+                    .stroke(Color.green, style: StrokeStyle(lineWidth: 15, lineCap: .round))
                     .rotationEffect(.degrees(-90))
 
                 VStack {
                     Image(systemName: tree.treeType.icon)
                         .font(.system(size: 60))
-                        .foregroundColor(.theaSuccess)
+                        .foregroundColor(.green)
 
                     Text("\(Int(viewModel.treeGrowthProgress))%")
                         .font(.title3)
@@ -366,7 +366,7 @@ public struct CognitiveDashboardView: View {
                 .foregroundStyle(.secondary)
         }
         .padding()
-        .background(Color.theaSuccess.opacity(0.1))
+        .background(Color.green.opacity(0.1))
         .cornerRadius(16)
     }
 
@@ -394,7 +394,7 @@ public struct CognitiveDashboardView: View {
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.theaSuccess)
+            .tint(.green)
         }
         .padding()
         .background(Color.gray.opacity(0.1))
@@ -411,14 +411,14 @@ public struct CognitiveDashboardView: View {
                     title: "Trees Grown",
                     value: "\(forest.totalTreesGrown)",
                     icon: "tree.fill",
-                    color: .theaSuccess
+                    color: .green
                 )
 
                 ForestStatCard(
                     title: "Current Streak",
                     value: "\(forest.currentStreak)",
                     icon: "flame.fill",
-                    color: .theaWarning
+                    color: .orange
                 )
             }
         }
@@ -459,13 +459,13 @@ public struct CognitiveDashboardView: View {
             if let favorite = stats.favoriteTreeType {
                 HStack {
                     Image(systemName: "star.fill")
-                        .foregroundColor(.theaWarning)
+                        .foregroundColor(.yellow)
 
                     Text("Favorite: \(favorite.displayName)")
                         .font(.subheadline)
                 }
                 .padding()
-                .background(Color.theaWarning.opacity(0.1))
+                .background(Color.yellow.opacity(0.1))
                 .cornerRadius(12)
             }
         }
@@ -501,11 +501,11 @@ public struct CognitiveDashboardView: View {
     private func errorView(_ message: String) -> some View {
         HStack {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(.theaError)
+                .foregroundColor(.red)
 
             Text(message)
                 .font(.caption)
-                .foregroundStyle(Color.theaError)
+                .foregroundStyle(.red)
 
             Spacer()
 
@@ -515,7 +515,7 @@ public struct CognitiveDashboardView: View {
             .font(.caption)
         }
         .padding()
-        .background(Color.theaError.opacity(0.1))
+        .background(Color.red.opacity(0.1))
         .cornerRadius(12)
     }
 }
@@ -530,7 +530,7 @@ private struct SubtaskRow: View {
         HStack(alignment: .top, spacing: 12) {
             Button(action: onToggle) {
                 Image(systemName: subtask.completed ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(subtask.completed ? .theaSuccess : .gray)
+                    .foregroundColor(subtask.completed ? .green : .gray)
                     .font(.title3)
             }
             .buttonStyle(.plain)
@@ -651,7 +651,7 @@ private struct PomodoroHistoryRow: View {
     var body: some View {
         HStack {
             Image(systemName: session.completed ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundColor(session.completed ? .theaSuccess : .theaError)
+                .foregroundColor(session.completed ? .green : .red)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(session.type.displayName)
@@ -749,7 +749,7 @@ private struct TimelineEventRow: View {
 
             if event.isCompleted {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.theaSuccess)
+                    .foregroundColor(.green)
             }
         }
         .padding()

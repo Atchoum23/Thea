@@ -197,15 +197,23 @@ public final class KeyboardShortcutsSystem: ObservableObject {
             }
         }
 
-        if let data = try? JSONEncoder().encode(saved) {
+        do {
+            let data = try JSONEncoder().encode(saved)
             UserDefaults.standard.set(data, forKey: "keyboard.customizations")
+        } catch {
+            logger.error("Failed to encode keyboard customizations: \(error.localizedDescription)")
         }
     }
 
     private func loadCustomizations() {
-        guard let data = UserDefaults.standard.data(forKey: "keyboard.customizations"),
-              let saved = try? JSONDecoder().decode([SavedShortcut].self, from: data)
-        else {
+        guard let data = UserDefaults.standard.data(forKey: "keyboard.customizations") else {
+            return
+        }
+        let saved: [SavedShortcut]
+        do {
+            saved = try JSONDecoder().decode([SavedShortcut].self, from: data)
+        } catch {
+            logger.error("Failed to decode keyboard customizations: \(error.localizedDescription)")
             return
         }
 

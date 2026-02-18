@@ -191,7 +191,11 @@ final class MediaServer: ObservableObject {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             .appendingPathComponent("Thea")
             .appendingPathComponent("MediaServer")
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            logger.error("Failed to create MediaServer storage directory: \(error.localizedDescription)")
+        }
         return dir
     }()
 
@@ -286,7 +290,7 @@ final class MediaServer: ObservableObject {
         receiveRequest(on: connection)
     }
 
-    nonisolated private func receiveRequest(on connection: NWConnection) {
+    private nonisolated func receiveRequest(on connection: NWConnection) {
         connection.receive(minimumIncompleteLength: 1, maximumLength: 65536) { [weak self] data, _, _, error in
             guard let data, error == nil else {
                 connection.cancel()
@@ -394,7 +398,11 @@ final class MediaServer: ObservableObject {
         }
 
         let fileURL = URL(fileURLWithPath: item.path)
-        guard let fileData = try? Data(contentsOf: fileURL) else {
+        let fileData: Data
+        do {
+            fileData = try Data(contentsOf: fileURL)
+        } catch {
+            logger.debug("Could not read media file \(fileURL.lastPathComponent): \(error.localizedDescription)")
             sendResponse(connection: connection, status: "404 Not Found", contentType: "text/plain", body: Data("File unreadable".utf8))
             return
         }
@@ -428,14 +436,14 @@ final class MediaServer: ObservableObject {
         })
     }
 
-    nonisolated private func escapeHTML(_ string: String) -> String {
+    private nonisolated func escapeHTML(_ string: String) -> String {
         string
             .replacingOccurrences(of: "&", with: "&amp;")
             .replacingOccurrences(of: "<", with: "&lt;")
             .replacingOccurrences(of: ">", with: "&gt;")
     }
 
-    nonisolated private func mimeType(for ext: String) -> String {
+    private nonisolated func mimeType(for ext: String) -> String {
         switch ext.lowercased() {
         case "mp4", "m4v": "video/mp4"
         case "mov": "video/quicktime"
@@ -472,7 +480,7 @@ final class MediaServer: ObservableObject {
 
     /// Remove a folder from the library.
     func removeFolder(id: UUID) {
-        let folderPath = folders.first { $0.id == id }?.path
+        let folderPath = folders.first(where: { $0.id == id })?.path
         folders.removeAll { $0.id == id }
         if let folderPath {
             items.removeAll { $0.path.hasPrefix(folderPath) }
@@ -502,7 +510,13 @@ final class MediaServer: ObservableObject {
 
             var folderItemCount = 0
             while let fileURL = enumerator?.nextObject() as? URL {
-                let isFile = (try? fileURL.resourceValues(forKeys: [.isRegularFileKey]))?.isRegularFile ?? false
+                let isFile: Bool
+                do {
+                    isFile = try fileURL.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile ?? false
+                } catch {
+                    logger.debug("Could not check file type for \(fileURL.lastPathComponent): \(error.localizedDescription)")
+                    continue
+                }
                 guard isFile else { continue }
 
                 guard let mediaType = MediaFileType.detect(from: fileURL.pathExtension) else { continue }
@@ -513,15 +527,25 @@ final class MediaServer: ObservableObject {
                     continue
                 }
 
-                let attrs = try? fileURL.resourceValues(forKeys: [.fileSizeKey])
-                let size = Int64(attrs?.fileSize ?? 0)
+                let size: Int64
+                do {
+                    let attrs = try fileURL.resourceValues(forKeys: [.fileSizeKey])
+                    size = Int64(attrs.fileSize ?? 0)
+                } catch {
+                    logger.debug("Could not get file size for \(fileURL.lastPathComponent): \(error.localizedDescription)")
+                    size = 0
+                }
 
                 // Get duration for audio/video
                 var duration: TimeInterval?
                 #if canImport(AVFoundation)
                 if mediaType == .video || mediaType == .audio {
                     let asset = AVURLAsset(url: fileURL)
-                    duration = try? await asset.load(.duration).seconds
+                    do {
+                        duration = try await asset.load(.duration).seconds
+                    } catch {
+                        logger.debug("Could not load asset duration for \(fileURL.lastPathComponent): \(error.localizedDescription)")
+                    }
                     if let d = duration, d.isNaN || d.isInfinite {
                         duration = nil
                     }
@@ -575,7 +599,7 @@ final class MediaServer: ObservableObject {
         if !search.isEmpty {
             result = result.filter {
                 $0.name.localizedCaseInsensitiveContains(search) ||
-                $0.tags.contains { $0.localizedCaseInsensitiveContains(search) }
+                $0.tags.contains(where: { $0.localizedCaseInsensitiveContains(search) })
             }
         }
         return result

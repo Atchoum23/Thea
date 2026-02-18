@@ -21,7 +21,6 @@
     /// Provides deep visibility into process execution, file operations, and system events
     /// NOTE: Requires Developer ID signing and special entitlement from Apple
     @available(macOS 11.0, *)
-    // @unchecked Sendable: mutable state serialized on dedicated `eventQueue` DispatchQueue
     public final class EndpointSecurityObserver: @unchecked Sendable {
         public static let shared = EndpointSecurityObserver()
 

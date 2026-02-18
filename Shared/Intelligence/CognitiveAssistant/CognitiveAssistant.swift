@@ -39,7 +39,11 @@ public final class CognitiveAssistant: ObservableObject {
             while !Task.isCancelled {
                 await updateCognitiveState()
                 await checkForInterventions()
-                try? await Task.sleep(for: .seconds(30))
+                do {
+                    try await Task.sleep(for: .seconds(30)
+                } catch {
+                    break
+                })
             }
         }
         logger.info("Cognitive monitoring started")

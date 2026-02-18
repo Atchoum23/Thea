@@ -17,9 +17,9 @@
 
         private let logger = Logger(subsystem: "app.thea.clipboard", category: "ClipboardObserver")
 
-        // Configuration — base 5s (was 0.5s); EnergyAdaptiveThrottler scales at runtime
+        // Configuration
         public var maxHistorySize: Int = 50
-        public var pollingInterval: TimeInterval = 5.0
+        public var pollingInterval: TimeInterval = 0.5
 
         // Callbacks
         public var onClipboardChanged: ((ClipboardItem) -> Void)?

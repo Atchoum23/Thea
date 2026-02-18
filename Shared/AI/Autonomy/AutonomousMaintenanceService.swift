@@ -257,16 +257,20 @@ public actor AutonomousMaintenanceService {
 
             // Sort by creation date (oldest first)
             let sorted = contents.sorted { url1, url2 in
-                let date1 = (try? url1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date.distantPast
-                let date2 = (try? url2.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date.distantPast
+                let date1: Date = { do { return (try url1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date.distantPast } catch { return Date.distantPast } }()
+                let date2: Date = { do { return (try url2.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date.distantPast } catch { return Date.distantPast } }()
                 return date1 < date2
             }
 
             // Calculate total size
             var totalSize: UInt64 = 0
             for file in sorted {
-                if let size = try? file.resourceValues(forKeys: [.fileSizeKey]).fileSize {
-                    totalSize += UInt64(size)
+                do {
+                    if let size = try file.resourceValues(forKeys: [.fileSizeKey]).fileSize {
+                        totalSize += UInt64(size)
+                    }
+                } catch {
+                    logger.debug("Could not get file size for \(file.lastPathComponent): \(error.localizedDescription)")
                 }
             }
 
@@ -278,10 +282,15 @@ public actor AutonomousMaintenanceService {
                 var shouldRemove = false
 
                 // Check age
-                if let cutoff = cutoffDate,
-                   let created = try? file.resourceValues(forKeys: [.creationDateKey]).creationDate,
-                   created < cutoff {
-                    shouldRemove = true
+                if let cutoff = cutoffDate {
+                    do {
+                        if let created = try file.resourceValues(forKeys: [.creationDateKey]).creationDate,
+                           created < cutoff {
+                            shouldRemove = true
+                        }
+                    } catch {
+                        logger.debug("Could not get creation date for \(file.lastPathComponent): \(error.localizedDescription)")
+                    }
                 }
 
                 // Check size
@@ -290,10 +299,14 @@ public actor AutonomousMaintenanceService {
                 }
 
                 if shouldRemove {
-                    if let size = try? file.resourceValues(forKeys: [.fileSizeKey]).fileSize {
-                        try fileManager.removeItem(at: file)
-                        bytesReclaimed += UInt64(size)
-                        totalSize -= UInt64(size)
+                    do {
+                        if let size = try file.resourceValues(forKeys: [.fileSizeKey]).fileSize {
+                            try fileManager.removeItem(at: file)
+                            bytesReclaimed += UInt64(size)
+                            totalSize -= UInt64(size)
+                        }
+                    } catch {
+                        logger.debug("Could not remove or size file \(file.lastPathComponent): \(error.localizedDescription)")
                     }
                 }
             }
@@ -311,24 +324,32 @@ public actor AutonomousMaintenanceService {
     private let lastRunKey = "AutonomousMaintenance.lastRuns"
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: configKey),
-           let decoded = try? JSONDecoder().decode(Configuration.self, from: data) {
-            configuration = decoded
+        guard let data = UserDefaults.standard.data(forKey: configKey) else { return }
+        do {
+            configuration = try JSONDecoder().decode(Configuration.self, from: data)
+        } catch {
+            logger.error("Failed to decode maintenance configuration: \(error.localizedDescription)")
         }
     }
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             UserDefaults.standard.set(data, forKey: configKey)
+        } catch {
+            logger.error("Failed to encode maintenance configuration: \(error.localizedDescription)")
         }
     }
 
     private func loadLastExecutionTimes() {
-        if let data = UserDefaults.standard.data(forKey: lastRunKey),
-           let decoded = try? JSONDecoder().decode(LastExecutionTimes.self, from: data) {
+        guard let data = UserDefaults.standard.data(forKey: lastRunKey) else { return }
+        do {
+            let decoded = try JSONDecoder().decode(LastExecutionTimes.self, from: data)
             lastMCPCleanup = decoded.mcpCleanup
             lastCachePrune = decoded.cachePrune
             lastDraftCleanup = decoded.draftCleanup
+        } catch {
+            logger.error("Failed to decode last execution times: \(error.localizedDescription)")
         }
     }
 
@@ -338,8 +359,11 @@ public actor AutonomousMaintenanceService {
             cachePrune: lastCachePrune,
             draftCleanup: lastDraftCleanup
         )
-        if let data = try? JSONEncoder().encode(times) {
+        do {
+            let data = try JSONEncoder().encode(times)
             UserDefaults.standard.set(data, forKey: lastRunKey)
+        } catch {
+            logger.error("Failed to encode last execution times: \(error.localizedDescription)")
         }
     }
 }

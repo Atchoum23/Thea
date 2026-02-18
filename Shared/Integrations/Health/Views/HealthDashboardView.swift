@@ -1,7 +1,11 @@
 import SwiftUI
+import OSLog
+
+private let healthDashboardLogger = Logger(subsystem: "ai.thea.app", category: "HealthDashboardView")
 
 /// Main health dashboard view
 public struct HealthDashboardView: View {
+    @State private var exportURL: URL?
     @State private var viewModel = HealthDashboardViewModel()
 
     public init() {}
@@ -24,7 +28,7 @@ public struct HealthDashboardView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 HStack(spacing: 8) {
-                    if let exportURL = viewModel.exportHealthData() {
+                    if let exportURL {
                         ShareLink(item: exportURL) {
                             Image(systemName: "square.and.arrow.up")
                         }
@@ -54,7 +58,7 @@ public struct HealthDashboardView: View {
         VStack(spacing: 20) {
             Image(systemName: "heart.text.square.fill")
                 .font(.system(size: 60))
-                .foregroundStyle(Color.theaError)
+                .foregroundStyle(.red)
 
             Text("Health Data Access")
                 .font(.title)
@@ -78,7 +82,7 @@ public struct HealthDashboardView: View {
             if let error = viewModel.errorMessage {
                 Text(error)
                     .font(.caption)
-                    .foregroundStyle(Color.theaError)
+                    .foregroundStyle(.red)
                     .multilineTextAlignment(.center)
             }
         }
@@ -169,7 +173,7 @@ public struct HealthDashboardView: View {
             icon: "figure.walk",
             title: "Activity",
             value: viewModel.todayActivitySummary.map { "\($0.activityScore)%" } ?? "No data",
-            color: .theaInfo,
+            color: .blue,
             trend: viewModel.getActivityTrend()
         )
     }
@@ -220,7 +224,7 @@ public struct HealthDashboardView: View {
             if let latest = viewModel.heartRateRecords.first {
                 HStack {
                     Image(systemName: "heart.fill")
-                        .foregroundColor(.theaError)
+                        .foregroundColor(.red)
 
                     Text("\(latest.beatsPerMinute) bpm")
                         .font(.title2)
@@ -322,7 +326,7 @@ private struct SleepRecordRow: View {
                 MetricPill(
                     icon: "bed.double.fill",
                     value: viewModel.formatDuration(record.totalMinutes),
-                    color: .theaInfo
+                    color: .blue
                 )
 
                 MetricPill(
@@ -370,19 +374,19 @@ private struct ActivitySummaryRow: View {
                 MetricPill(
                     icon: "figure.walk",
                     value: "\(summary.steps)",
-                    color: .theaSuccess
+                    color: .green
                 )
 
                 MetricPill(
                     icon: "flame.fill",
                     value: "\(summary.activeCalories) cal",
-                    color: .theaWarning
+                    color: .orange
                 )
 
                 MetricPill(
                     icon: "timer",
                     value: viewModel.formatDuration(summary.activeMinutes),
-                    color: .theaInfo
+                    color: .blue
                 )
 
                 Spacer()

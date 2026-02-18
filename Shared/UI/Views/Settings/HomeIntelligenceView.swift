@@ -131,7 +131,7 @@ struct HomeIntelligenceView: View {
                 if let result = commandResult {
                     HStack {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(Color.theaSuccess)
+                            .foregroundColor(.green)
                         Text(result)
                         Spacer()
                         Button {
@@ -142,14 +142,14 @@ struct HomeIntelligenceView: View {
                         .buttonStyle(.plain)
                     }
                     .padding(10)
-                    .background(Color.theaSuccess.opacity(0.1))
+                    .background(Color.green.opacity(0.1))
                     .cornerRadius(8)
                 }
 
                 if let error = commandError {
                     HStack {
                         Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(Color.theaError)
+                            .foregroundColor(.red)
                         Text(error)
                         Spacer()
                         Button {
@@ -160,7 +160,7 @@ struct HomeIntelligenceView: View {
                         .buttonStyle(.plain)
                     }
                     .padding(10)
-                    .background(Color.theaError.opacity(0.1))
+                    .background(Color.red.opacity(0.1))
                     .cornerRadius(8)
                 }
 
@@ -272,7 +272,7 @@ struct HomeIntelligenceView: View {
                 )
             } else {
                 LazyVGrid(columns: [
-                    GridItem(.adaptive(minimum: 180, maximum: 250))
+                    GridItem(.adaptive(minimum: 180, maximum: 250)),
                 ], spacing: 12) {
                     ForEach(filteredAccessories) { accessory in
                         accessoryCard(accessory)
@@ -290,7 +290,7 @@ struct HomeIntelligenceView: View {
                     .foregroundColor(accessory.isReachable ? .accentColor : .secondary)
                 Spacer()
                 Circle()
-                    .fill(accessory.isReachable ? Color.theaSuccess : Color.theaError)
+                    .fill(accessory.isReachable ? Color.green : Color.red)
                     .frame(width: 8, height: 8)
             }
 

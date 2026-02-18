@@ -529,8 +529,9 @@ public final class ResourceDiscoveryEngine: ObservableObject {
         ]
 
         for path in configPaths {
-            if let data = try? Data(contentsOf: path),
-               let config = try? JSONDecoder().decode(LocalMCPConfig.self, from: data) {
+            do {
+                let data = try Data(contentsOf: path)
+                let config = try JSONDecoder().decode(LocalMCPConfig.self, from: data)
                 for (name, server) in config.servers {
                     let resource = DiscoveredResource(
                         sourceRegistry: .local,
@@ -551,6 +552,8 @@ public final class ResourceDiscoveryEngine: ObservableObject {
                     )
                     resources.append(resource)
                 }
+            } catch {
+                logger.debug("Could not load local MCP config at \(path.lastPathComponent): \(error.localizedDescription)")
             }
         }
 
@@ -679,7 +682,11 @@ public final class ResourceDiscoveryEngine: ObservableObject {
         backgroundDiscoveryTask?.cancel()
         backgroundDiscoveryTask = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds((self?.discoveryInterval ?? 3600)))
+                do {
+                    try await Task.sleep(nanoseconds: UInt64((self?.discoveryInterval ?? 3600) * 1_000_000_000))
+                } catch {
+                    break
+                }
 
                 if !Task.isCancelled {
                     await self?.discoverNow()

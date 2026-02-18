@@ -124,7 +124,11 @@ public final class WellnessViewModel {
     public func updateAudioVolume(_ volume: Double) async {
         audioVolume = volume
         if let audio = currentAudio {
-            try? await focusService.playAmbientAudio(audio, volume: volume)
+            do {
+                try await focusService.playAmbientAudio(audio, volume: volume)
+            } catch {
+                errorMessage = "Audio playback failed: \(error.localizedDescription)"
+            }
         }
     }
 

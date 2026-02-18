@@ -212,7 +212,13 @@ final class ConversationMemoryExtractor {
         ]
 
         for pattern in personPatterns {
-            guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { continue }
+            let regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: pattern, options: [])
+            } catch {
+                logger.error("Invalid regex pattern '\(pattern)': \(error.localizedDescription)")
+                continue
+            }
             let range = NSRange(text.startIndex..<text.endIndex, in: text)
             let matches = regex.matches(in: text, range: range)
 
@@ -233,7 +239,13 @@ final class ConversationMemoryExtractor {
         ]
 
         for pattern in namePatterns {
-            guard let regex = try? NSRegularExpression(pattern: pattern) else { continue }
+            let regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: pattern)
+            } catch {
+                logger.error("Invalid name regex pattern '\(pattern)': \(error.localizedDescription)")
+                continue
+            }
             let nsRange = NSRange(text.startIndex..<text.endIndex, in: text)
             if let match = regex.firstMatch(in: text, range: nsRange),
                match.numberOfRanges > 1,

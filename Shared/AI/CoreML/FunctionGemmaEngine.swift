@@ -396,7 +396,13 @@ extension FunctionGemmaEngine {
 
     func extractURL(_ text: String) -> String? {
         let pattern = "https?://[^\\s]+"
-        guard let regex = try? NSRegularExpression(pattern: pattern) else { return nil }
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern)
+        } catch {
+            logger.debug("Failed to compile URL regex pattern: \(error.localizedDescription)")
+            return nil
+        }
         let range = NSRange(text.startIndex..<text.endIndex, in: text)
         if let match = regex.firstMatch(in: text, range: range),
            let swiftRange = Range(match.range, in: text)
@@ -415,8 +421,14 @@ extension FunctionGemmaEngine {
         ]
 
         for pattern in patterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
-               let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..<text.endIndex, in: text)),
+            let regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+            } catch {
+                logger.debug("Failed to compile time expression regex '\(pattern)': \(error.localizedDescription)")
+                continue
+            }
+            if let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..<text.endIndex, in: text)),
                let range = Range(match.range, in: text)
             {
                 return String(text[range])
@@ -442,8 +454,15 @@ extension FunctionGemmaEngine {
     }
 
     func parseFunctionCallFromOutput(_ output: String) -> FunctionCall? {
-        guard let data = output.data(using: .utf8),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+        guard let data = output.data(using: .utf8) else { return nil }
+        let jsonObject: Any
+        do {
+            jsonObject = try JSONSerialization.jsonObject(with: data)
+        } catch {
+            logger.debug("Failed to parse function call JSON: \(error.localizedDescription)")
+            return nil
+        }
+        guard let json = jsonObject as? [String: Any],
               let module = json["module"] as? String,
               let function = json["function"] as? String
         else { return nil }

@@ -102,23 +102,29 @@ public final class LifeMonitoringCloudSync: ObservableObject {
     // MARK: - Change Token Management
 
     private func loadChangeToken() {
-        guard let data = UserDefaults.standard.data(forKey: changeTokenKey),
-              let token = try? NSKeyedUnarchiver.unarchivedObject(
-                  ofClass: CKServerChangeToken.self,
-                  from: data
-              )
-        else { return }
-        changeToken = token
+        guard let data = UserDefaults.standard.data(forKey: changeTokenKey) else { return }
+        do {
+            let token = try NSKeyedUnarchiver.unarchivedObject(
+                ofClass: CKServerChangeToken.self,
+                from: data
+            )
+            changeToken = token
+        } catch {
+            logger.debug("Failed to unarchive change token: \(error.localizedDescription)")
+        }
     }
 
     private func saveChangeToken(_ token: CKServerChangeToken?) {
         changeToken = token
-        if let token = token,
-           let data = try? NSKeyedArchiver.archivedData(
-               withRootObject: token,
-               requiringSecureCoding: true
-           ) {
+        guard let token = token else { return }
+        do {
+            let data = try NSKeyedArchiver.archivedData(
+                withRootObject: token,
+                requiringSecureCoding: true
+            )
             UserDefaults.standard.set(data, forKey: changeTokenKey)
+        } catch {
+            logger.debug("Failed to archive change token: \(error.localizedDescription)")
         }
     }
 
@@ -258,7 +264,11 @@ public final class LifeMonitoringCloudSync: ObservableObject {
         if pendingEvents.count >= batchSize {
             uploadTask?.cancel()
             uploadTask = Task {
-                try? await uploadPendingEvents()
+                do {
+                    try await uploadPendingEvents()
+                } catch {
+                    self.logger.debug("Failed to upload pending events: \(error.localizedDescription)")
+                }
             }
         }
     }

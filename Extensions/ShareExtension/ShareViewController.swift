@@ -12,6 +12,34 @@ import UniformTypeIdentifiers
 /// Share Extension for Thea
 /// Allows users to share content from any app to Thea for AI processing
 class ShareViewController: SLComposeServiceViewController {
+    // MARK: - Error Types
+
+    enum ShareError: Error, LocalizedError {
+        case noAppGroupContainer
+        case directoryCreationFailed(Error)
+        case imageWriteFailed(index: Int, Error)
+        case fileCopyFailed(filename: String, Error)
+        case metadataWriteFailed(Error)
+        case pendingListWriteFailed(Error)
+
+        var errorDescription: String? {
+            switch self {
+            case .noAppGroupContainer:
+                "Unable to access shared storage. Thea may need to be reinstalled."
+            case .directoryCreationFailed(let error):
+                "Failed to prepare storage: \(error.localizedDescription)"
+            case .imageWriteFailed(let index, let error):
+                "Failed to save image \(index + 1): \(error.localizedDescription)"
+            case .fileCopyFailed(let filename, let error):
+                "Failed to copy \"\(filename)\": \(error.localizedDescription)"
+            case .metadataWriteFailed(let error):
+                "Failed to save share metadata: \(error.localizedDescription)"
+            case .pendingListWriteFailed(let error):
+                "Failed to update pending shares: \(error.localizedDescription)"
+            }
+        }
+    }
+
     // MARK: - Properties
 
     private var sharedItems: [SharedItem] = []
@@ -71,7 +99,22 @@ class ShareViewController: SLComposeServiceViewController {
 
     override func didSelectPost() {
         // Save shared content to App Group for the main app to process
-        saveSharedContent()
+        do {
+            try saveSharedContent()
+        } catch {
+            let alert = UIAlertController(
+                title: "Share Failed",
+                message: error.localizedDescription,
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+                self?.extensionContext?.cancelRequest(
+                    withError: error
+                )
+            })
+            present(alert, animated: true)
+            return
+        }
 
         // Notify the main app
         notifyMainApp()
@@ -156,19 +199,27 @@ class ShareViewController: SLComposeServiceViewController {
         }
     }
 
-    private func saveSharedContent() {
+    private func saveSharedContent() throws {
         guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
-            return
+            throw ShareError.noAppGroupContainer
         }
 
         // Create shared content directory
         let sharedDir = containerURL.appendingPathComponent("SharedContent", isDirectory: true)
-        try? FileManager.default.createDirectory(at: sharedDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: sharedDir, withIntermediateDirectories: true)
+        } catch {
+            throw ShareError.directoryCreationFailed(error)
+        }
 
         // Create a unique ID for this share
         let shareID = UUID().uuidString
         let shareDir = sharedDir.appendingPathComponent(shareID, isDirectory: true)
-        try? FileManager.default.createDirectory(at: shareDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: shareDir, withIntermediateDirectories: true)
+        } catch {
+            throw ShareError.directoryCreationFailed(error)
+        }
 
         // Save metadata
         var metadata: [String: Any] = [
@@ -198,16 +249,24 @@ class ShareViewController: SLComposeServiceViewController {
                 if let image = item.content as? UIImage,
                    let data = image.jpegData(compressionQuality: 0.8)
                 {
-                    try? data.write(to: imagePath)
-                    itemMeta["path"] = imagePath.lastPathComponent
+                    do {
+                        try data.write(to: imagePath)
+                        itemMeta["path"] = imagePath.lastPathComponent
+                    } catch {
+                        throw ShareError.imageWriteFailed(index: index, error)
+                    }
                 }
 
             case .file:
                 itemMeta["type"] = "file"
                 if let fileURL = item.content as? URL {
                     let destPath = shareDir.appendingPathComponent(fileURL.lastPathComponent)
-                    try? FileManager.default.copyItem(at: fileURL, to: destPath)
-                    itemMeta["path"] = fileURL.lastPathComponent
+                    do {
+                        try FileManager.default.copyItem(at: fileURL, to: destPath)
+                        itemMeta["path"] = fileURL.lastPathComponent
+                    } catch {
+                        throw ShareError.fileCopyFailed(filename: fileURL.lastPathComponent, error)
+                    }
                 }
             }
 
@@ -218,21 +277,28 @@ class ShareViewController: SLComposeServiceViewController {
 
         // Save metadata JSON
         let metadataPath = shareDir.appendingPathComponent("metadata.json")
-        if let jsonData = try? JSONSerialization.data(withJSONObject: metadata, options: .prettyPrinted) {
-            try? jsonData.write(to: metadataPath)
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: metadata, options: .prettyPrinted)
+            try jsonData.write(to: metadataPath)
+        } catch {
+            throw ShareError.metadataWriteFailed(error)
         }
 
         // Update the pending shares list
         let pendingPath = sharedDir.appendingPathComponent("pending.json")
         var pending: [String] = []
+        // Reading existing pending list is best-effort; start fresh if unreadable
         if let data = try? Data(contentsOf: pendingPath),
            let existing = try? JSONSerialization.jsonObject(with: data) as? [String]
         {
             pending = existing
         }
         pending.append(shareID)
-        if let jsonData = try? JSONSerialization.data(withJSONObject: pending) {
-            try? jsonData.write(to: pendingPath)
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: pending)
+            try jsonData.write(to: pendingPath)
+        } catch {
+            throw ShareError.pendingListWriteFailed(error)
         }
     }
 

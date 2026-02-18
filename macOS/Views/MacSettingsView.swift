@@ -28,7 +28,7 @@ private struct WindowResizableHelper: NSViewRepresentable {
             window.setFrameAutosaveName("TheaSettingsWindow")
 
             observation = window.observe(\.styleMask, options: [.new]) { win, _ in
-                Task { @MainActor in
+                DispatchQueue.main.async { @MainActor in
                     if !win.styleMask.contains(.resizable) {
                         win.styleMask.insert(.resizable)
                     }
@@ -56,12 +56,6 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case agent = "Agent"
     case moltbook = "Moltbook"
     case knowledge = "Knowledge"
-    case behavioralPatterns = "Behavioral Patterns"
-    case knowledgeGraph = "Knowledge Graph"
-    case healthInsights = "Health Insights"
-    case notificationSchedule = "Smart Scheduling"
-    case lifeJournal = "Life Journal"
-    case appPairing = "App Pairing"
     case liveGuidance = "Live Guidance"
 
     // Group 2: Features
@@ -102,8 +96,6 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case privacy = "Privacy"
 
     // Group 4: Customization
-    case responseStyles = "Response Styles"
-    case personalization = "Personalization"
     case theme = "Theme"
     case advanced = "Advanced"
 
@@ -122,12 +114,6 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .agent: "person.2.circle"
         case .moltbook: "bubble.left.and.text.bubble.right"
         case .knowledge: "books.vertical"
-        case .behavioralPatterns: "chart.bar.xaxis"
-        case .knowledgeGraph: "point.3.connected.trianglepath.dotted"
-        case .healthInsights: "heart.text.square"
-        case .notificationSchedule: "bell.and.waves.left.and.right"
-        case .lifeJournal: "book.pages"
-        case .appPairing: "app.connected.to.app.below.fill"
         case .liveGuidance: "eye.circle.fill"
         case .clipboard: "doc.on.clipboard"
         case .translation: "character.bubble"
@@ -162,8 +148,6 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .permissions: "hand.raised.fill"
         case .sync: "icloud.fill"
         case .privacy: "lock.shield"
-        case .responseStyles: "text.badge.star"
-        case .personalization: "person.text.rectangle"
         case .theme: "paintpalette"
         case .advanced: "slider.horizontal.3"
         case .subscription: "creditcard"
@@ -174,10 +158,10 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     var group: Int {
         switch self {
         case .general, .aiModels: 0
-        case .providers, .memory, .agent, .moltbook, .knowledge, .behavioralPatterns, .knowledgeGraph, .healthInsights, .notificationSchedule, .lifeJournal, .appPairing, .liveGuidance: 1
+        case .providers, .memory, .agent, .moltbook, .knowledge, .liveGuidance: 1
         case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home: 2
         case .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
-        case .responseStyles, .personalization, .theme, .advanced: 4
+        case .theme, .advanced: 4
         case .subscription, .about: 5
         }
     }
@@ -239,9 +223,6 @@ struct MacSettingsView: View {
                 ForEach(group) { category in
                     Label(category.rawValue, systemImage: category.icon)
                         .tag(category)
-                        .accessibilityLabel(category.rawValue)
-                        .accessibilityHint("Opens \(category.rawValue) settings")
-                        .accessibilityAddTraits(selectedCategory == category ? .isSelected : [])
                 }
             }
         }
@@ -276,7 +257,6 @@ struct MacSettingsView: View {
     }
 
     @ViewBuilder
-    // swiftlint:disable:next function_body_length
     private func detailContent(for category: SettingsCategory) -> some View {
         switch category {
         case .general:
@@ -288,32 +268,13 @@ struct MacSettingsView: View {
         case .memory:
             MemoryConfigurationView()
         case .agent:
-            ScrollView {
-                VStack(spacing: 20) {
-                    AgentConfigurationView()
-                    THEAAutonomySettingsView()
-                    THEAPendingActionsView()
-                }
-                .padding()
-            }
+            AgentConfigurationView()
         case .moltbook:
             MoltbookSettingsView()
         case .knowledge:
             KnowledgeScannerConfigurationView()
-        case .behavioralPatterns:
-            BehavioralPatternsView()
-        case .knowledgeGraph:
-            KnowledgeGraphExplorerView()
-        case .healthInsights:
-            HealthInsightsView()
-        case .notificationSchedule:
-            NotificationScheduleView()
-        case .lifeJournal:
-            LifeJournalView()
-        case .appPairing:
-            AppPairingSettingsView()
         case .liveGuidance:
-            liveGuidancePlaceholder
+            LiveGuidanceSettingsView()
         case .clipboard:
             TheaClipSettingsView()
         case .translation:
@@ -380,10 +341,6 @@ struct MacSettingsView: View {
             SyncSettingsView()
         case .privacy:
             ConfigurationPrivacySettingsView()
-        case .responseStyles:
-            ResponseStylesSettingsView()
-        case .personalization:
-            PersonalizationSettingsView()
         case .theme:
             ThemeConfigurationView()
         case .advanced:
@@ -393,26 +350,6 @@ struct MacSettingsView: View {
         case .about:
             AboutView()
         }
-    }
-
-    // MARK: - Live Guidance Placeholder
-
-    /// Placeholder for Live Guidance settings (dependencies excluded from current build).
-    private var liveGuidancePlaceholder: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "eye.circle.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text("Live Guidance")
-                .font(.theaTitle2)
-            Text("Screen monitoring and voice guidance settings will appear here when the Live Guidance module is enabled.")
-                .font(.theaBody)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: 400)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationTitle("Live Guidance")
     }
 }
 

@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 // MARK: - Transaction Importer
 
@@ -7,6 +8,7 @@ import Foundation
 @MainActor
 @Observable
 final class TransactionImporter {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "TransactionImporter")
     static let shared = TransactionImporter()
 
     private(set) var lastImportCount = 0
@@ -213,7 +215,10 @@ final class TransactionImporter {
             guard maxVariance < 0.3 else { continue } // Allow 30% variance
 
             let frequency: RecurringFrequency
-            if dayInterval < 10 { frequency = .weekly } else if dayInterval < 45 { frequency = .monthly } else if dayInterval < 100 { frequency = .quarterly } else { frequency = .annually }
+            if dayInterval < 10 { frequency = .weekly }
+            else if dayInterval < 45 { frequency = .monthly }
+            else if dayInterval < 100 { frequency = .quarterly }
+            else { frequency = .annually }
 
             let avgAmount = sorted.map(\.amount).reduce(0, +) / Double(sorted.count)
 
@@ -368,8 +373,14 @@ final class TransactionImporter {
     private func extractOFXValue(_ content: String, tag: String) -> String? {
         // OFX uses <TAG>value format (no closing tag in SGML mode)
         let pattern = "<\(tag)>([^<\\n]+)"
-        guard let regex = try? NSRegularExpression(pattern: pattern),
-              let match = regex.firstMatch(in: content, range: NSRange(content.startIndex..., in: content)),
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern)
+        } catch {
+            logger.error("Failed to compile OFX extraction regex: \(error)")
+            return nil
+        }
+        guard let match = regex.firstMatch(in: content, range: NSRange(content.startIndex..., in: content)),
               let range = Range(match.range(at: 1), in: content) else {
             return nil
         }

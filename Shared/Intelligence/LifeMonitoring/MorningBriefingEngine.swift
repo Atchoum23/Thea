@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 #if canImport(UserNotifications)
 import UserNotifications
 #endif
@@ -23,6 +24,7 @@ final class MorningBriefingEngine: ObservableObject {
 
     private var lastGeneratedDate: Date?
     private let eventStore = EKEventStore()
+    private let logger = Logger(subsystem: "ai.thea.app", category: "MorningBriefingEngine")
 
     var isEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: "briefing.enabled") }
@@ -329,7 +331,11 @@ final class MorningBriefingEngine: ObservableObject {
             trigger: nil // Deliver immediately
         )
 
-        try? await center.add(request)
+        do {
+            try await center.add(request)
+        } catch {
+            logger.error("Failed to schedule morning briefing notification: \(error.localizedDescription)")
+        }
         #endif
     }
 
@@ -353,22 +359,32 @@ final class MorningBriefingEngine: ObservableObject {
     private var briefingURL: URL {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             .appendingPathComponent("Thea", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            logger.error("Failed to create briefing directory: \(error.localizedDescription)")
+        }
         return dir.appendingPathComponent("latest_briefing.json")
     }
 
     private func saveBriefing(_ briefing: TheaDailyBriefing) {
-        if let data = try? JSONEncoder().encode(briefing) {
-            try? data.write(to: briefingURL)
+        do {
+            let data = try JSONEncoder().encode(briefing)
+            try data.write(to: briefingURL)
+        } catch {
+            logger.error("Failed to save briefing to disk: \(error.localizedDescription)")
         }
     }
 
     func loadSavedBriefing() {
-        guard let data = try? Data(contentsOf: briefingURL),
-              let briefing = try? JSONDecoder().decode(TheaDailyBriefing.self, from: data)
-        else { return }
-        latestBriefing = briefing
-        lastGeneratedDate = briefing.generatedAt
+        do {
+            let data = try Data(contentsOf: briefingURL)
+            let briefing = try JSONDecoder().decode(TheaDailyBriefing.self, from: data)
+            latestBriefing = briefing
+            lastGeneratedDate = briefing.generatedAt
+        } catch {
+            logger.error("Failed to load saved briefing: \(error.localizedDescription)")
+        }
     }
 }
 

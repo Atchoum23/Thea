@@ -11,6 +11,9 @@ import Foundation
     import AppKit
 #else
     import UIKit
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "ClipboardSyncService")
 #endif
 
 // MARK: - Clipboard Sync Service
@@ -61,7 +64,11 @@ public class ClipboardSyncService: ObservableObject {
 
         monitorTask = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(syncInterval))
+                do {
+                    try await Task.sleep(nanoseconds: UInt64(syncInterval * 1_000_000_000))
+                } catch {
+                    break
+                }
                 await MainActor.run {
                     self.checkForClipboardChanges()
                 }

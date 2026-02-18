@@ -368,8 +368,14 @@ public final class SquadOrchestrator {
                 group.addTask { try await operation() }
             }
             var collected: [SquadTaskResult] = []
-            while let result = try? await group.next() {
-                collected.append(result)
+            do {
+                while let result = try await group.next() {
+                    collected.append(result)
+                }
+            } catch {
+                // Log individual squad task failure without aborting others
+                let logger = Logger(subsystem: "ai.thea.app", category: "SquadOrchestrator")
+                logger.error("Squad task failed: \(error.localizedDescription)")
             }
             return collected
         }
@@ -467,7 +473,6 @@ public final class SquadOrchestrator {
         for try await chunk in stream {
             switch chunk.type {
             case .delta(let text): response += text
-            case .thinkingDelta: break
             case .complete(let msg): response = msg.content.textValue
             case .error(let error): throw error
             }

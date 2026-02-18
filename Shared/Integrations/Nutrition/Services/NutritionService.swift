@@ -25,12 +25,10 @@ public actor NutritionService: NutritionServiceProtocol {
 
     // MARK: - Meal Management
 
-    /// Logs a meal entry for nutrition tracking.
     public func logMeal(_ entry: MealEntry) async throws {
         mealEntries[entry.id] = entry
     }
 
-    /// Returns meal entries within the given date range, sorted most recent first.
     public func fetchMeals(for dateRange: DateInterval) async throws -> [MealEntry] {
         mealEntries.values.filter { entry in
             dateRange.contains(entry.timestamp)
@@ -39,7 +37,6 @@ public actor NutritionService: NutritionServiceProtocol {
 
     // MARK: - Food Search
 
-    /// Searches for food items by name in the local cache and USDA database, caching remote results.
     public func searchFood(query: String) async throws -> [FoodItem] {
         // First search local database
         let localResults = foodDatabase.values.filter { food in
@@ -57,7 +54,6 @@ public actor NutritionService: NutritionServiceProtocol {
         return Array(localResults) + usdaResults
     }
 
-    /// Looks up a food item by barcode, checking the local cache first then querying USDA branded foods.
     public func fetchFoodByBarcode(_ barcode: String) async throws -> FoodItem? {
         // Check local cache first
         if let cached = foodDatabase.values.first(where: { $0.barcode == barcode }) {
@@ -75,7 +71,6 @@ public actor NutritionService: NutritionServiceProtocol {
 
     // MARK: - Daily Summary
 
-    /// Computes the daily nutrition summary including total nutrients, calories consumed, and macro balance.
     public func getDailySummary(for date: Date) async throws -> NutritionSummary {
         let startOfDay = date.startOfDay
         let endOfDay = date.endOfDay
@@ -111,25 +106,21 @@ public actor NutritionService: NutritionServiceProtocol {
 
     // MARK: - Goals Management
 
-    /// Updates the user's nutrition goals (calories, macros, micronutrients).
     public func updateGoals(_ goals: NutritionGoals) async throws {
         currentGoals = goals
     }
 
-    /// Returns the current nutrition goals.
     public func fetchGoals() async throws -> NutritionGoals {
         currentGoals
     }
 
     // MARK: - Insights
 
-    /// Returns actionable nutrition insights for the given date based on intake vs. goals.
     public func getInsights(for date: Date) async throws -> [NutritionInsight] {
         let summary = try await getDailySummary(for: date)
         return try await analysisEngine.generateInsights(dailySummary: summary, goals: currentGoals)
     }
 
-    /// Identifies nutrient deficiencies for the given date with food suggestions to address them.
     public func getDeficiencies(for date: Date) async throws -> [NutrientDeficiency] {
         let summary = try await getDailySummary(for: date)
         return try await analysisEngine.identifyDeficiencies(summary: summary, goals: currentGoals)
@@ -153,7 +144,6 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
 
     // MARK: - API Methods
 
-    /// Searches the USDA FoodData Central API and returns matching food items with full nutrient profiles.
     public func searchUSDA(query: String, pageSize: Int = 20) async throws -> [FoodItem] {
         let params = [
             "query": query,
@@ -230,7 +220,6 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
         }
     }
 
-    /// Fetches detailed nutrient data for a specific USDA food by its FDC identifier.
     public func fetchFoodDetails(fdcID: String) async throws -> FoodItem {
         let data = try await makeRequest(endpoint: "/food/\(fdcID)")
 
@@ -280,7 +269,6 @@ public actor USDAFoodDatabaseService: USDAFoodDatabaseProtocol {
         )
     }
 
-    /// Looks up a branded food item by its UPC/GTIN barcode in the USDA database.
     public func fetchBrandedFood(barcode: String) async throws -> FoodItem? {
         let params = [
             "query": barcode,
@@ -371,7 +359,6 @@ public actor NutritionAnalysisEngine: NutritionAnalysisProtocol {
 
     // MARK: - Scoring
 
-    /// Computes an overall nutrition score from a nutrient profile.
     public func calculateNutritionScore(nutrients: NutrientProfile) async throws -> Double {
         nutrients.nutritionScore
     }

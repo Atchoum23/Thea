@@ -208,6 +208,8 @@ struct ArtifactDetailView: View {
 
     @State private var selectedTab: ContentTab = .code
     @State private var showCopied = false
+    @State private var saveError: Error?
+    @State private var showingSaveError = false
 
     enum ContentTab: String, CaseIterable {
         case code = "Code"
@@ -245,6 +247,11 @@ struct ArtifactDetailView: View {
                 Divider()
                 versionInfoView
             }
+        }
+        .alert("Save Failed", isPresented: $showingSaveError, presenting: saveError) { _ in
+            Button("OK") { }
+        } message: { error in
+            Text("Could not save file: \(error.localizedDescription)")
         }
     }
 
@@ -417,7 +424,12 @@ struct ArtifactDetailView: View {
             panel.canCreateDirectories = true
 
             if panel.runModal() == .OK, let url = panel.url {
-                try? artifact.content.write(to: url, atomically: true, encoding: .utf8)
+                do {
+                    try artifact.content.write(to: url, atomically: true, encoding: .utf8)
+                } catch {
+                    saveError = error
+                    showingSaveError = true
+                }
             }
         }
     #endif
@@ -432,7 +444,11 @@ enum ArtifactExtractor {
         var artifacts: [Artifact] = []
         let pattern = "```(\\w+)?\\n([\\s\\S]*?)```"
 
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern, options: [])
+        } catch {
+            logger.error("Failed to compile regex pattern: \(error.localizedDescription)")
             return artifacts
         }
 
@@ -513,6 +529,9 @@ enum ArtifactExtractor {
                 type: .code(language: .swift),
                 content: """
                 import Foundation
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "ArtifactPanel")
 
                 struct Example {
                     let value: Int

@@ -17,7 +17,7 @@ import OSLog
 public final class ControlCenterWidgetManager: ObservableObject {
     public static let shared = ControlCenterWidgetManager()
 
-    private let logger = Logger(subsystem: "com.thea.app", category: "ControlCenter")
+    private let logger = Logger(subsystem: "ai.thea.app", category: "ControlCenterWidgetManager")
 
     // MARK: - Published State
 
@@ -249,15 +249,23 @@ public final class ControlCenterWidgetManager: ObservableObject {
         let states = quickActions.reduce(into: [String: Bool]()) { result, action in
             result[action.id] = action.isEnabled
         }
-        if let data = try? JSONEncoder().encode(states) {
+        do {
+            let data = try JSONEncoder().encode(states)
             UserDefaults.standard.set(data, forKey: "controlCenter.actionStates")
+        } catch {
+            logger.error("Failed to encode action states: \(error.localizedDescription)")
         }
     }
 
     private func loadActionStates() {
-        guard let data = UserDefaults.standard.data(forKey: "controlCenter.actionStates"),
-              let states = try? JSONDecoder().decode([String: Bool].self, from: data)
-        else {
+        guard let data = UserDefaults.standard.data(forKey: "controlCenter.actionStates") else {
+            return
+        }
+        let states: [String: Bool]
+        do {
+            states = try JSONDecoder().decode([String: Bool].self, from: data)
+        } catch {
+            logger.error("Failed to decode action states: \(error.localizedDescription)")
             return
         }
 

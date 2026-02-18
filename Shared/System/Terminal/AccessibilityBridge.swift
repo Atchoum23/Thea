@@ -2,6 +2,9 @@
     import AppKit
     @preconcurrency import ApplicationServices
     import Foundation
+    import OSLog
+
+    private let accessibilityBridgeLogger = Logger(subsystem: "ai.thea.app", category: "AccessibilityBridge")
 
     /// Bridge for reading Terminal content via macOS Accessibility API
     /// Provides an alternative to AppleScript for deeper Terminal access
@@ -72,11 +75,12 @@
             // Find the text area (scroll area > text area)
             // swiftlint:disable:next force_cast
             let windowElement = window as! AXUIElement
-            if let textContent = try? findTextContent(in: windowElement) {
+            do {
+                let textContent = try findTextContent(in: windowElement)
                 return textContent
+            } catch {
+                throw AccessibilityError.elementNotFound
             }
-
-            throw AccessibilityError.elementNotFound
         }
 
         /// Read selected text from Terminal
@@ -194,8 +198,13 @@
                let childrenArray = children as? [AXUIElement]
             {
                 for child in childrenArray {
-                    if let text = try? findTextContent(in: child) {
-                        return text
+                    do {
+                        if let text = try findTextContent(in: child) {
+                            return text
+                        }
+                    } catch {
+                        // Element not readable; continue searching siblings
+                        accessibilityBridgeLogger.debug("Skipping unreadable AX child element: \(error.localizedDescription)")
                     }
                 }
             }
@@ -234,7 +243,6 @@
     // MARK: - Accessibility Monitoring
 
     /// Monitor for Terminal content changes using Accessibility observers
-    // @unchecked Sendable: AXObserver mutable state only accessed from main run loop
     final class TerminalAccessibilityMonitor: @unchecked Sendable {
         private var observer: AXObserver?
         private var terminalPID: pid_t?
@@ -294,12 +302,16 @@
         let monitor = Unmanaged<TerminalAccessibilityMonitor>.fromOpaque(refcon).takeUnretainedValue()
 
         // Read the new content
-        if let content = try? AccessibilityBridge.readTerminalText() {
-            // Capture the callback to avoid data race - execute on MainActor
-            let callback = monitor.onChange
-            Task { @MainActor in
-                callback?(content)
+        do {
+            if let content = try AccessibilityBridge.readTerminalText() {
+                // Capture the callback to avoid data race - execute on MainActor
+                let callback = monitor.onChange
+                Task { @MainActor in
+                    callback?(content)
+                }
             }
+        } catch {
+            accessibilityBridgeLogger.debug("Failed to read terminal text in notification callback: \(error.localizedDescription)")
         }
     }
 #endif

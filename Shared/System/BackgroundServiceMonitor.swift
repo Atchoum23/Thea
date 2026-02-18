@@ -14,6 +14,161 @@ import BackgroundTasks
 
 private let bsmLogger = Logger(subsystem: "ai.thea.app", category: "BackgroundServiceMonitor")
 
+// MARK: - Data Types
+
+/// Status of a monitored service
+enum TheaServiceStatus: String, Codable, Sendable, CaseIterable {
+    case healthy
+    case degraded
+    case unhealthy
+    case unknown
+    case recovering
+
+    var icon: String {
+        switch self {
+        case .healthy: "checkmark.circle.fill"
+        case .degraded: "exclamationmark.triangle.fill"
+        case .unhealthy: "xmark.circle.fill"
+        case .unknown: "questionmark.circle.fill"
+        case .recovering: "arrow.triangle.2.circlepath"
+        }
+    }
+
+    var priority: Int {
+        switch self {
+        case .unhealthy: 0
+        case .recovering: 1
+        case .degraded: 2
+        case .unknown: 3
+        case .healthy: 4
+        }
+    }
+}
+
+/// Category of monitored service
+enum TheaServiceCategory: String, Codable, Sendable, CaseIterable {
+    case sync
+    case aiProvider
+    case system
+    case integration
+    case privacy
+
+    var displayName: String {
+        switch self {
+        case .sync: "Sync & Transport"
+        case .aiProvider: "AI Providers"
+        case .system: "System Resources"
+        case .integration: "Integrations"
+        case .privacy: "Privacy & Security"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .sync: "arrow.triangle.2.circlepath"
+        case .aiProvider: "brain"
+        case .system: "cpu"
+        case .integration: "puzzlepiece"
+        case .privacy: "lock.shield"
+        }
+    }
+}
+
+/// A single health check result for a service
+struct TheaServiceCheckResult: Codable, Sendable, Identifiable {
+    let id: UUID
+    let serviceID: String
+    let serviceName: String
+    let category: TheaServiceCategory
+    let status: TheaServiceStatus
+    let message: String
+    let latencyMs: Double?
+    let timestamp: Date
+    let recoveryAttempted: Bool
+    let recoverySucceeded: Bool?
+
+    init(
+        serviceID: String,
+        serviceName: String,
+        category: TheaServiceCategory,
+        status: TheaServiceStatus,
+        message: String,
+        latencyMs: Double? = nil,
+        recoveryAttempted: Bool = false,
+        recoverySucceeded: Bool? = nil
+    ) {
+        self.id = UUID()
+        self.serviceID = serviceID
+        self.serviceName = serviceName
+        self.category = category
+        self.status = status
+        self.message = message
+        self.latencyMs = latencyMs
+        self.timestamp = Date()
+        self.recoveryAttempted = recoveryAttempted
+        self.recoverySucceeded = recoverySucceeded
+    }
+}
+
+/// Aggregate health snapshot of all services
+struct TheaHealthSnapshot: Codable, Sendable, Identifiable {
+    let id: UUID
+    let timestamp: Date
+    let checks: [TheaServiceCheckResult]
+    let overallStatus: TheaServiceStatus
+    let healthyCount: Int
+    let degradedCount: Int
+    let unhealthyCount: Int
+    let recoveryCount: Int
+
+    init(checks: [TheaServiceCheckResult]) {
+        self.id = UUID()
+        self.timestamp = Date()
+        self.checks = checks
+        self.healthyCount = checks.filter { $0.status == .healthy }.count
+        self.degradedCount = checks.filter { $0.status == .degraded }.count
+        self.unhealthyCount = checks.filter { $0.status == .unhealthy }.count
+        self.recoveryCount = checks.filter { $0.status == .recovering }.count
+
+        if unhealthyCount > 0 {
+            self.overallStatus = .unhealthy
+        } else if degradedCount > 0 || recoveryCount > 0 {
+            self.overallStatus = .degraded
+        } else if healthyCount > 0 {
+            self.overallStatus = .healthy
+        } else {
+            self.overallStatus = .unknown
+        }
+    }
+}
+
+/// Recovery action that can be performed
+struct TheaRecoveryAction: Codable, Sendable, Identifiable {
+    let id: UUID
+    let serviceID: String
+    let actionName: String
+    let description: String
+    let timestamp: Date
+    let succeeded: Bool
+    let errorMessage: String?
+
+    init(
+        serviceID: String,
+        actionName: String,
+        description: String,
+        succeeded: Bool,
+        errorMessage: String? = nil
+    ) {
+        self.id = UUID()
+        self.serviceID = serviceID
+        self.actionName = actionName
+        self.description = description
+        self.timestamp = Date()
+        self.succeeded = succeeded
+        self.errorMessage = errorMessage
+    }
+}
+
 // MARK: - Background Service Monitor
 
 @MainActor
@@ -53,7 +208,11 @@ final class BackgroundServiceMonitor: ObservableObject {
             in: .userDomainMask
         ).first ?? FileManager.default.temporaryDirectory
         let dir = appSupport.appendingPathComponent("Thea/ServiceHealth", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            bsmLogger.debug("Could not create service health directory: \(error.localizedDescription)")
+        }
         self.storageURL = dir.appendingPathComponent("health_history.json")
         loadHistory()
     }
@@ -68,7 +227,7 @@ final class BackgroundServiceMonitor: ObservableObject {
             while !Task.isCancelled {
                 await self?.performHealthCheck()
                 let interval = self?.checkInterval ?? 120
-                try? await Task.sleep(for: .seconds(interval))
+                do { try await Task.sleep(for: .seconds(interval)) } catch { break }
             }
         }
 
@@ -147,11 +306,7 @@ final class BackgroundServiceMonitor: ObservableObject {
         if syncEnabled {
             let lastSync = CloudKitService.shared.lastSyncDate
             let interval = lastSync.map { Date().timeIntervalSince($0) } ?? .infinity
-            // Guard against infinity/NaN before Int conversion — crashes if lastSyncDate is nil
-            if !interval.isFinite {
-                cloudKitStatus = .unknown
-                cloudKitMsg = "Never synced"
-            } else if interval < 600 { // Within 10 minutes
+            if interval < 600 { // Within 10 minutes
                 cloudKitStatus = .healthy
                 cloudKitMsg = "Last sync \(Int(interval))s ago"
             } else if interval < 3600 { // Within 1 hour
@@ -279,30 +434,34 @@ final class BackgroundServiceMonitor: ObservableObject {
         #else
         let homeURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first ?? URL(fileURLWithPath: "/")
         #endif
-        if let values = try? homeURL.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]),
-           let available = values.volumeAvailableCapacityForImportantUsage {
-            let availableGB = Double(available) / 1_073_741_824
-            let diskStatus: TheaServiceStatus
-            let diskMsg: String
+        do {
+            let values = try homeURL.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
+            if let available = values.volumeAvailableCapacityForImportantUsage {
+                let availableGB = Double(available) / 1_073_741_824
+                let diskStatus: TheaServiceStatus
+                let diskMsg: String
 
-            if availableGB > 20 {
-                diskStatus = .healthy
-                diskMsg = String(format: "%.1f GB available", availableGB)
-            } else if availableGB > 5 {
-                diskStatus = .degraded
-                diskMsg = String(format: "%.1f GB available — low space", availableGB)
-            } else {
-                diskStatus = .unhealthy
-                diskMsg = String(format: "%.1f GB available — critical", availableGB)
+                if availableGB > 20 {
+                    diskStatus = .healthy
+                    diskMsg = String(format: "%.1f GB available", availableGB)
+                } else if availableGB > 5 {
+                    diskStatus = .degraded
+                    diskMsg = String(format: "%.1f GB available — low space", availableGB)
+                } else {
+                    diskStatus = .unhealthy
+                    diskMsg = String(format: "%.1f GB available — critical", availableGB)
+                }
+
+                results.append(TheaServiceCheckResult(
+                    serviceID: "disk_space",
+                    serviceName: "Disk Space",
+                    category: .system,
+                    status: diskStatus,
+                    message: diskMsg
+                ))
             }
-
-            results.append(TheaServiceCheckResult(
-                serviceID: "disk_space",
-                serviceName: "Disk Space",
-                category: .system,
-                status: diskStatus,
-                message: diskMsg
-            ))
+        } catch {
+            bsmLogger.debug("Could not read disk capacity: \(error.localizedDescription)")
         }
 
         // Thermal state
@@ -535,7 +694,11 @@ final class BackgroundServiceMonitor: ObservableObject {
         let request = BGProcessingTaskRequest(identifier: Self.bgTaskIdentifier)
         request.earliestBeginDate = Date(timeIntervalSinceNow: 15 * 60) // 15 min
         request.requiresNetworkConnectivity = false
-        try? BGTaskScheduler.shared.submit(request)
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            bsmLogger.error("Failed to schedule background health check: \(error.localizedDescription)")
+        }
     }
     #endif
 
@@ -549,20 +712,35 @@ final class BackgroundServiceMonitor: ObservableObject {
             recoveries: Array(recoveryHistory.suffix(maxRecoveryHistory)),
             consecutiveFailures: consecutiveFailures
         )
-        if let data = try? encoder.encode(saveable) {
-            try? data.write(to: storageURL, options: .atomic)
+        do {
+            let data = try encoder.encode(saveable)
+            try data.write(to: storageURL, options: .atomic)
+        } catch {
+            bsmLogger.error("Failed to save health history: \(error.localizedDescription)")
         }
     }
 
     private func loadHistory() {
-        guard let data = try? Data(contentsOf: storageURL) else { return }
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        if let history = try? decoder.decode(SaveableHealthHistory.self, from: data) {
+        guard FileManager.default.fileExists(atPath: storageURL.path) else { return }
+        do {
+            let data = try Data(contentsOf: storageURL)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let history = try decoder.decode(SaveableHealthHistory.self, from: data)
             self.snapshotHistory = history.snapshots
             self.recoveryHistory = history.recoveries
             self.consecutiveFailures = history.consecutiveFailures
             self.latestSnapshot = history.snapshots.last
+        } catch {
+            bsmLogger.debug("Could not load service health history: \(error.localizedDescription)")
         }
     }
+}
+
+// MARK: - Persistence Model
+
+private struct SaveableHealthHistory: Codable {
+    let snapshots: [TheaHealthSnapshot]
+    let recoveries: [TheaRecoveryAction]
+    let consecutiveFailures: [String: Int]
 }

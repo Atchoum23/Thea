@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 // MARK: - Investment Tracker
 
@@ -8,6 +9,8 @@ import Foundation
 @Observable
 final class InvestmentTracker {
     static let shared = InvestmentTracker()
+
+    private let logger = Logger(subsystem: "com.thea.app", category: "InvestmentTracker")
 
     private(set) var portfolios: [InvestmentPortfolio] = []
     private(set) var holdings: [Holding] = []
@@ -258,30 +261,33 @@ final class InvestmentTracker {
     // MARK: - Persistence
 
     private func loadData() {
-        if let data = UserDefaults.standard.data(forKey: "thea.investment.portfolios"),
-           let loaded = try? JSONDecoder().decode([InvestmentPortfolio].self, from: data) {
-            portfolios = loaded
+        if let data = UserDefaults.standard.data(forKey: "thea.investment.portfolios") {
+            do { portfolios = try JSONDecoder().decode([InvestmentPortfolio].self, from: data) }
+            catch { logger.debug("Could not decode portfolios: \(error.localizedDescription)") }
         }
-        if let data = UserDefaults.standard.data(forKey: "thea.investment.holdings"),
-           let loaded = try? JSONDecoder().decode([Holding].self, from: data) {
-            holdings = loaded
+        if let data = UserDefaults.standard.data(forKey: "thea.investment.holdings") {
+            do { holdings = try JSONDecoder().decode([Holding].self, from: data) }
+            catch { logger.debug("Could not decode holdings: \(error.localizedDescription)") }
         }
-        if let data = UserDefaults.standard.data(forKey: "thea.investment.dividends"),
-           let loaded = try? JSONDecoder().decode([DividendRecord].self, from: data) {
-            dividendHistory = loaded
+        if let data = UserDefaults.standard.data(forKey: "thea.investment.dividends") {
+            do { dividendHistory = try JSONDecoder().decode([DividendRecord].self, from: data) }
+            catch { logger.debug("Could not decode dividends: \(error.localizedDescription)") }
         }
     }
 
     private func saveData() {
-        if let data = try? JSONEncoder().encode(portfolios) {
+        do {
+            let data = try JSONEncoder().encode(portfolios)
             UserDefaults.standard.set(data, forKey: "thea.investment.portfolios")
-        }
-        if let data = try? JSONEncoder().encode(holdings) {
+        } catch { logger.error("Failed to save portfolios: \(error.localizedDescription)") }
+        do {
+            let data = try JSONEncoder().encode(holdings)
             UserDefaults.standard.set(data, forKey: "thea.investment.holdings")
-        }
-        if let data = try? JSONEncoder().encode(dividendHistory) {
+        } catch { logger.error("Failed to save holdings: \(error.localizedDescription)") }
+        do {
+            let data = try JSONEncoder().encode(dividendHistory)
             UserDefaults.standard.set(data, forKey: "thea.investment.dividends")
-        }
+        } catch { logger.error("Failed to save dividends: \(error.localizedDescription)") }
     }
 }
 

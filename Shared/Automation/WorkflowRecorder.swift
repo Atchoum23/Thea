@@ -322,28 +322,38 @@ public final class WorkflowRecorder {
     private let configKey = "WorkflowRecorder.config"
 
     private func loadSavedWorkflows() {
-        if let data = UserDefaults.standard.data(forKey: workflowsKey),
-           let decoded = try? JSONDecoder().decode([RecordedWorkflow].self, from: data) {
-            savedWorkflows = decoded
+        guard let data = UserDefaults.standard.data(forKey: workflowsKey) else { return }
+        do {
+            savedWorkflows = try JSONDecoder().decode([RecordedWorkflow].self, from: data)
+        } catch {
+            logger.error("Failed to load saved workflows: \(error.localizedDescription, privacy: .public)")
         }
     }
 
     private func persistWorkflows() {
-        if let data = try? JSONEncoder().encode(savedWorkflows) {
+        do {
+            let data = try JSONEncoder().encode(savedWorkflows)
             UserDefaults.standard.set(data, forKey: workflowsKey)
+        } catch {
+            logger.error("Failed to persist workflows: \(error.localizedDescription, privacy: .public)")
         }
     }
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: configKey),
-           let decoded = try? JSONDecoder().decode(Configuration.self, from: data) {
-            configuration = decoded
+        guard let data = UserDefaults.standard.data(forKey: configKey) else { return }
+        do {
+            configuration = try JSONDecoder().decode(Configuration.self, from: data)
+        } catch {
+            logger.error("Failed to load configuration: \(error.localizedDescription, privacy: .public)")
         }
     }
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             UserDefaults.standard.set(data, forKey: configKey)
+        } catch {
+            logger.error("Failed to save configuration: \(error.localizedDescription, privacy: .public)")
         }
     }
 }

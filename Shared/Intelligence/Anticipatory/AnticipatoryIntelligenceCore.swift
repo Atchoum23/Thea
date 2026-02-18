@@ -135,7 +135,11 @@ public final class AnticipatoryIntelligenceCore {
         anticipationTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.runAnticipationCycle()
-                try? await Task.sleep(for: .seconds(5))
+                do {
+                    try await Task.sleep(for: .seconds(5)
+                } catch {
+                    break
+                })
             }
         }
     }

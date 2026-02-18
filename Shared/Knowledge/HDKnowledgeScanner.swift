@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import UniformTypeIdentifiers
 
 // MARK: - HD Knowledge Scanner
@@ -9,6 +10,8 @@ import UniformTypeIdentifiers
 @Observable
 final class HDKnowledgeScanner {
     static let shared = HDKnowledgeScanner()
+
+    private let logger = Logger(subsystem: "com.thea.app", category: "HDKnowledgeScanner")
 
     private(set) var indexedFiles: [ScannedFile] = []
     private(set) var isIndexing = false
@@ -52,26 +55,37 @@ final class HDKnowledgeScanner {
 
     private func loadConfiguration() {
         // Load from UserDefaults
-        if let data = UserDefaults.standard.data(forKey: "HDKnowledgeScanner.scanPaths"),
-           let paths = try? JSONDecoder().decode([URL].self, from: data)
-        {
-            scanPaths = paths
+        if let data = UserDefaults.standard.data(forKey: "HDKnowledgeScanner.scanPaths") {
+            do {
+                scanPaths = try JSONDecoder().decode([URL].self, from: data)
+            } catch {
+                logger.debug("Could not decode scan paths: \(error.localizedDescription)")
+            }
         }
 
-        if let data = UserDefaults.standard.data(forKey: "HDKnowledgeScanner.excludedPaths"),
-           let paths = try? JSONDecoder().decode([URL].self, from: data)
-        {
-            excludedPaths = Set(paths)
+        if let data = UserDefaults.standard.data(forKey: "HDKnowledgeScanner.excludedPaths") {
+            do {
+                let paths = try JSONDecoder().decode([URL].self, from: data)
+                excludedPaths = Set(paths)
+            } catch {
+                logger.debug("Could not decode excluded paths: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(scanPaths) {
+        do {
+            let data = try JSONEncoder().encode(scanPaths)
             UserDefaults.standard.set(data, forKey: "HDKnowledgeScanner.scanPaths")
+        } catch {
+            logger.error("Failed to save scan paths: \(error.localizedDescription)")
         }
 
-        if let data = try? JSONEncoder().encode(Array(excludedPaths)) {
+        do {
+            let data = try JSONEncoder().encode(Array(excludedPaths))
             UserDefaults.standard.set(data, forKey: "HDKnowledgeScanner.excludedPaths")
+        } catch {
+            logger.error("Failed to save excluded paths: \(error.localizedDescription)")
         }
     }
 
@@ -154,9 +168,12 @@ final class HDKnowledgeScanner {
     private func indexBatch(_ files: [URL]) async throws {
         // Execute sequentially to satisfy Swift 6 region-based isolation checker
         for fileURL in files {
-            if let file = try? await indexFile(fileURL) {
+            do {
+                let file = try await indexFile(fileURL)
                 indexedFiles.append(file)
                 totalFilesIndexed += 1
+            } catch {
+                logger.debug("Could not index file \(fileURL.lastPathComponent): \(error.localizedDescription)")
             }
         }
     }
@@ -203,10 +220,13 @@ final class HDKnowledgeScanner {
         }
 
         // Check file size
-        if let size = try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize,
-           size > config.maxFileSizeBytes
-        {
-            return false
+        do {
+            let resourceValues = try url.resourceValues(forKeys: [.fileSizeKey])
+            if let size = resourceValues.fileSize, size > config.maxFileSizeBytes {
+                return false
+            }
+        } catch {
+            logger.debug("Could not read file size for \(url.lastPathComponent): \(error.localizedDescription)")
         }
 
         return true
@@ -231,64 +251,26 @@ final class HDKnowledgeScanner {
     // MARK: - Embedding Generation
 
     private func generateEmbedding(_ text: String) async throws -> [Float] {
-        // Try OpenAI embedding API first (high-quality semantic vectors)
-        if let apiEmbedding = await fetchOpenAIEmbedding(for: text) {
-            return apiEmbedding
+        // Use default AI provider for embeddings
+        guard let _ = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
+            throw KnowledgeError.noProvider
         }
 
-        // Fallback: hash-based embedding when API is unavailable
-        return generateHashEmbedding(text)
+        // For now, generate simple hash-based embedding
+        // In production, use actual embedding API
+        return generateSimpleEmbedding(text)
     }
 
-    private func fetchOpenAIEmbedding(for text: String) async -> [Float]? {
-        guard let apiKey = SettingsManager.shared.getAPIKey(for: "openai"), !apiKey.isEmpty else {
-            return nil
-        }
-
-        let url = URL(string: "https://api.openai.com/v1/embeddings")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.timeoutInterval = 15
-
-        let body: [String: Any] = [
-            "model": "text-embedding-3-small",
-            "input": String(text.prefix(8000))
-        ]
-
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: body)
-            let (data, response) = try await URLSession.shared.data(for: request)
-
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                return nil
-            }
-
-            if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let dataArray = json["data"] as? [[String: Any]],
-               let first = dataArray.first,
-               let embedding = first["embedding"] as? [Double] {
-                return embedding.map { Float($0) }
-            }
-        } catch {
-            // Silently fall through to hash-based fallback
-        }
-
-        return nil
-    }
-
-    /// Hash-based embedding fallback when no embedding API is available.
-    /// Not semantically meaningful, but allows cosine distance ranking by term overlap.
-    private func generateHashEmbedding(_ text: String) -> [Float] {
+    private func generateSimpleEmbedding(_ text: String) -> [Float] {
         let dimension = config.embeddingDimension
         var embedding = [Float](repeating: 0, count: dimension)
 
+        // Simple hash-based embedding
         let words = text.lowercased().components(separatedBy: .whitespacesAndNewlines)
-        for word in words where !word.isEmpty {
+
+        for (index, word) in words.prefix(dimension).enumerated() {
             let hash = abs(word.hashValue)
-            let idx = hash % dimension
-            embedding[idx] += 1.0
+            embedding[index] = Float(hash % 1000) / 1000.0
         }
 
         // Normalize
@@ -396,8 +378,11 @@ final class HDKnowledgeScanner {
 
         // Re-index file
         if shouldIndex(url) {
-            if let newFile = try? await indexFile(url) {
+            do {
+                let newFile = try await indexFile(url)
                 indexedFiles.append(newFile)
+            } catch {
+                logger.debug("Could not re-index changed file \(url.lastPathComponent): \(error.localizedDescription)")
             }
         }
     }

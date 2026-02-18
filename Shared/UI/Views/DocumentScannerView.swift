@@ -476,12 +476,12 @@ private struct DocumentDetailView: View {
                     .font(.title2)
 
                 if editingTitle {
-                    TextField("Title", text: $titleText) {
+                    TextField("Title", text: $titleText, onCommit: {
                         var updated = document
                         updated.title = titleText
                         onUpdate(updated)
                         editingTitle = false
-                    }
+                    })
                     .textFieldStyle(.roundedBorder)
                 } else {
                     Text(document.title)
@@ -490,8 +490,6 @@ private struct DocumentDetailView: View {
                             titleText = document.title
                             editingTitle = true
                         }
-                        .accessibilityLabel("Document title: \(document.title)")
-                        .accessibilityHint("Double tap to edit title")
                 }
 
                 Spacer()
@@ -500,10 +498,9 @@ private struct DocumentDetailView: View {
                     scanner.toggleFavorite(document.id)
                 } label: {
                     Image(systemName: document.isFavorite ? "star.fill" : "star")
-                        .foregroundStyle(document.isFavorite ? Color.theaWarning : .secondary)
+                        .foregroundStyle(document.isFavorite ? .yellow : .secondary)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(document.isFavorite ? "Remove from favorites" : "Add to favorites")
             }
 
             // Tags
@@ -735,7 +732,7 @@ private struct StatBadge: View {
 
 #if os(iOS)
 struct DocumentCameraScannerView: UIViewControllerRepresentable {
-    var onCapture: @Sendable ([Data]) -> Void
+    var onCapture: ([Data]) -> Void
 
     func makeUIViewController(context: Context) -> UINavigationController {
         // Check if VNDocumentCameraViewController is available
@@ -762,14 +759,13 @@ struct DocumentCameraScannerView: UIViewControllerRepresentable {
         Coordinator(onCapture: onCapture)
     }
 
-    class Coordinator: NSObject, @preconcurrency VNDocumentCameraViewControllerDelegate {
-        let onCapture: @Sendable ([Data]) -> Void
+    class Coordinator: NSObject, VNDocumentCameraViewControllerDelegate {
+        let onCapture: ([Data]) -> Void
 
-        init(onCapture: @escaping @Sendable ([Data]) -> Void) {
+        init(onCapture: @escaping ([Data]) -> Void) {
             self.onCapture = onCapture
         }
 
-        @MainActor
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
             var images: [Data] = []
             for i in 0..<scan.pageCount {
@@ -782,12 +778,10 @@ struct DocumentCameraScannerView: UIViewControllerRepresentable {
             controller.dismiss(animated: true)
         }
 
-        @MainActor
         func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
             controller.dismiss(animated: true)
         }
 
-        @MainActor
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
             controller.dismiss(animated: true)
         }

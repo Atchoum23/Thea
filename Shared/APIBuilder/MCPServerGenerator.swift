@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import OSLog
 
 // MARK: - MCP Server Generator
 
@@ -16,6 +17,7 @@ public actor MCPServerGenerator {
 
     // MARK: - State
 
+    private let mcpGeneratorLogger = Logger(subsystem: "ai.thea.app", category: "MCPServerGenerator")
     private var generatedServers: [String: GeneratedMCPServer] = [:]
     private var templates: [String: MCPTemplate] = [:]
     private var isInitialized = false
@@ -232,7 +234,7 @@ public actor MCPServerGenerator {
             // MARK: - \(tool.name) Tool
 
             public func \(tool.name)(\(tool.parameters.map { "\($0.name): \($0.swiftType)" }.joined(separator: ", "))) async throws -> MCPToolResult {
-                // Add your \(tool.name) implementation here
+                // TODO: Implement \(tool.name) logic
                 return MCPToolResult(
                     content: [MCPContent(type: "text", text: "Result from \(tool.name)")],
                     isError: false
@@ -253,7 +255,7 @@ public actor MCPServerGenerator {
             // MARK: - \(resource.name) Resource
 
             private func read\(resource.name.capitalized)Resource(uri: String) async throws -> MCPResourceContent {
-                // Add your resource reading implementation here
+                // TODO: Implement resource reading logic
                 return MCPResourceContent(
                     uri: uri,
                     mimeType: "\(resource.mimeType)",
@@ -270,7 +272,7 @@ public actor MCPServerGenerator {
             // MARK: - \(prompt.name) Prompt
 
             private func get\(prompt.name.capitalized)Prompt(arguments: [String: String]) async throws -> MCPPromptResult {
-                // Add your prompt generation implementation here
+                // TODO: Implement prompt generation logic
                 return MCPPromptResult(
                     description: "\(prompt.description)",
                     messages: [
@@ -360,10 +362,13 @@ public actor MCPServerGenerator {
         schema["properties"] = properties
 
         // Convert to JSON string representation
-        if let data = try? JSONSerialization.data(withJSONObject: schema),
-           let string = String(data: data, encoding: .utf8)
-        {
-            return string
+        do {
+            let data = try JSONSerialization.data(withJSONObject: schema)
+            if let string = String(data: data, encoding: .utf8) {
+                return string
+            }
+        } catch {
+            mcpGeneratorLogger.error("Failed to serialize JSON schema: \(error.localizedDescription)")
         }
         return "{}"
     }

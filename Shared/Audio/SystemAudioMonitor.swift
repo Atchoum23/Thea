@@ -5,9 +5,13 @@
 
 import Foundation
 import AVFoundation
+import OSLog
+
+private let audioMonitorLogger = Logger(subsystem: "ai.thea.app", category: "SystemAudioMonitor")
 import Combine
 #if os(macOS)
 import ScreenCaptureKit
+import OSLog
 #endif
 
 // MARK: - Audio Monitor Types
@@ -129,7 +133,11 @@ final class SystemAudioMonitor {
 
         #if os(macOS)
         if let stream = stream {
-            try? await stream.stopCapture()
+            do {
+                try await stream.stopCapture()
+            } catch {
+                audioMonitorLogger.error("Failed to stop audio capture: \(error.localizedDescription)")
+            }
             self.stream = nil
         }
         #endif
@@ -306,7 +314,6 @@ final class SystemAudioMonitor {
 
 #if os(macOS)
 @available(macOS 13.0, *)
-// @unchecked Sendable: SCStreamOutput delegate — callbacks serialized by ScreenCaptureKit
 private class AudioStreamOutput: NSObject, SCStreamOutput, @unchecked Sendable {
     private weak var monitor: SystemAudioMonitor?
 

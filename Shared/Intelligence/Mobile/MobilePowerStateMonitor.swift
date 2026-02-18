@@ -5,6 +5,7 @@
 // Works on iOS/iPadOS and macOS (laptops).
 
 import Foundation
+import OSLog
 import Observation
 
 #if os(iOS)
@@ -111,6 +112,7 @@ public struct InferenceBudget: Sendable {
 @MainActor
 @Observable
 public final class MobilePowerStateMonitor {
+    private let logger = Logger(subsystem: \"ai.thea.app\", category: \"MobilePowerStateMonitor\")
     public static let shared = MobilePowerStateMonitor()
 
     // MARK: - State
@@ -199,7 +201,11 @@ public final class MobilePowerStateMonitor {
         monitoringTask?.cancel()
         monitoringTask = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(60))
+                do {
+                    try await Task.sleep(for: .seconds(60))
+                } catch {
+                    break
+                }
                 self?.updateMobilePowerState()
                 self?.recordDrainSample()
             }

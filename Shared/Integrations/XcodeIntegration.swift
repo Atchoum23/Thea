@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import OSLog
 #if os(macOS)
     import AppKit
 #endif
@@ -23,11 +24,11 @@ public actor XcodeIntegration: AppIntegrationModule {
     public let bundleIdentifier = "com.apple.dt.Xcode"
     public let icon = "hammer"
 
+    private let logger = Logger(subsystem: "ai.thea.app", category: "XcodeIntegration")
     private var isConnected = false
 
     private init() {}
 
-    /// Connects to a running Xcode instance (macOS only).
     public func connect() async throws {
         #if os(macOS)
             guard NSWorkspace.shared.runningApplications.contains(where: { $0.bundleIdentifier == bundleIdentifier }) else {
@@ -39,10 +40,8 @@ public actor XcodeIntegration: AppIntegrationModule {
         #endif
     }
 
-    /// Disconnects from Xcode.
     public func disconnect() async { isConnected = false }
 
-    /// Returns whether Xcode is installed on this system.
     public func isAvailable() async -> Bool {
         #if os(macOS)
             return NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) != nil
@@ -153,7 +152,7 @@ public actor XcodeIntegration: AppIntegrationModule {
             // The user can navigate manually or we could use AppleScript to go to line
             if let targetLine = line {
                 // Give Xcode time to open the file
-                try await Task.sleep(for: .milliseconds(500))
+                try await Task.sleep(nanoseconds: 500_000_000)
                 try await goToLine(targetLine)
             }
         #else
@@ -270,7 +269,13 @@ public actor XcodeIntegration: AppIntegrationModule {
     private func parseErrors(from output: String) -> [XcodeBuildIssue] {
         var issues: [XcodeBuildIssue] = []
         let pattern = #"(.+):(\d+):(\d+): error: (.+)"#
-        guard let regex = try? NSRegularExpression(pattern: pattern) else { return issues }
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern)
+        } catch {
+            logger.error("Failed to compile error regex: \(error.localizedDescription)")
+            return issues
+        }
 
         let matches = regex.matches(in: output, range: NSRange(output.startIndex..., in: output))
         for match in matches {
@@ -292,7 +297,13 @@ public actor XcodeIntegration: AppIntegrationModule {
     private func parseWarnings(from output: String) -> [XcodeBuildIssue] {
         var issues: [XcodeBuildIssue] = []
         let pattern = #"(.+):(\d+):(\d+): warning: (.+)"#
-        guard let regex = try? NSRegularExpression(pattern: pattern) else { return issues }
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern)
+        } catch {
+            logger.error("Failed to compile warning regex: \(error.localizedDescription)")
+            return issues
+        }
 
         let matches = regex.matches(in: output, range: NSRange(output.startIndex..., in: output))
         for match in matches {

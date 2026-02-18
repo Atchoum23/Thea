@@ -427,7 +427,10 @@ private func createParsedWAMsg(
         let type: WATestAttachmentType
         if raw.content.hasPrefix("AUD-") || raw.content.hasPrefix("PTT-") {
             type = .voiceNote
-        } else if raw.content.hasPrefix("VID-") { type = .video } else if raw.content.hasPrefix("STK-") { type = .sticker } else if raw.content.hasPrefix("IMG-") { type = .image } else { type = .document }
+        } else if raw.content.hasPrefix("VID-") { type = .video }
+        else if raw.content.hasPrefix("STK-") { type = .sticker }
+        else if raw.content.hasPrefix("IMG-") { type = .image }
+        else { type = .document }
         attachments = [WATestAttachment(type: type, fileName: raw.content)]
     } else {
         attachments = []

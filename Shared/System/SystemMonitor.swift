@@ -221,7 +221,11 @@ final class SystemMonitor: ObservableObject {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         let dir = appSupport.appendingPathComponent("Thea/SystemMonitor", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            smLogger.debug("Failed to create SystemMonitor directory: \(error.localizedDescription)")
+        }
         self.storageURL = dir.appendingPathComponent("snapshots.json")
         loadHistory()
     }
@@ -234,7 +238,11 @@ final class SystemMonitor: ObservableObject {
         monitorTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.captureSnapshot()
-                try? await Task.sleep(for: .seconds(interval))
+                do {
+                    try await Task.sleep(for: .seconds(interval))
+                } catch {
+                    break
+                }
             }
         }
         smLogger.info("System monitoring started (interval: \(interval)s)")
@@ -561,7 +569,11 @@ final class SystemMonitor: ObservableObject {
         snapshots.removeAll()
         anomalies.removeAll()
         latestSnapshot = nil
-        try? FileManager.default.removeItem(at: storageURL)
+        do {
+            try FileManager.default.removeItem(at: storageURL)
+        } catch {
+            smLogger.debug("Failed to remove snapshot storage file: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Summary

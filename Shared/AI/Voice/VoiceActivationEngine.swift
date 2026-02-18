@@ -238,7 +238,6 @@ final class VoiceActivationEngine {
             switch chunk.type {
             case let .delta(text):
                 response += text
-            case .thinkingDelta: break
             case .complete:
                 break
             case let .error(error):
@@ -284,7 +283,11 @@ final class VoiceActivationEngine {
 
         Task {
             while conversationMode {
-                try? await Task.sleep(for: .seconds(silenceThreshold))
+                do {
+                    try await Task.sleep(nanoseconds: UInt64(silenceThreshold * 1_000_000_000))
+                } catch {
+                    break // Task cancelled — silence detector stopping
+                }
 
                 if let lastSpeech = lastSpeechTime,
                    Date().timeIntervalSince(lastSpeech) >= silenceThreshold
@@ -340,7 +343,6 @@ final class VoiceActivationEngine {
 
 // MARK: - Speech Delegate
 
-// @unchecked Sendable: NSObject delegate — immutable onComplete closure set during init
 private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
     let onComplete: () -> Void
 

@@ -207,7 +207,11 @@ final class TranslationEngine: ObservableObject {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         let dir = appSupport.appendingPathComponent("Thea/Translation", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            logger.error("Failed to create Translation directory: \(error.localizedDescription)")
+        }
 
         self.historyFileURL = dir.appendingPathComponent("history.json")
         self.recentPairsFileURL = dir.appendingPathComponent("recent_pairs.json")
@@ -433,7 +437,6 @@ final class TranslationEngine: ObservableObject {
             switch chunk.type {
             case .delta(let delta):
                 translatedText += delta
-            case .thinkingDelta: break
             case .complete(let message):
                 if translatedText.isEmpty {
                     translatedText = message.content.textValue

@@ -237,7 +237,12 @@ public final class ProjectMemoryManager: ObservableObject {
 
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return try? encoder.encode(project)
+        do {
+            return try encoder.encode(project)
+        } catch {
+            logger.error("Failed to export project '\(project.name)': \(error.localizedDescription)")
+            return nil
+        }
     }
 
     /// Import project memory from JSON
@@ -271,7 +276,11 @@ public final class ProjectMemoryManager: ObservableObject {
     private func startAutoSave() {
         autoSaveTask = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(60))
+                do {
+                    try await Task.sleep(for: .seconds(60))
+                } catch {
+                    break
+                }
                 await MainActor.run {
                     self.saveProjects()
                 }
@@ -292,10 +301,14 @@ public final class ProjectMemoryManager: ObservableObject {
         guard let url = projectsURL else { return }
 
         // Ensure directory exists
-        try? fileManager.createDirectory(
-            at: url.deletingLastPathComponent(),
-            withIntermediateDirectories: true
-        )
+        do {
+            try fileManager.createDirectory(
+                at: url.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+        } catch {
+            logger.error("Failed to create project memories directory: \(error.localizedDescription)")
+        }
 
         do {
             let encoder = JSONEncoder()

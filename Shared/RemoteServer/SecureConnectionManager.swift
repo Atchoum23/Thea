@@ -12,7 +12,10 @@ import CryptoKit
 import Foundation
 import LocalAuthentication
 import Network
+import OSLog
 import Security
+
+private let scmLogger = Logger(subsystem: "ai.thea.app", category: "SecureConnection")
 
 // MARK: - Secure Connection Manager
 
@@ -24,6 +27,7 @@ public class SecureConnectionManager: ObservableObject {
     @Published public private(set) var isInitialized = false
     @Published public private(set) var securityEvents: [SecurityEvent] = []
     @Published public private(set) var activePairingCode: String?
+    @Published public var lastSecurityError: String?
 
     // MARK: - Security Configuration
 
@@ -51,7 +55,13 @@ public class SecureConnectionManager: ObservableObject {
     public func initialize() async throws {
         // Generate or load server key pair
         if let keyData = loadKeyFromKeychain(identifier: "thea.remote.server.privatekey") {
-            serverPrivateKey = try? P256.Signing.PrivateKey(rawRepresentation: keyData)
+            do {
+                serverPrivateKey = try P256.Signing.PrivateKey(rawRepresentation: keyData)
+            } catch {
+                scmLogger.error("Failed to deserialize stored server private key (corrupted?): \(error.localizedDescription)")
+                lastSecurityError = "Server private key corrupted — regenerating"
+                // Will fall through to regenerate below
+            }
         }
 
         if serverPrivateKey == nil {
@@ -216,7 +226,11 @@ public class SecureConnectionManager: ObservableObject {
 
         // Schedule cleanup
         Task {
-            try? await Task.sleep(for: .seconds(duration))
+            do {
+                try await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
+            } catch {
+                // Task cancelled — proceed with cleanup immediately
+            }
             await MainActor.run {
                 self.pairingCodes.removeValue(forKey: code)
                 if self.activePairingCode == code {
@@ -237,7 +251,11 @@ public class SecureConnectionManager: ObservableObject {
         guard let code = response.pairingCode else {
             logEvent(.authenticationFailed, "No pairing code provided")
             // SECURITY: Add delay to prevent timing attacks
-            try? await Task.sleep(for: .milliseconds(500)) // 500ms
+            do {
+                try await Task.sleep(nanoseconds: 500_000_000) // 500ms
+            } catch {
+                scmLogger.debug("Timing delay interrupted: \(error.localizedDescription)")
+            }
             return false
         }
 
@@ -245,7 +263,11 @@ public class SecureConnectionManager: ObservableObject {
         // First, get the session and verify it exists
         guard let session = pairingCodes[code] else {
             logEvent(.authenticationFailed, "Invalid pairing code")
-            try? await Task.sleep(for: .milliseconds(500)) // 500ms delay for timing attacks
+            do {
+                try await Task.sleep(nanoseconds: 500_000_000) // 500ms delay for timing attacks
+            } catch {
+                scmLogger.debug("Timing delay interrupted: \(error.localizedDescription)")
+            }
             return false
         }
 
@@ -349,18 +371,26 @@ public class SecureConnectionManager: ObservableObject {
 
     // SECURITY FIX (FINDING-011): Store trusted certificates in Keychain instead of UserDefaults
     private func loadTrustedCertificates() -> [Data]? {
-        guard let data = loadKeyFromKeychain(identifier: "thea.remote.trustedcerts"),
-              let certs = try? JSONDecoder().decode([Data].self, from: data)
-        else {
+        guard let data = loadKeyFromKeychain(identifier: "thea.remote.trustedcerts") else {
             return nil
         }
-        return certs
+        do {
+            return try JSONDecoder().decode([Data].self, from: data)
+        } catch {
+            scmLogger.error("Failed to decode trusted certificates from Keychain: \(error.localizedDescription)")
+            lastSecurityError = "Trusted certificates data corrupted"
+            return nil
+        }
     }
 
     // SECURITY FIX (FINDING-011): Store trusted certificates in Keychain instead of UserDefaults
     private func saveTrustedCertificates(_ certs: [Data]) {
-        if let data = try? JSONEncoder().encode(certs) {
+        do {
+            let data = try JSONEncoder().encode(certs)
             saveKeyToKeychain(data, identifier: "thea.remote.trustedcerts")
+        } catch {
+            scmLogger.error("Failed to encode trusted certificates for Keychain: \(error.localizedDescription)")
+            lastSecurityError = "Failed to save trusted certificates: \(error.localizedDescription)"
         }
     }
 
@@ -544,17 +574,24 @@ public class SecureConnectionManager: ObservableObject {
 
     // SECURITY FIX (FINDING-011): Store whitelist in Keychain instead of UserDefaults
     private func loadWhitelist() {
-        if let data = loadKeyFromKeychain(identifier: "thea.remote.whitelist"),
-           let jsonArray = try? JSONDecoder().decode([String].self, from: data)
-        {
+        guard let data = loadKeyFromKeychain(identifier: "thea.remote.whitelist") else { return }
+        do {
+            let jsonArray = try JSONDecoder().decode([String].self, from: data)
             whitelist = Set(jsonArray)
+        } catch {
+            scmLogger.error("Failed to decode IP whitelist from Keychain: \(error.localizedDescription)")
+            lastSecurityError = "IP whitelist data corrupted"
         }
     }
 
     // SECURITY FIX (FINDING-011): Store whitelist in Keychain instead of UserDefaults
     private func saveWhitelist() {
-        if let data = try? JSONEncoder().encode(Array(whitelist)) {
+        do {
+            let data = try JSONEncoder().encode(Array(whitelist))
             saveKeyToKeychain(data, identifier: "thea.remote.whitelist")
+        } catch {
+            scmLogger.error("Failed to encode IP whitelist for Keychain: \(error.localizedDescription)")
+            lastSecurityError = "Failed to save IP whitelist: \(error.localizedDescription)"
         }
     }
 
@@ -697,7 +734,6 @@ private struct PairingSession {
 
 // MARK: - Connection Security Error
 
-/// Errors related to connection security operations such as encryption, key management, and authentication challenges.
 public enum ConnectionSecurityError: Error, LocalizedError, Sendable {
     case keyNotInitialized
     case challengeGenerationFailed

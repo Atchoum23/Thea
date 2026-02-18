@@ -161,7 +161,7 @@ struct ChatInputView: View {
                     } label: {
                         Image(systemName: isListening ? "mic.fill" : "mic")
                             .font(.system(size: TheaSize.iconMedium))
-                            .foregroundStyle(isListening ? Color.theaError : .secondary)
+                            .foregroundStyle(isListening ? .red : .secondary)
                             .symbolEffect(.bounce, value: isListening)
                     }
                     .buttonStyle(.plain)
@@ -225,7 +225,7 @@ struct ChatInputView: View {
 
     private var characterCounter: some View {
         let count = text.count
-        let color: Color = count > 10_000 ? Color.theaError : (count > 5_000 ? Color.theaWarning : .secondary)
+        let color: Color = count > 10_000 ? .red : (count > 5_000 ? .orange : .secondary)
         return Text("\(count)")
             .font(.theaCaption2)
             .foregroundStyle(color)

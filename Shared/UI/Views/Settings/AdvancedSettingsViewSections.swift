@@ -2,8 +2,12 @@
 // Supporting types for AdvancedSettingsView
 
 import SwiftUI
+import OSLog
 
 // MARK: - Supporting Types
+
+private let advancedSettingsLogger = Logger(subsystem: "ai.thea.app", category: "AdvancedSettings")
+
 
 struct AdvancedSettingsConfiguration: Equatable, Codable {
     // Development
@@ -80,10 +84,13 @@ struct AdvancedSettingsConfiguration: Equatable, Codable {
     @MainActor
     static func load() -> AdvancedSettingsConfiguration {
         var config: AdvancedSettingsConfiguration
-        if let data = UserDefaults.standard.data(forKey: storageKey),
-           let loaded = try? JSONDecoder().decode(AdvancedSettingsConfiguration.self, from: data)
-        {
-            config = loaded
+        if let data = UserDefaults.standard.data(forKey: storageKey) {
+            do {
+                config = try JSONDecoder().decode(AdvancedSettingsConfiguration.self, from: data)
+            } catch {
+                advancedSettingsLogger.error("Failed to decode AdvancedSettingsConfiguration: \(error.localizedDescription)")
+                config = AdvancedSettingsConfiguration()
+            }
         } else {
             config = AdvancedSettingsConfiguration()
         }
@@ -110,8 +117,11 @@ struct AdvancedSettingsConfiguration: Equatable, Codable {
     }
 
     func save() {
-        if let data = try? JSONEncoder().encode(self) {
+        do {
+            let data = try JSONEncoder().encode(self)
             UserDefaults.standard.set(data, forKey: Self.storageKey)
+        } catch {
+            advancedSettingsLogger.error("Failed to encode AdvancedSettingsConfiguration: \(error.localizedDescription)")
         }
     }
 }
@@ -351,10 +361,17 @@ extension AdvancedSettingsView {
         ]
         for dirOpt in cacheDirs {
             guard let dir = dirOpt, fm.fileExists(atPath: dir.path) else { continue }
-            if let contents = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) {
+            do {
+                let contents = try fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil)
                 for item in contents {
-                    try? fm.removeItem(at: item)
+                    do {
+                        try fm.removeItem(at: item)
+                    } catch {
+                        advancedSettingsLogger.error("Failed to remove cache item \(item.lastPathComponent): \(error.localizedDescription)")
+                    }
                 }
+            } catch {
+                advancedSettingsLogger.error("Failed to list cache directory \(dir.lastPathComponent): \(error.localizedDescription)")
             }
         }
         cacheSize = "0 bytes"

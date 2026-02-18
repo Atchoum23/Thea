@@ -98,7 +98,7 @@ import Foundation
             try await workspace.openApplication(at: claudeURL, configuration: configuration)
 
             // Wait for app to be ready
-            try await Task.sleep(for: .seconds(1))
+            try await Task.sleep(nanoseconds: 1_000_000_000)
             isClaudeRunning = true
         }
 
@@ -127,7 +127,7 @@ import Foundation
 
             // Activate Claude
             try activateClaude()
-            try await Task.sleep(for: .milliseconds(500))
+            try await Task.sleep(nanoseconds: 500_000_000)
 
             // Use AppleScript to interact with Claude
             let script = """
@@ -159,7 +159,7 @@ import Foundation
             }
 
             // Wait for response (this is a simplified version - real implementation would monitor for response)
-            try await Task.sleep(for: .seconds(2))
+            try await Task.sleep(nanoseconds: 2_000_000_000)
 
             return "Prompt sent to Claude.app"
         }
@@ -268,7 +268,7 @@ import Foundation
             currentConversationId = UUID().uuidString
 
             if let prompt {
-                try await Task.sleep(for: .milliseconds(500))
+                try await Task.sleep(nanoseconds: 500_000_000)
                 _ = try await sendPrompt(prompt)
             }
         }
@@ -444,12 +444,10 @@ import Foundation
 
         private init() {}
 
-        /// Launches Claude.app (not supported on this platform).
         public func launchClaude() async throws {
             throw ClaudeBridgeError.notSupported
         }
 
-        /// Sends a prompt to Claude.app (not supported on this platform).
         public func sendPrompt(_: String) async throws -> String {
             throw ClaudeBridgeError.notSupported
         }

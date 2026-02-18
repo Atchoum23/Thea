@@ -2,10 +2,13 @@
     import AppKit
     import CoreGraphics
     import Foundation
+    import OSLog
 
     /// Manager for display profiles and automated switching
     public actor DisplayProfileManager {
         public static let shared = DisplayProfileManager()
+
+        private let logger = Logger(subsystem: "ai.thea.app", category: "DisplayProfileManager")
 
         private var profiles: [DisplayProfile] = []
         private var activeProfile: DisplayProfile?
@@ -37,13 +40,11 @@
 
         // MARK: - Profile Management
 
-        /// Adds a new display profile and persists it to UserDefaults.
         public func createProfile(_ profile: DisplayProfile) async {
             profiles.append(profile)
             await saveProfiles()
         }
 
-        /// Updates an existing display profile by ID.
         public func updateProfile(_ profile: DisplayProfile) async throws {
             guard let index = profiles.firstIndex(where: { $0.id == profile.id }) else {
                 throw ProfileError.profileNotFound
@@ -52,7 +53,6 @@
             await saveProfiles()
         }
 
-        /// Deletes the display profile with the given ID.
         public func deleteProfile(id: UUID) async throws {
             guard profiles.contains(where: { $0.id == id }) else {
                 throw ProfileError.profileNotFound
@@ -61,12 +61,10 @@
             await saveProfiles()
         }
 
-        /// Returns all saved display profiles.
         public func getProfiles() async -> [DisplayProfile] {
             profiles
         }
 
-        /// Returns the display profile with the given ID, or throws if not found.
         public func getProfile(id: UUID) async throws -> DisplayProfile {
             guard let profile = profiles.first(where: { $0.id == id }) else {
                 throw ProfileError.profileNotFound
@@ -76,7 +74,6 @@
 
         // MARK: - Profile Application
 
-        /// Applies a display profile's brightness and contrast settings to the given display.
         public func applyProfile(_ profile: DisplayProfile, to displayID: CGDirectDisplayID) async throws {
             let displayService = DisplayService()
 
@@ -90,7 +87,6 @@
             activeProfile = profile
         }
 
-        /// Applies a display profile to all currently active displays.
         public func applyProfileToAllDisplays(_ profile: DisplayProfile) async throws {
             let displays = getActiveDisplays()
 
@@ -99,25 +95,21 @@
             }
         }
 
-        /// Returns the currently active display profile, if any.
         public func getActiveProfile() async -> DisplayProfile? {
             activeProfile
         }
 
         // MARK: - Automatic Switching
 
-        /// Enables circadian-based automatic profile switching (checks every 15 minutes).
         public func enableAutomaticSwitching() async {
             automaticSwitching = true
             await startCircadianMonitoring()
         }
 
-        /// Disables automatic circadian profile switching.
         public func disableAutomaticSwitching() async {
             automaticSwitching = false
         }
 
-        /// Returns whether automatic circadian profile switching is enabled.
         public func isAutomaticSwitchingEnabled() async -> Bool {
             automaticSwitching
         }
@@ -132,11 +124,19 @@
                     let recommendedProfile = await getRecommendedProfile(for: hour)
 
                     if let profile = recommendedProfile, profile.id != activeProfile?.id {
-                        try? await applyProfileToAllDisplays(profile)
+                        do {
+                            try await applyProfileToAllDisplays(profile)
+                        } catch {
+                            logger.error("Failed to apply circadian profile: \(error)")
+                        }
                     }
 
                     // Check every 15 minutes
-                    try? await Task.sleep(for: .seconds(900))
+                    do {
+                        try await Task.sleep(for: .seconds(900))
+                    } catch {
+                        break
+                    }
                 }
             }
         }
@@ -154,18 +154,24 @@
         // MARK: - Private Helpers
 
         private func loadDefaultProfiles() async {
-            if let data = UserDefaults.standard.data(forKey: Self.profilesKey),
-               let saved = try? JSONDecoder().decode([DisplayProfile].self, from: data)
-            {
-                profiles = saved
+            if let data = UserDefaults.standard.data(forKey: Self.profilesKey) {
+                do {
+                    profiles = try JSONDecoder().decode([DisplayProfile].self, from: data)
+                } catch {
+                    logger.error("Failed to decode display profiles: \(error)")
+                    profiles = [.daytime, .evening, .night, .reading, .movie]
+                }
             } else {
                 profiles = [.daytime, .evening, .night, .reading, .movie]
             }
         }
 
         private func saveProfiles() async {
-            if let data = try? JSONEncoder().encode(profiles) {
+            do {
+                let data = try JSONEncoder().encode(profiles)
                 UserDefaults.standard.set(data, forKey: Self.profilesKey)
+            } catch {
+                logger.error("Failed to encode display profiles: \(error)")
             }
         }
 

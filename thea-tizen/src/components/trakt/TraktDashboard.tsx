@@ -24,6 +24,7 @@ export function TraktDashboard() {
     recentHistory,
     isLoading,
     error,
+    startAuth,
     cancelCheckIn,
     loadHistory,
   } = useTraktStore();

@@ -122,13 +122,17 @@ class CallDirectoryHandler: CXCallDirectoryProvider {
 
         let dataURL = containerURL.appendingPathComponent("blocked_numbers.json")
 
-        guard let data = try? Data(contentsOf: dataURL),
-              let numbers = try? JSONDecoder().decode([CXCallDirectoryPhoneNumber].self, from: data)
-        else {
+        guard let data = try? Data(contentsOf: dataURL) else {
+            // File doesn't exist yet — expected on first run
             return []
         }
 
-        return numbers
+        do {
+            return try JSONDecoder().decode([CXCallDirectoryPhoneNumber].self, from: data)
+        } catch {
+            logger.error("Failed to decode blocked numbers: \(error.localizedDescription)")
+            return []
+        }
     }
 
     private func loadBlockingChanges() -> (added: [CXCallDirectoryPhoneNumber], removed: [CXCallDirectoryPhoneNumber]) {
@@ -139,8 +143,20 @@ class CallDirectoryHandler: CXCallDirectoryProvider {
         let addedURL = containerURL.appendingPathComponent("blocked_numbers_added.json")
         let removedURL = containerURL.appendingPathComponent("blocked_numbers_removed.json")
 
-        let added = (try? JSONDecoder().decode([CXCallDirectoryPhoneNumber].self, from: Data(contentsOf: addedURL))) ?? []
-        let removed = (try? JSONDecoder().decode([CXCallDirectoryPhoneNumber].self, from: Data(contentsOf: removedURL))) ?? []
+        let added: [CXCallDirectoryPhoneNumber]
+        do {
+            added = try JSONDecoder().decode([CXCallDirectoryPhoneNumber].self, from: Data(contentsOf: addedURL))
+        } catch {
+            // File may not exist if no additions pending — not an error
+            added = []
+        }
+
+        let removed: [CXCallDirectoryPhoneNumber]
+        do {
+            removed = try JSONDecoder().decode([CXCallDirectoryPhoneNumber].self, from: Data(contentsOf: removedURL))
+        } catch {
+            removed = []
+        }
 
         return (added, removed)
     }
@@ -153,8 +169,15 @@ class CallDirectoryHandler: CXCallDirectoryProvider {
         let addedURL = containerURL.appendingPathComponent("blocked_numbers_added.json")
         let removedURL = containerURL.appendingPathComponent("blocked_numbers_removed.json")
 
-        try? FileManager.default.removeItem(at: addedURL)
-        try? FileManager.default.removeItem(at: removedURL)
+        for url in [addedURL, removedURL] {
+            do {
+                try FileManager.default.removeItem(at: url)
+            } catch let error as NSError where error.domain == NSCocoaErrorDomain && error.code == NSFileNoSuchFileError {
+                // File already removed or never existed — not an error
+            } catch {
+                logger.error("Failed to clear blocking changes at \(url.lastPathComponent): \(error.localizedDescription)")
+            }
+        }
     }
 
     private func loadCallerIDEntries() -> [CallerIDEntry] {
@@ -164,13 +187,17 @@ class CallDirectoryHandler: CXCallDirectoryProvider {
 
         let dataURL = containerURL.appendingPathComponent("caller_id_entries.json")
 
-        guard let data = try? Data(contentsOf: dataURL),
-              let entries = try? JSONDecoder().decode([CallerIDEntry].self, from: data)
-        else {
+        guard let data = try? Data(contentsOf: dataURL) else {
+            // File doesn't exist yet — expected on first run
             return []
         }
 
-        return entries
+        do {
+            return try JSONDecoder().decode([CallerIDEntry].self, from: data)
+        } catch {
+            logger.error("Failed to decode caller ID entries: \(error.localizedDescription)")
+            return []
+        }
     }
 
     private func loadIdentificationChanges() -> (added: [CallerIDEntry], removed: [CXCallDirectoryPhoneNumber]) {
@@ -181,8 +208,20 @@ class CallDirectoryHandler: CXCallDirectoryProvider {
         let addedURL = containerURL.appendingPathComponent("caller_id_added.json")
         let removedURL = containerURL.appendingPathComponent("caller_id_removed.json")
 
-        let added = (try? JSONDecoder().decode([CallerIDEntry].self, from: Data(contentsOf: addedURL))) ?? []
-        let removed = (try? JSONDecoder().decode([CXCallDirectoryPhoneNumber].self, from: Data(contentsOf: removedURL))) ?? []
+        let added: [CallerIDEntry]
+        do {
+            added = try JSONDecoder().decode([CallerIDEntry].self, from: Data(contentsOf: addedURL))
+        } catch {
+            // File may not exist if no additions pending
+            added = []
+        }
+
+        let removed: [CXCallDirectoryPhoneNumber]
+        do {
+            removed = try JSONDecoder().decode([CXCallDirectoryPhoneNumber].self, from: Data(contentsOf: removedURL))
+        } catch {
+            removed = []
+        }
 
         return (added, removed)
     }
@@ -195,8 +234,15 @@ class CallDirectoryHandler: CXCallDirectoryProvider {
         let addedURL = containerURL.appendingPathComponent("caller_id_added.json")
         let removedURL = containerURL.appendingPathComponent("caller_id_removed.json")
 
-        try? FileManager.default.removeItem(at: addedURL)
-        try? FileManager.default.removeItem(at: removedURL)
+        for url in [addedURL, removedURL] {
+            do {
+                try FileManager.default.removeItem(at: url)
+            } catch let error as NSError where error.domain == NSCocoaErrorDomain && error.code == NSFileNoSuchFileError {
+                // File already removed or never existed — not an error
+            } catch {
+                logger.error("Failed to clear ID changes at \(url.lastPathComponent): \(error.localizedDescription)")
+            }
+        }
     }
 }
 

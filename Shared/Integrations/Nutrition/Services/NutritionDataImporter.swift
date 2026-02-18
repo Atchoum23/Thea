@@ -1,6 +1,6 @@
-import Foundation
-
 import Combine
+import Foundation
+import OSLog
 
 /// Service for importing nutrition data from various sources (CSV, USDA API, barcode scanning)
 public actor NutritionDataImporter {
@@ -38,6 +38,8 @@ public actor NutritionDataImporter {
         case usdaAPI(String) // Food name
         case barcode(String) // UPC/EAN code
     }
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "NutritionDataImporter")
 
     private init() {}
 
@@ -94,7 +96,11 @@ public actor NutritionDataImporter {
     // MARK: - Import Methods
 
     private func importFromCSV(_ url: URL) async throws -> [FoodItem] {
-        guard let csvData = try? String(contentsOf: url, encoding: .utf8) else {
+        let csvData: String
+        do {
+            csvData = try String(contentsOf: url, encoding: .utf8)
+        } catch {
+            logger.error("Failed to read CSV file \(url.lastPathComponent): \(error.localizedDescription)")
             throw ImportError.fileNotFound
         }
 
@@ -135,7 +141,11 @@ public actor NutritionDataImporter {
     }
 
     private func importFromJSON(_ url: URL) async throws -> [FoodItem] {
-        guard let jsonData = try? Data(contentsOf: url) else {
+        let jsonData: Data
+        do {
+            jsonData = try Data(contentsOf: url)
+        } catch {
+            logger.error("Failed to read JSON file \(url.lastPathComponent): \(error.localizedDescription)")
             throw ImportError.fileNotFound
         }
 

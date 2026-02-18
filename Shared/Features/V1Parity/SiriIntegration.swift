@@ -279,7 +279,6 @@ public final class SiriIntegrationService {
                 switch chunk.type {
                 case .delta(let text):
                     response += text
-                case .thinkingDelta: break
                 case .complete(let message):
                     response = message.content.textValue
                 case .error(let error):

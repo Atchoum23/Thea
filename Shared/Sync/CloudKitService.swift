@@ -35,11 +35,6 @@ public class CloudKitService: ObservableObject {
     private var sharedDatabase: CKDatabase?
     private var publicDatabase: CKDatabase?
 
-    // MARK: - Zone
-
-    /// All Thea records live in a custom zone for delta sync support
-    static let theaZoneID = CKRecordZone.ID(zoneName: "TheaZone", ownerName: CKCurrentUserDefaultName)
-
     // MARK: - Record Types
 
     enum RecordType: String {
@@ -68,9 +63,6 @@ public class CloudKitService: ObservableObject {
 
         // Observe settings changes (lightweight, non-blocking)
         setupSettingsObserver()
-
-        // Observe conflict resolution from UI
-        setupConflictResolutionObserver()
 
         // Defer all heavy CloudKit operations to avoid blocking view layout.
         // Container creation, change token loading, and subscription setup
@@ -143,34 +135,9 @@ public class CloudKitService: ObservableObject {
         changeTokens[zoneID.zoneName]
     }
 
-    /// Tracks pending token changes for batched saving
-    private var hasUnsavedTokenChanges = false
-
     func setChangeToken(_ token: CKServerChangeToken?, for zoneID: CKRecordZone.ID) {
         changeTokens[zoneID.zoneName] = token
-        // Batch token saves — defer to avoid N consecutive UserDefaults writes during multi-zone sync
-        if !hasUnsavedTokenChanges {
-            hasUnsavedTokenChanges = true
-            Task { [weak self] in
-                try? await Task.sleep(for: .seconds(1))
-                guard let self else { return }
-                self.saveChangeTokens()
-                self.hasUnsavedTokenChanges = false
-            }
-        }
-    }
-
-    private func setupConflictResolutionObserver() {
-        NotificationCenter.default.addObserver(
-            forName: .syncConflictResolved,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            let conflictId = notification.userInfo?["conflictId"] as? UUID
-            Task { @MainActor [weak self] in
-                self?.logger.info("Conflict resolved: \(conflictId?.uuidString ?? "unknown")")
-            }
-        }
+        saveChangeTokens()
     }
 
     private func setupSettingsObserver() {
@@ -182,17 +149,6 @@ public class CloudKitService: ObservableObject {
         ) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.syncEnabled = SettingsManager.shared.iCloudSyncEnabled
-            }
-        }
-
-        // Re-check iCloud status when account changes (sign in/out mid-session)
-        NotificationCenter.default.addObserver(
-            forName: .CKAccountChanged,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                await self?.checkiCloudStatus()
             }
         }
     }

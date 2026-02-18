@@ -29,7 +29,6 @@ import SwiftUI
 
         // MARK: - Data Loading
 
-        /// Fetches all connected displays and selects the first one.
         public func loadDisplays() async {
             isLoading = true
             errorMessage = nil
@@ -48,7 +47,6 @@ import SwiftUI
             isLoading = false
         }
 
-        /// Reloads the display list from the display service.
         public func refreshData() async {
             await loadDisplays()
         }
@@ -65,7 +63,6 @@ import SwiftUI
 
         // MARK: - Profile Management
 
-        /// Applies the given profile to the currently selected display.
         public func applyProfile(_ profile: DisplayProfile) async {
             guard let displayID = selectedDisplay?.displayID else { return }
 
@@ -77,7 +74,6 @@ import SwiftUI
             }
         }
 
-        /// Sets the brightness for the currently selected display.
         public func setBrightness(_ value: Int) async {
             guard let displayID = selectedDisplay?.displayID else { return }
 
@@ -89,7 +85,6 @@ import SwiftUI
             }
         }
 
-        /// Sets the contrast for the currently selected display.
         public func setContrast(_ value: Int) async {
             guard let displayID = selectedDisplay?.displayID else { return }
 
@@ -103,7 +98,6 @@ import SwiftUI
 
         // MARK: - Scheduling
 
-        /// Assigns a schedule to the currently selected display.
         public func setSchedule(_ schedule: DisplaySchedule) async {
             guard let displayID = selectedDisplay?.displayID else { return }
 

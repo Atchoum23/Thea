@@ -11,6 +11,8 @@ struct RemoteAccessSettingsView: View {
     @State private var discoveredDevices: [DiscoveredDeviceInfo] = []
     @State private var isScanning = false
     @State private var showPairingCode = false
+    @State private var errorMessage: String?
+    @State private var showError = false
 
     var body: some View {
         Form {
@@ -28,6 +30,11 @@ struct RemoteAccessSettingsView: View {
         }
         .formStyle(.grouped)
         .navigationTitle("Remote Access")
+        .alert("Error", isPresented: $showError, presenting: errorMessage) { _ in
+            Button("OK") { }
+        } message: { message in
+            Text(message)
+        }
     }
 
     // MARK: - Server Section
@@ -41,7 +48,12 @@ struct RemoteAccessSettingsView: View {
                     set: { enabled in
                         Task {
                             if enabled {
-                                try? await server.start()
+                                do {
+                                    try await server.start()
+                                } catch {
+                                    errorMessage = "Failed to start remote server: \(error.localizedDescription)"
+                                    showError = true
+                                }
                             } else {
                                 await server.stop()
                             }
@@ -406,7 +418,11 @@ struct RemoteAccessSettingsView: View {
         #if os(macOS)
             Task {
                 await server.networkDiscovery.startDiscovery()
-                try? await Task.sleep(for: .seconds(3))
+                do {
+                    try await Task.sleep(nanoseconds: 3_000_000_000)
+                } catch {
+                    logger.error("Device scan sleep interrupted: \(error.localizedDescription)")
+                }
                 isScanning = false
             }
         #else
@@ -443,4 +459,7 @@ struct RemoteAccessSettingsView: View {
 
 #if os(iOS)
     import UIKit
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "RemoteAccessSettingsView")
 #endif

@@ -89,11 +89,11 @@ struct TheaAgentDetailView: View {
     private var stateColor: Color {
         switch session.state {
         case .idle: .gray
-        case .planning: .theaWarning
-        case .working: .theaSuccess
-        case .awaitingApproval, .paused: .theaWarning
-        case .completed: .theaInfo
-        case .failed: .theaError
+        case .planning: .orange
+        case .working: .green
+        case .awaitingApproval, .paused: .yellow
+        case .completed: .blue
+        case .failed: .red
         case .cancelled: .gray
         }
     }
@@ -181,16 +181,16 @@ struct TheaAgentDetailView: View {
     private func errorSection(_ error: String) -> some View {
         HStack(spacing: TheaSpacing.sm) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.theaError)
+                .foregroundStyle(.red)
             Text(error)
                 .font(.theaCaption1)
-                .foregroundStyle(.theaError)
+                .foregroundStyle(.red)
         }
         .padding(TheaSpacing.sm)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: TheaCornerRadius.sm)
-                .fill(Color.theaError.opacity(0.08))
+                .fill(Color.red.opacity(0.08))
         )
     }
 

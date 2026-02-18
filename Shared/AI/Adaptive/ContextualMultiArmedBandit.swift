@@ -626,14 +626,21 @@ public final class ContextualMultiArmedBandit: ObservableObject {
             totalPulls: totalPulls
         )
 
-        if let data = try? JSONEncoder().encode(state) {
+        do {
+            let data = try JSONEncoder().encode(state)
             UserDefaults.standard.set(data, forKey: persistenceKey)
+        } catch {
+            logger.error("Failed to encode BanditState: \(error.localizedDescription)")
         }
     }
 
     private func loadState() {
-        guard let data = UserDefaults.standard.data(forKey: persistenceKey),
-              let state = try? JSONDecoder().decode(BanditState.self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: persistenceKey) else { return }
+        let state: BanditState
+        do {
+            state = try JSONDecoder().decode(BanditState.self, from: data)
+        } catch {
+            logger.error("Failed to decode BanditState: \(error.localizedDescription)")
             return
         }
 

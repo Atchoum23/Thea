@@ -514,7 +514,7 @@ struct MissionErrorExtTests {
         let errors: [TestMissionError] = [
             .missionAlreadyActive, .validationFailed("x"),
             .phaseExecutionFailed("y"), .stepExecutionFailed("z"),
-            .checkpointRestoreFailed
+            .checkpointRestoreFailed,
         ]
         for error in errors {
             #expect(error.errorDescription != nil)

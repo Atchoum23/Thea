@@ -104,8 +104,8 @@ extension LocalModelsSettingsView {
                         .font(.caption2)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 2)
-                        .background(Color.theaSuccess.opacity(0.2))
-                        .foregroundStyle(Color.theaSuccess)
+                        .background(Color.green.opacity(0.2))
+                        .foregroundStyle(.green)
                         .cornerRadius(4)
                 }
             }

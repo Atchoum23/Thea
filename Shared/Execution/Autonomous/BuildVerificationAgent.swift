@@ -105,20 +105,25 @@ final class BuildVerificationAgent {
         var errors: [BlueprintBuildError] = []
         let pattern = #"(.+?):(\d+):(\d+): error: (.+)"#
 
-        if let regex = try? NSRegularExpression(pattern: pattern) {
-            let range = NSRange(output.startIndex..., in: output)
-            let matches = regex.matches(in: output, range: range)
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern)
+        } catch {
+            logger.error("Invalid error regex pattern: \(error.localizedDescription)")
+            return errors
+        }
+        let range = NSRange(output.startIndex..., in: output)
+        let matches = regex.matches(in: output, range: range)
 
-            for match in matches {
-                if let fileRange = Range(match.range(at: 1), in: output),
-                   let lineRange = Range(match.range(at: 2), in: output),
-                   let messageRange = Range(match.range(at: 4), in: output) {
-                    errors.append(BlueprintBuildError(
-                        message: String(output[messageRange]),
-                        file: String(output[fileRange]),
-                        line: Int(output[lineRange])
-                    ))
-                }
+        for match in matches {
+            if let fileRange = Range(match.range(at: 1), in: output),
+               let lineRange = Range(match.range(at: 2), in: output),
+               let messageRange = Range(match.range(at: 4), in: output) {
+                errors.append(BlueprintBuildError(
+                    message: String(output[messageRange]),
+                    file: String(output[fileRange]),
+                    line: Int(output[lineRange])
+                ))
             }
         }
 
@@ -129,18 +134,23 @@ final class BuildVerificationAgent {
         var warnings: [BlueprintBuildWarning] = []
         let pattern = #"(.+?):(\d+):(\d+): warning: (.+)"#
 
-        if let regex = try? NSRegularExpression(pattern: pattern) {
-            let range = NSRange(output.startIndex..., in: output)
-            let matches = regex.matches(in: output, range: range)
+        let regexW: NSRegularExpression
+        do {
+            regexW = try NSRegularExpression(pattern: pattern)
+        } catch {
+            logger.error("Invalid warning regex pattern: \(error.localizedDescription)")
+            return warnings
+        }
+        let rangeW = NSRange(output.startIndex..., in: output)
+        let matchesW = regexW.matches(in: output, range: rangeW)
 
-            for match in matches {
-                if let fileRange = Range(match.range(at: 1), in: output),
-                   let messageRange = Range(match.range(at: 4), in: output) {
-                    warnings.append(BlueprintBuildWarning(
-                        message: String(output[messageRange]),
-                        file: String(output[fileRange])
-                    ))
-                }
+        for match in matchesW {
+            if let fileRange = Range(match.range(at: 1), in: output),
+               let messageRange = Range(match.range(at: 4), in: output) {
+                warnings.append(BlueprintBuildWarning(
+                    message: String(output[messageRange]),
+                    file: String(output[fileRange])
+                ))
             }
         }
 
@@ -151,17 +161,22 @@ final class BuildVerificationAgent {
         var failures: [BlueprintTestFailure] = []
         let pattern = #"Test Case .+ '(.+)' failed"#
 
-        if let regex = try? NSRegularExpression(pattern: pattern) {
-            let range = NSRange(output.startIndex..., in: output)
-            let matches = regex.matches(in: output, range: range)
+        let regexF: NSRegularExpression
+        do {
+            regexF = try NSRegularExpression(pattern: pattern)
+        } catch {
+            logger.error("Invalid test failure regex pattern: \(error.localizedDescription)")
+            return failures
+        }
+        let rangeF = NSRange(output.startIndex..., in: output)
+        let matchesF = regexF.matches(in: output, range: rangeF)
 
-            for match in matches {
-                if let testRange = Range(match.range(at: 1), in: output) {
-                    failures.append(BlueprintTestFailure(
-                        test: String(output[testRange]),
-                        message: "Test failed"
-                    ))
-                }
+        for match in matchesF {
+            if let testRange = Range(match.range(at: 1), in: output) {
+                failures.append(BlueprintTestFailure(
+                    test: String(output[testRange]),
+                    message: "Test failed"
+                ))
             }
         }
 

@@ -7,6 +7,9 @@
 
 import Combine
 import Foundation
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "ConnectionQualityMonitor")
 
 // MARK: - Connection Quality
 
@@ -78,7 +81,11 @@ public class ConnectionQualityMonitor: ObservableObject {
         windowStartTime = Date()
         monitorTask = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(qualityUpdateInterval))
+                do {
+                    try await Task.sleep(nanoseconds: UInt64(qualityUpdateInterval * 1_000_000_000))
+                } catch {
+                    break
+                }
                 await MainActor.run {
                     self.updateQuality()
                     self.updateBandwidth()

@@ -130,10 +130,11 @@ public class PhotosMonitor: NSObject, ObservableObject {
         pollingTask = Task {
             while !Task.isCancelled {
                 await checkForNewPhotos()
-                // Base 30s (was 5s); scaled by EnergyAdaptiveThrottler
-                let baseInterval: TimeInterval = 30.0
-                let interval = baseInterval * EnergyAdaptiveThrottler.shared.intervalMultiplier
-                try? await Task.sleep(for: .seconds(interval))
+                do {
+                    try await Task.sleep(nanoseconds: 5 * 1_000_000_000) // 5 seconds
+                } catch {
+                    break
+                }
             }
         }
     }

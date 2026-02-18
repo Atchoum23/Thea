@@ -71,21 +71,25 @@ extension ActiveMemoryRetrieval {
             if let jsonStart = responseText.firstIndex(of: "["),
                let jsonEnd = responseText.lastIndex(of: "]") {
                 let jsonStr = String(responseText[jsonStart...jsonEnd])
-                if let data = jsonStr.data(using: .utf8),
-                   let indices = try? JSONDecoder().decode([Int].self, from: data) {
-                    var rankedSources: [RetrievalSource] = []
-                    for index in indices where index < sources.count {
-                        var source = sources[index]
-                        // Boost relevance based on AI ranking position
-                        source.relevanceScore *= (1.0 - Double(rankedSources.count) * 0.1)
-                        rankedSources.append(source)
+                if let data = jsonStr.data(using: .utf8) {
+                    do {
+                        let indices = try JSONDecoder().decode([Int].self, from: data)
+                        var rankedSources: [RetrievalSource] = []
+                        for index in indices where index < sources.count {
+                            var source = sources[index]
+                            // Boost relevance based on AI ranking position
+                            source.relevanceScore *= (1.0 - Double(rankedSources.count) * 0.1)
+                            rankedSources.append(source)
+                        }
+                        // Add any sources not ranked by AI
+                        let rankedIndices = Set(indices)
+                        for (index, source) in sources.enumerated() where !rankedIndices.contains(index) {
+                            rankedSources.append(source)
+                        }
+                        return rankedSources
+                    } catch {
+                        logger.warning("Failed to decode AI ranking indices: \(error.localizedDescription)")
                     }
-                    // Add any sources not ranked by AI
-                    let rankedIndices = Set(indices)
-                    for (index, source) in sources.enumerated() where !rankedIndices.contains(index) {
-                        rankedSources.append(source)
-                    }
-                    return rankedSources
                 }
             }
 
@@ -153,21 +157,26 @@ extension ActiveMemoryRetrieval {
             if let jsonStart = responseText.firstIndex(of: "{"),
                let jsonEnd = responseText.lastIndex(of: "}") {
                 let jsonStr = String(responseText[jsonStart...jsonEnd])
-                if let data = jsonStr.data(using: .utf8),
-                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                if let data = jsonStr.data(using: .utf8) {
+                    do {
+                        if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
 
-                    var facts: [ExtractedFact] = []
-                    if let factsArray = json["facts"] as? [[String: String]] {
-                        for factDict in factsArray {
-                            if let category = factDict["category"],
-                               let content = factDict["content"] {
-                                facts.append(ExtractedFact(category: category, content: content))
+                        var facts: [ExtractedFact] = []
+                        if let factsArray = json["facts"] as? [[String: String]] {
+                            for factDict in factsArray {
+                                if let category = factDict["category"],
+                                   let content = factDict["content"] {
+                                    facts.append(ExtractedFact(category: category, content: content))
+                                }
                             }
                         }
-                    }
 
-                    let importance = json["importance"] as? Double ?? 0.3
-                    return ExtractedInformation(facts: facts, importance: importance)
+                        let importance = json["importance"] as? Double ?? 0.3
+                        return ExtractedInformation(facts: facts, importance: importance)
+                        }
+                    } catch {
+                        logger.warning("Failed to parse extraction JSON: \(error.localizedDescription)")
+                    }
                 }
             }
 

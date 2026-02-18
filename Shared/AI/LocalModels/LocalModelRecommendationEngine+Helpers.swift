@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import OSLog
 
 // MARK: - Monitoring
 
@@ -18,7 +19,11 @@ extension LocalModelRecommendationEngine {
         monitoringTask = Task {
             while !Task.isCancelled {
                 let intervalSeconds = configuration.scanIntervalHours * 3600
-                try? await Task.sleep(for: .seconds(intervalSeconds))
+                do {
+                    try await Task.sleep(for: .seconds(intervalSeconds))
+                } catch {
+                    break
+                }
 
                 await scanInstalledModels()
                 await discoverAvailableModels()
@@ -63,28 +68,40 @@ extension LocalModelRecommendationEngine {
     }
 
     func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "LocalModelRecommendation.config"),
-           let config = try? JSONDecoder().decode(Configuration.self, from: data) {
-            configuration = config
+        if let data = UserDefaults.standard.data(forKey: "LocalModelRecommendation.config") {
+            do {
+                configuration = try JSONDecoder().decode(Configuration.self, from: data)
+            } catch {
+                logger.error("Failed to decode Configuration: \(error.localizedDescription)")
+            }
         }
     }
 
     func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             UserDefaults.standard.set(data, forKey: "LocalModelRecommendation.config")
+        } catch {
+            logger.error("Failed to encode Configuration: \(error.localizedDescription)")
         }
     }
 
     func loadUserProfile() {
-        if let data = UserDefaults.standard.data(forKey: "LocalModelRecommendation.userProfile"),
-           let profile = try? JSONDecoder().decode(UserUsageProfile.self, from: data) {
-            userProfile = profile
+        if let data = UserDefaults.standard.data(forKey: "LocalModelRecommendation.userProfile") {
+            do {
+                userProfile = try JSONDecoder().decode(UserUsageProfile.self, from: data)
+            } catch {
+                logger.error("Failed to decode UserUsageProfile: \(error.localizedDescription)")
+            }
         }
     }
 
     func saveUserProfile() {
-        if let data = try? JSONEncoder().encode(userProfile) {
+        do {
+            let data = try JSONEncoder().encode(userProfile)
             UserDefaults.standard.set(data, forKey: "LocalModelRecommendation.userProfile")
+        } catch {
+            logger.error("Failed to encode UserUsageProfile: \(error.localizedDescription)")
         }
     }
 
@@ -106,8 +123,12 @@ extension LocalModelRecommendationEngine {
             options: [.skipsHiddenFiles]
         ) {
             for case let fileURL as URL in enumerator {
-                if let size = try? fileURL.resourceValues(forKeys: [.fileSizeKey]).fileSize {
-                    totalSize += UInt64(size)
+                do {
+                    if let size = try fileURL.resourceValues(forKeys: [.fileSizeKey]).fileSize {
+                        totalSize += UInt64(size)
+                    }
+                } catch {
+                    logger.error("Failed to read file size for \(fileURL.lastPathComponent): \(error.localizedDescription)")
                 }
             }
         }

@@ -157,7 +157,7 @@ public final class TaskScheduler: ObservableObject {
     private func executeTask(_ task: ScheduledTask) async {
         // Check concurrent limit
         while runningTasks.count >= maxConcurrentTasks {
-            try? await Task.sleep(for: .milliseconds(100)) // 100ms
+            do { try await Task.sleep(nanoseconds: 100_000_000) } catch { break } // 100ms
         }
 
         guard let index = tasks.firstIndex(where: { $0.id == task.id }) else { return }
@@ -212,7 +212,11 @@ public final class TaskScheduler: ObservableObject {
                             self.tasks[taskIndex].status = .scheduled
                             // Schedule retry with delay
                             Task {
-                                try? await Task.sleep(for: .seconds((task.retryDelay ?? self.defaultRetryDelay)))
+                                do {
+                                    try await Task.sleep(nanoseconds: UInt64((task.retryDelay ?? self.defaultRetryDelay) * 1_000_000_000))
+                                } catch {
+                                    self.logger.debug("Retry sleep interrupted: \(error.localizedDescription, privacy: .public)")
+                                }
                                 self.scheduleTask(self.tasks[taskIndex])
                             }
                         } else {
@@ -443,34 +447,42 @@ public final class TaskScheduler: ObservableObject {
     // MARK: - Persistence
 
     private func loadTasks() {
-        guard let data = defaults.data(forKey: tasksKey),
-              let saved = try? JSONDecoder().decode([ScheduledTask].self, from: data)
-        else {
-            return
+        guard let data = defaults.data(forKey: tasksKey) else { return }
+        do {
+            tasks = try JSONDecoder().decode([ScheduledTask].self, from: data)
+        } catch {
+            logger.error("Failed to load tasks: \(error.localizedDescription, privacy: .public)")
         }
-        tasks = saved
     }
 
     private func saveTasks() {
-        guard let data = try? JSONEncoder().encode(tasks) else { return }
-        defaults.set(data, forKey: tasksKey)
+        do {
+            let data = try JSONEncoder().encode(tasks)
+            defaults.set(data, forKey: tasksKey)
+        } catch {
+            logger.error("Failed to save tasks: \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     private func loadExecutions() {
-        guard let data = defaults.data(forKey: executionsKey),
-              let saved = try? JSONDecoder().decode([TaskExecution].self, from: data)
-        else {
-            return
+        guard let data = defaults.data(forKey: executionsKey) else { return }
+        do {
+            let saved = try JSONDecoder().decode([TaskExecution].self, from: data)
+            executions = saved.suffix(1000).map(\.self)
+        } catch {
+            logger.error("Failed to load executions: \(error.localizedDescription, privacy: .public)")
         }
-        // Keep only recent executions
-        executions = saved.suffix(1000).map(\.self)
     }
 
     private func saveExecutions() {
         // Keep only recent executions
         let recent = executions.suffix(1000).map(\.self)
-        guard let data = try? JSONEncoder().encode(Array(recent)) else { return }
-        defaults.set(data, forKey: executionsKey)
+        do {
+            let data = try JSONEncoder().encode(Array(recent))
+            defaults.set(data, forKey: executionsKey)
+        } catch {
+            logger.error("Failed to save executions: \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     // MARK: - Statistics

@@ -134,7 +134,6 @@ struct ScannedQRCode: Codable, Sendable, Identifiable {
 
 struct QRContentParser: Sendable {
 
-    // swiftlint:disable:next function_body_length
     static func parse(_ content: String) -> (QRContentType, [String: String], [QRAction]) {
         let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -354,7 +353,11 @@ final class QRIntelligence {
     private init() {
         let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         storageDir = appSupport.appendingPathComponent("Thea/QRCodes")
-        try? fileManager.createDirectory(at: storageDir, withIntermediateDirectories: true)
+        do {
+            try fileManager.createDirectory(at: storageDir, withIntermediateDirectories: true)
+        } catch {
+            logger.error("Failed to create QR storage directory: \(error.localizedDescription)")
+        }
         loadCodes()
     }
 
@@ -446,13 +449,21 @@ final class QRIntelligence {
     private var storageFile: URL { storageDir.appendingPathComponent("scanned_codes.json") }
 
     private func loadCodes() {
-        guard let data = try? Data(contentsOf: storageFile),
-              let decoded = try? JSONDecoder().decode([ScannedQRCode].self, from: data) else { return }
-        self.scannedCodes = decoded
+        guard FileManager.default.fileExists(atPath: storageFile.path) else { return }
+        do {
+            let data = try Data(contentsOf: storageFile)
+            self.scannedCodes = try JSONDecoder().decode([ScannedQRCode].self, from: data)
+        } catch {
+            qrLogger.error("Failed to load QR codes: \(error.localizedDescription)")
+        }
     }
 
     private func saveCodes() {
-        guard let data = try? JSONEncoder().encode(scannedCodes) else { return }
-        try? data.write(to: storageFile)
+        do {
+            let data = try JSONEncoder().encode(scannedCodes)
+            try data.write(to: storageFile, options: .atomic)
+        } catch {
+            qrLogger.error("Failed to save QR codes: \(error.localizedDescription)")
+        }
     }
 }

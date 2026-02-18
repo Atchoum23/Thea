@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import SwiftData
 
 // MARK: - Swift Knowledge Learner
@@ -12,6 +13,11 @@ import SwiftData
 @Observable
 final class SwiftKnowledgeLearner {
     static let shared = SwiftKnowledgeLearner()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "SwiftKnowledgeLearner")
+
+    /// Last persistence error, observable by UI for user feedback
+    private(set) var lastPersistenceError: String?
 
     private var modelContext: ModelContext?
 
@@ -137,7 +143,11 @@ final class SwiftKnowledgeLearner {
         var blocks: [String] = []
         let pattern = "```(?:swift)?\\n?([\\s\\S]*?)```"
 
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern, options: [])
+        } catch {
+            logger.error("Failed to compile code block regex: \(error.localizedDescription)")
             return blocks
         }
 
@@ -482,15 +492,30 @@ extension SwiftKnowledgeLearner {
         }
 
         let encoder = JSONEncoder()
+        lastPersistenceError = nil
 
-        if let patternsData = try? encoder.encode(learnedPatterns.map(SwiftLearnedPatternDTO.init)) {
+        do {
+            let patternsData = try encoder.encode(learnedPatterns.map(SwiftLearnedPatternDTO.init))
             UserDefaults.standard.set(patternsData, forKey: "SwiftKnowledgeLearner.patterns")
+        } catch {
+            logger.error("Failed to encode learned patterns: \(error.localizedDescription)")
+            lastPersistenceError = "Failed to save learned patterns: \(error.localizedDescription)"
         }
-        if let snippetsData = try? encoder.encode(codeSnippets.map(CodeSnippetDTO.init)) {
+
+        do {
+            let snippetsData = try encoder.encode(codeSnippets.map(CodeSnippetDTO.init))
             UserDefaults.standard.set(snippetsData, forKey: "SwiftKnowledgeLearner.snippets")
+        } catch {
+            logger.error("Failed to encode code snippets: \(error.localizedDescription)")
+            lastPersistenceError = "Failed to save code snippets: \(error.localizedDescription)"
         }
-        if let errorsData = try? encoder.encode(errorResolutions.map(ErrorResolutionDTO.init)) {
+
+        do {
+            let errorsData = try encoder.encode(errorResolutions.map(ErrorResolutionDTO.init))
             UserDefaults.standard.set(errorsData, forKey: "SwiftKnowledgeLearner.errors")
+        } catch {
+            logger.error("Failed to encode error resolutions: \(error.localizedDescription)")
+            lastPersistenceError = "Failed to save error resolutions: \(error.localizedDescription)"
         }
 
         UserDefaults.standard.set(totalSessionsAnalyzed, forKey: "SwiftKnowledgeLearner.sessions")
@@ -500,20 +525,31 @@ extension SwiftKnowledgeLearner {
     func loadStoredKnowledge() async {
         let decoder = JSONDecoder()
 
-        if let data = UserDefaults.standard.data(forKey: "SwiftKnowledgeLearner.patterns"),
-           let dtos = try? decoder.decode([SwiftLearnedPatternDTO].self, from: data)
-        {
-            learnedPatterns = dtos.map(SwiftLearnedPattern.init)
+        if let data = UserDefaults.standard.data(forKey: "SwiftKnowledgeLearner.patterns") {
+            do {
+                let dtos = try decoder.decode([SwiftLearnedPatternDTO].self, from: data)
+                learnedPatterns = dtos.map(SwiftLearnedPattern.init)
+            } catch {
+                logger.error("Failed to decode learned patterns: \(error.localizedDescription)")
+            }
         }
-        if let data = UserDefaults.standard.data(forKey: "SwiftKnowledgeLearner.snippets"),
-           let dtos = try? decoder.decode([CodeSnippetDTO].self, from: data)
-        {
-            codeSnippets = dtos.map(CodeSnippet.init)
+
+        if let data = UserDefaults.standard.data(forKey: "SwiftKnowledgeLearner.snippets") {
+            do {
+                let dtos = try decoder.decode([CodeSnippetDTO].self, from: data)
+                codeSnippets = dtos.map(CodeSnippet.init)
+            } catch {
+                logger.error("Failed to decode code snippets: \(error.localizedDescription)")
+            }
         }
-        if let data = UserDefaults.standard.data(forKey: "SwiftKnowledgeLearner.errors"),
-           let dtos = try? decoder.decode([ErrorResolutionDTO].self, from: data)
-        {
-            errorResolutions = dtos.map(ErrorResolution.init)
+
+        if let data = UserDefaults.standard.data(forKey: "SwiftKnowledgeLearner.errors") {
+            do {
+                let dtos = try decoder.decode([ErrorResolutionDTO].self, from: data)
+                errorResolutions = dtos.map(ErrorResolution.init)
+            } catch {
+                logger.error("Failed to decode error resolutions: \(error.localizedDescription)")
+            }
         }
 
         totalSessionsAnalyzed = UserDefaults.standard.integer(forKey: "SwiftKnowledgeLearner.sessions")
@@ -521,17 +557,22 @@ extension SwiftKnowledgeLearner {
     }
 
     func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "SwiftKnowledgeLearner.config"),
-           let config = try? JSONDecoder().decode(Configuration.self, from: data)
-        {
-            configuration = config
+        guard let data = UserDefaults.standard.data(forKey: "SwiftKnowledgeLearner.config") else { return }
+        do {
+            configuration = try JSONDecoder().decode(Configuration.self, from: data)
+        } catch {
+            logger.error("Failed to decode learner configuration: \(error.localizedDescription)")
         }
     }
 
     func updateConfiguration(_ config: Configuration) {
         configuration = config
-        if let data = try? JSONEncoder().encode(config) {
+        do {
+            let data = try JSONEncoder().encode(config)
             UserDefaults.standard.set(data, forKey: "SwiftKnowledgeLearner.config")
+        } catch {
+            logger.error("Failed to encode learner configuration: \(error.localizedDescription)")
+            lastPersistenceError = "Failed to save configuration: \(error.localizedDescription)"
         }
     }
 

@@ -164,7 +164,7 @@ enum XcodeContextExtractor {
                     // Get line start to calculate column
                     var lineText: CFTypeRef?
                     var lineRange = CFRange(location: 0, length: rangeValue.location)
-                    let lineRangeValue = AXValueCreate(.cfRange, &lineRange)
+                    var lineRangeValue = AXValueCreate(.cfRange, &lineRange)
 
                     let lineResult = AXUIElementCopyParameterizedAttributeValue(
                         element as! AXUIElement,
@@ -222,84 +222,13 @@ enum XcodeContextExtractor {
     }
 
     private static func getBuildErrors(_ appElement: AXUIElement) -> String? {
-        // Navigate the AX hierarchy to find the Issue Navigator panel
-        // Xcode's Issue Navigator is a table/outline within the navigator area
-        guard let window = getFocusedWindow(appElement) else { return nil }
+        // Try to find Issue Navigator errors
+        // This is complex because the UI structure varies
+        // For now, return nil - can enhance later with more robust navigation
 
-        // Search for issue-related UI elements in the window hierarchy
-        var errors: [String] = []
-        collectIssueTexts(from: window, into: &errors, depth: 0, maxDepth: 12)
+        // TODO: Navigate AX hierarchy to find Issue Navigator
+        // and extract error messages if present
 
-        guard !errors.isEmpty else { return nil }
-
-        // Deduplicate and limit
-        let unique = Array(Set(errors)).sorted().prefix(20)
-        xcodeLogger.debug("Extracted \(unique.count) build issues from Xcode")
-        return unique.joined(separator: "\n")
-    }
-
-    private static func getFocusedWindow(_ appElement: AXUIElement) -> AXUIElement? {
-        var focusedWindow: CFTypeRef?
-        let result = AXUIElementCopyAttributeValue(
-            appElement,
-            kAXFocusedWindowAttribute as CFString,
-            &focusedWindow
-        )
-        guard result == .success else { return nil }
-        return (focusedWindow as! AXUIElement)
-    }
-
-    private static func collectIssueTexts(
-        from element: AXUIElement,
-        into issues: inout [String],
-        depth: Int,
-        maxDepth: Int
-    ) {
-        guard depth < maxDepth, issues.count < 50 else { return }
-
-        // Check if this element has a role that could contain issue text
-        var role: CFTypeRef?
-        AXUIElementCopyAttributeValue(element, kAXRoleAttribute as CFString, &role)
-        let roleStr = role as? String ?? ""
-
-        // Check for static text or cell content that looks like an error/warning
-        if roleStr == kAXStaticTextRole as String || roleStr == kAXCellRole as String || roleStr == "AXOutlineRow" {
-            var value: CFTypeRef?
-            AXUIElementCopyAttributeValue(element, kAXValueAttribute as CFString, &value)
-            if let text = value as? String, looksLikeBuildIssue(text) {
-                issues.append(text)
-                return
-            }
-
-            // Also check description
-            var desc: CFTypeRef?
-            AXUIElementCopyAttributeValue(element, kAXDescriptionAttribute as CFString, &desc)
-            if let text = desc as? String, looksLikeBuildIssue(text) {
-                issues.append(text)
-                return
-            }
-        }
-
-        // Recurse into children
-        var children: CFTypeRef?
-        let result = AXUIElementCopyAttributeValue(element, kAXChildrenAttribute as CFString, &children)
-        guard result == .success, let childArray = children as? [AXUIElement] else { return }
-
-        for child in childArray {
-            collectIssueTexts(from: child, into: &issues, depth: depth + 1, maxDepth: maxDepth)
-            if issues.count >= 50 { break }
-        }
-    }
-
-    private static func looksLikeBuildIssue(_ text: String) -> Bool {
-        let lower = text.lowercased()
-        let issuePatterns = [
-            "error:", "warning:", "cannot find", "type '", "no such module",
-            "undefined symbol", "linker error", "build failed", "missing return",
-            "expected ", "use of unresolved", "ambiguous use", "value of type",
-            "is not a member", "has no member", "undeclared type",
-            "cannot convert", "missing argument"
-        ]
-        return issuePatterns.contains { lower.contains($0) }
+        return nil
     }
 }

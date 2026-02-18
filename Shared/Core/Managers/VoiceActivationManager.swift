@@ -1,4 +1,5 @@
 import AVFoundation
+import OSLog
 import Foundation
 import Observation
 import Speech
@@ -27,6 +28,8 @@ final class VoiceActivationManager {
     private var speechRecognizer: SFSpeechRecognizer?
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "VoiceActivationManager")
 
     private init() {
         speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
@@ -92,7 +95,11 @@ final class VoiceActivationManager {
                     // Wake word detected — stop listening and trigger voice command
                     Task { @MainActor in
                         self.stopWakeWordDetection()
-                        try? self.startVoiceCommand()
+                        do {
+                            try self.startVoiceCommand()
+                        } catch {
+                            self.logger.error("Failed to start voice command: \(error)")
+                        }
                     }
                 }
             }
@@ -100,7 +107,11 @@ final class VoiceActivationManager {
                 // Restart wake word detection on completion/error
                 Task { @MainActor in
                     self.stopWakeWordDetection()
-                    try? self.startWakeWordDetection()
+                    do {
+                        try self.startWakeWordDetection()
+                    } catch {
+                        self.logger.error("Failed to restart wake word detection: \(error)")
+                    }
                 }
             }
         }

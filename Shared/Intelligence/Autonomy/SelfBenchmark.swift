@@ -97,15 +97,24 @@ actor SelfBenchmark {
     private init() {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         let theaDir = appSupport.appendingPathComponent("Thea")
-        try? FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        } catch {
+            logger.debug("Could not create Thea directory: \(error.localizedDescription)")
+        }
         storageURL = theaDir.appendingPathComponent("self_benchmark.json")
 
         // Inline load to avoid calling actor-isolated method from init
-        if let data = try? Data(contentsOf: storageURL),
-           let state = try? JSONDecoder().decode(BenchmarkState.self, from: data) {
-            snapshots = state.snapshots
-            responseLatencies = state.latencies
-            feedbackScores = state.feedbackScores
+        if FileManager.default.fileExists(atPath: storageURL.path) {
+            do {
+                let data = try Data(contentsOf: storageURL)
+                let state = try JSONDecoder().decode(BenchmarkState.self, from: data)
+                snapshots = state.snapshots
+                responseLatencies = state.latencies
+                feedbackScores = state.feedbackScores
+            } catch {
+                logger.debug("Could not load benchmark state: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -323,17 +332,25 @@ actor SelfBenchmark {
 
     private func saveState() {
         let state = BenchmarkState(snapshots: snapshots, latencies: responseLatencies, feedbackScores: feedbackScores)
-        if let data = try? JSONEncoder().encode(state) {
-            try? data.write(to: storageURL)
+        do {
+            let data = try JSONEncoder().encode(state)
+            try data.write(to: storageURL)
+        } catch {
+            logger.error("Failed to save benchmark state: \(error.localizedDescription)")
         }
     }
 
     private func loadState() {
-        guard let data = try? Data(contentsOf: storageURL),
-              let state = try? JSONDecoder().decode(BenchmarkState.self, from: data) else { return }
-        snapshots = state.snapshots
-        responseLatencies = state.latencies
-        feedbackScores = state.feedbackScores
+        guard FileManager.default.fileExists(atPath: storageURL.path) else { return }
+        do {
+            let data = try Data(contentsOf: storageURL)
+            let state = try JSONDecoder().decode(BenchmarkState.self, from: data)
+            snapshots = state.snapshots
+            responseLatencies = state.latencies
+            feedbackScores = state.feedbackScores
+        } catch {
+            logger.debug("Could not load benchmark state: \(error.localizedDescription)")
+        }
     }
 }
 #endif

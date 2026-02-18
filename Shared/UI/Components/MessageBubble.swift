@@ -32,9 +32,7 @@ struct MessageBubble: View {
 
     @State private var isHovering = false
     @State private var showCopiedFeedback = false
-    @State private var isThinkingExpanded = false
     @StateObject private var settingsManager = SettingsManager.shared
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Info about branches for this message position
     struct BranchInfo {
@@ -77,7 +75,7 @@ struct MessageBubble: View {
                 #if os(macOS)
                     if isHovering {
                         hoverActionBar
-                            .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .top)))
+                            .transition(.opacity.combined(with: .move(edge: .top)))
                     }
                 #endif
 
@@ -93,12 +91,8 @@ struct MessageBubble: View {
         .accessibilityLabel(messageAccessibilityLabel)
         .accessibilityHint(message.messageRole == .assistant ? "AI response" : "Your message")
         .onHover { hovering in
-            if reduceMotion {
+            withAnimation(.easeInOut(duration: 0.15)) {
                 isHovering = hovering
-            } else {
-                withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
-                    isHovering = hovering
-                }
             }
         }
         // Context menu for full action set
@@ -112,43 +106,15 @@ struct MessageBubble: View {
         let text = message.content.textValue
 
         if message.messageRole == .assistant {
-            VStack(alignment: .leading, spacing: TheaSpacing.sm) {
-                // Collapsible thinking trace (from extended thinking / adaptive thinking)
-                if let thinkingTrace = message.metadata?.thinkingTrace, !thinkingTrace.isEmpty {
-                    thinkingTraceView(thinkingTrace)
-                }
-
-                Markdown(text)
-                    .markdownTheme(theaMarkdownTheme)
-                    .markdownCodeSyntaxHighlighter(TheaCodeHighlighter())
-                    .textSelection(.enabled)
-            }
+            Markdown(text)
+                .markdownTheme(theaMarkdownTheme)
+                .markdownCodeSyntaxHighlighter(TheaCodeHighlighter())
+                .textSelection(.enabled)
         } else {
             Text(text)
                 .font(.theaBody)
                 .textSelection(.enabled)
         }
-    }
-
-    @ViewBuilder
-    private func thinkingTraceView(_ trace: String) -> some View {
-        DisclosureGroup(isExpanded: $isThinkingExpanded) {
-            Text(trace)
-                .font(.theaCaption1)
-                .foregroundStyle(.secondary)
-                .textSelection(.enabled)
-                .padding(.top, TheaSpacing.xs)
-        } label: {
-            HStack(spacing: 4) {
-                Image(systemName: "brain.head.profile")
-                    .font(.system(size: 10))
-                    .accessibilityHidden(true)
-                Text("Thinking")
-                    .font(.theaCaption2.weight(.medium))
-            }
-            .foregroundStyle(Color.theaPrimaryDefault.opacity(0.8))
-        }
-        .tint(Color.theaPrimaryDefault.opacity(0.6))
     }
 
     // MARK: - Metadata Row
@@ -185,21 +151,15 @@ struct MessageBubble: View {
                     .foregroundStyle(.tertiary)
             }
 
-            // Confidence badge with hallucination warning
+            // Confidence badge
             if let confidence = message.metadata?.confidence, confidence > 0 {
-                let hasHallucinationFlags = !(message.metadata?.hallucinationFlags ?? []).isEmpty
                 HStack(spacing: 2) {
-                    Image(systemName: hasHallucinationFlags
-                        ? "exclamationmark.triangle.fill"
-                        : confidence >= 0.8 ? "checkmark.shield.fill" : "shield")
+                    Image(systemName: confidence >= 0.8 ? "checkmark.shield.fill" : "shield")
                         .font(.system(size: 8))
-                        .accessibilityHidden(true)
                     Text("\(Int(confidence * 100))%")
                         .font(.theaCaption2)
                 }
-                .foregroundStyle(confidence >= 0.8 ? Color.theaSuccess : confidence >= 0.5 ? Color.theaWarning : Color.theaError)
-                .help(confidenceHelpText)
-                .accessibilityLabel(hasHallucinationFlags ? "Confidence \(Int(confidence * 100))% — hallucination flags detected" : "Confidence \(Int(confidence * 100))%")
+                .foregroundStyle(confidence >= 0.8 ? .green : confidence >= 0.5 ? .orange : .red)
             }
 
             // Respect timestampDisplay setting
@@ -228,7 +188,7 @@ struct MessageBubble: View {
                 // Copy
                 actionButton(
                     icon: showCopiedFeedback ? "checkmark" : "doc.on.doc",
-                    color: showCopiedFeedback ? Color.theaSuccess : .secondary,
+                    color: showCopiedFeedback ? .green : .secondary,
                     help: "Copy"
                 ) {
                     copyToClipboard()
@@ -474,19 +434,6 @@ extension MessageBubble {
         let truncated = content.count > 200 ? String(content.prefix(200)) + "..." : content
         return "\(role), \(time): \(truncated)"
     }
-
-    private var confidenceHelpText: String {
-        guard let confidence = message.metadata?.confidence else { return "" }
-        let flags = message.metadata?.hallucinationFlags ?? []
-        var text = "Confidence: \(Int(confidence * 100))%"
-        if !flags.isEmpty {
-            let highRisk = flags.filter { $0.riskLevel == .high }.count
-            let medRisk = flags.filter { $0.riskLevel == .medium }.count
-            if highRisk > 0 { text += "\n\(highRisk) high-risk claim(s) flagged" }
-            if medRisk > 0 { text += "\n\(medRisk) medium-risk claim(s) flagged" }
-        }
-        return text
-    }
 }
 
 // MARK: - MessageBubble + Helpers
@@ -523,19 +470,18 @@ extension MessageBubble {
     var backgroundColor: Color {
         switch message.messageRole {
         case .user:
-            .theaUserBubble
+            return .theaUserBubble
         case .assistant:
-            .theaAssistantBubble
+            return .theaAssistantBubble
         case .system:
-            .theaSurface
+            return .theaSurface
         }
     }
 
     var foregroundColor: Color {
         switch message.messageRole {
         case .user:
-            // Adaptive: ensures readability on user bubble in both light and dark modes
-            Color(white: 1.0)
+            .white
         case .assistant, .system:
             .primary
         }

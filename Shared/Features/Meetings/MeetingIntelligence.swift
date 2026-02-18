@@ -24,7 +24,7 @@ import os.log
 public final class MeetingIntelligence: ObservableObject {
     public static let shared = MeetingIntelligence()
 
-    private let logger = Logger(subsystem: "app.thea.meetings", category: "MeetingIntelligence")
+    private let logger = Logger(subsystem: "ai.thea.app", category: "MeetingIntelligence")
 
     // MARK: - State
 
@@ -383,18 +383,22 @@ public final class MeetingIntelligence: ObservableObject {
     // MARK: - Meeting History
 
     private func loadMeetingHistory() {
-        if let data = UserDefaults.standard.data(forKey: "thea.meetings.history"),
-           let history = try? JSONDecoder().decode([Meeting].self, from: data)
-        {
-            meetingHistory = history
+        guard let data = UserDefaults.standard.data(forKey: "thea.meetings.history") else { return }
+        do {
+            meetingHistory = try JSONDecoder().decode([Meeting].self, from: data)
+        } catch {
+            logger.error("Failed to decode meeting history: \(error.localizedDescription)")
         }
     }
 
     private func saveMeetingHistory() {
         // Keep last 50 meetings
         let toSave = Array(meetingHistory.prefix(50))
-        if let data = try? JSONEncoder().encode(toSave) {
+        do {
+            let data = try JSONEncoder().encode(toSave)
             UserDefaults.standard.set(data, forKey: "thea.meetings.history")
+        } catch {
+            logger.error("Failed to encode meeting history: \(error.localizedDescription)")
         }
     }
 

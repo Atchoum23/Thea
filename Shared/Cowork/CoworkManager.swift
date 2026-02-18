@@ -1,5 +1,6 @@
 #if os(macOS)
     import Foundation
+    import OSLog
     import SwiftUI
 
     /// Main manager for Cowork functionality
@@ -8,6 +9,7 @@
     @Observable
     final class CoworkManager {
         static let shared = CoworkManager()
+        private let logger = Logger(subsystem: "ai.thea.app", category: "CoworkManager")
 
         // MARK: - State
 
@@ -154,8 +156,15 @@
                 guard let jsonStart = responseText.firstIndex(of: "["),
                       let jsonEnd = responseText.lastIndex(of: "]") else { return nil }
                 let jsonStr = String(responseText[jsonStart...jsonEnd])
-                guard let data = jsonStr.data(using: .utf8),
-                      let parsed = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+                guard let data = jsonStr.data(using: .utf8) else { return nil }
+                let parsed: [[String: Any]]
+                do {
+                    guard let result = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+                        return nil
+                    }
+                    parsed = result
+                } catch {
+                    logger.error("Failed to parse cowork steps JSON: \(error)")
                     return nil
                 }
 
@@ -314,7 +323,7 @@
             }
 
             // Simulate some work
-            try await Task.sleep(for: .milliseconds(500))
+            try await Task.sleep(nanoseconds: 500_000_000)
         }
 
         /// Generate a summary report for a session

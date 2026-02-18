@@ -347,7 +347,11 @@ public final class VoiceFirstModeManager {
 
     private func waitForSpeechCompletion() async {
         while VoiceInteractionEngine.shared.isSpeaking {
-            try? await Task.sleep(for: .milliseconds(100))
+            do {
+                try await Task.sleep(for: .milliseconds(100))
+            } catch {
+                break
+            }
         }
     }
 
@@ -405,15 +409,22 @@ public final class VoiceFirstModeManager {
     private let configurationKey = "VoiceFirstMode.configuration"
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: configurationKey),
-           let decoded = try? JSONDecoder().decode(Configuration.self, from: data) {
-            configuration = decoded
+        if let data = UserDefaults.standard.data(forKey: configurationKey) {
+            do {
+                let decoded = try JSONDecoder().decode(Configuration.self, from: data)
+                configuration = decoded
+            } catch {
+                logger.error("Failed to decode voice-first mode configuration: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             UserDefaults.standard.set(data, forKey: configurationKey)
+        } catch {
+            logger.error("Failed to encode voice-first mode configuration: \(error.localizedDescription)")
         }
     }
 

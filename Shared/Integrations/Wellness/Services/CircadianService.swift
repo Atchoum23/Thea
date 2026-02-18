@@ -11,12 +11,10 @@ public actor CircadianService: CircadianServiceProtocol {
 
     // MARK: - Public Methods
 
-    /// Returns the current circadian phase based on time of day.
     public func getCurrentPhase() async -> CircadianPhase {
         currentPhase
     }
 
-    /// Returns UI recommendations (brightness, blue filter, theme) for the current phase.
     public func getUIRecommendations() async -> UIRecommendations {
         let phase = currentPhase
         let theme: UIRecommendations.Theme = switch phase {
@@ -36,7 +34,6 @@ public actor CircadianService: CircadianServiceProtocol {
         )
     }
 
-    /// Recalculates the circadian phase and notifies observers if it changed.
     public func updatePhaseSettings() async {
         let newPhase = CircadianPhase.current()
 
@@ -48,13 +45,11 @@ public actor CircadianService: CircadianServiceProtocol {
 
     // MARK: - Observer Management
 
-    /// Registers an observer for circadian phase change notifications.
     public func addObserver(_ observer: WellnessObserver) {
         observers.append(WeakObserver(observer))
         cleanupObservers()
     }
 
-    /// Removes a previously registered observer.
     public func removeObserver(_ observer: WellnessObserver) {
         observers.removeAll { $0.value === observer }
     }

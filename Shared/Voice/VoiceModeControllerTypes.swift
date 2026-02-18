@@ -3,6 +3,9 @@
 
 import Foundation
 import SwiftUI
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "VoiceModeControllerTypes")
 
 // MARK: - Voice Mode State
 
@@ -115,7 +118,11 @@ public struct VoiceModeButton: View {
                 if controller.isVoiceModeEnabled {
                     controller.stopVoiceMode()
                 } else {
-                    try? await controller.startVoiceMode()
+                    do {
+                        try await controller.startVoiceMode()
+                    } catch {
+                        logger.error("Failed to start voice mode: \(error.localizedDescription)")
+                    }
                 }
             }
         } label: {

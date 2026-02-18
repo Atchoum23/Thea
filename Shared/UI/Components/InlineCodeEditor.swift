@@ -113,6 +113,8 @@ public final class InlineCodeEditorController: ObservableObject {
 public struct InlineCodeEditorView: View {
     @ObservedObject var controller = InlineCodeEditorController.shared
     @Environment(\.colorScheme) private var colorScheme
+    @State private var errorMessage: String?
+    @State private var showError = false
 
     public init() {}
 
@@ -140,6 +142,11 @@ public struct InlineCodeEditorView: View {
                     .stroke(Color.accentColor.opacity(0.3), lineWidth: 1)
             )
             .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
+            .alert("Edit Failed", isPresented: $showError, presenting: errorMessage) { _ in
+                Button("OK") { }
+            } message: { message in
+                Text(message)
+            }
         }
     }
 
@@ -196,7 +203,12 @@ public struct InlineCodeEditorView: View {
                     ForEach(CodeEditType.allCases.filter { $0 != .custom }, id: \.self) { type in
                         QuickEditButton(type: type) {
                             Task {
-                                try? await controller.applyEdit(type: type)
+                                do {
+                                    try await controller.applyEdit(type: type)
+                                } catch {
+                                    errorMessage = "Failed to apply edit: \(error.localizedDescription)"
+                                    showError = true
+                                }
                             }
                         }
                         .disabled(controller.isProcessing)
@@ -211,11 +223,16 @@ public struct InlineCodeEditorView: View {
 
                 Button {
                     Task {
-                        try? await controller.applyEdit(
-                            type: .custom,
-                            prompt: controller.customPrompt
-                        )
-                        controller.customPrompt = ""
+                        do {
+                            try await controller.applyEdit(
+                                type: .custom,
+                                prompt: controller.customPrompt
+                            )
+                            controller.customPrompt = ""
+                        } catch {
+                            errorMessage = "Failed to apply custom edit: \(error.localizedDescription)"
+                            showError = true
+                        }
                     }
                 } label: {
                     Image(systemName: "paperplane.fill")
@@ -295,6 +312,8 @@ private struct QuickEditButton: View {
 public struct InlineEditContextMenu: View {
     let code: String
     let language: String?
+    @State private var errorMessage: String?
+    @State private var showError = false
 
     public init(code: String, language: String? = nil) {
         self.code = code
@@ -315,7 +334,12 @@ public struct InlineEditContextMenu: View {
                 Button {
                     InlineCodeEditorController.shared.startEditing(code: code, language: language)
                     Task {
-                        try? await InlineCodeEditorController.shared.applyEdit(type: type)
+                        do {
+                            try await InlineCodeEditorController.shared.applyEdit(type: type)
+                        } catch {
+                            errorMessage = "Failed to apply \(type.displayName) edit: \(error.localizedDescription)"
+                            showError = true
+                        }
                     }
                 } label: {
                     Label(type.displayName, systemImage: type.icon)
@@ -334,6 +358,11 @@ public struct InlineEditContextMenu: View {
             } label: {
                 Label("Copy Code", systemImage: "doc.on.doc")
             }
+        }
+        .alert("Edit Failed", isPresented: $showError, presenting: errorMessage) { _ in
+            Button("OK") { }
+        } message: { message in
+            Text(message)
         }
     }
 }

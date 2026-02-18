@@ -2,6 +2,9 @@
 // Settings for voice interaction, speech recognition, and TTS
 
 import SwiftUI
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "VoiceSettingsView")
 
 struct VoiceSettingsView: View {
     @State private var engine = VoiceInteractionEngine.shared
@@ -196,7 +199,7 @@ struct VoiceSettingsView: View {
             } label: {
                 HStack {
                     Image(systemName: isTestingMic ? "mic.fill" : "mic")
-                        .foregroundStyle(isTestingMic ? .theaError : .primary)
+                        .foregroundStyle(isTestingMic ? .red : .primary)
                     Text(isTestingMic ? "Listening..." : "Test Microphone")
                     Spacer()
                     if isTestingMic {
@@ -218,7 +221,7 @@ struct VoiceSettingsView: View {
             } label: {
                 HStack {
                     Image(systemName: isTestingVoice ? "speaker.wave.3.fill" : "speaker.wave.2")
-                        .foregroundStyle(isTestingVoice ? .theaInfo : .primary)
+                        .foregroundStyle(isTestingVoice ? .blue : .primary)
                     Text(isTestingVoice ? "Speaking..." : "Test Voice Output")
                     Spacer()
                     if isTestingVoice {
@@ -234,7 +237,7 @@ struct VoiceSettingsView: View {
                 Spacer()
                 if engine.isAuthorized {
                     Label("Authorized", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.theaSuccess)
+                        .foregroundStyle(.green)
                 } else {
                     Button("Authorize") {
                         Task {
@@ -350,7 +353,11 @@ struct VoiceSettingsView: View {
 
             Task {
                 while engine.isSpeaking {
-                    try? await Task.sleep(for: .milliseconds(100))
+                    do {
+                        try await Task.sleep(for: .milliseconds(100))
+                    } catch {
+                        break
+                    }
                 }
                 isTestingVoice = false
             }
@@ -387,7 +394,7 @@ struct VoiceRow: View {
                             .font(.caption2)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
-                            .background(Color.theaInfo.opacity(0.2))
+                            .background(Color.blue.opacity(0.2))
                             .cornerRadius(4)
                     }
                 }
@@ -407,7 +414,7 @@ struct VoiceRow: View {
 
             if isSelected {
                 Image(systemName: "checkmark")
-                    .foregroundStyle(.theaInfo)
+                    .foregroundStyle(.blue)
             }
         }
         .contentShape(Rectangle())

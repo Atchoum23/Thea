@@ -93,13 +93,17 @@ actor DNSBlocklistService {
 
     init() {
         // Inline persistence load (cannot call actor-isolated methods from init)
-        if let data = UserDefaults.standard.data(forKey: storageKey),
-           let persisted = try? JSONDecoder().decode([BlocklistEntry].self, from: data) {
-            for entry in persisted {
-                entries[entry.domain] = entry
+        if let data = UserDefaults.standard.data(forKey: storageKey) {
+            do {
+                let persisted = try JSONDecoder().decode([BlocklistEntry].self, from: data)
+                for entry in persisted {
+                    entries[entry.domain] = entry
+                }
+                let statsData = UserDefaults.standard.dictionary(forKey: statsKey)
+                blockedCountTotal = statsData?["total"] as? Int ?? 0
+            } catch {
+                logger.error("Failed to decode persisted blocklist entries: \(error.localizedDescription)")
             }
-            let statsData = UserDefaults.standard.dictionary(forKey: statsKey)
-            blockedCountTotal = statsData?["total"] as? Int ?? 0
         }
 
         if entries.isEmpty {
@@ -308,15 +312,23 @@ actor DNSBlocklistService {
 
     private func persistEntries() {
         let allEntries = Array(entries.values)
-        if let data = try? JSONEncoder().encode(allEntries) {
+        do {
+            let data = try JSONEncoder().encode(allEntries)
             UserDefaults.standard.set(data, forKey: storageKey)
+        } catch {
+            logger.error("Failed to persist blocklist entries: \(error.localizedDescription)")
         }
     }
 
     private func loadPersistedEntries() {
-        guard let data = UserDefaults.standard.data(forKey: storageKey),
-              let persisted = try? JSONDecoder().decode([BlocklistEntry].self, from: data)
-        else { return }
+        guard let data = UserDefaults.standard.data(forKey: storageKey) else { return }
+        let persisted: [BlocklistEntry]
+        do {
+            persisted = try JSONDecoder().decode([BlocklistEntry].self, from: data)
+        } catch {
+            logger.error("Failed to decode persisted blocklist entries: \(error.localizedDescription)")
+            return
+        }
 
         for entry in persisted {
             entries[entry.domain] = entry

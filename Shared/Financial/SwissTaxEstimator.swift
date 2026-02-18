@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 // MARK: - Swiss Tax Estimator
 
@@ -9,6 +10,7 @@ import Foundation
 @Observable
 final class SwissTaxEstimator {
     static let shared = SwissTaxEstimator()
+    private let logger = Logger(subsystem: "com.thea.app", category: "SwissTaxEstimator")
 
     private(set) var lastEstimate: SwissTaxResult?
     private(set) var deductions: [TaxDeduction] = []
@@ -245,28 +247,38 @@ final class SwissTaxEstimator {
     // MARK: - Persistence
 
     private func loadDeductions() {
-        if let data = UserDefaults.standard.data(forKey: "thea.tax.deductions"),
-           let loaded = try? JSONDecoder().decode([TaxDeduction].self, from: data) {
-            deductions = loaded
+        guard let data = UserDefaults.standard.data(forKey: "thea.tax.deductions") else { return }
+        do {
+            deductions = try JSONDecoder().decode([TaxDeduction].self, from: data)
+        } catch {
+            logger.debug("Could not load tax deductions: \(error.localizedDescription)")
         }
     }
 
     private func saveDeductions() {
-        if let data = try? JSONEncoder().encode(deductions) {
+        do {
+            let data = try JSONEncoder().encode(deductions)
             UserDefaults.standard.set(data, forKey: "thea.tax.deductions")
+        } catch {
+            logger.debug("Could not save tax deductions: \(error.localizedDescription)")
         }
     }
 
     private func loadPayments() {
-        if let data = UserDefaults.standard.data(forKey: "thea.tax.payments"),
-           let loaded = try? JSONDecoder().decode([QuarterlyPayment].self, from: data) {
-            quarterlyPayments = loaded
+        guard let data = UserDefaults.standard.data(forKey: "thea.tax.payments") else { return }
+        do {
+            quarterlyPayments = try JSONDecoder().decode([QuarterlyPayment].self, from: data)
+        } catch {
+            logger.debug("Could not load quarterly payments: \(error.localizedDescription)")
         }
     }
 
     private func savePayments() {
-        if let data = try? JSONEncoder().encode(quarterlyPayments) {
+        do {
+            let data = try JSONEncoder().encode(quarterlyPayments)
             UserDefaults.standard.set(data, forKey: "thea.tax.payments")
+        } catch {
+            logger.debug("Could not save quarterly payments: \(error.localizedDescription)")
         }
     }
 }

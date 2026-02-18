@@ -202,7 +202,7 @@ public final class LiveAutoCorrect {
             guard let self else { return }
 
             do {
-                try await Task.sleep(for: .milliseconds(self.debounceInterval))
+                try await Task.sleep(nanoseconds: UInt64(self.debounceInterval) * 1_000_000)
             } catch {
                 return // Task was cancelled
             }
@@ -418,7 +418,6 @@ public final class LiveAutoCorrect {
                 switch response.type {
                 case .delta(let text):
                     corrected += text
-                case .thinkingDelta: break
                 case .complete(let msg):
                     corrected = msg.content.textValue
                 case .error(let error):
@@ -487,8 +486,10 @@ public final class LiveAutoCorrect {
 
     private func loadUserDictionary() {
         let url = getUserDictionaryURL()
-        if let data = try? Data(contentsOf: url),
-           let words = try? JSONDecoder().decode(Set<String>.self, from: data) {
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        do {
+            let data = try Data(contentsOf: url)
+            let words = try JSONDecoder().decode(Set<String>.self, from: data)
             userDictionary = words
             // Learn all words
             for word in words {
@@ -498,20 +499,179 @@ public final class LiveAutoCorrect {
                 UITextChecker.learnWord(word)
                 #endif
             }
+        } catch {
+            logger.debug("Could not load user dictionary: \(error.localizedDescription)")
         }
     }
 
     private func saveUserDictionary() {
         let url = getUserDictionaryURL()
-        if let data = try? JSONEncoder().encode(userDictionary) {
-            try? data.write(to: url)
+        do {
+            let data = try JSONEncoder().encode(userDictionary)
+            try data.write(to: url)
+        } catch {
+            logger.debug("Could not save user dictionary: \(error.localizedDescription)")
         }
     }
 
     private func getUserDictionaryURL() -> URL {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         let theaDir = appSupport.appendingPathComponent("Thea", isDirectory: true)
-        try? FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        } catch {
+            logger.debug("Could not create Thea app support directory: \(error.localizedDescription)")
+        }
         return theaDir.appendingPathComponent("user_dictionary.json")
+    }
+}
+
+// MARK: - Models
+
+public struct CorrectionResult: Sendable {
+    public let original: String
+    public let corrected: String
+    public let corrections: [Correction]
+    public var language: String = "en"
+    public var confidence: Double = 0
+    public var processingTime: TimeInterval = 0
+
+    public var hasCorrections: Bool {
+        !corrections.isEmpty
+    }
+
+    public var correctionCount: Int {
+        corrections.count
+    }
+}
+
+public struct Correction: Sendable, Identifiable {
+    public let id = UUID()
+    public let original: String
+    public let replacement: String
+    public let type: CorrectionType
+    public let confidence: Double
+    public let alternatives: [String]
+}
+
+public enum CorrectionType: String, Sendable, Codable {
+    case spelling
+    case grammar
+    case punctuation
+    case capitalization
+    case whitespace
+}
+
+public struct AutoCorrectStats: Sendable {
+    public var totalCorrections: Int = 0
+    public var textsProcessed: Int = 0
+    public var averageProcessingTime: TimeInterval = 0
+    public var languagesDetected: [String: Int] = [:]
+}
+
+private struct WordToken {
+    let text: String
+    let range: Range<String.Index>?
+}
+
+// MARK: - SwiftUI View Modifier
+
+import SwiftUI
+
+public struct AutoCorrectModifier: ViewModifier {
+    @Binding var text: String
+    @State private var correctionResult: CorrectionResult?
+    @State private var showSuggestions = false
+
+    public func body(content: Content) -> some View {
+        content
+            .onChange(of: text) { _, newValue in
+                if LiveAutoCorrect.shared.isEnabled && LiveAutoCorrect.shared.liveMode {
+                    LiveAutoCorrect.shared.processLiveInput(newValue) { result in
+                        Task { @MainActor in
+                            correctionResult = result
+                            if result.hasCorrections && LiveAutoCorrect.shared.showSuggestions {
+                                showSuggestions = true
+                            } else if !LiveAutoCorrect.shared.showSuggestions && result.hasCorrections {
+                                // Auto-replace mode
+                                text = result.corrected
+                            }
+                        }
+                    }
+                }
+            }
+            .popover(isPresented: $showSuggestions) {
+                if let result = correctionResult {
+                    AutoCorrectSuggestionView(result: result) { accepted in
+                        if accepted {
+                            text = result.corrected
+                        }
+                        showSuggestions = false
+                    }
+                }
+            }
+    }
+}
+
+public extension View {
+    /// Enable AI-powered auto-correct for a text field
+    func autoCorrect(text: Binding<String>) -> some View {
+        modifier(AutoCorrectModifier(text: text))
+    }
+}
+
+// MARK: - Suggestion View
+
+struct AutoCorrectSuggestionView: View {
+    let result: CorrectionResult
+    let onAction: (Bool) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "text.badge.checkmark")
+                    .foregroundStyle(.blue)
+                Text("Suggested Correction")
+                    .font(.headline)
+                Spacer()
+                Text(result.language.uppercased())
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Divider()
+
+            ForEach(result.corrections) { correction in
+                HStack {
+                    Text(correction.original)
+                        .strikethrough()
+                        .foregroundStyle(.secondary)
+                    Image(systemName: "arrow.right")
+                        .foregroundStyle(.secondary)
+                    Text(correction.replacement)
+                        .bold()
+                        .foregroundStyle(.primary)
+                }
+                .font(.body)
+            }
+
+            Divider()
+
+            HStack {
+                Button("Ignore") {
+                    onAction(false)
+                }
+                .buttonStyle(.bordered)
+
+                Spacer()
+
+                Button("Accept") {
+                    onAction(true)
+                }
+                .buttonStyle(.borderedProminent)
+            }
+        }
+        .padding()
+        .frame(minWidth: 280)
     }
 }

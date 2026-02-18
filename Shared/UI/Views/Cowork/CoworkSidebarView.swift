@@ -47,7 +47,7 @@
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Image(systemName: "folder.fill")
-                        .foregroundStyle(.theaInfo)
+                        .foregroundStyle(.blue)
                         .accessibilityHidden(true)
                     Text("Working Folder")
                         .font(.headline)
@@ -147,10 +147,10 @@
         private func colorForStepStatus(_ status: CoworkStep.StepStatus) -> Color {
             switch status {
             case .pending: .secondary
-            case .inProgress: .theaInfo
-            case .completed: .theaSuccess
-            case .failed: .theaError
-            case .skipped: .theaWarning
+            case .inProgress: .blue
+            case .completed: .green
+            case .failed: .red
+            case .skipped: .orange
             }
         }
 
@@ -198,7 +198,7 @@
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Image(systemName: "tray.full.fill")
-                        .foregroundStyle(.theaWarning)
+                        .foregroundStyle(.orange)
                         .accessibilityHidden(true)
                     Text("Queue")
                         .font(.headline)
@@ -210,7 +210,7 @@
                             .font(.caption.bold())
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.theaWarning.opacity(0.2))
+                            .background(Color.orange.opacity(0.2))
                             .cornerRadius(4)
                     }
                 }
@@ -249,9 +249,9 @@
         private func colorForPriority(_ priority: CoworkTask.TaskPriority) -> Color {
             switch priority {
             case .low: .secondary
-            case .normal: .theaInfo
-            case .high: .theaWarning
-            case .urgent: .theaError
+            case .normal: .blue
+            case .high: .orange
+            case .urgent: .red
             }
         }
     }

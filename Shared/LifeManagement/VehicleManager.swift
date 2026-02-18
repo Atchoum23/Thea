@@ -73,7 +73,8 @@ struct Vehicle: Codable, Sendable, Identifiable, Hashable {
         MaintenanceSchedule.defaults(for: fuelType).filter { schedule in
             guard let lastService = serviceRecords
                 .filter({ $0.type == schedule.serviceType })
-                .max(by: { $0.date < $1.date }) else {
+                .sorted(by: { $0.date > $1.date })
+                .first else {
                 return true // Never serviced — overdue
             }
 
@@ -193,7 +194,7 @@ struct MaintenanceSchedule: Codable, Sendable {
             MaintenanceSchedule(serviceType: .battery, intervalKm: nil, intervalMonths: 48),
             MaintenanceSchedule(serviceType: .wipers, intervalKm: nil, intervalMonths: 12),
             MaintenanceSchedule(serviceType: .airFilter, intervalKm: 20_000, intervalMonths: 24),
-            MaintenanceSchedule(serviceType: .inspection, intervalKm: nil, intervalMonths: 12)
+            MaintenanceSchedule(serviceType: .inspection, intervalKm: nil, intervalMonths: 12),
         ]
         if fuelType != .electric {
             schedules.append(MaintenanceSchedule(serviceType: .oilChange, intervalKm: 10_000, intervalMonths: 12))
@@ -221,7 +222,11 @@ final class VehicleManager: ObservableObject {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         let dir = appSupport.appendingPathComponent("Thea/LifeManagement", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            vehicleLogger.error("Failed to create storage directory: \(error.localizedDescription)")
+        }
         storageURL = dir.appendingPathComponent("vehicles.json")
         loadState()
     }
@@ -281,17 +286,28 @@ final class VehicleManager: ObservableObject {
     private func save() {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        if let data = try? encoder.encode(vehicles) {
-            try? data.write(to: storageURL, options: .atomic)
+        do {
+            let data = try encoder.encode(vehicles)
+            try data.write(to: storageURL, options: .atomic)
+        } catch {
+            vehicleLogger.error("Failed to save vehicle data: \(error.localizedDescription)")
         }
     }
 
     private func loadState() {
-        guard let data = try? Data(contentsOf: storageURL) else { return }
+        let data: Data
+        do {
+            data = try Data(contentsOf: storageURL)
+        } catch {
+            vehicleLogger.error("Failed to read vehicle data: \(error.localizedDescription)")
+            return
+        }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        if let loaded = try? decoder.decode([Vehicle].self, from: data) {
-            vehicles = loaded
+        do {
+            vehicles = try decoder.decode([Vehicle].self, from: data)
+        } catch {
+            vehicleLogger.error("Failed to decode vehicle data: \(error.localizedDescription)")
         }
     }
 }

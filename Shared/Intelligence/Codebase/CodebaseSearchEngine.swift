@@ -296,7 +296,13 @@ public final class CodebaseSearchEngine: ObservableObject {
         var symbolPatterns: [String] = []
 
         // Extract quoted phrases
-        let quoteRegex = try? NSRegularExpression(pattern: "\"([^\"]+)\"", options: [])
+        let quoteRegex: NSRegularExpression?
+        do {
+            quoteRegex = try NSRegularExpression(pattern: "\"([^\"]+)\"", options: [])
+        } catch {
+            logger.error("Failed to compile quote regex pattern")
+            quoteRegex = nil
+        }
         let range = NSRange(text.startIndex..., in: text)
         var remainingText = text
 

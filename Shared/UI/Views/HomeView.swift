@@ -4,6 +4,8 @@ import SwiftUI
 struct HomeView: View {
     @State private var selectedConversation: Conversation?
     @State private var showingSettings = false
+    @State private var errorMessage: String?
+    @State private var showingError = false
 
     var body: some View {
         NavigationSplitView {
@@ -16,13 +18,23 @@ struct HomeView: View {
                     let conversation = ChatManager.shared.createConversation(title: "New Conversation")
                     selectedConversation = conversation
                     Task {
-                        try? await ChatManager.shared.sendMessage(prompt, in: conversation)
+                        do {
+                            try await ChatManager.shared.sendMessage(prompt, in: conversation)
+                        } catch {
+                            errorMessage = "Failed to send message: \(error.localizedDescription)"
+                            showingError = true
+                        }
                     }
                 }
             }
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
+        }
+        .alert("Error", isPresented: $showingError, presenting: errorMessage) { _ in
+            Button("OK") { }
+        } message: { message in
+            Text(message)
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name.newConversation)) { _ in
             createNewConversation()

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import OSLog
 
 // MARK: - Throttling Engine
 
@@ -42,6 +43,7 @@ public final class ThrottlingEngine {
 
     private let defaults = UserDefaults.standard
     private let configKey = "ThrottlingEngine.configuration"
+    private let logger = Logger(subsystem: "ai.thea.app", category: "ThrottlingEngine")
 
     // MARK: - Callbacks
 
@@ -50,10 +52,14 @@ public final class ThrottlingEngine {
     // MARK: - Initialization
 
     private init() {
-        if let data = defaults.data(forKey: configKey),
-           let config = try? JSONDecoder().decode(ThrottlingConfiguration.self, from: data)
-        {
-            configuration = config
+        if let data = defaults.data(forKey: configKey) {
+            do {
+                configuration = try JSONDecoder().decode(ThrottlingConfiguration.self, from: data)
+            } catch {
+                Logger(subsystem: "ai.thea.app", category: "ThrottlingEngine")
+                    .debug("Failed to decode ThrottlingConfiguration: \(error.localizedDescription)")
+                configuration = ThrottlingConfiguration()
+            }
         } else {
             configuration = ThrottlingConfiguration()
         }
@@ -63,8 +69,11 @@ public final class ThrottlingEngine {
     }
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             defaults.set(data, forKey: configKey)
+        } catch {
+            logger.debug("Failed to encode ThrottlingConfiguration: \(error.localizedDescription)")
         }
     }
 
@@ -213,7 +222,7 @@ public final class ThrottlingEngine {
         // Apply delay if needed
         let delay = getOperationDelay(for: category)
         if delay > 0 {
-            try await Task.sleep(for: .seconds(delay))
+            try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
         }
 
         return try await operation()
@@ -238,7 +247,11 @@ public final class ThrottlingEngine {
         configuration.enabled = false
 
         Task {
-            try? await Task.sleep(for: .seconds(duration))
+            do {
+                try await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
+            } catch {
+                break
+            }
             await MainActor.run {
                 self.configuration = previousConfig
             }

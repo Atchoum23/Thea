@@ -164,7 +164,7 @@ public struct WellnessDashboardView: View {
                             .fontWeight(.semibold)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(.theaError)
+                    .tint(.red)
                 }
 
                 // Progress bar
@@ -228,7 +228,7 @@ public struct WellnessDashboardView: View {
                         }
                     }) {
                         Image(systemName: "stop.fill")
-                            .foregroundColor(.theaError)
+                            .foregroundColor(.red)
                     }
                     .buttonStyle(.borderedProminent)
                 }
@@ -237,7 +237,7 @@ public struct WellnessDashboardView: View {
             if viewModel.isPlayingAudio, let audio = viewModel.currentAudio {
                 HStack {
                     Image(systemName: audio.icon)
-                        .foregroundColor(.theaInfo)
+                        .foregroundColor(.blue)
 
                     Text(audio.displayName)
                         .font(.subheadline)
@@ -245,10 +245,10 @@ public struct WellnessDashboardView: View {
                     Spacer()
 
                     Image(systemName: "waveform")
-                        .foregroundColor(.theaInfo)
+                        .foregroundColor(.blue)
                 }
                 .padding()
-                .background(Color.theaInfo.opacity(0.1))
+                .background(Color.blue.opacity(0.1))
                 .cornerRadius(12)
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -337,11 +337,11 @@ public struct WellnessDashboardView: View {
     private func errorView(_ message: String) -> some View {
         HStack {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(.theaError)
+                .foregroundColor(.red)
 
             Text(message)
                 .font(.caption)
-                .foregroundStyle(Color.theaError)
+                .foregroundStyle(.red)
 
             Spacer()
 
@@ -351,7 +351,7 @@ public struct WellnessDashboardView: View {
             .font(.caption)
         }
         .padding()
-        .background(Color.theaError.opacity(0.1))
+        .background(Color.red.opacity(0.1))
         .cornerRadius(12)
     }
 }
@@ -440,7 +440,7 @@ private struct SessionHistoryRow: View {
             }
 
             Image(systemName: session.completed ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundColor(session.completed ? .theaSuccess : .theaError)
+                .foregroundColor(session.completed ? .green : .red)
         }
         .padding()
         .background(Color.gray.opacity(0.1))
@@ -459,7 +459,7 @@ private struct WellnessStatCard: View {
         VStack(alignment: .leading, spacing: 8) {
             Image(systemName: icon)
                 .font(.caption)
-                .foregroundColor(.theaInfo)
+                .foregroundColor(.blue)
 
             Text(value)
                 .font(.title2)

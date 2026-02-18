@@ -10,7 +10,6 @@ import os.log
 
 // MARK: - WebSocket Server Protocol
 
-/// Delegate that receives events from the local WebSocket server used for browser extension communication.
 @MainActor
 public protocol LifeMonitorWebSocketServerDelegate: AnyObject, Sendable {
     nonisolated func webSocketServer(

@@ -6,6 +6,7 @@
 //  Copyright © 2026. All rights reserved.
 //
 
+import OSLog
 import SwiftUI
 
 #if os(macOS) || os(iOS)
@@ -384,6 +385,7 @@ import SwiftUI
         @State private var isStreaming = false
         @State private var scale: CGFloat = 1.0
         @State private var offset: CGSize = .zero
+        private let logger = Logger(subsystem: "com.thea.app", category: "RemoteClientView")
 
         var body: some View {
             GeometryReader { geometry in
@@ -411,7 +413,11 @@ import SwiftUI
             }
             .onAppear {
                 Task {
-                    _ = try? await client.captureScreen()
+                    do {
+                        _ = try await client.captureScreen()
+                    } catch {
+                        logger.warning("Failed to capture screen on appear: \(error.localizedDescription)")
+                    }
                 }
             }
         }
@@ -462,27 +468,42 @@ import SwiftUI
                     let y = Int(value.location.y * scaleY)
 
                     Task {
-                        try? await client.click(at: x, y)
-                        // Refresh screen
-                        _ = try? await client.captureScreen()
+                        do {
+                            try await client.click(at: x, y)
+                        } catch {
+                            logger.warning("Failed to send click: \(error.localizedDescription)")
+                        }
+                        do {
+                            _ = try await client.captureScreen()
+                        } catch {
+                            logger.warning("Failed to capture screen after click: \(error.localizedDescription)")
+                        }
                     }
                 }
         }
 
         private func captureScreen() {
             Task {
-                _ = try? await client.captureScreen()
+                do {
+                    _ = try await client.captureScreen()
+                } catch {
+                    logger.warning("Failed to capture screen: \(error.localizedDescription)")
+                }
             }
         }
 
         private func toggleStream() {
             Task {
-                if isStreaming {
-                    try? await client.stopScreenStream()
-                } else {
-                    try? await client.startScreenStream()
+                do {
+                    if isStreaming {
+                        try await client.stopScreenStream()
+                    } else {
+                        try await client.startScreenStream()
+                    }
+                    isStreaming.toggle()
+                } catch {
+                    logger.warning("Failed to toggle screen stream: \(error.localizedDescription)")
                 }
-                isStreaming.toggle()
             }
         }
 

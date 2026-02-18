@@ -1,8 +1,7 @@
 @preconcurrency import CoreLocation
 import Foundation
 import MapKit
-import os.log
-
+import OSLog
 // MARK: - Sendable Wrapper
 
 /// Wrapper to safely transfer non-Sendable types across isolation boundaries
@@ -233,7 +232,11 @@ private final class LocationManagerHelper: NSObject, CLLocationManagerDelegate {
         #endif
 
         // Wait a moment for the permission dialog
-        try? await Task.sleep(for: .seconds(1))
+        do {
+            try await Task.sleep(for: .seconds(1))
+        } catch {
+            // Task cancelled — permission dialog wait interrupted
+        }
         return checkAuthorizationStatus()
     }
 

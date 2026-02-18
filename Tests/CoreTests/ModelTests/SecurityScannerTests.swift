@@ -106,7 +106,7 @@ private struct TestScanReport: Codable, Identifiable {
     let completedAt: Date
 
     var overallThreatLevel: TestThreatLevel {
-        findings.max { $0.threatLevel < $1.threatLevel }?.threatLevel ?? .clean
+        findings.max(by: { $0.threatLevel < $1.threatLevel })?.threatLevel ?? .clean
     }
 
     var findingsByCategory: [TestScanCategory: [TestSecurityFinding]] {
@@ -136,9 +136,7 @@ struct ThreatLevelTests {
     }
 
     @Test func equality() {
-        let a = TestThreatLevel.medium
-        let b = TestThreatLevel.medium
-        #expect(!(a < b))
+        #expect(!(TestThreatLevel.medium < TestThreatLevel.medium))
     }
 
     @Test func uniqueIcons() {
@@ -378,19 +376,19 @@ struct KnownPatternsTests {
 
     @Test func pupDetection() {
         let appName = "MacKeeper"
-        let isPUP = pupIndicators.contains { appName.localizedCaseInsensitiveContains($0) }
+        let isPUP = pupIndicators.contains(where: { appName.localizedCaseInsensitiveContains($0) })
         #expect(isPUP)
     }
 
     @Test func pupNoFalsePositive() {
         let appName = "Safari"
-        let isPUP = pupIndicators.contains { appName.localizedCaseInsensitiveContains($0) }
+        let isPUP = pupIndicators.contains(where: { appName.localizedCaseInsensitiveContains($0) })
         #expect(!isPUP)
     }
 
     @Test func pupCaseInsensitive() {
         let appName = "mackeeper"
-        let isPUP = pupIndicators.contains { appName.localizedCaseInsensitiveContains($0) }
+        let isPUP = pupIndicators.contains(where: { appName.localizedCaseInsensitiveContains($0) })
         #expect(isPUP)
     }
 

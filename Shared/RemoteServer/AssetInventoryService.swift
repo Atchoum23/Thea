@@ -6,6 +6,9 @@
 //
 
 import Foundation
+import OSLog
+
+private let inventoryLogger = Logger(subsystem: "ai.thea.app", category: "AssetInventory")
 
 // MARK: - Asset Inventory Service
 
@@ -151,7 +154,12 @@ public class AssetInventoryService: ObservableObject {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return try? encoder.encode(report)
+        do {
+            return try encoder.encode(report)
+        } catch {
+            ErrorLogger.log(error, context: "AssetInventoryService.exportAsJSON")
+            return nil
+        }
     }
 
     /// Export inventory as CSV (apps list)
@@ -193,11 +201,12 @@ public class AssetInventoryService: ObservableObject {
                 task.waitUntilExit()
 
                 let data = pipe.fileHandleForReading.readDataToEndOfFile()
-                guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
                     return [:]
                 }
                 return json
             } catch {
+                inventoryLogger.debug("Could not parse system_profiler output: \(error.localizedDescription)")
                 return [:]
             }
         }
@@ -322,15 +331,27 @@ public class AssetInventoryService: ObservableObject {
             let fm = FileManager.default
 
             for dir in appDirs {
-                guard let contents = try? fm.contentsOfDirectory(atPath: dir) else { continue }
+                let contents: [String]
+                do {
+                    contents = try fm.contentsOfDirectory(atPath: dir)
+                } catch {
+                    inventoryLogger.debug("Could not list applications in \(dir): \(error.localizedDescription)")
+                    continue
+                }
 
                 for item in contents where item.hasSuffix(".app") {
                     let appPath = (dir as NSString).appendingPathComponent(item)
                     let plistPath = (appPath as NSString).appendingPathComponent("Contents/Info.plist")
 
-                    guard let plistData = fm.contents(atPath: plistPath),
-                          let plist = try? PropertyListSerialization.propertyList(from: plistData, format: nil) as? [String: Any]
-                    else { continue }
+                    guard let plistData = fm.contents(atPath: plistPath) else { continue }
+                    let plist: [String: Any]
+                    do {
+                        guard let parsed = try PropertyListSerialization.propertyList(from: plistData, format: nil) as? [String: Any] else { continue }
+                        plist = parsed
+                    } catch {
+                        inventoryLogger.debug("Could not parse plist for \(item): \(error.localizedDescription)")
+                        continue
+                    }
 
                     let name = plist["CFBundleDisplayName"] as? String
                         ?? plist["CFBundleName"] as? String
@@ -338,9 +359,17 @@ public class AssetInventoryService: ObservableObject {
                     let version = plist["CFBundleShortVersionString"] as? String ?? "Unknown"
                     let bundleId = plist["CFBundleIdentifier"] as? String
 
-                    let attrs = try? fm.attributesOfItem(atPath: appPath)
-                    let size = attrs?[.size] as? Int64
-                    let modified = attrs?[.modificationDate] as? Date
+                    let size: Int64?
+                    let modified: Date?
+                    do {
+                        let attrs = try fm.attributesOfItem(atPath: appPath)
+                        size = attrs[.size] as? Int64
+                        modified = attrs[.modificationDate] as? Date
+                    } catch {
+                        inventoryLogger.debug("Could not get attributes for \(item): \(error.localizedDescription)")
+                        size = nil
+                        modified = nil
+                    }
 
                     apps.append(InstalledApp(
                         name: name,
@@ -385,7 +414,6 @@ public class AssetInventoryService: ObservableObject {
 
 // MARK: - Inventory Report
 
-/// Summary report containing hardware and software inventory data collected at a point in time.
 public struct InventoryReport: Codable, Sendable {
     public let collectedAt: Date
     public let hardware: HardwareInventory

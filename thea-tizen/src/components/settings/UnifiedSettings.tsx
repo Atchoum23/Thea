@@ -12,6 +12,7 @@
 import React, { useState, useEffect } from 'react';
 import { secureConfigService, AppConfiguration } from '../../services/config/SecureConfigService';
 import { NordVPNSettings } from './NordVPNSettings';
+import { SMARTDNS_ACTIVATION_GUIDE } from '../../services/vpn/NordVPNProxyService';
 import './UnifiedSettings.css';
 
 type SettingsSection = 'overview' | 'tmdb' | 'nordvpn' | 'trakt' | 'sync' | 'preferences';

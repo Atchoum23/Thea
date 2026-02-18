@@ -9,6 +9,7 @@
 
 import Foundation
 import CryptoKit
+import OSLog
 
 // MARK: - Todoist Client
 
@@ -29,13 +30,13 @@ public actor TodoistClient {
 
     // MARK: - Configuration
 
-    /// Stores OAuth client credentials for token migration and revocation flows.
     public func configureOAuth(clientId: String, clientSecret: String) {
         self.clientId = clientId
         self.clientSecret = clientSecret
     }
 
-    /// Sets the bearer token used for all subsequent API requests.
+    // MARK: - Configuration
+
     public func configure(accessToken: String) {
         self.accessToken = accessToken
     }
@@ -655,12 +656,12 @@ private struct EmptyResponse: Codable {}
 
 /// Todoist integration coordinator for Thea
 public actor TodoistIntegration {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "TodoistIntegration")
     private let client = TodoistClient()
     private var isConfigured = false
 
     public init() {}
 
-    /// Configures the underlying Todoist client with the given access token.
     public func configure(accessToken: String) async {
         await client.configure(accessToken: accessToken)
         isConfigured = true
@@ -731,7 +732,13 @@ public actor TodoistIntegration {
 
         // Extract labels (@label)
         let labelPattern = #"@(\w+)"#
-        let regex = try? NSRegularExpression(pattern: labelPattern)
+        let regex: NSRegularExpression?
+        do {
+            regex = try NSRegularExpression(pattern: labelPattern)
+        } catch {
+            logger.error("Failed to compile label regex pattern: \(error)")
+            regex = nil
+        }
         if let matches = regex?.matches(in: content, range: NSRange(content.startIndex..., in: content)) {
             labels = matches.compactMap { match -> String? in
                 guard let range = Range(match.range(at: 1), in: content) else { return nil }

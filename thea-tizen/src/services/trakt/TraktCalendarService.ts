@@ -218,7 +218,6 @@ class TraktCalendarService {
    */
   async getUpcomingContent(): Promise<UpcomingContent> {
     const today = this.formatDate(new Date());
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const tomorrow = this.formatDate(new Date(Date.now() + 24 * 60 * 60 * 1000));
 
     let shows: TraktCalendarItem[] = [];

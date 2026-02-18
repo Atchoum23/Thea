@@ -228,10 +228,13 @@ public actor TeamKnowledgeBase {
         var items: [SharedKnowledgeItem] = []
 
         for result in results.matchResults {
-            if let record = try? result.1.get() {
+            do {
+                let record = try result.1.get()
                 if let item = SharedKnowledgeItem(from: record) {
                     items.append(item)
                 }
+            } catch {
+                logger.error("Failed to fetch CloudKit record: \(error.localizedDescription)")
             }
         }
 
@@ -292,17 +295,24 @@ public actor TeamKnowledgeBase {
     private let cacheKey = "TeamKnowledgeBase.cache"
 
     private func loadLocalCache() async {
-        if let data = UserDefaults.standard.data(forKey: cacheKey),
-           let decoded = try? JSONDecoder().decode(TeamKnowledgeCache.self, from: data) {
-            teamKnowledge = decoded.knowledge
-            lastSyncTime = decoded.syncTimes
+        if let data = UserDefaults.standard.data(forKey: cacheKey) {
+            do {
+                let decoded = try JSONDecoder().decode(TeamKnowledgeCache.self, from: data)
+                teamKnowledge = decoded.knowledge
+                lastSyncTime = decoded.syncTimes
+            } catch {
+                logger.error("Failed to decode local cache: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveLocalCache() async {
         let cache = TeamKnowledgeCache(knowledge: teamKnowledge, syncTimes: lastSyncTime)
-        if let data = try? JSONEncoder().encode(cache) {
+        do {
+            let data = try JSONEncoder().encode(cache)
             UserDefaults.standard.set(data, forKey: cacheKey)
+        } catch {
+            logger.error("Failed to encode local cache: \(error.localizedDescription)")
         }
     }
 }

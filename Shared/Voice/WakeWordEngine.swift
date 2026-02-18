@@ -13,6 +13,7 @@
 // - Sensory Wake Word: Ultra-low power detection
 
 import Foundation
+import os.log
 @preconcurrency import AVFoundation
 import Accelerate
 
@@ -23,6 +24,7 @@ import Accelerate
 @MainActor
 @Observable
 final class WakeWordEngine {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "WakeWordEngine")
     static let shared = WakeWordEngine()
 
     // MARK: - State
@@ -252,8 +254,17 @@ final class WakeWordEngine {
             pauseListening()
 
             Task {
-                try? await Task.sleep(for: .seconds(configuration.timeoutAfterDetection))
-                try? resumeListening()
+                do {
+                    try await Task.sleep(for: .seconds(configuration.timeoutAfterDetection))
+                } catch {
+                    logger.error("WakeWordEngine: sleep interrupted after detection: \(error.localizedDescription)")
+                }
+                do {
+                    try resumeListening()
+                } catch {
+                    errorMessage = "Failed to resume listening: \(error.localizedDescription)"
+                    onError?(WakeWordError.audioSetupFailed)
+                }
             }
         }
     }
@@ -323,24 +334,34 @@ final class WakeWordEngine {
             let wasActive = isActive
             stopListening()
             Task {
-                try? await startListening()
-                if !wasActive {
-                    pauseListening()
+                do {
+                    try await startListening()
+                    if !wasActive {
+                        pauseListening()
+                    }
+                } catch {
+                    errorMessage = "Failed to restart listening after config update: \(error.localizedDescription)"
+                    onError?(WakeWordError.audioSetupFailed)
                 }
             }
         }
     }
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "WakeWord.config"),
-           let config = try? JSONDecoder().decode(Configuration.self, from: data) {
-            configuration = config
+        guard let data = UserDefaults.standard.data(forKey: "WakeWord.config") else { return }
+        do {
+            configuration = try JSONDecoder().decode(Configuration.self, from: data)
+        } catch {
+            logger.error("WakeWordEngine: failed to decode configuration: \(error.localizedDescription)")
         }
     }
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             UserDefaults.standard.set(data, forKey: "WakeWord.config")
+        } catch {
+            ErrorLogger.log(error, context: "WakeWordEngine.saveConfiguration")
         }
     }
 
@@ -368,7 +389,6 @@ final class WakeWordEngine {
 // MARK: - Audio Processor (Nonisolated)
 
 /// Handles all audio processing off the main thread
-// @unchecked Sendable: mutable state serialized on dedicated processingQueue DispatchQueue
 private final class AudioProcessor: @unchecked Sendable {
     private var audioEngine: AVAudioEngine?
     private let processingQueue = DispatchQueue(label: "app.thea.wakeword.processing", qos: .userInteractive)
@@ -558,7 +578,6 @@ private final class AudioProcessor: @unchecked Sendable {
 
 // MARK: - Speaker Trainer (Nonisolated)
 
-// @unchecked Sendable: all stored properties are immutable lets; methods are pure functions
 private final class SpeakerTrainer: @unchecked Sendable {
     private let embeddingSize = 128
 

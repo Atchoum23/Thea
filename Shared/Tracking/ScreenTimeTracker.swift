@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import Observation
 @preconcurrency import SwiftData
 
@@ -13,6 +14,8 @@ import Observation
     @Observable
     final class ScreenTimeTracker {
         static let shared = ScreenTimeTracker()
+
+        private let logger = Logger(subsystem: "ai.thea.app", category: "ScreenTimeTracker")
 
         private var modelContext: ModelContext?
         private(set) var isTracking = false
@@ -155,7 +158,13 @@ import Observation
 
             // Encode usage data
             let encoder = JSONEncoder()
-            let usageData = (try? encoder.encode(usageDatabase)) ?? Data()
+            let usageData: Data
+            do {
+                usageData = try encoder.encode(usageDatabase)
+            } catch {
+                logger.error("Failed to encode usage database: \(error)")
+                usageData = Data()
+            }
 
             let record = DailyScreenTimeRecord(
                 date: Calendar.current.startOfDay(for: Date()),
@@ -166,7 +175,11 @@ import Observation
             )
 
             context.insert(record)
-            try? context.save()
+            do {
+                try context.save()
+            } catch {
+                logger.error("Failed to save screen time record: \(error)")
+            }
         }
 
         // MARK: - Analytics
@@ -227,7 +240,13 @@ import Observation
 
             // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
             let descriptor = FetchDescriptor<DailyScreenTimeRecord>()
-            let allRecords = (try? context.fetch(descriptor)) ?? []
+            let allRecords: [DailyScreenTimeRecord]
+            do {
+                allRecords = try context.fetch(descriptor)
+            } catch {
+                logger.error("Failed to fetch screen time records: \(error)")
+                return nil
+            }
             return allRecords.first { $0.date == startOfDay }
         }
 
@@ -236,7 +255,13 @@ import Observation
 
             // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
             let descriptor = FetchDescriptor<DailyScreenTimeRecord>()
-            let allRecords = (try? context.fetch(descriptor)) ?? []
+            let allRecords: [DailyScreenTimeRecord]
+            do {
+                allRecords = try context.fetch(descriptor)
+            } catch {
+                logger.error("Failed to fetch screen time records for range: \(error)")
+                return []
+            }
             return allRecords
                 .filter { $0.date >= start && $0.date <= end }
                 .sorted { $0.date > $1.date }
@@ -277,6 +302,8 @@ import Observation
     @Observable
     final class ScreenTimeTracker {
         static let shared = ScreenTimeTracker()
+
+        private let logger = Logger(subsystem: "ai.thea.app", category: "ScreenTimeTracker")
         private init() {}
         func setModelContext(_: ModelContext) {}
     }

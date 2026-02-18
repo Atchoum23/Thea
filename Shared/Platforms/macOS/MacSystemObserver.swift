@@ -147,7 +147,12 @@
             pendingSnapshotUpdate = true
 
             Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(100)) // 100ms debounce
+                do {
+                    try await Task.sleep(nanoseconds: 100_000_000) // 100ms debounce
+                } catch {
+                    self.pendingSnapshotUpdate = false
+                    return
+                }
                 self.pendingSnapshotUpdate = false
                 await self.updateSnapshot()
             }
@@ -156,7 +161,11 @@
         private func startSnapshotUpdates() {
             snapshotUpdateTask = Task { [weak self] in
                 while !Task.isCancelled {
-                    try? await Task.sleep(for: .seconds(5)) // 5 seconds
+                    do {
+                        try await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+                    } catch {
+                        break
+                    }
                     await self?.updateSnapshot()
                 }
             }

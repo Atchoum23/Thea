@@ -68,7 +68,6 @@ export function ColorButtonHints({ hints, className = '' }: ColorButtonHintsProp
 /**
  * Common hint configurations
  */
-// eslint-disable-next-line react-refresh/only-export-components
 export const CommonHints = {
   chat: [
     { color: 'red' as const, label: 'Cancel' },

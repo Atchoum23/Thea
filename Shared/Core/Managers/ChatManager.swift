@@ -18,7 +18,6 @@ final class ChatManager: ObservableObject {
     @Published var activeConversation: Conversation?
     @Published var isStreaming: Bool = false
     @Published var streamingText: String = ""
-    @Published var streamingThinkingText: String = ""
     @Published var conversations: [Conversation] = []
     @Published var messageQueue: [(text: String, conversation: Conversation)] = []
 
@@ -29,31 +28,12 @@ final class ChatManager: ObservableObject {
 
     private init() {}
 
-    /// Consecutive save failure count for retry logic
-    private var consecutiveSaveFailures = 0
-
-    /// Save model context with error logging and retry on transient failures
+    /// Save model context with error logging instead of silent `try?`
     func saveContext(operation: String = #function) {
         do {
             try modelContext?.save()
-            consecutiveSaveFailures = 0
         } catch {
-            consecutiveSaveFailures += 1
-            chatLogger.error("❌ Save failed in \(operation) (\(self.consecutiveSaveFailures)x): \(error.localizedDescription)")
-
-            // Retry once after a brief delay for transient DB lock failures
-            if consecutiveSaveFailures <= 2 {
-                Task {
-                    try? await Task.sleep(for: .milliseconds(100))
-                    do {
-                        try self.modelContext?.save()
-                        self.consecutiveSaveFailures = 0
-                        chatLogger.info("✅ Save retry succeeded for \(operation)")
-                    } catch {
-                        chatLogger.error("❌ Save retry also failed in \(operation): \(error.localizedDescription)")
-                    }
-                }
-            }
+            chatLogger.error("❌ Save failed in \(operation): \(error.localizedDescription)")
         }
     }
 
@@ -211,7 +191,7 @@ final class ChatManager: ObservableObject {
     #else
     /// No-op on non-macOS platforms (app pairing is macOS-only)
     func injectForegroundAppContext(into message: String) -> String {
-        message
+        return message
     }
     #endif
 }
@@ -227,7 +207,6 @@ struct AIMessage: Sendable {
     let model: String
     var tokenCount: Int?
     var metadata: MessageMetadata?
-    var thinkingTrace: String?
 
     init(
         id: UUID,
@@ -237,8 +216,7 @@ struct AIMessage: Sendable {
         timestamp: Date,
         model: String,
         tokenCount: Int? = nil,
-        metadata: MessageMetadata? = nil,
-        thinkingTrace: String? = nil
+        metadata: MessageMetadata? = nil
     ) {
         self.id = id
         self.conversationID = conversationID
@@ -248,7 +226,6 @@ struct AIMessage: Sendable {
         self.model = model
         self.tokenCount = tokenCount
         self.metadata = metadata
-        self.thinkingTrace = thinkingTrace
     }
 }
 

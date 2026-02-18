@@ -6,7 +6,7 @@ private let registryLogger = Logger(subsystem: "ai.thea.app", category: "Provide
 
 @MainActor
 @Observable
-final class ProviderRegistry: ProviderRegistryProtocol {
+final class ProviderRegistry {
     static let shared = ProviderRegistry()
 
     private(set) var availableProviders: [ProviderInfo] = []
@@ -130,15 +130,15 @@ final class ProviderRegistry: ProviderRegistryProtocol {
                 let provider = LocalModelProvider(modelName: model.name, instance: instance)
                 localProviders["local:\(model.name)"] = provider
                 debugLog("✅ Registered local model: \(model.name)")
-                registryLogger.info("Registered local model: \(model.name)")
+                print("✅ Registered local model: \(model.name)")
             } catch {
                 debugLog("⚠️ Failed to load local model \(model.name): \(error)")
-                registryLogger.warning("Failed to load local model \(model.name): \(error.localizedDescription)")
+                print("⚠️ Failed to load local model \(model.name): \(error)")
             }
         }
 
         debugLog("📊 Total local models registered: \(localProviders.count)")
-        registryLogger.info("Total local models registered: \(self.localProviders.count)")
+        print("📊 Total local models registered: \(localProviders.count)")
         #else
         // Local models not available on watchOS/tvOS
         debugLog("📱 Skipping local model refresh - not available on this platform")
@@ -203,10 +203,10 @@ final class ProviderRegistry: ProviderRegistryProtocol {
         do {
             apiKey = try SecureStorage.shared.loadAPIKey(for: id)
         } catch {
-            registryLogger.error("Failed to load API key for provider '\(id)': \(error.localizedDescription)")
+            registryLogger.error("Failed to load API key for '\(id)': \(error.localizedDescription)")
             return nil
         }
-        guard let apiKey, !apiKey.isEmpty else {
+        guard let apiKey else {
             return nil
         }
 
@@ -226,20 +226,6 @@ final class ProviderRegistry: ProviderRegistryProtocol {
         default:
             return nil
         }
-    }
-
-
-    /// Register an external provider at runtime (plugin support).
-    /// New providers can be added without modifying the built-in switch statement.
-    func registerProvider(_ provider: AIProvider, id: String) {
-        providers[id] = provider
-        let info = ProviderInfo(provider: provider, isConfigured: true)
-        if let index = availableProviders.firstIndex(where: { $0.id == id }) {
-            availableProviders[index] = info
-        } else {
-            availableProviders.append(info)
-        }
-        debugLog("Registered external provider: \(id)")
     }
 
     // MARK: - Provider Access

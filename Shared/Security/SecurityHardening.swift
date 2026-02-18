@@ -286,7 +286,11 @@ public final class SecurityManager: ObservableObject {
         let expiredIds = activeCredentials.filter(\.isExpired).map(\.id)
 
         for credential in activeCredentials.filter(\.isExpired) {
-            try? keychain.delete(key: credential.id, service: credential.service)
+            do {
+                try keychain.delete(key: credential.id, service: credential.service)
+            } catch {
+                logger.warning("Failed to delete expired credential \(credential.id): \(error.localizedDescription)")
+            }
         }
 
         activeCredentials.removeAll { $0.isExpired }
@@ -372,7 +376,11 @@ public final class SecurityManager: ObservableObject {
     }
 
     private func redact(pattern: String, in text: String, replacement: String) -> String {
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) else {
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+        } catch {
+            logger.debug("Redact pattern failed: \(error.localizedDescription)")
             return text
         }
         return regex.stringByReplacingMatches(
@@ -430,7 +438,12 @@ public final class SecurityManager: ObservableObject {
 
     /// Export audit log
     public func exportAuditLog() -> Data? {
-        try? JSONEncoder().encode(auditLog)
+        do {
+            return try JSONEncoder().encode(auditLog)
+        } catch {
+            logger.error("Failed to export audit log: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     // MARK: - Security Checks
@@ -492,34 +505,43 @@ public final class SecurityManager: ObservableObject {
     // MARK: - Persistence
 
     private func saveCredentialMetadata() {
-        if let data = try? JSONEncoder().encode(activeCredentials) {
+        do {
+            let data = try JSONEncoder().encode(activeCredentials)
             UserDefaults.standard.set(data, forKey: "thea.security.credentials_metadata")
+        } catch {
+            logger.error("Failed to save credential metadata: \(error.localizedDescription)")
         }
     }
 
     private func loadCredentialMetadata() {
-        guard let data = UserDefaults.standard.data(forKey: "thea.security.credentials_metadata"),
-              let credentials = try? JSONDecoder().decode([SecureCredential].self, from: data) else {
-            return
+        guard let data = UserDefaults.standard.data(forKey: "thea.security.credentials_metadata") else { return }
+        do {
+            activeCredentials = try JSONDecoder().decode([SecureCredential].self, from: data)
+        } catch {
+            logger.debug("Could not decode credential metadata: \(error.localizedDescription)")
         }
-        activeCredentials = credentials
     }
 
     private func saveAuditLog() {
         // Only save recent events for performance
         let recentLog = Array(auditLog.suffix(500))
-        if let data = try? JSONEncoder().encode(recentLog) {
+        do {
+            let data = try JSONEncoder().encode(recentLog)
             UserDefaults.standard.set(data, forKey: "thea.security.audit_log")
+        } catch {
+            logger.error("Failed to save audit log: \(error.localizedDescription)")
         }
     }
 
     private func loadAuditLog() {
-        guard let data = UserDefaults.standard.data(forKey: "thea.security.audit_log"),
-              let log = try? JSONDecoder().decode([SecurityAuditEvent].self, from: data) else {
-            return
+        guard let data = UserDefaults.standard.data(forKey: "thea.security.audit_log") else { return }
+        do {
+            let log = try JSONDecoder().decode([SecurityAuditEvent].self, from: data)
+            auditLog = log
+            recentEvents = Array(log.suffix(50))
+        } catch {
+            logger.debug("Could not decode audit log: \(error.localizedDescription)")
         }
-        auditLog = log
-        recentEvents = Array(log.suffix(50))
     }
 }
 

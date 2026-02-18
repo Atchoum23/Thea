@@ -143,7 +143,7 @@ class WatchAvailabilityService {
   /**
    * Check if content is available on local Plex server
    */
-  private async checkPlexAvailability(_title: string, _type: 'movie' | 'tv'): Promise<boolean> {
+  private async checkPlexAvailability(title: string, type: 'movie' | 'tv'): Promise<boolean> {
     const plexAccount = this.streamingAccounts.find(
       a => a.providerName === 'Plex' && a.active && a.localServer
     );

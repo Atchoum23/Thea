@@ -44,22 +44,28 @@ public final class OnboardingManager: ObservableObject {
     private func loadState() {
         isOnboardingComplete = UserDefaults.standard.bool(forKey: "onboarding.complete")
 
-        if let completedData = UserDefaults.standard.data(forKey: "onboarding.completedSteps"),
-           let completed = try? JSONDecoder().decode(Set<String>.self, from: completedData)
-        {
-            completedSteps = completed
+        if let completedData = UserDefaults.standard.data(forKey: "onboarding.completedSteps") {
+            do {
+                completedSteps = try JSONDecoder().decode(Set<String>.self, from: completedData)
+            } catch {
+                logger.debug("Could not decode completed steps: \(error.localizedDescription)")
+            }
         }
 
-        if let skippedData = UserDefaults.standard.data(forKey: "onboarding.skippedSteps"),
-           let skipped = try? JSONDecoder().decode(Set<String>.self, from: skippedData)
-        {
-            skippedSteps = skipped
+        if let skippedData = UserDefaults.standard.data(forKey: "onboarding.skippedSteps") {
+            do {
+                skippedSteps = try JSONDecoder().decode(Set<String>.self, from: skippedData)
+            } catch {
+                logger.debug("Could not decode skipped steps: \(error.localizedDescription)")
+            }
         }
 
-        if let discoveredData = UserDefaults.standard.data(forKey: "onboarding.discoveredFeatures"),
-           let discovered = try? JSONDecoder().decode(Set<String>.self, from: discoveredData)
-        {
-            discoveredFeatures = discovered
+        if let discoveredData = UserDefaults.standard.data(forKey: "onboarding.discoveredFeatures") {
+            do {
+                discoveredFeatures = try JSONDecoder().decode(Set<String>.self, from: discoveredData)
+            } catch {
+                logger.debug("Could not decode discovered features: \(error.localizedDescription)")
+            }
         }
 
         updateProgress()
@@ -68,16 +74,25 @@ public final class OnboardingManager: ObservableObject {
     private func saveState() {
         UserDefaults.standard.set(isOnboardingComplete, forKey: "onboarding.complete")
 
-        if let data = try? JSONEncoder().encode(completedSteps) {
+        do {
+            let data = try JSONEncoder().encode(completedSteps)
             UserDefaults.standard.set(data, forKey: "onboarding.completedSteps")
+        } catch {
+            logger.error("Failed to save completed steps: \(error.localizedDescription)")
         }
 
-        if let data = try? JSONEncoder().encode(skippedSteps) {
+        do {
+            let data = try JSONEncoder().encode(skippedSteps)
             UserDefaults.standard.set(data, forKey: "onboarding.skippedSteps")
+        } catch {
+            logger.error("Failed to save skipped steps: \(error.localizedDescription)")
         }
 
-        if let data = try? JSONEncoder().encode(discoveredFeatures) {
+        do {
+            let data = try JSONEncoder().encode(discoveredFeatures)
             UserDefaults.standard.set(data, forKey: "onboarding.discoveredFeatures")
+        } catch {
+            logger.error("Failed to save discovered features: \(error.localizedDescription)")
         }
     }
 

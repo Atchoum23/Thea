@@ -5,7 +5,6 @@ import MLXLMCommon
 
 // MARK: - Local Model Provider
 
-// @unchecked Sendable: all stored properties are immutable lets, no mutable state
 final class LocalModelProvider: AIProvider, @unchecked Sendable {
     private let modelName: String
     private let instance: LocalModelInstance

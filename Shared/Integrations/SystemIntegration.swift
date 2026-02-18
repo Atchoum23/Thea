@@ -27,15 +27,12 @@ public actor SystemIntegration: AppIntegrationModule {
 
     private init() {}
 
-    /// Activates the system integration module.
     public func connect() async throws {
         isConnected = true
     }
 
-    /// Deactivates the system integration module.
     public func disconnect() async { isConnected = false }
 
-    /// Returns `true`; system integration is always available.
     public func isAvailable() async -> Bool { true }
 
     // MARK: - System Info

@@ -58,7 +58,11 @@ public final class PredictiveEngine: ObservableObject {
         predictionTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.generatePredictions()
-                try? await Task.sleep(for: .seconds(60)) // Every minute
+                do {
+                    try await Task.sleep(nanoseconds: 60_000_000_000) // Every minute
+                } catch {
+                    break
+                }
             }
         }
     }
@@ -314,6 +318,7 @@ public final class PredictiveEngine: ObservableObject {
         }
 
         let dataURL = containerURL.appendingPathComponent("predictive_data.json")
+        guard fileManager.fileExists(atPath: dataURL.path) else { return }
 
         do {
             let data = try Data(contentsOf: dataURL)
@@ -322,7 +327,7 @@ public final class PredictiveEngine: ObservableObject {
             timeBasedPatterns = decoded.timeBasedPatterns
             logger.info("Loaded predictive data")
         } catch {
-            logger.error("Failed to load predictive data: \(error.localizedDescription)")
+            logger.debug("Could not load predictive data: \(error.localizedDescription)")
         }
     }
 
@@ -344,7 +349,7 @@ public final class PredictiveEngine: ObservableObject {
             try encoded.write(to: dataURL)
             logger.info("Saved predictive data")
         } catch {
-            logger.error("Failed to save predictive data: \(error.localizedDescription)")
+            logger.debug("Could not save predictive data: \(error.localizedDescription)")
         }
     }
 

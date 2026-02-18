@@ -1,8 +1,10 @@
 import Foundation
 
 import Combine
+import OSLog
 
 public actor AssessmentDataExporter {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "AssessmentDataExporter")
     public static let shared = AssessmentDataExporter()
 
     public enum ExportFormat: String, Sendable {
@@ -94,9 +96,14 @@ public actor AssessmentDataExporter {
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
 
-        guard let jsonData = try? encoder.encode(assessments),
-              let jsonString = String(data: jsonData, encoding: .utf8)
-        else {
+        let jsonData: Data
+        do {
+            jsonData = try encoder.encode(assessments)
+        } catch {
+            logger.error("Failed to encode assessments to JSON: \(error)")
+            throw ExportError.encodingFailed
+        }
+        guard let jsonString = String(data: jsonData, encoding: .utf8) else {
             throw ExportError.encodingFailed
         }
 
@@ -290,7 +297,6 @@ public final class AssessmentExportCoordinator: ObservableObject {
 
     public init() {}
 
-    /// Exports a single assessment in the specified format and stores the result.
     public func exportSingle(_ assessment: Assessment, format: AssessmentDataExporter.ExportFormat) async {
         isExporting = true
         errorMessage = nil
@@ -305,7 +311,6 @@ public final class AssessmentExportCoordinator: ObservableObject {
         isExporting = false
     }
 
-    /// Exports multiple assessments in the specified format and stores the result.
     public func exportMultiple(_ assessments: [Assessment], format: AssessmentDataExporter.ExportFormat) async {
         isExporting = true
         errorMessage = nil
@@ -320,7 +325,6 @@ public final class AssessmentExportCoordinator: ObservableObject {
         isExporting = false
     }
 
-    /// Saves exported content to a file with the given name.
     public func saveToFile(_ content: String, filename: String) throws {
         // Would implement file saving to user's directory
         // Mock implementation
@@ -328,7 +332,6 @@ public final class AssessmentExportCoordinator: ObservableObject {
         print("Content length: \(content.count) characters")
     }
 
-    /// Prepares content for sharing via the system share sheet.
     public func shareContent(_ content: String) {
         // Would implement system share sheet
         exportedContent = content

@@ -7,8 +7,9 @@
  * - Chat interface for natural language interaction
  */
 
-import { tmdbStreamingService, ContentStreamingInfo } from '../streaming/TMDBStreamingService';
-import { smartWatchService, WatchRecommendation } from '../streaming/SmartWatchService';
+import { ProviderRegistry } from './ProviderRegistry';
+import { tmdbStreamingService, ContentStreamingInfo, StreamingOption } from '../streaming/TMDBStreamingService';
+import { smartWatchService, WatchRecommendation, WatchOption } from '../streaming/SmartWatchService';
 import { nordVPNProxyService } from '../vpn/NordVPNProxyService';
 import { streamingAvailabilityService, StreamingAppId } from '../streaming/StreamingAvailabilityService';
 
@@ -233,7 +234,7 @@ class WatchAssistant {
    */
   private buildOptionSummaries(
     streamingInfo: ContentStreamingInfo | null,
-    _recommendation: WatchRecommendation
+    recommendation: WatchRecommendation
   ): WatchOptionSummary[] {
     const summaries: WatchOptionSummary[] = [];
     const accounts = streamingAvailabilityService.getAccounts();

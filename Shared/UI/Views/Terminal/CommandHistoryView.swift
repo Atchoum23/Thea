@@ -157,11 +157,11 @@
 
                     let successful = session.commandHistory.count { $0.wasSuccessful }
                     Label("\(successful) successful", systemImage: "checkmark.circle")
-                        .foregroundStyle(.theaSuccess)
+                        .foregroundStyle(.green)
 
                     let failed = session.commandHistory.count { !$0.wasSuccessful }
                     Label("\(failed) failed", systemImage: "xmark.circle")
-                        .foregroundStyle(.theaError)
+                        .foregroundStyle(.red)
 
                     let totalDuration = session.commandHistory.reduce(0) { $0 + $1.duration }
                     Label(String(format: "%.1fs total", totalDuration), systemImage: "clock")
@@ -205,7 +205,7 @@
                 HStack {
                     // Status indicator
                     Image(systemName: command.wasSuccessful ? "checkmark.circle.fill" : "xmark.circle.fill")
-                        .foregroundStyle(command.wasSuccessful ? .theaSuccess : .theaError)
+                        .foregroundStyle(command.wasSuccessful ? .green : .red)
 
                     // Command text
                     Text(command.command)
@@ -272,7 +272,7 @@
                                 ScrollView {
                                     Text(command.errorOutput)
                                         .font(.system(.caption, design: .monospaced))
-                                        .foregroundStyle(.theaError)
+                                        .foregroundStyle(.red)
                                         .textSelection(.enabled)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                 }

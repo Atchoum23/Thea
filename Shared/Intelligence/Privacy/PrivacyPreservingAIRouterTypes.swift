@@ -2,6 +2,7 @@
 // Types, enums, and supporting actors for PrivacyPreservingAIRouter
 
 import Foundation
+import OSLog
 
 // MARK: - Data Sensitivity Classification
 
@@ -371,6 +372,7 @@ actor DataClassifier {
 /// Anonymizes content based on strategies
 actor DataAnonymizer {
 
+    private let logger = Logger(subsystem: "ai.thea.app", category: "DataAnonymizer")
     private var pseudonymCache: [String: String] = [:]
     private var pseudonymCounter = 0
 
@@ -478,7 +480,8 @@ actor DataAnonymizer {
         ]
 
         for pattern in namePatterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
+            do {
+                let regex = try NSRegularExpression(pattern: pattern, options: [])
                 let nsContent = result as NSString
                 let matches = regex.matches(in: result, options: [], range: NSRange(location: 0, length: nsContent.length))
 
@@ -488,6 +491,8 @@ actor DataAnonymizer {
                     result = nsContent.replacingCharacters(in: match.range, with: pseudonym) as String
                     mapping[pseudonym] = originalName
                 }
+            } catch {
+                logger.debug("Invalid name pattern: \(error.localizedDescription)")
             }
         }
 
@@ -510,7 +515,8 @@ actor DataAnonymizer {
         var result = content
 
         if type == .email {
-            if let regex = try? NSRegularExpression(pattern: #"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"#, options: []) {
+            do {
+                let regex = try NSRegularExpression(pattern: #"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"#, options: [])
                 let nsContent = result as NSString
                 let matches = regex.matches(in: result, options: [], range: NSRange(location: 0, length: nsContent.length))
 
@@ -519,6 +525,8 @@ actor DataAnonymizer {
                     let hash = String(email.hashValue.magnitude).prefix(8)
                     result = nsContent.replacingCharacters(in: match.range, with: "user_\(hash)@domain.tld") as String
                 }
+            } catch {
+                logger.debug("Invalid email pattern: \(error.localizedDescription)")
             }
         }
 
@@ -561,7 +569,8 @@ actor DataAnonymizer {
 
         // Replace precise coordinates with approximate
         let coordPattern = #"(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})"#
-        if let regex = try? NSRegularExpression(pattern: coordPattern, options: []) {
+        do {
+            let regex = try NSRegularExpression(pattern: coordPattern, options: [])
             let nsContent = result as NSString
             let matches = regex.matches(in: result, options: [], range: NSRange(location: 0, length: nsContent.length))
 
@@ -575,6 +584,8 @@ actor DataAnonymizer {
                     result = nsContent.replacingCharacters(in: match.range, with: blurred) as String
                 }
             }
+        } catch {
+            logger.debug("Invalid coordinate pattern: \(error.localizedDescription)")
         }
 
         return result
@@ -600,7 +611,8 @@ actor DataAnonymizer {
             ]
 
             let dollarPattern = #"\$[\d,]+(?:\.\d{2})?"#
-            if let regex = try? NSRegularExpression(pattern: dollarPattern, options: []) {
+            do {
+                let regex = try NSRegularExpression(pattern: dollarPattern, options: [])
                 let nsContent = result as NSString
                 let matches = regex.matches(in: result, options: [], range: NSRange(location: 0, length: nsContent.length))
 
@@ -618,6 +630,8 @@ actor DataAnonymizer {
                         }
                     }
                 }
+            } catch {
+                logger.debug("Invalid dollar amount pattern: \(error.localizedDescription)")
             }
 
         default:

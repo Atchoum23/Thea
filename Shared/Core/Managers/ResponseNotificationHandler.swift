@@ -11,16 +11,17 @@
 
 import Foundation
 import OSLog
+
+private let responseNotificationLogger = Logger(subsystem: "ai.thea.app", category: "ResponseNotificationHandler")
 import UserNotifications
 #if os(macOS)
 import AppKit
 #elseif os(iOS)
 import UIKit
+import OSLog
 #endif
 
 // MARK: - Response Notification Handler
-
-private let notifLogger = Logger(subsystem: "ai.thea.app", category: "ResponseNotificationHandler")
 
 @MainActor
 final class ResponseNotificationHandler: ObservableObject {
@@ -61,7 +62,7 @@ final class ResponseNotificationHandler: ObservableObject {
             isAuthorized = granted
             return granted
         } catch {
-            notifLogger.error("Notification authorization failed: \(error.localizedDescription)")
+            print("❌ Notification authorization failed: \(error)")
             return false
         }
     }
@@ -156,7 +157,7 @@ final class ResponseNotificationHandler: ObservableObject {
             try await center.add(request)
             updateBadgeCount()
         } catch {
-            notifLogger.error("Failed to send response notification: \(error.localizedDescription)")
+            print("❌ Failed to send response notification: \(error)")
         }
     }
 
@@ -195,7 +196,7 @@ final class ResponseNotificationHandler: ObservableObject {
             try await center.add(request)
             updateBadgeCount()
         } catch {
-            notifLogger.error("Failed to send attention notification: \(error.localizedDescription)")
+            print("❌ Failed to send attention notification: \(error)")
         }
     }
 
@@ -226,7 +227,7 @@ final class ResponseNotificationHandler: ObservableObject {
         do {
             try await center.add(request)
         } catch {
-            notifLogger.error("Failed to send task notification: \(error.localizedDescription)")
+            print("❌ Failed to send task notification: \(error)")
         }
     }
 
@@ -297,8 +298,6 @@ final class ResponseNotificationHandler: ObservableObject {
 
 // MARK: - Response Notification Delegate
 
-// @unchecked Sendable: @MainActor isolates all mutable state; NSObject superclass requires
-// @unchecked because NSObject itself is not Sendable
 @MainActor
 final class ResponseNotificationDelegate: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
     static let shared = ResponseNotificationDelegate()
@@ -361,7 +360,7 @@ final class ResponseNotificationDelegate: NSObject, UNUserNotificationCenterDele
             do {
                 try await ChatManager.shared.regenerateLastMessage(in: conversation)
             } catch {
-                notifLogger.error("Failed to regenerate message from notification action: \(error.localizedDescription)")
+                responseNotificationLogger.error("Failed to regenerate last message: \(error.localizedDescription)")
             }
         }
     }

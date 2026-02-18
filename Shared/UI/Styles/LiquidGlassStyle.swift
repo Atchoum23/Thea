@@ -127,20 +127,6 @@ extension View {
     func liquidGlassTint(_ color: Color) -> some View {
         self.tint(color)
     }
-
-    /// Apply Liquid Glass prominent button styling (macOS 26+ / iOS 26+)
-    @ViewBuilder
-    func liquidGlassButton(tint: Color = .accentColor) -> some View {
-        if #available(macOS 26, iOS 26, *) {
-            self
-                .buttonStyle(.glassProminent)
-                .tint(tint)
-        } else {
-            self
-                .buttonStyle(.borderedProminent)
-                .tint(tint)
-        }
-    }
 }
 
 // MARK: - Glass Effect Container

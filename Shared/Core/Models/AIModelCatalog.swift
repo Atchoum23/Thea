@@ -9,23 +9,7 @@ import Foundation
 // MARK: - Known Models
 
 public extension AIModel {
-    // MARK: - Anthropic Models (Claude 4.6 - Latest)
-
-    static let claude46Opus = AIModel(
-        id: "claude-opus-4-6",
-        name: "Claude Opus 4.6",
-        provider: "anthropic",
-        description: "Most capable model — adaptive thinking, 1M context, interleaved tool use",
-        contextWindow: 1_000_000,
-        maxOutputTokens: 32_000,
-        capabilities: [.chat, .vision, .codeGeneration, .reasoning, .functionCalling],
-        inputCostPer1K: Decimal(string: "0.015"),
-        outputCostPer1K: Decimal(string: "0.075"),
-        supportsVision: true,
-        supportsFunctionCalling: true
-    )
-
-    // MARK: - Anthropic Models (Claude 4.5)
+    // MARK: - Anthropic Models (Claude 4.5 - Latest)
 
     static let claude45Opus = AIModel(
         id: "claude-opus-4-5-20251101",
@@ -368,20 +352,6 @@ public extension AIModel {
 
     // MARK: - OpenRouter Models
 
-    static let orClaude46Opus = AIModel(
-        id: "anthropic/claude-opus-4-6",
-        name: "Claude Opus 4.6 (OpenRouter)",
-        provider: "openrouter",
-        description: "Claude Opus 4.6 via OpenRouter — adaptive thinking, 1M context",
-        contextWindow: 1_000_000,
-        maxOutputTokens: 32_000,
-        capabilities: [.chat, .vision, .codeGeneration, .reasoning, .functionCalling],
-        inputCostPer1K: Decimal(string: "0.015"),
-        outputCostPer1K: Decimal(string: "0.075"),
-        supportsVision: true,
-        supportsFunctionCalling: true
-    )
-
     static let orClaude45Sonnet = AIModel(
         id: "anthropic/claude-sonnet-4-5-20250929",
         name: "Claude Sonnet 4.5 (OpenRouter)",
@@ -513,7 +483,7 @@ public extension AIModel {
     // MARK: - Common Model Lists
 
     static var anthropicModels: [AIModel] {
-        [claude46Opus, claude45Opus, claude45Sonnet, claude45Haiku, claude4Opus, claude4Sonnet, claude35Haiku]
+        [claude45Opus, claude45Sonnet, claude45Haiku, claude4Opus, claude4Sonnet, claude35Haiku]
     }
 
     static var openaiModels: [AIModel] {
@@ -537,7 +507,7 @@ public extension AIModel {
     }
 
     static var openRouterModels: [AIModel] {
-        [orClaude46Opus, orClaude45Sonnet, orGpt4o, orGemini25Pro, orDeepseekChat, orLlama370b]
+        [orClaude45Sonnet, orGpt4o, orGemini25Pro, orDeepseekChat, orLlama370b]
     }
 
     static var localModels: [AIModel] {
@@ -546,69 +516,5 @@ public extension AIModel {
 
     static var allKnownModels: [AIModel] {
         anthropicModels + openaiModels + googleModels + deepseekModels + groqModels + perplexityModels + openRouterModels + localModels
-    }
-
-    // MARK: - Catalog Lookup Helpers
-
-    /// Look up a model by its exact ID.
-    /// - Parameter id: The model identifier (e.g. "claude-sonnet-4-5-20250929").
-    /// - Returns: The matching `AIModel`, or `nil` if not found.
-    static func model(id: String) -> AIModel? {
-        allKnownModels.first { $0.id == id }
-    }
-
-    /// Filter catalog models by provider name.
-    /// - Parameter provider: Provider string (e.g. "anthropic", "openai", "local").
-    /// - Returns: All models matching the provider.
-    static func models(for provider: String) -> [AIModel] {
-        allKnownModels.filter { $0.provider == provider }
-    }
-
-    /// Select the best model matching a capability set and cost constraint.
-    ///
-    /// Selection priority (in order):
-    /// 1. Matches ALL required capabilities
-    /// 2. Output cost per 1K tokens ≤ `maxCostPer1KOutput` (if specified)
-    /// 3. Local models preferred first when `preferLocal` is `true`
-    /// 4. Among remaining candidates, choose the one with the highest `maxOutputTokens`
-    ///    (proxy for capability), breaking ties by lowest output cost.
-    ///
-    /// - Parameters:
-    ///   - capabilities: Required model capabilities.
-    ///   - maxCostPer1KOutput: Optional cost ceiling (USD per 1K output tokens).
-    ///   - preferLocal: When `true`, local models rank before cloud models.
-    /// - Returns: The best-matching `AIModel`, or `nil` if no candidates qualify.
-    static func bestModel(
-        capabilities: Set<ModelCapability>,
-        maxCostPer1KOutput: Decimal? = nil,
-        preferLocal: Bool = false
-    ) -> AIModel? {
-        var candidates = allKnownModels.filter { model in
-            capabilities.isSubset(of: model.capabilities)
-        }
-
-        if let costLimit = maxCostPer1KOutput {
-            candidates = candidates.filter { model in
-                guard let cost = model.outputCostPer1K else { return model.isLocal }
-                return cost <= costLimit
-            }
-        }
-
-        guard !candidates.isEmpty else { return nil }
-
-        return candidates.sorted { lhs, rhs in
-            // Local preference
-            if preferLocal && lhs.isLocal != rhs.isLocal {
-                return lhs.isLocal
-            }
-            // Higher maxOutputTokens wins (better capability)
-            if lhs.maxOutputTokens != rhs.maxOutputTokens {
-                return lhs.maxOutputTokens > rhs.maxOutputTokens
-            }
-            // Tie-break: lower cost wins
-            let lCost = lhs.outputCostPer1K ?? .zero
-            let rCost = rhs.outputCostPer1K ?? .zero
-            return lCost < rCost
-        }.first
     }
 }

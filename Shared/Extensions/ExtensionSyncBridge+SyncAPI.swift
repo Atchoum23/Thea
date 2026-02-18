@@ -82,8 +82,11 @@ extension ExtensionSyncBridge {
 
         // Check for pending messages from Safari extension
         if let messageData = userDefaults.data(forKey: "safari.pendingMessage") {
-            if let message = try? JSONDecoder().decode(SyncMessage.self, from: messageData) {
+            do {
+                let message = try JSONDecoder().decode(SyncMessage.self, from: messageData)
                 handleSafariExtensionMessage(message)
+            } catch {
+                logger.debug("Could not decode Safari extension message: \(error.localizedDescription)")
             }
             userDefaults.removeObject(forKey: "safari.pendingMessage")
         }
@@ -101,14 +104,20 @@ extension ExtensionSyncBridge {
     func syncToAppGroup(_ message: SyncMessage) {
         guard let userDefaults = UserDefaults(suiteName: appGroupIdentifier) else { return }
 
-        if let data = try? JSONEncoder().encode(message) {
+        do {
+            let data = try JSONEncoder().encode(message)
             userDefaults.set(data, forKey: "app.pendingMessage")
+        } catch {
+            logger.debug("Could not encode message for app group: \(error.localizedDescription)")
         }
 
         // Also sync current state
         let state = getCurrentState()
-        if let stateData = try? JSONSerialization.data(withJSONObject: state) {
+        do {
+            let stateData = try JSONSerialization.data(withJSONObject: state)
             userDefaults.set(stateData, forKey: "app.currentState")
+        } catch {
+            logger.debug("Could not serialize state for app group: \(error.localizedDescription)")
         }
     }
 

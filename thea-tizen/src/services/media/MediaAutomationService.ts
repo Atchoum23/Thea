@@ -5,9 +5,9 @@
  */
 
 import { releaseParserService, ParsedRelease } from './ReleaseParserService';
-import { qualityProfileService } from './QualityProfileService';
-import { mediaLibraryService } from './MediaLibraryService';
-import { releaseMonitorService, SearchResult, Indexer } from './ReleaseMonitorService';
+import { qualityProfileService, QualityProfile } from './QualityProfileService';
+import { mediaLibraryService, Movie, TVShow, MediaItem } from './MediaLibraryService';
+import { releaseMonitorService, WantedItem, SearchResult, Indexer } from './ReleaseMonitorService';
 
 export interface AutomationConfig {
   enabled: boolean;

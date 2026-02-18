@@ -184,7 +184,13 @@ public final class SpeechIntelligence: ObservableObject {
             // Create temporary file for audio
             let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".wav")
             try audioData.write(to: tempURL)
-            defer { try? FileManager.default.removeItem(at: tempURL) }
+            defer {
+                do {
+                    try FileManager.default.removeItem(at: tempURL)
+                } catch {
+                    logger.debug("Failed to remove temp audio file: \(error.localizedDescription)")
+                }
+            }
 
             // Create recognition request
             let request = SFSpeechURLRecognitionRequest(url: tempURL)
@@ -246,7 +252,11 @@ public final class SpeechIntelligence: ObservableObject {
             await withCheckedContinuation { continuation in
                 Task {
                     while synthesizer.isSpeaking {
-                        try? await Task.sleep(for: .milliseconds(100)) // 100ms
+                        do {
+                        try await Task.sleep(nanoseconds: 100_000_000) // 100ms
+                    } catch {
+                        break
+                    }
                     }
                     await MainActor.run {
                         self.isSpeaking = false

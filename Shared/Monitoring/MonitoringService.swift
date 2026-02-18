@@ -7,6 +7,7 @@
 //
 
 @preconcurrency import Foundation
+import OSLog
 #if os(macOS)
     import AppKit
 #endif
@@ -125,7 +126,11 @@ public actor MonitoringService {
             // Start newly enabled monitors
             for type in config.enabledMonitors {
                 if !previousConfig.enabledMonitors.contains(type) {
-                    try? await startMonitor(type)
+                    do {
+                        try await startMonitor(type)
+                    } catch {
+                        ErrorLogger.log(error, context: "MonitoringService.updateConfiguration.startMonitor(\(type.rawValue))")
+                    }
                 }
             }
         }
@@ -154,7 +159,6 @@ public actor MonitoringService {
 
 // MARK: - Activity Monitor Protocol
 
-/// An actor that monitors a specific type of user activity (e.g., app switching, idle time).
 public protocol ActivityMonitor: Actor {
     var type: MonitorType { get }
     var isActive: Bool { get }
@@ -246,19 +250,25 @@ public struct MonitoringConfiguration: Codable, Sendable, Equatable {
     }
 
     private static let configKey = "MonitoringService.configuration"
+    private static let configLogger = Logger(subsystem: "ai.thea.app", category: "MonitoringConfiguration")
 
     public static func load() -> MonitoringConfiguration {
-        if let data = UserDefaults.standard.data(forKey: configKey),
-           let config = try? JSONDecoder().decode(MonitoringConfiguration.self, from: data)
-        {
-            return config
+        if let data = UserDefaults.standard.data(forKey: configKey) {
+            do {
+                return try JSONDecoder().decode(MonitoringConfiguration.self, from: data)
+            } catch {
+                configLogger.error("Failed to decode MonitoringConfiguration: \(error.localizedDescription)")
+            }
         }
         return MonitoringConfiguration()
     }
 
     public func save() {
-        if let data = try? JSONEncoder().encode(self) {
+        do {
+            let data = try JSONEncoder().encode(self)
             UserDefaults.standard.set(data, forKey: MonitoringConfiguration.configKey)
+        } catch {
+            ErrorLogger.log(error, context: "MonitoringConfiguration.save")
         }
     }
 }
@@ -423,7 +433,11 @@ public actor IdleTimeMonitor: ActivityMonitor {
         checkTask = Task {
             while !Task.isCancelled, isActive {
                 await checkIdleState()
-                try? await Task.sleep(for: .seconds(30)) // 30 seconds
+                do {
+                    try await Task.sleep(nanoseconds: 30_000_000_000) // 30 seconds
+                } catch {
+                    break
+                }
             }
         }
     }
@@ -480,8 +494,8 @@ public actor FocusModeMonitor: ActivityMonitor {
     public func start() async throws {
         guard !isActive else { return }
         isActive = true
-        // Focus mode monitoring requires com.apple.developer.focus-status entitlement
-        // When entitlement is provisioned, use INFocusStatusCenter.default
+        // Focus mode monitoring would use Apple's Focus API
+        // Currently a placeholder as the API requires specific entitlements
     }
 
     public func stop() async {
@@ -543,7 +557,11 @@ public actor SystemInputActivityMonitor: ActivityMonitor {
         checkTask = Task {
             while !Task.isCancelled, isActive {
                 await sampleActivity()
-                try? await Task.sleep(for: .seconds(60)) // 1 minute
+                do {
+                    try await Task.sleep(nanoseconds: 60_000_000_000) // 1 minute
+                } catch {
+                    break
+                }
             }
         }
     }

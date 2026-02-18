@@ -414,7 +414,8 @@ public final class NotificationIntelligenceService: ObservableObject {
             var clearances: [NotificationClearance] = []
 
             for (_, result) in results.matchResults {
-                if let record = try? result.get() {
+                do {
+                    let record = try result.get()
                     let clearance = NotificationClearance(
                         notificationID: UUID(uuidString: record["notificationID"] as? String ?? "") ?? UUID(),
                         appIdentifier: record["appIdentifier"] as? String ?? "",
@@ -423,6 +424,8 @@ public final class NotificationIntelligenceService: ObservableObject {
                         deviceID: record["deviceID"] as? String ?? ""
                     )
                     clearances.append(clearance)
+                } catch {
+                    logger.debug("Skipping CloudKit record with error: \(error.localizedDescription)")
                 }
             }
 
@@ -479,16 +482,23 @@ public final class NotificationIntelligenceService: ObservableObject {
     // MARK: - Persistence Helpers
 
     private func savePerAppSettings() {
-        if let data = try? JSONEncoder().encode(perAppSettings) {
+        do {
+            let data = try JSONEncoder().encode(perAppSettings)
             UserDefaults.standard.set(data, forKey: "thea.notif.perAppSettings")
+        } catch {
+            logger.error("Failed to save per-app notification settings: \(error.localizedDescription)")
         }
     }
 
     private static func loadPerAppSettings() -> [String: AppNotificationSettings] {
-        guard let data = UserDefaults.standard.data(forKey: "thea.notif.perAppSettings"),
-              let settings = try? JSONDecoder().decode([String: AppNotificationSettings].self, from: data)
-        else { return [:] }
-        return settings
+        guard let data = UserDefaults.standard.data(forKey: "thea.notif.perAppSettings") else { return [:] }
+        do {
+            return try JSONDecoder().decode([String: AppNotificationSettings].self, from: data)
+        } catch {
+            Logger(subsystem: "app.thea", category: "NotificationIntelligence")
+                .error("Failed to load per-app notification settings: \(error.localizedDescription)")
+            return [:]
+        }
     }
 }
 

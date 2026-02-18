@@ -38,17 +38,7 @@ final class HealthCoachingPipeline {
     /// Whether to use smart notification scheduling for insight delivery
     var useSmartScheduling = true
 
-    private let storageURL: URL = {
-        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-            .appendingPathComponent("Thea", isDirectory: true)
-            .appendingPathComponent("HealthCoaching", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("coaching_state.json")
-    }()
-
-    private init() {
-        loadFromDisk()
-    }
+    private init() {}
 
     // MARK: - Analysis Pipeline
 
@@ -94,7 +84,6 @@ final class HealthCoachingPipeline {
 
         lastAnalysis = report
         activeInsights = Array(insights.prefix(maxActiveInsights))
-        saveToDisk()
 
         // Step 4: Deliver top insight via smart notification
         if let topInsight = insights.first {
@@ -124,7 +113,8 @@ final class HealthCoachingPipeline {
         }
 
         // Sleep data (last 7 days)
-        if let sleepRecords = try? await service.fetchSleepData(for: weekRange) {
+        do {
+            let sleepRecords = try await service.fetchSleepData(for: weekRange)
             for record in sleepRecords {
                 dataPoints.append(.sleep(
                     totalMinutes: record.totalMinutes,
@@ -134,20 +124,26 @@ final class HealthCoachingPipeline {
                     date: record.startDate
                 ))
             }
+        } catch {
+            logger.warning("Failed to fetch sleep data: \(error.localizedDescription)")
         }
 
         // Activity data (today)
-        if let activity = try? await service.fetchActivityData(for: now) {
+        do {
+            let activity = try await service.fetchActivityData(for: now)
             dataPoints.append(.activity(
                 steps: activity.steps,
                 activeCalories: Int(activity.activeCalories),
                 exerciseMinutes: activity.activeMinutes,
                 date: now
             ))
+        } catch {
+            logger.warning("Failed to fetch activity data: \(error.localizedDescription)")
         }
 
         // Heart rate data (last 24 hours)
-        if let heartRates = try? await service.fetchHeartRateData(for: dayRange) {
+        do {
+            let heartRates = try await service.fetchHeartRateData(for: dayRange)
             let hrSum = heartRates.reduce(into: 0) { $0 += $1.beatsPerMinute }
             let avgHR = heartRates.isEmpty ? 0 : hrSum / heartRates.count
             let restingRecords = heartRates.filter { $0.context == .resting }
@@ -158,15 +154,22 @@ final class HealthCoachingPipeline {
                 restingBPM: restingHR,
                 date: now
             ))
+        } catch {
+            logger.warning("Failed to fetch heart rate data: \(error.localizedDescription)")
         }
 
         // Blood pressure (last 7 days)
-        if let bpReadings = try? await service.fetchBloodPressureData(for: weekRange), let latest = bpReadings.last {
-            dataPoints.append(.bloodPressure(
-                systolic: latest.systolic,
-                diastolic: latest.diastolic,
-                date: latest.timestamp
-            ))
+        do {
+            let bpReadings = try await service.fetchBloodPressureData(for: weekRange)
+            if let latest = bpReadings.last {
+                dataPoints.append(.bloodPressure(
+                    systolic: latest.systolic,
+                    diastolic: latest.diastolic,
+                    date: latest.timestamp
+                ))
+            }
+        } catch {
+            logger.warning("Failed to fetch blood pressure data: \(error.localizedDescription)")
         }
         #endif
 
@@ -392,11 +395,15 @@ final class HealthCoachingPipeline {
             )
         } else {
             let service = NotificationService.shared
-            _ = try? await service.scheduleReminder(
-                title: insight.title,
-                body: insight.message,
-                at: Date()
-            )
+            do {
+                _ = try await service.scheduleReminder(
+                    title: insight.title,
+                    body: insight.message,
+                    at: Date()
+                )
+            } catch {
+                logger.warning("Failed to schedule health insight notification: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -404,79 +411,10 @@ final class HealthCoachingPipeline {
 
     func dismissInsight(_ id: UUID) {
         activeInsights.removeAll { $0.id == id }
-        saveToDisk()
     }
 
     func clearAllInsights() {
         activeInsights.removeAll()
-        saveToDisk()
-    }
-
-    // MARK: - Persistence
-
-    private struct PersistedState: Codable {
-        let lastAnalysisDate: Date?
-        let insights: [PersistedInsight]
-        let lastReportScore: Double?
-        let lastReportDate: Date?
-    }
-
-    private struct PersistedInsight: Codable {
-        let category: String
-        let severity: String
-        let title: String
-        let message: String
-        let suggestion: String
-        let dataValue: Double
-    }
-
-    private func saveToDisk() {
-        let persistedInsights = activeInsights.map { insight in
-            PersistedInsight(
-                category: insight.category.rawValue,
-                severity: insight.severity.rawValue,
-                title: insight.title,
-                message: insight.message,
-                suggestion: insight.suggestion,
-                dataValue: insight.dataValue
-            )
-        }
-        let state = PersistedState(
-            lastAnalysisDate: lastAnalysisDate,
-            insights: persistedInsights,
-            lastReportScore: lastAnalysis?.overallScore,
-            lastReportDate: lastAnalysis?.date
-        )
-        do {
-            let data = try JSONEncoder().encode(state)
-            try data.write(to: storageURL, options: .atomic)
-        } catch {
-            logger.error("Failed to save coaching state: \(error.localizedDescription)")
-        }
-    }
-
-    private func loadFromDisk() {
-        guard FileManager.default.fileExists(atPath: storageURL.path) else { return }
-        do {
-            let data = try Data(contentsOf: storageURL)
-            let state = try JSONDecoder().decode(PersistedState.self, from: data)
-            lastAnalysisDate = state.lastAnalysisDate
-            activeInsights = state.insights.compactMap { pi in
-                guard let category = CoachingInsightCategory(rawValue: pi.category),
-                      let severity = CoachingSeverity(rawValue: pi.severity) else { return nil }
-                return CoachingInsight(
-                    category: category,
-                    severity: severity,
-                    title: pi.title,
-                    message: pi.message,
-                    suggestion: pi.suggestion,
-                    dataValue: pi.dataValue
-                )
-            }
-            logger.info("Loaded \(self.activeInsights.count) coaching insights from disk")
-        } catch {
-            logger.error("Failed to load coaching state: \(error.localizedDescription)")
-        }
     }
 }
 

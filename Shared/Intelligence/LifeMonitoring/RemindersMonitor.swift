@@ -245,7 +245,11 @@ public actor RemindersMonitor {
 
             // Schedule notification when reminder is due - using Sendable reminderData
             let task = Task { [weak self, reminderData] in
-                try? await Task.sleep(for: .seconds(timeUntilDue))
+                do {
+                    try await Task.sleep(nanoseconds: UInt64(timeUntilDue * 1_000_000_000))
+                } catch {
+                    return
+                }
                 guard !Task.isCancelled else { return }
                 await self?.reminderDueFromData(reminderData)
             }

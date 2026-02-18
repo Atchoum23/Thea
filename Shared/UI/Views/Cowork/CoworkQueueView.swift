@@ -80,8 +80,8 @@
                 if let session = manager.currentSession {
                     // Queue stats
                     HStack(spacing: 16) {
-                        statBadge(label: "Queued", value: session.taskQueue.pendingCount, color: .theaInfo)
-                        statBadge(label: "Active", value: session.taskQueue.activeCount, color: .theaSuccess)
+                        statBadge(label: "Queued", value: session.taskQueue.pendingCount, color: .blue)
+                        statBadge(label: "Active", value: session.taskQueue.activeCount, color: .green)
                         statBadge(label: "Completed", value: session.taskQueue.completedTasks.count, color: .secondary)
                     }
 
@@ -385,19 +385,19 @@
         private func colorForPriority(_ priority: CoworkTask.TaskPriority) -> Color {
             switch priority {
             case .low: .secondary
-            case .normal: .theaInfo
-            case .high: .theaWarning
-            case .urgent: .theaError
+            case .normal: .blue
+            case .high: .orange
+            case .urgent: .red
             }
         }
 
         private func colorForStatus(_ status: CoworkTask.TaskStatus) -> Color {
             switch status {
             case .queued: .secondary
-            case .inProgress: .theaInfo
-            case .completed: .theaSuccess
-            case .failed: .theaError
-            case .cancelled: .theaWarning
+            case .inProgress: .blue
+            case .completed: .green
+            case .failed: .red
+            case .cancelled: .orange
             }
         }
 

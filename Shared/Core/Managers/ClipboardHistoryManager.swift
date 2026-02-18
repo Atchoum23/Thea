@@ -42,7 +42,14 @@ final class ClipboardHistoryManager: ObservableObject {
             "(?i)AKIA[0-9A-Z]{16}",
             "-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----"
         ]
-        return patterns.compactMap { try? NSRegularExpression(pattern: $0) }
+        return patterns.compactMap { pattern -> NSRegularExpression? in
+            do {
+                return try NSRegularExpression(pattern: pattern)
+            } catch {
+                clipLogger.error("Invalid sensitive pattern \(pattern): \(error.localizedDescription)")
+                return nil
+            }
+        }
     }()
 
     private init() {}
@@ -77,7 +84,6 @@ final class ClipboardHistoryManager: ObservableObject {
             }
         }
 
-        // swiftlint:disable:next function_body_length
         private func handleClipboardChange(_ item: ClipboardItem) {
             guard isRecording, settings.clipboardHistoryEnabled else { return }
 
@@ -460,7 +466,12 @@ final class ClipboardHistoryManager: ObservableObject {
     var totalEntryCount: Int {
         guard let context = modelContext else { return 0 }
         let descriptor = FetchDescriptor<TheaClipEntry>()
-        return (try? context.fetchCount(descriptor)) ?? 0
+        do {
+            return try context.fetchCount(descriptor)
+        } catch {
+            clipLogger.error("Failed to fetch total entry count: \(error.localizedDescription)")
+            return 0
+        }
     }
 
     var favoriteCount: Int {

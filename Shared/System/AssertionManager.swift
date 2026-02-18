@@ -9,6 +9,9 @@
 import Foundation
 #if os(macOS)
     import IOKit.pwr_mgt
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "AssertionManager")
 #endif
 
 // MARK: - Assertion Manager
@@ -124,7 +127,11 @@ public actor AssertionManager {
 
         // Create new timer
         releaseTimers[type] = Task {
-            try? await Task.sleep(for: .seconds(duration))
+            do {
+                try await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
+            } catch {
+                return
+            }
 
             guard !Task.isCancelled else { return }
 

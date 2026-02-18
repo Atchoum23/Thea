@@ -1,5 +1,6 @@
 import Foundation
 import Network
+import OSLog
 #if os(macOS)
 import AppKit
 import IOKit
@@ -17,6 +18,8 @@ import BackgroundTasks
 @Observable
 final class AutonomousTaskExecutor {
     static let shared = AutonomousTaskExecutor()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "AutonomousTaskExecutor")
 
     // MARK: - Task Registry
 
@@ -145,7 +148,7 @@ final class AutonomousTaskExecutor {
         let monitorTask = Task {
             while !Task.isCancelled {
                 // Check conditions periodically
-                try? await Task.sleep(for: .seconds(10))
+                do { try await Task.sleep(for: .seconds(10)) } catch { break }
 
                 let conditionsMet = await checkConditions(for: task)
 
@@ -576,17 +579,22 @@ final class AutonomousTaskExecutor {
 
     private func saveRegisteredTasks() {
         let encoder = JSONEncoder()
-        if let data = try? encoder.encode(registeredTasks.map(AutonomousTaskDTO.init)) {
+        do {
+            let data = try encoder.encode(registeredTasks.map(AutonomousTaskDTO.init))
             UserDefaults.standard.set(data, forKey: "AutonomousTaskExecutor.tasks")
+        } catch {
+            logger.error("Failed to save registered tasks: \(error.localizedDescription, privacy: .public)")
         }
     }
 
     private func loadRegisteredTasks() {
         let decoder = JSONDecoder()
-        if let data = UserDefaults.standard.data(forKey: "AutonomousTaskExecutor.tasks"),
-           let dtos = try? decoder.decode([AutonomousTaskDTO].self, from: data)
-        {
+        guard let data = UserDefaults.standard.data(forKey: "AutonomousTaskExecutor.tasks") else { return }
+        do {
+            let dtos = try decoder.decode([AutonomousTaskDTO].self, from: data)
             registeredTasks = dtos.map(AutonomousTask.init)
+        } catch {
+            logger.error("Failed to load registered tasks: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -594,15 +602,21 @@ final class AutonomousTaskExecutor {
         // Keep only last 100 executions
         let recentHistory = Array(executionHistory.suffix(100))
         let encoder = JSONEncoder()
-        if let data = try? encoder.encode(recentHistory) {
+        do {
+            let data = try encoder.encode(recentHistory)
             UserDefaults.standard.set(data, forKey: "AutonomousTaskExecutor.history")
+        } catch {
+            logger.error("Failed to save execution history: \(error.localizedDescription, privacy: .public)")
         }
     }
 
     func updateConfiguration(_ config: Configuration) {
         configuration = config
-        if let data = try? JSONEncoder().encode(config) {
+        do {
+            let data = try JSONEncoder().encode(config)
             UserDefaults.standard.set(data, forKey: "AutonomousTaskExecutor.config")
+        } catch {
+            logger.error("Failed to save configuration: \(error.localizedDescription, privacy: .public)")
         }
 
         if config.enableAutonomousExecution && !isMonitoring {
@@ -613,10 +627,11 @@ final class AutonomousTaskExecutor {
     }
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "AutonomousTaskExecutor.config"),
-           let config = try? JSONDecoder().decode(Configuration.self, from: data)
-        {
-            configuration = config
+        guard let data = UserDefaults.standard.data(forKey: "AutonomousTaskExecutor.config") else { return }
+        do {
+            configuration = try JSONDecoder().decode(Configuration.self, from: data)
+        } catch {
+            logger.error("Failed to load configuration: \(error.localizedDescription, privacy: .public)")
         }
     }
 }

@@ -70,10 +70,13 @@ public final class ShortcutsOrchestrator: ObservableObject {
         var discovered: [OrchestratorShortcutInfo] = []
 
         // Load from user defaults (shortcuts the user has configured)
-        if let data = UserDefaults.standard.data(forKey: "thea.shortcuts.available"),
-           let shortcuts = try? JSONDecoder().decode([OrchestratorShortcutInfo].self, from: data)
-        {
-            discovered.append(contentsOf: shortcuts)
+        if let data = UserDefaults.standard.data(forKey: "thea.shortcuts.available") {
+            do {
+                let shortcuts = try JSONDecoder().decode([OrchestratorShortcutInfo].self, from: data)
+                discovered.append(contentsOf: shortcuts)
+            } catch {
+                logger.error("Failed to decode available shortcuts: \(error.localizedDescription, privacy: .public)")
+            }
         }
 
         // Add common/suggested shortcuts
@@ -280,16 +283,20 @@ public final class ShortcutsOrchestrator: ObservableObject {
     }
 
     private func loadRecentShortcuts() {
-        if let data = UserDefaults.standard.data(forKey: "thea.shortcuts.recent"),
-           let shortcuts = try? JSONDecoder().decode([OrchestratorShortcutInfo].self, from: data)
-        {
-            recentShortcuts = shortcuts
+        guard let data = UserDefaults.standard.data(forKey: "thea.shortcuts.recent") else { return }
+        do {
+            recentShortcuts = try JSONDecoder().decode([OrchestratorShortcutInfo].self, from: data)
+        } catch {
+            logger.error("Failed to load recent shortcuts: \(error.localizedDescription, privacy: .public)")
         }
     }
 
     private func saveRecentShortcuts() {
-        if let data = try? JSONEncoder().encode(recentShortcuts) {
+        do {
+            let data = try JSONEncoder().encode(recentShortcuts)
             UserDefaults.standard.set(data, forKey: "thea.shortcuts.recent")
+        } catch {
+            logger.error("Failed to save recent shortcuts: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -310,8 +317,11 @@ public final class ShortcutsOrchestrator: ObservableObject {
     }
 
     private func saveAvailableShortcuts() {
-        if let data = try? JSONEncoder().encode(availableShortcuts) {
+        do {
+            let data = try JSONEncoder().encode(availableShortcuts)
             UserDefaults.standard.set(data, forKey: "thea.shortcuts.available")
+        } catch {
+            logger.error("Failed to save available shortcuts: \(error.localizedDescription, privacy: .public)")
         }
     }
 }

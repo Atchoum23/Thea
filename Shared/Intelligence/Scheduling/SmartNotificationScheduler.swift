@@ -49,7 +49,7 @@ final class SmartNotificationScheduler {
     func optimalDeliveryTime(
         priority: NotificationPriority,
         category: NotificationService.Category? = nil
-    ) async -> DeliveryDecision {
+    ) -> DeliveryDecision {
         scheduledCount += 1
 
         // Bypass smart scheduling if disabled or critical
@@ -60,18 +60,6 @@ final class SmartNotificationScheduler {
 
         let fingerprint = BehavioralFingerprint.shared
         let context = fingerprint.currentContext()
-
-        // Check if user is in Focus Mode — defer non-critical notifications
-        let focusMode = await FocusModeIntelligence.shared.getCurrentFocusModeInternal()
-        if focusMode != nil, priority != .high {
-            deferredCount += 1
-            // Defer by 30 minutes (or until Focus ends, whichever is sooner)
-            let deferDate = Date().addingTimeInterval(30 * 60)
-            return .deferred(
-                until: deferDate,
-                reason: "User in Focus Mode — deferring non-critical notification"
-            )
-        }
 
         // Check if user is likely asleep
         if !context.isAwake {
@@ -133,7 +121,7 @@ final class SmartNotificationScheduler {
         priority: NotificationPriority,
         category: NotificationService.Category? = nil
     ) async {
-        let decision = await optimalDeliveryTime(priority: priority, category: category)
+        let decision = optimalDeliveryTime(priority: priority, category: category)
         let service = NotificationService.shared
 
         switch decision {

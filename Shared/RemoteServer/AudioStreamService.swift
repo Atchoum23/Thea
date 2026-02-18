@@ -10,6 +10,9 @@ import Foundation
     import AVFoundation
     import CoreMedia
     import ScreenCaptureKit
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "AudioStreamService")
 #endif
 
 // MARK: - Audio Stream Service
@@ -100,7 +103,11 @@ public class AudioStreamService: ObservableObject {
     public func stopCapture() async {
         #if os(macOS)
             if let stream {
-                try? await stream.stopCapture()
+                do {
+                    try await stream.stopCapture()
+                } catch {
+                    logger.error("Failed to stop audio capture: \(error.localizedDescription)")
+                }
             }
             stream = nil
             audioOutput = nil

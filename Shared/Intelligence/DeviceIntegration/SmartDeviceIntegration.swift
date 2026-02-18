@@ -34,7 +34,11 @@ public final class SmartDeviceManager: ObservableObject {
 
         // Discovery would use mDNS/Bonjour, SSDP, or manufacturer-specific protocols
         // Simulated for now
-        try? await Task.sleep(for: .seconds(2))
+        do {
+            try await Task.sleep(nanoseconds: 2_000_000_000)
+        } catch {
+            logger.error("Discovery sleep interrupted: \(error.localizedDescription)")
+        }
 
         discoveryStatus = .completed
         logger.info("Device discovery completed")

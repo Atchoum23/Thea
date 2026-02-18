@@ -8,7 +8,6 @@ import OSLog
 
 // MARK: - OpenAI Provider
 
-// @unchecked Sendable: stateless provider — all stored properties are immutable configuration
 public final class OpenAIProvider: AIProvider, @unchecked Sendable {
     public let id = "openai"
     public let name = "OpenAI"

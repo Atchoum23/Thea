@@ -231,8 +231,11 @@ public final class CrossDeviceNotificationRouter: ObservableObject {
         record["createdAt"] = Date()
         record["delivered"] = false
 
-        if let userData = try? JSONEncoder().encode(notification.userInfo) {
+        do {
+            let userData = try JSONEncoder().encode(notification.userInfo)
             record["userInfo"] = userData
+        } catch {
+            logger.warning("Failed to encode notification userInfo: \(error.localizedDescription)")
         }
 
         _ = try await database.save(record)
@@ -330,10 +333,12 @@ public struct TheaNotification: Identifiable, Sendable {
         createdAt = record["createdAt"] as? Date ?? Date()
 
         // Decode userInfo
-        if let userData = record["userInfo"] as? Data,
-           let decoded = try? JSONDecoder().decode([String: String].self, from: userData)
-        {
-            userInfo = decoded
+        if let userData = record["userInfo"] as? Data {
+            do {
+                userInfo = try JSONDecoder().decode([String: String].self, from: userData)
+            } catch {
+                userInfo = [:]
+            }
         } else {
             userInfo = [:]
         }

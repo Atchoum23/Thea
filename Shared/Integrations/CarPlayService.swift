@@ -11,6 +11,7 @@ import SwiftUI
 
 #if canImport(CarPlay)
     import CarPlay
+    import OSLog
 
     // MARK: - CarPlay Service
 
@@ -18,6 +19,7 @@ import SwiftUI
     @MainActor
     public class CarPlayService: NSObject, ObservableObject {
         public static let shared = CarPlayService()
+        private let logger = Logger(subsystem: "ai.thea.app", category: "CarPlayService")
 
         // MARK: - Published State
 
@@ -239,7 +241,11 @@ import SwiftUI
             // Execute prompt
             Task {
                 // This would integrate with the AI service
-                try? await Task.sleep(for: .seconds(2))
+                do {
+                    try await Task.sleep(nanoseconds: 2_000_000_000)
+                } catch {
+                    logger.warning("CarPlay AI prompt sleep cancelled: \(error)")
+                }
 
                 await MainActor.run {
                     interfaceController?.dismissTemplate(animated: true) { _, _ in }

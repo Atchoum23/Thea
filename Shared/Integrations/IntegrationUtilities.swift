@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import SwiftUI
 
 // MARK: - Number Formatting
@@ -192,7 +193,14 @@ public enum DataExporter {
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
 
-        guard let jsonData = try? encoder.encode(data) else { return nil }
+        let jsonData: Data
+        do {
+            jsonData = try encoder.encode(data)
+        } catch {
+            Logger(subsystem: "ai.thea.app", category: "IntegrationUtilities")
+                .error("Failed to encode data to JSON: \(error.localizedDescription)")
+            return nil
+        }
         return String(data: jsonData, encoding: .utf8)
     }
 }
@@ -276,7 +284,6 @@ public actor CacheManager<Key: Hashable, Value> {
         self.maxAge = maxAge
     }
 
-    /// Returns the cached value for the given key, or nil if expired or absent.
     public func get(_ key: Key) -> Value? {
         guard let cached = cache[key] else { return nil }
 
@@ -289,17 +296,14 @@ public actor CacheManager<Key: Hashable, Value> {
         return cached.value
     }
 
-    /// Stores a value in the cache with the current timestamp.
     public func set(_ key: Key, value: Value) {
         cache[key] = (value, Date())
     }
 
-    /// Removes all entries from the cache.
     public func clear() {
         cache.removeAll()
     }
 
-    /// Removes only entries that have exceeded the maximum age.
     public func clearExpired() {
         let now = Date()
         cache = cache.filter { now.timeIntervalSince($0.value.timestamp) <= maxAge }
@@ -316,18 +320,20 @@ public actor Debouncer {
         self.duration = duration
     }
 
-    /// Schedules the action, cancelling any previously pending invocation.
     public func debounce(_ action: @escaping @Sendable () async -> Void) {
         task?.cancel()
         task = Task {
-            try? await Task.sleep(for: .seconds(duration))
+            do {
+                try await Task.sleep(for: .seconds(duration))
+            } catch {
+                return // Task was cancelled — do not execute action
+            }
             if !Task.isCancelled {
                 await action()
             }
         }
     }
 
-    /// Cancels any pending debounced action.
     public func cancel() {
         task?.cancel()
         task = nil

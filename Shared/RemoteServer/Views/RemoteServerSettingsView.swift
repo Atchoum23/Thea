@@ -17,6 +17,8 @@ import SwiftUI
         @ObservedObject private var server = TheaRemoteServer.shared
         @State private var showPairingCode = false
         @State private var generatedPairingCode: String?
+        @State private var errorMessage: String?
+        @State private var showError = false
 
         public init() {}
 
@@ -196,6 +198,11 @@ import SwiftUI
                 .sheet(isPresented: $showPairingCode) {
                     PairingCodeView(code: generatedPairingCode ?? "------")
                 }
+                .alert("Server Error", isPresented: $showError) {
+                    Button("OK", role: .cancel) {}
+                } message: {
+                    Text(errorMessage ?? "An unknown error occurred")
+                }
         }
     }
 
@@ -261,7 +268,12 @@ import SwiftUI
                 if server.isRunning {
                     await server.stop()
                 } else {
-                    try? await server.start()
+                    do {
+                        try await server.start()
+                    } catch {
+                        errorMessage = "Failed to start server: \(error.localizedDescription)"
+                        showError = true
+                    }
                 }
             }
         }

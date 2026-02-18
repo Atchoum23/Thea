@@ -3,6 +3,7 @@
 // Enables long-term context across sessions
 
 import Foundation
+import OSLog
 
 // MARK: - Conversation Memory System
 
@@ -26,11 +27,14 @@ final class ConversationMemory {
         var maxRetrievedContext: Int = 5
     }
 
+    private let logger = Logger(subsystem: "ai.thea.app", category: "ConversationMemory")
+
     private(set) var configuration = Configuration()
     private(set) var conversationSummaries: [ConversationSummary] = []
     private(set) var learnedFacts: [LearnedFact] = []
     private(set) var userPreferences: [String: String] = [:]
     private(set) var isProcessing = false
+    var lastError: String?
 
     // MARK: - Memory Types
 
@@ -387,51 +391,78 @@ final class ConversationMemory {
     // MARK: - Persistence
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.config"),
-           let config = try? JSONDecoder().decode(Configuration.self, from: data) {
-            configuration = config
+        guard let data = UserDefaults.standard.data(forKey: "ConversationMemory.config") else { return }
+        do {
+            configuration = try JSONDecoder().decode(Configuration.self, from: data)
+        } catch {
+            logger.warning("Failed to decode conversation memory config, using defaults: \(error.localizedDescription)")
         }
     }
 
     private func loadMemory() {
         let decoder = JSONDecoder()
 
-        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.summaries"),
-           let summaries = try? decoder.decode([ConversationSummary].self, from: data) {
-            conversationSummaries = summaries
+        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.summaries") {
+            do {
+                conversationSummaries = try decoder.decode([ConversationSummary].self, from: data)
+            } catch {
+                logger.warning("Failed to decode conversation summaries: \(error.localizedDescription)")
+            }
         }
 
-        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.facts"),
-           let facts = try? decoder.decode([LearnedFact].self, from: data) {
-            learnedFacts = facts
+        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.facts") {
+            do {
+                learnedFacts = try decoder.decode([LearnedFact].self, from: data)
+            } catch {
+                logger.warning("Failed to decode learned facts: \(error.localizedDescription)")
+            }
         }
 
-        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.prefs"),
-           let prefs = try? decoder.decode([String: String].self, from: data) {
-            userPreferences = prefs
+        if let data = UserDefaults.standard.data(forKey: "ConversationMemory.prefs") {
+            do {
+                userPreferences = try decoder.decode([String: String].self, from: data)
+            } catch {
+                logger.warning("Failed to decode user preferences: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveMemory() {
         let encoder = JSONEncoder()
 
-        if let data = try? encoder.encode(conversationSummaries) {
-            UserDefaults.standard.set(data, forKey: "ConversationMemory.summaries")
+        do {
+            let summaryData = try encoder.encode(conversationSummaries)
+            UserDefaults.standard.set(summaryData, forKey: "ConversationMemory.summaries")
+        } catch {
+            logger.error("Failed to save conversation summaries: \(error.localizedDescription)")
+            lastError = "Failed to save conversation summaries: \(error.localizedDescription)"
         }
 
-        if let data = try? encoder.encode(learnedFacts) {
-            UserDefaults.standard.set(data, forKey: "ConversationMemory.facts")
+        do {
+            let factsData = try encoder.encode(learnedFacts)
+            UserDefaults.standard.set(factsData, forKey: "ConversationMemory.facts")
+        } catch {
+            logger.error("Failed to save learned facts: \(error.localizedDescription)")
+            lastError = "Failed to save learned facts: \(error.localizedDescription)"
         }
 
-        if let data = try? encoder.encode(userPreferences) {
-            UserDefaults.standard.set(data, forKey: "ConversationMemory.prefs")
+        do {
+            let prefsData = try encoder.encode(userPreferences)
+            UserDefaults.standard.set(prefsData, forKey: "ConversationMemory.prefs")
+        } catch {
+            logger.error("Failed to save user preferences: \(error.localizedDescription)")
+            lastError = "Failed to save user preferences: \(error.localizedDescription)"
         }
     }
 
     func updateConfiguration(_ config: Configuration) {
         configuration = config
-        if let data = try? JSONEncoder().encode(config) {
+        do {
+            let data = try JSONEncoder().encode(config)
             UserDefaults.standard.set(data, forKey: "ConversationMemory.config")
+        } catch {
+            logger.error("Failed to save conversation memory config: \(error.localizedDescription)")
+            lastError = "Failed to save configuration: \(error.localizedDescription)"
         }
     }
 

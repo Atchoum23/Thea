@@ -201,33 +201,45 @@
                 for provider in attachments {
                     // Handle text
                     if provider.hasItemConformingToTypeIdentifier("public.plain-text") {
-                        if let text = try? await loadText(from: provider) {
+                        do {
+                            let text = try await loadText(from: provider)
                             sharedContent = SharedContent(type: .text, text: text)
                             return
+                        } catch {
+                            logger.debug("Failed to load text from share extension: \(error.localizedDescription)")
                         }
                     }
 
                     // Handle URL
                     if provider.hasItemConformingToTypeIdentifier("public.url") {
-                        if let url = try? await loadURL(from: provider) {
+                        do {
+                            let url = try await loadURL(from: provider)
                             sharedContent = SharedContent(type: .url, url: url.absoluteString)
                             return
+                        } catch {
+                            logger.debug("Failed to load URL from share extension: \(error.localizedDescription)")
                         }
                     }
 
                     // Handle image
                     if provider.hasItemConformingToTypeIdentifier("public.image") {
-                        if let imageData = try? await loadImage(from: provider) {
+                        do {
+                            let imageData = try await loadImage(from: provider)
                             sharedContent = SharedContent(type: .image, data: imageData)
                             return
+                        } catch {
+                            logger.debug("Failed to load image from share extension: \(error.localizedDescription)")
                         }
                     }
 
                     // Handle PDF
                     if provider.hasItemConformingToTypeIdentifier("com.adobe.pdf") {
-                        if let pdfData = try? await loadPDF(from: provider) {
+                        do {
+                            let pdfData = try await loadPDF(from: provider)
                             sharedContent = SharedContent(type: .pdf, data: pdfData)
                             return
+                        } catch {
+                            logger.debug("Failed to load PDF from share extension: \(error.localizedDescription)")
                         }
                     }
                 }
@@ -269,8 +281,13 @@
                         continuation.resume(throwing: error)
                     } else if let image = item as? UIImage, let data = image.pngData() {
                         continuation.resume(returning: data)
-                    } else if let url = item as? URL, let data = try? Data(contentsOf: url) {
-                        continuation.resume(returning: data)
+                    } else if let url = item as? URL {
+                        do {
+                            let data = try Data(contentsOf: url)
+                            continuation.resume(returning: data)
+                        } catch {
+                            continuation.resume(throwing: ShareError.invalidContent)
+                        }
                     } else {
                         continuation.resume(throwing: ShareError.invalidContent)
                     }
@@ -283,8 +300,13 @@
                 provider.loadItem(forTypeIdentifier: "com.adobe.pdf", options: nil) { item, error in
                     if let error {
                         continuation.resume(throwing: error)
-                    } else if let url = item as? URL, let data = try? Data(contentsOf: url) {
-                        continuation.resume(returning: data)
+                    } else if let url = item as? URL {
+                        do {
+                            let data = try Data(contentsOf: url)
+                            continuation.resume(returning: data)
+                        } catch {
+                            continuation.resume(throwing: ShareError.invalidContent)
+                        }
                     } else {
                         continuation.resume(throwing: ShareError.invalidContent)
                     }

@@ -26,9 +26,6 @@ import Foundation
 
         // MARK: - Authorization
 
-        /// Requests HealthKit read authorization for all monitored data types (sleep, heart rate, activity, blood pressure, VO2 max).
-        /// - Returns: `true` if authorization was granted.
-        /// - Throws: ``HealthError/healthKitUnavailable`` if HealthKit is not supported, or ``HealthError/authorizationDenied`` on failure.
         public func requestAuthorization() async throws -> Bool {
             guard HKHealthStore.isHealthDataAvailable() else {
                 throw HealthError.healthKitUnavailable
@@ -59,10 +56,6 @@ import Foundation
 
         // MARK: - Sleep Data
 
-        /// Fetches sleep analysis samples from HealthKit and groups them into consolidated sleep sessions.
-        /// - Parameter dateRange: The date interval to query. Must have positive duration.
-        /// - Returns: An array of ``SleepRecord`` values with stage breakdowns and quality scores.
-        /// - Throws: ``HealthError/authorizationDenied`` if not authorized, ``HealthError/invalidDateRange`` if duration is zero, or ``HealthError/fetchFailed(_:)`` on query failure.
         public func fetchSleepData(for dateRange: DateInterval) async throws -> [SleepRecord] {
             guard isAuthorized else {
                 throw HealthError.authorizationDenied
@@ -72,24 +65,37 @@ import Foundation
                 throw HealthError.invalidDateRange
             }
 
-            // Modern HKSampleQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
-            let sleepType = HKCategoryType(.sleepAnalysis)
+            let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!
             let predicate = HKQuery.predicateForSamples(
                 withStart: dateRange.start,
                 end: dateRange.end,
                 options: .strictStartDate
             )
-            let descriptor = HKSampleQueryDescriptor(
-                predicates: [.categorySample(type: sleepType, predicate: predicate)],
-                sortDescriptors: [SortDescriptor(\.startDate, order: .forward)],
-                limit: nil
-            )
 
-            do {
-                let samples = try await descriptor.result(for: healthStore)
-                return processSleepSamples(samples)
-            } catch {
-                throw HealthError.fetchFailed(error.localizedDescription)
+            return try await withCheckedThrowingContinuation { continuation in
+                let query = HKSampleQuery(
+                    sampleType: sleepType,
+                    predicate: predicate,
+                    limit: HKObjectQueryNoLimit,
+                    sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+                ) { [weak self] _, samples, error in
+                    if let error {
+                        continuation.resume(throwing: HealthError.fetchFailed(error.localizedDescription))
+                        return
+                    }
+
+                    guard let samples = samples as? [HKCategorySample], let self else {
+                        continuation.resume(returning: [])
+                        return
+                    }
+
+                    Task {
+                        let records = await self.processSleepSamples(samples)
+                        continuation.resume(returning: records)
+                    }
+                }
+
+                healthStore.execute(query)
             }
         }
 
@@ -170,10 +176,6 @@ import Foundation
 
         // MARK: - Heart Rate Data
 
-        /// Fetches heart rate samples from HealthKit with inferred activity context.
-        /// - Parameter dateRange: The date interval to query. Must have positive duration.
-        /// - Returns: An array of ``HeartRateRecord`` values with BPM and context (resting, active, workout, sleep).
-        /// - Throws: ``HealthError/authorizationDenied`` if not authorized, ``HealthError/invalidDateRange`` if duration is zero, or ``HealthError/fetchFailed(_:)`` on query failure.
         public func fetchHeartRateData(for dateRange: DateInterval) async throws -> [HeartRateRecord] {
             guard isAuthorized else {
                 throw HealthError.authorizationDenied
@@ -183,33 +185,48 @@ import Foundation
                 throw HealthError.invalidDateRange
             }
 
-            // Modern HKSampleQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
-            let heartRateType = HKQuantityType(.heartRate)
+            let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!
             let predicate = HKQuery.predicateForSamples(
                 withStart: dateRange.start,
                 end: dateRange.end,
                 options: .strictStartDate
             )
-            let descriptor = HKSampleQueryDescriptor(
-                predicates: [.quantitySample(type: heartRateType, predicate: predicate)],
-                sortDescriptors: [SortDescriptor(\.startDate, order: .forward)],
-                limit: nil
-            )
 
-            do {
-                let samples = try await descriptor.result(for: healthStore)
-                return samples.map { sample -> HeartRateRecord in
-                    let bpm = Int(sample.quantity.doubleValue(for: HKUnit.count().unitDivided(by: HKUnit.minute())))
-                    let context = self.determineHeartRateContext(bpm: bpm, date: sample.startDate)
-                    return HeartRateRecord(
-                        timestamp: sample.startDate,
-                        beatsPerMinute: bpm,
-                        context: context,
-                        source: .healthKit
-                    )
+            return try await withCheckedThrowingContinuation { continuation in
+                let query = HKSampleQuery(
+                    sampleType: heartRateType,
+                    predicate: predicate,
+                    limit: HKObjectQueryNoLimit,
+                    sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+                ) { [weak self] _, samples, error in
+                    if let error {
+                        continuation.resume(throwing: HealthError.fetchFailed(error.localizedDescription))
+                        return
+                    }
+
+                    guard let samples = samples as? [HKQuantitySample], let self else {
+                        continuation.resume(returning: [])
+                        return
+                    }
+
+                    Task {
+                        let records = await samples.asyncMap { sample -> HeartRateRecord in
+                            let bpm = Int(sample.quantity.doubleValue(for: HKUnit.count().unitDivided(by: HKUnit.minute())))
+                            let context = await self.determineHeartRateContext(bpm: bpm, date: sample.startDate)
+
+                            return HeartRateRecord(
+                                timestamp: sample.startDate,
+                                beatsPerMinute: bpm,
+                                context: context,
+                                source: .healthKit
+                            )
+                        }
+
+                        continuation.resume(returning: records)
+                    }
                 }
-            } catch {
-                throw HealthError.fetchFailed(error.localizedDescription)
+
+                healthStore.execute(query)
             }
         }
 
@@ -230,10 +247,6 @@ import Foundation
 
         // MARK: - Activity Data
 
-        /// Fetches a full-day activity summary (steps, calories, distance, exercise minutes, flights climbed) from HealthKit.
-        /// - Parameter date: The calendar day to summarize. The entire day from midnight to midnight is queried.
-        /// - Returns: An ``ActivitySummary`` aggregating all activity metrics for the day.
-        /// - Throws: ``HealthError/authorizationDenied`` if not authorized.
         public func fetchActivityData(for date: Date) async throws -> ActivitySummary {
             guard isAuthorized else {
                 throw HealthError.authorizationDenied
@@ -298,39 +311,46 @@ import Foundation
             start: Date,
             end: Date
         ) async throws -> Double {
-            // Modern HKStatisticsQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
-            let quantityType = HKQuantityType(identifier)
-            let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
-
-            let descriptor = HKStatisticsQueryDescriptor(
-                predicate: .quantitySample(type: quantityType, predicate: predicate),
-                options: .cumulativeSum
-            )
-
-            let statistics = try await descriptor.result(for: healthStore)
-
-            let unit: HKUnit = switch identifier {
-            case .stepCount, .flightsClimbed:
-                HKUnit.count()
-            case .activeEnergyBurned, .basalEnergyBurned:
-                HKUnit.kilocalorie()
-            case .distanceWalkingRunning:
-                HKUnit.meter()
-            case .appleExerciseTime:
-                HKUnit.minute()
-            default:
-                HKUnit.count()
+            guard let quantityType = HKQuantityType.quantityType(forIdentifier: identifier) else {
+                return 0
             }
 
-            return statistics?.sumQuantity()?.doubleValue(for: unit) ?? 0
+            let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
+
+            return try await withCheckedThrowingContinuation { continuation in
+                let query = HKStatisticsQuery(
+                    quantityType: quantityType,
+                    quantitySamplePredicate: predicate,
+                    options: .cumulativeSum
+                ) { _, statistics, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+
+                    let unit = switch identifier {
+                    case .stepCount, .flightsClimbed:
+                        HKUnit.count()
+                    case .activeEnergyBurned, .basalEnergyBurned:
+                        HKUnit.kilocalorie()
+                    case .distanceWalkingRunning:
+                        HKUnit.meter()
+                    case .appleExerciseTime:
+                        HKUnit.minute()
+                    default:
+                        HKUnit.count()
+                    }
+
+                    let sum = statistics?.sumQuantity()?.doubleValue(for: unit) ?? 0
+                    continuation.resume(returning: sum)
+                }
+
+                healthStore.execute(query)
+            }
         }
 
         // MARK: - Blood Pressure Data
 
-        /// Fetches blood pressure readings by correlating systolic and diastolic samples within a 60-second window.
-        /// - Parameter dateRange: The date interval to query.
-        /// - Returns: An array of ``BloodPressureReading`` values with paired systolic/diastolic measurements.
-        /// - Throws: ``HealthError/authorizationDenied`` if not authorized.
         public func fetchBloodPressureData(for dateRange: DateInterval) async throws -> [BloodPressureReading] {
             guard isAuthorized else {
                 throw HealthError.authorizationDenied
@@ -376,20 +396,27 @@ import Foundation
             type: HKQuantityType,
             predicate: NSPredicate
         ) async throws -> [HKQuantitySample] {
-            // Modern HKSampleQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
-            let descriptor = HKSampleQueryDescriptor(
-                predicates: [.quantitySample(type: type, predicate: predicate)],
-                sortDescriptors: [SortDescriptor(\.startDate, order: .forward)],
-                limit: nil
-            )
-            return try await descriptor.result(for: healthStore)
+            try await withCheckedThrowingContinuation { continuation in
+                let query = HKSampleQuery(
+                    sampleType: type,
+                    predicate: predicate,
+                    limit: HKObjectQueryNoLimit,
+                    sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+                ) { _, samples, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+
+                    continuation.resume(returning: samples as? [HKQuantitySample] ?? [])
+                }
+
+                healthStore.execute(query)
+            }
         }
 
         // MARK: - Anomaly Detection
 
-        /// Detects cardiac anomalies (tachycardia and bradycardia) in resting heart rate records.
-        /// - Parameter records: Heart rate records to analyze. Only records with a `.resting` context are evaluated.
-        /// - Returns: An array of ``CardiacAnomaly`` values with severity levels (mild, moderate, severe).
         public func detectCardiacAnomalies(in records: [HeartRateRecord]) async throws -> [CardiacAnomaly] {
             var anomalies: [CardiacAnomaly] = []
 
@@ -426,10 +453,6 @@ import Foundation
 
         // MARK: - VO2 Max Data
 
-        /// Fetches VO2 max samples from HealthKit, sorted by most recent first.
-        /// - Parameter dateRange: The date interval to query. Must have positive duration.
-        /// - Returns: An array of ``VO2MaxRecord`` values in mL/kg/min.
-        /// - Throws: ``HealthError/authorizationDenied`` if not authorized, ``HealthError/invalidDateRange`` if duration is zero, or ``HealthError/fetchFailed(_:)`` on query failure.
         public func fetchVO2MaxData(for dateRange: DateInterval) async throws -> [VO2MaxRecord] {
             guard isAuthorized else {
                 throw HealthError.authorizationDenied
@@ -439,72 +462,77 @@ import Foundation
                 throw HealthError.invalidDateRange
             }
 
-            // Modern HKSampleQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
-            let vo2MaxType = HKQuantityType(.vo2Max)
+            let vo2MaxType = HKObjectType.quantityType(forIdentifier: .vo2Max)!
             let predicate = HKQuery.predicateForSamples(
                 withStart: dateRange.start,
                 end: dateRange.end,
                 options: .strictStartDate
             )
-            let descriptor = HKSampleQueryDescriptor(
-                predicates: [.quantitySample(type: vo2MaxType, predicate: predicate)],
-                sortDescriptors: [SortDescriptor(\.startDate, order: .reverse)],
-                limit: nil
-            )
 
-            do {
-                let samples = try await descriptor.result(for: healthStore)
-                let unit = HKUnit(from: "mL/kg*min")
-                return samples.map { sample -> VO2MaxRecord in
-                    VO2MaxRecord(
-                        timestamp: sample.startDate,
-                        value: sample.quantity.doubleValue(for: unit),
-                        source: .healthKit
-                    )
+            return try await withCheckedThrowingContinuation { continuation in
+                let query = HKSampleQuery(
+                    sampleType: vo2MaxType,
+                    predicate: predicate,
+                    limit: HKObjectQueryNoLimit,
+                    sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]
+                ) { _, samples, error in
+                    if let error {
+                        continuation.resume(throwing: HealthError.fetchFailed(error.localizedDescription))
+                        return
+                    }
+
+                    guard let samples = samples as? [HKQuantitySample] else {
+                        continuation.resume(returning: [])
+                        return
+                    }
+
+                    let unit = HKUnit(from: "mL/kg*min")
+                    let records = samples.map { sample -> VO2MaxRecord in
+                        VO2MaxRecord(
+                            timestamp: sample.startDate,
+                            value: sample.quantity.doubleValue(for: unit),
+                            source: .healthKit
+                        )
+                    }
+
+                    continuation.resume(returning: records)
                 }
-            } catch {
-                throw HealthError.fetchFailed(error.localizedDescription)
+
+                healthStore.execute(query)
             }
         }
     }
 
 #else
 
-    /// Stub implementation for platforms without HealthKit. All methods throw ``HealthError/healthKitUnavailable``.
+    /// Stub implementation for platforms without HealthKit
     public actor HealthKitService: HealthDataProvider {
         public init() {}
 
-        /// Stub: always throws ``HealthError/healthKitUnavailable``.
         public func requestAuthorization() async throws -> Bool {
             throw HealthError.healthKitUnavailable
         }
 
-        /// Stub: always throws ``HealthError/healthKitUnavailable``.
         public func fetchSleepData(for _: DateInterval) async throws -> [SleepRecord] {
             throw HealthError.healthKitUnavailable
         }
 
-        /// Stub: always throws ``HealthError/healthKitUnavailable``.
         public func fetchHeartRateData(for _: DateInterval) async throws -> [HeartRateRecord] {
             throw HealthError.healthKitUnavailable
         }
 
-        /// Stub: always throws ``HealthError/healthKitUnavailable``.
         public func fetchActivityData(for _: Date) async throws -> ActivitySummary {
             throw HealthError.healthKitUnavailable
         }
 
-        /// Stub: always throws ``HealthError/healthKitUnavailable``.
         public func fetchBloodPressureData(for _: DateInterval) async throws -> [BloodPressureReading] {
             throw HealthError.healthKitUnavailable
         }
 
-        /// Stub: always throws ``HealthError/healthKitUnavailable``.
         public func detectCardiacAnomalies(in _: [HeartRateRecord]) async throws -> [CardiacAnomaly] {
             throw HealthError.healthKitUnavailable
         }
 
-        /// Stub: always throws ``HealthError/healthKitUnavailable``.
         public func fetchVO2MaxData(for _: DateInterval) async throws -> [VO2MaxRecord] {
             throw HealthError.healthKitUnavailable
         }

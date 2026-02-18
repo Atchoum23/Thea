@@ -10,12 +10,14 @@ import SwiftUI
 
 #if canImport(TipKit)
     import TipKit
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
 
     // MARK: - Tips Manager
 
     @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
     @MainActor
-    /// Manages TipKit tip configuration, lifecycle, and testing utilities across the app.
     public class TipKitManager: ObservableObject {
         public static let shared = TipKitManager()
 
@@ -38,7 +40,11 @@ import SwiftUI
 
         /// Reset all tips
         public func resetAllTips() async {
-            try? Tips.resetDatastore()
+            do {
+                try Tips.resetDatastore()
+            } catch {
+                logger.error("Failed to reset TipKit datastore: \(error.localizedDescription)")
+            }
         }
 
         /// Show all tips immediately (for testing)
@@ -367,7 +373,6 @@ import SwiftUI
     // MARK: - Tip Events
 
     @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
-    /// Container for TipKit event recording methods that trigger tip rule evaluations.
     public struct TipEvents {
         /// Record when user starts their first chat
         public static func recordFirstChat() {
@@ -409,7 +414,6 @@ import SwiftUI
 
 // MARK: - Fallback for Older OS
 
-/// Fallback utilities for checking TipKit availability on older OS versions.
 public enum TipKitFallback {
     public static func isAvailable() -> Bool {
         if #available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *) {

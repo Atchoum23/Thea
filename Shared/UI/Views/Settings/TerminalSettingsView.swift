@@ -57,7 +57,7 @@
                     Spacer()
                     HStack(spacing: 4) {
                         Circle()
-                            .fill(manager.isConnected ? Color.theaSuccess : Color.theaError)
+                            .fill(manager.isConnected ? Color.green : Color.red)
                             .frame(width: 8, height: 8)
                         Text(manager.isConnected ? "Connected" : "Disconnected")
                             .foregroundStyle(.secondary)
@@ -153,7 +153,7 @@
                 if manager.securityPolicy.allowSudo {
                     Label("Sudo commands can perform privileged operations. Use with caution.", systemImage: "exclamationmark.triangle")
                         .font(.caption)
-                        .foregroundStyle(Color.theaWarning)
+                        .foregroundStyle(.orange)
                 }
 
                 // Network commands
@@ -357,7 +357,7 @@
                     Spacer()
                     if AccessibilityBridge.isAccessibilityEnabled() {
                         Label("Granted", systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(Color.theaSuccess)
+                            .foregroundStyle(.green)
                     } else {
                         Button("Request Access") {
                             AccessibilityBridge.requestAccessibilityAccess()

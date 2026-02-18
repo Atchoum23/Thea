@@ -232,8 +232,8 @@ public final class HealthDashboardViewModel {
     // MARK: - Health Data Export
 
     /// Export health data to a structured JSON file.
-    /// Returns the URL of the exported file, or nil on failure.
-    public func exportHealthData() -> URL? {
+    /// Returns the URL of the exported file.
+    public func exportHealthData() throws -> URL {
         let export = HealthExportData(
             exportDate: Date(),
             periodDays: 7,
@@ -289,7 +289,7 @@ public final class HealthDashboardViewModel {
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
 
-        guard let data = try? encoder.encode(export) else { return nil }
+        let data = try encoder.encode(export)
 
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -297,7 +297,7 @@ public final class HealthDashboardViewModel {
         let filename = "Thea-Health-Export-\(dateString).json"
 
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
-        guard (try? data.write(to: tempURL)) != nil else { return nil }
+        try data.write(to: tempURL)
         return tempURL
     }
 }

@@ -83,7 +83,7 @@ struct TVDashboardView: View {
                 // Network Status
                 HStack(spacing: 8) {
                     Image(systemName: report.networkStatus.isConnected ? "wifi" : "wifi.slash")
-                        .foregroundStyle(report.networkStatus.isConnected ? .theaSuccess : .theaError)
+                        .foregroundStyle(report.networkStatus.isConnected ? .green : .red)
                     Text(report.networkStatus.connectionType)
                         .font(.subheadline)
                 }
@@ -91,7 +91,7 @@ struct TVDashboardView: View {
                 // Storage Status
                 HStack(spacing: 8) {
                     Image(systemName: "internaldrive")
-                        .foregroundStyle(report.storageStatus.percentUsed > 90 ? .theaWarning : .secondary)
+                        .foregroundStyle(report.storageStatus.percentUsed > 90 ? .orange : .secondary)
                     Text("\(Int(100 - report.storageStatus.percentUsed))% free")
                         .font(.subheadline)
                 }
@@ -100,7 +100,7 @@ struct TVDashboardView: View {
                 let healthyCount = report.services.filter { $0.status == .healthy }.count
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.theaSuccess)
+                        .foregroundStyle(.green)
                     Text("\(healthyCount)/\(report.services.count) services")
                         .font(.subheadline)
                 }
@@ -136,7 +136,7 @@ struct TVDashboardView: View {
                     }
                     .padding(.horizontal, 24)
                     .padding(.vertical, 16)
-                    .background(selectedSection == section ? Color.theaPrimaryDefault : Color.clear)
+                    .background(selectedSection == section ? Color.blue : Color.clear)
                     .foregroundStyle(selectedSection == section ? .white : .primary)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
@@ -295,7 +295,7 @@ struct TVDashboardView: View {
                     .font(.callout)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
-                    .background(Color.theaInfo.opacity(0.2))
+                    .background(.blue.opacity(0.2))
                     .clipShape(Capsule())
             }
 
@@ -333,9 +333,9 @@ struct TVDashboardView: View {
 
     private func statusColor(for status: HealthStatus) -> Color {
         switch status {
-        case .healthy: .theaSuccess
-        case .degraded: .theaWarning
-        case .unhealthy: .theaError
+        case .healthy: .green
+        case .degraded: .yellow
+        case .unhealthy: .red
         case .unknown: .gray
         }
     }
@@ -386,7 +386,7 @@ struct UpNextCard: View {
 
             // Progress bar
             ProgressView(value: item.progress.percentComplete, total: 100)
-                .tint(.theaInfo)
+                .tint(.blue)
                 .frame(width: 200)
         }
         .padding(16)
@@ -460,11 +460,11 @@ struct DownloadQueueRow: View {
     private var statusColor: Color {
         switch item.status {
         case .queued: .secondary
-        case .downloading: .theaInfo
-        case .paused: .theaWarning
-        case .seeding: .theaSuccess
-        case .completed: .theaSuccess
-        case .failed: .theaError
+        case .downloading: .blue
+        case .paused: .orange
+        case .seeding: .green
+        case .completed: .green
+        case .failed: .red
         case .importing: .purple
         }
     }
@@ -502,7 +502,7 @@ struct CalendarRow: View {
                 HStack {
                     Text("S\(entry.episode.season)E\(entry.episode.number)")
                         .font(.subheadline)
-                        .foregroundStyle(.theaInfo)
+                        .foregroundStyle(.blue)
 
                     if let title = entry.episode.title {
                         Text("• \(title)")
@@ -554,7 +554,7 @@ struct WantedItemRow: View {
             // Type icon
             Image(systemName: item.type == .movie ? "film" : "tv")
                 .font(.title2)
-                .foregroundStyle(.theaInfo)
+                .foregroundStyle(.blue)
                 .frame(width: 40)
 
             // Info
@@ -601,7 +601,7 @@ struct StatCard: View {
         VStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.title)
-                .foregroundStyle(.theaInfo)
+                .foregroundStyle(.blue)
 
             Text(value)
                 .font(.system(size: 36, weight: .bold, design: .rounded))

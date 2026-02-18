@@ -8,7 +8,6 @@ import OSLog
 
 // MARK: - Google Provider
 
-// @unchecked Sendable: stateless provider — all stored properties are immutable configuration
 public final class GoogleProvider: AIProvider, @unchecked Sendable {
     public let id = "google"
     public let name = "Google AI"

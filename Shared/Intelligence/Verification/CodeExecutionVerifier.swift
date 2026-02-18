@@ -141,7 +141,11 @@ public final class CodeExecutionVerifier {
         // Pattern: ```language\ncode\n```
         let pattern = #"```(\w*)\n([\s\S]*?)```"#
 
-        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern)
+        } catch {
+            logger.debug("Could not compile code block regex: \(error.localizedDescription)")
             return blocks
         }
 
@@ -224,7 +228,6 @@ public final class CodeExecutionVerifier {
 // MARK: - JavaScript Engine (JavaScriptCore)
 
 /// JavaScript execution using built-in JavaScriptCore
-// @unchecked Sendable: stateless — only stored property is immutable `let logger`
 final class JavaScriptEngine: @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.ai", category: "JavaScriptEngine")
 
@@ -301,7 +304,6 @@ final class JavaScriptEngine: @unchecked Sendable {
 
 #if os(macOS)
 /// Swift execution using swift command
-// @unchecked Sendable: stateless — only stored property is immutable `let logger`
 final class SwiftExecutionEngine: @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.ai", category: "SwiftExecutionEngine")
 
@@ -331,7 +333,7 @@ final class SwiftExecutionEngine: @unchecked Sendable {
 
             // Timeout handling
             let timeoutTask = Task {
-                try await Task.sleep(for: .seconds(10))  // 10 seconds
+                try await Task.sleep(nanoseconds: 10_000_000_000)  // 10 seconds
                 if process.isRunning {
                     process.terminate()
                 }
@@ -347,7 +349,7 @@ final class SwiftExecutionEngine: @unchecked Sendable {
             let errorOutput = String(data: errorData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
 
             // Clean up
-            try? FileManager.default.removeItem(at: tempFile)
+            do { try FileManager.default.removeItem(at: tempFile) } catch { logger.debug("Could not remove temp file: \(error.localizedDescription)") }
 
             var errors: [String] = []
             var warnings: [String] = []
@@ -373,7 +375,7 @@ final class SwiftExecutionEngine: @unchecked Sendable {
             )
 
         } catch {
-            try? FileManager.default.removeItem(at: tempFile)
+            do { try FileManager.default.removeItem(at: tempFile) } catch { logger.debug("Could not remove temp file: \(error.localizedDescription)") }
             return CodeExecResult(
                 success: false,
                 output: nil,
@@ -402,7 +404,6 @@ final class SwiftExecutionEngine: @unchecked Sendable {
 // MARK: - Python Execution Engine (macOS only)
 
 /// Python execution using python3 command
-// @unchecked Sendable: stateless — only stored property is immutable `let logger`
 final class PythonExecutionEngine: @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.ai", category: "PythonExecutionEngine")
 
@@ -429,7 +430,7 @@ final class PythonExecutionEngine: @unchecked Sendable {
 
             // Timeout handling
             let timeoutTask = Task {
-                try await Task.sleep(for: .seconds(10))  // 10 seconds
+                try await Task.sleep(nanoseconds: 10_000_000_000)  // 10 seconds
                 if process.isRunning {
                     process.terminate()
                 }
@@ -445,7 +446,7 @@ final class PythonExecutionEngine: @unchecked Sendable {
             let errorOutput = String(data: errorData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
 
             // Clean up
-            try? FileManager.default.removeItem(at: tempFile)
+            do { try FileManager.default.removeItem(at: tempFile) } catch { logger.debug("Could not remove temp file: \(error.localizedDescription)") }
 
             var errors: [String] = []
             if let errorOutput, !errorOutput.isEmpty {
@@ -461,7 +462,7 @@ final class PythonExecutionEngine: @unchecked Sendable {
             )
 
         } catch {
-            try? FileManager.default.removeItem(at: tempFile)
+            do { try FileManager.default.removeItem(at: tempFile) } catch { logger.debug("Could not remove temp file: \(error.localizedDescription)") }
             return CodeExecResult(
                 success: false,
                 output: nil,

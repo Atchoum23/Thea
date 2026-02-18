@@ -15,7 +15,6 @@ public struct ProjectMemory: Identifiable, Codable, Sendable, Hashable {
         lhs.id == rhs.id
     }
 
-    /// Hashes the project memory by its unique identifier for use in sets and dictionaries.
     public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

@@ -118,14 +118,14 @@ extension ModelSettingsView {
                 Text("Input")
                 Spacer()
                 Text(model.pricing.formattedPromptPrice)
-                    .foregroundStyle(.theaInfo)
+                    .foregroundStyle(.blue)
             }
 
             HStack {
                 Text("Output")
                 Spacer()
                 Text(model.pricing.formattedCompletionPrice)
-                    .foregroundStyle(.theaInfo)
+                    .foregroundStyle(.blue)
             }
 
             VStack(alignment: .leading, spacing: 4) {
@@ -263,10 +263,10 @@ extension ModelSettingsView {
         Text(text)
             .font(.caption)
             .fontWeight(highlight ? .bold : .regular)
-            .foregroundStyle(highlight ? .theaSuccess : .primary)
+            .foregroundStyle(highlight ? .green : .primary)
             .frame(height: 40)
             .frame(maxWidth: .infinity)
-            .background(highlight ? Color.theaSuccess.opacity(0.1) : Color.clear)
+            .background(highlight ? Color.green.opacity(0.1) : Color.clear)
     }
 
     // MARK: - Price Comparison

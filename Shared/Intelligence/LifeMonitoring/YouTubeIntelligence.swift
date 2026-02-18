@@ -7,6 +7,7 @@
 // Extracts insights and knowledge from watched content
 
 import Foundation
+import OSLog
 
 // MARK: - Content Types
 
@@ -308,6 +309,7 @@ public struct ContentPreferences: Sendable {
 
 /// Main engine for learning from YouTube content
 public actor YouTubeIntelligence {
+    private let logger = Logger(subsystem: \"ai.thea.app\", category: \"YouTubeIntelligence\")
     // MARK: - Singleton
 
     public static let shared = YouTubeIntelligence()
@@ -379,7 +381,11 @@ public actor YouTubeIntelligence {
         Task { [weak self] in
             while await (self?.checkIsRunning() ?? false) {
                 await self?.generatePeriodicInsights()
-                try? await Task.sleep(for: .seconds(3600)) // Every hour
+                do {
+                    try await Task.sleep(nanoseconds: 3600_000_000_000) // Every hour
+                } catch {
+                    break
+                }
             }
         }
     }

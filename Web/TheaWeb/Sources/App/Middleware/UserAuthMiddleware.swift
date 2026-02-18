@@ -26,10 +26,10 @@ struct UserAuthMiddleware: AsyncMiddleware {
         throw Abort(.unauthorized, reason: "Authentication required")
     }
 
-    private func authenticateBearerToken(_ token: String, on database: Database) async throws -> User? {
+    private func authenticateBearerToken(_ token: String, on db: Database) async throws -> User? {
         let tokenHash = SHA256.hash(data: Data(token.utf8)).hexString
 
-        guard let session = try await Session.query(on: database)
+        guard let session = try await Session.query(on: db)
             .filter(\.$tokenHash == tokenHash)
             .filter(\.$isValid == true)
             .with(\.$user)
@@ -40,7 +40,7 @@ struct UserAuthMiddleware: AsyncMiddleware {
         // Check expiration
         guard !session.isExpired else {
             session.isValid = false
-            try await session.save(on: database)
+            try await session.save(on: db)
             return nil
         }
 
@@ -52,10 +52,10 @@ struct UserAuthMiddleware: AsyncMiddleware {
         return session.user
     }
 
-    private func authenticateAPIKey(_ key: String, on database: Database) async throws -> User? {
+    private func authenticateAPIKey(_ key: String, on db: Database) async throws -> User? {
         let keyHash = SHA256.hash(data: Data(key.utf8)).hexString
 
-        guard let apiKey = try await APIKey.query(on: database)
+        guard let apiKey = try await APIKey.query(on: db)
             .filter(\.$keyHash == keyHash)
             .filter(\.$isActive == true)
             .with(\.$user)
@@ -75,7 +75,7 @@ struct UserAuthMiddleware: AsyncMiddleware {
 
         // Update last used timestamp
         apiKey.lastUsedAt = Date()
-        try? await apiKey.save(on: database)
+        try? await apiKey.save(on: db)
 
         return apiKey.user
     }

@@ -345,7 +345,11 @@ public final class QuickLauncher: ObservableObject {
                 icon: "arrow.triangle.2.circlepath",
                 keywords: ["sync", "icloud", "refresh"],
                 action: .run {
-                    try? await CloudKitService.shared.syncAll()
+                    do {
+                        try await CloudKitService.shared.syncAll()
+                    } catch {
+                        Logger(subsystem: "com.thea.app", category: "QuickLauncher").error("Sync failed: \(error.localizedDescription)")
+                    }
                 }
             ),
 
@@ -423,28 +427,37 @@ public final class QuickLauncher: ObservableObject {
 
     private func loadRecentCommands() {
         // Load from UserDefaults
-        if let data = UserDefaults.standard.data(forKey: "launcher.recent"),
-           let ids = try? JSONDecoder().decode([String].self, from: data)
-        {
-            recentCommands = ids.compactMap { id in
-                registeredCommands.first { $0.id == id }
+        if let data = UserDefaults.standard.data(forKey: "launcher.recent") {
+            do {
+                let ids = try JSONDecoder().decode([String].self, from: data)
+                recentCommands = ids.compactMap { id in
+                    registeredCommands.first { $0.id == id }
+                }
+            } catch {
+                logger.debug("Could not decode recent commands: \(error.localizedDescription)")
             }
         }
     }
 
     private func saveRecentCommands() {
         let ids = recentCommands.map(\.id)
-        if let data = try? JSONEncoder().encode(ids) {
+        do {
+            let data = try JSONEncoder().encode(ids)
             UserDefaults.standard.set(data, forKey: "launcher.recent")
+        } catch {
+            logger.error("Failed to save recent commands: \(error.localizedDescription)")
         }
     }
 
     private func loadPinnedCommands() {
-        if let data = UserDefaults.standard.data(forKey: "launcher.pinned"),
-           let ids = try? JSONDecoder().decode([String].self, from: data)
-        {
-            pinnedCommands = ids.compactMap { id in
-                registeredCommands.first { $0.id == id }
+        if let data = UserDefaults.standard.data(forKey: "launcher.pinned") {
+            do {
+                let ids = try JSONDecoder().decode([String].self, from: data)
+                pinnedCommands = ids.compactMap { id in
+                    registeredCommands.first { $0.id == id }
+                }
+            } catch {
+                logger.debug("Could not decode pinned commands: \(error.localizedDescription)")
             }
         }
     }
@@ -454,8 +467,11 @@ public final class QuickLauncher: ObservableObject {
         guard !pinnedCommands.contains(where: { $0.id == command.id }) else { return }
         pinnedCommands.append(command)
         let ids = pinnedCommands.map(\.id)
-        if let data = try? JSONEncoder().encode(ids) {
+        do {
+            let data = try JSONEncoder().encode(ids)
             UserDefaults.standard.set(data, forKey: "launcher.pinned")
+        } catch {
+            logger.error("Failed to save pinned commands: \(error.localizedDescription)")
         }
     }
 
@@ -463,8 +479,11 @@ public final class QuickLauncher: ObservableObject {
     public func unpin(_ command: LauncherCommand) {
         pinnedCommands.removeAll { $0.id == command.id }
         let ids = pinnedCommands.map(\.id)
-        if let data = try? JSONEncoder().encode(ids) {
+        do {
+            let data = try JSONEncoder().encode(ids)
             UserDefaults.standard.set(data, forKey: "launcher.pinned")
+        } catch {
+            logger.error("Failed to save pinned commands after unpin: \(error.localizedDescription)")
         }
     }
 
@@ -525,7 +544,11 @@ public final class QuickLauncher: ObservableObject {
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
             process.arguments = ["-e", script]
-            try? process.run()
+            do {
+                try process.run()
+            } catch {
+                logger.error("Failed to run script: \(error.localizedDescription)")
+            }
         #endif
     }
 
@@ -598,7 +621,6 @@ public enum LauncherResult: Identifiable, Sendable {
     }
 }
 
-/// A plug-in that extends the quick launcher with custom search results.
 public protocol LauncherExtension: Sendable {
     var name: String { get }
     func search(query: String) async -> [LauncherResult]?

@@ -12,8 +12,6 @@ import OSLog
 
 @available(iOS 16.0, macOS 13.0, *)
 public struct TheaFocusFilter: SetFocusFilterIntent {
-    // nonisolated(unsafe): AppIntents protocol requires static var; these are set once at
-    // compile time and never mutated — effectively constants with protocol constraints
     nonisolated(unsafe) public static var title: LocalizedStringResource = "Thea Focus Settings"
     nonisolated(unsafe) public static var description: IntentDescription? = IntentDescription("Configure Thea behavior during Focus mode")
 
@@ -66,10 +64,8 @@ public enum FocusNotificationMode: String, AppEnum {
     case important
     case none
 
-    // nonisolated(unsafe): AppEnum protocol requires static var; initialized once, never mutated
     nonisolated(unsafe) public static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Notification Mode")
 
-    // nonisolated(unsafe): AppEnum protocol requires static var dictionary; set at declaration, read-only in practice
     nonisolated(unsafe) public static var caseDisplayRepresentations: [FocusNotificationMode: DisplayRepresentation] = [
         .all: DisplayRepresentation(title: "All Notifications", subtitle: "Receive all Thea notifications"),
         .smart: DisplayRepresentation(title: "Smart", subtitle: "AI determines importance"),

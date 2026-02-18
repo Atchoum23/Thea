@@ -264,7 +264,7 @@ final class StreamingAvailabilityService: ObservableObject {
     /// Get the best streaming option for content
     func getBestStreamingOption(contentID: String, type: ContentType) async -> StreamingContentInfo? {
         let availability = await checkAvailability(contentID: contentID, type: type, season: nil)
-        return availability.first { $0.isAvailable && !$0.isGeoBlocked }
+        return availability.filter { $0.isAvailable && !$0.isGeoBlocked }.first
     }
 
     /// Check if a provider's content is bundled in Switzerland

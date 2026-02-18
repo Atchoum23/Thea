@@ -2,6 +2,9 @@
 // Comprehensive advanced settings for Thea
 
 import SwiftUI
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "AdvancedSettingsView")
 
 struct AdvancedSettingsView: View {
     @State var settingsManager = SettingsManager.shared
@@ -648,9 +651,13 @@ extension AdvancedSettingsView {
             guard let dir = dirOpt, fm.fileExists(atPath: dir.path) else { continue }
             if let enumerator = fm.enumerator(at: dir, includingPropertiesForKeys: [.fileSizeKey]) {
                 while let fileURL = enumerator.nextObject() as? URL {
-                    if let values = try? fileURL.resourceValues(forKeys: [.fileSizeKey]),
-                       let size = values.fileSize {
-                        totalBytes += UInt64(size)
+                    do {
+                        let values = try fileURL.resourceValues(forKeys: [.fileSizeKey])
+                        if let size = values.fileSize {
+                            totalBytes += UInt64(size)
+                        }
+                    } catch {
+                        logger.error("Failed to read file size: \(error.localizedDescription)")
                     }
                 }
             }

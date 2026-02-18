@@ -150,7 +150,6 @@ public final class WebSearchVerifier {
                 switch chunk.type {
                 case let .delta(text):
                     responseText += text
-                case .thinkingDelta: break
                 case let .complete(msg):
                     responseText = msg.content.textValue
                 case .error:
@@ -162,9 +161,13 @@ public final class WebSearchVerifier {
             if let jsonStart = responseText.firstIndex(of: "["),
                let jsonEnd = responseText.lastIndex(of: "]") {
                 let jsonStr = String(responseText[jsonStart...jsonEnd])
-                if let data = jsonStr.data(using: .utf8),
-                   let claims = try? JSONDecoder().decode([String].self, from: data) {
-                    return claims
+                if let data = jsonStr.data(using: .utf8) {
+                    do {
+                        let claims = try JSONDecoder().decode([String].self, from: data)
+                        return claims
+                    } catch {
+                        logger.debug("Failed to decode claims JSON: \(error.localizedDescription)")
+                    }
                 }
             }
 
@@ -180,7 +183,8 @@ public final class WebSearchVerifier {
 
         // Pattern: sentences with numbers/dates
         let numberPattern = #"\b\d{4}\b|\b\d+%\b|\$[\d,]+|\b\d+\s*(million|billion|thousand)\b"#
-        if let regex = try? NSRegularExpression(pattern: numberPattern, options: .caseInsensitive) {
+        do {
+            let regex = try NSRegularExpression(pattern: numberPattern, options: .caseInsensitive)
             let range = NSRange(response.startIndex..., in: response)
             let matches = regex.matches(in: response, range: range)
 
@@ -189,6 +193,8 @@ public final class WebSearchVerifier {
                     claims.append(String(response[sentenceRange]))
                 }
             }
+        } catch {
+            logger.debug("Invalid number pattern regex: \(error.localizedDescription)")
         }
 
         return Array(Set(claims)).prefix(5).map { String($0) }
@@ -255,7 +261,6 @@ public final class WebSearchVerifier {
                 switch chunk.type {
                 case let .delta(text):
                     responseText += text
-                case .thinkingDelta: break
                 case let .complete(msg):
                     responseText = msg.content.textValue
                 case .error:
@@ -267,15 +272,20 @@ public final class WebSearchVerifier {
             if let jsonStart = responseText.firstIndex(of: "{"),
                let jsonEnd = responseText.lastIndex(of: "}") {
                 let jsonStr = String(responseText[jsonStart...jsonEnd])
-                if let data = jsonStr.data(using: .utf8),
-                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    return VerifiedClaim(
-                        claim: claim,
-                        confirmed: json["confirmed"] as? Bool ?? false,
-                        confidence: json["confidence"] as? Double ?? 0.5,
-                        source: json["source"] as? String,
-                        correction: json["correction"] as? String
-                    )
+                if let data = jsonStr.data(using: .utf8) {
+                    do {
+                        if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                            return VerifiedClaim(
+                                claim: claim,
+                                confirmed: json["confirmed"] as? Bool ?? false,
+                                confidence: json["confidence"] as? Double ?? 0.5,
+                                source: json["source"] as? String,
+                                correction: json["correction"] as? String
+                            )
+                        }
+                    } catch {
+                        logger.debug("Failed to parse verification JSON: \(error.localizedDescription)")
+                    }
                 }
             }
 

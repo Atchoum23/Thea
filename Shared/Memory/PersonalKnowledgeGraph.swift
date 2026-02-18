@@ -24,7 +24,11 @@ actor PersonalKnowledgeGraph {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             .appendingPathComponent("Thea", isDirectory: true)
             .appendingPathComponent("KnowledgeGraph", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            Logger(subsystem: "ai.thea.app", category: "PersonalKnowledgeGraph").error("Failed to create KG directory: \(error.localizedDescription)")
+        }
         return dir.appendingPathComponent("graph.json")
     }()
 
@@ -213,117 +217,6 @@ actor PersonalKnowledgeGraph {
         }
     }
 
-    // MARK: - Hybrid Search (BM25 + Semantic)
-
-    /// Hybrid search combining BM25 keyword scoring with graph connectivity and recency.
-    /// Returns entities ranked by a weighted combination of keyword relevance, connectivity, and recency.
-    func hybridSearch(query: String, limit: Int = 10) -> [KGSearchResult] {
-        let queryTerms = tokenize(query)
-        guard !queryTerms.isEmpty else { return [] }
-
-        let k1 = 1.2
-        let b = 0.75
-        let allEntities = Array(entities.values)
-        let avgDocLen = allEntities.isEmpty ? 1.0 : Double(allEntities.reduce(0) { $0 + documentLength($1) }) / Double(allEntities.count)
-        let totalDocs = Double(allEntities.count)
-
-        var results: [KGSearchResult] = []
-
-        for entity in allEntities {
-            let docTerms = tokenize(entity.name + " " + entity.attributes.values.joined(separator: " "))
-            let docLen = Double(docTerms.count)
-
-            var bm25Score = 0.0
-            for term in queryTerms {
-                let tf = Double(docTerms.filter { $0 == term }.count)
-                let docsContaining = Double(allEntities.filter { e in
-                    tokenize(e.name + " " + e.attributes.values.joined(separator: " ")).contains(term)
-                }.count)
-                let idf = log((totalDocs - docsContaining + 0.5) / (docsContaining + 0.5) + 1.0)
-                let tfNorm = (tf * (k1 + 1)) / (tf + k1 * (1 - b + b * (docLen / avgDocLen)))
-                bm25Score += idf * tfNorm
-            }
-
-            let connectionCount = Double(relationships(for: entity.id).count)
-            let connectivityScore = min(connectionCount / 10.0, 1.0)
-            let daysSinceUpdate = Date().timeIntervalSince(entity.lastUpdatedAt) / 86400
-            let recencyBoost = max(0, 1.0 - (daysSinceUpdate / 365.0))
-
-            // Combined: 60% BM25, 20% connectivity, 20% recency
-            let combinedScore = bm25Score * 0.6 + connectivityScore * 0.2 + recencyBoost * 0.2
-
-            if bm25Score > 0 || query.lowercased().contains(entity.name.lowercased()) {
-                results.append(KGSearchResult(
-                    entity: entity,
-                    score: combinedScore,
-                    matchType: bm25Score > 0 ? .keyword : .semantic
-                ))
-            }
-        }
-
-        return Array(results.sorted { $0.score > $1.score }.prefix(limit))
-    }
-
-    /// Semantic deduplication: merge entities with very similar names and same type
-    func deduplicateEntities(similarityThreshold: Double = 0.85) {
-        let allEntities = Array(entities.values)
-        var merged: Set<String> = []
-
-        for outer in allEntities {
-            guard !merged.contains(outer.id) else { continue }
-            for inner in allEntities where outer.id != inner.id && !merged.contains(inner.id) {
-                let similarity = jaccardSimilarity(
-                    Set(tokenize(outer.name.lowercased())),
-                    Set(tokenize(inner.name.lowercased()))
-                )
-                if similarity >= similarityThreshold && outer.type == inner.type {
-                    let (keep, remove) = outer.referenceCount >= inner.referenceCount ? (outer, inner) : (inner, outer)
-                    var updated = keep
-                    updated.referenceCount += remove.referenceCount
-                    for (key, value) in remove.attributes where updated.attributes[key] == nil {
-                        updated.attributes[key] = value
-                    }
-                    entities[updated.id] = updated
-                    entities.removeValue(forKey: remove.id)
-
-                    // Re-point edges
-                    edges = edges.map { edge in
-                        var e = edge
-                        if e.sourceID == remove.id {
-                            e = KGEdge(sourceID: keep.id, targetID: e.targetID, relationship: e.relationship, confidence: e.confidence, createdAt: e.createdAt, lastReferencedAt: e.lastReferencedAt)
-                        }
-                        if e.targetID == remove.id {
-                            e = KGEdge(sourceID: e.sourceID, targetID: keep.id, relationship: e.relationship, confidence: e.confidence, createdAt: e.createdAt, lastReferencedAt: e.lastReferencedAt)
-                        }
-                        return e
-                    }
-
-                    merged.insert(remove.id)
-                    isDirty = true
-                }
-            }
-        }
-    }
-
-    // MARK: - BM25 Helpers
-
-    private func tokenize(_ text: String) -> [String] {
-        text.lowercased()
-            .components(separatedBy: CharacterSet.alphanumerics.inverted)
-            .filter { $0.count > 1 }
-    }
-
-    private func documentLength(_ entity: KGEntity) -> Int {
-        tokenize(entity.name + " " + entity.attributes.values.joined(separator: " ")).count
-    }
-
-    private func jaccardSimilarity(_ a: Set<String>, _ b: Set<String>) -> Double {
-        let intersection = a.intersection(b).count
-        let union = a.union(b).count
-        guard union > 0 else { return 0 }
-        return Double(intersection) / Double(union)
-    }
-
     // MARK: - Statistics
 
     var entityCount: Int { entities.count }
@@ -438,20 +331,6 @@ struct KGStatistics: Sendable {
     let edgeCount: Int
     let typeDistribution: [KGEntityType: Int]
     let averageConnections: Double
-}
-
-// MARK: - Search Result
-
-struct KGSearchResult: Sendable {
-    let entity: KGEntity
-    let score: Double
-    let matchType: KGMatchType
-}
-
-enum KGMatchType: String, Sendable {
-    case keyword
-    case semantic
-    case hybrid
 }
 
 private struct KGSerializedGraph: Codable {

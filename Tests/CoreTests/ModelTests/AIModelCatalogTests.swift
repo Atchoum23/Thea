@@ -94,7 +94,7 @@ final class AIModelCatalogIntegrityTests: XCTestCase {
 final class AIModelCatalogProviderTests: XCTestCase {
 
     func testAnthropicModelsCount() {
-        XCTAssertEqual(AIModel.anthropicModels.count, 7)
+        XCTAssertEqual(AIModel.anthropicModels.count, 6)
     }
 
     func testAnthropicModelsAllHaveCorrectProvider() {
@@ -115,14 +115,9 @@ final class AIModelCatalogProviderTests: XCTestCase {
         }
     }
 
-    func testAnthropicContextWindows() {
+    func testAnthropicContext200K() {
         for model in AIModel.anthropicModels {
-            // claude-opus-4-6 has 1M context; all others have 200K
-            if model.id == "claude-opus-4-6" {
-                XCTAssertEqual(model.contextWindow, 1_000_000, "\(model.id) should have 1M context")
-            } else {
-                XCTAssertEqual(model.contextWindow, 200_000, "\(model.id) should have 200K context")
-            }
+            XCTAssertEqual(model.contextWindow, 200_000, "\(model.id) should have 200K context")
         }
     }
 
@@ -192,7 +187,7 @@ final class AIModelCatalogProviderTests: XCTestCase {
     }
 
     func testOpenRouterModelsCount() {
-        XCTAssertEqual(AIModel.openRouterModels.count, 6)
+        XCTAssertEqual(AIModel.openRouterModels.count, 5)
     }
 
     func testOpenRouterModelsAllHaveCorrectProvider() {

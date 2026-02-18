@@ -21,7 +21,6 @@ import OSLog
 // MARK: - Model Quality Benchmark
 
 /// Tracks and analyzes model quality over time
-// @unchecked Sendable: mutable state (modelMetrics) only accessed from single evaluation context
 final class ModelQualityBenchmark: @unchecked Sendable {
     private let logger = Logger(subsystem: "ai.thea.app", category: "ModelQualityBenchmark")
 
@@ -277,16 +276,23 @@ final class ModelQualityBenchmark: @unchecked Sendable {
     // MARK: - Persistence
 
     private func loadPersistedState() {
-        if let data = UserDefaults.standard.data(forKey: metricsKey),
-           let decoded = try? JSONDecoder().decode([String: ModelQualityMetrics].self, from: data) {
-            modelMetrics = decoded
-            logger.debug("Loaded quality metrics for \(decoded.count) models")
+        if let data = UserDefaults.standard.data(forKey: metricsKey) {
+            do {
+                let decoded = try JSONDecoder().decode([String: ModelQualityMetrics].self, from: data)
+                modelMetrics = decoded
+                logger.debug("Loaded quality metrics for \(decoded.count) models")
+            } catch {
+                logger.error("Failed to decode ModelQualityMetrics: \(error.localizedDescription)")
+            }
         }
     }
 
     private func persistState() {
-        if let data = try? JSONEncoder().encode(modelMetrics) {
+        do {
+            let data = try JSONEncoder().encode(modelMetrics)
             UserDefaults.standard.set(data, forKey: metricsKey)
+        } catch {
+            logger.error("Failed to encode ModelQualityMetrics: \(error.localizedDescription)")
         }
     }
 

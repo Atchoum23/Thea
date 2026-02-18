@@ -9,6 +9,7 @@ import Combine
 import CoreML
 import Foundation
 import NaturalLanguage
+import OSLog
 
 // MARK: - MLModel Wrapper
 
@@ -43,6 +44,7 @@ public class CoreMLService: ObservableObject {
 
     private let modelDirectory: URL
     private let computeUnits: MLComputeUnits = .all
+    private let logger = Logger(subsystem: "com.thea.app", category: "CoreMLService")
 
     // MARK: - NLP Components
 
@@ -57,13 +59,21 @@ public class CoreMLService: ObservableObject {
         guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
             // Fallback to temporary directory
             modelDirectory = FileManager.default.temporaryDirectory.appendingPathComponent("Thea/Models")
-            try? FileManager.default.createDirectory(at: modelDirectory, withIntermediateDirectories: true)
+            do {
+                try FileManager.default.createDirectory(at: modelDirectory, withIntermediateDirectories: true)
+            } catch {
+                logger.debug("Could not create temp model directory: \(error.localizedDescription)")
+            }
             Task { await discoverModels() }
             return
         }
         modelDirectory = appSupport.appendingPathComponent("Thea/Models")
 
-        try? FileManager.default.createDirectory(at: modelDirectory, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: modelDirectory, withIntermediateDirectories: true)
+        } catch {
+            logger.debug("Could not create model directory: \(error.localizedDescription)")
+        }
 
         Task {
             await discoverModels()
@@ -86,8 +96,14 @@ public class CoreMLService: ObservableObject {
         }
 
         // Downloaded models
-        let contents = try? FileManager.default.contentsOfDirectory(at: modelDirectory, includingPropertiesForKeys: nil)
-        for url in contents ?? [] where url.pathExtension == "mlmodelc" || url.pathExtension == "mlpackage" {
+        let contents: [URL]
+        do {
+            contents = try FileManager.default.contentsOfDirectory(at: modelDirectory, includingPropertiesForKeys: nil)
+        } catch {
+            logger.debug("Could not list model directory contents: \(error.localizedDescription)")
+            return
+        }
+        for url in contents where url.pathExtension == "mlmodelc" || url.pathExtension == "mlpackage" {
             if let info = await loadModelInfo(from: url, source: .downloaded) {
                 models.append(info)
             }
@@ -116,7 +132,13 @@ public class CoreMLService: ObservableObject {
                 url: compiledURL,
                 inputDescription: description.inputDescriptionsByName.map { "\($0.key): \($0.value.type)" }.joined(separator: ", "),
                 outputDescription: description.outputDescriptionsByName.map { "\($0.key): \($0.value.type)" }.joined(separator: ", "),
-                size: (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int64) ?? 0
+                size: {
+                    do {
+                        return (try FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int64) ?? 0
+                    } catch {
+                        return 0
+                    }
+                }()
             )
         } catch {
             return nil
@@ -362,11 +384,13 @@ public class CoreMLService: ObservableObject {
 
         // Move compiled model
         let finalURL = modelDirectory.appendingPathComponent(name).appendingPathExtension("mlmodelc")
-        try? FileManager.default.removeItem(at: finalURL)
+        do { try FileManager.default.removeItem(at: finalURL) } catch { /* ok if not found */ }
         try FileManager.default.moveItem(at: compiledURL, to: finalURL)
 
         // Clean up uncompiled
-        try? FileManager.default.removeItem(at: destinationURL)
+        do { try FileManager.default.removeItem(at: destinationURL) } catch {
+            logger.debug("Could not remove uncompiled model: \(error.localizedDescription)")
+        }
 
         await discoverModels()
 

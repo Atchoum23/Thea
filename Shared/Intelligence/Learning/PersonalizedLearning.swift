@@ -340,7 +340,7 @@ public final class LearningManager: ObservableObject {
         userProfile.updatedAt = Date()
 
         Task {
-            try? await saveProfile()
+            do { try await saveProfile() } catch { logger.error("Failed to save learning profile: \(error.localizedDescription)") }
             await generateRecommendations()
         }
     }
@@ -354,7 +354,7 @@ public final class LearningManager: ObservableObject {
         userProfile.updatedAt = Date()
 
         Task {
-            try? await saveProfile()
+            do { try await saveProfile() } catch { logger.error("Failed to save learning profile: \(error.localizedDescription)") }
         }
     }
 
@@ -370,7 +370,7 @@ public final class LearningManager: ObservableObject {
         userProfile.updatedAt = Date()
 
         Task {
-            try? await saveProfile()
+            do { try await saveProfile() } catch { logger.error("Failed to save learning profile: \(error.localizedDescription)") }
         }
     }
 
@@ -397,7 +397,7 @@ public final class LearningManager: ObservableObject {
         userProfile.updatedAt = Date()
 
         Task {
-            try? await saveProfile()
+            do { try await saveProfile() } catch { logger.error("Failed to save learning profile: \(error.localizedDescription)") }
         }
     }
 
@@ -408,7 +408,7 @@ public final class LearningManager: ObservableObject {
             userProfile.updatedAt = Date()
 
             Task {
-                try? await saveProfile()
+                do { try await saveProfile() } catch { logger.error("Failed to save learning profile: \(error.localizedDescription)") }
             }
         }
     }
@@ -434,7 +434,7 @@ public final class LearningManager: ObservableObject {
         userProfile.updatedAt = Date()
 
         Task {
-            try? await saveProfile()
+            do { try await saveProfile() } catch { logger.error("Failed to save learning profile: \(error.localizedDescription)") }
         }
     }
 
@@ -492,8 +492,8 @@ public final class LearningManager: ObservableObject {
     // MARK: - Adaptive Response
 
     /// Get response style based on user profile
-    public func getResponseStyle() -> PersonalizedResponseStyle {
-        PersonalizedResponseStyle(
+    public func getResponseStyle() -> ResponseStyle {
+        ResponseStyle(
             verbosity: userProfile.experienceLevel == .novice ? .detailed : .concise,
             codeExamples: userProfile.preferredLearningStyle == .handson,
             visualAids: userProfile.preferredLearningStyle == .visual,
@@ -535,11 +535,10 @@ public struct DailyProgress: Sendable {
     public var skillsPracticed: [UUID]
 }
 
-// MARK: - Personalized Response Style
+// MARK: - Response Style
 
-/// Style configuration for AI responses based on user profile.
-/// Prefixed to avoid conflict with the ResponseStyle preset struct in Core/Models/ResponseStyle.swift.
-public struct PersonalizedResponseStyle: Sendable {
+/// Style configuration for AI responses based on user profile
+public struct ResponseStyle: Sendable {
     public let verbosity: Verbosity
     public let codeExamples: Bool
     public let visualAids: Bool
@@ -552,6 +551,3 @@ public struct PersonalizedResponseStyle: Sendable {
         case detailed
     }
 }
-
-/// V1 compatibility typealias — prefer `PersonalizedResponseStyle` for new code.
-public typealias ResponseStyle_Personalized = PersonalizedResponseStyle

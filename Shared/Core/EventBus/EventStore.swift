@@ -57,31 +57,90 @@ public actor EventStore {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
 
+        var skippedCount = 0
         for line in lines {
-            if let data = Data(base64Encoded: line) {
-                // Try to decode as each known event type
-                if let event = try? decoder.decode(MessageEvent.self, from: data) {
-                    await handler(event)
-                } else if let event = try? decoder.decode(ActionEvent.self, from: data) {
-                    await handler(event)
-                } else if let event = try? decoder.decode(StateEvent.self, from: data) {
-                    await handler(event)
-                } else if let event = try? decoder.decode(ErrorEvent.self, from: data) {
-                    await handler(event)
-                } else if let event = try? decoder.decode(PerformanceEvent.self, from: data) {
-                    await handler(event)
-                } else if let event = try? decoder.decode(LearningEvent.self, from: data) {
-                    await handler(event)
-                } else if let event = try? decoder.decode(MemoryEvent.self, from: data) {
-                    await handler(event)
-                } else if let event = try? decoder.decode(VerificationEvent.self, from: data) {
-                    await handler(event)
-                } else if let event = try? decoder.decode(NavigationEvent.self, from: data) {
-                    await handler(event)
-                } else if let event = try? decoder.decode(LifecycleEvent.self, from: data) {
-                    await handler(event)
-                }
+            guard let data = Data(base64Encoded: line) else {
+                skippedCount += 1
+                continue
             }
+
+            // Try to decode as each known event type (polymorphic decode)
+            var decoded = false
+
+            do {
+                await handler(try decoder.decode(MessageEvent.self, from: data))
+                decoded = true
+            } catch {}
+
+            if !decoded {
+                do {
+                    await handler(try decoder.decode(ActionEvent.self, from: data))
+                    decoded = true
+                } catch {}
+            }
+
+            if !decoded {
+                do {
+                    await handler(try decoder.decode(StateEvent.self, from: data))
+                    decoded = true
+                } catch {}
+            }
+
+            if !decoded {
+                do {
+                    await handler(try decoder.decode(ErrorEvent.self, from: data))
+                    decoded = true
+                } catch {}
+            }
+
+            if !decoded {
+                do {
+                    await handler(try decoder.decode(PerformanceEvent.self, from: data))
+                    decoded = true
+                } catch {}
+            }
+
+            if !decoded {
+                do {
+                    await handler(try decoder.decode(LearningEvent.self, from: data))
+                    decoded = true
+                } catch {}
+            }
+
+            if !decoded {
+                do {
+                    await handler(try decoder.decode(MemoryEvent.self, from: data))
+                    decoded = true
+                } catch {}
+            }
+
+            if !decoded {
+                do {
+                    await handler(try decoder.decode(VerificationEvent.self, from: data))
+                    decoded = true
+                } catch {}
+            }
+
+            if !decoded {
+                do {
+                    await handler(try decoder.decode(NavigationEvent.self, from: data))
+                    decoded = true
+                } catch {}
+            }
+
+            if !decoded {
+                do {
+                    await handler(try decoder.decode(LifecycleEvent.self, from: data))
+                    decoded = true
+                } catch {}
+            }
+
+            if !decoded {
+                skippedCount += 1
+            }
+        }
+        if skippedCount > 0 {
+            logger.warning("EventStore replay: \(skippedCount) event(s) could not be decoded")
         }
     }
 
@@ -118,10 +177,13 @@ public actor EventStore {
 
     /// Get storage size in bytes
     public func storageSize() -> Int64 {
-        guard let attrs = try? fileManager.attributesOfItem(atPath: eventFileURL.path) else {
+        do {
+            let attrs = try fileManager.attributesOfItem(atPath: eventFileURL.path)
+            return attrs[.size] as? Int64 ?? 0
+        } catch {
+            logger.debug("Could not read event store file attributes: \(error.localizedDescription)")
             return 0
         }
-        return attrs[.size] as? Int64 ?? 0
     }
 
     /// Compact the event store (remove events older than specified date)
@@ -140,11 +202,12 @@ public actor EventStore {
             if let data = Data(base64Encoded: line) {
                 // Try to decode to get timestamp
                 // This is a simplified approach - in production would use a more efficient method
-                if let event = try? decoder.decode(MessageEvent.self, from: data) {
+                do {
+                    let event = try decoder.decode(MessageEvent.self, from: data)
                     if event.timestamp >= date {
                         keptLines.append(line)
                     }
-                } else {
+                } catch {
                     // Keep events we can't decode
                     keptLines.append(line)
                 }

@@ -26,6 +26,8 @@ struct ContentView: View {
     @State private var showingKeyboardShortcuts = false
     @State private var showingCommandPalette = false
     @State private var newProjectTitle = ""
+    @State private var errorMessage: String?
+    @State private var showError = false
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -114,7 +116,17 @@ struct ContentView: View {
                 lines.append("---")
                 lines.append("")
             }
-            try? lines.joined(separator: "\n").write(to: url, atomically: true, encoding: .utf8)
+            do {
+                try lines.joined(separator: "\n").write(to: url, atomically: true, encoding: .utf8)
+            } catch {
+                errorMessage = "Failed to export conversation: \(error.localizedDescription)"
+                showError = true
+            }
+        }
+        .alert("Error", isPresented: $showError, presenting: errorMessage) { _ in
+            Button("OK") { }
+        } message: { message in
+            Text(message)
         }
     }
 
@@ -130,7 +142,6 @@ struct ContentView: View {
         .navigationTitle("THEA")
         .frame(minWidth: 160, idealWidth: 180)
         .listStyle(.sidebar)
-        .softEdges()
     }
 
     // MARK: - List Column
@@ -182,9 +193,15 @@ struct ContentView: View {
                     welcomeInputText = ""
                     let conversation = chatManager.createConversation(title: "New Conversation")
                     selectedConversation = conversation
-                    Task { @MainActor in
-                        try? await Task.sleep(for: .milliseconds(200))
-                        try? await chatManager.sendMessage(prompt, in: conversation)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        Task {
+                            do {
+                                try await chatManager.sendMessage(prompt, in: conversation)
+                            } catch {
+                                errorMessage = "Failed to send message: \(error.localizedDescription)"
+                                showError = true
+                            }
+                        }
                     }
                 }
 
@@ -199,9 +216,15 @@ struct ContentView: View {
                         welcomeInputText = ""
                         let conversation = chatManager.createConversation(title: "New Conversation")
                         selectedConversation = conversation
-                        Task { @MainActor in
-                            try? await Task.sleep(for: .milliseconds(200))
-                            try? await chatManager.sendMessage(prompt, in: conversation)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            Task {
+                                do {
+                                    try await chatManager.sendMessage(prompt, in: conversation)
+                                } catch {
+                                    errorMessage = "Failed to send message: \(error.localizedDescription)"
+                                    showError = true
+                                }
+                            }
                         }
                     },
                     onVoiceToggle: {
@@ -223,7 +246,7 @@ struct ContentView: View {
     /// Cycles: .all → .doubleColumn (hide nav sidebar) → .detailOnly (hide conversations too) → .all
     private var sidebarToggleButton: some View {
         Button {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+            withAnimation(.easeInOut(duration: 0.25)) {
                 switch columnVisibility {
                 case .all:
                     columnVisibility = .doubleColumn
@@ -353,9 +376,15 @@ struct ContentView: View {
 
     private func handleVoiceInput() {
         if isListeningForVoice {
-            try? voiceManager.startVoiceCommand()
-            voiceManager.onTranscriptionComplete = { (transcription: String) in
-                welcomeInputText = transcription
+            do {
+                try voiceManager.startVoiceCommand()
+                voiceManager.onTranscriptionComplete = { (transcription: String) in
+                    welcomeInputText = transcription
+                    isListeningForVoice = false
+                }
+            } catch {
+                errorMessage = "Failed to start voice input: \(error.localizedDescription)"
+                showError = true
                 isListeningForVoice = false
             }
         } else {
@@ -379,8 +408,13 @@ struct ContentView: View {
 
         if voiceManager.isEnabled {
             Task {
-                try? await voiceManager.requestPermissions()
-                try? voiceManager.startWakeWordDetection()
+                do {
+                    try await voiceManager.requestPermissions()
+                    try voiceManager.startWakeWordDetection()
+                } catch {
+                    errorMessage = "Failed to initialize voice features: \(error.localizedDescription)"
+                    showError = true
+                }
             }
         }
     }

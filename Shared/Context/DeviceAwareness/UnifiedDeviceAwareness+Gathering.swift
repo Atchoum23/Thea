@@ -4,7 +4,10 @@ import UIKit
 #elseif os(macOS)
 import AppKit
 import IOKit.ps
+import OSLog
 #endif
+
+private let deviceAwarenessGatheringLogger = Logger(subsystem: "ai.thea.app", category: "UnifiedDeviceAwareness")
 
 // MARK: - Data Gathering Methods
 
@@ -186,13 +189,19 @@ extension UnifiedDeviceAwareness {
 
         for directory in appDirectories {
             let url = URL(fileURLWithPath: directory)
-            let contents = try? FileManager.default.contentsOfDirectory(
-                at: url,
-                includingPropertiesForKeys: [.isDirectoryKey],
-                options: [.skipsHiddenFiles]
-            )
+            let contents: [URL]
+            do {
+                contents = try FileManager.default.contentsOfDirectory(
+                    at: url,
+                    includingPropertiesForKeys: [.isDirectoryKey],
+                    options: [.skipsHiddenFiles]
+                )
+            } catch {
+                deviceAwarenessGatheringLogger.error("Failed to list directory '\(url.path)': \(error.localizedDescription)")
+                continue
+            }
 
-            for fileURL in contents ?? [] {
+            for fileURL in contents {
                 if fileURL.pathExtension == "app" {
                     if let bundle = Bundle(url: fileURL) {
                         let app = DeviceInstalledApp(

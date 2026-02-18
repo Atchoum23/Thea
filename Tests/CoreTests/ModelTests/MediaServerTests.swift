@@ -560,7 +560,7 @@ struct LibraryFilteringTests {
             TestMediaLibraryItem(name: "Concert Live", path: "/c.mp4", type: .video, sizeBytes: 2_000_000),
             TestMediaLibraryItem(name: "Jazz Album", path: "/j.mp3", type: .audio, sizeBytes: 500_000),
             TestMediaLibraryItem(name: "Rock Song", path: "/r.flac", type: .audio, sizeBytes: 800_000),
-            TestMediaLibraryItem(name: "Vacation Photo", path: "/v.jpg", type: .image, sizeBytes: 3_000_000)
+            TestMediaLibraryItem(name: "Vacation Photo", path: "/v.jpg", type: .image, sizeBytes: 3_000_000),
         ]
     }
 
@@ -658,7 +658,7 @@ struct LibraryStatsTests {
             TestMediaLibraryItem(name: "V2", path: "/v2.mp4", type: .video, sizeBytes: 2_000_000_000),
             TestMediaLibraryItem(name: "A1", path: "/a1.mp3", type: .audio, sizeBytes: 5_000_000),
             TestMediaLibraryItem(name: "I1", path: "/i1.jpg", type: .image, sizeBytes: 3_000_000),
-            TestMediaLibraryItem(name: "I2", path: "/i2.png", type: .image, sizeBytes: 2_000_000)
+            TestMediaLibraryItem(name: "I2", path: "/i2.png", type: .image, sizeBytes: 2_000_000),
         ]
         let videos = items.filter { $0.type == .video }.count
         let audio = items.filter { $0.type == .audio }.count

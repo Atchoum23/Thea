@@ -205,7 +205,6 @@ public final class AppUpdateService: ObservableObject {
 
     // MARK: - Check for Updates
 
-    /// Checks CloudKit for available app updates published by other devices and presents a notification if a newer version is found.
     public func checkForUpdates() async {
         guard let database = await getPrivateDatabase() else {
             logger.debug("CloudKit not available - skipping update check")
@@ -371,10 +370,6 @@ public final class AppUpdateService: ObservableObject {
 
     // MARK: - Handle Notification Action
 
-    /// Handles the user's response to an update notification, either triggering an immediate update or scheduling a reminder.
-    /// - Parameters:
-    ///   - actionID: The identifier of the notification action the user tapped.
-    ///   - userInfo: The notification's payload containing update details.
     public func handleNotificationAction(_ actionID: String, userInfo: [AnyHashable: Any]) {
         switch actionID {
         case Self.updateNowActionID:
@@ -384,7 +379,12 @@ public final class AppUpdateService: ObservableObject {
         case Self.remindLaterActionID:
             // Schedule a reminder in 1 hour
             Task {
-                try? await Task.sleep(for: .seconds(3600))
+                do {
+                    try await Task.sleep(for: .seconds(3600))
+                } catch {
+                    logger.debug("Remind-later sleep interrupted: \(error.localizedDescription)")
+                    return
+                }
                 if let update = availableUpdate {
                     await showUpdateNotification(update)
                 }
@@ -448,23 +448,27 @@ public final class AppUpdateService: ObservableObject {
     // MARK: - History Persistence
 
     private func loadUpdateHistory() {
-        guard let data = UserDefaults.standard.data(forKey: "thea.update.history"),
-              let history = try? JSONDecoder().decode([AppUpdateInfo].self, from: data)
-        else { return }
-        updateHistory = history
+        guard let data = UserDefaults.standard.data(forKey: "thea.update.history") else { return }
+        do {
+            updateHistory = try JSONDecoder().decode([AppUpdateInfo].self, from: data)
+        } catch {
+            logger.error("Failed to decode update history: \(error.localizedDescription)")
+        }
     }
 
     private func saveUpdateHistory() {
         // Keep only last 20
         let trimmed = Array(updateHistory.prefix(20))
-        if let data = try? JSONEncoder().encode(trimmed) {
+        do {
+            let data = try JSONEncoder().encode(trimmed)
             UserDefaults.standard.set(data, forKey: "thea.update.history")
+        } catch {
+            logger.error("Failed to encode update history: \(error.localizedDescription)")
         }
     }
 
     // MARK: - Dismiss Update
 
-    /// Dismisses the current update notification by clearing the available update state.
     public func dismissUpdate() {
         availableUpdate = nil
     }

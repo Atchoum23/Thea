@@ -7,7 +7,6 @@ import AVFoundation
 // Wraps MLXAudioEngine to provide VoiceSynthesisBackend conformance
 // Uses Soprano-80M for TTS and GLM-ASR-Nano for STT
 
-// @unchecked Sendable: audioPlayer only accessed sequentially within async methods
 final class MLXVoiceBackend: VoiceSynthesisBackend, VoiceRecognitionBackend, @unchecked Sendable {
 
     private var audioPlayer: AVAudioPlayer?
@@ -30,18 +29,14 @@ final class MLXVoiceBackend: VoiceSynthesisBackend, VoiceRecognitionBackend, @un
 
         let audioURL = try await engine.speak(text: text)
 
-        // Play audio using AVAudioPlayer with error propagation
+        // Play audio using AVAudioPlayer
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             Task { @MainActor in
                 do {
                     let player = try AVAudioPlayer(contentsOf: audioURL)
                     self.audioPlayer = player
-                    let delegate = AudioPlayerCompletionDelegate { error in
-                        if let error {
-                            continuation.resume(throwing: error)
-                        } else {
-                            continuation.resume()
-                        }
+                    let delegate = AudioPlayerCompletionDelegate {
+                        continuation.resume()
                     }
                     player.delegate = delegate
                     // Hold reference to delegate to keep it alive
@@ -119,32 +114,19 @@ final class MLXVoiceBackend: VoiceSynthesisBackend, VoiceRecognitionBackend, @un
 
 // MARK: - Audio Player Completion Delegate
 
-// @unchecked Sendable: NSObject delegate with immutable @Sendable closure set during init
 private final class AudioPlayerCompletionDelegate: NSObject, AVAudioPlayerDelegate, @unchecked Sendable {
-    private let onComplete: @Sendable (Error?) -> Void
+    private let completion: @Sendable () -> Void
 
-    init(onComplete: @escaping @Sendable (Error?) -> Void) {
-        self.onComplete = onComplete
+    init(completion: @escaping @Sendable () -> Void) {
+        self.completion = completion
     }
 
-    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        onComplete(flag ? nil : MLXVoiceError.playbackFailed)
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully _: Bool) {
+        completion()
     }
 
     func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
-        onComplete(error ?? MLXVoiceError.decodeError)
-    }
-}
-
-enum MLXVoiceError: LocalizedError {
-    case playbackFailed
-    case decodeError
-
-    var errorDescription: String? {
-        switch self {
-        case .playbackFailed: "Audio playback did not complete successfully"
-        case .decodeError: "Audio decode error occurred during playback"
-        }
+        completion()
     }
 }
 

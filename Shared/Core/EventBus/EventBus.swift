@@ -349,7 +349,7 @@ public final class EventBus: ObservableObject {
             }
             UserDefaults.standard.set(storedEvents, forKey: "EventBus.events")
         } catch {
-            logger.warning("Failed to persist event \(event.id): \(error.localizedDescription)")
+            logger.error("Failed to encode event for persistence: \(error)")
         }
     }
 
@@ -428,9 +428,6 @@ private struct AnyTheaEvent: Codable {
         do {
             self.data = try JSONEncoder().encode(event)
         } catch {
-            // Fallback: store empty data but log the encoding failure
-            Logger(subsystem: "com.thea.v2", category: "EventBus")
-                .warning("Failed to encode event \(event.id) data: \(error.localizedDescription)")
             self.data = Data()
         }
     }

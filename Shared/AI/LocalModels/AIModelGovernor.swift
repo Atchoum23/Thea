@@ -320,28 +320,32 @@ final class AIModelGovernor {
         let fileManager = FileManager.default
 
         #if os(macOS)
-        if let attributes = try? fileManager.attributesOfFileSystem(forPath: NSHomeDirectory()),
-           let freeSpace = attributes[.systemFreeSize] as? Int64,
-           let totalSpace = attributes[.systemSize] as? Int64 {
+        do {
+            let attributes = try fileManager.attributesOfFileSystem(forPath: NSHomeDirectory())
+            if let freeSpace = attributes[.systemFreeSize] as? Int64,
+               let totalSpace = attributes[.systemSize] as? Int64 {
 
-            let freeGB = Double(freeSpace) / 1_000_000_000
-            let totalGB = Double(totalSpace) / 1_000_000_000
-            let usedPercent = 1.0 - (freeGB / totalGB)
+                let freeGB = Double(freeSpace) / 1_000_000_000
+                let totalGB = Double(totalSpace) / 1_000_000_000
+                let usedPercent = 1.0 - (freeGB / totalGB)
 
-            // Calculate current model storage
-            let manager = LocalModelManager.shared
-            let modelStorageGB = manager.availableModels.reduce(0.0) { $0 + Double($1.size) / 1_000_000_000 }
+                // Calculate current model storage
+                let manager = LocalModelManager.shared
+                let modelStorageGB = manager.availableModels.reduce(0.0) { $0 + Double($1.size) / 1_000_000_000 }
 
-            return StorageAnalysis(
-                freeSpaceGB: freeGB,
-                totalSpaceGB: totalGB,
-                usedPercent: usedPercent,
-                modelStorageGB: modelStorageGB,
-                canAccommodate: freeGB > modelSize * 1.5, // Need 1.5x for safety
-                pressureLevel: usedPercent > 0.9 ? .critical :
-                              usedPercent > 0.8 ? .high :
-                              usedPercent > 0.7 ? .moderate : .low
-            )
+                return StorageAnalysis(
+                    freeSpaceGB: freeGB,
+                    totalSpaceGB: totalGB,
+                    usedPercent: usedPercent,
+                    modelStorageGB: modelStorageGB,
+                    canAccommodate: freeGB > modelSize * 1.5, // Need 1.5x for safety
+                    pressureLevel: usedPercent > 0.9 ? .critical :
+                                  usedPercent > 0.8 ? .high :
+                                  usedPercent > 0.7 ? .moderate : .low
+                )
+            }
+        } catch {
+            logger.error("Failed to read file system attributes: \(error.localizedDescription)")
         }
         #endif
 
@@ -610,7 +614,11 @@ final class AIModelGovernor {
     private func startContinuousMonitoring() async {
         // Monitor system state periodically
         while true {
-            try? await Task.sleep(for: .seconds(30))
+            do {
+                try await Task.sleep(for: .seconds(30))
+            } catch {
+                break
+            }
 
             updateSystemState()
             gradualProactivityIncrease()
@@ -651,9 +659,12 @@ final class AIModelGovernor {
     // MARK: - Persistence
 
     private func loadState() {
-        if let data = UserDefaults.standard.data(forKey: "AIModelGovernor.proactivityHistory"),
-           let history = try? JSONDecoder().decode([ProactivityEvent].self, from: data) {
-            proactivityHistory = history
+        if let data = UserDefaults.standard.data(forKey: "AIModelGovernor.proactivityHistory") {
+            do {
+                proactivityHistory = try JSONDecoder().decode([ProactivityEvent].self, from: data)
+            } catch {
+                logger.error("Failed to decode proactivityHistory: \(error.localizedDescription)")
+            }
         }
 
         proactivityScore = UserDefaults.standard.double(forKey: "AIModelGovernor.proactivityScore")
@@ -663,8 +674,11 @@ final class AIModelGovernor {
     }
 
     private func saveState() {
-        if let data = try? JSONEncoder().encode(proactivityHistory) {
+        do {
+            let data = try JSONEncoder().encode(proactivityHistory)
             UserDefaults.standard.set(data, forKey: "AIModelGovernor.proactivityHistory")
+        } catch {
+            logger.error("Failed to encode proactivityHistory: \(error.localizedDescription)")
         }
         UserDefaults.standard.set(proactivityScore, forKey: "AIModelGovernor.proactivityScore")
     }

@@ -33,7 +33,11 @@ final class BehavioralFingerprint {
     private let storageURL: URL = {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             .appendingPathComponent("Thea", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            Logger(subsystem: "ai.thea.app", category: "BehavioralFingerprint").error("Failed to create storage directory: \(error.localizedDescription)")
+        }
         return dir.appendingPathComponent("behavioral_fingerprint.json")
     }()
 

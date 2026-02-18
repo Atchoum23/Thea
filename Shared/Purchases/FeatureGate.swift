@@ -78,7 +78,7 @@ enum ProFeature: String, CaseIterable, Sendable {
     /// Features included in the free tier (limited versions).
     static let freeFeatures: Set<ProFeature> = [
         .customSystemPrompts,
-        .conversationForking
+        .conversationForking,
     ]
 }
 

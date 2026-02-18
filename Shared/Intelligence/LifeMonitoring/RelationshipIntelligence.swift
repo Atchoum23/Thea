@@ -12,6 +12,7 @@
 
 import Foundation
 import Contacts
+import OSLog
 
 // MARK: - Relationship Model
 
@@ -137,6 +138,8 @@ public struct ContactRelationship: Identifiable, Codable, Sendable {
 
 public actor RelationshipIntelligence {
     public static let shared = RelationshipIntelligence()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "RelationshipIntelligence")
 
     // MARK: - Properties
 
@@ -551,13 +554,19 @@ public actor RelationshipIntelligence {
 
     private func saveData() async {
         if let defaults = UserDefaults(suiteName: "group.app.theathe") {
-            if let encoded = try? JSONEncoder().encode(Array(relationships.values)) {
+            do {
+                let encoded = try JSONEncoder().encode(Array(relationships.values))
                 defaults.set(encoded, forKey: "contactRelationships")
+            } catch {
+                logger.error("Failed to encode contact relationships: \(error)")
             }
             // Keep only last 1000 communication events
             let recentLog = Array(communicationLog.suffix(1000))
-            if let logEncoded = try? JSONEncoder().encode(recentLog) {
+            do {
+                let logEncoded = try JSONEncoder().encode(recentLog)
                 defaults.set(logEncoded, forKey: "communicationLog")
+            } catch {
+                logger.error("Failed to encode communication log: \(error)")
             }
             defaults.synchronize()
         }
@@ -565,15 +574,22 @@ public actor RelationshipIntelligence {
 
     public func loadData() async {
         if let defaults = UserDefaults(suiteName: "group.app.theathe") {
-            if let data = defaults.data(forKey: "contactRelationships"),
-               let loaded = try? JSONDecoder().decode([ContactRelationship].self, from: data) {
-                for rel in loaded {
-                    relationships[rel.id] = rel
+            if let data = defaults.data(forKey: "contactRelationships") {
+                do {
+                    let loaded = try JSONDecoder().decode([ContactRelationship].self, from: data)
+                    for rel in loaded {
+                        relationships[rel.id] = rel
+                    }
+                } catch {
+                    logger.error("Failed to decode contact relationships: \(error)")
                 }
             }
-            if let logData = defaults.data(forKey: "communicationLog"),
-               let loadedLog = try? JSONDecoder().decode([CommunicationEvent].self, from: logData) {
-                communicationLog = loadedLog
+            if let logData = defaults.data(forKey: "communicationLog") {
+                do {
+                    communicationLog = try JSONDecoder().decode([CommunicationEvent].self, from: logData)
+                } catch {
+                    logger.error("Failed to decode communication log: \(error)")
+                }
             }
         }
     }

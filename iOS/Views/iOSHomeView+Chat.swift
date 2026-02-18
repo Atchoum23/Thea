@@ -11,6 +11,8 @@ struct iOSChatView: View {
     @StateObject private var settingsManager = SettingsManager.shared
     @State private var messageText = ""
     @State private var isListeningForVoice = false
+    @State private var showingError = false
+    @State private var errorMessage: String?
     @FocusState private var isInputFocused: Bool
 
     private var messageSpacing: CGFloat {
@@ -56,6 +58,11 @@ struct iOSChatView: View {
         }
         .onAppear {
             chatManager.selectConversation(conversation)
+        }
+        .alert("Error", isPresented: $showingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "An unknown error occurred")
         }
     }
 
@@ -121,7 +128,6 @@ struct iOSChatView: View {
                 .lineLimit(1 ... 6)
                 .focused($isInputFocused)
                 .disabled(chatManager.isStreaming)
-                .accessibilityIdentifier("chatMessageInput")
                 .accessibilityLabel("Message input")
                 .onSubmit {
                     if !messageText.isEmpty {
@@ -162,13 +168,26 @@ struct iOSChatView: View {
         isInputFocused = false
 
         Task {
-            try? await chatManager.sendMessage(text, in: conversation)
+            do {
+                try await chatManager.sendMessage(text, in: conversation)
+            } catch {
+                errorMessage = "Failed to send message: \(error.localizedDescription)"
+                showingError = true
+                messageText = text
+            }
         }
     }
 
     private func handleVoiceInput() {
         if isListeningForVoice {
-            try? voiceManager.startVoiceCommand()
+            do {
+                try voiceManager.startVoiceCommand()
+            } catch {
+                errorMessage = "Voice input failed: \(error.localizedDescription)"
+                showingError = true
+                isListeningForVoice = false
+                return
+            }
             voiceManager.onTranscriptionComplete = { transcription in
                 messageText = transcription
                 isListeningForVoice = false

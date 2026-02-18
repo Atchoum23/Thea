@@ -1,4 +1,7 @@
 import Foundation
+import OSLog
+
+private let mlxScanLogger = Logger(subsystem: "com.thea.app", category: "MLXModelScanner")
 
 // MARK: - MLX Model Scanner
 
@@ -29,8 +32,11 @@ actor MLXModelScanner {
         while let fileURL = enumerator?.nextObject() as? URL {
             // Check if it's a model file
             if isModelFile(fileURL) {
-                if let model = try? await extractModelInfo(from: fileURL) {
+                do {
+                    let model = try await extractModelInfo(from: fileURL)
                     models.append(model)
+                } catch {
+                    mlxScanLogger.debug("Could not extract model info from \(fileURL.lastPathComponent): \(error.localizedDescription)")
                 }
             }
         }
@@ -71,10 +77,12 @@ actor MLXModelScanner {
         }
 
         // Check for MLX model directories (typically contain config.json and weights)
-        if let isDirectory = try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory,
-           isDirectory
-        {
-            return isMLXModelDirectory(url)
+        do {
+            if try url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true {
+                return isMLXModelDirectory(url)
+            }
+        } catch {
+            mlxScanLogger.debug("Could not read directory attribute for \(url.lastPathComponent): \(error.localizedDescription)")
         }
 
         return false
@@ -157,18 +165,25 @@ actor MLXModelScanner {
         var parameters: String?
         var quantization: String?
 
-        if FileManager.default.fileExists(atPath: configURL.path),
-           let data = try? Data(contentsOf: configURL),
-           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        {
-            // Extract model parameters if available
-            if let hiddenSize = json["hidden_size"] as? Int {
-                parameters = formatParameters(hiddenSize: hiddenSize)
-            }
-
-            // Check for quantization info
-            if let dtype = json["torch_dtype"] as? String {
-                quantization = dtype
+        if FileManager.default.fileExists(atPath: configURL.path) {
+            do {
+                let data = try Data(contentsOf: configURL)
+                do {
+                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                        // Extract model parameters if available
+                        if let hiddenSize = json["hidden_size"] as? Int {
+                            parameters = formatParameters(hiddenSize: hiddenSize)
+                        }
+                        // Check for quantization info
+                        if let dtype = json["torch_dtype"] as? String {
+                            quantization = dtype
+                        }
+                    }
+                } catch {
+                    mlxScanLogger.debug("Could not parse config.json: \(error.localizedDescription)")
+                }
+            } catch {
+                mlxScanLogger.debug("Could not read config.json at \(configURL.path): \(error.localizedDescription)")
             }
         }
 
@@ -179,7 +194,12 @@ actor MLXModelScanner {
             quantization = quantization ?? parsedQuant
         }
 
-        let modifiedDate = try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
+        var modifiedDate: Date?
+        do {
+            modifiedDate = try url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
+        } catch {
+            mlxScanLogger.debug("Could not read modification date for \(url.lastPathComponent): \(error.localizedDescription)")
+        }
 
         return ScannedModel(
             id: UUID(),
@@ -210,8 +230,12 @@ actor MLXModelScanner {
         // Convert to array first to avoid makeIterator in async context
         let allObjects = enumerator.allObjects
         for case let fileURL as URL in allObjects {
-            if let size = try? fileURL.resourceValues(forKeys: [.fileSizeKey]).fileSize {
-                totalSize += Int64(size)
+            do {
+                if let size = try fileURL.resourceValues(forKeys: [.fileSizeKey]).fileSize {
+                    totalSize += Int64(size)
+                }
+            } catch {
+                mlxScanLogger.debug("Could not get file size for \(fileURL.lastPathComponent): \(error.localizedDescription)")
             }
         }
 

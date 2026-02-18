@@ -1,5 +1,8 @@
 // OrchestratorConfiguration.swift
 import Foundation
+import OSLog
+
+private let orchestratorConfigurationLogger = Logger(subsystem: "ai.thea.app", category: "OrchestratorConfiguration")
 
 /// Configuration for the AI Orchestration Engine.
 /// Controls query decomposition, model routing, and multi-agent coordination.
@@ -72,54 +75,9 @@ public struct OrchestratorConfiguration: Codable, Sendable, Equatable {
         "general": ["local-any", "anthropic/claude-sonnet-4", "openai/gpt-4o-mini"]
     ]
 
-    /// Get preferred models for a task type.
-    /// Returns user-defined routing rules first, falls back to catalog-computed preferences.
-    @MainActor
+    /// Get preferred models for a task type
     public func preferredModels(for taskType: TaskType) -> [String] {
-        let rules = taskRoutingRules[taskType.rawValue] ?? []
-        if !rules.isEmpty { return rules }
-        return computePreferredModels(for: taskType).map { $0.id }
-    }
-
-    /// Compute preferred models dynamically from AIModelCatalog based on task capabilities.
-    /// Used when no user-defined routing rule exists for the given task type.
-    /// - Parameter taskType: The task to route.
-    /// - Returns: Ordered list of models (best first) from the catalog.
-    @MainActor
-    public func computePreferredModels(for taskType: TaskType) -> [AIModel] {
-        let required = taskType.preferredCapabilities
-        let capabilityService = SystemCapabilityService.shared
-
-        // Use preferLocal only when the task is simple and RAM supports it
-        let preferLocal = localModelPreference == .always || localModelPreference == .prefer
-            || (localModelPreference == .balanced && taskType.isSimple)
-
-        var candidates = AIModel.allKnownModels.filter { model in
-            // Must support at least one required capability
-            !required.isDisjoint(with: model.capabilities)
-            // Local models must fit in RAM
-            && capabilityService.canRunLocalModel(model)
-        }
-
-        // Apply cost filter when preferCheaperModels
-        if preferCheaperModels, let budget = costBudgetPerQuery {
-            candidates = candidates.filter { model in
-                guard let outputCost = model.outputCostPer1K else { return model.isLocal }
-                // Rough estimate: 1K output tokens
-                return outputCost <= budget
-            }
-        }
-
-        // Sort: local preference, then capability tier (maxOutputTokens proxy), then cost
-        candidates.sort { lhs, rhs in
-            if preferLocal && lhs.isLocal != rhs.isLocal { return lhs.isLocal }
-            if lhs.maxOutputTokens != rhs.maxOutputTokens { return lhs.maxOutputTokens > rhs.maxOutputTokens }
-            let lCost = lhs.outputCostPer1K ?? .zero
-            let rCost = rhs.outputCostPer1K ?? .zero
-            return lCost < rCost
-        }
-
-        return Array(candidates.prefix(5)) // top 5 candidates
+        taskRoutingRules[taskType.rawValue] ?? []
     }
 
     // MARK: - Cost Management
@@ -171,17 +129,25 @@ public struct OrchestratorConfiguration: Codable, Sendable, Equatable {
     private static let storageKey = "com.thea.orchestrator.configuration"
 
     public static func load() -> OrchestratorConfiguration {
-        guard let data = UserDefaults.standard.data(forKey: storageKey),
-              let config = try? JSONDecoder().decode(OrchestratorConfiguration.self, from: data)
-        else {
+        guard let data = UserDefaults.standard.data(forKey: storageKey) else {
             return OrchestratorConfiguration()
         }
-        return config
+        let decoder = JSONDecoder()
+        do {
+            return try decoder.decode(OrchestratorConfiguration.self, from: data)
+        } catch {
+            orchestratorConfigurationLogger.error("Failed to decode OrchestratorConfiguration: \(error)")
+            return OrchestratorConfiguration()
+        }
     }
 
     public func save() {
-        if let data = try? JSONEncoder().encode(self) {
+        let encoder = JSONEncoder()
+        do {
+            let data = try encoder.encode(self)
             UserDefaults.standard.set(data, forKey: Self.storageKey)
+        } catch {
+            orchestratorConfigurationLogger.error("Failed to encode OrchestratorConfiguration: \(error)")
         }
     }
 

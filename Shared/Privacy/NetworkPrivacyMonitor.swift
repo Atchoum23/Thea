@@ -303,15 +303,20 @@ actor NetworkPrivacyMonitor {
             dailySnapshots = Array(dailySnapshots.suffix(maxSnapshots))
         }
 
-        if let data = try? JSONEncoder().encode(dailySnapshots) {
+        do {
+            let data = try JSONEncoder().encode(dailySnapshots)
             UserDefaults.standard.set(data, forKey: snapshotKey)
+        } catch {
+            logger.debug("Could not save daily snapshots: \(error.localizedDescription)")
         }
     }
 
     func loadDailySnapshots() {
-        if let data = UserDefaults.standard.data(forKey: snapshotKey),
-           let loaded = try? JSONDecoder().decode([DailySnapshot].self, from: data) {
-            dailySnapshots = loaded
+        guard let data = UserDefaults.standard.data(forKey: snapshotKey) else { return }
+        do {
+            dailySnapshots = try JSONDecoder().decode([DailySnapshot].self, from: data)
+        } catch {
+            logger.debug("Could not load daily snapshots: \(error.localizedDescription)")
         }
     }
 
@@ -355,7 +360,12 @@ actor NetworkPrivacyMonitor {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
-        return try? encoder.encode(report)
+        do {
+            return try encoder.encode(report)
+        } catch {
+            logger.debug("Could not encode export report: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     func exportReportAsCSV() -> String {
@@ -419,8 +429,11 @@ actor NetworkPrivacyMonitor {
         if existingReports.count > 12 {
             existingReports = Array(existingReports.suffix(12))
         }
-        if let data = try? JSONEncoder().encode(existingReports) {
+        do {
+            let data = try JSONEncoder().encode(existingReports)
             UserDefaults.standard.set(data, forKey: monthlyReportKey)
+        } catch {
+            logger.debug("Could not save monthly reports: \(error.localizedDescription)")
         }
         UserDefaults.standard.set(now, forKey: lastMonthlyReportKey)
 
@@ -491,10 +504,13 @@ actor NetworkPrivacyMonitor {
 
     /// Load previously generated monthly reports.
     func loadMonthlyReports() -> [MonthlyTransparencyReport] {
-        guard let data = UserDefaults.standard.data(forKey: monthlyReportKey),
-              let reports = try? JSONDecoder().decode([MonthlyTransparencyReport].self, from: data)
-        else { return [] }
-        return reports
+        guard let data = UserDefaults.standard.data(forKey: monthlyReportKey) else { return [] }
+        do {
+            return try JSONDecoder().decode([MonthlyTransparencyReport].self, from: data)
+        } catch {
+            logger.debug("Could not load monthly reports: \(error.localizedDescription)")
+            return []
+        }
     }
 
     // MARK: - Domain Classification

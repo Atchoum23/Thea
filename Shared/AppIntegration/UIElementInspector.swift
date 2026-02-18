@@ -234,8 +234,6 @@ public struct UIElementInfo: Sendable, Identifiable {
     public let frame: CGRect
 
     #if os(macOS)
-        // nonisolated(unsafe): AXUIElement is a CF type without Sendable conformance;
-        // immutable let — initialized once and never mutated after init
         nonisolated(unsafe) public let axElement: AXUIElement?
     #else
         public let axElement: AnyObject? = nil

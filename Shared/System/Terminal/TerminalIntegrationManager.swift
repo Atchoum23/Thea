@@ -1,6 +1,7 @@
 #if os(macOS)
     import Combine
     import Foundation
+import OSLog
     import SwiftUI
 
     /// Central manager for Terminal.app integration
@@ -8,6 +9,8 @@
     @MainActor
     final class TerminalIntegrationManager: ObservableObject {
         static let shared = TerminalIntegrationManager()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "TerminalIntegrationManager")
 
         // MARK: - Published State
 
@@ -67,7 +70,11 @@
             let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
                 ?? FileManager.default.temporaryDirectory
             let theaFolder = appSupport.appendingPathComponent("Thea", isDirectory: true)
-            try? FileManager.default.createDirectory(at: theaFolder, withIntermediateDirectories: true)
+            do {
+                try FileManager.default.createDirectory(at: theaFolder, withIntermediateDirectories: true)
+            } catch {
+                logger.error("Failed to create Thea app support directory: \(error.localizedDescription)")
+            }
             commandHistoryURL = theaFolder.appendingPathComponent("terminal_history.json")
 
             // Load saved configuration
@@ -263,7 +270,7 @@
                             }
                             lastContent = content
                         }
-                        try await Task.sleep(for: .seconds(interval))
+                        try await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
                     } catch {
                         if !Task.isCancelled {
                             await MainActor.run {
@@ -290,7 +297,7 @@
                 if try await !isTerminalBusy() {
                     return
                 }
-                try await Task.sleep(for: .seconds(pollInterval))
+                try await Task.sleep(nanoseconds: UInt64(pollInterval * 1_000_000_000))
             }
             throw TerminalCommandExecutor.ExecutorError.timeout
         }
@@ -369,17 +376,22 @@
                 showOutputIn = display
             }
 
-            if let policyData = defaults.data(forKey: "terminal.securityPolicy"),
-               let policy = try? JSONDecoder().decode(TerminalSecurityPolicy.self, from: policyData)
-            {
-                securityPolicy = policy
-                executor = TerminalCommandExecutor(securityPolicy: policy)
+            if let policyData = defaults.data(forKey: "terminal.securityPolicy") {
+                do {
+                    let policy = try JSONDecoder().decode(TerminalSecurityPolicy.self, from: policyData)
+                    securityPolicy = policy
+                    executor = TerminalCommandExecutor(securityPolicy: policy)
+                } catch {
+                    logger.error("Failed to decode terminal security policy: \(error.localizedDescription)")
+                }
             }
 
-            if let commandsData = defaults.data(forKey: "terminal.quickCommands"),
-               let commands = try? JSONDecoder().decode([QuickCommand].self, from: commandsData)
-            {
-                quickCommands = commands
+            if let commandsData = defaults.data(forKey: "terminal.quickCommands") {
+                do {
+                    quickCommands = try JSONDecoder().decode([QuickCommand].self, from: commandsData)
+                } catch {
+                    logger.error("Failed to decode terminal quick commands: \(error.localizedDescription)")
+                }
             }
 
             isEnabled = defaults.bool(forKey: "terminal.isEnabled")
@@ -395,12 +407,18 @@
             defaults.set(showOutputIn.rawValue, forKey: "terminal.outputDisplay")
             defaults.set(isEnabled, forKey: "terminal.isEnabled")
 
-            if let policyData = try? JSONEncoder().encode(securityPolicy) {
+            do {
+                let policyData = try JSONEncoder().encode(securityPolicy)
                 defaults.set(policyData, forKey: "terminal.securityPolicy")
+            } catch {
+                logger.error("Failed to encode terminal security policy: \(error.localizedDescription)")
             }
 
-            if let commandsData = try? JSONEncoder().encode(quickCommands) {
+            do {
+                let commandsData = try JSONEncoder().encode(quickCommands)
                 defaults.set(commandsData, forKey: "terminal.quickCommands")
+            } catch {
+                logger.error("Failed to encode terminal quick commands: \(error.localizedDescription)")
             }
 
             // Update executor with new policy
@@ -415,19 +433,24 @@
             let historyToSave = Array(session.commandHistory.suffix(1000))
 
             Task.detached {
-                if let data = try? JSONEncoder().encode(historyToSave) {
-                    try? data.write(to: historyURL)
+                do {
+                    let data = try JSONEncoder().encode(historyToSave)
+                    try data.write(to: historyURL)
+                } catch {
+                    // Logger is MainActor-isolated; use a plain print for detached task
+                    print("[TerminalIntegrationManager] Failed to save command history: \(error.localizedDescription)")
                 }
             }
         }
 
         func loadCommandHistory() -> [TerminalCommand] {
-            guard let data = try? Data(contentsOf: commandHistoryURL),
-                  let history = try? JSONDecoder().decode([TerminalCommand].self, from: data)
-            else {
+            do {
+                let data = try Data(contentsOf: commandHistoryURL)
+                return try JSONDecoder().decode([TerminalCommand].self, from: data)
+            } catch {
+                logger.error("Failed to load command history: \(error.localizedDescription)")
                 return []
             }
-            return history
         }
     }
 

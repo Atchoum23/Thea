@@ -12,7 +12,6 @@ import os.log
 
 // MARK: - Mail Monitor Protocol
 
-/// Delegate that receives notifications when new emails are detected in Mail.app.
 public protocol MailMonitorDelegate: AnyObject, Sendable {
     nonisolated func mailMonitor(_ _monitor: MailMonitor, didReceive email: MailEvent)
 }
@@ -71,7 +70,11 @@ public actor MailMonitor {
     private func monitorLoop() async {
         while isRunning && !Task.isCancelled {
             await checkForNewMail()
-            try? await Task.sleep(for: .seconds(pollIntervalSeconds))
+            do {
+                try await Task.sleep(nanoseconds: pollIntervalSeconds * 1_000_000_000)
+            } catch {
+                break
+            }
         }
     }
 

@@ -12,7 +12,6 @@ public actor FocusForestService: FocusForestServiceProtocol {
 
     // MARK: - Tree Management
 
-    /// Plants a new tree of the given type; only one tree can grow at a time.
     public func plantTree(type: FocusTree.TreeType) async throws -> FocusTree {
         guard currentTree == nil else {
             throw CognitiveError.treeAlreadyPlanted
@@ -28,7 +27,6 @@ public actor FocusForestService: FocusForestServiceProtocol {
         return tree
     }
 
-    /// Adds focus minutes to the current tree; moves it to the forest when fully grown.
     public func updateTreeGrowth(minutes: Int) async throws {
         guard var tree = currentTree else {
             throw CognitiveError.taskBreakdownFailed("No tree is currently planted")
@@ -70,7 +68,6 @@ public actor FocusForestService: FocusForestServiceProtocol {
         }
     }
 
-    /// Marks the current tree as dead (interrupted) and adds it to the forest.
     public func killCurrentTree() async throws {
         guard var tree = currentTree else {
             throw CognitiveError.taskBreakdownFailed("No tree is currently planted")
@@ -89,12 +86,10 @@ public actor FocusForestService: FocusForestServiceProtocol {
         currentTree = nil
     }
 
-    /// Returns the complete focus forest with all trees.
     public func getForest() async -> FocusForest {
         forest
     }
 
-    /// Returns aggregate statistics (trees grown, focus minutes, streaks) for the forest.
     public func getForestStats() async -> ForestStats {
         let totalTrees = forest.totalTreesGrown
         let totalMinutes = forest.totalMinutesFocused
@@ -120,12 +115,10 @@ public actor FocusForestService: FocusForestServiceProtocol {
 
     // MARK: - Helper Methods
 
-    /// Returns the tree currently being grown, if any.
     public func getCurrentTree() async -> FocusTree? {
         currentTree
     }
 
-    /// Returns the number of trees fully grown today.
     public func getTreesGrownToday() async -> Int {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())

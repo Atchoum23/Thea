@@ -78,12 +78,12 @@ final class MLXInferenceTests: XCTestCase {
         // Find the smallest model by parameter count (e.g., "2b" or "3b")
         let allModels = await LocalModelManager.shared.availableModels
         let models = allModels.filter { $0.type == .mlx }
-        let smallModel = models.min { model1, model2 in
+        let smallModel = models.sorted { model1, model2 in
             // Extract parameter count from name
             let params1 = extractParamCount(model1.parameters)
             let params2 = extractParamCount(model2.parameters)
             return params1 < params2
-        }
+        }.first
 
         guard let model = smallModel else {
             XCTFail("No MLX models available for testing")

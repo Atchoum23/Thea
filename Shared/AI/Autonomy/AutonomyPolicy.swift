@@ -641,14 +641,21 @@ public final class AutonomyPolicyManager: ObservableObject {
             cascadingTrustFactor: cascadingTrustFactor
         )
 
-        if let data = try? JSONEncoder().encode(state) {
+        do {
+            let data = try JSONEncoder().encode(state)
             UserDefaults.standard.set(data, forKey: stateKey)
+        } catch {
+            logger.error("Failed to encode AutonomyState: \(error.localizedDescription)")
         }
     }
 
     private func loadState() {
-        guard let data = UserDefaults.standard.data(forKey: stateKey),
-              let state = try? JSONDecoder().decode(AutonomyState.self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: stateKey) else { return }
+        let state: AutonomyState
+        do {
+            state = try JSONDecoder().decode(AutonomyState.self, from: data)
+        } catch {
+            logger.error("Failed to decode AutonomyState: \(error.localizedDescription)")
             return
         }
 

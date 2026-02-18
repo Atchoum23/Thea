@@ -2,7 +2,6 @@
     import Foundation
 
     /// Executes terminal commands either directly via Process or through Terminal.app
-    // @unchecked Sendable: stateless command executor — no mutable state
     final class TerminalCommandExecutor: @unchecked Sendable {
         enum ExecutorError: LocalizedError {
             case commandBlocked(String)
@@ -115,7 +114,7 @@
 
                 // Timeout task
                 group.addTask {
-                    try await Task.sleep(for: .seconds(timeoutSeconds))
+                    try await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
                     throw ExecutorError.timeout
                 }
 

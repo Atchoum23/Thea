@@ -166,7 +166,11 @@ final class ProactiveEngagementEngine {
     private func evaluateCalendarTriggers() async -> [ProactiveEngagement] {
         #if os(macOS)
         let integration = CalendarIntegration.shared
-        guard let events = try? await integration.getTodayEvents() else {
+        let events: [CalendarEvent]
+        do {
+            events = try await integration.getTodayEvents()
+        } catch {
+            logger.error("Failed to fetch today's calendar events: \(error.localizedDescription)")
             return []
         }
 

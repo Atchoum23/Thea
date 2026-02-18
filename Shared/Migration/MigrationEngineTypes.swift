@@ -90,7 +90,6 @@ struct MigrationSourceInfo {
     let isInstalled: Bool
 }
 
-// @unchecked Sendable: mutable state only accessed from single migration Task context
 class MigrationJob: Identifiable, @unchecked Sendable {
     let id: UUID
     let source: String
@@ -173,8 +172,12 @@ struct ClaudeAppMigration: MigrationSource {
             conversationCount = conversations.count
 
             for conv in conversations {
-                if let size = try? conv.resourceValues(forKeys: [.fileSizeKey]).fileSize {
-                    totalSize += Int64(size)
+                do {
+                    if let size = try conv.resourceValues(forKeys: [.fileSizeKey]).fileSize {
+                        totalSize += Int64(size)
+                    }
+                } catch {
+                    // Non-critical: skip size for this file
                 }
             }
         }

@@ -10,8 +10,6 @@ public actor CalendarContextProvider: ContextProvider {
     public let displayName = "Calendar"
 
     private let logger = Logger(subsystem: "app.thea", category: "CalendarProvider")
-    // nonisolated(unsafe): EKEventStore is thread-safe but lacks Sendable conformance;
-    // initialized once in actor init, then used only from within actor-isolated methods
     nonisolated(unsafe) private let eventStore = EKEventStore()
 
     private var state: ContextProviderState = .idle
@@ -76,7 +74,11 @@ public actor CalendarContextProvider: ContextProvider {
         updateTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.fetchCalendarData()
-                try? await Task.sleep(for: .seconds(60))
+                do {
+                    try await Task.sleep(for: .seconds(60))
+                } catch {
+                    break // Task cancelled — stop periodic updates
+                }
             }
         }
 

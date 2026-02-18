@@ -20,7 +20,7 @@ interface ServiceConfigPanelProps {
   onClose?: () => void;
 }
 
-export const ServiceConfigPanel: React.FC<ServiceConfigPanelProps> = ({ onClose: _onClose }) => {
+export const ServiceConfigPanel: React.FC<ServiceConfigPanelProps> = ({ onClose }) => {
   const [selectedService, setSelectedService] = useState<ServiceConfig | null>(null);
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState(false);
@@ -42,25 +42,22 @@ export const ServiceConfigPanel: React.FC<ServiceConfigPanelProps> = ({ onClose:
     const currentValues: Record<string, any> = {};
 
     switch (service.id) {
-      case 'plex': {
+      case 'plex':
         const plexConfig = secureConfigService.getPlex();
         currentValues.serverUrl = plexConfig.serverUrl;
         currentValues.token = plexConfig.token;
         break;
-      }
-      case 'trakt': {
+      case 'trakt':
         const traktConfig = secureConfigService.getTrakt();
         currentValues.clientId = traktConfig.clientId;
         currentValues.clientSecret = traktConfig.clientSecret;
         break;
-      }
-      case 'tmdb': {
+      case 'tmdb':
         const tmdbConfig = secureConfigService.getTMDB();
         currentValues.apiKey = tmdbConfig.apiKey;
         currentValues.accessToken = tmdbConfig.accessToken;
         break;
-      }
-      case 'nordvpn': {
+      case 'nordvpn':
         const nordConfig = secureConfigService.getNordVPN();
         currentValues.serviceUsername = nordConfig.serviceUsername;
         currentValues.servicePassword = nordConfig.servicePassword;
@@ -68,13 +65,11 @@ export const ServiceConfigPanel: React.FC<ServiceConfigPanelProps> = ({ onClose:
         currentValues.smartDNSSecondary = nordConfig.smartDNSSecondary;
         currentValues.activatedIP = nordConfig.smartDNSActivatedIP;
         break;
-      }
-      case 'syncBridge': {
+      case 'syncBridge':
         const syncConfig = secureConfigService.getSyncBridge();
         currentValues.url = syncConfig.url;
         currentValues.deviceToken = syncConfig.deviceToken;
         break;
-      }
       case 'qualityPrefs':
         // Load from TorrentQualityService
         try {
@@ -170,16 +165,15 @@ export const ServiceConfigPanel: React.FC<ServiceConfigPanelProps> = ({ onClose:
 
     try {
       switch (selectedService.id) {
-        case 'plex': {
+        case 'plex':
           const plexResponse = await fetch(`${formValues.serverUrl}/identity`, {
             headers: { 'X-Plex-Token': formValues.token },
           });
           if (!plexResponse.ok) throw new Error('Failed to connect to Plex');
           setMessage({ type: 'success', text: 'Connected to Plex successfully!' });
           break;
-        }
 
-        case 'trakt': {
+        case 'trakt':
           const traktResponse = await fetch('https://api.trakt.tv/users/settings', {
             headers: {
               'Content-Type': 'application/json',
@@ -190,14 +184,12 @@ export const ServiceConfigPanel: React.FC<ServiceConfigPanelProps> = ({ onClose:
           if (!traktResponse.ok) throw new Error('Invalid Trakt credentials');
           setMessage({ type: 'success', text: 'Trakt credentials valid!' });
           break;
-        }
 
-        case 'syncBridge': {
+        case 'syncBridge':
           const bridgeResponse = await fetch(`${formValues.url}/health`);
           if (!bridgeResponse.ok) throw new Error('Bridge not responding');
           setMessage({ type: 'success', text: 'Sync Bridge is online!' });
           break;
-        }
 
         default:
           setMessage({ type: 'error', text: 'Connection test not available for this service' });

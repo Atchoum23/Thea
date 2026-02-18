@@ -171,17 +171,21 @@ public final class AutonomousImprovementEngine {
             )
 
             // Parse JSON response
-            if let data = response.data(using: String.Encoding.utf8),
-               let models = try? JSONDecoder().decode([ModelDiscoveryJSON].self, from: data) {
-                return models.map { model in
-                    AIDiscovery(
-                        type: .newModel,
-                        title: model.name,
-                        description: model.capability,
-                        source: model.provider,
-                        relevance: Relevance(rawValue: model.relevance) ?? .medium,
-                        discoveredAt: Date()
-                    )
+            if let data = response.data(using: String.Encoding.utf8) {
+                do {
+                    let models = try JSONDecoder().decode([ModelDiscoveryJSON].self, from: data)
+                    return models.map { model in
+                        AIDiscovery(
+                            type: .newModel,
+                            title: model.name,
+                            description: model.capability,
+                            source: model.provider,
+                            relevance: Relevance(rawValue: model.relevance) ?? .medium,
+                            discoveredAt: Date()
+                        )
+                    }
+                } catch {
+                    logger.error("Failed to decode model discoveries: \(error.localizedDescription)")
                 }
             }
         } catch {
@@ -220,17 +224,21 @@ public final class AutonomousImprovementEngine {
                 model: model
             )
 
-            if let data = response.data(using: String.Encoding.utf8),
-               let techniques = try? JSONDecoder().decode([TechniqueDiscoveryJSON].self, from: data) {
-                return techniques.map { tech in
-                    AIDiscovery(
-                        type: .newTechnique,
-                        title: tech.name,
-                        description: "\(tech.description). Application: \(tech.applicability)",
-                        source: "AI Research",
-                        relevance: .medium,
-                        discoveredAt: Date()
-                    )
+            if let data = response.data(using: String.Encoding.utf8) {
+                do {
+                    let techniques = try JSONDecoder().decode([TechniqueDiscoveryJSON].self, from: data)
+                    return techniques.map { tech in
+                        AIDiscovery(
+                            type: .newTechnique,
+                            title: tech.name,
+                            description: "\(tech.description). Application: \(tech.applicability)",
+                            source: "AI Research",
+                            relevance: .medium,
+                            discoveredAt: Date()
+                        )
+                    }
+                } catch {
+                    logger.error("Failed to decode technique discoveries: \(error.localizedDescription)")
                 }
             }
         } catch {
@@ -362,20 +370,24 @@ public final class AutonomousImprovementEngine {
                     model: model
                 )
 
-                if let data = response.data(using: String.Encoding.utf8),
-                   let proposalJSON = try? JSONDecoder().decode(ProposalJSON.self, from: data) {
-                    proposals.append(ImprovementProposal(
-                        id: UUID(),
-                        title: proposalJSON.title,
-                        description: proposalJSON.description,
-                        implementationSteps: proposalJSON.implementation_steps,
-                        filesToModify: proposalJSON.files_to_modify,
-                        estimatedLines: proposalJSON.estimated_lines,
-                        riskLevel: RiskLevel(rawValue: proposalJSON.risk_level) ?? .medium,
-                        rollbackPlan: proposalJSON.rollback_plan,
-                        createdAt: Date(),
-                        status: .pending
-                    ))
+                if let data = response.data(using: String.Encoding.utf8) {
+                    do {
+                        let proposalJSON = try JSONDecoder().decode(ProposalJSON.self, from: data)
+                        proposals.append(ImprovementProposal(
+                            id: UUID(),
+                            title: proposalJSON.title,
+                            description: proposalJSON.description,
+                            implementationSteps: proposalJSON.implementation_steps,
+                            filesToModify: proposalJSON.files_to_modify,
+                            estimatedLines: proposalJSON.estimated_lines,
+                            riskLevel: RiskLevel(rawValue: proposalJSON.risk_level) ?? .medium,
+                            rollbackPlan: proposalJSON.rollback_plan,
+                            createdAt: Date(),
+                            status: .pending
+                        ))
+                    } catch {
+                        logger.error("Failed to decode proposal JSON: \(error.localizedDescription)")
+                    }
                 }
             } catch {
                 logger.warning("Failed to generate proposal for: \(opportunity.title)")
@@ -410,7 +422,6 @@ public final class AutonomousImprovementEngine {
             switch chunk.type {
             case let .delta(text):
                 result += text
-            case .thinkingDelta: break
             case let .complete(msg):
                 result = msg.content.textValue
             case .error:
@@ -493,7 +504,11 @@ public final class AutonomousImprovementEngine {
                 let delay = nextReview.timeIntervalSinceNow
 
                 if delay > 0 {
-                    try? await Task.sleep(for: .seconds(delay))
+                    do {
+                        try await Task.sleep(for: .seconds(delay))
+                    } catch {
+                        break
+                    }
                 }
 
                 if !Task.isCancelled {

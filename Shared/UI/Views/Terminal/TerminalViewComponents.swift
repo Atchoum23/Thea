@@ -1,4 +1,5 @@
 #if os(macOS)
+    import OSLog
     import SwiftUI
 
     // MARK: - Terminal Output View (with ANSI colors)
@@ -31,6 +32,10 @@
         }
     }
 
+    private let terminalViewComponentsLogger = Logger(subsystem: "ai.thea.app", category: "TerminalViewComponents")
+
+    private let terminalViewComponentsLogger = Logger(subsystem: "ai.thea.app", category: "TerminalViewComponents")
+
     // MARK: - Windows List View
 
     extension TerminalView {
@@ -45,11 +50,13 @@
                         } actions: {
                             Button("Open Terminal") {
                                 Task {
-                                    try? await manager.openNewWindow()
+                                    do {
+                                        try await manager.openNewWindow()
+                                    } catch {
+                                        terminalViewComponentsLogger.error("Failed to open new terminal window: \(error.localizedDescription)")
+                                    }
                                 }
                             }
-                            .accessibilityLabel("Open Terminal")
-                            .accessibilityHint("Opens the Terminal application")
                         }
                     } else {
                         ForEach(manager.terminalWindows) { window in
@@ -65,7 +72,6 @@
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Image(systemName: "macwindow")
-                        .accessibilityHidden(true)
                     Text("Window \(window.index)")
                         .font(.headline)
                     Spacer()
@@ -77,12 +83,11 @@
                 ForEach(window.tabs) { tab in
                     HStack {
                         Image(systemName: tab.isBusy ? "play.fill" : "terminal")
-                            .foregroundStyle(tab.isBusy ? .theaSuccess : .secondary)
-                            .accessibilityHidden(true)
+                            .foregroundStyle(tab.isBusy ? .green : .secondary)
                         Text("Tab \(tab.index)")
                         if tab.isBusy {
                             Text("(busy)")
-                                .foregroundStyle(.theaWarning)
+                                .foregroundStyle(.orange)
                         }
                         Spacer()
                         Text(tab.tty)
@@ -90,7 +95,6 @@
                             .foregroundStyle(.secondary)
                     }
                     .padding(.leading, 20)
-                    .accessibilityElement(children: .combine)
 
                     if !tab.processes.isEmpty {
                         Text("Processes: \(tab.processes.joined(separator: ", "))")
@@ -103,28 +107,31 @@
                 HStack {
                     Button("Read Content") {
                         Task {
-                            if let content = try? await manager.readTerminalContent(windowIndex: window.index, tabIndex: window.selectedTab) {
+                            do {
+                                let content = try await manager.readTerminalContent(windowIndex: window.index, tabIndex: window.selectedTab)
                                 manager.lastOutput = content
                                 selectedTab = .output
+                            } catch {
+                                terminalViewComponentsLogger.error("Failed to read terminal content: \(error.localizedDescription)")
                             }
                         }
                     }
                     .buttonStyle(.bordered)
-                    .accessibilityLabel("Read Content")
-                    .accessibilityHint("Reads the terminal content from window \(window.index)")
 
                     Button("Execute Here") {
                         if !commandInput.isEmpty {
                             Task {
-                                try? await manager.executeInTerminalTab(commandInput, windowIndex: window.index, tabIndex: window.selectedTab)
+                                do {
+                                    try await manager.executeInTerminalTab(commandInput, windowIndex: window.index, tabIndex: window.selectedTab)
+                                } catch {
+                                    terminalViewComponentsLogger.error("Failed to execute command in terminal: \(error.localizedDescription)")
+                                }
                                 commandInput = ""
                             }
                         }
                     }
                     .buttonStyle(.bordered)
                     .disabled(commandInput.isEmpty)
-                    .accessibilityLabel("Execute Here")
-                    .accessibilityHint("Executes the current command in window \(window.index)")
                 }
             }
             .padding()
@@ -147,9 +154,8 @@
                 }
 
                 Text("$")
-                    .foregroundStyle(.theaSuccess)
+                    .foregroundStyle(.green)
                     .fontWeight(.bold)
-                    .accessibilityHidden(true)
 
                 TextField("Enter command...", text: $commandInput)
                     .textFieldStyle(.plain)
@@ -174,7 +180,6 @@
                 .buttonStyle(.borderedProminent)
                 .disabled(commandInput.isEmpty || isExecuting || !manager.isEnabled)
                 .accessibilityLabel("Execute command")
-                .accessibilityHint("Runs the entered command in the terminal")
 
                 Menu {
                     ForEach(TerminalIntegrationManager.ExecutionMode.allCases, id: \.self) { mode in

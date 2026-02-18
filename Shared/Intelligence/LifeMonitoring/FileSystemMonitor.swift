@@ -12,7 +12,6 @@ import os.log
 
 // MARK: - File System Monitor Protocol
 
-/// Delegate that receives notifications when file system changes are detected via FSEvents.
 public protocol FileSystemMonitorDelegate: AnyObject, Sendable {
     nonisolated func fileSystemMonitor(_ _monitor: FileSystemMonitor, didDetect change: FileSystemChange)
 }
@@ -20,7 +19,6 @@ public protocol FileSystemMonitorDelegate: AnyObject, Sendable {
 // MARK: - File System Monitor
 
 /// Monitors file system changes on macOS
-// @unchecked Sendable: mutable state serialized on dedicated `eventQueue` DispatchQueue + FSEvents callback
 public final class FileSystemMonitor: @unchecked Sendable {
     private let logger = Logger(subsystem: "ai.thea.app", category: "FileSystemMonitor")
 

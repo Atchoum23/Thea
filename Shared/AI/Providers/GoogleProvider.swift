@@ -1,6 +1,9 @@
 import Foundation
+import OSLog
 
 final class GoogleProvider: AIProvider, Sendable {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "GoogleProvider")
+
     let metadata = ProviderMetadata(
         name: "google",
         displayName: "Google (Gemini)",
@@ -99,10 +102,16 @@ final class GoogleProvider: AIProvider, Sendable {
                         var accumulatedText = ""
 
                         for try await line in asyncBytes.lines {
-                            guard let data = line.data(using: .utf8),
-                                  // try? OK: SSE line may be malformed; skip and continue
-                                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                                  let candidates = json["candidates"] as? [[String: Any]],
+                            guard let data = line.data(using: .utf8) else { continue }
+                            let json: [String: Any]
+                            do {
+                                guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { continue }
+                                json = parsed
+                            } catch {
+                                logger.debug("Skipped malformed SSE line: \(error.localizedDescription)")
+                                continue
+                            }
+                            guard let candidates = json["candidates"] as? [[String: Any]],
                                   let content = candidates.first?["content"] as? [String: Any],
                                   let parts = content["parts"] as? [[String: Any]],
                                   let text = parts.first?["text"] as? String

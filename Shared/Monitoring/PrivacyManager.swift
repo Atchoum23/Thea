@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import OSLog
 #if os(macOS)
     import AppKit
     import ApplicationServices
@@ -28,31 +29,41 @@ public actor PrivacyManager {
 
     private let defaults = UserDefaults.standard
     private let consentKey = "PrivacyManager.consentGiven"
+    private let logger = Logger(subsystem: "ai.thea.app", category: "PrivacyManager")
 
     // MARK: - Initialization
 
     private init() {
         // Load consent synchronously from UserDefaults
-        if let data = defaults.data(forKey: consentKey),
-           let consent = try? JSONDecoder().decode(Set<String>.self, from: data)
-        {
-            consentGiven = Set(consent.compactMap { PrivacyPermission(rawValue: $0) })
+        if let data = defaults.data(forKey: consentKey) {
+            do {
+                let consent = try JSONDecoder().decode(Set<String>.self, from: data)
+                consentGiven = Set(consent.compactMap { PrivacyPermission(rawValue: $0) })
+            } catch {
+                // Non-fatal: consent reverts to empty set (all permissions require re-grant)
+            }
         }
         isInitialized = true
     }
 
     private func loadConsentStatus() {
-        if let data = defaults.data(forKey: consentKey),
-           let consent = try? JSONDecoder().decode(Set<String>.self, from: data)
-        {
-            consentGiven = Set(consent.compactMap { PrivacyPermission(rawValue: $0) })
+        if let data = defaults.data(forKey: consentKey) {
+            do {
+                let consent = try JSONDecoder().decode(Set<String>.self, from: data)
+                consentGiven = Set(consent.compactMap { PrivacyPermission(rawValue: $0) })
+            } catch {
+                logger.error("Failed to decode consent status: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveConsentStatus() {
         let consentStrings = Set(consentGiven.map(\.rawValue))
-        if let data = try? JSONEncoder().encode(consentStrings) {
+        do {
+            let data = try JSONEncoder().encode(consentStrings)
             defaults.set(data, forKey: consentKey)
+        } catch {
+            logger.error("Failed to save consent status: \(error.localizedDescription)")
         }
     }
 

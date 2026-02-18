@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 // MARK: - Ollama 0.14 Agent Loop Support
 // Implements the new --experimental agent loop from Ollama 0.14 (January 2026)
@@ -9,6 +10,8 @@ import Foundation
 @Observable
 final class OllamaAgentLoop {
     static let shared = OllamaAgentLoop()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "OllamaAgentLoop")
 
     // MARK: - Configuration
 
@@ -217,9 +220,15 @@ final class OllamaAgentLoop {
         var toolCalls: [ToolCall] = []
 
         for try await line in bytes.lines {
-            guard let data = line.data(using: .utf8),
-                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-            else { continue }
+            guard let data = line.data(using: .utf8) else { continue }
+            let json: [String: Any]
+            do {
+                guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { continue }
+                json = parsed
+            } catch {
+                logger.error("Failed to parse streaming JSON line: \(error.localizedDescription)")
+                continue
+            }
 
             // Parse streaming response
             if let message = json["message"] as? [String: Any] {
@@ -406,7 +415,14 @@ final class OllamaAgentLoop {
 
         let (data, _) = try await URLSession.shared.data(for: request)
 
-        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+        let parsedJSON: [String: Any]?
+        do {
+            parsedJSON = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        } catch {
+            logger.error("Failed to parse web search response JSON: \(error.localizedDescription)")
+            parsedJSON = nil
+        }
+        if let json = parsedJSON,
            let results = json["results"] as? [[String: Any]]
         {
             var searchResults = "Web search results for '\(query)':\n\n"

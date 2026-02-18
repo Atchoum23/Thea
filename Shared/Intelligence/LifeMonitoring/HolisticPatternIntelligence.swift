@@ -77,7 +77,11 @@ public final class HolisticPatternIntelligence: ObservableObject {
         periodicAnalysisTask = Task {
             while !Task.isCancelled {
                 // Run deep analysis every configured interval
-                try? await Task.sleep(for: .seconds(configuration.deepAnalysisInterval))
+                do {
+                    try await Task.sleep(nanoseconds: UInt64(configuration.deepAnalysisInterval) * 1_000_000_000)
+                } catch {
+                    break
+                }
                 guard !Task.isCancelled else { break }
                 await runDeepAnalysis()
             }
@@ -808,18 +812,23 @@ public final class HolisticPatternIntelligence: ObservableObject {
     private let persistenceKey = "HolisticPatternIntelligence.patterns"
 
     private func persistPatterns() {
-        if let data = try? JSONEncoder().encode(detectedPatterns) {
+        do {
+            let data = try JSONEncoder().encode(detectedPatterns)
             UserDefaults.standard.set(data, forKey: persistenceKey)
+        } catch {
+            logger.debug("Failed to persist patterns: \(error.localizedDescription)")
         }
     }
 
     private func loadPersistedPatterns() {
-        guard let data = UserDefaults.standard.data(forKey: persistenceKey),
-              let patterns = try? JSONDecoder().decode([DetectedLifePattern].self, from: data) else {
-            return
+        guard let data = UserDefaults.standard.data(forKey: persistenceKey) else { return }
+        do {
+            let patterns = try JSONDecoder().decode([DetectedLifePattern].self, from: data)
+            self.detectedPatterns = patterns
+            logger.info("Loaded \(patterns.count) persisted patterns")
+        } catch {
+            logger.debug("Failed to load persisted patterns: \(error.localizedDescription)")
         }
-        self.detectedPatterns = patterns
-        logger.info("Loaded \(patterns.count) persisted patterns")
     }
 
     // MARK: - Public API

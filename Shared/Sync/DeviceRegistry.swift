@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 #if os(macOS)
     import AppKit
 #else
@@ -18,7 +19,8 @@ import Foundation
 /// Manages registered devices for cross-device sync
 @MainActor
 @Observable
-public final class DeviceRegistry: DeviceRegistryProtocol {
+public final class DeviceRegistry {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "DeviceRegistry")
     public static let shared = DeviceRegistry()
 
     // MARK: - State
@@ -154,16 +156,20 @@ public final class DeviceRegistry: DeviceRegistryProtocol {
     // MARK: - Persistence
 
     private func loadRegisteredDevices() {
-        if let data = defaults.data(forKey: devicesKey),
-           let devices = try? JSONDecoder().decode([DeviceInfo].self, from: data)
-        {
-            registeredDevices = devices
+        guard let data = defaults.data(forKey: devicesKey) else { return }
+        do {
+            registeredDevices = try JSONDecoder().decode([DeviceInfo].self, from: data)
+        } catch {
+            logger.error("DeviceRegistry: failed to decode registered devices: \(error.localizedDescription)")
         }
     }
 
     private func saveRegisteredDevices() {
-        if let data = try? JSONEncoder().encode(registeredDevices) {
+        do {
+            let data = try JSONEncoder().encode(registeredDevices)
             defaults.set(data, forKey: devicesKey)
+        } catch {
+            logger.error("DeviceRegistry: failed to encode registered devices: \(error.localizedDescription)")
         }
     }
 }

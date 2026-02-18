@@ -1,24 +1,5 @@
 # THEA Project
 
-## ⛔ INVIOLABLE RULE: NEVER REDUCE THEA'S CAPABILITIES
-
-**This overrides everything. No exceptions. No debate.**
-
-Thea is a personal life-monitoring assistant. Its entire value comes from its comprehensiveness.
-
-**NEVER remove, delete, disable, comment out, stub, or reduce:**
-- Any existing feature, class, function, view, service, manager, or integration
-- Any life-monitoring capability: location tracking, HealthKit data, behavioral fingerprinting, ambient intelligence, driving detection, screen time monitoring, calendar analysis, predictive modeling, focus mode monitoring, pattern learning — ALL of it stays, ALL of it must be wired and active
-- Any AI capability: local models, cloud providers, verification pipeline, agent mode, orchestrator
-- Any security or privacy feature
-- Any platform target (macOS, iOS, watchOS, tvOS, Tizen, Web)
-
-**If something appears "unused":** wire it in — do not remove it.
-**If something conflicts with App Store review policies:** keep it — Thea is personal-use only, not distributed.
-**The purpose of every change is MORE capability, not less.**
-
----
-
 ## CRITICAL SAFETY RULES
 
 ### ⚠️ MANDATORY: Commit After Every Edit
@@ -149,15 +130,12 @@ done
 
 ## Project Facts
 
-- **Swift 6.0** with `SWIFT_STRICT_CONCURRENCY: complete` (full data-race safety)
+- **Swift 6.0** with strict concurrency (actors, async/await)
 - **XcodeGen** generates project from `project.yml`
 - **Schemes**: Thea-macOS, Thea-iOS, Thea-watchOS, Thea-tvOS
 - **Local models**: `~/.cache/huggingface/hub/`
 - **Architecture**: MVVM with SwiftUI + SwiftData
 - **Remote**: `https://github.com/Atchoum23/Thea.git`
-- **HealthKit**: Modern `HKSampleQueryDescriptor`/`HKStatisticsQueryDescriptor` async/await (iOS 15.4+)
-- **Concurrency**: `Task.sleep(for: .seconds(...))` Duration-based API throughout (no nanoseconds)
-- **Tests**: 3654 tests across 746 suites via `swift test`
 
 ## Orchestrator System (ACTIVE in macOS build)
 

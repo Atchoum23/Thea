@@ -11,6 +11,8 @@ struct LifeTrackingView: View {
     @State private var screenTimeRecord: DailyScreenTimeRecord?
     @State private var inputStats: DailyInputStatistics?
     @State private var insights: [LifeInsight] = []
+    @State private var errorMessage: String?
+    @State private var showError = false
 
     private var config: LifeTrackingConfiguration {
         AppConfiguration.shared.lifeTrackingConfig
@@ -43,6 +45,11 @@ struct LifeTrackingView: View {
             .task(id: selectedDate) {
                 await loadData()
             }
+            .alert("Error", isPresented: $showError, presenting: errorMessage) { _ in
+                Button("OK") { }
+            } message: { message in
+                Text(message)
+            }
         }
     }
 
@@ -58,28 +65,49 @@ struct LifeTrackingView: View {
             predicate: #Predicate { $0.date >= startOfDay && $0.date < endOfDay },
             sortBy: [SortDescriptor(\.date, order: .reverse)]
         )
-        healthSnapshot = try? modelContext.fetch(healthDescriptor).first
+        do {
+            healthSnapshot = try modelContext.fetch(healthDescriptor).first
+        } catch {
+            errorMessage = "Failed to fetch health snapshot: \(error.localizedDescription)"
+            showError = true
+        }
 
         // Fetch screen time
         let screenDescriptor = FetchDescriptor<DailyScreenTimeRecord>(
             predicate: #Predicate { $0.date >= startOfDay && $0.date < endOfDay },
             sortBy: [SortDescriptor(\.date, order: .reverse)]
         )
-        screenTimeRecord = try? modelContext.fetch(screenDescriptor).first
+        do {
+            screenTimeRecord = try modelContext.fetch(screenDescriptor).first
+        } catch {
+            errorMessage = "Failed to fetch screen time record: \(error.localizedDescription)"
+            showError = true
+        }
 
         // Fetch input stats
         let inputDescriptor = FetchDescriptor<DailyInputStatistics>(
             predicate: #Predicate { $0.date >= startOfDay && $0.date < endOfDay },
             sortBy: [SortDescriptor(\.date, order: .reverse)]
         )
-        inputStats = try? modelContext.fetch(inputDescriptor).first
+        do {
+            inputStats = try modelContext.fetch(inputDescriptor).first
+        } catch {
+            errorMessage = "Failed to fetch input statistics: \(error.localizedDescription)"
+            showError = true
+        }
 
         // Fetch recent insights
         var insightDescriptor = FetchDescriptor<LifeInsight>(
             sortBy: [SortDescriptor(\LifeInsight.date, order: .reverse)]
         )
         insightDescriptor.fetchLimit = 5
-        insights = (try? modelContext.fetch(insightDescriptor)) ?? []
+        do {
+            insights = try modelContext.fetch(insightDescriptor)
+        } catch {
+            errorMessage = "Failed to fetch insights: \(error.localizedDescription)"
+            showError = true
+            insights = []
+        }
     }
 
     // MARK: - Tracking Status

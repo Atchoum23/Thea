@@ -372,7 +372,11 @@ final class ProactiveModelManager {
             .appendingPathComponent("SharedLLMs/models-mlx/hub")
 
         // Create directory if needed
-        try? FileManager.default.createDirectory(at: modelsDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: modelsDir, withIntermediateDirectories: true)
+        } catch {
+            logger.error("Failed to create models directory: \(error.localizedDescription)")
+        }
 
         // Use huggingface-cli to download
         process.arguments = [
@@ -391,7 +395,11 @@ final class ProactiveModelManager {
             // Monitor progress (simplified - real implementation would parse output)
             Task {
                 while process.isRunning {
-                    try? await Task.sleep(for: .seconds(2))
+                    do {
+                        try await Task.sleep(for: .seconds(2))
+                    } catch {
+                        break
+                    }
 
                     // Update progress (estimate based on time for now)
                     if var progress = activeDownloads[recommendation.modelId] {
@@ -520,16 +528,23 @@ final class ProactiveModelManager {
     }
 
     private func loadUsageHistory() {
-        guard let data = UserDefaults.standard.data(forKey: "ProactiveModelManager.usageHistory"),
-              let history = try? JSONDecoder().decode([String: ModelUsageRecord].self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: "ProactiveModelManager.usageHistory") else {
             return
         }
-        modelUsageHistory = history
+        do {
+            modelUsageHistory = try JSONDecoder().decode([String: ModelUsageRecord].self, from: data)
+        } catch {
+            logger.error("Failed to decode modelUsageHistory: \(error.localizedDescription)")
+        }
     }
 
     private func saveUsageHistory() {
-        guard let data = try? JSONEncoder().encode(modelUsageHistory) else { return }
-        UserDefaults.standard.set(data, forKey: "ProactiveModelManager.usageHistory")
+        do {
+            let data = try JSONEncoder().encode(modelUsageHistory)
+            UserDefaults.standard.set(data, forKey: "ProactiveModelManager.usageHistory")
+        } catch {
+            logger.error("Failed to encode modelUsageHistory: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Startup Analysis

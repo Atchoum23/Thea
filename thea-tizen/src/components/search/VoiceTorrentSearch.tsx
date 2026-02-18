@@ -11,7 +11,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { FocusContext, useFocusable, setFocus } from '@noriginmedia/norigin-spatial-navigation';
-import { FocusableList } from '../ui/FocusableCard';
+import { FocusableButton, FocusableList, FocusableCard } from '../ui/FocusableCard';
 import { useTVRemote } from '../../hooks/useTVRemote';
 import {
   aiTorrentSearchService,
@@ -132,7 +132,6 @@ export function VoiceTorrentSearch({ onDownload, onClose, initialQuery }: VoiceT
     return () => {
       recognitionRef.current?.abort();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuery]);
 
   // Start/stop voice input

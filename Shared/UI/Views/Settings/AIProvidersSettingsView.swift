@@ -3,6 +3,9 @@
 // Supporting types and sections in AIProvidersSettingsViewSections.swift
 
 import SwiftUI
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "AIProvidersSettingsView")
 
 // MARK: - Main View
 
@@ -110,8 +113,8 @@ struct AIProvidersSettingsView: View {
                             .font(.caption2)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.theaInfo.opacity(0.2))
-                            .foregroundStyle(.theaInfo)
+                            .background(Color.blue.opacity(0.2))
+                            .foregroundStyle(.blue)
                             .cornerRadius(4)
                     }
                 }
@@ -193,11 +196,11 @@ struct AIProvidersSettingsView: View {
 
             if settingsManager.hasAPIKey(for: provider) {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.theaSuccess)
+                    .foregroundStyle(.green)
                     .accessibilityHidden(true)
             } else if !key.wrappedValue.isEmpty {
                 Image(systemName: "circle.dotted")
-                    .foregroundStyle(.theaWarning)
+                    .foregroundStyle(.orange)
                     .accessibilityHidden(true)
             }
         }
@@ -223,9 +226,9 @@ struct AIProvidersSettingsView: View {
             .padding(.vertical, 4)
 
             HStack(spacing: 16) {
-                metricCard(title: "Avg Latency", value: formatLatency(nil), icon: "clock", color: .theaInfo)
+                metricCard(title: "Avg Latency", value: formatLatency(nil), icon: "clock", color: .blue)
                 metricCard(title: "Tokens/sec", value: formatTokensPerSecond(nil), icon: "bolt", color: .orange)
-                metricCard(title: "Error Rate", value: formatErrorRate(nil), icon: "exclamationmark.triangle", color: .theaError)
+                metricCard(title: "Error Rate", value: formatErrorRate(nil), icon: "exclamationmark.triangle", color: .red)
             }
 
             Button("View Detailed History") { showingUsageHistory = true }
@@ -392,7 +395,11 @@ extension AIProvidersSettingsView {
         providerStatuses[providerId] = .testing
         Task {
             let startTime = Date()
-            try? await Task.sleep(for: .seconds(1))
+            do {
+                try await Task.sleep(for: .seconds(1))
+            } catch {
+                logger.error("Provider test sleep interrupted: \(error.localizedDescription)")
+            }
             let latency = Date().timeIntervalSince(startTime) * 1000
             await MainActor.run {
                 if settingsManager.hasAPIKey(for: providerId) {

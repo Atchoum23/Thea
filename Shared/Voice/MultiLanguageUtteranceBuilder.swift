@@ -6,6 +6,7 @@
 // Solution: Detect language segments and queue multiple utterances
 
 import Foundation
+import os.log
 import AVFoundation
 import NaturalLanguage
 
@@ -34,6 +35,7 @@ struct LanguageSegment: Identifiable, Sendable {
 @MainActor
 @Observable
 final class MultiLanguageUtteranceBuilder {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "MultiLanguageUtteranceBuilder")
     static let shared = MultiLanguageUtteranceBuilder()
 
     // Voice preferences
@@ -248,11 +250,14 @@ final class MultiLanguageUtteranceBuilder {
     // MARK: - Persistence
 
     private func loadPreferredVoices() {
-        guard let data = UserDefaults.standard.data(forKey: "preferredVoices"),
-              let identifiers = try? JSONDecoder().decode([String: String].self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: "preferredVoices") else { return }
+        let identifiers: [String: String]
+        do {
+            identifiers = try JSONDecoder().decode([String: String].self, from: data)
+        } catch {
+            logger.error("MultiLanguageUtteranceBuilder: failed to decode preferred voices: \(error.localizedDescription)")
             return
         }
-
         for (language, identifier) in identifiers {
             if let voice = AVSpeechSynthesisVoice(identifier: identifier) {
                 preferredVoices[language] = voice
@@ -262,8 +267,11 @@ final class MultiLanguageUtteranceBuilder {
 
     private func savePreferredVoices() {
         let identifiers = preferredVoices.mapValues { $0.identifier }
-        if let data = try? JSONEncoder().encode(identifiers) {
+        do {
+            let data = try JSONEncoder().encode(identifiers)
             UserDefaults.standard.set(data, forKey: "preferredVoices")
+        } catch {
+            logger.error("MultiLanguageUtteranceBuilder: failed to encode preferred voices: \(error.localizedDescription)")
         }
     }
 }

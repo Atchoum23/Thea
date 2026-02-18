@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import Observation
 @preconcurrency import SwiftData
 
@@ -14,6 +15,8 @@ import Observation
     @Observable
     final class InputTrackingManager {
         static let shared = InputTrackingManager()
+
+        private let logger = Logger(subsystem: "ai.thea.app", category: "InputTrackingManager")
 
         private var modelContext: ModelContext?
         private(set) var isTracking = false
@@ -210,7 +213,13 @@ import Observation
             // Check if record exists - fetch all and filter to avoid Swift 6 #Predicate Sendable issues
             let targetDate = record.date
             let descriptor = FetchDescriptor<DailyInputStatistics>()
-            let allRecords = (try? context.fetch(descriptor)) ?? []
+            let allRecords: [DailyInputStatistics]
+            do {
+                allRecords = try context.fetch(descriptor)
+            } catch {
+                logger.error("Failed to fetch input statistics for save: \(error)")
+                return
+            }
 
             if let existing = allRecords.first(where: { $0.date == targetDate }) {
                 existing.mouseClicks = record.mouseClicks
@@ -222,7 +231,11 @@ import Observation
                 context.insert(record)
             }
 
-            try? context.save()
+            do {
+                try context.save()
+            } catch {
+                logger.error("Failed to save input statistics: \(error)")
+            }
         }
 
         // MARK: - Historical Data
@@ -234,7 +247,13 @@ import Observation
 
             // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
             let descriptor = FetchDescriptor<DailyInputStatistics>()
-            let allRecords = (try? context.fetch(descriptor)) ?? []
+            let allRecords: [DailyInputStatistics]
+            do {
+                allRecords = try context.fetch(descriptor)
+            } catch {
+                logger.error("Failed to fetch input statistics: \(error)")
+                return nil
+            }
             return allRecords.first { $0.date == startOfDay }
         }
 
@@ -243,7 +262,13 @@ import Observation
 
             // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
             let descriptor = FetchDescriptor<DailyInputStatistics>()
-            let allRecords = (try? context.fetch(descriptor)) ?? []
+            let allRecords: [DailyInputStatistics]
+            do {
+                allRecords = try context.fetch(descriptor)
+            } catch {
+                logger.error("Failed to fetch input statistics for range: \(error)")
+                return []
+            }
             return allRecords
                 .filter { $0.date >= start && $0.date <= end }
                 .sorted { $0.date > $1.date }
@@ -294,6 +319,8 @@ import Observation
     @Observable
     final class InputTrackingManager {
         static let shared = InputTrackingManager()
+
+        private let logger = Logger(subsystem: "ai.thea.app", category: "InputTrackingManager")
         private init() {}
         func setModelContext(_: ModelContext) {}
     }

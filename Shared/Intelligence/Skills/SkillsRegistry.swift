@@ -44,7 +44,11 @@ public final class SkillsRegistryService: ObservableObject {
         installedSkillsURL = theaDir.appendingPathComponent("installed.json")
 
         // Create directories
-        try? FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        } catch {
+            logger.error("Failed to create skills directory: \(error.localizedDescription)")
+        }
 
         Task {
             await loadInstalledSkills()

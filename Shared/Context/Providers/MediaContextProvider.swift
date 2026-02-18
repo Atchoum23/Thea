@@ -57,7 +57,11 @@ public actor MediaContextProvider: ContextProvider {
         updateTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.fetchMediaInfo()
-                try? await Task.sleep(for: .seconds(5))
+                do {
+                    try await Task.sleep(for: .seconds(5))
+                } catch {
+                    break // Task cancelled — stop periodic updates
+                }
             }
         }
 

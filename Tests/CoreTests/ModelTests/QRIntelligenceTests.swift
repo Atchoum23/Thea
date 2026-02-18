@@ -45,51 +45,6 @@ private enum TestQRActionType: String, Sendable {
     case callPhone, sendSMS, connectWiFi, addContact, openMap, addCalendarEvent
 }
 
-private func parseWiFiFields(_ body: String) -> [String: String] {
-    var data: [String: String] = [:]
-    for field in body.components(separatedBy: ";") {
-        let parts = field.components(separatedBy: ":")
-        guard parts.count >= 2 else { continue }
-        switch parts[0].uppercased() {
-        case "S": data["ssid"] = parts.dropFirst().joined(separator: ":")
-        case "T": data["security"] = parts[1]
-        case "P": data["password"] = parts.dropFirst().joined(separator: ":")
-        case "H": data["hidden"] = parts[1]
-        default: break
-        }
-    }
-    return data
-}
-
-private func parseVCardFields(_ text: String) -> [String: String] {
-    var data: [String: String] = [:]
-    for line in text.components(separatedBy: .newlines) {
-        let parts = line.components(separatedBy: ":")
-        guard parts.count >= 2 else { continue }
-        let key = parts[0].components(separatedBy: ";").first?.uppercased() ?? ""
-        let value = parts.dropFirst().joined(separator: ":")
-        switch key {
-        case "FN": data["name"] = value
-        case "TEL": data["phone"] = value
-        case "EMAIL": data["email"] = value
-        default: break
-        }
-    }
-    return data
-}
-
-private func parseCalendarSummary(_ text: String) -> [String: String] {
-    var data: [String: String] = [:]
-    for line in text.components(separatedBy: .newlines) {
-        let parts = line.components(separatedBy: ":")
-        guard parts.count >= 2 else { continue }
-        let key = parts[0].components(separatedBy: ";").first?.uppercased() ?? ""
-        let value = parts.dropFirst().joined(separator: ":")
-        if key == "SUMMARY" { data["summary"] = value }
-    }
-    return data
-}
-
 private func parseQR(_ content: String) -> (TestQRContentType, [String: String], [TestQRActionType]) {
     let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -121,13 +76,38 @@ private func parseQR(_ content: String) -> (TestQRContentType, [String: String],
 
     // WIFI:
     if trimmed.uppercased().hasPrefix("WIFI:") {
-        let data = parseWiFiFields(String(trimmed.dropFirst(5)))
+        var data: [String: String] = [:]
+        let body = String(trimmed.dropFirst(5))
+        for field in body.components(separatedBy: ";") {
+            let parts = field.components(separatedBy: ":")
+            guard parts.count >= 2 else { continue }
+            switch parts[0].uppercased() {
+            case "S": data["ssid"] = parts.dropFirst().joined(separator: ":")
+            case "T": data["security"] = parts[1]
+            case "P": data["password"] = parts.dropFirst().joined(separator: ":")
+            case "H": data["hidden"] = parts[1]
+            default: break
+            }
+        }
         return (.wifi, data, [.connectWiFi, .copyToClipboard])
     }
 
     // vCard
     if trimmed.hasPrefix("BEGIN:VCARD") {
-        return (.vcard, parseVCardFields(trimmed), [.addContact, .copyToClipboard])
+        var data: [String: String] = [:]
+        for line in trimmed.components(separatedBy: .newlines) {
+            let parts = line.components(separatedBy: ":")
+            guard parts.count >= 2 else { continue }
+            let key = parts[0].components(separatedBy: ";").first?.uppercased() ?? ""
+            let value = parts.dropFirst().joined(separator: ":")
+            switch key {
+            case "FN": data["name"] = value
+            case "TEL": data["phone"] = value
+            case "EMAIL": data["email"] = value
+            default: break
+            }
+        }
+        return (.vcard, data, [.addContact, .copyToClipboard])
     }
 
     // geo:
@@ -140,7 +120,15 @@ private func parseQR(_ content: String) -> (TestQRContentType, [String: String],
 
     // Calendar
     if trimmed.hasPrefix("BEGIN:VEVENT") || trimmed.hasPrefix("BEGIN:VCALENDAR") {
-        return (.calendar, parseCalendarSummary(trimmed), [.addCalendarEvent, .copyToClipboard])
+        var data: [String: String] = [:]
+        for line in trimmed.components(separatedBy: .newlines) {
+            let parts = line.components(separatedBy: ":")
+            guard parts.count >= 2 else { continue }
+            let key = parts[0].components(separatedBy: ";").first?.uppercased() ?? ""
+            let value = parts.dropFirst().joined(separator: ":")
+            if key == "SUMMARY" { data["summary"] = value }
+        }
+        return (.calendar, data, [.addCalendarEvent, .copyToClipboard])
     }
 
     // Email pattern

@@ -16,7 +16,7 @@ import os.log
 public final class CommunicationAssistant: ObservableObject {
     public static let shared = CommunicationAssistant()
 
-    private let logger = Logger(subsystem: "app.thea.communication", category: "CommunicationAssistant")
+    private let logger = Logger(subsystem: "ai.thea.app", category: "CommunicationAssistant")
 
     // MARK: - State
 
@@ -415,19 +415,24 @@ public final class CommunicationAssistant: ObservableObject {
     }
 
     private func loadTemplates() {
-        if let data = UserDefaults.standard.data(forKey: "thea.comm.templates"),
-           let templates = try? JSONDecoder().decode([MessageTemplate].self, from: data)
-        {
-            savedTemplates = templates
-        } else {
-            // Load default templates
+        guard let data = UserDefaults.standard.data(forKey: "thea.comm.templates") else {
+            savedTemplates = defaultTemplates()
+            return
+        }
+        do {
+            savedTemplates = try JSONDecoder().decode([MessageTemplate].self, from: data)
+        } catch {
+            logger.error("Failed to decode message templates: \(error.localizedDescription)")
             savedTemplates = defaultTemplates()
         }
     }
 
     private func saveTemplates() {
-        if let data = try? JSONEncoder().encode(savedTemplates) {
+        do {
+            let data = try JSONEncoder().encode(savedTemplates)
             UserDefaults.standard.set(data, forKey: "thea.comm.templates")
+        } catch {
+            logger.error("Failed to encode message templates: \(error.localizedDescription)")
         }
     }
 

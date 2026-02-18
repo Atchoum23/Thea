@@ -828,8 +828,7 @@ struct G2StatsTests {
 
     @Test("Auto-action rate zero when no classified")
     func autoActionRateZero() {
-        let totalClassified = 0
-        let rate = totalClassified > 0 ? Double(5) / Double(totalClassified) : 0.0
+        let rate = 0 > 0 ? Double(5) / Double(0) : 0.0
         #expect(rate == 0)
     }
 }

@@ -1,4 +1,5 @@
 #if os(macOS)
+    import OSLog
     import SwiftUI
 
     /// Main Terminal integration view
@@ -55,24 +56,23 @@
                     } label: {
                         Label("Refresh", systemImage: "arrow.clockwise")
                     }
-                    .accessibilityLabel("Refresh windows")
-                    .accessibilityHint("Refreshes the list of terminal windows")
 
                     Button {
                         Task {
-                            try? await manager.openNewWindow()
+                            do {
+                                try await manager.openNewWindow()
+                            } catch {
+                                Logger(subsystem: "app.thea", category: "Terminal")
+                                    .error("Failed to open new terminal window: \(error.localizedDescription)")
+                            }
                         }
                     } label: {
                         Label("New Window", systemImage: "plus.rectangle")
                     }
-                    .accessibilityLabel("New Window")
-                    .accessibilityHint("Opens a new terminal window")
 
                     Toggle(isOn: $manager.isEnabled) {
                         Label("Enabled", systemImage: manager.isEnabled ? "terminal.fill" : "terminal")
                     }
-                    .accessibilityLabel("Terminal integration")
-                    .accessibilityHint("Toggles terminal integration on or off")
                 }
             }
             .onAppear {
@@ -110,7 +110,7 @@
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Circle()
-                        .fill(manager.isConnected ? Color.theaSuccess : Color.theaError)
+                        .fill(manager.isConnected ? Color.green : Color.red)
                         .frame(width: 8, height: 8)
                         .accessibilityHidden(true)
                     Text(manager.isConnected ? "Connected" : "Disconnected")
@@ -149,8 +149,6 @@
                         Image(systemName: "ellipsis.circle")
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("More quick commands")
-                    .accessibilityHint("Shows additional quick command options")
                 }
 
                 ScrollView {
@@ -162,7 +160,6 @@
                                 HStack {
                                     Image(systemName: command.icon)
                                         .frame(width: 20)
-                                        .accessibilityHidden(true)
                                     Text(command.name)
                                         .lineLimit(1)
                                     Spacer()
@@ -174,8 +171,6 @@
                             }
                             .buttonStyle(.plain)
                             .disabled(isExecuting)
-                            .accessibilityLabel(command.name)
-                            .accessibilityHint("Executes the \(command.name) command")
                         }
                     }
                 }
@@ -195,8 +190,6 @@
                         Image(systemName: "plus")
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("New session")
-                    .accessibilityHint("Creates a new terminal session")
                 }
 
                 ScrollView {
@@ -204,7 +197,6 @@
                         ForEach(manager.sessions) { session in
                             HStack {
                                 Image(systemName: session.id == manager.currentSession?.id ? "terminal.fill" : "terminal")
-                                    .accessibilityHidden(true)
                                 Text(session.name)
                                     .lineLimit(1)
                                 Spacer()
@@ -216,10 +208,6 @@
                             .padding(.horizontal, 8)
                             .background(session.id == manager.currentSession?.id ? Color.accentColor.opacity(0.2) : Color.clear)
                             .cornerRadius(4)
-                            .accessibilityElement(children: .combine)
-                            .accessibilityLabel("\(session.name), \(session.commandHistory.count) commands")
-                            .accessibilityHint("Switches to this terminal session")
-                            .accessibilityAddTraits(session.id == manager.currentSession?.id ? .isSelected : [])
                             .onTapGesture {
                                 manager.switchToSession(session)
                             }
@@ -244,9 +232,6 @@
                             .background(selectedTab == tab ? Color.accentColor.opacity(0.2) : Color.clear)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("\(tab.rawValue) tab")
-                    .accessibilityHint("Switches to the \(tab.rawValue) tab")
-                    .accessibilityAddTraits(selectedTab == tab ? .isSelected : [])
                 }
                 Spacer()
             }
@@ -279,16 +264,13 @@
                         if !manager.lastError.isEmpty {
                             HStack {
                                 Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(.theaError)
-                                    .accessibilityHidden(true)
+                                    .foregroundStyle(.red)
                                 Text(manager.lastError)
-                                    .foregroundStyle(.theaError)
+                                    .foregroundStyle(.red)
                             }
                             .padding()
-                            .background(Color.theaError.opacity(0.1))
+                            .background(Color.red.opacity(0.1))
                             .cornerRadius(8)
-                            .accessibilityElement(children: .combine)
-                            .accessibilityLabel("Error: \(manager.lastError)")
                         }
 
                         Color.clear.frame(height: 1).id("bottom")
@@ -309,9 +291,8 @@
                 // Command line
                 HStack {
                     Text("$")
-                        .foregroundStyle(.theaSuccess)
+                        .foregroundStyle(.green)
                         .fontWeight(.bold)
-                        .accessibilityHidden(true)
                     Text(command.command)
                         .fontDesign(.monospaced)
                     Spacer()
@@ -321,11 +302,11 @@
 
                     if command.wasSuccessful {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.theaSuccess)
+                            .foregroundStyle(.green)
                             .accessibilityLabel("Succeeded")
                     } else {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.theaError)
+                            .foregroundStyle(.red)
                             .accessibilityLabel("Failed")
                     }
                 }
@@ -340,7 +321,7 @@
                 if !command.errorOutput.isEmpty {
                     Text(command.errorOutput)
                         .font(.system(.body, design: .monospaced))
-                        .foregroundStyle(.theaError)
+                        .foregroundStyle(.red)
                         .padding(.leading, 16)
                 }
 

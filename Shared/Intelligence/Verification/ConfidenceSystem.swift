@@ -181,20 +181,17 @@ public final class ConfidenceSystem {
     public var enableStaticAnalysis: Bool = true
     public var enableFeedbackLearning: Bool = true
 
-    // Weights for each source type (normalized to sum to 1.0)
+    // Weights for each source type
     public var sourceWeights: [ConfidenceSource.SourceType: Double] = [
-        .modelConsensus: 0.30,
-        .webVerification: 0.17,
-        .codeExecution: 0.22,
-        .staticAnalysis: 0.09,
-        .userFeedback: 0.09,
-        .cachedKnowledge: 0.04,
-        .patternMatch: 0.04,
-        .semanticAnalysis: 0.05
+        .modelConsensus: 0.35,
+        .webVerification: 0.20,
+        .codeExecution: 0.25,
+        .staticAnalysis: 0.10,
+        .userFeedback: 0.10,
+        .cachedKnowledge: 0.05,
+        .patternMatch: 0.05,
+        .semanticAnalysis: 0.15
     ]
-
-    /// Per-verifier timeout (seconds) — prevents slow verifiers from blocking others
-    public var verifierTimeout: TimeInterval = 8.0
 
     private init() {}
 
@@ -213,78 +210,47 @@ public final class ConfidenceSystem {
         var factors: [ConfidenceDecomposition.DecompositionFactor] = []
         var conflicts: [ConfidenceDecomposition.ConflictInfo] = []
 
-        // Capture verifiers and config into local lets for Sendable closure use
-        let timeout = self.verifierTimeout
-        let consensus = self.multiModelConsensus
-        let webVfy = self.webVerifier
-        let codeExec = self.codeExecutor
-        let staticAn = self.staticAnalyzer
-        let fbLearner = self.feedbackLearner
-        let doMultiModel = enableMultiModel && context.allowMultiModel
-        let doWebVerify = enableWebVerification && context.allowWebSearch && taskType.requiresFactualVerification
-        let doCodeExec = enableCodeExecution && context.allowCodeExecution && taskType.isCodeRelated
-        let doStaticAnalysis = enableStaticAnalysis && taskType.isCodeRelated
-        let doFeedback = enableFeedbackLearning
-        let lang = context.language
+        // 1. Multi-model consensus
+        if enableMultiModel && context.allowMultiModel {
+            let consensusResult = await multiModelConsensus.validate(
+                query: query,
+                response: response,
+                taskType: taskType
+            )
+            sources.append(consensusResult.source)
+            factors.append(contentsOf: consensusResult.factors)
+            conflicts.append(contentsOf: consensusResult.conflicts)
+        }
 
-        // Run enabled verifiers in parallel with per-verifier timeout
-        await withTaskGroup(of: VerifierOutput?.self) { group in
-            // 1. Multi-model consensus
-            if doMultiModel {
-                group.addTask {
-                    await Self.withTimeout(seconds: timeout) {
-                        let r = await consensus.validate(query: query, response: response, taskType: taskType)
-                        return VerifierOutput(source: r.source, factors: r.factors, conflicts: r.conflicts)
-                    }
-                }
-            }
+        // 2. Web verification (for factual claims)
+        if enableWebVerification && context.allowWebSearch && taskType.requiresFactualVerification {
+            let webResult = await webVerifier.verify(response: response, query: query)
+            sources.append(webResult.source)
+            factors.append(contentsOf: webResult.factors)
+        }
 
-            // 2. Web verification (for factual claims)
-            if doWebVerify {
-                group.addTask {
-                    await Self.withTimeout(seconds: timeout) {
-                        let r = await webVfy.verify(response: response, query: query)
-                        return VerifierOutput(source: r.source, factors: r.factors, conflicts: [])
-                    }
-                }
-            }
+        // 3. Code execution (for code responses)
+        if enableCodeExecution && context.allowCodeExecution && taskType.isCodeRelated {
+            let execResult = await codeExecutor.verify(response: response, language: context.language)
+            sources.append(execResult.source)
+            factors.append(contentsOf: execResult.factors)
+        }
 
-            // 3. Code execution (for code responses)
-            if doCodeExec {
-                group.addTask {
-                    await Self.withTimeout(seconds: timeout) {
-                        let r = await codeExec.verify(response: response, language: lang)
-                        return VerifierOutput(source: r.source, factors: r.factors, conflicts: [])
-                    }
-                }
-            }
+        // 4. Static analysis (for code)
+        if enableStaticAnalysis && taskType.isCodeRelated {
+            let analysisResult = await staticAnalyzer.analyze(response: response, language: context.language)
+            sources.append(analysisResult.source)
+            factors.append(contentsOf: analysisResult.factors)
+        }
 
-            // 4. Static analysis (for code)
-            if doStaticAnalysis {
-                group.addTask {
-                    await Self.withTimeout(seconds: timeout) {
-                        let r = await staticAn.analyze(response: response, language: lang)
-                        return VerifierOutput(source: r.source, factors: r.factors, conflicts: [])
-                    }
-                }
-            }
-
-            // 5. User feedback history
-            if doFeedback {
-                group.addTask {
-                    await Self.withTimeout(seconds: timeout) {
-                        let r = await fbLearner.assessFromHistory(taskType: taskType, responsePattern: response)
-                        return VerifierOutput(source: r.source, factors: r.factors, conflicts: [])
-                    }
-                }
-            }
-
-            for await output in group {
-                guard let output else { continue }
-                sources.append(output.source)
-                factors.append(contentsOf: output.factors)
-                conflicts.append(contentsOf: output.conflicts)
-            }
+        // 5. User feedback history
+        if enableFeedbackLearning {
+            let feedbackResult = await feedbackLearner.assessFromHistory(
+                taskType: taskType,
+                responsePattern: response
+            )
+            sources.append(feedbackResult.source)
+            factors.append(contentsOf: feedbackResult.factors)
         }
 
         // Calculate overall confidence
@@ -307,73 +273,6 @@ public final class ConfidenceSystem {
         logger.info("Confidence result: \(result.level.rawValue) (\(String(format: "%.0f%%", result.overallConfidence * 100)))")
 
         return result
-    }
-
-    // MARK: - Hallucination Detection (Semantic Entropy)
-
-    /// Detect potential hallucinations using semantic entropy analysis.
-    /// Checks for factual claims that have high variance across self-consistency probes:
-    /// - Hedging language patterns (uncertain claims presented as facts)
-    /// - Specific quantitative claims (dates, numbers, URLs)
-    /// - Claims contradicting known knowledge graph entities
-    func detectHallucinations(
-        _ response: String,
-        query: String,
-        knowledgeContext: [String] = []
-    ) async -> [HallucinationFlag] {
-        var flags: [HallucinationFlag] = []
-
-        let sentences = response.components(separatedBy: CharacterSet(charactersIn: ".!?"))
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { $0.count > 10 }
-
-        for sentence in sentences {
-            let lower = sentence.lowercased()
-
-            // Heuristic 1: Hedging language in factual context
-            let hedgePatterns = [
-                "i believe", "i think", "probably", "might be",
-                "reportedly", "some sources say", "it seems", "allegedly"
-            ]
-            let hasHedge = hedgePatterns.contains { lower.contains($0) }
-
-            // Heuristic 2: Specific quantitative claims are higher risk
-            let hasSpecificNumber = sentence.range(of: #"\b\d{4,}\b"#, options: .regularExpression) != nil
-            let hasURL = sentence.range(of: #"https?://\S+"#, options: .regularExpression) != nil
-            let hasSpecificDate = sentence.range(of: #"\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}"#, options: .regularExpression) != nil
-
-            // Heuristic 3: Contradicts known knowledge graph facts
-            let contradictsKnowledge = knowledgeContext.contains { known in
-                let knownLower = known.lowercased()
-                // Simple contradiction: sentence claims opposite of known fact
-                return (lower.contains("not") && knownLower.split(separator: " ").filter { $0.count > 3 }.contains { lower.contains(String($0).lowercased()) })
-            }
-
-            // Risk scoring
-            var riskScore = 0.0
-            if hasHedge { riskScore += 0.3 }
-            if hasSpecificNumber { riskScore += 0.2 }
-            if hasURL { riskScore += 0.4 } // URLs in AI responses are high hallucination risk
-            if hasSpecificDate { riskScore += 0.15 }
-            if contradictsKnowledge { riskScore += 0.5 }
-
-            if riskScore >= 0.3 {
-                let risk: HallucinationRisk = riskScore >= 0.6 ? .high : riskScore >= 0.4 ? .medium : .low
-                var reasons: [String] = []
-                if hasURL { reasons.append("contains URL (high fabrication risk)") }
-                if hasHedge { reasons.append("hedging language") }
-                if hasSpecificDate || hasSpecificNumber { reasons.append("specific claim without source") }
-                if contradictsKnowledge { reasons.append("may contradict known facts") }
-
-                flags.append(HallucinationFlag(
-                    claim: String(sentence.prefix(120)),
-                    riskLevel: risk,
-                    reason: reasons.joined(separator: "; ")
-                ))
-            }
-        }
-
-        return flags
     }
 
     /// Record user feedback for learning
@@ -406,35 +305,6 @@ public final class ConfidenceSystem {
         }
 
         return totalWeight > 0 ? weightedSum / totalWeight : 0.0
-    }
-
-    // MARK: - Helpers
-
-    /// Intermediate result from a verifier
-    private struct VerifierOutput: Sendable {
-        let source: ConfidenceSource
-        let factors: [ConfidenceDecomposition.DecompositionFactor]
-        let conflicts: [ConfidenceDecomposition.ConflictInfo]
-    }
-
-    /// Run an async closure with a timeout; returns nil if timeout exceeded
-    private static func withTimeout<T: Sendable>(
-        seconds: TimeInterval,
-        operation: @escaping @Sendable () async -> T
-    ) async -> T? {
-        await withTaskGroup(of: T?.self) { group in
-            group.addTask { await operation() }
-            group.addTask {
-                try? await Task.sleep(for: .seconds(seconds))
-                return nil
-            }
-            // Return whichever finishes first
-            for await result in group {
-                group.cancelAll()
-                return result
-            }
-            return nil
-        }
     }
 
     private func generateDecomposition(

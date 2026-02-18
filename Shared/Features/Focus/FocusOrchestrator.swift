@@ -28,6 +28,7 @@ public final class FocusOrchestrator: ObservableObject {
     @Published public private(set) var availableFocusModes: [FocusMode] = []
     @Published public private(set) var isAutomationEnabled = true
     @Published public private(set) var scheduledTransitions: [FocusTransition] = []
+    @Published public var lastError: String?
 
     // MARK: - Rules
 
@@ -180,7 +181,12 @@ public final class FocusOrchestrator: ObservableObject {
 
             // Auto-apply if confidence is high
             if shouldAutoApply(suggested, reason: reason) {
-                try? await setFocus(suggested)
+                do {
+                    try await setFocus(suggested)
+                } catch {
+                    logger.error("Failed to auto-apply focus '\(suggested.name)': \(error.localizedDescription)")
+                    lastError = "Failed to set focus '\(suggested.name)': \(error.localizedDescription)"
+                }
             }
         }
     }
@@ -238,13 +244,33 @@ public final class FocusOrchestrator: ObservableObject {
         guard delay > 0 else { return }
 
         Task {
-            try? await Task.sleep(for: .seconds(delay))
-            try? await setFocus(transition.targetFocus)
+            do {
+                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            } catch {
+                // Task was cancelled or sleep interrupted - continue anyway
+            }
+
+            do {
+                try await setFocus(transition.targetFocus)
+            } catch {
+                logger.error("Scheduled focus transition to '\(transition.targetFocus.name)' failed: \(error.localizedDescription)")
+                lastError = "Scheduled focus '\(transition.targetFocus.name)' failed: \(error.localizedDescription)"
+            }
 
             // If duration specified, schedule end
             if let duration = transition.duration {
-                try? await Task.sleep(for: .seconds(duration))
-                try? await setFocus(nil)
+                do {
+                    try await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
+                } catch {
+                    // Task was cancelled - break out of wait
+                    break
+                }
+                do {
+                    try await setFocus(nil)
+                } catch {
+                    logger.error("Failed to clear focus after scheduled duration: \(error.localizedDescription)")
+                    lastError = "Failed to clear focus: \(error.localizedDescription)"
+                }
             }
 
             scheduledTransitions.removeAll { $0.id == transition.id }
@@ -300,38 +326,62 @@ public final class FocusOrchestrator: ObservableObject {
     // MARK: - Configuration
 
     private func loadConfiguration() {
-        // Load rules from UserDefaults
-        if let data = UserDefaults.standard.data(forKey: "thea.focus.locationRules"),
-           let rules = try? JSONDecoder().decode([LocationFocusRule].self, from: data)
-        {
-            locationRules = rules
+        let decoder = JSONDecoder()
+
+        if let data = UserDefaults.standard.data(forKey: "thea.focus.locationRules") {
+            do {
+                locationRules = try decoder.decode([LocationFocusRule].self, from: data)
+            } catch {
+                logger.warning("Failed to decode location rules, using defaults: \(error.localizedDescription)")
+            }
         }
 
-        if let data = UserDefaults.standard.data(forKey: "thea.focus.timeRules"),
-           let rules = try? JSONDecoder().decode([TimeFocusRule].self, from: data)
-        {
-            timeRules = rules
+        if let data = UserDefaults.standard.data(forKey: "thea.focus.timeRules") {
+            do {
+                timeRules = try decoder.decode([TimeFocusRule].self, from: data)
+            } catch {
+                logger.warning("Failed to decode time rules, using defaults: \(error.localizedDescription)")
+            }
         }
 
-        if let data = UserDefaults.standard.data(forKey: "thea.focus.appRules"),
-           let rules = try? JSONDecoder().decode([AppFocusRule].self, from: data)
-        {
-            appRules = rules
+        if let data = UserDefaults.standard.data(forKey: "thea.focus.appRules") {
+            do {
+                appRules = try decoder.decode([AppFocusRule].self, from: data)
+            } catch {
+                logger.warning("Failed to decode app rules, using defaults: \(error.localizedDescription)")
+            }
         }
 
         isAutomationEnabled = UserDefaults.standard.bool(forKey: "thea.focus.automationEnabled")
     }
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(locationRules) {
-            UserDefaults.standard.set(data, forKey: "thea.focus.locationRules")
+        let encoder = JSONEncoder()
+
+        do {
+            let locationData = try encoder.encode(locationRules)
+            UserDefaults.standard.set(locationData, forKey: "thea.focus.locationRules")
+        } catch {
+            logger.error("Failed to save location rules: \(error.localizedDescription)")
+            lastError = "Failed to save location rules: \(error.localizedDescription)"
         }
-        if let data = try? JSONEncoder().encode(timeRules) {
-            UserDefaults.standard.set(data, forKey: "thea.focus.timeRules")
+
+        do {
+            let timeData = try encoder.encode(timeRules)
+            UserDefaults.standard.set(timeData, forKey: "thea.focus.timeRules")
+        } catch {
+            logger.error("Failed to save time rules: \(error.localizedDescription)")
+            lastError = "Failed to save time rules: \(error.localizedDescription)"
         }
-        if let data = try? JSONEncoder().encode(appRules) {
-            UserDefaults.standard.set(data, forKey: "thea.focus.appRules")
+
+        do {
+            let appData = try encoder.encode(appRules)
+            UserDefaults.standard.set(appData, forKey: "thea.focus.appRules")
+        } catch {
+            logger.error("Failed to save app rules: \(error.localizedDescription)")
+            lastError = "Failed to save app rules: \(error.localizedDescription)"
         }
+
         UserDefaults.standard.set(isAutomationEnabled, forKey: "thea.focus.automationEnabled")
     }
 

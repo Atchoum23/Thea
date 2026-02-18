@@ -51,15 +51,7 @@ enum TheaIdentityPrompt {
             sections.append(buildCodingPreferences())
         }
 
-        // 7. Personalization Context (user-defined, opt-in)
-        let personalization = buildPersonalizationContext()
-        if !personalization.isEmpty { sections.append(personalization) }
-
-        // 8. Response Style Suffix (user-selected preset)
-        let responseStyle = buildResponseStyleSuffix()
-        if !responseStyle.isEmpty { sections.append(responseStyle) }
-
-        // 9. Conversation Context
+        // 7. Conversation Context
         let conversationContext = buildConversationContext(
             language: conversationLanguage,
             systemPrompt: conversationSystemPrompt
@@ -149,7 +141,7 @@ enum TheaIdentityPrompt {
         if allDevices.count > 1 {
             let others = allDevices.filter { $0.id != current.id }
             let descriptions = others.map { device in
-                let status = onlineDevices.contains { $0.id == device.id } ? "online" : "offline"
+                let status = onlineDevices.contains(where: { $0.id == device.id }) ? "online" : "offline"
                 return "\(device.name) (\(device.type.displayName), \(status))"
             }
             lines.append("- Ecosystem: \(descriptions.joined(separator: ", "))")
@@ -200,31 +192,6 @@ enum TheaIdentityPrompt {
         - Fix issues immediately — no deferring; test edge cases and error conditions
         - Always choose the cleanest architectural solution, not the easiest hack
         """
-    }
-
-    private static func buildPersonalizationContext() -> String {
-        let settings = SettingsManager.shared
-        guard settings.personalizationEnabled else { return "" }
-
-        var parts: [String] = []
-
-        let ctx = settings.personalizationContext.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !ctx.isEmpty {
-            parts.append("USER CONTEXT:\n\(ctx)")
-        }
-
-        let pref = settings.personalizationResponsePreference.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !pref.isEmpty {
-            parts.append("RESPONSE PREFERENCES:\n\(pref)")
-        }
-
-        guard !parts.isEmpty else { return "" }
-        return "PERSONALIZATION:\n" + parts.joined(separator: "\n\n")
-    }
-
-    private static func buildResponseStyleSuffix() -> String {
-        guard let activeStyle = SettingsManager.shared.activeResponseStyle else { return "" }
-        return activeStyle.systemPromptSuffix
     }
 
     private static func buildConversationContext(

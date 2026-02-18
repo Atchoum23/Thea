@@ -12,7 +12,6 @@ import os.log
 
 // MARK: - Clipboard Monitor Protocol
 
-/// Delegate that receives notifications when the system clipboard content changes.
 public protocol ClipboardMonitorDelegate: AnyObject, Sendable {
     nonisolated func clipboardMonitor(_ _monitor: ClipboardMonitor, didCapture content: MonitoredClipboardContent)
 }
@@ -34,8 +33,8 @@ public actor ClipboardMonitor {
     private var monitorTask: Task<Void, Never>?
     private var lastChangeCount: Int = 0
 
-    // Configuration — base 5s, scaled by EnergyAdaptiveThrottler at runtime
-    private let baseIntervalSeconds: Double = 5.0 // Was 500ms, now 5s for battery efficiency
+    // Configuration
+    private let pollIntervalMs: UInt64 = 500 // Check every 500ms
     private let maxContentLength = 10000 // Max chars to capture
 
     // Privacy - patterns to skip
@@ -54,7 +53,15 @@ public actor ClipboardMonitor {
             // Private keys
             "-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----"
         ]
-        return patterns.compactMap { try? NSRegularExpression(pattern: $0) }
+        let logger = Logger(subsystem: "ai.thea.app", category: "ClipboardMonitor")
+        return patterns.compactMap { pattern -> NSRegularExpression? in
+            do {
+                return try NSRegularExpression(pattern: pattern)
+            } catch {
+                logger.error("Failed to compile sensitive pattern \(pattern): \(error.localizedDescription)")
+                return nil
+            }
+        }
     }()
 
     public init() {}
@@ -97,9 +104,11 @@ public actor ClipboardMonitor {
                 await captureMonitoredClipboardContent()
             }
 
-            let multiplier = await MainActor.run { EnergyAdaptiveThrottler.shared.intervalMultiplier }
-            let interval = baseIntervalSeconds * multiplier
-            try? await Task.sleep(for: .seconds(interval))
+            do {
+                try await Task.sleep(nanoseconds: pollIntervalMs * 1_000_000)
+            } catch {
+                break
+            }
         }
     }
 

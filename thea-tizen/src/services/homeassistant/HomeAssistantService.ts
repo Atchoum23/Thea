@@ -394,7 +394,7 @@ class HomeAssistantService {
    * Extract dominant color from an image for ambient lighting
    * (Would need to use a canvas or external service)
    */
-  async setAmbientFromImage(_imageUrl: string): Promise<void> {
+  async setAmbientFromImage(imageUrl: string): Promise<void> {
     // For now, use a neutral warm color
     // In a real implementation, extract colors from the movie poster/backdrop
     const warmWhite: [number, number, number] = [255, 180, 107];

@@ -9,6 +9,8 @@ struct MediaServerView: View {
     @State private var showAddFolder = false
     @State private var selectedType: MediaFileType?
     @State private var searchText = ""
+    @State private var errorMessage: String?
+    @State private var showError = false
 
     var body: some View {
         #if os(macOS)
@@ -33,6 +35,11 @@ struct MediaServerView: View {
                 }
         }
         #endif
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "An unknown error occurred")
+        }
     }
 
     // MARK: - Sidebar (macOS)
@@ -57,7 +64,14 @@ struct MediaServerView: View {
                     Button("Stop") { server.stop() }
                         .buttonStyle(.bordered)
                 } else {
-                    Button("Start") { try? server.start() }
+                    Button("Start") {
+                            do {
+                                try server.start()
+                            } catch {
+                                errorMessage = "Failed to start server: \(error.localizedDescription)"
+                                showError = true
+                            }
+                        }
                         .buttonStyle(.borderedProminent)
                 }
             }
@@ -132,7 +146,12 @@ struct MediaServerView: View {
         }
         .fileImporter(isPresented: $showAddFolder, allowedContentTypes: [.folder]) { result in
             if case .success(let url) = result {
-                try? server.addFolder(url.path)
+                do {
+                    try server.addFolder(url.path)
+                } catch {
+                    errorMessage = "Failed to add folder: \(error.localizedDescription)"
+                    showError = true
+                }
                 Task { await server.scanLibrary() }
             }
         }

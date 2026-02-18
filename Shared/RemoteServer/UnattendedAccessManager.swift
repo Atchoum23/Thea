@@ -7,6 +7,7 @@
 
 import CryptoKit
 import Foundation
+import os.log
 import Security
 
 // MARK: - Unattended Access Manager
@@ -14,6 +15,7 @@ import Security
 /// Manages persistent unattended access credentials and profiles
 @MainActor
 public class UnattendedAccessManager: ObservableObject {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "UnattendedAccessManager")
     // MARK: - Published State
 
     @Published public private(set) var isEnabled = false
@@ -147,17 +149,21 @@ public class UnattendedAccessManager: ObservableObject {
     // MARK: - Persistence
 
     private func loadProfiles() {
-        guard let data = loadFromKeychain(identifier: Self.profilesKey),
-              let decoded = try? JSONDecoder().decode([UnattendedAccessProfile].self, from: data)
-        else {
-            return
+        guard let data = loadFromKeychain(identifier: Self.profilesKey) else { return }
+        do {
+            profiles = try JSONDecoder().decode([UnattendedAccessProfile].self, from: data)
+        } catch {
+            logger.error("UnattendedAccessManager: failed to decode access profiles: \(error.localizedDescription)")
         }
-        profiles = decoded
     }
 
     private func saveProfiles() {
-        guard let data = try? JSONEncoder().encode(profiles) else { return }
-        saveToKeychain(data, identifier: Self.profilesKey)
+        do {
+            let data = try JSONEncoder().encode(profiles)
+            saveToKeychain(data, identifier: Self.profilesKey)
+        } catch {
+            logger.error("UnattendedAccessManager: failed to encode access profiles: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Keychain
@@ -201,7 +207,6 @@ public class UnattendedAccessManager: ObservableObject {
 
 // MARK: - Unattended Access Profile
 
-/// Configuration profile for unattended access, defining permissions, time restrictions, and target device.
 public struct UnattendedAccessProfile: Codable, Sendable, Identifiable {
     public let id: String
     public var name: String
@@ -213,7 +218,6 @@ public struct UnattendedAccessProfile: Codable, Sendable, Identifiable {
     public var createdAt: Date
     public var lastUsedAt: Date?
 
-    /// A recurring time window defined by start/end hours and days of the week during which unattended access is permitted.
     public struct TimeWindow: Codable, Sendable {
         public let startHour: Int
         public let endHour: Int
@@ -265,7 +269,6 @@ public struct UnattendedAccessProfile: Codable, Sendable, Identifiable {
 
 // MARK: - Unattended Access Error
 
-/// Errors from unattended access operations such as weak passwords, Keychain failures, or denied access.
 public enum UnattendedAccessError: Error, LocalizedError, Sendable {
     case passwordTooShort
     case keychainError

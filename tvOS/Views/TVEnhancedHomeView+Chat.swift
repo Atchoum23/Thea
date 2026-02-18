@@ -41,7 +41,7 @@ struct TVEnhancedChatView: View {
         if !inferenceClient.connectionState.isConnected {
             HStack(spacing: 12) {
                 Image(systemName: "desktopcomputer.trianglebadge.exclamationmark")
-                    .foregroundStyle(.theaWarning)
+                    .foregroundStyle(.orange)
                 Text("Not connected to Mac -- responses are simulated")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -59,8 +59,13 @@ struct TVEnhancedChatView: View {
 
             Image(systemName: "brain.head.profile")
                 .font(.system(size: 120))
-                .foregroundStyle(Color.theaHeroGradientDefault)
-                .accessibilityHidden(true)
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.blue, .purple],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
 
             VStack(spacing: 12) {
                 Text("Welcome to THEA")
@@ -91,7 +96,6 @@ struct TVEnhancedChatView: View {
                                 .clipShape(Capsule())
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("Suggested: \(prompt)")
                     }
                 }
             }
@@ -99,7 +103,6 @@ struct TVEnhancedChatView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .accessibilityElement(children: .contain)
     }
 
     private var messagesList: some View {
@@ -146,8 +149,6 @@ struct TVEnhancedChatView: View {
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Voice input")
-            .accessibilityHint("Activate microphone for voice input")
 
             TextField("Ask Thea anything...", text: $inputText)
                 .font(.title3)
@@ -160,12 +161,10 @@ struct TVEnhancedChatView: View {
             Button(action: sendMessage) {
                 Image(systemName: "arrow.up.circle.fill")
                     .font(.system(size: 50))
-                    .foregroundStyle(inputText.isEmpty ? Color.secondary : Color.theaPrimaryDefault)
+                    .foregroundStyle(inputText.isEmpty ? Color.secondary : Color.blue)
             }
             .disabled(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isProcessing)
             .buttonStyle(.plain)
-            .accessibilityLabel("Send message")
-            .accessibilityHint("Sends your message to Thea")
         }
         .padding(20)
         .background(.ultraThinMaterial)
@@ -307,13 +306,12 @@ struct TVChatMessageRow: View {
             if message.isUser { Spacer(minLength: 200) }
 
             if !message.isUser {
-                Image(systemName: "sparkles")
+                Image(systemName: "brain.head.profile")
                     .font(.title2)
-                    .foregroundStyle(Color.theaPrimaryDefault)
+                    .foregroundStyle(.blue)
                     .frame(width: 44, height: 44)
-                    .background(Color.theaPrimaryDefault.opacity(0.1))
+                    .background(.blue.opacity(0.1))
                     .clipShape(Circle())
-                    .accessibilityHidden(true)
             }
 
             VStack(alignment: message.isUser ? .trailing : .leading, spacing: 6) {
@@ -335,13 +333,13 @@ struct TVChatMessageRow: View {
 
                         if message.isStreaming {
                             Text("\u{2588}")
-                                .foregroundStyle(Color.theaPrimaryDefault)
+                                .foregroundStyle(.blue)
                                 .opacity(0.8)
                         }
                     }
                     .padding(20)
-                    .background(message.isUser ? Color(hex: "0066FF") : Color.gray.opacity(0.2))
-                    .foregroundStyle(message.isUser ? Color(white: 1.0) : .primary)
+                    .background(message.isUser ? Color.blue : Color.secondary.opacity(0.2))
+                    .foregroundStyle(message.isUser ? .white : .primary)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
                 }
 

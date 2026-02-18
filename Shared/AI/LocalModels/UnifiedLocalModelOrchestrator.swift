@@ -494,8 +494,12 @@ final class UnifiedLocalModelOrchestrator {
     // MARK: - Persistence
 
     private func loadPerformanceHistory() {
-        guard let data = UserDefaults.standard.data(forKey: "LocalOrchestrator.performanceHistory"),
-              let history = try? JSONDecoder().decode([String: LocalModelPerformanceMetrics].self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: "LocalOrchestrator.performanceHistory") else { return }
+        let history: [String: LocalModelPerformanceMetrics]
+        do {
+            history = try JSONDecoder().decode([String: LocalModelPerformanceMetrics].self, from: data)
+        } catch {
+            logger.error("Failed to decode LocalOrchestrator performance history: \(error.localizedDescription)")
             return
         }
         modelPerformance = history
@@ -503,8 +507,12 @@ final class UnifiedLocalModelOrchestrator {
     }
 
     private func savePerformanceHistory() {
-        guard let data = try? JSONEncoder().encode(modelPerformance) else { return }
-        UserDefaults.standard.set(data, forKey: "LocalOrchestrator.performanceHistory")
+        do {
+            let data = try JSONEncoder().encode(modelPerformance)
+            UserDefaults.standard.set(data, forKey: "LocalOrchestrator.performanceHistory")
+        } catch {
+            logger.error("Failed to encode LocalOrchestrator performance history: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Cleanup

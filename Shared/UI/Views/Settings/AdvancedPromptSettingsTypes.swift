@@ -2,6 +2,7 @@
 // Supporting types for AdvancedPromptSettingsView
 
 import Foundation
+import OSLog
 
 // MARK: - Custom Prompt
 
@@ -62,6 +63,8 @@ struct CustomPrompt: Identifiable, Codable, Hashable {
 
 // MARK: - Prompt Library
 
+private let promptLibraryLogger = Logger(subsystem: "ai.thea.app", category: "PromptLibrary")
+
 struct PromptLibrary: Codable {
     var prompts: [CustomPrompt] = []
 
@@ -112,16 +115,23 @@ struct PromptLibrary: Codable {
     // MARK: - Persistence
 
     static func load() -> PromptLibrary {
-        guard let data = UserDefaults.standard.data(forKey: Self.storageKey),
-              let library = try? JSONDecoder().decode(PromptLibrary.self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: Self.storageKey) else {
             return PromptLibrary(prompts: defaultPrompts())
         }
-        return library
+        do {
+            return try JSONDecoder().decode(PromptLibrary.self, from: data)
+        } catch {
+            promptLibraryLogger.error("Failed to decode PromptLibrary: \(error.localizedDescription)")
+            return PromptLibrary(prompts: defaultPrompts())
+        }
     }
 
     func save() {
-        if let data = try? JSONEncoder().encode(self) {
+        do {
+            let data = try JSONEncoder().encode(self)
             UserDefaults.standard.set(data, forKey: Self.storageKey)
+        } catch {
+            promptLibraryLogger.error("Failed to encode PromptLibrary: \(error.localizedDescription)")
         }
     }
 

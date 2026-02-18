@@ -26,7 +26,7 @@ extension OrchestratorSettingsView {
                         Text("\(String(format: "%.2f", executionStats.avgResponseTime))s")
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundStyle(executionStats.avgResponseTime < 2.0 ? Color.theaSuccess : executionStats.avgResponseTime < 5.0 ? Color.theaWarning : Color.theaError)
+                            .foregroundStyle(executionStats.avgResponseTime < 2.0 ? .green : executionStats.avgResponseTime < 5.0 ? .orange : .red)
                     }
 
                     Spacer()
@@ -47,7 +47,7 @@ extension OrchestratorSettingsView {
                         Text("\(Int(executionStats.successRate * 100))%")
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundStyle(executionStats.successRate > 0.95 ? Color.theaSuccess : executionStats.successRate > 0.8 ? Color.theaWarning : Color.theaError)
+                            .foregroundStyle(executionStats.successRate > 0.95 ? .green : executionStats.successRate > 0.8 ? .orange : .red)
                     }
 
                     Spacer()
@@ -56,11 +56,11 @@ extension OrchestratorSettingsView {
                     VStack(alignment: .trailing, spacing: 2) {
                         Text("\(executionStats.successfulTasks) successful")
                             .font(.caption)
-                            .foregroundStyle(Color.theaSuccess)
+                            .foregroundStyle(.green)
 
                         Text("\(executionStats.failedTasks) failed")
                             .font(.caption)
-                            .foregroundStyle(Color.theaError)
+                            .foregroundStyle(.red)
                     }
                 }
 
@@ -110,7 +110,7 @@ extension OrchestratorSettingsView {
                                 let width = geometry.size.width * CGFloat(count) / CGFloat(maxCount)
 
                                 RoundedRectangle(cornerRadius: 2)
-                                    .fill(model.hasPrefix("local-") ? Color.theaSuccess : Color.theaInfo)
+                                    .fill(model.hasPrefix("local-") ? Color.green : Color.blue)
                                     .frame(width: width, height: 12)
                             }
                             .frame(height: 12)
@@ -134,7 +134,7 @@ extension OrchestratorSettingsView {
                 let height = CGFloat(time / maxTime) * 30
 
                 RoundedRectangle(cornerRadius: 1)
-                    .fill(time < 2.0 ? Color.theaSuccess : time < 5.0 ? Color.theaWarning : Color.theaError)
+                    .fill(time < 2.0 ? Color.green : time < 5.0 ? Color.orange : Color.red)
                     .frame(width: 6, height: max(4, height))
             }
         }
@@ -195,7 +195,7 @@ extension OrchestratorSettingsView {
     func executionHistoryRow(_ execution: ExecutionRecord) -> some View {
         HStack(spacing: 12) {
             Image(systemName: execution.success ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundStyle(execution.success ? Color.theaSuccess : Color.theaError)
+                .foregroundStyle(execution.success ? .green : .red)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(execution.taskType)
@@ -214,7 +214,7 @@ extension OrchestratorSettingsView {
                     .font(.caption2)
                     .padding(.horizontal, 4)
                     .padding(.vertical, 2)
-                    .background(Color.theaInfo.opacity(0.2))
+                    .background(Color.blue.opacity(0.2))
                     .cornerRadius(4)
 
                 Text("\(String(format: "%.2f", execution.responseTime))s")

@@ -80,12 +80,6 @@ enum TheaSchemaMigrationPlan: SchemaMigrationPlan {
         ]
     }
 
-    /// The latest schema version. Pass this to `ModelContainer(for:migrationPlan:configurations:)`.
-    /// Update this to `SchemaV2.self` etc. as new versions are added.
-    static var currentSchema: Schema {
-        Schema(versionedSchema: SchemaV1.self)
-    }
-
     // MARK: - Future Migration Stages (Examples)
 
     /*

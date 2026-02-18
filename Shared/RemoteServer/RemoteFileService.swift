@@ -7,12 +7,14 @@
 //
 
 import Foundation
+import OSLog
 
 // MARK: - Remote File Service
 
 /// Secure file access service for remote operations
 @MainActor
 public class RemoteFileService: ObservableObject {
+    private let logger = Logger(subsystem: "com.thea.app", category: "RemoteFileService")
     // MARK: - Published State
 
     @Published public private(set) var isEnabled = true
@@ -88,8 +90,11 @@ public class RemoteFileService: ObservableObject {
                         continue
                     }
 
-                    if let item = try? createFileItem(at: fullPath, relativePath: relativePath) {
+                    do {
+                        let item = try createFileItem(at: fullPath, relativePath: relativePath)
                         items.append(item)
+                    } catch {
+                        logger.debug("Could not index file \(relativePath): \(error.localizedDescription)")
                     }
                 }
             }
@@ -101,8 +106,11 @@ public class RemoteFileService: ObservableObject {
                 }
 
                 let fullPath = (resolvedPath as NSString).appendingPathComponent(name)
-                if let item = try? createFileItem(at: fullPath, relativePath: name) {
+                do {
+                    let item = try createFileItem(at: fullPath, relativePath: name)
                     items.append(item)
+                } catch {
+                    logger.debug("Could not index file \(name): \(error.localizedDescription)")
                 }
             }
         }
@@ -133,7 +141,7 @@ public class RemoteFileService: ObservableObject {
             return .error("Cannot open file for reading")
         }
 
-        defer { try? fileHandle.close() }
+        defer { do { try fileHandle.close() } catch { logger.debug("Failed to close read file handle: \(error.localizedDescription)") } }
 
         // Seek to offset
         try fileHandle.seek(toOffset: UInt64(offset))
@@ -166,7 +174,7 @@ public class RemoteFileService: ObservableObject {
             return .error("Cannot open file for writing")
         }
 
-        defer { try? fileHandle.close() }
+        defer { do { try fileHandle.close() } catch { logger.debug("Failed to close write file handle: \(error.localizedDescription)") } }
 
         if append {
             try fileHandle.seekToEnd()
@@ -202,9 +210,13 @@ public class RemoteFileService: ObservableObject {
 
         if isDirectory.boolValue, !recursive {
             // Check if directory is empty
-            let contents = try? fileManager.contentsOfDirectory(atPath: resolvedPath)
-            if let contents, !contents.isEmpty {
-                return .error("Directory is not empty. Use recursive delete.")
+            do {
+                let contents = try fileManager.contentsOfDirectory(atPath: resolvedPath)
+                if !contents.isEmpty {
+                    return .error("Directory is not empty. Use recursive delete.")
+                }
+            } catch {
+                logger.debug("Could not check directory contents before delete: \(error.localizedDescription)")
             }
         }
 
@@ -337,7 +349,11 @@ public class RemoteFileService: ObservableObject {
         let isSymlink = attributes[.type] as? FileAttributeType == .typeSymbolicLink
         var symlinkTarget: String?
         if isSymlink {
-            symlinkTarget = try? fileManager.destinationOfSymbolicLink(atPath: path)
+            do {
+                symlinkTarget = try fileManager.destinationOfSymbolicLink(atPath: path)
+            } catch {
+                logger.debug("Could not read symlink target for \(path): \(error.localizedDescription)")
+            }
         }
 
         let name = (path as NSString).lastPathComponent

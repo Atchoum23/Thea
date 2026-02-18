@@ -91,7 +91,7 @@
                 // Enabled indicator
                 if skillsManager.isEnabled(skill) {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.theaSuccess)
+                        .foregroundStyle(.green)
                         .accessibilityHidden(true)
                 }
             }
@@ -188,7 +188,7 @@
                         if skillsManager.isEnabled(skill) {
                             Label("Enabled", systemImage: "checkmark.circle.fill")
                                 .font(.caption)
-                                .foregroundStyle(.theaSuccess)
+                                .foregroundStyle(.green)
                         } else {
                             Label("Disabled", systemImage: "xmark.circle.fill")
                                 .font(.caption)

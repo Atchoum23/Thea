@@ -7,6 +7,9 @@
 //
 
 import Foundation
+import OSLog
+
+private let asanaLogger = Logger(subsystem: "ai.thea.app", category: "AsanaModels")
 
 // MARK: - Data Models
 
@@ -392,7 +395,6 @@ public struct AsanaCustomField: Codable, Sendable {
 
 // MARK: - Batch API Models
 
-// @unchecked Sendable: data is [String: Any] for Asana Batch API flexibility; values are JSON primitives
 public struct AsanaBatchAction: @unchecked Sendable {
     public let relativePath: String
     public let method: String
@@ -487,7 +489,6 @@ public struct AsanaWebhookResource: Codable, Sendable {
 
 // MARK: - Helper Types
 
-// @unchecked Sendable: type-erased Codable wrapper; wraps only JSON-primitive values
 public struct AsanaAnyCodable: Codable, @unchecked Sendable {
     public let value: Any
 
@@ -499,26 +500,26 @@ public struct AsanaAnyCodable: Codable, @unchecked Sendable {
         let container = try decoder.singleValueContainer()
         if container.decodeNil() {
             value = NSNull()
-        } else if let string = try? container.decode(String.self) {
-            value = string
-        } else if let int = try? container.decode(Int.self) {
-            value = int
-        } else if let double = try? container.decode(Double.self) {
-            value = double
-        } else if let bool = try? container.decode(Bool.self) {
-            value = bool
-        } else if let array = try? container.decode([AsanaAnyCodable].self) {
-            value = array.map { $0.value }
-        } else if let keyedContainer = try? decoder.container(keyedBy: DynamicCodingKey.self) {
+            return
+        }
+        do { value = try container.decode(String.self); return } catch {}
+        do { value = try container.decode(Int.self); return } catch {}
+        do { value = try container.decode(Double.self); return } catch {}
+        do { value = try container.decode(Bool.self); return } catch {}
+        do { value = (try container.decode([AsanaAnyCodable].self)).map { $0.value }; return } catch {}
+        do {
+            let keyedContainer = try decoder.container(keyedBy: DynamicCodingKey.self)
             var dict: [String: Any] = [:]
             for key in keyedContainer.allKeys {
                 let nested = try keyedContainer.decode(AsanaAnyCodable.self, forKey: key)
                 dict[key.stringValue] = nested.value
             }
             value = dict
-        } else {
-            value = NSNull()
+            return
+        } catch {
+            asanaLogger.debug("AsanaAnyCodable: falling back to NSNull for unrecognised type: \(error.localizedDescription, privacy: .public)")
         }
+        value = NSNull()
     }
 
     private struct DynamicCodingKey: CodingKey {

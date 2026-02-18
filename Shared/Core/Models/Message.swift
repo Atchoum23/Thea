@@ -1,10 +1,12 @@
 import Foundation
+import OSLog
 @preconcurrency import SwiftData
 
 /// Shared JSON coders to avoid repeated instantiation in computed properties.
 /// JSONDecoder/JSONEncoder are reference types and thread-safe for concurrent reads.
 private let sharedDecoder = JSONDecoder()
 private let sharedEncoder = JSONEncoder()
+private let messageLogger = Logger(subsystem: "com.thea.app", category: "Message")
 
 @Model
 final class Message {
@@ -68,11 +70,25 @@ final class Message {
         self.id = id
         self.conversationID = conversationID
         self.role = role.rawValue
-        contentData = (try? sharedEncoder.encode(content)) ?? Data()
+        do {
+            contentData = try sharedEncoder.encode(content)
+        } catch {
+            messageLogger.error("Failed to encode message content: \(error.localizedDescription)")
+            contentData = Data()
+        }
         self.timestamp = timestamp
         self.model = model
         self.tokenCount = tokenCount
-        metadataData = metadata.flatMap { try? sharedEncoder.encode($0) }
+        if let metadata {
+            do {
+                metadataData = try sharedEncoder.encode(metadata)
+            } catch {
+                messageLogger.error("Failed to encode message metadata: \(error.localizedDescription)")
+                metadataData = nil
+            }
+        } else {
+            metadataData = nil
+        }
         self.orderIndex = orderIndex
         self.parentMessageId = parentMessageId
         self.branchIndex = branchIndex
@@ -87,12 +103,22 @@ final class Message {
     }
 
     var content: MessageContent {
-        (try? sharedDecoder.decode(MessageContent.self, from: contentData)) ?? .text("")
+        do {
+            return try sharedDecoder.decode(MessageContent.self, from: contentData)
+        } catch {
+            messageLogger.error("Failed to decode message content: \(error.localizedDescription)")
+            return .text("")
+        }
     }
 
     var metadata: MessageMetadata? {
         guard let data = metadataData else { return nil }
-        return try? sharedDecoder.decode(MessageMetadata.self, from: data)
+        do {
+            return try sharedDecoder.decode(MessageMetadata.self, from: data)
+        } catch {
+            messageLogger.error("Failed to decode message metadata: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     #if !THEA_MODELS_ONLY
@@ -120,7 +146,12 @@ final class Message {
     /// Original content if this message was edited
     var originalContent: MessageContent? {
         guard let data = originalContentData else { return nil }
-        return try? sharedDecoder.decode(MessageContent.self, from: data)
+        do {
+            return try sharedDecoder.decode(MessageContent.self, from: data)
+        } catch {
+            messageLogger.error("Failed to decode original message content: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     /// Create an edited version of this message (for branching)
@@ -206,12 +237,6 @@ struct MessageMetadata: Codable, Sendable {
     // Follow-up suggestions generated after AI response
     var followUpSuggestions: [FollowUpSuggestion]?
 
-    // Extended thinking trace (summarized thinking from Claude Opus 4.6 adaptive thinking)
-    var thinkingTrace: String?
-
-    // Hallucination risk flags from semantic entropy analysis
-    var hallucinationFlags: [HallucinationFlag]?
-
     init(
         finishReason: String? = nil,
         systemFingerprint: String? = nil,
@@ -222,9 +247,7 @@ struct MessageMetadata: Codable, Sendable {
         respondingDeviceType: String? = nil,
         confidence: Double? = nil,
         inputTokens: Int? = nil,
-        followUpSuggestions: [FollowUpSuggestion]? = nil,
-        thinkingTrace: String? = nil,
-        hallucinationFlags: [HallucinationFlag]? = nil
+        followUpSuggestions: [FollowUpSuggestion]? = nil
     ) {
         self.finishReason = finishReason
         self.systemFingerprint = systemFingerprint
@@ -236,8 +259,6 @@ struct MessageMetadata: Codable, Sendable {
         self.confidence = confidence
         self.inputTokens = inputTokens
         self.followUpSuggestions = followUpSuggestions
-        self.thinkingTrace = thinkingTrace
-        self.hallucinationFlags = hallucinationFlags
     }
 }
 
@@ -261,29 +282,6 @@ enum SuggestionGenerationSource: String, Codable, Sendable {
     case heuristic
     case ai
     case learnedPattern
-}
-
-// MARK: - Hallucination Flag
-
-/// Flags specific claims in a response that may be hallucinated
-struct HallucinationFlag: Codable, Sendable, Identifiable {
-    let id: UUID
-    let claim: String
-    let riskLevel: HallucinationRisk
-    let reason: String
-
-    init(claim: String, riskLevel: HallucinationRisk, reason: String) {
-        self.id = UUID()
-        self.claim = claim
-        self.riskLevel = riskLevel
-        self.reason = reason
-    }
-}
-
-enum HallucinationRisk: String, Codable, Sendable {
-    case low
-    case medium
-    case high
 }
 
 // MARK: - Identifiable

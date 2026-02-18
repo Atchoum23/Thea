@@ -76,7 +76,11 @@ public actor HealthContextProvider: ContextProvider {
             updateTask = Task { [weak self] in
                 while !Task.isCancelled {
                     await self?.fetchHealthData()
-                    try? await Task.sleep(for: .seconds(60))
+                    do {
+                        try await Task.sleep(for: .seconds(60))
+                    } catch {
+                        break // Task cancelled — stop periodic updates
+                    }
                 }
             }
 

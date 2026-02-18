@@ -502,7 +502,11 @@ public final class CausalPatternAnalyzer {
     private func startPeriodicAnalysis() {
         Task.detached { [weak self] in
             while true {
-                try? await Task.sleep(for: .seconds(600)) // Every 10 minutes
+                do {
+                    try await Task.sleep(for: .seconds(600)
+                } catch {
+                    break
+                }) // Every 10 minutes
                 await self?.performPeriodicAnalysis()
             }
         }

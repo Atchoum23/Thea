@@ -1,9 +1,13 @@
 import Foundation
+import OSLog
 #if os(macOS)
 import MLXLMCommon
 #endif
 
 // MARK: - Local Model Instances
+
+private let localModelProviderLogger = Logger(subsystem: "ai.thea.app", category: "LocalModelProvider")
+
 
 protocol LocalModelInstance: Sendable {
     var model: LocalModel { get }
@@ -44,11 +48,15 @@ struct OllamaModelInstance: LocalModelInstance {
                     let (bytes, _) = try await URLSession.shared.bytes(for: request)
 
                     for try await line in bytes.lines {
-                        if let data = line.data(using: .utf8),
-                           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                           let response = json["response"] as? String
-                        {
-                            continuation.yield(response)
+                        if let data = line.data(using: .utf8) {
+                            do {
+                                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                                   let response = json["response"] as? String {
+                                    continuation.yield(response)
+                                }
+                            } catch {
+                                localModelProviderLogger.error("Skipping malformed generate stream line: \(error.localizedDescription)")
+                            }
                         }
                     }
 
@@ -89,12 +97,16 @@ struct OllamaModelInstance: LocalModelInstance {
                     let (bytes, _) = try await URLSession.shared.bytes(for: request)
 
                     for try await line in bytes.lines {
-                        if let data = line.data(using: .utf8),
-                           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                           let message = json["message"] as? [String: Any],
-                           let content = message["content"] as? String
-                        {
-                            continuation.yield(content)
+                        if let data = line.data(using: .utf8) {
+                            do {
+                                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                                   let message = json["message"] as? [String: Any],
+                                   let content = message["content"] as? String {
+                                    continuation.yield(content)
+                                }
+                            } catch {
+                                localModelProviderLogger.error("Skipping malformed chat stream line: \(error.localizedDescription)")
+                            }
                         }
                     }
 

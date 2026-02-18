@@ -9,6 +9,7 @@
 //
 
 import Foundation
+import OSLog
 import SwiftData
 
 // MARK: - GDPR Data Exporter
@@ -19,6 +20,8 @@ import SwiftData
 @MainActor
 public final class GDPRDataExporter {
     public static let shared = GDPRDataExporter()
+
+    private let logger = Logger(subsystem: "com.thea.app", category: "GDPRDataExporter")
 
     private init() {}
 
@@ -57,7 +60,13 @@ public final class GDPRDataExporter {
 
     private func exportInputStatistics(context: ModelContext) async throws -> [[String: Any]] {
         let descriptor = FetchDescriptor<DailyInputStatistics>()
-        let records = (try? context.fetch(descriptor)) ?? []
+        let records: [DailyInputStatistics]
+        do {
+            records = try context.fetch(descriptor)
+        } catch {
+            logger.error("Failed to fetch input statistics: \(error.localizedDescription)")
+            records = []
+        }
 
         return records.map { record in
             [
@@ -73,7 +82,13 @@ public final class GDPRDataExporter {
 
     private func exportBrowsingHistory(context: ModelContext) async throws -> [[String: Any]] {
         let descriptor = FetchDescriptor<BrowsingRecord>()
-        let records = (try? context.fetch(descriptor)) ?? []
+        let records: [BrowsingRecord]
+        do {
+            records = try context.fetch(descriptor)
+        } catch {
+            logger.error("Failed to fetch browsing history: \(error.localizedDescription)")
+            records = []
+        }
 
         return records.map { record in
             [
@@ -89,20 +104,26 @@ public final class GDPRDataExporter {
     }
 
     private func exportLocationHistory(context _: ModelContext) async throws -> [[String: Any]] {
-        // LocationRecord is not persisted via SwiftData — location data is ephemeral
-        // Returns empty until location history persistence is added
+        // Note: LocationRecord model would need to exist
+        // This is a placeholder for the expected structure
         []
     }
 
     private func exportScreenTimeData(context _: ModelContext) async throws -> [[String: Any]] {
-        // ScreenTimeRecord is not persisted via SwiftData — screen time uses ScreenTimeTracker in-memory
-        // Returns empty until screen time persistence is added
+        // Note: ScreenTimeRecord model would need to exist
+        // This is a placeholder for the expected structure
         []
     }
 
     private func exportConversations(context: ModelContext) async throws -> [[String: Any]] {
         let descriptor = FetchDescriptor<Conversation>()
-        let records = (try? context.fetch(descriptor)) ?? []
+        let records: [Conversation]
+        do {
+            records = try context.fetch(descriptor)
+        } catch {
+            logger.error("Failed to fetch conversations: \(error.localizedDescription)")
+            records = []
+        }
 
         return records.map { record in
             [
@@ -145,21 +166,21 @@ public final class GDPRDataExporter {
     public func deleteAllData(modelContext: ModelContext) async throws {
         // Delete input statistics
         let inputDescriptor = FetchDescriptor<DailyInputStatistics>()
-        let inputRecords = (try? modelContext.fetch(inputDescriptor)) ?? []
+        let inputRecords = try modelContext.fetch(inputDescriptor)
         for record in inputRecords {
             modelContext.delete(record)
         }
 
         // Delete browsing history
         let browsingDescriptor = FetchDescriptor<BrowsingRecord>()
-        let browsingRecords = (try? modelContext.fetch(browsingDescriptor)) ?? []
+        let browsingRecords = try modelContext.fetch(browsingDescriptor)
         for record in browsingRecords {
             modelContext.delete(record)
         }
 
         // Delete conversations
         let conversationDescriptor = FetchDescriptor<Conversation>()
-        let conversations = (try? modelContext.fetch(conversationDescriptor)) ?? []
+        let conversations = try modelContext.fetch(conversationDescriptor)
         for record in conversations {
             modelContext.delete(record)
         }

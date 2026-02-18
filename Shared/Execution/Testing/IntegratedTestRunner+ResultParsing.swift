@@ -96,26 +96,31 @@ extension IntegratedTestRunner {
         var results: [TestCaseResult] = []
 
         // Try JSON parsing first
-        if let jsonData = output.data(using: .utf8),
-           let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any],
-           let tests = json["tests"] as? [[String: Any]] {
-            for test in tests {
-                let name = test["nodeid"] as? String ?? "unknown"
-                let outcome = test["outcome"] as? String ?? "unknown"
-                let duration = test["duration"] as? Double ?? 0
+        if let jsonData = output.data(using: .utf8) {
+            do {
+                if let json = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any],
+                   let tests = json["tests"] as? [[String: Any]] {
+                    for test in tests {
+                        let name = test["nodeid"] as? String ?? "unknown"
+                        let outcome = test["outcome"] as? String ?? "unknown"
+                        let duration = test["duration"] as? Double ?? 0
 
-                let status: TestStatus = switch outcome {
-                case "passed": .passed
-                case "failed": .failed
-                case "skipped": .skipped
-                default: .error
+                        let status: TestStatus = switch outcome {
+                        case "passed": .passed
+                        case "failed": .failed
+                        case "skipped": .skipped
+                        default: .error
+                        }
+
+                        results.append(TestCaseResult(
+                            name: name,
+                            status: status,
+                            duration: duration
+                        ))
+                    }
                 }
-
-                results.append(TestCaseResult(
-                    name: name,
-                    status: status,
-                    duration: duration
-                ))
+            } catch {
+                // JSON parse failed — fall through to text parsing below
             }
         }
 
@@ -159,34 +164,39 @@ extension IntegratedTestRunner {
     private func parseJestOutput(output: String) -> [TestCaseResult] {
         var results: [TestCaseResult] = []
 
-        if let jsonData = output.data(using: .utf8),
-           let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any],
-           let testResults = json["testResults"] as? [[String: Any]] {
-            for file in testResults {
-                if let assertionResults = file["assertionResults"] as? [[String: Any]] {
-                    for test in assertionResults {
-                        let name = test["fullName"] as? String
-                            ?? test["title"] as? String
-                            ?? "unknown"
-                        let statusStr = test["status"] as? String ?? "unknown"
-                        let duration = (test["duration"] as? Double ?? 0) / 1000
+        if let jsonData = output.data(using: .utf8) {
+            do {
+                if let json = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any],
+                   let testResults = json["testResults"] as? [[String: Any]] {
+                    for file in testResults {
+                        if let assertionResults = file["assertionResults"] as? [[String: Any]] {
+                            for test in assertionResults {
+                                let name = test["fullName"] as? String
+                                    ?? test["title"] as? String
+                                    ?? "unknown"
+                                let statusStr = test["status"] as? String ?? "unknown"
+                                let duration = (test["duration"] as? Double ?? 0) / 1000
 
-                        let status: TestStatus = switch statusStr {
-                        case "passed": .passed
-                        case "failed": .failed
-                        case "pending", "skipped": .skipped
-                        default: .error
+                                let status: TestStatus = switch statusStr {
+                                case "passed": .passed
+                                case "failed": .failed
+                                case "pending", "skipped": .skipped
+                                default: .error
+                                }
+
+                                results.append(TestCaseResult(
+                                    name: name,
+                                    status: status,
+                                    duration: duration,
+                                    errorMessage: (test["failureMessages"] as? [String])?
+                                        .joined(separator: "\n")
+                                ))
+                            }
                         }
-
-                        results.append(TestCaseResult(
-                            name: name,
-                            status: status,
-                            duration: duration,
-                            errorMessage: (test["failureMessages"] as? [String])?
-                                .joined(separator: "\n")
-                        ))
                     }
                 }
+            } catch {
+                // JSON parse failed — no Jest output to parse
             }
         }
 
@@ -196,30 +206,35 @@ extension IntegratedTestRunner {
     private func parseMochaOutput(output: String) -> [TestCaseResult] {
         var results: [TestCaseResult] = []
 
-        if let jsonData = output.data(using: .utf8),
-           let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
-            if let passes = json["passes"] as? [[String: Any]] {
-                for test in passes {
-                    let name = test["fullTitle"] as? String
-                        ?? test["title"] as? String
-                        ?? "unknown"
-                    let duration = (test["duration"] as? Double ?? 0) / 1000
-                    results.append(TestCaseResult(
-                        name: name, status: .passed, duration: duration
-                    ))
+        if let jsonData = output.data(using: .utf8) {
+            do {
+                if let json = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
+                    if let passes = json["passes"] as? [[String: Any]] {
+                        for test in passes {
+                            let name = test["fullTitle"] as? String
+                                ?? test["title"] as? String
+                                ?? "unknown"
+                            let duration = (test["duration"] as? Double ?? 0) / 1000
+                            results.append(TestCaseResult(
+                                name: name, status: .passed, duration: duration
+                            ))
+                        }
+                    }
+                    if let failures = json["failures"] as? [[String: Any]] {
+                        for test in failures {
+                            let name = test["fullTitle"] as? String
+                                ?? test["title"] as? String
+                                ?? "unknown"
+                            let duration = (test["duration"] as? Double ?? 0) / 1000
+                            let error = (test["err"] as? [String: Any])?["message"] as? String
+                            results.append(TestCaseResult(
+                                name: name, status: .failed, duration: duration, errorMessage: error
+                            ))
+                        }
+                    }
                 }
-            }
-            if let failures = json["failures"] as? [[String: Any]] {
-                for test in failures {
-                    let name = test["fullTitle"] as? String
-                        ?? test["title"] as? String
-                        ?? "unknown"
-                    let duration = (test["duration"] as? Double ?? 0) / 1000
-                    let error = (test["err"] as? [String: Any])?["message"] as? String
-                    results.append(TestCaseResult(
-                        name: name, status: .failed, duration: duration, errorMessage: error
-                    ))
-                }
+            } catch {
+                // JSON parse failed — no Mocha output to parse
             }
         }
 
@@ -237,9 +252,13 @@ extension IntegratedTestRunner {
         var results: [TestCaseResult] = []
 
         for line in output.components(separatedBy: .newlines) {
-            guard let data = line.data(using: .utf8),
-                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-                continue
+            guard let data = line.data(using: .utf8) else { continue }
+            let json: [String: Any]
+            do {
+                guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { continue }
+                json = parsed
+            } catch {
+                continue // not valid JSON line
             }
 
             guard let action = json["Action"] as? String,
@@ -313,11 +332,13 @@ extension IntegratedTestRunner {
             }
 
             // Check for .xcodeproj or .xcworkspace
-            if let contents = try? fileManager.contentsOfDirectory(atPath: current),
-               contents.contains(where: {
-                   $0.hasSuffix(".xcodeproj") || $0.hasSuffix(".xcworkspace")
-               }) {
-                return current
+            do {
+                let contents = try fileManager.contentsOfDirectory(atPath: current)
+                if contents.contains(where: { $0.hasSuffix(".xcodeproj") || $0.hasSuffix(".xcworkspace") }) {
+                    return current
+                }
+            } catch {
+                // Can't read this directory — continue searching upward
             }
 
             current = (current as NSString).deletingLastPathComponent

@@ -2,7 +2,10 @@
 // Thea — AI-powered code assistant UI
 // Replaces: Cursor, Codex (for AI-assisted development)
 
+import OSLog
 import SwiftUI
+
+private let codeAssistantViewLogger = Logger(subsystem: "ai.thea.app", category: "CodeAssistantView")
 
 struct CodeAssistantView: View {
     @StateObject private var assistant = CodeAssistant.shared
@@ -61,7 +64,11 @@ struct CodeAssistantView: View {
         .fileImporter(isPresented: $showAddProject, allowedContentTypes: [.folder]) { result in
             if case .success(let url) = result {
                 Task {
-                    _ = try? await assistant.scanProject(at: url)
+                    do {
+                        try await assistant.scanProject(at: url)
+                    } catch {
+                        codeAssistantViewLogger.error("Failed to scan project at \(url.path): \(error.localizedDescription)")
+                    }
                 }
             }
         }
@@ -159,7 +166,11 @@ struct CodeAssistantView: View {
         .contextMenu {
             Button("Rescan") {
                 Task {
-                    _ = try? await assistant.scanProject(at: URL(fileURLWithPath: project.path))
+                    do {
+                        try await assistant.scanProject(at: URL(fileURLWithPath: project.path))
+                    } catch {
+                        codeAssistantViewLogger.error("Failed to rescan project: \(error.localizedDescription)")
+                    }
                 }
             }
             #if os(macOS)
@@ -242,7 +253,11 @@ struct CodeAssistantView: View {
                     Spacer()
                     Button {
                         Task {
-                            _ = try? await assistant.scanProject(at: URL(fileURLWithPath: project.path))
+                            do {
+                                try await assistant.scanProject(at: URL(fileURLWithPath: project.path))
+                            } catch {
+                                codeAssistantViewLogger.error("Failed to rescan project: \(error.localizedDescription)")
+                            }
                         }
                     } label: {
                         Label(assistant.isScanning ? "Scanning..." : "Rescan", systemImage: "arrow.clockwise")
@@ -268,7 +283,7 @@ struct CodeAssistantView: View {
                 // Language breakdown
                 if !project.languages.isEmpty {
                     GroupBox("Language Breakdown") {
-                        ForEach(project.languages.sorted { $0.value > $1.value }, id: \.key) { lang, lines in
+                        ForEach(project.languages.sorted(by: { $0.value > $1.value }), id: \.key) { lang, lines in
                             HStack {
                                 Image(systemName: lang.icon)
                                     .frame(width: 20)

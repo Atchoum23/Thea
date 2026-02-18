@@ -253,7 +253,7 @@ public final class ModelDownloadManager {
         // Filter to essential model files (weights, config, tokenizer)
         let essentialExtensions = ["safetensors", "json", "txt", "model", "bin", "gguf"]
         let filesToDownload = filenames.filter { name in
-            essentialExtensions.contains { name.hasSuffix(".\($0)") }
+            essentialExtensions.contains(where: { name.hasSuffix(".\($0)") })
         }
 
         guard !filesToDownload.isEmpty else {
@@ -273,8 +273,18 @@ public final class ModelDownloadManager {
             try FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
 
             // Skip if file already exists and has content
-            if FileManager.default.fileExists(atPath: destPath.path),
-               let attrs = try? FileManager.default.attributesOfItem(atPath: destPath.path),
+            let fileAttrs: [FileAttributeKey: Any]?
+            if FileManager.default.fileExists(atPath: destPath.path) {
+                do {
+                    fileAttrs = try FileManager.default.attributesOfItem(atPath: destPath.path)
+                } catch {
+                    logger.error("Failed to get file attributes for \(destPath.path): \(error)")
+                    fileAttrs = nil
+                }
+            } else {
+                fileAttrs = nil
+            }
+            if let attrs = fileAttrs,
                let size = attrs[.size] as? Int64, size > 0 {
                 logger.info("Skipping existing file: \(filename)")
                 let overallProgress = Double(fileIndex + 1) / Double(totalFiles)

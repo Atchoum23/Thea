@@ -1,5 +1,6 @@
 #if os(macOS)
     import Foundation
+    import OSLog
     import UserNotifications
 
     // MARK: - QA Tools Manager
@@ -10,6 +11,8 @@
     @Observable
     final class QAToolsManager {
         static let shared = QAToolsManager()
+
+        private let logger = Logger(subsystem: "ai.thea.app", category: "QAToolsManager")
 
         private(set) var isRunning = false
         private(set) var currentTool: QATool?
@@ -426,9 +429,15 @@
         // MARK: - Persistence
 
         private func loadHistory() {
-            guard let data = UserDefaults.standard.data(forKey: "QAToolsManager.history"),
-                  let decoded = try? JSONDecoder().decode([QAToolResult].self, from: data)
-            else {
+            guard let data = UserDefaults.standard.data(forKey: "QAToolsManager.history") else {
+                return
+            }
+            let decoder = JSONDecoder()
+            let decoded: [QAToolResult]
+            do {
+                decoded = try decoder.decode([QAToolResult].self, from: data)
+            } catch {
+                logger.error("Failed to decode QA history: \(error)")
                 return
             }
 
@@ -448,8 +457,12 @@
         }
 
         private func saveHistory() {
-            if let data = try? JSONEncoder().encode(history) {
+            let encoder = JSONEncoder()
+            do {
+                let data = try encoder.encode(history)
                 UserDefaults.standard.set(data, forKey: "QAToolsManager.history")
+            } catch {
+                logger.error("Failed to encode QA history: \(error)")
             }
         }
 

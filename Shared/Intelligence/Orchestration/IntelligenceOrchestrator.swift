@@ -279,7 +279,7 @@ public final class IntelligenceOrchestrator: ObservableObject {
         skills: [SkillDefinition],
         knowledge: [ProjectKnowledgeItem],
         learningContext: LearningContext,
-        responseStyle: PersonalizedResponseStyle
+        responseStyle: ResponseStyle
     ) -> String {
         var prompt = basePrompt
 
@@ -502,7 +502,7 @@ public struct IntelligenceTaskContext: Identifiable, Sendable {
     public let matchingSkills: [SkillDefinition]
     public let knowledgeItems: [ProjectKnowledgeItem]
     public let learningContext: LearningContext
-    public let responseStyle: PersonalizedResponseStyle
+    public let responseStyle: ResponseStyle
     public let enhancedSystemPrompt: String
     public let createdAt: Date
 }

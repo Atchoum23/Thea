@@ -7,6 +7,7 @@
 
 import AVFoundation
 import Foundation
+import OSLog
 import UniformTypeIdentifiers
 
 // MARK: - Types
@@ -218,6 +219,8 @@ enum MediaPlayerError: Error, LocalizedError, Sendable {
 final class MediaPlayer: ObservableObject {
     static let shared = MediaPlayer()
 
+    private let logger = Logger(subsystem: "ai.thea.app", category: "MediaPlayer")
+
     // MARK: - Published State
 
     @Published private(set) var status: PlaybackStatus = .idle
@@ -242,7 +245,11 @@ final class MediaPlayer: ObservableObject {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             .appendingPathComponent("Thea")
             .appendingPathComponent("MediaPlayer")
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            Logger(subsystem: "ai.thea.app", category: "MediaPlayer").debug("Could not create media player storage: \(error.localizedDescription)")
+        }
         return dir
     }()
 
@@ -292,17 +299,27 @@ final class MediaPlayer: ObservableObject {
         item.lastPlayedAt = Date()
 
         // Extract video metadata
-        if let videoTrack = try? await asset.loadTracks(withMediaType: .video).first {
-            let size = try? await videoTrack.load(.naturalSize)
-            if let size {
-                item.resolution = "\(Int(size.width))x\(Int(size.height))"
+        do {
+            if let videoTrack = try await asset.loadTracks(withMediaType: .video).first {
+                do {
+                    let size = try await videoTrack.load(.naturalSize)
+                    item.resolution = "\(Int(size.width))x\(Int(size.height))"
+                } catch {
+                    logger.debug("Could not load video track size: \(error.localizedDescription)")
+                }
             }
+        } catch {
+            logger.debug("Could not load video tracks: \(error.localizedDescription)")
         }
 
         // File size for local files
         if url.isFileURL {
-            let attrs = try? FileManager.default.attributesOfItem(atPath: url.path)
-            item.fileSize = attrs?[.size] as? Int64
+            do {
+                let attrs = try FileManager.default.attributesOfItem(atPath: url.path)
+                item.fileSize = attrs[.size] as? Int64
+            } catch {
+                logger.debug("Could not get file size for \(url.lastPathComponent): \(error.localizedDescription)")
+            }
         }
 
         // Extract chapters from asset
@@ -543,20 +560,15 @@ final class MediaPlayer: ObservableObject {
             let languages = try await asset.load(.availableChapterLocales)
             guard let locale = languages.first else { return [] }
             let groups = try await asset.loadChapterMetadataGroups(bestMatchingPreferredLanguages: [locale.identifier])
-            var chapters: [MediaChapter] = []
-            for group in groups {
-                var title = "Chapter"
-                for item in group.items where item.commonKey == .commonKeyTitle {
-                    if let value = try? await item.load(.stringValue) {
-                        title = value
-                        break
-                    }
-                }
+            return groups.map { group in
+                let title = group.items.compactMap { item -> String? in
+                    guard item.commonKey == .commonKeyTitle else { return nil }
+                    return item.stringValue
+                }.first ?? "Chapter"
                 let start = CMTimeGetSeconds(group.timeRange.start)
                 let end = start + CMTimeGetSeconds(group.timeRange.duration)
-                chapters.append(MediaChapter(title: title, startTime: start, endTime: end))
+                return MediaChapter(title: title, startTime: start, endTime: end)
             }
-            return chapters
         } catch {
             return []
         }

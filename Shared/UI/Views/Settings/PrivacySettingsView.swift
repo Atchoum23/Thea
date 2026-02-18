@@ -1,10 +1,13 @@
 // PrivacySettingsView.swift
 // Comprehensive privacy settings for Thea
 
+import OSLog
 import SwiftUI
 #if canImport(LocalAuthentication)
 import LocalAuthentication
 #endif
+
+private let privacySettingsLogger = Logger(subsystem: "ai.thea.app", category: "PrivacySettingsView")
 
 struct PrivacySettingsView: View {
     @Environment(\.modelContext) private var modelContext
@@ -180,8 +183,8 @@ struct PrivacySettingsView: View {
                         .font(.caption2)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Color.theaSuccess.opacity(0.2))
-                        .foregroundStyle(Color.theaSuccess)
+                        .background(Color.green.opacity(0.2))
+                        .foregroundStyle(.green)
                         .cornerRadius(4)
                 }
             }
@@ -421,13 +424,21 @@ extension PrivacySettingsView {
                 #endif
 
                 exportProgress = 1.0
-                try? await Task.sleep(for: .milliseconds(300))
+                do {
+                    try await Task.sleep(nanoseconds: 300_000_000)
+                } catch {
+                    // Cancellation during export delay is benign
+                }
 
                 isExporting = false
                 privacyConfig.auditLogEntries.append(
                     PrivacyAuditLogEntry(id: UUID(), type: .dataExport, description: "Data export completed", timestamp: Date(), details: "Format: \(privacyConfig.exportFormat.rawValue)")
                 )
-                try? FileManager.default.removeItem(at: fileURL)
+                do {
+                    try FileManager.default.removeItem(at: fileURL)
+                } catch {
+                    privacySettingsLogger.debug("Failed to remove temp export file: \(error.localizedDescription)")
+                }
             } catch {
                 isExporting = false
                 exportError = error

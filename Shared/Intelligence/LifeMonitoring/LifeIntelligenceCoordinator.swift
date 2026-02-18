@@ -13,6 +13,7 @@
 // Provides unified decision-making with full context.
 
 import Foundation
+import OSLog
 #if canImport(UserNotifications)
 import UserNotifications
 #endif
@@ -20,6 +21,7 @@ import UserNotifications
 // MARK: - Life Intelligence Coordinator
 
 public actor LifeIntelligenceCoordinator {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "LifeIntelligenceCoordinator")
     public static let shared = LifeIntelligenceCoordinator()
 
     // MARK: - Subsystems
@@ -368,7 +370,11 @@ public actor LifeIntelligenceCoordinator {
             trigger: nil
         )
 
-        try? await UNUserNotificationCenter.current().add(request)
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+        } catch {
+            logger.debug("Failed to schedule notification: \(error.localizedDescription)")
+        }
         #endif
 
         print("[Notification] \(priority): \(title) - \(body)")
@@ -382,7 +388,11 @@ public actor LifeIntelligenceCoordinator {
 
     private func periodicContextUpdate() async {
         while isRunning {
-            try? await Task.sleep(for: .seconds(60))
+            do {
+                try await Task.sleep(for: .seconds(60))
+            } catch {
+                break
+            }
 
             // Update context
             currentContext.urgentTasksCount = await taskIntelligence.getUrgentTasks().count
@@ -414,7 +424,11 @@ public actor LifeIntelligenceCoordinator {
             }
 
             let timeUntilDigest = endOfDay.timeIntervalSince(now)
-            try? await Task.sleep(for: .seconds(timeUntilDigest))
+            do {
+                try await Task.sleep(for: .seconds(timeUntilDigest))
+            } catch {
+                break
+            }
 
             await generateDailyDigest()
         }

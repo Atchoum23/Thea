@@ -20,68 +20,61 @@ import OSLog
 
 // MARK: - Long-Term Memory Manager
 
-/// Manages persistent facts with time-based decay and reinforcement,
-/// inspired by spaced repetition algorithms. Facts weaken over time
-/// unless reinforced by recall, and are automatically pruned when
-/// their strength drops below a configurable threshold.
+/// Manages persistent facts with time-based decay and reinforcement
 public actor LongTermMemoryManager {
-    /// Shared singleton instance.
     public static let shared = LongTermMemoryManager()
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "LongTermMemory")
 
     // MARK: - Configuration
 
-    /// Parameters controlling memory decay, reinforcement, and pruning behavior.
+    /// Memory decay configuration
     public struct Configuration: Sendable {
-        /// Base decay rate per day (0-1). Higher values cause faster forgetting.
+        /// Base decay rate per day (0-1, higher = faster decay)
         public var baseDecayRate: Double = 0.1
 
-        /// Minimum strength before a memory is eligible for pruning.
+        /// Minimum strength before memory is considered for pruning
         public var minimumStrength: Double = 0.1
 
-        /// Strength boost factor applied when a memory is recalled.
+        /// Reinforcement factor when memory is recalled
         public var reinforcementFactor: Double = 0.2
 
-        /// Maximum single-recall reinforcement boost.
+        /// Maximum reinforcement boost
         public var maxReinforcement: Double = 0.5
 
-        /// Interval between automatic decay passes, in seconds.
+        /// How often to run decay (seconds)
         public var decayInterval: TimeInterval = 3600  // 1 hour
 
-        /// Maximum number of memories to store before eviction.
+        /// Maximum number of memories to store
         public var maxMemories: Int = 5000
 
-        /// Whether to automatically prune memories below minimum strength.
+        /// Auto-prune memories below minimum strength
         public var autoPruneEnabled: Bool = true
 
-        /// Creates a default configuration.
         public init() {}
     }
 
-    /// Current decay and pruning configuration.
     public var configuration = Configuration()
 
     // MARK: - State
 
-    /// All stored long-term memories, keyed by ID.
+    /// All stored long-term memories
     private var memories: [UUID: LongTermMemory] = [:]
 
-    /// Index mapping category names to memory IDs for fast category lookups.
+    /// Index by category for faster lookups
     private var categoryIndex: [String: Set<UUID>] = [:]
 
-    /// Index mapping lowercased keywords to memory IDs for fast search.
+    /// Index by keyword for faster search
     private var keywordIndex: [String: Set<UUID>] = [:]
 
-    /// Background task running the periodic decay loop.
+    /// Decay task
     private var decayTask: Task<Void, Never>?
 
-    /// When the last decay pass was run.
+    /// Last decay run time
     private var lastDecayTime: Date?
 
     // MARK: - Persistence
 
-    /// UserDefaults key for persisted memory data.
     private let storageKey = "LongTermMemoryManager.memories"
 
     // MARK: - Initialization
@@ -95,14 +88,14 @@ public actor LongTermMemoryManager {
 
     // MARK: - Public API
 
-    /// Stores a fact as a long-term memory with initial strength.
+    /// Store a fact with initial strength
     /// - Parameters:
-    ///   - fact: The content of the fact to store.
-    ///   - category: Category for organization and retrieval.
-    ///   - initialStrength: Starting strength (clamped to 0.0-1.0, default 0.8).
-    ///   - keywords: Keywords for search indexing.
-    ///   - source: Where this fact originated from.
-    /// - Returns: The UUID of the newly created memory.
+    ///   - fact: The content of the fact
+    ///   - category: Category for organization
+    ///   - initialStrength: Starting strength (0-1, default 0.8)
+    ///   - keywords: Keywords for search indexing
+    ///   - source: Where this fact came from
+    /// - Returns: The created memory ID
     @discardableResult
     public func storeFact(
         _ fact: String,
@@ -140,9 +133,7 @@ public actor LongTermMemoryManager {
         return memory.id
     }
 
-    /// Reinforces a memory when it is recalled or used, boosting its strength.
-    /// The boost is proportional to how much room there is to grow (diminishing returns near 1.0).
-    /// - Parameter factId: ID of the memory to reinforce.
+    /// Reinforce a memory (called when it's recalled/used)
     public func reinforceFact(_ factId: UUID) async {
         guard var memory = memories[factId] else {
             logger.warning("Attempted to reinforce non-existent memory: \(factId)")
@@ -162,12 +153,7 @@ public actor LongTermMemoryManager {
         await saveToStorage()
     }
 
-    /// Retrieves active memories above a minimum strength threshold.
-    /// - Parameters:
-    ///   - minStrength: Minimum strength to include (default 0.3).
-    ///   - category: Optional category filter.
-    ///   - limit: Maximum number of memories to return.
-    /// - Returns: Memories sorted by strength (strongest first).
+    /// Get active memories above minimum strength threshold
     public func getActiveMemories(
         minStrength: Double = 0.3,
         category: String? = nil,
@@ -189,12 +175,7 @@ public actor LongTermMemoryManager {
         return result
     }
 
-    /// Searches memories by keyword, matching against both the keyword index and content.
-    /// - Parameters:
-    ///   - keywords: Keywords to search for.
-    ///   - minStrength: Minimum strength to include (default 0.2).
-    ///   - limit: Maximum results to return (default 20).
-    /// - Returns: Matching memories sorted by strength (strongest first).
+    /// Search memories by keyword
     public func search(
         keywords: [String],
         minStrength: Double = 0.2,
@@ -225,15 +206,12 @@ public actor LongTermMemoryManager {
             .map { $0 }
     }
 
-    /// Retrieves a single memory by ID.
-    /// - Parameter id: Memory identifier.
-    /// - Returns: The memory if it exists, or nil.
+    /// Get memory by ID
     public func getMemory(_ id: UUID) -> LongTermMemory? {
         memories[id]
     }
 
-    /// Returns all categories with their memory counts and average strengths.
-    /// - Returns: Array of tuples sorted by count (most memories first).
+    /// Get all categories with memory counts
     public func getCategories() -> [(category: String, count: Int, avgStrength: Double)] {
         categoryIndex.map { category, ids in
             let categoryMemories = ids.compactMap { memories[$0] }
@@ -244,11 +222,7 @@ public actor LongTermMemoryManager {
         .sorted { $0.count > $1.count }
     }
 
-    /// Manually reduces a memory's strength by a specified amount.
-    /// If the memory drops below minimum strength and auto-prune is enabled, it is removed.
-    /// - Parameters:
-    ///   - id: Memory identifier.
-    ///   - amount: Amount to subtract from strength.
+    /// Manually decay a specific memory
     public func decayMemory(_ id: UUID, by amount: Double) async {
         guard var memory = memories[id] else { return }
 
@@ -262,15 +236,13 @@ public actor LongTermMemoryManager {
         await saveToStorage()
     }
 
-    /// Permanently deletes a memory.
-    /// - Parameter id: Memory identifier to delete.
+    /// Delete a memory
     public func deleteMemory(_ id: UUID) async {
         await pruneMemory(id)
         await saveToStorage()
     }
 
-    /// Runs the decay algorithm on all memories, applying time-based strength reduction.
-    /// Memories that fall below the minimum strength threshold are pruned if auto-prune is enabled.
+    /// Run decay on all memories
     public func decayUnusedFacts() async {
         let now = Date()
         var prunedCount = 0
@@ -299,8 +271,7 @@ public actor LongTermMemoryManager {
         logger.info("Decay complete. Pruned \(prunedCount) memories below threshold")
     }
 
-    /// Returns aggregate statistics about the long-term memory store.
-    /// - Returns: Statistics including counts, average strength, and last decay time.
+    /// Get statistics about long-term memory
     public func getStatistics() -> LongTermMemoryStats {
         let allMemories = Array(memories.values)
         let strengths = allMemories.map(\.strength)
@@ -317,7 +288,7 @@ public actor LongTermMemoryManager {
 
     // MARK: - Private Implementation
 
-    /// Starts the background periodic decay loop.
+    /// Start the decay loop
     private func startDecayLoop() {
         decayTask?.cancel()
         decayTask = Task { [weak self] in
@@ -333,8 +304,7 @@ public actor LongTermMemoryManager {
         }
     }
 
-    /// Removes a memory from all indexes and the main store.
-    /// - Parameter id: Memory identifier to prune.
+    /// Prune a memory from all indexes
     private func pruneMemory(_ id: UUID) async {
         guard let memory = memories[id] else { return }
 
@@ -358,7 +328,7 @@ public actor LongTermMemoryManager {
         logger.debug("Pruned memory: \(id)")
     }
 
-    /// Evicts the weakest memories when the store exceeds the maximum capacity.
+    /// Enforce maximum memory limit
     private func enforceMemoryLimit() async {
         guard memories.count > configuration.maxMemories else { return }
 
@@ -375,23 +345,24 @@ public actor LongTermMemoryManager {
 
     // MARK: - Persistence
 
-    /// Loads memories from UserDefaults.
     private func loadFromStorage() async {
-        guard let data = UserDefaults.standard.data(forKey: storageKey),
-              let decoded = try? JSONDecoder().decode(LongTermMemoryStorage.self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: storageKey) else {
             logger.debug("No existing long-term memory data found")
             return
         }
 
-        memories = decoded.memories
-        categoryIndex = decoded.categoryIndex
-        keywordIndex = decoded.keywordIndex
-        lastDecayTime = decoded.lastDecayTime
-
-        logger.info("Loaded \(self.memories.count) long-term memories from storage")
+        do {
+            let decoded = try JSONDecoder().decode(LongTermMemoryStorage.self, from: data)
+            memories = decoded.memories
+            categoryIndex = decoded.categoryIndex
+            keywordIndex = decoded.keywordIndex
+            lastDecayTime = decoded.lastDecayTime
+            logger.info("Loaded \(self.memories.count) long-term memories from storage")
+        } catch {
+            logger.error("Failed to decode long-term memory storage: \(error.localizedDescription)")
+        }
     }
 
-    /// Persists current memories to UserDefaults.
     private func saveToStorage() async {
         let storage = LongTermMemoryStorage(
             memories: memories,
@@ -400,46 +371,29 @@ public actor LongTermMemoryManager {
             lastDecayTime: lastDecayTime
         )
 
-        if let data = try? JSONEncoder().encode(storage) {
+        do {
+            let data = try JSONEncoder().encode(storage)
             UserDefaults.standard.set(data, forKey: storageKey)
+        } catch {
+            logger.error("Failed to encode long-term memory storage: \(error.localizedDescription)")
         }
     }
 }
 
 // MARK: - Supporting Types
 
-/// A single long-term memory with content, strength, and metadata.
+/// A long-term memory with strength and metadata
 public struct LongTermMemory: Identifiable, Codable, Sendable {
-    /// Unique memory identifier.
     public let id: UUID
-    /// Textual content of the stored fact.
     public let content: String
-    /// Category for organization (e.g. "user_preferences", "project_facts").
     public let category: String
-    /// Current strength (0.0 = forgotten, 1.0 = maximally retained).
     public var strength: Double
-    /// Keywords for search indexing.
     public let keywords: [String]
-    /// Where this memory originated from.
     public let source: LongTermMemorySource
-    /// When this memory was first created.
     public let createdAt: Date
-    /// When this memory was last reinforced by recall.
     public var lastReinforcedAt: Date?
-    /// How many times this memory has been reinforced.
     public var reinforcementCount: Int
 
-    /// Creates a long-term memory.
-    /// - Parameters:
-    ///   - id: Memory identifier.
-    ///   - content: Fact content.
-    ///   - category: Organization category.
-    ///   - strength: Initial strength (0.0-1.0).
-    ///   - keywords: Search keywords.
-    ///   - source: Memory origin.
-    ///   - createdAt: Creation time.
-    ///   - lastReinforcedAt: Last reinforcement time.
-    ///   - reinforcementCount: Reinforcement count.
     public init(
         id: UUID = UUID(),
         content: String,
@@ -462,53 +416,41 @@ public struct LongTermMemory: Identifiable, Codable, Sendable {
         self.reinforcementCount = reinforcementCount
     }
 
-    /// Whether this memory is considered strong (strength >= 0.7).
+    /// Whether this memory is considered strong
     public var isStrong: Bool {
         strength >= 0.7
     }
 
-    /// Whether this memory is at risk of being pruned (strength < 0.3).
+    /// Whether this memory is at risk of being forgotten
     public var isWeak: Bool {
         strength < 0.3
     }
 
-    /// Number of days since last activity (reinforcement or creation).
+    /// Days since last activity
     public var daysSinceActivity: Double {
         let lastActivity = lastReinforcedAt ?? createdAt
         return Date().timeIntervalSince(lastActivity) / 86400
     }
 }
 
-/// Origin of a long-term memory.
+/// Source of a memory
 public enum LongTermMemorySource: String, Codable, Sendable {
-    /// Extracted from an AI conversation.
-    case conversation
-    /// Explicitly provided by the user.
-    case userInput
-    /// Inferred from behavioral context.
-    case inference
-    /// Imported from an external source.
-    case external
-    /// Generated by a system process.
-    case system
+    case conversation   // From AI conversation
+    case userInput      // Explicitly provided by user
+    case inference      // Inferred from context
+    case external       // From external source
+    case system         // System-generated
 }
 
-/// Aggregate statistics about the long-term memory store.
+/// Statistics about long-term memory
 public struct LongTermMemoryStats: Sendable {
-    /// Total number of stored memories.
     public let totalMemories: Int
-    /// Number of distinct categories.
     public let categories: Int
-    /// Mean strength across all memories.
     public let averageStrength: Double
-    /// Number of memories with strength >= 0.7.
     public let strongMemories: Int
-    /// Number of memories with strength < 0.3.
     public let weakMemories: Int
-    /// When the last decay pass was run.
     public let lastDecayTime: Date?
 
-    /// Overall health score combining strong ratio and average strength.
     public var healthScore: Double {
         guard totalMemories > 0 else { return 0 }
         let strongRatio = Double(strongMemories) / Double(totalMemories)
@@ -517,23 +459,18 @@ public struct LongTermMemoryStats: Sendable {
     }
 }
 
-/// Internal persistence structure for serializing the entire memory store.
+/// Storage structure for persistence
 private struct LongTermMemoryStorage: Codable {
-    /// All memories keyed by ID.
     let memories: [UUID: LongTermMemory]
-    /// Category-to-IDs index.
     let categoryIndex: [String: Set<UUID>]
-    /// Keyword-to-IDs index.
     let keywordIndex: [String: Set<UUID>]
-    /// Last decay pass timestamp.
     let lastDecayTime: Date?
 }
 
 // MARK: - Integration with MemoryManager
 
 extension LongTermMemoryManager {
-    /// Imports high-importance semantic memories from MemoryManager into long-term storage.
-    /// Up to 100 memories are imported with an initial strength of 0.7.
+    /// Import memories from MemoryManager via semantic search
     public func importFromMemoryManager() async {
         let semanticMemories = await MemoryManager.shared.getMemoriesByImportance(type: .semantic, limit: 100)
 
@@ -550,7 +487,7 @@ extension LongTermMemoryManager {
         logger.info("Imported \(semanticMemories.count) memories from MemoryManager")
     }
 
-    /// Exports strong memories (strength >= 0.7) to MemoryManager's semantic store.
+    /// Export strong memories to MemoryManager
     public func exportToMemoryManager() async {
         let strongMemories = getActiveMemories(minStrength: 0.7)
 

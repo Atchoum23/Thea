@@ -1,10 +1,6 @@
 // FocusModeIntelligence+AutoReply.swift
-// THEA - Auto-Reply Logic & Message Sending
+// THEA - Auto-Reply, Message Sending, Language Detection, Urgency Detection
 // Split from FocusModeIntelligence.swift
-//
-// Related extensions:
-// - FocusModeIntelligence+LanguageDetection.swift: Language/urgency detection, time-aware responses
-// - FocusModeIntelligence+StatusSync.swift: WhatsApp/Telegram/COMBOX status sync
 
 import Foundation
 #if canImport(AppKit)
@@ -14,21 +10,12 @@ import AppKit
 import UIKit
 #endif
 
-// MARK: - Auto-Reply Logic & Message Sending
+// MARK: - Auto-Reply, Messaging & Language Detection
 
 extension FocusModeIntelligence {
 
     // MARK: - Auto-Reply Logic
 
-    /// Determine whether an auto-reply should be sent to a specific contact.
-    ///
-    /// Checks that auto-reply is enabled globally, the platform is allowed,
-    /// the reply window hasn't been exceeded, and the per-contact max hasn't been reached.
-    ///
-    /// - Parameters:
-    ///   - contactKey: The unique key identifying the contact.
-    ///   - platform: The communication platform to check against allowed platforms.
-    /// - Returns: `true` if an auto-reply should be sent.
     func shouldSendAutoReply(to contactKey: String, platform: CommunicationPlatform) async -> Bool {
         guard getGlobalSettings().autoReplyEnabled else { return false }
         guard getGlobalSettings().autoReplyPlatforms.contains(platform) else { return false }
@@ -51,12 +38,6 @@ extension FocusModeIntelligence {
         return true
     }
 
-    /// Send the initial auto-reply to a contact, optionally including availability info and urgency prompt.
-    ///
-    /// - Parameters:
-    ///   - communication: The incoming communication to reply to (mutated with status).
-    ///   - state: The conversation state (mutated with reply count and stage).
-    ///   - language: The BCP-47 language code for template selection.
     func sendInitialAutoReply(
         to communication: inout IncomingCommunication,
         state: inout ConversationState,
@@ -80,6 +61,7 @@ extension FocusModeIntelligence {
             state.awaitingUrgencyResponse = true
         }
 
+        // Send via appropriate method
         let success = await sendMessage(to: communication.phoneNumber ?? "", message: message, platform: communication.platform)
 
         if success {
@@ -92,12 +74,6 @@ extension FocusModeIntelligence {
         }
     }
 
-    /// Send call instructions to a contact who confirmed their message is urgent.
-    ///
-    /// - Parameters:
-    ///   - communication: The incoming communication (mutated with status).
-    ///   - state: The conversation state (mutated with stage).
-    ///   - language: The BCP-47 language code for template selection.
     func sendUrgentCallInstructions(
         to communication: inout IncomingCommunication,
         state: inout ConversationState,
@@ -116,15 +92,13 @@ extension FocusModeIntelligence {
         }
     }
 
-    /// Send an SMS notification to a caller whose call was missed during Focus mode.
-    ///
-    /// - Parameter communication: The missed call communication record.
     func sendMissedCallNotification(for communication: IncomingCommunication) async {
         guard let phoneNumber = communication.phoneNumber else { return }
 
         let language = await detectLanguage(for: communication.contactId, phoneNumber: phoneNumber, messageContent: nil)
         let template = getMessageTemplates().callerNotification[language] ?? getMessageTemplates().callerNotification["en"]!
 
+        // Send via SMS (most reliable for call notifications)
         let success = await sendMessage(to: phoneNumber, message: template.missedCallSMS, platform: .sms)
 
         if success {
@@ -132,16 +106,18 @@ extension FocusModeIntelligence {
         }
     }
 
-    /// Handle a detected emergency message with immediate response and optional auto-callback.
-    ///
-    /// - Parameter communication: The incoming communication flagged as an emergency.
     func handleEmergencyMessage(_ communication: IncomingCommunication) async {
+        // Emergency detected - immediate action
         print("[FocusMode] EMERGENCY DETECTED from \(communication.contactName ?? communication.phoneNumber ?? "unknown")")
 
+        // If auto-dial emergency services is enabled and keywords suggest real emergency
+        // This is a safety feature - be very careful with false positives
         if getGlobalSettings().autoDialEmergencyServices {
             // Only for true emergencies (911 keywords, etc.)
+            // This would need very careful implementation
         }
 
+        // Send immediate response with emergency services info
         guard let phoneNumber = communication.phoneNumber else { return }
         _ = communication.languageDetected ?? "en"
 
@@ -156,6 +132,7 @@ extension FocusModeIntelligence {
 
         _ = await sendMessage(to: phoneNumber, message: emergencyMessage, platform: communication.platform)
 
+        // Auto-callback if enabled
         if getGlobalSettings().autoCallbackEnabled {
             await initiateCallback(to: phoneNumber, reason: "Emergency detected")
         }
@@ -163,18 +140,9 @@ extension FocusModeIntelligence {
 
     // MARK: - Message Sending
 
-    /// Send a message to a phone number via the appropriate platform.
-    ///
-    /// On macOS, uses AppleScript automation for Messages, WhatsApp, and Telegram.
-    /// On iOS, delegates to Shortcuts automations.
-    ///
-    /// - Parameters:
-    ///   - phoneNumber: The recipient's phone number.
-    ///   - message: The message text to send.
-    ///   - platform: The communication platform to use.
-    /// - Returns: `true` if the message was sent successfully.
     func sendMessage(to phoneNumber: String, message: String, platform: CommunicationPlatform) async -> Bool {
         #if os(macOS)
+        // On Mac, we can use AppleScript for Messages and direct APIs for others
         switch platform {
         case .imessage, .sms:
             return await sendViaMessages(to: phoneNumber, message: message)
@@ -186,12 +154,12 @@ extension FocusModeIntelligence {
             return false
         }
         #else
+        // On iOS, use Shortcuts
         return await sendViaShortcuts(to: phoneNumber, message: message, platform: platform)
         #endif
     }
 
     #if os(macOS)
-    /// Send a message via the macOS Messages app using AppleScript.
     func sendViaMessages(to phoneNumber: String, message: String) async -> Bool {
         let script = """
         tell application "Messages"
@@ -204,8 +172,10 @@ extension FocusModeIntelligence {
         return await runAppleScript(script)
     }
 
-    /// Send a message via WhatsApp Desktop using AppleScript UI automation.
     func sendViaWhatsApp(to phoneNumber: String, message: String) async -> Bool {
+        // WhatsApp MCP Server approach - using AppleScript automation
+        // Reference: https://github.com/victor-torres/whatsapp-applescript
+
         let cleanNumber = phoneNumber.replacingOccurrences(of: "+", with: "").replacingOccurrences(of: " ", with: "")
 
         let script = """
@@ -234,9 +204,9 @@ extension FocusModeIntelligence {
         return await runAppleScript(script)
     }
 
-    /// Send a message via Telegram Desktop using AppleScript UI automation.
     func sendViaTelegram(to chatId: String, message: String) async -> Bool {
         #if os(macOS)
+        // Use AppleScript to send via Telegram Desktop
         let escapedMessage = message.replacingOccurrences(of: "\"", with: "\\\"")
         let script = """
         tell application "Telegram" to activate
@@ -261,10 +231,6 @@ extension FocusModeIntelligence {
         #endif
     }
 
-    /// Execute an AppleScript and return whether it succeeded.
-    ///
-    /// - Parameter script: The AppleScript source code to execute.
-    /// - Returns: `true` if the script executed without errors.
     func runAppleScript(_ script: String) async -> Bool {
         await withCheckedContinuation { continuation in
             DispatchQueue.global().async {
@@ -284,10 +250,6 @@ extension FocusModeIntelligence {
         }
     }
 
-    /// Execute an AppleScript and return its string result.
-    ///
-    /// - Parameter script: The AppleScript source code to execute.
-    /// - Returns: The string value returned by the script, or `nil` on failure.
     func runAppleScriptReturning(_ script: String) async -> String? {
         await withCheckedContinuation { continuation in
             DispatchQueue.global().async {
@@ -307,13 +269,6 @@ extension FocusModeIntelligence {
     }
     #endif
 
-    /// Send a message via iOS Shortcuts automation.
-    ///
-    /// - Parameters:
-    ///   - phoneNumber: The recipient's phone number.
-    ///   - message: The message text to send.
-    ///   - platform: The target platform (.imessage/.sms or .whatsapp).
-    /// - Returns: `true` if the Shortcuts URL was successfully opened.
     func sendViaShortcuts(to phoneNumber: String, message: String, platform: CommunicationPlatform) async -> Bool {
         #if os(iOS)
         let shortcutName: String
@@ -338,5 +293,327 @@ extension FocusModeIntelligence {
         #else
         return false
         #endif
+    }
+
+    // MARK: - WhatsApp Status Management
+
+    func updateWhatsAppStatus(_ status: String) async {
+        #if os(macOS)
+        setPreviousWhatsAppStatus(await getCurrentWhatsAppStatus())
+
+        let escapedStatus = status.replacingOccurrences(of: "\"", with: "\\\"")
+        let script = """
+        tell application "WhatsApp" to activate
+        delay 0.5
+        tell application "System Events"
+            tell process "WhatsApp"
+                keystroke "," using command down
+                delay 0.5
+                -- Click profile area to edit status
+                click static text 1 of group 1 of scroll area 1 of window 1
+                delay 0.3
+                keystroke "a" using command down
+                keystroke "\(escapedStatus)"
+                delay 0.1
+                key code 36
+            end tell
+        end tell
+        """
+        _ = await runAppleScript(script)
+        #endif
+    }
+
+    func revertWhatsAppStatus() async {
+        if let previous = getPreviousWhatsAppStatus() {
+            await updateWhatsAppStatus(previous)
+            setPreviousWhatsAppStatus(nil)
+        }
+    }
+
+    func getCurrentWhatsAppStatus() async -> String? {
+        #if os(macOS)
+        // Read WhatsApp status via AppleScript UI inspection
+        return await runAppleScriptReturning("""
+        tell application "System Events"
+            if exists (process "WhatsApp") then
+                tell process "WhatsApp"
+                    try
+                        return description of static text 1 of group 1 of toolbar 1 of window 1
+                    end try
+                end tell
+            end if
+        end tell
+        return ""
+        """)
+        #else
+        return nil
+        #endif
+    }
+
+    // MARK: - Telegram Status Management
+
+    func updateTelegramStatus(_ status: String) async {
+        // Telegram Bot API or automation
+        print("[Telegram] Would update status to: \(status)")
+    }
+
+    func clearTelegramStatus() async {
+        print("[Telegram] Would clear status")
+    }
+
+    // MARK: - COMBOX Integration
+
+    func switchComboxGreeting(to greetingType: String) async {
+        // Swisscom COMBOX greeting change
+        // This requires calling 086 and navigating menus via DTMF
+
+        print("[COMBOX] Would switch greeting to: \(greetingType)")
+
+        // Actual implementation would use Shortcuts to:
+        // 1. Call 086
+        // 2. Navigate menu with DTMF tones
+        // 3. Select appropriate greeting
+
+        #if os(iOS)
+        // Trigger Shortcuts automation
+        if let url = URL(string: "shortcuts://run-shortcut?name=THEA%20COMBOX%20Greeting&input=text&text=\(greetingType)") {
+            await MainActor.run {
+                UIApplication.shared.open(url)
+            }
+        }
+        #endif
+    }
+
+    // MARK: - Language Detection
+
+    func detectLanguage(for contactId: String?, phoneNumber: String?, messageContent: String?) async -> String {
+        // Check cached
+        if let cId = contactId, let cached = getContactLanguage(cId), cached.confidence > 0.7 {
+            return cached.detectedLanguage
+        }
+
+        // Try phone number
+        if let phone = phoneNumber, let langFromPhone = languageFromPhoneNumber(phone) {
+            if let cId = contactId {
+                setContactLanguageInfo(cId, info: ContactLanguageInfo(
+                    contactId: cId,
+                    detectedLanguage: langFromPhone,
+                    confidence: 0.7,
+                    detectionMethod: .phoneCountryCode,
+                    isManuallySet: false,
+                    previousLanguages: [],
+                    lastUpdated: Date()
+                ))
+            }
+            return langFromPhone
+        }
+
+        // Try message content analysis
+        if let content = messageContent, !content.isEmpty {
+            if let detected = detectLanguageFromText(content) {
+                if let cId = contactId {
+                    var info = getContactLanguage(cId) ?? ContactLanguageInfo(
+                        contactId: cId,
+                        detectedLanguage: detected,
+                        confidence: 0.6,
+                        detectionMethod: .messageHistory,
+                        isManuallySet: false,
+                        previousLanguages: [],
+                        lastUpdated: Date()
+                    )
+                    info.detectedLanguage = detected
+                    info.lastUpdated = Date()
+                    setContactLanguageInfo(cId, info: info)
+                }
+                return detected
+            }
+        }
+
+        // Default to device locale
+        return Locale.current.language.languageCode?.identifier ?? "en"
+    }
+
+    func languageFromPhoneNumber(_ phoneNumber: String) -> String? {
+        let countryCodeToLanguage: [String: String] = [
+            "+1": "en", "+44": "en", "+61": "en", "+64": "en",
+            "+33": "fr", "+32": "fr", // Belgium - could be fr/nl
+            "+41": "de", // Switzerland - could be de/fr/it
+            "+49": "de", "+43": "de",
+            "+39": "it",
+            "+34": "es", "+52": "es", "+54": "es",
+            "+351": "pt", "+55": "pt",
+            "+31": "nl",
+            "+81": "ja",
+            "+86": "zh", "+852": "zh", "+886": "zh",
+            "+82": "ko",
+            "+7": "ru",
+            "+966": "ar", "+971": "ar", "+20": "ar"
+        ]
+
+        for (code, lang) in countryCodeToLanguage {
+            if phoneNumber.hasPrefix(code) {
+                return lang
+            }
+        }
+
+        return nil
+    }
+
+    func detectLanguageFromText(_ text: String) -> String? {
+        // Simple keyword-based detection
+        let languageIndicators: [String: [String]] = [
+            "fr": ["bonjour", "merci", "salut", "oui", "non", "comment", "pourquoi", "c'est", "je", "tu"],
+            "de": ["hallo", "danke", "guten", "bitte", "ja", "nein", "wie", "warum", "ich", "du", "ist"],
+            "it": ["ciao", "grazie", "buongiorno", "si\u{300}", "no", "come", "perche\u{301}", "sono", "tu", "e\u{300}"],
+            "es": ["hola", "gracias", "buenos", "si\u{301}", "no", "co\u{301}mo", "por que\u{301}", "soy", "tu\u{301}", "es"],
+            "pt": ["ola\u{301}", "obrigado", "bom dia", "sim", "na\u{303}o", "como", "por que", "sou", "tu", "e\u{301}"],
+            "nl": ["hallo", "dank", "goedemorgen", "ja", "nee", "hoe", "waarom", "ik", "jij", "is"]
+        ]
+
+        let lowercased = text.lowercased()
+
+        var scores: [String: Int] = [:]
+        for (lang, indicators) in languageIndicators {
+            for indicator in indicators {
+                if lowercased.contains(indicator) {
+                    scores[lang, default: 0] += 1
+                }
+            }
+        }
+
+        // Return language with highest score, if any
+        if let (lang, score) = scores.max(by: { $0.value < $1.value }), score >= 2 {
+            return lang
+        }
+
+        return nil
+    }
+
+    // MARK: - Urgency Detection
+
+    func detectUrgency(in message: String, language: String) -> IncomingCommunication.UrgencyLevel {
+        let templates = getMessageTemplates().urgentResponse[language] ?? getMessageTemplates().urgentResponse["en"]!
+        let lowercased = message.lowercased()
+
+        // Check for emergency keywords first
+        for keyword in templates.emergencyKeywords {
+            if lowercased.contains(keyword.lowercased()) {
+                return .emergency
+            }
+        }
+
+        // Check for urgent keywords
+        for keyword in templates.yesKeywords {
+            if lowercased.contains(keyword.lowercased()) {
+                return .urgent
+            }
+        }
+
+        return .unknown
+    }
+
+    func detectEmergency(in message: String, language: String) -> Bool {
+        let templates = getMessageTemplates().urgentResponse[language] ?? getMessageTemplates().urgentResponse["en"]!
+        let lowercased = message.lowercased()
+
+        for keyword in templates.emergencyKeywords {
+            if lowercased.contains(keyword.lowercased()) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    func isAffirmativeResponse(_ message: String, language: String) -> Bool {
+        let templates = getMessageTemplates().urgentResponse[language] ?? getMessageTemplates().urgentResponse["en"]!
+        let lowercased = message.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+
+        for keyword in templates.yesKeywords {
+            if lowercased == keyword.lowercased() || lowercased.hasPrefix(keyword.lowercased()) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    func isNegativeResponse(_ message: String, language: String) -> Bool {
+        let templates = getMessageTemplates().urgentResponse[language] ?? getMessageTemplates().urgentResponse["en"]!
+        let lowercased = message.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+
+        for keyword in templates.noKeywords {
+            if lowercased == keyword.lowercased() || lowercased.hasPrefix(keyword.lowercased()) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    // MARK: - Time-Aware Responses
+
+    func getAvailabilityInfo(language: String) -> String? {
+        guard let mode = getCurrentFocusMode() else { return nil }
+
+        // Check if Focus mode has a schedule that tells us when it ends
+        for schedule in mode.schedules where schedule.enabled {
+            // Calculate when this schedule ends
+            let calendar = Calendar.current
+            let now = Date()
+
+            if let endHour = schedule.endTime.hour,
+               let endMinute = schedule.endTime.minute {
+                var components = calendar.dateComponents([.year, .month, .day], from: now)
+                components.hour = endHour
+                components.minute = endMinute
+
+                if let endTime = calendar.date(from: components) {
+                    let formatter = DateFormatter()
+                    formatter.timeStyle = .short
+                    formatter.locale = Locale(identifier: language)
+
+                    let timeString = formatter.string(from: endTime)
+
+                    // Localized availability messages
+                    let availabilityMessages: [String: String] = [
+                        "en": "I should be available around \(timeString).",
+                        "fr": "Je devrais \u{00EA}tre disponible vers \(timeString).",
+                        "de": "Ich sollte gegen \(timeString) verf\u{00FC}gbar sein.",
+                        "it": "Dovrei essere disponibile verso le \(timeString).",
+                        "es": "Deber\u{00ED}a estar disponible alrededor de las \(timeString)."
+                    ]
+
+                    return availabilityMessages[language] ?? availabilityMessages["en"]
+                }
+            }
+        }
+
+        return nil
+    }
+
+    // MARK: - Callback System
+
+    func initiateCallback(to phoneNumber: String, reason: String) async {
+        // Initiate a call back to the contact
+        #if os(iOS)
+        if let url = URL(string: "tel://\(phoneNumber.replacingOccurrences(of: " ", with: ""))") {
+            await MainActor.run {
+                UIApplication.shared.open(url)
+            }
+        }
+        #elseif os(macOS)
+        // On Mac, use FaceTime or handoff to iPhone
+        if let url = URL(string: "facetime://\(phoneNumber)") {
+            NSWorkspace.shared.open(url)
+        }
+        #endif
+    }
+
+    func processPendingCallbacks() async {
+        for callback in getPendingCallbacks() where !callback.completed {
+            // Schedule reminder or initiate callback
+            print("[FocusMode] Pending callback to \(callback.phoneNumber): \(callback.reason)")
+        }
     }
 }

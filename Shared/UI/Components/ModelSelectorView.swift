@@ -51,8 +51,6 @@ struct ModelSelectorView: View {
                 .cornerRadius(6)
             }
             .help("Model category: \(selectedCategory.description)")
-            .accessibilityLabel("Model category: \(selectedCategory.rawValue)")
-            .accessibilityHint("Select AI model category")
 
             // Model picker
             Picker("", selection: $selectedModel) {
@@ -162,8 +160,6 @@ struct CompactModelSelectorView: View {
             .cornerRadius(6)
         }
         .help("Select AI model")
-        .accessibilityLabel("AI model selector")
-        .accessibilityHint("Select which AI model to use for responses")
         .task {
             await catalogManager.refreshIfNeeded()
         }

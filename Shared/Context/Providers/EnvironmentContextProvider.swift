@@ -1,5 +1,5 @@
 import Foundation
-import os.log
+import OSLog
 #if canImport(CoreBluetooth)
     @preconcurrency import CoreBluetooth
 #endif
@@ -64,7 +64,11 @@ public actor EnvironmentContextProvider: ContextProvider {
         updateTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.fetchEnvironmentData()
-                try? await Task.sleep(for: .seconds(30))
+                do {
+                    try await Task.sleep(for: .seconds(30))
+                } catch {
+                    break // Task cancelled — stop periodic updates
+                }
             }
         }
 

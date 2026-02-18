@@ -61,11 +61,11 @@ struct WelcomeView: View {
                         Spacer()
                     }
                     .padding(TheaSpacing.md)
-                    .background(.ultraThinMaterial)
+                    .background(Color.theaSurface.opacity(0.6))
                     .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.md))
                     .overlay(
                         RoundedRectangle(cornerRadius: TheaCornerRadius.md)
-                            .stroke(Color.secondary.opacity(0.15), lineWidth: 0.5)
+                            .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
                     )
                 }
                 .buttonStyle(.plain)

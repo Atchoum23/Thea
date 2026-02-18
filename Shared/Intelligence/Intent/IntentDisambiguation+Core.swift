@@ -187,36 +187,48 @@ public final class IntentDisambiguator: ObservableObject {
 
         // Extract file names (simple pattern)
         let filePattern = #"\b[\w-]+\.(swift|py|js|ts|json|md|txt|yml|yaml)\b"#
-        if let regex = try? NSRegularExpression(pattern: filePattern),
-           let match = regex.firstMatch(in: query, range: NSRange(query.startIndex..., in: query)) {
-            let range = Range(match.range, in: query)!
-            entities.append(IntentEntity(
-                type: .fileName,
-                value: String(query[range])
-            ))
+        do {
+            let regex = try NSRegularExpression(pattern: filePattern)
+            if let match = regex.firstMatch(in: query, range: NSRange(query.startIndex..., in: query)) {
+                let range = Range(match.range, in: query)!
+                entities.append(IntentEntity(
+                    type: .fileName,
+                    value: String(query[range])
+                ))
+            }
+        } catch {
+            logger.debug("Invalid file pattern regex: \(error.localizedDescription)")
         }
 
         // Extract function names (camelCase or snake_case)
         let funcPattern = #"\b[a-z][a-zA-Z0-9_]*\("#
-        if let regex = try? NSRegularExpression(pattern: funcPattern),
-           let match = regex.firstMatch(in: query, range: NSRange(query.startIndex..., in: query)) {
-            let range = Range(match.range, in: query)!
-            let value = String(query[range]).dropLast()  // Remove (
-            entities.append(IntentEntity(
-                type: .functionName,
-                value: String(value)
-            ))
+        do {
+            let regex = try NSRegularExpression(pattern: funcPattern)
+            if let match = regex.firstMatch(in: query, range: NSRange(query.startIndex..., in: query)) {
+                let range = Range(match.range, in: query)!
+                let value = String(query[range]).dropLast()  // Remove (
+                entities.append(IntentEntity(
+                    type: .functionName,
+                    value: String(value)
+                ))
+            }
+        } catch {
+            logger.debug("Invalid function pattern regex: \(error.localizedDescription)")
         }
 
         // Extract paths
         let pathPattern = #"[/~][\w/.-]+"#
-        if let regex = try? NSRegularExpression(pattern: pathPattern),
-           let match = regex.firstMatch(in: query, range: NSRange(query.startIndex..., in: query)) {
-            let range = Range(match.range, in: query)!
-            entities.append(IntentEntity(
-                type: .path,
-                value: String(query[range])
-            ))
+        do {
+            let regex = try NSRegularExpression(pattern: pathPattern)
+            if let match = regex.firstMatch(in: query, range: NSRange(query.startIndex..., in: query)) {
+                let range = Range(match.range, in: query)!
+                entities.append(IntentEntity(
+                    type: .path,
+                    value: String(query[range])
+                ))
+            }
+        } catch {
+            logger.debug("Invalid path pattern regex: \(error.localizedDescription)")
         }
 
         return entities

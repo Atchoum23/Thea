@@ -106,7 +106,6 @@ public struct RateLimitState: Sendable {
         self.lastDayReset = Date()
     }
 
-    /// Resets request counters whose time windows have elapsed.
     public mutating func resetIfNeeded() {
         let now = Date()
 
@@ -126,7 +125,6 @@ public struct RateLimitState: Sendable {
         }
     }
 
-    /// Returns whether a new request is permitted under the given rate limit configuration.
     public func canMakeRequest(config: MCPRateLimitConfig) -> Bool {
         minuteRequests < config.requestsPerMinute + config.burstAllowance &&
         hourRequests < config.requestsPerHour &&
@@ -432,7 +430,6 @@ public struct MCPRequest: Identifiable, Sendable {
             self.backoffMultiplier = backoffMultiplier
         }
 
-        /// Computes the exponential backoff delay for the given retry attempt.
         public func delay(forAttempt attempt: Int) -> TimeInterval {
             let delay = initialDelay * pow(backoffMultiplier, Double(attempt))
             return min(delay, maxDelay)
@@ -539,7 +536,7 @@ public final class MCPGateway: ObservableObject {
         updateConnectionStatus(at: index, status: .connecting)
 
         // Simulate connection (in production, actual connection logic)
-        try await Task.sleep(for: .milliseconds(500))  // 0.5 seconds
+        try await Task.sleep(nanoseconds: 500_000_000)  // 0.5 seconds
 
         // Update status to connected
         updateConnectionStatus(at: index, status: .connected)
@@ -620,7 +617,7 @@ public final class MCPGateway: ObservableObject {
 
                 // Wait before retry
                 let delay = request.retryPolicy.delay(forAttempt: retryCount)
-                try? await Task.sleep(for: .seconds(delay))
+                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
                 retryCount += 1
 
                 logger.debug("Retrying request \(request.id) (attempt \(retryCount))")
@@ -736,7 +733,6 @@ public final class MCPGateway: ObservableObject {
 
     // MARK: - Statistics
 
-    /// Returns aggregate gateway statistics including connection, pool, and request counts.
     public func statistics() async -> GatewayStatistics {
         let poolStats = await connectionPool.statistics()
         let unhealthy = await healthMonitor.unhealthyServers()
@@ -777,7 +773,7 @@ public final class MCPGateway: ObservableObject {
 
     private func executeRequest(_ request: MCPRequest) async throws -> [String: String] {
         // Simulate request execution
-        try await Task.sleep(for: .milliseconds(100))  // 0.1 seconds
+        try await Task.sleep(nanoseconds: 100_000_000)  // 0.1 seconds
 
         // In production, actual MCP protocol implementation
         return ["status": "ok", "method": request.method]

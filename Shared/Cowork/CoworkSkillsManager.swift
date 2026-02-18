@@ -1,11 +1,14 @@
 #if os(macOS)
     import Foundation
+    import OSLog
 
     /// Manages skills (file type creation capabilities) for Cowork
     @MainActor
     @Observable
     final class CoworkSkillsManager {
         static let shared = CoworkSkillsManager()
+
+        private let logger = Logger(subsystem: "ai.thea.app", category: "CoworkSkillsManager")
 
         var enabledSkills: Set<SkillType> = Set(SkillType.allCases)
         var skillConfigurations: [SkillType: SkillConfiguration] = [:]
@@ -360,8 +363,12 @@
             let enabledRaw = enabledSkills.map(\.rawValue)
             UserDefaults.standard.set(enabledRaw, forKey: "cowork.enabledSkills")
 
-            if let data = try? JSONEncoder().encode(skillConfigurations) {
+            let encoder = JSONEncoder()
+            do {
+                let data = try encoder.encode(skillConfigurations)
                 UserDefaults.standard.set(data, forKey: "cowork.skillConfigurations")
+            } catch {
+                logger.error("Failed to encode skill configurations: \(error)")
             }
         }
 
@@ -370,10 +377,13 @@
                 enabledSkills = Set(enabledRaw.compactMap { SkillType(rawValue: $0) })
             }
 
-            if let data = UserDefaults.standard.data(forKey: "cowork.skillConfigurations"),
-               let configs = try? JSONDecoder().decode([SkillType: SkillConfiguration].self, from: data)
-            {
-                skillConfigurations = configs
+            if let data = UserDefaults.standard.data(forKey: "cowork.skillConfigurations") {
+                let decoder = JSONDecoder()
+                do {
+                    skillConfigurations = try decoder.decode([SkillType: SkillConfiguration].self, from: data)
+                } catch {
+                    logger.error("Failed to decode skill configurations: \(error)")
+                }
             }
         }
 

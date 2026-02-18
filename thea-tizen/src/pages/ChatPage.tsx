@@ -3,11 +3,11 @@
  * Main AI conversation interface
  */
 
-import { useRef, useEffect, useState, useMemo } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FocusContext, useFocusable } from '@noriginmedia/norigin-spatial-navigation';
 import { useChatStore } from '../stores/chatStore';
-import { MessageBubble, EmptyConversation } from '../components/chat/MessageBubble';
+import { MessageBubble, EmptyConversation, TypingIndicator } from '../components/chat/MessageBubble';
 import { FocusableButton, FocusableCard, FocusableList } from '../components/ui/FocusableCard';
 import { ColorButtonHints, CommonHints } from '../components/ui/ColorButtonHints';
 import { useTVRemote } from '../hooks/useTVRemote';
@@ -41,10 +41,9 @@ export function ChatPage() {
     ? conversations.find((c) => c.id === conversationId)
     : conversations[0];
 
-  const currentMessages = useMemo(() =>
-    currentConversation ? messages[currentConversation.id] || [] : [],
-    [currentConversation, messages]
-  );
+  const currentMessages = currentConversation
+    ? messages[currentConversation.id] || []
+    : [];
 
   // Set active conversation
   useEffect(() => {
@@ -95,7 +94,7 @@ export function ChatPage() {
 
   const handleVoiceInput = () => {
     // Voice input using Web Speech API
-     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const SpeechRecognitionAPI = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
 
     if (SpeechRecognitionAPI) {
@@ -104,7 +103,7 @@ export function ChatPage() {
       recognition.continuous = false;
       recognition.interimResults = false;
 
-       
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         setInputText(transcript);

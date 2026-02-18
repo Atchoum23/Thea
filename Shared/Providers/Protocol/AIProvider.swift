@@ -60,7 +60,7 @@ public protocol AIProvider: Sendable {
 // MARK: - Default Implementation
 
 public extension AIProvider {
-    /// Default sync implementation that collects streaming chunks into a single response.
+    /// Default sync implementation using streaming
     func chatSync(
         messages: [ChatMessage],
         model: String,
@@ -92,64 +92,39 @@ public extension AIProvider {
 
 // MARK: - Provider Capability
 
-/// Describes a discrete capability that an AI provider may support.
 public enum ProviderCapability: String, Codable, Sendable, CaseIterable {
-    /// Basic chat completion
-    case chat
-    /// Streaming token-by-token responses
-    case streaming
-    /// Image and visual content understanding
-    case vision
-    /// Tool use / function calling
-    case functionCalling
-    /// Text embedding generation
-    case embedding
-    /// Integrated web search
-    case webSearch
-    /// Server-side code execution
-    case codeExecution
-    /// Extended chain-of-thought reasoning
-    case reasoning
-    /// Support for multiple input/output modalities
-    case multimodal
+    case chat           // Basic chat completion
+    case streaming      // Streaming responses
+    case vision         // Image understanding
+    case functionCalling // Tool use
+    case embedding      // Text embeddings
+    case webSearch      // Integrated web search
+    case codeExecution  // Code execution
+    case reasoning      // Extended reasoning
+    case multimodal     // Multiple modalities
 }
 
 // MARK: - Chat Types
 
-/// A single message in a chat conversation, with a role and content.
 public struct ChatMessage: Codable, Sendable {
-    /// Role of the message sender (e.g. "user", "assistant", "system").
     public let role: String
-    /// Content of the message, either plain text or multipart.
     public let content: ChatContent
 
-    /// Creates a message with structured content.
-    /// - Parameters:
-    ///   - role: The sender role.
-    ///   - content: The structured chat content.
     public init(role: String, content: ChatContent) {
         self.role = role
         self.content = content
     }
 
-    /// Creates a message with plain text content.
-    /// - Parameters:
-    ///   - role: The sender role.
-    ///   - text: The text content of the message.
     public init(role: String, text: String) {
         self.role = role
         self.content = .text(text)
     }
 }
 
-/// Content of a chat message, either plain text or multipart (text + images).
 public enum ChatContent: Codable, Sendable {
-    /// Plain text content.
     case text(String)
-    /// Multipart content containing text and/or images.
     case multipart([ChatContentPart])
 
-    /// Extracts the text value, joining multipart text segments with newlines.
     public var textValue: String {
         switch self {
         case let .text(string):
@@ -165,63 +140,28 @@ public enum ChatContent: Codable, Sendable {
     }
 }
 
-/// A single part of multipart chat content.
 public enum ChatContentPart: Codable, Sendable {
-    /// Text content segment.
     case text(String)
-    /// Inline image data with MIME type (e.g. "image/png").
     case image(Data, mimeType: String)
-    /// Reference to an image at a URL.
     case imageURL(URL)
 }
 
-/// Options controlling AI chat completion behavior.
 public struct ChatOptions: Sendable {
-    /// Sampling temperature (0.0 = deterministic, 2.0 = very random).
     public let temperature: Double?
-    /// Maximum tokens to generate in the response.
     public let maxTokens: Int?
-    /// Nucleus sampling probability threshold.
     public let topP: Double?
-    /// Whether to stream the response token by token.
     public let stream: Bool
-    /// Tool definitions available for function calling.
     public let tools: [ToolDefinition]?
-    /// System prompt prepended to the conversation.
     public let systemPrompt: String?
-    /// Anthropic prompt caching configuration.
     public let cacheControl: CacheControl?
-    /// Extended thinking / chain-of-thought configuration.
     public let thinking: ThinkingConfig?
-    /// Structured output format (JSON, JSON schema).
     public let outputFormat: OutputFormat?
-    /// Quality/cost tradeoff level (Opus 4.5 only).
-    public let effort: EffortLevel?
-    /// Automatic context management to clear old tool results.
-    public let contextManagement: ContextManagement?
-    /// Anthropic server-side tools (web search, web fetch).
-    public let serverTools: [ServerTool]?
-    /// Thinking level for Gemini 3 models.
-    public let geminiThinkingLevel: GeminiThinkingLevel?
-    /// Thinking mode for DeepSeek models.
-    public let deepseekThinking: DeepSeekThinkingConfig?
+    public let effort: EffortLevel?                    // P0: Opus 4.5 only
+    public let contextManagement: ContextManagement?   // P1: Auto-clear old tool results
+    public let serverTools: [ServerTool]?              // P2: Web search, web fetch, etc.
+    public let geminiThinkingLevel: GeminiThinkingLevel?  // Gemini 3 thinking level
+    public let deepseekThinking: DeepSeekThinkingConfig?  // DeepSeek thinking mode
 
-    /// Creates chat options with the specified parameters.
-    /// - Parameters:
-    ///   - temperature: Sampling temperature.
-    ///   - maxTokens: Maximum tokens to generate.
-    ///   - topP: Nucleus sampling threshold.
-    ///   - stream: Whether to stream the response.
-    ///   - tools: Tool definitions for function calling.
-    ///   - systemPrompt: System prompt text.
-    ///   - cacheControl: Anthropic cache control setting.
-    ///   - thinking: Extended thinking configuration.
-    ///   - outputFormat: Structured output format.
-    ///   - effort: Quality/cost tradeoff level.
-    ///   - contextManagement: Context management rules.
-    ///   - serverTools: Server-side tool configurations.
-    ///   - geminiThinkingLevel: Gemini thinking level.
-    ///   - deepseekThinking: DeepSeek thinking configuration.
     public init(
         temperature: Double? = nil,
         maxTokens: Int? = nil,
@@ -254,20 +194,15 @@ public struct ChatOptions: Sendable {
         self.deepseekThinking = deepseekThinking
     }
 
-    /// Default options: streaming enabled, all other parameters nil.
     public static let `default` = ChatOptions()
 }
 
 // MARK: - Cache Control (Anthropic)
 
-/// Anthropic prompt caching TTL configuration.
 public enum CacheControl: Sendable {
-    /// 5-minute TTL (default ephemeral cache).
-    case ephemeral
-    /// 1-hour TTL (GA as of August 2025).
-    case longLived
+    case ephemeral      // 5-minute TTL (default)
+    case longLived      // 1-hour TTL (GA as of Aug 2025)
 
-    /// Human-readable TTL string.
     public var ttl: String {
         switch self {
         case .ephemeral: return "5m"
@@ -278,41 +213,29 @@ public enum CacheControl: Sendable {
 
 // MARK: - Extended Thinking (Anthropic)
 
-/// Configuration for Anthropic extended thinking (chain-of-thought reasoning).
 public struct ThinkingConfig: Sendable {
-    /// Whether extended thinking is enabled.
     public let enabled: Bool
-    /// Token budget for thinking (clamped to 1,024 - 128,000).
-    public let budgetTokens: Int
+    public let budgetTokens: Int  // 1,024 to 128,000
 
-    /// Creates a thinking configuration.
-    /// - Parameters:
-    ///   - enabled: Whether to enable extended thinking.
-    ///   - budgetTokens: Token budget, clamped to [1024, 128000].
     public init(enabled: Bool = true, budgetTokens: Int = 10_000) {
         self.enabled = enabled
         self.budgetTokens = min(max(budgetTokens, 1024), 128_000)
     }
 
-    /// Default configuration: enabled with 10,000 token budget.
     public static let `default` = ThinkingConfig()
 }
 
 // MARK: - Gemini Thinking Level
 
-/// Thinking level for Gemini 3 models.
-/// Controls how much the model thinks before responding.
+/// Thinking level for Gemini 3 models
+/// Controls how much the model thinks before responding
 public enum GeminiThinkingLevel: String, Sendable {
-    /// Flash only - minimal thinking.
-    case minimal
-    /// Quick reasoning pass.
-    case low
-    /// Balanced reasoning (default for Flash).
-    case medium
-    /// Deep reasoning (default for Pro).
-    case high
+    case minimal  // Flash only - minimal thinking
+    case low      // Quick reasoning
+    case medium   // Balanced (default for Flash)
+    case high     // Deep reasoning (default for Pro)
 
-    /// Approximate thinking budget in tokens for Gemini 2.5 compatibility.
+    /// Approximate thinking budget in tokens for Gemini 2.5 compatibility
     public var approximateBudget: Int {
         switch self {
         case .minimal: return 1_024
@@ -325,58 +248,39 @@ public enum GeminiThinkingLevel: String, Sendable {
 
 // MARK: - DeepSeek Thinking Mode
 
-/// Thinking mode configuration for DeepSeek models.
+/// Thinking mode configuration for DeepSeek models
 public struct DeepSeekThinkingConfig: Sendable {
-    /// Whether thinking mode is enabled.
     public let enabled: Bool
 
-    /// Creates a DeepSeek thinking configuration.
-    /// - Parameter enabled: Whether to enable thinking mode.
     public init(enabled: Bool = true) {
         self.enabled = enabled
     }
 
-    /// Default configuration: thinking enabled.
     public static let `default` = DeepSeekThinkingConfig()
 }
 
 // MARK: - Structured Outputs (Anthropic)
 
-/// Output format specification for structured AI responses.
 public enum OutputFormat: Sendable {
-    /// Basic JSON output without schema validation.
-    case json
-    /// JSON output validated against a JSON Schema (stored as serialized Data).
-    case jsonSchema(Data)
+    case json                           // Basic JSON output
+    case jsonSchema(Data)               // JSON with schema validation (Data for Sendable)
 
-    /// Creates a JSON schema output format from a dictionary.
-    /// - Parameter schema: JSON Schema dictionary.
-    /// - Returns: An output format with the serialized schema.
+    /// Create JSON schema output format
     public static func schema(_ schema: [String: Any]) -> OutputFormat {
         let data = (try? JSONSerialization.data(withJSONObject: schema)) ?? Data()
         return .jsonSchema(data)
     }
 }
 
-/// Definition of a tool available for AI function calling.
 public struct ToolDefinition: Codable, Sendable {
-    /// Tool name used in function call references.
     public let name: String
-    /// Human-readable description of what the tool does.
     public let description: String
-    /// JSON-serialized parameter schema for Sendable compliance.
-    public let parametersJSON: Data
+    public let parametersJSON: Data  // Store as JSON Data for Sendable compliance
 
-    /// Deserialized parameter schema dictionary.
     public var parameters: [String: Any] {
         (try? JSONSerialization.jsonObject(with: parametersJSON) as? [String: Any]) ?? [:]
     }
 
-    /// Creates a tool definition.
-    /// - Parameters:
-    ///   - name: Tool name.
-    ///   - description: What the tool does.
-    ///   - parameters: JSON Schema describing the tool's parameters.
     public init(name: String, description: String, parameters: [String: Any] = [:]) {
         self.name = name
         self.description = description
@@ -390,33 +294,18 @@ public struct ToolDefinition: Codable, Sendable {
 
 // MARK: - Stream Types
 
-/// A chunk emitted during streaming AI response generation.
 public enum StreamChunk: Sendable {
-    /// A fragment of generated text content.
     case content(String)
-    /// Stream completed with optional finish reason and token usage.
     case done(finishReason: String?, usage: TokenUsage?)
-    /// An error occurred during streaming.
     case error(Error)
 }
 
-/// Token usage statistics for a single AI request.
 public struct TokenUsage: Codable, Sendable {
-    /// Number of tokens in the input prompt.
     public let promptTokens: Int
-    /// Number of tokens generated in the response.
     public let completionTokens: Int
-    /// Total tokens consumed (prompt + completion).
     public let totalTokens: Int
-    /// Number of cached tokens (Anthropic prompt caching).
     public let cachedTokens: Int?
 
-    /// Creates token usage statistics.
-    /// - Parameters:
-    ///   - promptTokens: Input prompt token count.
-    ///   - completionTokens: Generated response token count.
-    ///   - totalTokens: Total tokens (defaults to prompt + completion if nil).
-    ///   - cachedTokens: Cached token count from prompt caching.
     public init(
         promptTokens: Int,
         completionTokens: Int,
@@ -430,20 +319,11 @@ public struct TokenUsage: Codable, Sendable {
     }
 }
 
-/// Complete response from a non-streaming AI chat request.
 public struct ChatResponse: Sendable {
-    /// Generated text content.
     public let content: String
-    /// Reason the model stopped generating (e.g. "stop", "max_tokens").
     public let finishReason: String
-    /// Token usage statistics, if available.
     public let usage: TokenUsage?
 
-    /// Creates a chat response.
-    /// - Parameters:
-    ///   - content: Generated text.
-    ///   - finishReason: Stop reason.
-    ///   - usage: Token usage statistics.
     public init(content: String, finishReason: String, usage: TokenUsage? = nil) {
         self.content = content
         self.finishReason = finishReason
@@ -453,23 +333,12 @@ public struct ChatResponse: Sendable {
 
 // MARK: - Provider Health
 
-/// Health check result for an AI provider.
 public struct ProviderHealth: Sendable {
-    /// Whether the provider is reachable and functioning.
     public let isHealthy: Bool
-    /// Round-trip latency of the health check, if measured.
     public let latency: TimeInterval?
-    /// Error message if the provider is unhealthy.
     public let errorMessage: String?
-    /// Timestamp when the health check was performed.
     public let checkedAt: Date
 
-    /// Creates a provider health result.
-    /// - Parameters:
-    ///   - isHealthy: Whether the provider is healthy.
-    ///   - latency: Measured latency.
-    ///   - errorMessage: Error details if unhealthy.
-    ///   - checkedAt: When the check was performed.
     public init(
         isHealthy: Bool,
         latency: TimeInterval? = nil,
@@ -482,12 +351,8 @@ public struct ProviderHealth: Sendable {
         self.checkedAt = checkedAt
     }
 
-    /// Convenience: a healthy provider result.
     public static let healthy = ProviderHealth(isHealthy: true)
 
-    /// Convenience: an unhealthy provider result with an error message.
-    /// - Parameter message: Description of the health issue.
-    /// - Returns: An unhealthy `ProviderHealth` value.
     public static func unhealthy(_ message: String) -> ProviderHealth {
         ProviderHealth(isHealthy: false, errorMessage: message)
     }
@@ -495,31 +360,18 @@ public struct ProviderHealth: Sendable {
 
 // MARK: - Provider Error
 
-/// Errors that can occur during AI provider operations.
 public enum ProviderError: Error, LocalizedError {
-    /// Provider is not configured (missing API key or setup).
     case notConfigured(provider: String)
-    /// API key is invalid or expired.
     case invalidAPIKey
-    /// Request was rate-limited; retry after the specified interval.
     case rateLimited(retryAfter: TimeInterval?)
-    /// Requested model does not exist or is unavailable.
     case modelNotFound(model: String)
-    /// Input exceeds the model's context window.
     case contextTooLong(tokens: Int, max: Int)
-    /// Model context window exceeded (stop reason from API).
-    case contextWindowExceeded
-    /// Model refused to respond due to safety guidelines.
-    case safetyRefusal
-    /// Network-level error (DNS, TLS, connection reset, etc.).
+    case contextWindowExceeded        // New: model_context_window_exceeded stop reason
+    case safetyRefusal                // New: refusal stop reason
     case networkError(underlying: Error)
-    /// Provider returned an unparseable or unexpected response.
     case invalidResponse(details: String)
-    /// Server returned an HTTP error status code.
     case serverError(status: Int, message: String?)
-    /// Request exceeded the configured timeout.
     case timeout
-    /// Request was cancelled by the caller.
     case cancelled
 
     public var errorDescription: String? {
@@ -557,37 +409,26 @@ public enum ProviderError: Error, LocalizedError {
 
 // MARK: - Effort Level (P0 - Opus 4.5 Only)
 
-/// Controls quality/cost tradeoff for Claude Opus 4.5.
-/// Uses beta header: effort-2025-11-24.
+/// Controls quality/cost tradeoff for Claude Opus 4.5
+/// Beta header: effort-2025-11-24
 public enum EffortLevel: String, Sendable {
-    /// Maximum quality, higher token usage.
-    case high
-    /// Balanced quality and cost (default).
-    case medium
-    /// Faster responses, lower token usage.
-    case low
+    case high      // Maximum quality, higher token usage
+    case medium    // Balanced (default)
+    case low       // Faster, lower token usage
 }
 
 // MARK: - Context Management (P1)
 
-/// Configures automatic context window management to clear old tool results
-/// when approaching token limits. Uses beta header: context-management-2025-06-27.
+/// Auto-clear old tool results when approaching context limits
+/// Beta header: context-management-2025-06-27
 public struct ContextManagement: Sendable {
-    /// Edit rules to apply when context grows too large.
     public let edits: [ContextEdit]
 
-    /// Creates a context management configuration.
-    /// - Parameter edits: The edit rules to apply.
     public init(edits: [ContextEdit]) {
         self.edits = edits
     }
 
-    /// Clears old tool use results when the token count exceeds a threshold.
-    /// - Parameters:
-    ///   - threshold: Input token count that triggers clearing.
-    ///   - keepLast: Number of most recent tool uses to preserve.
-    ///   - excludeTools: Tool names to never clear.
-    /// - Returns: A configured `ContextManagement` instance.
+    /// Convenience: clear tool uses when reaching token threshold
     public static func clearToolUses(
         atTokens threshold: Int,
         keepLast: Int = 3,
@@ -603,9 +444,7 @@ public struct ContextManagement: Sendable {
         ])
     }
 
-    /// Clears thinking blocks when the token count exceeds a threshold.
-    /// - Parameter threshold: Input token count that triggers clearing.
-    /// - Returns: A configured `ContextManagement` instance.
+    /// Convenience: clear thinking blocks when reaching token threshold
     public static func clearThinking(atTokens threshold: Int) -> ContextManagement {
         ContextManagement(edits: [
             ContextEdit(
@@ -616,34 +455,18 @@ public struct ContextManagement: Sendable {
     }
 }
 
-/// A single context edit rule specifying what to clear and when.
 public struct ContextEdit: Sendable {
-    /// Type of content to clear from context.
     public enum EditType: String, Sendable {
-        /// Clear old tool use result blocks.
         case clearToolUses = "clear_tool_uses_20250919"
-        /// Clear thinking/reasoning blocks.
         case clearThinking = "clear_thinking_20251015"
     }
 
-    /// What type of content to clear.
     public let type: EditType
-    /// Condition that triggers this edit.
     public let trigger: ContextTrigger
-    /// Number of recent items to keep (tool uses only).
-    public let keep: Int?
-    /// Minimum number of items to clear.
-    public let clearAtLeast: Int?
-    /// Tool names excluded from clearing.
+    public let keep: Int?           // Number of tool uses to keep
+    public let clearAtLeast: Int?   // Minimum to clear
     public let excludeTools: [String]?
 
-    /// Creates a context edit rule.
-    /// - Parameters:
-    ///   - type: The type of content to clear.
-    ///   - trigger: When to trigger the edit.
-    ///   - keep: Number of recent items to preserve.
-    ///   - clearAtLeast: Minimum items to clear.
-    ///   - excludeTools: Tools to exclude from clearing.
     public init(
         type: EditType,
         trigger: ContextTrigger,
@@ -659,13 +482,9 @@ public struct ContextEdit: Sendable {
     }
 }
 
-/// Token threshold that triggers a context edit operation.
 public struct ContextTrigger: Sendable {
-    /// Input token count at which to trigger the context edit.
     public let inputTokens: Int
 
-    /// Creates a context trigger.
-    /// - Parameter inputTokens: Token count threshold.
     public init(inputTokens: Int) {
         self.inputTokens = inputTokens
     }
@@ -673,14 +492,11 @@ public struct ContextTrigger: Sendable {
 
 // MARK: - Server Tools (P2)
 
-/// Anthropic server-side tools (web search, web fetch, etc.).
+/// Anthropic server-side tools (web search, web fetch, etc.)
 public enum ServerTool: Sendable {
-    /// Server-side web search tool.
     case webSearch(WebSearchConfig)
-    /// Server-side web page fetch tool.
     case webFetch(WebFetchConfig)
 
-    /// Serializes the tool configuration to a dictionary for the API request body.
     public var toolDefinition: [String: Any] {
         switch self {
         case let .webSearch(config):
@@ -727,24 +543,14 @@ public enum ServerTool: Sendable {
     }
 }
 
-/// Configuration for the Anthropic web search server tool.
-/// Pricing: $10 per 1,000 searches.
+/// Web search tool configuration
+/// Pricing: $10 per 1,000 searches
 public struct WebSearchConfig: Sendable {
-    /// Maximum number of searches allowed per request.
     public let maxUses: Int?
-    /// Domains to restrict search results to.
     public let allowedDomains: [String]?
-    /// Domains to exclude from search results.
     public let blockedDomains: [String]?
-    /// User location for localized search results.
     public let userLocation: UserLocation?
 
-    /// Creates a web search configuration.
-    /// - Parameters:
-    ///   - maxUses: Maximum search invocations.
-    ///   - allowedDomains: Allowed domain whitelist.
-    ///   - blockedDomains: Blocked domain blacklist.
-    ///   - userLocation: User's approximate location.
     public init(
         maxUses: Int? = nil,
         allowedDomains: [String]? = nil,
@@ -757,31 +563,18 @@ public struct WebSearchConfig: Sendable {
         self.userLocation = userLocation
     }
 
-    /// Default configuration with no restrictions.
     public static let `default` = WebSearchConfig()
 }
 
-/// Configuration for the Anthropic web fetch server tool.
-/// Pricing: FREE (only standard token costs).
+/// Web fetch tool configuration
+/// Pricing: FREE (only standard token costs)
 public struct WebFetchConfig: Sendable {
-    /// Maximum number of fetch operations allowed per request.
     public let maxUses: Int?
-    /// Domains to restrict fetching to.
     public let allowedDomains: [String]?
-    /// Domains to block from fetching.
     public let blockedDomains: [String]?
-    /// Maximum content tokens to extract from fetched pages.
     public let maxContentTokens: Int?
-    /// Whether to enable citation annotations in the response.
     public let citationsEnabled: Bool
 
-    /// Creates a web fetch configuration.
-    /// - Parameters:
-    ///   - maxUses: Maximum fetch invocations.
-    ///   - allowedDomains: Allowed domain whitelist.
-    ///   - blockedDomains: Blocked domain blacklist.
-    ///   - maxContentTokens: Token limit for fetched content.
-    ///   - citationsEnabled: Whether to annotate citations.
     public init(
         maxUses: Int? = nil,
         allowedDomains: [String]? = nil,
@@ -796,27 +589,16 @@ public struct WebFetchConfig: Sendable {
         self.citationsEnabled = citationsEnabled
     }
 
-    /// Default configuration with no restrictions and citations disabled.
     public static let `default` = WebFetchConfig()
 }
 
-/// Approximate user location for localized search results.
+/// User location for localized search results
 public struct UserLocation: Sendable {
-    /// City name.
     public let city: String?
-    /// State or region name.
     public let region: String?
-    /// ISO country code.
     public let country: String?
-    /// IANA timezone identifier (e.g. "America/New_York").
     public let timezone: String?
 
-    /// Creates a user location.
-    /// - Parameters:
-    ///   - city: City name.
-    ///   - region: State or region.
-    ///   - country: Country code.
-    ///   - timezone: IANA timezone.
     public init(
         city: String? = nil,
         region: String? = nil,
@@ -829,7 +611,6 @@ public struct UserLocation: Sendable {
         self.timezone = timezone
     }
 
-    /// Serializes the location to a dictionary for the API request body.
     func toDictionary() -> [String: Any] {
         var dict: [String: Any] = ["type": "approximate"]
         if let city { dict["city"] = city }

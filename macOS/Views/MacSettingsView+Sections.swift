@@ -1,3 +1,4 @@
+import OSLog
 @preconcurrency import SwiftData
 import SwiftUI
 
@@ -216,14 +217,19 @@ extension MacSettingsView {
 
                         HStack {
                             Button("Test Wake Word") {
-                                try? voiceManager.startWakeWordDetection()
+                                do {
+                                    try voiceManager.startWakeWordDetection()
+                                } catch {
+                                    Logger(subsystem: "app.thea", category: "Settings")
+                                        .error("Wake word detection failed: \(error.localizedDescription)")
+                                }
                             }
 
                             if voiceManager.isListening {
                                 Button("Stop") {
                                     voiceManager.stopWakeWordDetection()
                                 }
-                                .foregroundStyle(.theaError)
+                                .foregroundStyle(.red)
                             }
                         }
 

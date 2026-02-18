@@ -165,7 +165,7 @@
                                     .font(.caption)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 4)
-                                    .background(Color.theaInfo.opacity(0.1))
+                                    .background(Color.blue.opacity(0.1))
                                     .cornerRadius(4)
                             }
                         }
@@ -204,7 +204,7 @@
                                     .lineLimit(1)
                             }
                             .font(.caption)
-                            .foregroundStyle(.theaSuccess)
+                            .foregroundStyle(.green)
                         }
                     }
                 }
@@ -213,10 +213,10 @@
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Error")
                             .font(.caption.bold())
-                            .foregroundStyle(.theaError)
+                            .foregroundStyle(.red)
                         Text(error)
                             .font(.caption)
-                            .foregroundStyle(.theaError)
+                            .foregroundStyle(.red)
                     }
                 }
 
@@ -248,7 +248,7 @@
             return VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.theaSuccess)
+                        .foregroundStyle(.green)
                         .accessibilityHidden(true)
                     Text("Session Complete")
                         .font(.headline)
@@ -270,7 +270,7 @@
                 }
             }
             .padding()
-            .background(Color.theaSuccess.opacity(0.1))
+            .background(Color.green.opacity(0.1))
             .cornerRadius(12)
         }
 
@@ -305,18 +305,18 @@
         private func colorForStepStatus(_ status: CoworkStep.StepStatus) -> Color {
             switch status {
             case .pending: .secondary
-            case .inProgress: .theaInfo
-            case .completed: .theaSuccess
-            case .failed: .theaError
-            case .skipped: .theaWarning
+            case .inProgress: .blue
+            case .completed: .green
+            case .failed: .red
+            case .skipped: .orange
             }
         }
 
         private func colorForLogLevel(_ level: CoworkStep.LogEntry.LogLevel) -> Color {
             switch level {
-            case .info: .theaInfo
-            case .warning: .theaWarning
-            case .error: .theaError
+            case .info: .blue
+            case .warning: .orange
+            case .error: .red
             case .debug: .secondary
             }
         }

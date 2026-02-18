@@ -14,7 +14,7 @@
 
 import { healthMonitorService, HealthSummary } from '../health/HealthMonitorService';
 import { plexWebhookService, WatchSession } from '../webhooks/PlexWebhookService';
-import { downloadMonitorService, DownloadProgress } from '../downloads/DownloadMonitorService';
+import { downloadMonitorService, DownloadCompletion, DownloadProgress } from '../downloads/DownloadMonitorService';
 import { episodeMonitorService } from '../automation/EpisodeMonitorService';
 import { contentPredictionService, PredictedContent } from '../prediction/ContentPredictionService';
 import { ipMonitorService, IPCheckResult } from '../vpn/IPMonitorService';

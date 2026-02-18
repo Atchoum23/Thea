@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 // MARK: - Model Selection Configuration
 
@@ -143,19 +144,26 @@ struct ModelCapabilities: Codable, Sendable, Equatable {
 
 // MARK: - Model Extensions
 
+private let modelSelectionLogger = Logger(subsystem: "ai.thea.app", category: "ModelSelectionConfiguration")
+
 extension AppConfiguration {
     var modelSelectionConfig: ModelSelectionConfiguration {
         get {
-            if let data = UserDefaults.standard.data(forKey: "AppConfiguration.modelSelectionConfig"),
-               let config = try? JSONDecoder().decode(ModelSelectionConfiguration.self, from: data)
-            {
-                return config
+            if let data = UserDefaults.standard.data(forKey: "AppConfiguration.modelSelectionConfig") {
+                do {
+                    return try JSONDecoder().decode(ModelSelectionConfiguration.self, from: data)
+                } catch {
+                    modelSelectionLogger.error("Failed to decode ModelSelectionConfiguration: \(error.localizedDescription)")
+                }
             }
             return ModelSelectionConfiguration()
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 UserDefaults.standard.set(data, forKey: "AppConfiguration.modelSelectionConfig")
+            } catch {
+                modelSelectionLogger.error("Failed to encode ModelSelectionConfiguration: \(error.localizedDescription)")
             }
         }
     }

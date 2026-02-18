@@ -8,6 +8,7 @@ import ServiceManagement
 @MainActor
 final class SettingsManager: ObservableObject {
     static let shared = SettingsManager()
+
     private let logger = Logger(subsystem: "ai.thea.app", category: "SettingsManager")
 
     // MARK: - Sync Engine
@@ -77,7 +78,7 @@ final class SettingsManager: ObservableObject {
                 }
             } catch {
                 // Registration can fail if not properly entitled; log but don't crash
-                logger.error("Login item registration failed: \(error.localizedDescription)")
+                print("Login item registration failed: \(error.localizedDescription)")
             }
             #endif
         }
@@ -344,39 +345,6 @@ final class SettingsManager: ObservableObject {
         }
     }
 
-    // MARK: - Response Styles Settings
-
-    /// ID of the currently active response style (nil = no style active)
-    @Published var selectedResponseStyleID: String? {
-        didSet { persist(selectedResponseStyleID as Any, forKey: "selectedResponseStyleID") }
-    }
-
-    /// JSON-encoded array of ResponseStyle values (includes built-in + custom)
-    @Published var customResponseStyles: [ResponseStyle] {
-        didSet {
-            if let data = try? JSONEncoder().encode(customResponseStyles) {
-                persist(data, forKey: "customResponseStyles")
-            }
-        }
-    }
-
-    // MARK: - Personalization Settings
-
-    /// Free-text block the user fills in about themselves
-    @Published var personalizationContext: String {
-        didSet { persist(personalizationContext, forKey: "personalizationContext") }
-    }
-
-    /// How the user prefers responses to be formatted / phrased
-    @Published var personalizationResponsePreference: String {
-        didSet { persist(personalizationResponsePreference, forKey: "personalizationResponsePreference") }
-    }
-
-    /// When true, personalization context is injected into every system prompt
-    @Published var personalizationEnabled: Bool {
-        didSet { persist(personalizationEnabled, forKey: "personalizationEnabled") }
-    }
-
     // MARK: - Init
 
     private init() {
@@ -388,7 +356,7 @@ final class SettingsManager: ObservableObject {
         iCloudSyncEnabled = d.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
         analyticsEnabled = d.bool(forKey: "analyticsEnabled")
         handoffEnabled = d.object(forKey: "handoffEnabled") as? Bool ?? true
-        cloudAPIPrivacyGuardEnabled = d.object(forKey: "cloudAPIPrivacyGuardEnabled") as? Bool ?? true
+        cloudAPIPrivacyGuardEnabled = d.bool(forKey: "cloudAPIPrivacyGuardEnabled")
         launchAtLogin = d.bool(forKey: "launchAtLogin")
         showInMenuBar = d.object(forKey: "showInMenuBar") as? Bool ?? true
         notificationsEnabled = d.object(forKey: "notificationsEnabled") as? Bool ?? true
@@ -459,71 +427,12 @@ final class SettingsManager: ObservableObject {
         enableSemanticSearch = d.object(forKey: "enableSemanticSearch") as? Bool ?? true
         defaultExportFormat = d.string(forKey: "defaultExportFormat") ?? "markdown"
         favoriteModels = Set(d.array(forKey: "favoriteModels") as? [String] ?? [])
-        // Response Styles
-        selectedResponseStyleID = d.string(forKey: "selectedResponseStyleID")
-        if let data = d.data(forKey: "customResponseStyles"),
-           let decoded = try? JSONDecoder().decode([ResponseStyle].self, from: data) {
-            customResponseStyles = decoded
-        } else {
-            customResponseStyles = []
-        }
-        // Personalization
-        personalizationContext = d.string(forKey: "personalizationContext") ?? ""
-        personalizationResponsePreference = d.string(forKey: "personalizationResponsePreference") ?? ""
-        personalizationEnabled = d.bool(forKey: "personalizationEnabled")
         syncObserver = NotificationCenter.default
             .publisher(for: .preferenceSyncDidPull)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.reloadFromDefaults()
             }
-
-        // One-time Keychain migration audit: scan UserDefaults for leftover API keys
-        // and force-migrate them to Keychain. Runs once per install/device.
-        Task { [weak self] in
-            try? await Task.sleep(for: .seconds(2))
-            self?.auditAndMigrateAPIKeys()
-        }
-    }
-
-    /// Scan UserDefaults for any remaining `*_api_key` or `apiKey_*` patterns,
-    /// migrate them to Keychain, and remove from UserDefaults.
-    private func auditAndMigrateAPIKeys() {
-        let defaults = UserDefaults.standard
-        let auditKey = "settings.keychainAuditCompleted.v1"
-        guard !defaults.bool(forKey: auditKey) else { return }
-
-        var migrated = 0
-        var found = 0
-
-        for key in defaults.dictionaryRepresentation().keys {
-            let isLegacyKey = key.hasSuffix("_api_key") || key.hasPrefix("apiKey_")
-            guard isLegacyKey, let value = defaults.string(forKey: key), !value.isEmpty else { continue }
-            found += 1
-
-            // Derive provider name from key
-            let provider: String
-            if key.hasSuffix("_api_key") {
-                provider = String(key.dropLast("_api_key".count))
-            } else {
-                provider = String(key.dropFirst("apiKey_".count))
-            }
-
-            do {
-                try SecureStorage.shared.saveAPIKey(value, for: provider)
-                defaults.removeObject(forKey: key)
-                migrated += 1
-                logger.info("Keychain audit: migrated '\(provider, privacy: .public)' API key from UserDefaults")
-            } catch {
-                logger.error("Keychain audit: failed to migrate '\(provider, privacy: .public)': \(error.localizedDescription, privacy: .public)")
-            }
-        }
-
-        if found > 0 {
-            logger.info("Keychain audit complete: \(migrated)/\(found) keys migrated to Keychain")
-        }
-
-        defaults.set(true, forKey: auditKey)
     }
 
 }
@@ -558,7 +467,7 @@ extension SettingsManager {
         iCloudSyncEnabled = d.object(forKey: "iCloudSyncEnabled") as? Bool ?? true
         analyticsEnabled = d.bool(forKey: "analyticsEnabled")
         handoffEnabled = d.object(forKey: "handoffEnabled") as? Bool ?? true
-        cloudAPIPrivacyGuardEnabled = d.object(forKey: "cloudAPIPrivacyGuardEnabled") as? Bool ?? true
+        cloudAPIPrivacyGuardEnabled = d.bool(forKey: "cloudAPIPrivacyGuardEnabled")
         launchAtLogin = d.bool(forKey: "launchAtLogin")
         showInMenuBar = d.object(forKey: "showInMenuBar") as? Bool ?? true
         notificationsEnabled = d.object(forKey: "notificationsEnabled") as? Bool ?? true
@@ -635,31 +544,6 @@ extension SettingsManager {
         activeFocusMode = d.string(forKey: "activeFocusMode") ?? "general"
         enableSemanticSearch = d.object(forKey: "enableSemanticSearch") as? Bool ?? true
         defaultExportFormat = d.string(forKey: "defaultExportFormat") ?? "markdown"
-        // Response Styles
-        selectedResponseStyleID = d.string(forKey: "selectedResponseStyleID")
-        if let data = d.data(forKey: "customResponseStyles"),
-           let decoded = try? JSONDecoder().decode([ResponseStyle].self, from: data) {
-            customResponseStyles = decoded
-        }
-        // Personalization
-        personalizationContext = d.string(forKey: "personalizationContext") ?? ""
-        personalizationResponsePreference = d.string(forKey: "personalizationResponsePreference") ?? ""
-        personalizationEnabled = d.bool(forKey: "personalizationEnabled")
-    }
-}
-
-// MARK: - Response Styles (computed from built-ins + custom)
-
-extension SettingsManager {
-    /// All available response styles: built-in defaults merged with user-created styles.
-    var allResponseStyles: [ResponseStyle] {
-        ResponseStyle.builtInStyles + customResponseStyles
-    }
-
-    /// Returns the currently selected style, or nil if none is selected.
-    var activeResponseStyle: ResponseStyle? {
-        guard let id = selectedResponseStyleID else { return nil }
-        return allResponseStyles.first { $0.id == id }
     }
 }
 
@@ -668,29 +552,31 @@ extension SettingsManager {
 extension SettingsManager {
     func getAPIKey(for provider: String) -> String? {
         do {
-            if let key = try SecureStorage.shared.loadAPIKey(for: provider), !key.isEmpty { return key }
+            let key = try SecureStorage.shared.loadAPIKey(for: provider)
+            if let key = key, !key.isEmpty {
+                return key
+            }
         } catch {
-            logger.error("Failed to load API key for \(provider) from Keychain: \(error.localizedDescription)")
+            logger.error("Failed to load API key for \(provider): \(error.localizedDescription)")
         }
 
-        // Migrate from legacy UserDefaults storage
         if let oldKey = UserDefaults.standard.string(forKey: "\(provider)_api_key"), !oldKey.isEmpty {
             do {
                 try SecureStorage.shared.saveAPIKey(oldKey, for: provider)
-                UserDefaults.standard.removeObject(forKey: "\(provider)_api_key")
             } catch {
-                logger.error("Failed to migrate API key for \(provider) to Keychain: \(error.localizedDescription)")
+                logger.error("Failed to migrate legacy API key for \(provider): \(error.localizedDescription)")
             }
+            UserDefaults.standard.removeObject(forKey: "\(provider)_api_key")
             return oldKey
         }
 
         if let legacyKey = UserDefaults.standard.string(forKey: "apiKey_\(provider)"), !legacyKey.isEmpty {
             do {
                 try SecureStorage.shared.saveAPIKey(legacyKey, for: provider)
-                UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
             } catch {
-                logger.error("Failed to migrate legacy API key for \(provider) to Keychain: \(error.localizedDescription)")
+                logger.error("Failed to migrate legacy API key (v1) for \(provider): \(error.localizedDescription)")
             }
+            UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
             return legacyKey
         }
 
@@ -703,7 +589,7 @@ extension SettingsManager {
             UserDefaults.standard.removeObject(forKey: "\(provider)_api_key")
             UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
         } catch {
-            logger.error("Failed to save API key for \(provider): \(error.localizedDescription)")
+            print("Failed to save API key for \(provider): \(error)")
         }
     }
 
@@ -713,7 +599,7 @@ extension SettingsManager {
             UserDefaults.standard.removeObject(forKey: "\(provider)_api_key")
             UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
         } catch {
-            logger.error("Failed to delete API key for \(provider): \(error.localizedDescription)")
+            print("Failed to delete API key for \(provider): \(error)")
         }
     }
 

@@ -112,7 +112,7 @@ struct ScanReport: Codable, Sendable, Identifiable {
     let completedAt: Date
 
     var overallThreatLevel: ThreatLevel {
-        findings.max { $0.threatLevel < $1.threatLevel }?.threatLevel ?? .clean
+        findings.max(by: { $0.threatLevel < $1.threatLevel })?.threatLevel ?? .clean
     }
 
     var findingsByCategory: [ScanCategory: [SystemSecurityFinding]] {
@@ -168,12 +168,22 @@ actor SystemSecurityScanner {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         let theaDir = appSupport.appendingPathComponent("Thea/SecurityScanner")
-        try? FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        } catch {
+            ssLogger.error("Failed to create SecurityScanner directory: \(error.localizedDescription)")
+        }
         let file = theaDir.appendingPathComponent("scan_history.json")
         self.historyFile = file
         // Inline loadHistory to avoid calling actor-isolated method from init
-        if let data = try? Data(contentsOf: file) {
-            self.scanHistory = (try? JSONDecoder().decode([ScanReport].self, from: data)) ?? []
+        do {
+            let data = try Data(contentsOf: file)
+            self.scanHistory = try JSONDecoder().decode([ScanReport].self, from: data)
+        } catch CocoaError.fileReadNoSuchFile {
+            self.scanHistory = []
+        } catch {
+            ssLogger.error("Failed to load scan history: \(error.localizedDescription)")
+            self.scanHistory = []
         }
     }
 
@@ -248,7 +258,13 @@ actor SystemSecurityScanner {
         ]
 
         for dir in launchPaths {
-            let items = (try? FileManager.default.contentsOfDirectory(atPath: dir)) ?? []
+            let items: [String]
+            do {
+                items = try FileManager.default.contentsOfDirectory(atPath: dir)
+            } catch {
+                ssLogger.debug("Cannot read directory \(dir): \(error.localizedDescription)")
+                continue
+            }
             for item in items {
                 filesChecked += 1
                 let fullPath = (dir as NSString).appendingPathComponent(item)
@@ -291,16 +307,22 @@ actor SystemSecurityScanner {
         var filesChecked = 0
 
         let appsDir = "/Applications"
-        let items = (try? FileManager.default.contentsOfDirectory(atPath: appsDir)) ?? []
+        let items: [String]
+        do {
+            items = try FileManager.default.contentsOfDirectory(atPath: appsDir)
+        } catch {
+            ssLogger.error("Cannot read /Applications: \(error.localizedDescription)")
+            return ([], 0)
+        }
 
         for item in items where item.hasSuffix(".app") {
             filesChecked += 1
             let infoPlistPath = "\(appsDir)/\(item)/Contents/Info.plist"
 
-            if let data = FileManager.default.contents(atPath: infoPlistPath),
-               let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any],
-               let bundleID = plist["CFBundleIdentifier"] as? String {
-                if knownAdware.contains(bundleID) {
+            guard let data = FileManager.default.contents(atPath: infoPlistPath) else { continue }
+            do {
+                let plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any]
+                if let bundleID = plist?["CFBundleIdentifier"] as? String, knownAdware.contains(bundleID) {
                     findings.append(SystemSecurityFinding(
                         category: .adware,
                         threatLevel: .high,
@@ -310,13 +332,19 @@ actor SystemSecurityScanner {
                         recommendation: "Remove this application. It may inject ads, track browsing, or modify browser settings."
                     ))
                 }
+            } catch {
+                ssLogger.debug("Cannot parse Info.plist for \(item): \(error.localizedDescription)")
             }
         }
 
         // Check browser extensions directory
         let safariExtDir = NSHomeDirectory() + "/Library/Safari/Extensions"
-        let extItems = (try? FileManager.default.contentsOfDirectory(atPath: safariExtDir)) ?? []
-        filesChecked += extItems.count
+        do {
+            let extItems = try FileManager.default.contentsOfDirectory(atPath: safariExtDir)
+            filesChecked += extItems.count
+        } catch {
+            ssLogger.debug("Cannot read Safari extensions directory: \(error.localizedDescription)")
+        }
 
         return (findings, filesChecked)
     }
@@ -326,7 +354,13 @@ actor SystemSecurityScanner {
         var filesChecked = 0
 
         let appsDir = "/Applications"
-        let items = (try? FileManager.default.contentsOfDirectory(atPath: appsDir)) ?? []
+        let items: [String]
+        do {
+            items = try FileManager.default.contentsOfDirectory(atPath: appsDir)
+        } catch {
+            ssLogger.error("Cannot read /Applications for PUP scan: \(error.localizedDescription)")
+            return ([], 0)
+        }
 
         for item in items where item.hasSuffix(".app") {
             filesChecked += 1
@@ -359,7 +393,8 @@ actor SystemSecurityScanner {
             ssLogger.info("TCC database found — permission audit available via System Settings")
         }
 
-        // Check for apps that have accessibility permission (TCC.db is SIP-protected)
+        // Check for apps that have accessibility permission
+        let accessibilityPlist = "/Library/Application Support/com.apple.TCC/TCC.db"
         filesChecked += 1
 
         // Check for tracking-related files
@@ -372,17 +407,21 @@ actor SystemSecurityScanner {
         for path in trackingPaths {
             if FileManager.default.fileExists(atPath: path) {
                 filesChecked += 1
-                let attrs = try? FileManager.default.attributesOfItem(atPath: path)
-                let size = (attrs?[.size] as? Int64) ?? 0
-                if size > 10_000_000 { // > 10MB
-                    findings.append(SystemSecurityFinding(
-                        category: .privacy,
-                        threatLevel: .low,
-                        title: "Large Tracking Database",
-                        description: "Tracking/cookie database at \((path as NSString).lastPathComponent) is \(Self.formatFileSize(size))",
-                        filePath: path,
-                        recommendation: "Consider clearing browser cookies and history periodically to reduce tracking surface."
-                    ))
+                do {
+                    let attrs = try FileManager.default.attributesOfItem(atPath: path)
+                    let size = (attrs[.size] as? Int64) ?? 0
+                    if size > 10_000_000 { // > 10MB
+                        findings.append(SystemSecurityFinding(
+                            category: .privacy,
+                            threatLevel: .low,
+                            title: "Large Tracking Database",
+                            description: "Tracking/cookie database at \((path as NSString).lastPathComponent) is \(Self.formatFileSize(size))",
+                            filePath: path,
+                            recommendation: "Consider clearing browser cookies and history periodically to reduce tracking surface."
+                        ))
+                    }
+                } catch {
+                    ssLogger.debug("Cannot read attributes for \(path): \(error.localizedDescription)")
                 }
             }
         }
@@ -399,16 +438,21 @@ actor SystemSecurityScanner {
         // Check if firewall is enabled
         let firewallPlist = "/Library/Preferences/com.apple.alf.plist"
         filesChecked += 1
-        if let data = FileManager.default.contents(atPath: firewallPlist),
-           let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any],
-           let enabled = plist["globalstate"] as? Int, enabled == 0 {
-            findings.append(SystemSecurityFinding(
-                category: .network,
-                threatLevel: .medium,
-                title: "macOS Firewall Disabled",
-                description: "The built-in application firewall is not enabled",
-                recommendation: "Enable firewall in System Settings > Network > Firewall"
-            ))
+        if let data = FileManager.default.contents(atPath: firewallPlist) {
+            do {
+                let plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any]
+                if let enabled = plist?["globalstate"] as? Int, enabled == 0 {
+                    findings.append(SystemSecurityFinding(
+                        category: .network,
+                        threatLevel: .medium,
+                        title: "macOS Firewall Disabled",
+                        description: "The built-in application firewall is not enabled",
+                        recommendation: "Enable firewall in System Settings > Network > Firewall"
+                    ))
+                }
+            } catch {
+                ssLogger.debug("Cannot parse firewall plist: \(error.localizedDescription)")
+            }
         }
 
         // Check SSH config for weak settings
@@ -455,12 +499,19 @@ actor SystemSecurityScanner {
         let sensitiveDirs = ["/usr/local/bin", "/usr/local/sbin"]
 
         for dir in sensitiveDirs {
-            let items = (try? FileManager.default.contentsOfDirectory(atPath: dir)) ?? []
+            let items: [String]
+            do {
+                items = try FileManager.default.contentsOfDirectory(atPath: dir)
+            } catch {
+                ssLogger.debug("Cannot read directory \(dir): \(error.localizedDescription)")
+                continue
+            }
             for item in items.prefix(100) { // Limit to prevent slow scans
                 filesChecked += 1
                 let path = (dir as NSString).appendingPathComponent(item)
-                if let attrs = try? FileManager.default.attributesOfItem(atPath: path),
-                   let permissions = attrs[.posixPermissions] as? Int {
+                do {
+                    let attrs = try FileManager.default.attributesOfItem(atPath: path)
+                    guard let permissions = attrs[.posixPermissions] as? Int else { continue }
                     // Check world-writable (o+w = 0o002)
                     if permissions & 0o002 != 0 {
                         findings.append(SystemSecurityFinding(
@@ -472,28 +523,41 @@ actor SystemSecurityScanner {
                             recommendation: "Fix permissions: chmod o-w \(path)"
                         ))
                     }
+                } catch {
+                    ssLogger.debug("Cannot read attributes for \(path): \(error.localizedDescription)")
                 }
             }
         }
 
         // Check SSH key permissions
         let sshDir = NSHomeDirectory() + "/.ssh"
-        let sshItems = (try? FileManager.default.contentsOfDirectory(atPath: sshDir)) ?? []
+        let sshItems: [String]
+        do {
+            sshItems = try FileManager.default.contentsOfDirectory(atPath: sshDir)
+        } catch {
+            ssLogger.debug("Cannot read ~/.ssh: \(error.localizedDescription)")
+            return (findings, filesChecked)
+        }
         for item in sshItems {
             filesChecked += 1
             let path = (sshDir as NSString).appendingPathComponent(item)
-            if item.hasPrefix("id_") && !item.hasSuffix(".pub"),
-               let attrs = try? FileManager.default.attributesOfItem(atPath: path),
-               let permissions = attrs[.posixPermissions] as? Int,
-               permissions & 0o077 != 0 {
-                findings.append(SystemSecurityFinding(
-                    category: .permissions,
-                    threatLevel: .high,
-                    title: "Insecure SSH Key: \(item)",
-                    description: "SSH private key has overly permissive access (mode: \(String(permissions, radix: 8)))",
-                    filePath: path,
-                    recommendation: "Fix permissions: chmod 600 \(path)"
-                ))
+            if item.hasPrefix("id_") && !item.hasSuffix(".pub") {
+                do {
+                    let attrs = try FileManager.default.attributesOfItem(atPath: path)
+                    guard let permissions = attrs[.posixPermissions] as? Int else { continue }
+                    if permissions & 0o077 != 0 {
+                        findings.append(SystemSecurityFinding(
+                            category: .permissions,
+                            threatLevel: .high,
+                            title: "Insecure SSH Key: \(item)",
+                            description: "SSH private key has overly permissive access (mode: \(String(permissions, radix: 8)))",
+                            filePath: path,
+                            recommendation: "Fix permissions: chmod 600 \(path)"
+                        ))
+                    }
+                } catch {
+                    ssLogger.debug("Cannot read attributes for SSH key \(item): \(error.localizedDescription)")
+                }
             }
         }
         #endif
@@ -537,18 +601,22 @@ actor SystemSecurityScanner {
         ]
 
         for dir in projectDirs {
-            if let items = try? FileManager.default.contentsOfDirectory(atPath: dir) {
-                for item in items where item == ".env" {
-                    filesChecked += 1
-                    findings.append(SystemSecurityFinding(
-                        category: .credentials,
-                        threatLevel: .medium,
-                        title: "Environment File: \(dir)/\(item)",
-                        description: "Plaintext .env file may contain API keys and secrets",
-                        filePath: "\(dir)/\(item)",
-                        recommendation: "Ensure .env files are in .gitignore and credentials are stored securely."
-                    ))
-                }
+            let items: [String]
+            do {
+                items = try FileManager.default.contentsOfDirectory(atPath: dir)
+            } catch {
+                continue // Directory might not exist
+            }
+            for item in items where item == ".env" {
+                filesChecked += 1
+                findings.append(SystemSecurityFinding(
+                    category: .credentials,
+                    threatLevel: .medium,
+                    title: "Environment File: \(dir)/\(item)",
+                    description: "Plaintext .env file may contain API keys and secrets",
+                    filePath: "\(dir)/\(item)",
+                    recommendation: "Ensure .env files are in .gitignore and credentials are stored securely."
+                ))
             }
         }
 
@@ -605,7 +673,7 @@ actor SystemSecurityScanner {
 
     // MARK: - Helper
 
-    nonisolated private func runProcess(_ path: String, arguments: [String]) -> String {
+    private nonisolated func runProcess(_ path: String, arguments: [String]) -> String {
         #if os(macOS)
         let process = Process()
         process.executableURL = URL(fileURLWithPath: path)
@@ -629,7 +697,7 @@ actor SystemSecurityScanner {
 
     // MARK: - Formatting
 
-    nonisolated private static func formatFileSize(_ bytes: Int64) -> String {
+    private nonisolated static func formatFileSize(_ bytes: Int64) -> String {
         let units = ["B", "KB", "MB", "GB"]
         var value = Double(bytes)
         var unitIndex = 0
@@ -656,12 +724,23 @@ actor SystemSecurityScanner {
     // MARK: - Persistence
 
     private func loadHistory() {
-        guard let data = try? Data(contentsOf: historyFile) else { return }
-        scanHistory = (try? JSONDecoder().decode([ScanReport].self, from: data)) ?? []
+        do {
+            let data = try Data(contentsOf: historyFile)
+            scanHistory = try JSONDecoder().decode([ScanReport].self, from: data)
+        } catch CocoaError.fileReadNoSuchFile {
+            // File doesn't exist yet - expected on first run
+            return
+        } catch {
+            ssLogger.error("Failed to load scan history: \(error.localizedDescription)")
+        }
     }
 
     private func saveHistory() {
-        guard let data = try? JSONEncoder().encode(scanHistory) else { return }
-        try? data.write(to: historyFile, options: .atomic)
+        do {
+            let data = try JSONEncoder().encode(scanHistory)
+            try data.write(to: historyFile, options: .atomic)
+        } catch {
+            ssLogger.error("Failed to save scan history: \(error.localizedDescription)")
+        }
     }
 }

@@ -24,7 +24,7 @@ import OSLog
 public final class IntegratedTestRunner {
     public static let shared = IntegratedTestRunner()
 
-    let logger = Logger(subsystem: "com.thea.testing", category: "IntegratedTestRunner")
+    let logger = Logger(subsystem: "ai.thea.app", category: "IntegratedTestRunner")
 
     // MARK: - State
 
@@ -61,8 +61,14 @@ public final class IntegratedTestRunner {
         }
 
         // Check for Xcode project
-        let xcodeProj = try? fileManager.contentsOfDirectory(atPath: projectPath)
-            .first { $0.hasSuffix(".xcodeproj") || $0.hasSuffix(".xcworkspace") }
+        let xcodeProj: String?
+        do {
+            xcodeProj = try fileManager.contentsOfDirectory(atPath: projectPath)
+                .first { $0.hasSuffix(".xcodeproj") || $0.hasSuffix(".xcworkspace") }
+        } catch {
+            logger.error("Failed to list directory for Xcode project detection: \(error.localizedDescription)")
+            xcodeProj = nil
+        }
         if xcodeProj != nil {
             return .xctest
         }
@@ -71,14 +77,19 @@ public final class IntegratedTestRunner {
         let packageJson = (projectPath as NSString).appendingPathComponent("package.json")
         if fileManager.fileExists(atPath: packageJson) {
             // Read package.json to detect framework
-            if let data = fileManager.contents(atPath: packageJson),
-               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                let deps = (json["devDependencies"] as? [String: Any]) ?? [:]
-                let allDeps = deps.merging((json["dependencies"] as? [String: Any]) ?? [:]) { $1 }
+            if let data = fileManager.contents(atPath: packageJson) {
+                do {
+                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                        let deps = (json["devDependencies"] as? [String: Any]) ?? [:]
+                        let allDeps = deps.merging((json["dependencies"] as? [String: Any]) ?? [:]) { $1 }
 
-                if allDeps["jest"] != nil { return .jest }
-                if allDeps["mocha"] != nil { return .mocha }
-                if allDeps["vitest"] != nil { return .vitest }
+                        if allDeps["jest"] != nil { return .jest }
+                        if allDeps["mocha"] != nil { return .mocha }
+                        if allDeps["vitest"] != nil { return .vitest }
+                    }
+                } catch {
+                    logger.error("Failed to parse package.json: \(error.localizedDescription)")
+                }
             }
             return .jest  // Default for Node.js
         }

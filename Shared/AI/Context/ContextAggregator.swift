@@ -644,7 +644,11 @@ public final class ContextAggregator: ObservableObject {
     private var correlationsFileURL: URL {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         let theaDir = appSupport.appendingPathComponent("ai.thea.app", isDirectory: true)
-        try? FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        } catch {
+            logger.error("Failed to create app support directory: \(error.localizedDescription)")
+        }
         return theaDir.appendingPathComponent("context_correlations.json")
     }
 

@@ -17,7 +17,7 @@ public final class FeatureFlags: ObservableObject {
 
     // MARK: - Published Flags
 
-    @Published public private(set) var flags: [String: FeatureFlagEntry] = [:]
+    @Published public private(set) var flags: [String: FeatureFlag] = [:]
     @Published public private(set) var lastSyncDate: Date?
 
     // MARK: - Core Feature Flags
@@ -205,7 +205,7 @@ public final class FeatureFlags: ObservableObject {
     }
 
     public func setFlag(_ key: String, enabled: Bool, source: FeatureFlagSource = .local) {
-        flags[key] = FeatureFlagEntry(
+        flags[key] = FeatureFlag(
             key: key,
             isEnabled: enabled,
             source: source,
@@ -223,58 +223,40 @@ public final class FeatureFlags: ObservableObject {
     // MARK: - Persistence
 
     private func loadFlags() {
-        guard let data = defaults.data(forKey: flagsKey),
-              let savedFlags = try? JSONDecoder().decode([String: FeatureFlagEntry].self, from: data)
-        else {
+        guard let data = defaults.data(forKey: flagsKey) else {
             return
         }
-        flags = savedFlags
+        let decoder = JSONDecoder()
+        do {
+            flags = try decoder.decode([String: FeatureFlag].self, from: data)
+        } catch {
+            logger.error("Failed to decode feature flags: \(error)")
+        }
     }
 
     private func saveFlags() {
-        guard let data = try? JSONEncoder().encode(flags) else { return }
-        defaults.set(data, forKey: flagsKey)
+        let encoder = JSONEncoder()
+        do {
+            let data = try encoder.encode(flags)
+            defaults.set(data, forKey: flagsKey)
+        } catch {
+            logger.error("Failed to encode feature flags: \(error)")
+        }
     }
 
-    // MARK: - Remote Config Sync via iCloud Key-Value Store
-
-    private let iCloudFlagsKey = "thea.feature.flags.remote"
+    // MARK: - Remote Config Sync
 
     public func syncWithRemote() async throws {
-        let store = NSUbiquitousKeyValueStore.default
-
-        // Pull remote overrides from iCloud KVS
-        store.synchronize()
-        if let remoteData = store.data(forKey: iCloudFlagsKey),
-           let remoteFlags = try? JSONDecoder().decode([String: FeatureFlagEntry].self, from: remoteData)
-        {
-            // Merge: remote flags override local only if they're newer
-            for (key, remoteFlag) in remoteFlags {
-                if let localFlag = flags[key] {
-                    if remoteFlag.lastUpdated > localFlag.lastUpdated {
-                        flags[key] = remoteFlag
-                    }
-                } else {
-                    flags[key] = remoteFlag
-                }
-            }
-            saveFlags()
-            logger.info("Merged \(remoteFlags.count) remote feature flags from iCloud")
-        }
-
-        // Push local flags to iCloud KVS
-        if let localData = try? JSONEncoder().encode(flags) {
-            store.set(localData, forKey: iCloudFlagsKey)
-        }
-
+        // Placeholder for remote config sync
+        // Could integrate with Firebase Remote Config, LaunchDarkly, etc.
         lastSyncDate = Date()
-        logger.info("Feature flags synced with iCloud")
+        logger.info("Feature flags synced")
     }
 }
 
 // MARK: - Feature Flag Model
 
-public struct FeatureFlagEntry: Codable, Sendable {
+public struct FeatureFlag: Codable, Sendable {
     public let key: String
     public var isEnabled: Bool
     public let source: FeatureFlagSource

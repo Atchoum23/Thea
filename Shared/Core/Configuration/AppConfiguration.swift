@@ -1,14 +1,10 @@
 import Foundation
+import OSLog
 
 // MARK: - App Configuration
 
 // Centralized configuration for all hardcoded values.
 // All settings are persisted via UserDefaults with sensible defaults.
-//
-// NOTE: try? usage throughout this file is intentional and correct:
-// - Getters: try? decode returns nil → falls through to default instance
-// - Setters: try? encode only fails if the type has non-Codable properties (impossible for these types)
-// Converting these to ErrorLogger would add ~100 lines with no diagnostic value.
 
 @MainActor
 @Observable
@@ -16,16 +12,20 @@ final class AppConfiguration {
     static let shared = AppConfiguration()
 
     private let defaults = UserDefaults.standard
+    private let logger = Logger(subsystem: "app.thea.Thea", category: "AppConfiguration")
 
     // Stored property for theme so @Observable tracks changes and views re-render
     var themeConfigStored: ThemeConfiguration
 
     private init() {
         // Load themeConfig from UserDefaults at launch
-        if let data = UserDefaults.standard.data(forKey: "AppConfiguration.themeConfig"),
-           let config = try? JSONDecoder().decode(ThemeConfiguration.self, from: data)
-        {
-            themeConfigStored = config
+        if let data = UserDefaults.standard.data(forKey: "AppConfiguration.themeConfig") {
+            do {
+                themeConfigStored = try JSONDecoder().decode(ThemeConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode ThemeConfiguration: \(error.localizedDescription)")
+                themeConfigStored = ThemeConfiguration()
+            }
         } else {
             themeConfigStored = ThemeConfiguration()
         }
@@ -72,16 +72,22 @@ final class AppConfiguration {
 
     var providerConfig: ProviderConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.providerConfig"),
-               let config = try? JSONDecoder().decode(ProviderConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.providerConfig") else {
+                return ProviderConfiguration()
             }
-            return ProviderConfiguration()
+            do {
+                return try JSONDecoder().decode(ProviderConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode ProviderConfiguration: \(error.localizedDescription)")
+                return ProviderConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.providerConfig")
+            } catch {
+                logger.error("Failed to encode ProviderConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -90,16 +96,22 @@ final class AppConfiguration {
 
     var memoryConfig: AppMemoryConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.memoryConfig"),
-               let config = try? JSONDecoder().decode(AppMemoryConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.memoryConfig") else {
+                return AppMemoryConfiguration()
             }
-            return AppMemoryConfiguration()
+            do {
+                return try JSONDecoder().decode(AppMemoryConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode AppMemoryConfiguration: \(error.localizedDescription)")
+                return AppMemoryConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.memoryConfig")
+            } catch {
+                logger.error("Failed to encode AppMemoryConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -108,16 +120,22 @@ final class AppConfiguration {
 
     var agentConfig: AgentConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.agentConfig"),
-               let config = try? JSONDecoder().decode(AgentConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.agentConfig") else {
+                return AgentConfiguration()
             }
-            return AgentConfiguration()
+            do {
+                return try JSONDecoder().decode(AgentConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode AgentConfiguration: \(error.localizedDescription)")
+                return AgentConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.agentConfig")
+            } catch {
+                logger.error("Failed to encode AgentConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -126,16 +144,22 @@ final class AppConfiguration {
 
     var executionMode: ExecutionModeConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.executionMode"),
-               let config = try? JSONDecoder().decode(ExecutionModeConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.executionMode") else {
+                return ExecutionModeConfiguration()
             }
-            return ExecutionModeConfiguration()
+            do {
+                return try JSONDecoder().decode(ExecutionModeConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode ExecutionModeConfiguration: \(error.localizedDescription)")
+                return ExecutionModeConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.executionMode")
+            } catch {
+                logger.error("Failed to encode ExecutionModeConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -144,16 +168,22 @@ final class AppConfiguration {
 
     var localModelConfig: LocalModelConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.localModelConfig"),
-               let config = try? JSONDecoder().decode(LocalModelConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.localModelConfig") else {
+                return LocalModelConfiguration()
             }
-            return LocalModelConfiguration()
+            do {
+                return try JSONDecoder().decode(LocalModelConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode LocalModelConfiguration: \(error.localizedDescription)")
+                return LocalModelConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.localModelConfig")
+            } catch {
+                logger.error("Failed to encode LocalModelConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -162,16 +192,22 @@ final class AppConfiguration {
 
     var orchestratorConfig: OrchestratorConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.orchestratorConfig"),
-               let config = try? JSONDecoder().decode(OrchestratorConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.orchestratorConfig") else {
+                return OrchestratorConfiguration()
             }
-            return OrchestratorConfiguration()
+            do {
+                return try JSONDecoder().decode(OrchestratorConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode OrchestratorConfiguration: \(error.localizedDescription)")
+                return OrchestratorConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.orchestratorConfig")
+            } catch {
+                logger.error("Failed to encode OrchestratorConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -184,8 +220,11 @@ final class AppConfiguration {
         get { themeConfigStored }
         set {
             themeConfigStored = newValue
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.themeConfig")
+            } catch {
+                logger.error("Failed to encode ThemeConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -223,16 +262,22 @@ final class AppConfiguration {
 
     var voiceConfig: VoiceConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.voiceConfig"),
-               let config = try? JSONDecoder().decode(VoiceConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.voiceConfig") else {
+                return VoiceConfiguration()
             }
-            return VoiceConfiguration()
+            do {
+                return try JSONDecoder().decode(VoiceConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode VoiceConfiguration: \(error.localizedDescription)")
+                return VoiceConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.voiceConfig")
+            } catch {
+                logger.error("Failed to encode VoiceConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -241,16 +286,22 @@ final class AppConfiguration {
 
     var knowledgeScannerConfig: KnowledgeScannerConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.knowledgeScannerConfig"),
-               let config = try? JSONDecoder().decode(KnowledgeScannerConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.knowledgeScannerConfig") else {
+                return KnowledgeScannerConfiguration()
             }
-            return KnowledgeScannerConfiguration()
+            do {
+                return try JSONDecoder().decode(KnowledgeScannerConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode KnowledgeScannerConfiguration: \(error.localizedDescription)")
+                return KnowledgeScannerConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.knowledgeScannerConfig")
+            } catch {
+                logger.error("Failed to encode KnowledgeScannerConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -259,16 +310,22 @@ final class AppConfiguration {
 
     var codeIntelligenceConfig: CodeIntelligenceConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.codeIntelligenceConfig"),
-               let config = try? JSONDecoder().decode(CodeIntelligenceConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.codeIntelligenceConfig") else {
+                return CodeIntelligenceConfiguration()
             }
-            return CodeIntelligenceConfiguration()
+            do {
+                return try JSONDecoder().decode(CodeIntelligenceConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode CodeIntelligenceConfiguration: \(error.localizedDescription)")
+                return CodeIntelligenceConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.codeIntelligenceConfig")
+            } catch {
+                logger.error("Failed to encode CodeIntelligenceConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -277,16 +334,22 @@ final class AppConfiguration {
 
     var apiValidationConfig: APIValidationConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.apiValidationConfig"),
-               let config = try? JSONDecoder().decode(APIValidationConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.apiValidationConfig") else {
+                return APIValidationConfiguration()
             }
-            return APIValidationConfiguration()
+            do {
+                return try JSONDecoder().decode(APIValidationConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode APIValidationConfiguration: \(error.localizedDescription)")
+                return APIValidationConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.apiValidationConfig")
+            } catch {
+                logger.error("Failed to encode APIValidationConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -295,16 +358,22 @@ final class AppConfiguration {
 
     var externalAPIsConfig: ExternalAPIsConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.externalAPIsConfig"),
-               let config = try? JSONDecoder().decode(ExternalAPIsConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.externalAPIsConfig") else {
+                return ExternalAPIsConfiguration()
             }
-            return ExternalAPIsConfiguration()
+            do {
+                return try JSONDecoder().decode(ExternalAPIsConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode ExternalAPIsConfiguration: \(error.localizedDescription)")
+                return ExternalAPIsConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.externalAPIsConfig")
+            } catch {
+                logger.error("Failed to encode ExternalAPIsConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -313,16 +382,22 @@ final class AppConfiguration {
 
     var metaAIConfig: MetaAIConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.metaAIConfig"),
-               let config = try? JSONDecoder().decode(MetaAIConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.metaAIConfig") else {
+                return MetaAIConfiguration()
             }
-            return MetaAIConfiguration()
+            do {
+                return try JSONDecoder().decode(MetaAIConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode MetaAIConfiguration: \(error.localizedDescription)")
+                return MetaAIConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.metaAIConfig")
+            } catch {
+                logger.error("Failed to encode MetaAIConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -331,16 +406,22 @@ final class AppConfiguration {
 
     var promptEngineeringConfig: PromptEngineeringConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.promptEngineeringConfig"),
-               let config = try? JSONDecoder().decode(PromptEngineeringConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.promptEngineeringConfig") else {
+                return PromptEngineeringConfiguration()
             }
-            return PromptEngineeringConfiguration()
+            do {
+                return try JSONDecoder().decode(PromptEngineeringConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode PromptEngineeringConfiguration: \(error.localizedDescription)")
+                return PromptEngineeringConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.promptEngineeringConfig")
+            } catch {
+                logger.error("Failed to encode PromptEngineeringConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -349,16 +430,22 @@ final class AppConfiguration {
 
     var lifeTrackingConfig: LifeTrackingConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.lifeTrackingConfig"),
-               let config = try? JSONDecoder().decode(LifeTrackingConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.lifeTrackingConfig") else {
+                return LifeTrackingConfiguration()
             }
-            return LifeTrackingConfiguration()
+            do {
+                return try JSONDecoder().decode(LifeTrackingConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode LifeTrackingConfiguration: \(error.localizedDescription)")
+                return LifeTrackingConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.lifeTrackingConfig")
+            } catch {
+                logger.error("Failed to encode LifeTrackingConfiguration: \(error.localizedDescription)")
             }
         }
     }
@@ -367,16 +454,22 @@ final class AppConfiguration {
 
     var qaToolsConfig: QAToolsConfiguration {
         get {
-            if let data = defaults.data(forKey: "AppConfiguration.qaToolsConfig"),
-               let config = try? JSONDecoder().decode(QAToolsConfiguration.self, from: data)
-            {
-                return config
+            guard let data = defaults.data(forKey: "AppConfiguration.qaToolsConfig") else {
+                return QAToolsConfiguration()
             }
-            return QAToolsConfiguration()
+            do {
+                return try JSONDecoder().decode(QAToolsConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode QAToolsConfiguration: \(error.localizedDescription)")
+                return QAToolsConfiguration()
+            }
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            do {
+                let data = try JSONEncoder().encode(newValue)
                 defaults.set(data, forKey: "AppConfiguration.qaToolsConfig")
+            } catch {
+                logger.error("Failed to encode QAToolsConfiguration: \(error.localizedDescription)")
             }
         }
     }

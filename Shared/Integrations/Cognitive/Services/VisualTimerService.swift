@@ -9,7 +9,6 @@ public actor VisualTimerService: VisualTimerServiceProtocol {
 
     // MARK: - Session Management
 
-    /// Starts a new Pomodoro session with the given type and optional custom duration.
     public func startPomodoro(
         type: PomodoroSession.SessionType,
         duration: Int? = nil,
@@ -35,7 +34,6 @@ public actor VisualTimerService: VisualTimerServiceProtocol {
         return session
     }
 
-    /// Ends the active Pomodoro session, recording whether it was completed.
     public func endPomodoro(completed: Bool) async throws -> PomodoroSession {
         guard var session = activeSession else {
             throw CognitiveError.taskBreakdownFailed("No active Pomodoro session")
@@ -58,19 +56,16 @@ public actor VisualTimerService: VisualTimerServiceProtocol {
         return session
     }
 
-    /// Returns the currently active Pomodoro session, if any.
     public func getActiveSession() async -> PomodoroSession? {
         activeSession
     }
 
-    /// Returns the most recent Pomodoro sessions up to the given limit.
     public func getSessionHistory(limit: Int = 20) async -> [PomodoroSession] {
         Array(sessionHistory.prefix(limit))
     }
 
     // MARK: - Statistics
 
-    /// Computes Pomodoro statistics (session count, completion rate, average length) for the given date range.
     public func getStatistics(for period: DateInterval) async -> PomodoroStats {
         let sessionsInPeriod = sessionHistory.filter { session in
             session.startTime >= period.start && session.startTime <= period.end
@@ -92,12 +87,10 @@ public actor VisualTimerService: VisualTimerServiceProtocol {
 
     // MARK: - Helper Methods
 
-    /// Returns Pomodoro statistics for today.
     public func getTodayStats() async -> PomodoroStats {
         await getStatistics(for: .today)
     }
 
-    /// Returns Pomodoro statistics for the current week.
     public func getWeekStats() async -> PomodoroStats {
         await getStatistics(for: .thisWeek)
     }

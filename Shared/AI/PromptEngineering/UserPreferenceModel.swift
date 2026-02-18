@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import Observation
 @preconcurrency import SwiftData
 
@@ -13,6 +14,8 @@ final class UserPreferenceModel {
 
     private var modelContext: ModelContext?
     private var preferencesCache: [String: [UserPromptPreference]] = [:]
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "UserPreferenceModel")
 
     private init() {}
 
@@ -46,7 +49,13 @@ final class UserPreferenceModel {
 
         // Find existing preference - fetch all and filter to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<UserPromptPreference>()
-        let allPreferences = (try? context.fetch(descriptor)) ?? []
+        let allPreferences: [UserPromptPreference]
+        do {
+            allPreferences = try context.fetch(descriptor)
+        } catch {
+            logger.error("Failed to fetch preferences for update: \(error.localizedDescription)")
+            return
+        }
 
         if let existing = allPreferences.first(where: { $0.category == category && $0.preferenceKey == key }) {
             // Update existing preference
@@ -71,7 +80,11 @@ final class UserPreferenceModel {
             context.insert(preference)
         }
 
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            logger.error("Failed to save preference update: \(error.localizedDescription)")
+        }
         await loadPreferences()
     }
 

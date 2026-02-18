@@ -96,12 +96,6 @@ public struct ModelTaskPerformance: Codable, Sendable {
         return totalLatency / Double(total)
     }
 
-    public var averageCost: Decimal {
-        let total = successCount + failureCount
-        guard total > 0 else { return 0 }
-        return totalCost / Decimal(total)
-    }
-
     public var averageQuality: Double? {
         guard qualityCount > 0 else { return nil }
         return qualitySum / Double(qualityCount)

@@ -6,11 +6,14 @@
 
 import Combine
 import Foundation
+import OSLog
 #if canImport(UIKit)
 import UIKit
 #elseif canImport(AppKit)
 import AppKit
 #endif
+
+private let syncLogger = Logger(subsystem: "com.thea.app", category: "PreferenceSyncEngine")
 
 // MARK: - Device Class
 
@@ -331,17 +334,24 @@ public struct DeviceProfile: Codable, Identifiable, Sendable, Equatable {
     private static let storageKey = "com.thea.deviceProfile"
 
     private static func load() -> DeviceProfile? {
-        guard let data = UserDefaults.standard.data(forKey: storageKey),
-              var profile = try? JSONDecoder().decode(DeviceProfile.self, from: data)
-        else { return nil }
-        profile.lastActive = Date()
-        profile.save()
-        return profile
+        guard let data = UserDefaults.standard.data(forKey: storageKey) else { return nil }
+        do {
+            var profile = try JSONDecoder().decode(DeviceProfile.self, from: data)
+            profile.lastActive = Date()
+            profile.save()
+            return profile
+        } catch {
+            syncLogger.debug("Could not decode device profile: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     func save() {
-        if let data = try? JSONEncoder().encode(self) {
+        do {
+            let data = try JSONEncoder().encode(self)
             UserDefaults.standard.set(data, forKey: Self.storageKey)
+        } catch {
+            syncLogger.error("Failed to save device profile: \(error.localizedDescription)")
         }
     }
 }
@@ -568,8 +578,11 @@ public final class PreferenceSyncEngine: ObservableObject {
         profile.save()
 
         // Store in cloud
-        if let data = try? JSONEncoder().encode(profile) {
+        do {
+            let data = try JSONEncoder().encode(profile)
             cloud.set(data, forKey: "device.\(profile.id)")
+        } catch {
+            syncLogger.error("Failed to encode device profile for cloud: \(error.localizedDescription)")
         }
         cloud.synchronize()
         loadRegisteredDevices()
@@ -580,10 +593,13 @@ public final class PreferenceSyncEngine: ObservableObject {
         var devices: [DeviceProfile] = []
 
         for (key, value) in cloudDict where key.hasPrefix("device.") {
-            guard let data = value as? Data,
-                  let profile = try? JSONDecoder().decode(DeviceProfile.self, from: data)
-            else { continue }
-            devices.append(profile)
+            guard let data = value as? Data else { continue }
+            do {
+                let profile = try JSONDecoder().decode(DeviceProfile.self, from: data)
+                devices.append(profile)
+            } catch {
+                syncLogger.debug("Could not decode registered device for key \(key): \(error.localizedDescription)")
+            }
         }
 
         // Sort: current device first, then by last active
@@ -610,15 +626,23 @@ public final class PreferenceSyncEngine: ObservableObject {
 
     private func saveScopeOverrides() {
         let dict = scopeOverrides.mapKeys { $0.rawValue }.mapValues { $0.rawValue }
-        if let data = try? JSONEncoder().encode(dict) {
+        do {
+            let data = try JSONEncoder().encode(dict)
             UserDefaults.standard.set(data, forKey: scopeOverridesKey)
+        } catch {
+            syncLogger.error("Failed to save scope overrides: \(error.localizedDescription)")
         }
     }
 
     private func loadScopeOverrides() {
-        guard let data = UserDefaults.standard.data(forKey: scopeOverridesKey),
-              let dict = try? JSONDecoder().decode([String: String].self, from: data)
-        else { return }
+        guard let data = UserDefaults.standard.data(forKey: scopeOverridesKey) else { return }
+        let dict: [String: String]
+        do {
+            dict = try JSONDecoder().decode([String: String].self, from: data)
+        } catch {
+            syncLogger.debug("Could not decode scope overrides: \(error.localizedDescription)")
+            return
+        }
 
         scopeOverrides = dict.compactMap { key, value -> (SyncCategory, SyncScope)? in
             guard let cat = SyncCategory(rawValue: key),

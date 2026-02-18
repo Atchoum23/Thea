@@ -42,7 +42,11 @@ public final class DocumentationGroundingService: ObservableObject {
             ?? FileManager.default.temporaryDirectory
         cacheURL = appSupport.appendingPathComponent("Thea/docs_cache")
 
-        try? FileManager.default.createDirectory(at: cacheURL, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: cacheURL, withIntermediateDirectories: true)
+        } catch {
+            logger.debug("Could not create docs cache directory: \(error.localizedDescription)")
+        }
 
         Task {
             await loadCache()
@@ -199,11 +203,15 @@ public final class DocumentationGroundingService: ObservableObject {
         ]
 
         for pattern in patterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
-               let match = regex.firstMatch(in: query, range: NSRange(query.startIndex..., in: query)),
-               match.numberOfRanges > 1,
-               let range = Range(match.range(at: 1), in: query) {
-                return String(query[range]).lowercased()
+            do {
+                let regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+                if let match = regex.firstMatch(in: query, range: NSRange(query.startIndex..., in: query)),
+                   match.numberOfRanges > 1,
+                   let range = Range(match.range(at: 1), in: query) {
+                    return String(query[range]).lowercased()
+                }
+            } catch {
+                logger.debug("Invalid library name regex pattern: \(error.localizedDescription)")
             }
         }
 
@@ -211,67 +219,24 @@ public final class DocumentationGroundingService: ObservableObject {
     }
 
     private func inferLibraryInfo(from name: String) async -> LibraryInfo? {
-        let possibleRepoSlugs = [
-            "\(name)/\(name)",
-            "\(name)js/\(name)",
-            "\(name)-team/\(name)",
-            "apple/\(name)"
+        // Try to construct URLs from common patterns
+        let possibleRepoURLs = [
+            "https://github.com/\(name)/\(name)",
+            "https://github.com/\(name)js/\(name)",
+            "https://github.com/\(name)-team/\(name)"
         ]
 
-        // Try GitHub API to find the real repo
-        for slug in possibleRepoSlugs {
-            if let info = await fetchGitHubRepoInfo(slug: slug, name: name) {
-                return info
-            }
-        }
-
-        // Graceful fallback — return minimal info so the pipeline continues
+        // For now, return basic info
         return LibraryInfo(
             id: "/\(name)/\(name)",
             name: name,
-            description: "Library: \(name) (could not resolve repository)",
+            description: "Library: \(name)",
             documentationURL: nil,
-            repositoryURL: nil,
+            repositoryURL: URL(string: possibleRepoURLs[0]),
             version: nil,
-            trustScore: 2,
+            trustScore: 5,
             cachedAt: Date()
         )
-    }
-
-    private func fetchGitHubRepoInfo(slug: String, name: String) async -> LibraryInfo? {
-        guard let url = URL(string: "https://api.github.com/repos/\(slug)") else { return nil }
-
-        var request = URLRequest(url: url)
-        request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
-        request.timeoutInterval = 8
-
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return nil }
-
-            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
-
-            let description = json["description"] as? String ?? "Library: \(name)"
-            let htmlURL = json["html_url"] as? String
-            let homepage = json["homepage"] as? String
-            let stars = json["stargazers_count"] as? Int ?? 0
-
-            // Trust score based on star count (0-10 scale)
-            let trustScore = min(10, max(1, stars / 500 + 3))
-
-            return LibraryInfo(
-                id: slug,
-                name: name,
-                description: description,
-                documentationURL: homepage.flatMap { URL(string: $0) },
-                repositoryURL: htmlURL.flatMap { URL(string: $0) },
-                version: nil,
-                trustScore: trustScore,
-                cachedAt: Date()
-            )
-        } catch {
-            return nil
-        }
     }
 
     private func fetchDocumentation(from url: URL, topic: String?) async -> String? {
@@ -309,18 +274,22 @@ public final class DocumentationGroundingService: ObservableObject {
 
     private func loadCache() async {
         let cacheFile = cacheURL.appendingPathComponent("libraries.json")
-        guard FileManager.default.fileExists(atPath: cacheFile.path),
-              let data = try? Data(contentsOf: cacheFile),
-              let cached = try? JSONDecoder().decode([String: LibraryInfo].self, from: data) else {
-            return
+        guard FileManager.default.fileExists(atPath: cacheFile.path) else { return }
+        do {
+            let data = try Data(contentsOf: cacheFile)
+            cachedLibraries = try JSONDecoder().decode([String: LibraryInfo].self, from: data)
+        } catch {
+            logger.debug("Could not load docs cache: \(error.localizedDescription)")
         }
-        cachedLibraries = cached
     }
 
     private func saveCache() async {
         let cacheFile = cacheURL.appendingPathComponent("libraries.json")
-        if let data = try? JSONEncoder().encode(cachedLibraries) {
-            try? data.write(to: cacheFile)
+        do {
+            let data = try JSONEncoder().encode(cachedLibraries)
+            try data.write(to: cacheFile)
+        } catch {
+            logger.error("Failed to save docs cache: \(error.localizedDescription)")
         }
     }
 
@@ -664,11 +633,15 @@ public actor DocsResearcherAgent {
         ]
 
         for pattern in patterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
-               let match = regex.firstMatch(in: query, range: NSRange(query.startIndex..., in: query)),
-               match.numberOfRanges > 1,
-               let range = Range(match.range(at: 1), in: query) {
-                return String(query[range]).lowercased()
+            do {
+                let regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+                if let match = regex.firstMatch(in: query, range: NSRange(query.startIndex..., in: query)),
+                   match.numberOfRanges > 1,
+                   let range = Range(match.range(at: 1), in: query) {
+                    return String(query[range]).lowercased()
+                }
+            } catch {
+                logger.debug("Invalid query library regex pattern: \(error.localizedDescription)")
             }
         }
 

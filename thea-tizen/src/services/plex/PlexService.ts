@@ -11,7 +11,7 @@
  * - Monitor for new content additions
  */
 
-import { STREAMING_ACCOUNTS } from '../../config/secrets';
+import { SECRETS, STREAMING_ACCOUNTS } from '../../config/secrets';
 
 export interface PlexServer {
   name: string;

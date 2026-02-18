@@ -8,7 +8,7 @@ import Foundation
 
 // MARK: - Test Doubles
 
-private enum TestMailCategory: String, CaseIterable, Sendable {
+fileprivate enum TestMailCategory: String, CaseIterable, Sendable {
     case bill
     case invoice
     case taxDocument
@@ -60,7 +60,7 @@ private enum TestMailCategory: String, CaseIterable, Sendable {
     }
 }
 
-private enum TestMailUrgency: String, CaseIterable, Sendable, Comparable {
+fileprivate enum TestMailUrgency: String, CaseIterable, Sendable, Comparable {
     case low
     case normal
     case high
@@ -80,7 +80,7 @@ private enum TestMailUrgency: String, CaseIterable, Sendable, Comparable {
     }
 }
 
-private struct TestExtractedAmount: Identifiable, Sendable {
+fileprivate struct TestExtractedAmount: Identifiable, Sendable {
     let id: UUID
     let value: Double
     let currency: String
@@ -102,7 +102,7 @@ private struct TestExtractedAmount: Identifiable, Sendable {
     }
 }
 
-private struct TestPhysicalMailItem: Identifiable, Sendable {
+fileprivate struct TestPhysicalMailItem: Identifiable, Sendable {
     let id: UUID
     let title: String
     let sender: String?
@@ -145,7 +145,7 @@ private struct TestPhysicalMailItem: Identifiable, Sendable {
 
 // MARK: - Classification Logic (mirrors PhysicalMailChannel)
 
-private enum TestMailClassifier {
+fileprivate enum TestMailClassifier {
     static func classifyMail(from text: String) -> TestMailCategory {
         let lower = text.lowercased()
 
@@ -267,7 +267,7 @@ private enum TestMailClassifier {
             (#"EUR\s*([\d.]+,?\d*)"#, "EUR"),
             (#"€\s*([\d.]+,?\d*)"#, "EUR"),
             (#"([\d.]+,?\d*)\s*€"#, "EUR"),
-            (#"\$\s*([\d,]+\.?\d*)"#, "USD")
+            (#"\$\s*([\d,]+\.?\d*)"#, "USD"),
         ]
 
         for (pattern, currency) in patterns {
@@ -828,7 +828,7 @@ struct ItemFilteringTests {
     func activeExcludesArchived() {
         var items = [
             TestPhysicalMailItem(title: "A"),
-            TestPhysicalMailItem(title: "B")
+            TestPhysicalMailItem(title: "B"),
         ]
         items[1].isArchived = true
         let active = items.filter { !$0.isArchived }
@@ -841,7 +841,7 @@ struct ItemFilteringTests {
         let items = [
             TestPhysicalMailItem(title: "Bill", actionRequired: true),
             TestPhysicalMailItem(title: "Ad", actionRequired: false),
-            TestPhysicalMailItem(title: "Tax", actionRequired: true)
+            TestPhysicalMailItem(title: "Tax", actionRequired: true),
         ]
         let actionItems = items.filter(\.actionRequired)
         #expect(actionItems.count == 2)
@@ -852,7 +852,7 @@ struct ItemFilteringTests {
         let items = [
             TestPhysicalMailItem(title: "A", category: .bill),
             TestPhysicalMailItem(title: "B", category: .bill),
-            TestPhysicalMailItem(title: "C", category: .medical)
+            TestPhysicalMailItem(title: "C", category: .medical),
         ]
         let breakdown = Dictionary(grouping: items, by: \.category).mapValues(\.count)
         #expect(breakdown[.bill] == 2)
@@ -863,7 +863,7 @@ struct ItemFilteringTests {
     func searchBySender() {
         let items = [
             TestPhysicalMailItem(title: "Bill", sender: "Swisscom"),
-            TestPhysicalMailItem(title: "Tax", sender: "Steuerverwaltung")
+            TestPhysicalMailItem(title: "Tax", sender: "Steuerverwaltung"),
         ]
         let query = "swisscom"
         let results = items.filter { $0.sender?.lowercased().contains(query) ?? false }
@@ -875,7 +875,7 @@ struct ItemFilteringTests {
     func searchByOCR() {
         let items = [
             TestPhysicalMailItem(title: "A", ocrText: "Rechnung für Internet"),
-            TestPhysicalMailItem(title: "B", ocrText: "Diagnose vom Arzt")
+            TestPhysicalMailItem(title: "B", ocrText: "Diagnose vom Arzt"),
         ]
         let query = "internet"
         let results = items.filter { $0.ocrText.lowercased().contains(query) }

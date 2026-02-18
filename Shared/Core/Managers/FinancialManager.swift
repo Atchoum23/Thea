@@ -95,7 +95,11 @@ final class FinancialManager {
         isSyncing = true
 
         // Simulate sync delay
-        try? await Task.sleep(for: .seconds(1)) // try? OK: cancellation is best-effort
+        do {
+            try await Task.sleep(for: .seconds(1))
+        } catch {
+            // Task cancelled — expected during shutdown
+        }
 
         // Update the account's last sync time
         account.updatedAt = Date()

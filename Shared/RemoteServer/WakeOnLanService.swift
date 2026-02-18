@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os.log
 import Network
 
 // MARK: - Wake-on-LAN Service
@@ -13,6 +14,7 @@ import Network
 /// Send Wake-on-LAN magic packets to wake sleeping or powered-down machines
 @MainActor
 public class WakeOnLanService: ObservableObject {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "WakeOnLanService")
     // MARK: - Published State
 
     @Published public private(set) var knownDevices: [WoLDevice] = []
@@ -203,15 +205,21 @@ public class WakeOnLanService: ObservableObject {
     // MARK: - Persistence
 
     private func loadDevices() {
-        guard let data = UserDefaults.standard.data(forKey: Self.storageKey),
-              let decoded = try? JSONDecoder().decode([WoLDevice].self, from: data)
-        else { return }
-        knownDevices = decoded
+        guard let data = UserDefaults.standard.data(forKey: Self.storageKey) else { return }
+        do {
+            knownDevices = try JSONDecoder().decode([WoLDevice].self, from: data)
+        } catch {
+            logger.error("WakeOnLanService: failed to decode WoL devices: \(error.localizedDescription)")
+        }
     }
 
     private func saveDevices() {
-        guard let data = try? JSONEncoder().encode(knownDevices) else { return }
-        UserDefaults.standard.set(data, forKey: Self.storageKey)
+        do {
+            let data = try JSONEncoder().encode(knownDevices)
+            UserDefaults.standard.set(data, forKey: Self.storageKey)
+        } catch {
+            logger.error("WakeOnLanService: failed to encode WoL devices: \(error.localizedDescription)")
+        }
     }
 }
 

@@ -6,6 +6,7 @@
 // AI-powered refactoring, test generation, and build management.
 
 import Foundation
+import OSLog
 
 // MARK: - Types
 
@@ -178,7 +179,7 @@ struct CodeProjectInfo: Codable, Identifiable, Sendable {
     }
 
     var primaryLanguage: CodeLanguageType? {
-        languages.max { $0.value < $1.value }?.key
+        languages.max(by: { $0.value < $1.value })?.key
     }
 
     var formattedLines: String {
@@ -271,6 +272,8 @@ enum CodeAssistantError: Error, LocalizedError, Sendable {
 final class CodeAssistant: ObservableObject {
     static let shared = CodeAssistant()
 
+    private let logger = Logger(subsystem: "com.thea.app", category: "CodeAssistant")
+
     // MARK: - Published State
 
     @Published private(set) var projects: [CodeProjectInfo] = []
@@ -283,7 +286,11 @@ final class CodeAssistant: ObservableObject {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             .appendingPathComponent("Thea")
             .appendingPathComponent("CodeAssistant")
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            Logger(subsystem: "com.thea.app", category: "CodeAssistant").debug("Could not create CodeAssistant directory: \(error.localizedDescription)")
+        }
         return dir
     }()
 
@@ -333,7 +340,7 @@ final class CodeAssistant: ObservableObject {
                 continue
             }
 
-            let isFile = (try? fileURL.resourceValues(forKeys: [.isRegularFileKey]))?.isRegularFile ?? false
+            let isFile: Bool = { do { return try fileURL.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile ?? false } catch { return false } }()
             guard isFile else { continue }
 
             let lang = CodeLanguageType.detect(from: fileURL.pathExtension)
@@ -406,7 +413,7 @@ final class CodeAssistant: ObservableObject {
                 continue
             }
 
-            let isFile = (try? fileURL.resourceValues(forKeys: [.isRegularFileKey]))?.isRegularFile ?? false
+            let isFile: Bool = { do { return try fileURL.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile ?? false } catch { return false } }()
             guard isFile else { continue }
 
             let lang = CodeLanguageType.detect(from: fileURL.pathExtension)
@@ -414,7 +421,8 @@ final class CodeAssistant: ObservableObject {
 
             if let language, lang != language { continue }
 
-            let attrs = try? fileURL.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey])
+            var attrs: URLResourceValues?
+            do { attrs = try fileURL.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey]) } catch { attrs = nil }
             let lineCount: Int
             if let data = fm.contents(atPath: fileURL.path),
                let content = String(data: data, encoding: .utf8) {
@@ -701,10 +709,12 @@ final class CodeAssistant: ObservableObject {
             // Use simple prefix/contains matching for non-regex patterns
             if pattern.contains("(") {
                 // For complex patterns, use regex
-                if let regex = try? NSRegularExpression(pattern: pattern) {
+                do {
+                    let regex = try NSRegularExpression(pattern: pattern)
                     return regex.firstMatch(in: trimmed, range: NSRange(trimmed.startIndex..., in: trimmed)) != nil
+                } catch {
+                    return false
                 }
-                return false
             }
             return trimmed.contains(pattern)
         }.count

@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import Observation
 @preconcurrency import SwiftData
 
@@ -19,6 +20,8 @@ final class PromptOptimizer {
     private var config: PromptEngineeringConfiguration {
         AppConfiguration.shared.promptEngineeringConfig
     }
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "PromptOptimizer")
 
     private init() {}
 
@@ -213,7 +216,11 @@ final class PromptOptimizer {
             )
             template.lastUsed = Date()
 
-            try? context.save()
+            do {
+                try context.save()
+            } catch {
+                logger.error("Failed to save template outcome stats: \(error.localizedDescription)")
+            }
         }
 
         // Create few-shot example if highly successful
@@ -225,7 +232,11 @@ final class PromptOptimizer {
                 quality: Float(confidence)
             )
             context.insert(example)
-            try? context.save()
+            do {
+                try context.save()
+            } catch {
+                logger.error("Failed to save few-shot example: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -285,7 +296,11 @@ final class PromptOptimizer {
         )
 
         context.insert(template)
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            logger.error("Failed to save new template: \(error.localizedDescription)")
+        }
     }
 
     /// Updates an existing template
@@ -312,7 +327,11 @@ final class PromptOptimizer {
             template.templateText = newText
         }
 
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            logger.error("Failed to save updated template: \(error.localizedDescription)")
+        }
     }
 
     /// Gets all templates for a category
@@ -321,7 +340,13 @@ final class PromptOptimizer {
 
         // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<PromptTemplate>()
-        let allTemplates = (try? context.fetch(descriptor)) ?? []
+        let allTemplates: [PromptTemplate]
+        do {
+            allTemplates = try context.fetch(descriptor)
+        } catch {
+            logger.error("Failed to fetch templates for category \(category): \(error.localizedDescription)")
+            allTemplates = []
+        }
         return allTemplates
             .filter { $0.category == category && $0.isActive }
             .sorted { $0.successRate > $1.successRate }
@@ -343,8 +368,20 @@ final class PromptOptimizer {
         let templateDescriptor = FetchDescriptor<PromptTemplate>()
         let exampleDescriptor = FetchDescriptor<CodeFewShotExample>()
 
-        let templates = (try? context.fetch(templateDescriptor)) ?? []
-        let examples = (try? context.fetch(exampleDescriptor)) ?? []
+        let templates: [PromptTemplate]
+        let examples: [CodeFewShotExample]
+        do {
+            templates = try context.fetch(templateDescriptor)
+            examples = try context.fetch(exampleDescriptor)
+        } catch {
+            logger.error("Failed to fetch optimization stats data: \(error.localizedDescription)")
+            return OptimizationStats(
+                totalTemplates: 0,
+                averageSuccessRate: 0,
+                totalOptimizations: 0,
+                fewShotExamplesCount: 0
+            )
+        }
 
         let avgSuccessRate = templates.isEmpty ? 0 : templates.map(\.successRate).reduce(0, +) / Float(templates.count)
         let totalOptimizations = templates.reduce(0) { $0 + $1.successCount + $1.failureCount }

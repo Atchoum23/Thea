@@ -100,7 +100,11 @@ public final class AmbientIntelligenceSystem {
         monitoringTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.updateAmbientContext()
-                try? await Task.sleep(for: .seconds(10))
+                do {
+                    try await Task.sleep(for: .seconds(10)
+                } catch {
+                    break
+                })
             }
         }
     }
@@ -174,12 +178,9 @@ public final class AmbientIntelligenceSystem {
             isResting = false
         }
 
-        // Driving detection: inferred from navigation/maps activity
-        if action.type.contains("navigation") || action.type.contains("maps") || action.type.contains("driving") {
-            isDriving = true
-        } else if isWorking || isInMeeting {
-            isDriving = false
-        }
+        // Driving detection would require device motion APIs
+        // For now, placeholder
+        isDriving = false
     }
 
     private func hasContextChangedSignificantly(from old: AmbientContext, to new: AmbientContext) -> Bool {

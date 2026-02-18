@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 import Combine
 
@@ -411,6 +412,7 @@ public final class CareerGoalCoordinator: ObservableObject {
     @Published public var isLoading = false
 
     private let tracker = CareerGoalTracker.shared
+    private let logger = Logger(subsystem: "ai.thea.app", category: "CareerGoalCoordinator")
 
     public init() {}
 
@@ -422,17 +424,29 @@ public final class CareerGoalCoordinator: ObservableObject {
     }
 
     public func createGoal(_ goal: CareerGoal) async {
-        try? await tracker.createGoal(goal)
+        do {
+            try await tracker.createGoal(goal)
+        } catch {
+            logger.error("Failed to create career goal: \(error.localizedDescription)")
+        }
         await loadGoals()
     }
 
     public func updateGoal(_ goal: CareerGoal) async {
-        try? await tracker.updateGoal(goal)
+        do {
+            try await tracker.updateGoal(goal)
+        } catch {
+            logger.error("Failed to update career goal: \(error.localizedDescription)")
+        }
         await loadGoals()
     }
 
     public func deleteGoal(_ goal: CareerGoal) async {
-        try? await tracker.deleteGoal(id: goal.id)
+        do {
+            try await tracker.deleteGoal(id: goal.id)
+        } catch {
+            logger.error("Failed to delete career goal: \(error.localizedDescription)")
+        }
         await loadGoals()
     }
 }

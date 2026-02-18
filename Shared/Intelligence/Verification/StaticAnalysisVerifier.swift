@@ -95,7 +95,7 @@ public final class StaticAnalysisVerifier {
             factors.append(ConfidenceDecomposition.DecompositionFactor(
                 name: "Critical Issues",
                 contribution: -0.3 * Double(min(3, errorCount)),
-                explanation: "\(errorCount) error(s) found: \(issues.first { $0.severity == .error }?.message ?? "")"
+                explanation: "\(errorCount) error(s) found: \(issues.filter { $0.severity == .error }.first?.message ?? "")"
             ))
         }
 
@@ -171,14 +171,18 @@ extension StaticAnalysisVerifier {
 
         // Force unwrap detection
         let forceUnwrapPattern = #"[^?]\![^\=]"#
-        if let regex = try? NSRegularExpression(pattern: forceUnwrapPattern),
-           regex.firstMatch(in: code, range: NSRange(code.startIndex..., in: code)) != nil {
-            issues.append(AnalysisIssue(
-                severity: .warning,
-                message: "Force unwrap detected - consider using optional binding",
-                source: .pattern,
-                line: nil
-            ))
+        do {
+            let regex = try NSRegularExpression(pattern: forceUnwrapPattern)
+            if regex.firstMatch(in: code, range: NSRange(code.startIndex..., in: code)) != nil {
+                issues.append(AnalysisIssue(
+                    severity: .warning,
+                    message: "Force unwrap detected - consider using optional binding",
+                    source: .pattern,
+                    line: nil
+                ))
+            }
+        } catch {
+            logger.debug("Force unwrap pattern failed: \(error.localizedDescription)")
         }
 
         // Force try detection
@@ -246,25 +250,33 @@ extension StaticAnalysisVerifier {
             process.waitUntilExit()
 
             let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-            try? FileManager.default.removeItem(at: tempFile)
+            do {
+                try FileManager.default.removeItem(at: tempFile)
+            } catch {
+                logger.debug("Could not remove temp SwiftLint file: \(error.localizedDescription)")
+            }
 
             // Parse SwiftLint JSON output
-            if let lintResults = try? JSONSerialization.jsonObject(with: outputData) as? [[String: Any]] {
-                return lintResults.map { result in
-                    let severity: AnalysisIssue.Severity
-                    switch result["severity"] as? String {
-                    case "error": severity = .error
-                    case "warning": severity = .warning
-                    default: severity = .info
-                    }
+            do {
+                if let lintResults = try JSONSerialization.jsonObject(with: outputData) as? [[String: Any]] {
+                    return lintResults.map { result in
+                        let severity: AnalysisIssue.Severity
+                        switch result["severity"] as? String {
+                        case "error": severity = .error
+                        case "warning": severity = .warning
+                        default: severity = .info
+                        }
 
-                    return AnalysisIssue(
-                        severity: severity,
-                        message: result["reason"] as? String ?? "SwiftLint issue",
-                        source: .swiftlint,
-                        line: result["line"] as? Int
-                    )
+                        return AnalysisIssue(
+                            severity: severity,
+                            message: result["reason"] as? String ?? "SwiftLint issue",
+                            source: .swiftlint,
+                            line: result["line"] as? Int
+                        )
+                    }
                 }
+            } catch {
+                logger.debug("Could not parse SwiftLint JSON output: \(error.localizedDescription)")
             }
 
         } catch {
@@ -299,7 +311,11 @@ extension StaticAnalysisVerifier {
             process.waitUntilExit()
 
             let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
-            try? FileManager.default.removeItem(at: tempFile)
+            do {
+                try FileManager.default.removeItem(at: tempFile)
+            } catch {
+                logger.debug("Could not remove temp compiler check file: \(error.localizedDescription)")
+            }
 
             if let errorOutput = String(data: errorData, encoding: .utf8), !errorOutput.isEmpty {
                 return parseCompilerOutput(errorOutput)
@@ -342,10 +358,14 @@ extension StaticAnalysisVerifier {
     private func extractLineNumber(from line: String) -> Int? {
         // Pattern: filename.swift:42:8: error: ...
         let pattern = #":(\d+):\d+:"#
-        if let regex = try? NSRegularExpression(pattern: pattern),
-           let match = regex.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)),
-           let range = Range(match.range(at: 1), in: line) {
-            return Int(line[range])
+        do {
+            let regex = try NSRegularExpression(pattern: pattern)
+            if let match = regex.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)),
+               let range = Range(match.range(at: 1), in: line) {
+                return Int(line[range])
+            }
+        } catch {
+            logger.debug("Line number extraction pattern failed: \(error.localizedDescription)")
         }
         return nil
     }
@@ -368,14 +388,18 @@ extension StaticAnalysisVerifier {
 
         // == instead of ===
         let looseEqualityPattern = #"[^=!]==[^=]"#
-        if let regex = try? NSRegularExpression(pattern: looseEqualityPattern),
-           regex.firstMatch(in: code, range: NSRange(code.startIndex..., in: code)) != nil {
-            issues.append(AnalysisIssue(
-                severity: .warning,
-                message: "Consider using === instead of == for strict equality",
-                source: .pattern,
-                line: nil
-            ))
+        do {
+            let regex = try NSRegularExpression(pattern: looseEqualityPattern)
+            if regex.firstMatch(in: code, range: NSRange(code.startIndex..., in: code)) != nil {
+                issues.append(AnalysisIssue(
+                    severity: .warning,
+                    message: "Consider using === instead of == for strict equality",
+                    source: .pattern,
+                    line: nil
+                ))
+            }
+        } catch {
+            logger.debug("Loose equality pattern failed: \(error.localizedDescription)")
         }
 
         // eval() usage
@@ -480,7 +504,6 @@ extension StaticAnalysisVerifier {
                 switch chunk.type {
                 case let .delta(text):
                     responseText += text
-                case .thinkingDelta: break
                 case let .complete(msg):
                     responseText = msg.content.textValue
                 case .error:
@@ -490,25 +513,28 @@ extension StaticAnalysisVerifier {
 
             // Parse issues
             if let jsonStart = responseText.firstIndex(of: "["),
-               let jsonEnd = responseText.lastIndex(of: "]") {
-                let jsonStr = String(responseText[jsonStart...jsonEnd])
-                if let data = jsonStr.data(using: .utf8),
-                   let issues = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
-                    return issues.map { issue in
-                        let severity: AnalysisIssue.Severity
-                        switch issue["severity"] as? String {
-                        case "error": severity = .error
-                        case "warning": severity = .warning
-                        default: severity = .info
-                        }
+               let jsonEnd = responseText.lastIndex(of: "]"),
+               let data = String(responseText[jsonStart...jsonEnd]).data(using: .utf8) {
+                do {
+                    if let issues = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
+                        return issues.map { issue in
+                            let severity: AnalysisIssue.Severity
+                            switch issue["severity"] as? String {
+                            case "error": severity = .error
+                            case "warning": severity = .warning
+                            default: severity = .info
+                            }
 
-                        return AnalysisIssue(
-                            severity: severity,
-                            message: issue["message"] as? String ?? "AI-detected issue",
-                            source: .ai,
-                            line: issue["line"] as? Int
-                        )
+                            return AnalysisIssue(
+                                severity: severity,
+                                message: issue["message"] as? String ?? "AI-detected issue",
+                                source: .ai,
+                                line: issue["line"] as? Int
+                            )
+                        }
                     }
+                } catch {
+                    logger.debug("Could not parse AI analysis JSON: \(error.localizedDescription)")
                 }
             }
 
@@ -529,7 +555,11 @@ extension StaticAnalysisVerifier {
 
         let pattern = #"```(\w*)\n([\s\S]*?)```"#
 
-        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern)
+        } catch {
+            logger.debug("Code block extraction pattern failed: \(error.localizedDescription)")
             return blocks
         }
 

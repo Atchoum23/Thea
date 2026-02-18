@@ -373,29 +373,13 @@ public struct EncodedFrame: Sendable {
 
         public init() {}
 
-        /// Configure the encoder with codec, profile, and dimensions.
-        /// - Parameters:
-        ///   - codec: The video codec to use.
-        ///   - profile: The quality profile controlling bitrate and frame rate.
-        ///   - width: Frame width in pixels.
-        ///   - height: Frame height in pixels.
-        /// - Throws: ``VideoEncoderError/notSupported`` unconditionally on non-macOS platforms.
         public func configure(codec _: VideoCodec, profile _: StreamQualityProfile, width _: Int, height _: Int) throws {
             throw VideoEncoderError.notSupported
         }
 
-        /// Set callback for receiving encoded frames. No-op on non-macOS platforms.
-        /// - Parameter callback: A closure invoked with each ``EncodedFrame`` after encoding.
         public func setFrameCallback(_: @escaping (EncodedFrame) -> Void) {}
-
-        /// Force a key frame on the next encode. No-op on non-macOS platforms.
         public func requestKeyFrame() {}
-
-        /// Adjust bitrate based on network conditions. No-op on non-macOS platforms.
-        /// - Parameter networkBandwidthBps: The estimated network bandwidth in bits per second.
         public func adjustBitrate(networkBandwidthBps _: Int64) {}
-
-        /// Stop encoding and release resources. No-op on non-macOS platforms.
         public func stop() {}
     }
 

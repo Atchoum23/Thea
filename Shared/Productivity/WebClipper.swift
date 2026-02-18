@@ -225,7 +225,8 @@ struct HTMLExtractor: Sendable {
         }
         // Numeric entities
         let numericPattern = "&#(\\d+);"
-        if let regex = try? NSRegularExpression(pattern: numericPattern) {
+        do {
+            let regex = try NSRegularExpression(pattern: numericPattern)
             let nsRange = NSRange(result.startIndex..., in: result)
             let matches = regex.matches(in: result, range: nsRange).reversed()
             for match in matches {
@@ -236,6 +237,8 @@ struct HTMLExtractor: Sendable {
                     result.replaceSubrange(fullRange, with: String(scalar))
                 }
             }
+        } catch {
+            wcLogger.debug("Invalid numeric entity regex: \(error.localizedDescription)")
         }
         return result
     }
@@ -301,7 +304,11 @@ final class WebClipper {
     private init() {
         let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         storageDir = appSupport.appendingPathComponent("Thea/WebClips")
-        try? fileManager.createDirectory(at: storageDir, withIntermediateDirectories: true)
+        do {
+            try fileManager.createDirectory(at: storageDir, withIntermediateDirectories: true)
+        } catch {
+            wcLogger.debug("Could not create WebClips storage directory: \(error.localizedDescription)")
+        }
         loadArticles()
     }
 
@@ -432,13 +439,21 @@ final class WebClipper {
     private var storageFile: URL { storageDir.appendingPathComponent("articles.json") }
 
     private func loadArticles() {
-        guard let data = try? Data(contentsOf: storageFile),
-              let decoded = try? JSONDecoder().decode([ClippedArticle].self, from: data) else { return }
-        self.articles = decoded
+        guard FileManager.default.fileExists(atPath: storageFile.path) else { return }
+        do {
+            let data = try Data(contentsOf: storageFile)
+            self.articles = try JSONDecoder().decode([ClippedArticle].self, from: data)
+        } catch {
+            wcLogger.debug("Could not load clipped articles: \(error.localizedDescription)")
+        }
     }
 
     private func saveArticles() {
-        guard let data = try? JSONEncoder().encode(articles) else { return }
-        try? data.write(to: storageFile)
+        do {
+            let data = try JSONEncoder().encode(articles)
+            try data.write(to: storageFile)
+        } catch {
+            wcLogger.error("Failed to save clipped articles: \(error.localizedDescription)")
+        }
     }
 }

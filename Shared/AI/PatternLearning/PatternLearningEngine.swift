@@ -382,29 +382,39 @@ public final class PatternLearningEngine: ObservableObject {
 
     private func loadState() {
         // Load user profile
-        if let data = UserDefaults.standard.data(forKey: "thea.patterns.profile"),
-           let profile = try? JSONDecoder().decode(UserBehaviorProfile.self, from: data)
-        {
-            userProfile = profile
+        if let data = UserDefaults.standard.data(forKey: "thea.patterns.profile") {
+            do {
+                userProfile = try JSONDecoder().decode(UserBehaviorProfile.self, from: data)
+            } catch {
+                logger.error("Failed to decode user behavior profile: \(error.localizedDescription)")
+            }
         }
 
         // Load patterns
-        if let data = UserDefaults.standard.data(forKey: "thea.patterns.learned"),
-           let patterns = try? JSONDecoder().decode([BehavioralPattern].self, from: data)
-        {
-            detectedPatterns = patterns
+        if let data = UserDefaults.standard.data(forKey: "thea.patterns.learned") {
+            do {
+                detectedPatterns = try JSONDecoder().decode([BehavioralPattern].self, from: data)
+            } catch {
+                logger.error("Failed to decode behavioral patterns: \(error.localizedDescription)")
+            }
         }
     }
 
     public func saveState() {
         // Save profile
-        if let data = try? JSONEncoder().encode(userProfile) {
+        do {
+            let data = try JSONEncoder().encode(userProfile)
             UserDefaults.standard.set(data, forKey: "thea.patterns.profile")
+        } catch {
+            logger.error("Failed to encode user behavior profile: \(error.localizedDescription)")
         }
 
         // Save patterns
-        if let data = try? JSONEncoder().encode(detectedPatterns) {
+        do {
+            let data = try JSONEncoder().encode(detectedPatterns)
             UserDefaults.standard.set(data, forKey: "thea.patterns.learned")
+        } catch {
+            logger.error("Failed to encode behavioral patterns: \(error.localizedDescription)")
         }
     }
 

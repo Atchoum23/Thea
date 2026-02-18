@@ -9,68 +9,42 @@ import Foundation
 
 /// Represents the type of task a query represents
 public enum TaskType: String, Codable, Sendable, CaseIterable {
-    /// Writing new code from scratch.
-    case codeGeneration
-    /// Analyzing code structure, quality, or patterns.
-    case codeAnalysis
-    /// Fixing code issues (alias for debugging).
-    case codeDebugging
-    /// Fixing code issues.
-    case debugging
-    /// Explaining how code works.
-    case codeExplanation
-    /// Improving existing code without changing behavior.
-    case codeRefactoring
-    /// Questions with definitive factual answers.
-    case factual
-    /// Creative writing, brainstorming, or ideation.
-    case creative
-    /// Analyzing data, arguments, or complex topics.
-    case analysis
-    /// Searching for and synthesizing information.
-    case research
-    /// General conversational exchange.
-    case conversation
-    /// System operations (files, terminal, OS commands).
-    case system
-    /// Mathematical calculations or proofs.
-    case math
-    /// Language translation between human languages.
-    case translation
-    /// Summarizing or condensing content.
-    case summarization
-    /// Task planning, project management, or roadmapping.
-    case planning
-    /// Cannot determine the task type.
-    case unknown
+    case codeGeneration      // Writing new code
+    case codeAnalysis        // Analyzing code structure/quality
+    case codeDebugging       // Fixing code issues (alias for debugging)
+    case debugging           // Fixing code issues
+    case codeExplanation     // Explaining code
+    case codeRefactoring     // Improving existing code
+    case factual             // Questions with factual answers
+    case creative            // Creative writing, brainstorming
+    case analysis            // Analyzing data or code
+    case research            // Searching for information
+    case conversation        // General chat
+    case system              // System operations (files, terminal)
+    case math                // Mathematical calculations
+    case translation         // Language translation
+    case summarization       // Summarizing content
+    case planning            // Task planning, project management
+    case unknown             // Cannot determine
 
-    /// Legacy alias: use `factual` instead.
-    case simpleQA
-    /// Legacy alias: use `analysis` instead.
-    case complexReasoning
-    /// Legacy alias: use `creative` instead.
-    case creativeWriting
-    /// Legacy alias: use `math` instead.
-    case mathLogic
-    /// Legacy alias: use `research` instead.
-    case informationRetrieval
-    /// Legacy alias: use `codeGeneration` instead.
-    case appDevelopment
-    /// Legacy alias: use `creative` instead.
-    case contentCreation
-    /// Legacy alias: use `system` instead.
-    case workflowAutomation
-    /// Legacy alias: use `creative` instead.
-    case creation
-    /// Legacy alias: use `conversation` instead.
-    case general
+    // V1 compatibility aliases (legacy names)
+    case simpleQA            // Legacy: use factual
+    case complexReasoning    // Legacy: use analysis
+    case creativeWriting     // Legacy: use creative
+    case mathLogic           // Legacy: use math
+    case informationRetrieval // Legacy: use research
+    case appDevelopment      // Legacy: use codeGeneration
+    case contentCreation     // Legacy: use creative
+    case workflowAutomation  // Legacy: use system
+    case creation            // Legacy: use creative
+    case general             // Legacy: use conversation
 
-    /// Human-readable display name (V1 compatibility alias).
+    /// Human-readable display name (V1 compatibility alias)
     public var displayName: String {
         description
     }
 
-    /// Human-readable description of this task type.
+    /// Human-readable description
     public var description: String {
         switch self {
         case .codeGeneration, .appDevelopment: return "Code Generation"
@@ -92,7 +66,7 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
         }
     }
 
-    /// Model capabilities recommended for handling this task type.
+    /// Suggested model capabilities for this task type
     public var preferredCapabilities: Set<ModelCapability> {
         switch self {
         case .codeGeneration, .debugging, .codeDebugging, .codeRefactoring, .appDevelopment:
@@ -122,7 +96,7 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
         }
     }
 
-    /// Whether this task type benefits from extended chain-of-thought reasoning.
+    /// Whether this task type benefits from extended reasoning
     public var benefitsFromReasoning: Bool {
         switch self {
         case .debugging, .codeDebugging, .codeAnalysis, .analysis, .complexReasoning, .math, .mathLogic, .planning, .codeRefactoring:
@@ -132,8 +106,8 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
         }
     }
 
-    /// Whether this is a simple query suitable for a local or lightweight model.
-    /// Simple tasks require short responses with no complex reasoning or code generation.
+    /// Whether this is a simple query that can be handled by a local model
+    /// Simple = short response, no complex reasoning, no code generation
     public var isSimple: Bool {
         switch self {
         case .conversation, .general, .factual, .simpleQA, .translation:
@@ -143,7 +117,7 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
         }
     }
 
-    /// Whether this task type represents an actionable operation (code, system, planning).
+    /// Whether this task type represents an actionable operation (code, system, planning)
     public var isActionable: Bool {
         switch self {
         case .codeGeneration, .appDevelopment, .codeRefactoring, .debugging, .codeDebugging,
@@ -154,7 +128,7 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
         }
     }
 
-    /// Whether this task type typically benefits from web search augmentation.
+    /// Whether this task type typically needs web search
     public var needsWebSearch: Bool {
         switch self {
         case .research, .factual, .simpleQA, .informationRetrieval:
@@ -164,34 +138,7 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
         }
     }
 
-    /// Recommended LLM temperature for this task type.
-    /// Lower values produce more deterministic output; higher values produce more creative output.
-    public var recommendedTemperature: Double {
-        switch self {
-        case .codeGeneration, .codeDebugging, .debugging, .codeRefactoring, .appDevelopment:
-            return 0.1 // Deterministic code generation
-        case .factual, .simpleQA, .translation:
-            return 0.2 // Precision
-        case .math, .mathLogic:
-            return 0.15 // Exact computation
-        case .codeAnalysis, .codeExplanation:
-            return 0.25 // Structured but readable
-        case .analysis, .complexReasoning, .planning, .summarization:
-            return 0.3 // Thoughtful reasoning
-        case .research, .informationRetrieval:
-            return 0.4 // Exploratory
-        case .system, .workflowAutomation:
-            return 0.2 // Deterministic system operations
-        case .conversation, .general:
-            return 0.7 // Natural conversation
-        case .creative, .creativeWriting, .contentCreation, .creation:
-            return 0.8 // Creative output
-        case .unknown:
-            return 0.5 // Balanced default
-        }
-    }
-
-    /// Expected response length for this task type, used for token budgeting.
+    /// Typical response length expectation
     public var expectedResponseLength: ResponseLength {
         switch self {
         case .conversation, .general:
@@ -208,16 +155,11 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
 
 // MARK: - Response Length
 
-/// Expected response length category, used for token budget estimation.
 public enum ResponseLength: String, Codable, Sendable {
-    /// Short response, under 100 tokens.
-    case short
-    /// Medium response, 100-500 tokens.
-    case medium
-    /// Long response, over 500 tokens.
-    case long
+    case short   // < 100 tokens
+    case medium  // 100-500 tokens
+    case long    // > 500 tokens
 
-    /// Suggested maxTokens value for this response length.
     public var suggestedMaxTokens: Int {
         switch self {
         case .short: return 500
@@ -225,72 +167,39 @@ public enum ResponseLength: String, Codable, Sendable {
         case .long: return 8000
         }
     }
-
-    /// Scaled max tokens proportional to the model's maximum output capacity.
-    /// Caps at 50% of the model's `maxOutputTokens` to leave room for reasoning.
-    /// - Parameter model: The AI model that will generate the response.
-    /// - Returns: Token budget appropriate for this response length and model.
-    public func scaledMaxTokens(for model: AIModel) -> Int {
-        let modelMax = model.maxOutputTokens
-        let cap = modelMax / 2 // 50% cap
-        let base = suggestedMaxTokens
-        // Scale proportionally: if model supports more output, give more tokens
-        let scaled = Int(Double(base) * Double(modelMax) / 8000.0)
-        return min(max(base, scaled), max(base, cap))
-    }
 }
 
 // MARK: - Classification Result
 
-/// V1 compatibility typealias for `ClassificationResult`.
+/// V1 compatibility typealias
 public typealias TaskClassification = ClassificationResult
 
-/// Method used to classify a query into a task type.
+/// Classification method used to classify the query
 public enum ClassificationMethodType: String, Codable, Sendable {
-    /// Full AI model classification.
-    case ai
-    /// Semantic embedding similarity matching.
-    case embedding
-    /// Learned pattern matching from prior classifications.
-    case pattern
-    /// Previously cached classification result.
-    case cache
+    case ai         // Full AI classification
+    case embedding  // Semantic embedding similarity
+    case pattern    // Learned pattern matching
+    case cache      // Cache hit
 }
 
-/// Result of classifying a user query into a task type.
+/// Result of task classification
 public struct ClassificationResult: Codable, Sendable {
-    /// Primary classified task type.
     public let taskType: TaskType
-    /// Classification confidence score (0.0 - 1.0).
     public let confidence: Double
-    /// Human-readable explanation of why this type was chosen.
     public let reasoning: String?
-    /// Alternative task types with their confidence scores.
     public let alternativeTypes: [(TaskType, Double)]?
-    /// Model suggested by the classifier for this task.
     public let suggestedModel: String?
-    /// When the classification was performed.
     public let timestamp: Date
-    /// Method used for classification.
     public let classificationMethod: ClassificationMethodType
 
-    /// V1 compatibility alias for `taskType`.
+    /// V1 compatibility alias for taskType
     public var primaryType: TaskType { taskType }
 
-    /// V1 compatibility: secondary types extracted from alternatives.
+    /// V1 compatibility - secondary types from alternatives
     public var secondaryTypes: [TaskType] {
         alternativeTypes?.map { $0.0 } ?? []
     }
 
-    /// Creates a classification result.
-    /// - Parameters:
-    ///   - taskType: Primary classified task type.
-    ///   - confidence: Confidence score (0.0 - 1.0).
-    ///   - reasoning: Explanation of the classification.
-    ///   - alternativeTypes: Other candidate types with scores.
-    ///   - suggestedModel: Recommended model for the task.
-    ///   - timestamp: When classification occurred.
-    ///   - classificationMethod: Method used.
     public init(
         taskType: TaskType,
         confidence: Double,
@@ -336,7 +245,6 @@ public struct ClassificationResult: Codable, Sendable {
         }
     }
 
-    /// Encodes this classification result, converting `alternativeTypes` tuples into a serializable array-of-arrays format.
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(taskType, forKey: .taskType)
@@ -352,7 +260,7 @@ public struct ClassificationResult: Codable, Sendable {
         }
     }
 
-    /// Whether the classification confidence is high enough to act on (>= 0.7).
+    /// Whether the classification is confident enough to act on
     public var isConfident: Bool {
         confidence >= 0.7
     }

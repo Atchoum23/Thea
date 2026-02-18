@@ -116,11 +116,16 @@ actor OpenClawSecurityGuard {
         ]
 
         for (pattern, description) in patterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
-                let range = NSRange(lower.startIndex..<lower.endIndex, in: lower)
-                if regex.firstMatch(in: lower, range: range) != nil {
-                    return InjectionCheckResult(detected: true, pattern: description)
-                }
+            let regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+            } catch {
+                logger.error("Failed to compile injection detection regex: \(error)")
+                continue
+            }
+            let range = NSRange(lower.startIndex..<lower.endIndex, in: lower)
+            if regex.firstMatch(in: lower, range: range) != nil {
+                return InjectionCheckResult(detected: true, pattern: description)
             }
         }
 

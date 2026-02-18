@@ -214,36 +214,24 @@ public class NetworkDiscoveryService: ObservableObject {
             let endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host(ip), port: nwPort)
             let connection = NWConnection(to: endpoint, using: .tcp)
 
-            // Serial queue ensures hasResumed is thread-safe (state handler + timeout both run here)
-            let probeQueue = DispatchQueue(label: "ai.thea.probe-\(ip)-\(port)")
-
             let isOpen = await withCheckedContinuation { continuation in
-                // nonisolated(unsafe): safe because probeQueue is serial and all accesses happen on it
-                nonisolated(unsafe) var hasResumed = false
-
                 connection.stateUpdateHandler = { state in
-                    guard !hasResumed else { return }
                     switch state {
                     case .ready:
-                        hasResumed = true
                         continuation.resume(returning: true)
                         connection.cancel()
                     case .failed, .cancelled:
-                        hasResumed = true
                         continuation.resume(returning: false)
                     default:
                         break
                     }
                 }
 
-                connection.start(queue: probeQueue)
+                connection.start(queue: .global(qos: .utility))
 
-                // Timeout (same serial queue for thread safety)
-                probeQueue.asyncAfter(deadline: .now() + 0.5) {
-                    guard !hasResumed else { return }
-                    hasResumed = true
+                // Timeout
+                DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
                     connection.cancel()
-                    continuation.resume(returning: false)
                 }
             }
 

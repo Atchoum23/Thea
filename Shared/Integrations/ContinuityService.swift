@@ -287,7 +287,12 @@ public class ContinuityService: ObservableObject {
         browser.start(queue: .main)
 
         // Browse for 5 seconds then stop
-        try? await Task.sleep(for: .seconds(5))
+        do {
+            try await Task.sleep(for: .seconds(5))
+        } catch {
+            Logger(subsystem: "ai.thea.app", category: "ContinuityService")
+                .warning("Continuity browse sleep cancelled: \(error)")
+        }
         browser.cancel()
         #endif
     }

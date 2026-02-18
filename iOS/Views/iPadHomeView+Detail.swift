@@ -15,6 +15,8 @@ struct IPadChatDetailView: View {
     @StateObject private var settingsManager = SettingsManager.shared
     @State private var messageText = ""
     @State private var isListeningForVoice = false
+    @State private var showingError = false
+    @State private var errorMessage: String?
     @FocusState private var isInputFocused: Bool
 
     private var messageSpacing: CGFloat {
@@ -79,6 +81,11 @@ struct IPadChatDetailView: View {
         .onAppear {
             chatManager.selectConversation(conversation)
             isInputFocused = true
+        }
+        .alert("Error", isPresented: $showingError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "An unknown error occurred")
         }
     }
 
@@ -204,7 +211,14 @@ struct IPadChatDetailView: View {
 
     private func handleVoiceInput() {
         if isListeningForVoice {
-            try? voiceManager.startVoiceCommand()
+            do {
+                try voiceManager.startVoiceCommand()
+            } catch {
+                errorMessage = "Voice input failed: \(error.localizedDescription)"
+                showingError = true
+                isListeningForVoice = false
+                return
+            }
             voiceManager.onTranscriptionComplete = { (transcription: String) in
                 messageText = transcription
                 isListeningForVoice = false

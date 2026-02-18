@@ -4,6 +4,9 @@
 // Supporting types for SkillsRegistryService.
 
 import Foundation
+import OSLog
+
+private let skillsTypesLogger = Logger(subsystem: "com.thea.app", category: "SkillsRegistryTypes")
 
 // MARK: - Models
 
@@ -180,9 +183,20 @@ actor DependencyScanner {
     }
 
     private func scanPackageJson(at url: URL) -> [Dependency]? {
-        guard FileManager.default.fileExists(atPath: url.path),
-              let data = try? Data(contentsOf: url),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        let data: Data
+        do {
+            data = try Data(contentsOf: url)
+        } catch {
+            skillsTypesLogger.debug("Failed to read package.json: \(error.localizedDescription)")
+            return nil
+        }
+        let json: [String: Any]
+        do {
+            guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
+            json = parsed
+        } catch {
+            skillsTypesLogger.debug("Failed to parse package.json: \(error.localizedDescription)")
             return nil
         }
 
@@ -200,8 +214,12 @@ actor DependencyScanner {
     }
 
     private func scanRequirementsTxt(at url: URL) -> [Dependency]? {
-        guard FileManager.default.fileExists(atPath: url.path),
-              let content = try? String(contentsOf: url, encoding: .utf8) else {
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        let content: String
+        do {
+            content = try String(contentsOf: url, encoding: .utf8)
+        } catch {
+            skillsTypesLogger.debug("Failed to read requirements.txt: \(error.localizedDescription)")
             return nil
         }
 
@@ -222,8 +240,12 @@ actor DependencyScanner {
     }
 
     private func scanPyprojectToml(at url: URL) -> [Dependency]? {
-        guard FileManager.default.fileExists(atPath: url.path),
-              let content = try? String(contentsOf: url, encoding: .utf8) else {
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        let content: String
+        do {
+            content = try String(contentsOf: url, encoding: .utf8)
+        } catch {
+            skillsTypesLogger.debug("Failed to read pyproject.toml: \(error.localizedDescription)")
             return nil
         }
 
@@ -255,8 +277,12 @@ actor DependencyScanner {
     }
 
     private func scanPackageSwift(at url: URL) -> [Dependency]? {
-        guard FileManager.default.fileExists(atPath: url.path),
-              let content = try? String(contentsOf: url, encoding: .utf8) else {
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        let content: String
+        do {
+            content = try String(contentsOf: url, encoding: .utf8)
+        } catch {
+            skillsTypesLogger.debug("Failed to read Package.swift: \(error.localizedDescription)")
             return nil
         }
 
@@ -265,17 +291,21 @@ actor DependencyScanner {
 
         // Extract package names from .package declarations
         let pattern = #"\.package\([^)]*(?:name:\s*"([^"]+)"|url:[^)]*\/([^"\/]+)(?:\.git)?)"#
-        if let regex = try? NSRegularExpression(pattern: pattern) {
-            let range = NSRange(content.startIndex..., in: content)
-            let matches = regex.matches(in: content, range: range)
-
-            for match in matches {
-                for i in 1..<match.numberOfRanges {
-                    if let range = Range(match.range(at: i), in: content) {
-                        let name = String(content[range])
-                        deps.append(Dependency(name: name, version: nil, type: .swift))
-                        break
-                    }
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern)
+        } catch {
+            skillsTypesLogger.debug("Failed to compile Swift package regex: \(error.localizedDescription)")
+            return deps.isEmpty ? nil : deps
+        }
+        let range = NSRange(content.startIndex..., in: content)
+        let matches = regex.matches(in: content, range: range)
+        for match in matches {
+            for i in 1..<match.numberOfRanges {
+                if let range = Range(match.range(at: i), in: content) {
+                    let name = String(content[range])
+                    deps.append(Dependency(name: name, version: nil, type: .swift))
+                    break
                 }
             }
         }

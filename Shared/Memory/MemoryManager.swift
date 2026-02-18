@@ -72,7 +72,11 @@ public final class MemoryManager: ObservableObject {
         // Store in Application Support
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         let theaDir = appSupport.appendingPathComponent("ai.thea.app", isDirectory: true)
-        try? FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        } catch {
+            logger.error("Failed to create Thea app support directory: \(error.localizedDescription)")
+        }
         memoryFileURL = theaDir.appendingPathComponent("memories.json")
 
         loadMemories()
@@ -86,8 +90,6 @@ public final class MemoryManager: ObservableObject {
 
     // MARK: - Setup (SwiftData compatibility stub)
 
-    /// Sets the SwiftData model context for memory persistence and marks the manager as initialized.
-    /// - Parameter context: The model context to use for SwiftData operations.
     public func setModelContext(_ context: Any) {
         modelContext = context
         isInitialized = true
@@ -181,8 +183,12 @@ extension MemoryManager {
     /// Schedule periodic decay application
     func scheduleDecayApplication() {
         Task {
-            while true {
-                try? await Task.sleep(for: .seconds(3600))
+            while !Task.isCancelled {
+                do {
+                    try await Task.sleep(nanoseconds: 3600_000_000_000)
+                } catch {
+                    break
+                }
                 applyTimeDecay()
             }
         }

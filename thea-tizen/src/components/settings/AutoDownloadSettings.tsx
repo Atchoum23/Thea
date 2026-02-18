@@ -17,7 +17,7 @@ interface AutoDownloadSettingsProps {
   onClose?: () => void;
 }
 
-export function AutoDownloadSettings({ onClose: _onClose }: AutoDownloadSettingsProps) {
+export function AutoDownloadSettings({ onClose }: AutoDownloadSettingsProps) {
   const { ref, focusKey } = useFocusable({
     focusable: false,
     saveLastFocusedChild: true,
@@ -571,33 +571,30 @@ interface QualitySelectorProps {
   onChange: (value: '4K' | '1080p' | '720p' | 'any') => void;
 }
 
-function QualityOptionButton({ opt, isSelected, onChange }: { opt: '4K' | '1080p' | '720p' | 'any'; isSelected: boolean; onChange: (v: '4K' | '1080p' | '720p' | 'any') => void }) {
-  const { ref, focused } = useFocusable({
-    onEnterPress: () => onChange(opt),
-  });
-  return (
-    <button
-      ref={ref}
-      onClick={() => onChange(opt)}
-      className={`
-        px-4 py-2 text-sm transition-colors
-        ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'}
-        ${focused ? 'ring-2 ring-white ring-inset' : ''}
-      `}
-    >
-      {opt}
-    </button>
-  );
-}
-
 function QualitySelector({ value, onChange }: QualitySelectorProps) {
   const options: Array<'4K' | '1080p' | '720p' | 'any'> = ['4K', '1080p', '720p', 'any'];
 
   return (
     <div className="flex rounded-lg overflow-hidden">
-      {options.map((opt) => (
-        <QualityOptionButton key={opt} opt={opt} isSelected={value === opt} onChange={onChange} />
-      ))}
+      {options.map((opt) => {
+        const { ref, focused } = useFocusable({
+          onEnterPress: () => onChange(opt),
+        });
+        return (
+          <button
+            key={opt}
+            ref={ref}
+            onClick={() => onChange(opt)}
+            className={`
+              px-4 py-2 text-sm transition-colors
+              ${value === opt ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'}
+              ${focused ? 'ring-2 ring-white ring-inset' : ''}
+            `}
+          >
+            {opt}
+          </button>
+        );
+      })}
     </div>
   );
 }

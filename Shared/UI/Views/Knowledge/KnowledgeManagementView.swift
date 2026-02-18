@@ -5,6 +5,8 @@ struct KnowledgeManagementView: View {
     @State private var searchQuery = ""
     @State private var searchResults: [SearchResult] = []
     @State private var showingPathSelector = false
+    @State private var errorMessage: String?
+    @State private var showError = false
 
     var body: some View {
         NavigationSplitView {
@@ -58,7 +60,12 @@ struct KnowledgeManagementView: View {
                     } else {
                         Button("Start Indexing") {
                             Task {
-                                try? await scanner.startIndexing()
+                                do {
+                                    try await scanner.startIndexing()
+                                } catch {
+                                    errorMessage = "Indexing failed: \(error.localizedDescription)"
+                                    showError = true
+                                }
                             }
                         }
                         .buttonStyle(.borderedProminent)
@@ -115,6 +122,11 @@ struct KnowledgeManagementView: View {
             if case let .success(urls) = result, let url = urls.first {
                 scanner.configureScanPaths(scanner.scanPaths + [url])
             }
+        }
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "An unknown error occurred")
         }
     }
 

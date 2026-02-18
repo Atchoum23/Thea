@@ -8,6 +8,7 @@
 
 import Foundation
 import Combine
+import OSLog
 #if canImport(UserNotifications)
 import UserNotifications
 #endif
@@ -19,6 +20,8 @@ import UserNotifications
 @Observable
 final class WorkflowEngine {
     static let shared = WorkflowEngine()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "WorkflowEngine")
 
     // State
     private(set) var workflows: [AutomationWorkflow] = []
@@ -233,7 +236,6 @@ final class WorkflowEngine {
         for try await chunk in stream {
             switch chunk.type {
             case .delta(let text): result += text
-            case .thinkingDelta: break
             case .complete(let msg): result = msg.content.textValue
             case .error(let err): throw err
             }
@@ -349,10 +351,14 @@ final class WorkflowEngine {
             return interpolated.trimmingCharacters(in: .whitespacesAndNewlines)
         case "json":
             // Parse JSON and return formatted
-            if let data = interpolated.data(using: .utf8),
-               let json = try? JSONSerialization.jsonObject(with: data),
-               let formatted = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted) {
-                return String(data: formatted, encoding: .utf8) ?? interpolated
+            if let data = interpolated.data(using: .utf8) {
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data)
+                    let formatted = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
+                    return String(data: formatted, encoding: .utf8) ?? interpolated
+                } catch {
+                    logger.error("JSON transform failed: \(error.localizedDescription, privacy: .public)")
+                }
             }
             return interpolated
         default:
@@ -451,16 +457,20 @@ final class WorkflowEngine {
     // MARK: - Persistence
 
     private func loadWorkflows() {
-        guard let data = UserDefaults.standard.data(forKey: "workflows"),
-              let saved = try? JSONDecoder().decode([AutomationWorkflow].self, from: data) else {
-            return
+        guard let data = UserDefaults.standard.data(forKey: "workflows") else { return }
+        do {
+            workflows = try JSONDecoder().decode([AutomationWorkflow].self, from: data)
+        } catch {
+            logger.error("Failed to load workflows: \(error.localizedDescription, privacy: .public)")
         }
-        workflows = saved
     }
 
     private func saveWorkflows() {
-        if let data = try? JSONEncoder().encode(workflows) {
+        do {
+            let data = try JSONEncoder().encode(workflows)
             UserDefaults.standard.set(data, forKey: "workflows")
+        } catch {
+            logger.error("Failed to save workflows: \(error.localizedDescription, privacy: .public)")
         }
     }
 }

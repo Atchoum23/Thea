@@ -9,11 +9,13 @@
 import CloudKit
 import Combine
 import Foundation
+import os.log
 
 // MARK: - Cross Device Service
 
 /// Central service for cross-device synchronization
 public actor CrossDeviceService {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "CrossDeviceService")
     public static let shared = CrossDeviceService()
 
     // MARK: - State
@@ -244,7 +246,6 @@ public actor CrossDeviceService {
         syncEnabled = config.autoSyncEnabled
     }
 
-    /// Returns the current cross-device sync configuration, including auto-sync, conflict resolution, and sync interval settings.
     public func getConfiguration() -> CrossDeviceSyncConfiguration {
         configuration
     }
@@ -304,18 +305,25 @@ public struct CrossDeviceSyncConfiguration: Codable, Sendable {
     private static let configKey = "CrossDeviceService.configuration"
 
     public static func load() -> CrossDeviceSyncConfiguration {
-        if let data = UserDefaults.standard.data(forKey: configKey),
-           let config = try? JSONDecoder().decode(CrossDeviceSyncConfiguration.self, from: data)
-        {
-            return config
+        guard let data = UserDefaults.standard.data(forKey: configKey) else {
+            return CrossDeviceSyncConfiguration()
         }
-        return CrossDeviceSyncConfiguration()
+        do {
+            return try JSONDecoder().decode(CrossDeviceSyncConfiguration.self, from: data)
+        } catch {
+            let logger = Logger(subsystem: "ai.thea.app", category: "CrossDeviceService")
+            logger.error("CrossDeviceSyncConfiguration: failed to decode configuration: \(error.localizedDescription)")
+            return CrossDeviceSyncConfiguration()
+        }
     }
 
-    /// Persists the current cross-device sync configuration to UserDefaults as JSON.
     public func save() {
-        if let data = try? JSONEncoder().encode(self) {
+        do {
+            let data = try JSONEncoder().encode(self)
             UserDefaults.standard.set(data, forKey: CrossDeviceSyncConfiguration.configKey)
+        } catch {
+            let logger = Logger(subsystem: "ai.thea.app", category: "CrossDeviceService")
+            logger.error("CrossDeviceSyncConfiguration: failed to encode configuration: \(error.localizedDescription)")
         }
     }
 }

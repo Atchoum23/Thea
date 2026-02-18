@@ -213,7 +213,6 @@ private struct PermissionRow: View {
 
 // MARK: - Activity Stats View
 
-/// View displaying daily activity statistics including screen time, idle periods, and app usage.
 public struct ActivityStatsView: View {
     @State private var stats: DailyActivityStats?
     @State private var selectedDate = Date()

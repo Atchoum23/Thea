@@ -129,8 +129,20 @@ final class WindowManager {
         guard let context = modelContext else { return }
 
         // Encode position and size
-        let positionData = try? JSONEncoder().encode(window.position) // try? OK: encoding CGPoint is best-effort
-        let sizeData = try? JSONEncoder().encode(window.size) // try? OK: encoding CGSize is best-effort
+        let positionData: Data?
+        do {
+            positionData = try JSONEncoder().encode(window.position)
+        } catch {
+            windowLogger.debug("Could not encode window position: \(error.localizedDescription)")
+            positionData = nil
+        }
+        let sizeData: Data?
+        do {
+            sizeData = try JSONEncoder().encode(window.size)
+        } catch {
+            windowLogger.debug("Could not encode window size: \(error.localizedDescription)")
+            sizeData = nil
+        }
 
         let windowState = WindowState(
             id: window.id,
@@ -201,8 +213,20 @@ final class WindowManager {
                     continue
                 }
 
-                let position = try? JSONDecoder().decode(CGPoint.self, from: state.position) // try? OK: decoding CGPoint is best-effort
-                let size = try? JSONDecoder().decode(CGSize.self, from: state.size) // try? OK: decoding CGSize is best-effort
+                let position: CGPoint?
+                do {
+                    position = try JSONDecoder().decode(CGPoint.self, from: state.position)
+                } catch {
+                    windowLogger.debug("Could not decode window position: \(error.localizedDescription)")
+                    position = nil
+                }
+                let size: CGSize?
+                do {
+                    size = try JSONDecoder().decode(CGSize.self, from: state.size)
+                } catch {
+                    windowLogger.debug("Could not decode window size: \(error.localizedDescription)")
+                    size = nil
+                }
 
                 let window = WindowInstance(
                     id: state.id,

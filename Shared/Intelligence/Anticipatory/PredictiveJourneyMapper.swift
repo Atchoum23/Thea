@@ -216,15 +216,21 @@ public final class PredictiveJourneyMapper {
     }
 
     private func loadJourneyTemplates() {
-        if let data = UserDefaults.standard.data(forKey: "JourneyTemplates"),
-           let decoded = try? JSONDecoder().decode([JourneyTemplate].self, from: data) {
-            journeyTemplates = decoded
+        if let data = UserDefaults.standard.data(forKey: "JourneyTemplates") {
+            do {
+                journeyTemplates = try JSONDecoder().decode([JourneyTemplate].self, from: data)
+            } catch {
+                logger.error("Failed to decode journey templates: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveJourneyTemplates() {
-        if let encoded = try? JSONEncoder().encode(journeyTemplates) {
+        do {
+            let encoded = try JSONEncoder().encode(journeyTemplates)
             UserDefaults.standard.set(encoded, forKey: "JourneyTemplates")
+        } catch {
+            logger.error("Failed to encode journey templates: \(error.localizedDescription)")
         }
     }
 

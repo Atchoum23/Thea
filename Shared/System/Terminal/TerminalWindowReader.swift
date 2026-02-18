@@ -4,7 +4,6 @@
 
     /// Reads content from Terminal.app windows using AppleScript
     /// This is the core component for "Work with Apps" style Terminal reading
-    // @unchecked Sendable: stateless — uses AppleScript for each read call, no mutable state
     final class TerminalWindowReader: @unchecked Sendable {
         enum ReaderError: LocalizedError {
             case terminalNotRunning

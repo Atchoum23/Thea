@@ -7,6 +7,7 @@
 
 import Combine
 import Foundation
+import OSLog
 import UserNotifications
 
 #if canImport(UIKit)
@@ -21,6 +22,8 @@ import UserNotifications
 @MainActor
 public class NotificationService: ObservableObject {
     public static let shared = NotificationService()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "NotificationService")
 
     // MARK: - Published State
 
@@ -314,11 +317,19 @@ public class NotificationService: ObservableObject {
 
     #if os(iOS)
         public func setBadgeCount(_ count: Int) async {
-            try? await UNUserNotificationCenter.current().setBadgeCount(count)
+            do {
+                try await UNUserNotificationCenter.current().setBadgeCount(count)
+            } catch {
+                logger.debug("Could not set badge count: \(error.localizedDescription)")
+            }
         }
 
         public func clearBadge() async {
-            try? await UNUserNotificationCenter.current().setBadgeCount(0)
+            do {
+                try await UNUserNotificationCenter.current().setBadgeCount(0)
+            } catch {
+                logger.debug("Could not clear badge: \(error.localizedDescription)")
+            }
         }
     #endif
 
@@ -408,7 +419,11 @@ public class NotificationService: ObservableObject {
             content: content,
             trigger: trigger
         )
-        try? await UNUserNotificationCenter.current().add(request)
+        do {
+            try await UNUserNotificationCenter.current().add(request)
+        } catch {
+            Logger(subsystem: "ai.thea.app", category: "NotificationService").debug("Could not add snoozed notification: \(error.localizedDescription)")
+        }
     }
 
     private func createNotificationImage() -> URL? {
@@ -420,8 +435,12 @@ public class NotificationService: ObservableObject {
             if let image = UIImage(systemName: "brain.fill"),
                let data = image.pngData()
             {
-                try? data.write(to: imageURL)
-                return imageURL
+                do {
+                    try data.write(to: imageURL)
+                    return imageURL
+                } catch {
+                    logger.debug("Could not write notification image: \(error.localizedDescription)")
+                }
             }
         #endif
 
@@ -450,7 +469,6 @@ public enum NotificationActionResult: Sendable {
 
 // MARK: - Notification Delegate
 
-// @unchecked Sendable: NSObject delegate — singleton, callbacks dispatched by system on main thread
 public class TheaNotificationDelegate: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
     public static let shared = TheaNotificationDelegate()
 

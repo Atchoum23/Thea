@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 import SwiftUI
 
 // MARK: - Font Manager
@@ -15,6 +16,7 @@ import SwiftUI
 @MainActor
 @Observable
 public final class FontManager {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "FontManager")
     public static let shared = FontManager()
 
     private let defaults = UserDefaults.standard
@@ -32,10 +34,13 @@ public final class FontManager {
     // MARK: - Initialization
 
     private init() {
-        if let data = defaults.data(forKey: configKey),
-           let config = try? JSONDecoder().decode(FontConfiguration.self, from: data)
-        {
-            configuration = config
+        if let data = defaults.data(forKey: configKey) {
+            do {
+                configuration = try JSONDecoder().decode(FontConfiguration.self, from: data)
+            } catch {
+                logger.error("FontManager: failed to decode font configuration: \(error.localizedDescription)")
+                configuration = FontConfiguration()
+            }
         } else {
             configuration = FontConfiguration()
         }
@@ -44,8 +49,11 @@ public final class FontManager {
     // MARK: - Persistence
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             defaults.set(data, forKey: configKey)
+        } catch {
+            logger.error("FontManager: failed to encode font configuration: \(error.localizedDescription)")
         }
     }
 
@@ -143,7 +151,6 @@ public final class FontManager {
 
 // MARK: - Font Configuration
 
-/// Font configuration specifying family, design, scale factor, and spacing adjustments.
 public struct FontConfiguration: Codable, Sendable, Equatable {
     /// Font family selection
     public var fontFamily: FontFamily = .system
@@ -182,7 +189,6 @@ public struct FontConfiguration: Codable, Sendable, Equatable {
 
 // MARK: - Font Family
 
-/// Available font families including system defaults and custom font names.
 public enum FontFamily: Codable, Sendable, Equatable, Hashable {
     case system
     case monospaced
@@ -207,7 +213,6 @@ public enum FontFamily: Codable, Sendable, Equatable, Hashable {
 
 // MARK: - Font Design
 
-/// Font design styles mapping to SwiftUI's `Font.Design` options.
 public enum FontDesign: String, Codable, Sendable, CaseIterable {
     case `default`
     case rounded
@@ -226,7 +231,6 @@ public enum FontDesign: String, Codable, Sendable, CaseIterable {
 
 // MARK: - Font Style
 
-/// Semantic font styles with predefined base sizes and weights, analogous to SwiftUI's text styles.
 public enum FontStyle: String, CaseIterable, Sendable {
     case largeTitle
     case title

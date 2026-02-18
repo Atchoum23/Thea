@@ -249,12 +249,8 @@ var TVNavigation = (function () {
                 break;
 
             case KEY.GREEN:
-                // Reconnect if connection lost, otherwise toggle sidebar
-                if (TheaClient && TheaClient.state.token && !TheaClient.state.ws) {
-                    TheaClient.connectWebSocket();
-                } else {
-                    toggleSidebar();
-                }
+                // Quick action: toggle sidebar
+                toggleSidebar();
                 break;
 
             case KEY.YELLOW:

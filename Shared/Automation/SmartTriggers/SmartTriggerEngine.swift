@@ -425,7 +425,11 @@ public final class SmartTriggerEngine: ObservableObject {
         case let .openApp(appId):
             #if os(macOS)
                 if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: appId) {
-                    _ = try? await NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
+                    do {
+                        _ = try await NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
+                    } catch {
+                        logger.error("Failed to open app \(appId): \(error.localizedDescription)")
+                    }
                 }
             #endif
 
@@ -527,18 +531,24 @@ public final class SmartTriggerEngine: ObservableObject {
     // MARK: - Persistence
 
     private func loadTriggers() {
-        guard let data = defaults.data(forKey: triggersKey),
-              let saved = try? JSONDecoder().decode([SmartTrigger].self, from: data)
-        else {
+        guard let data = defaults.data(forKey: triggersKey) else { return }
+        do {
+            let saved = try JSONDecoder().decode([SmartTrigger].self, from: data)
+            triggers = saved
+        } catch {
+            logger.error("Failed to decode triggers: \(error.localizedDescription)")
             return
         }
-        triggers = saved
         triggers.filter(\.isEnabled).forEach { activateTrigger($0) }
     }
 
     private func saveTriggers() {
-        guard let data = try? JSONEncoder().encode(triggers) else { return }
-        defaults.set(data, forKey: triggersKey)
+        do {
+            let data = try JSONEncoder().encode(triggers)
+            defaults.set(data, forKey: triggersKey)
+        } catch {
+            logger.error("Failed to encode triggers: \(error.localizedDescription)")
+        }
     }
 }
 

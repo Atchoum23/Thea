@@ -55,7 +55,11 @@ public actor FocusContextProvider: ContextProvider {
         updateTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.fetchFocusStatus()
-                try? await Task.sleep(for: .seconds(30))
+                do {
+                    try await Task.sleep(for: .seconds(30))
+                } catch {
+                    break // Task cancelled — stop periodic updates
+                }
             }
         }
 

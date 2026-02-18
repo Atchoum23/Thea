@@ -173,12 +173,22 @@ extension ChatView {
     func setupProvider() async {
         let hasLocalModels = !ProviderRegistry.shared.getAvailableLocalModels().isEmpty
 
-        if let apiKey = try? SecureStorage.shared.loadAPIKey(for: "openai") {
-            selectedProvider = OpenAIProvider(apiKey: apiKey)
-        } else if hasLocalModels {
-            selectedProvider = ProviderRegistry.shared.getLocalProvider()
-        } else {
-            showingAPIKeySetup = true
+        do {
+            let apiKey = try SecureStorage.shared.loadAPIKey(for: "openai")
+            if let apiKey {
+                selectedProvider = OpenAIProvider(apiKey: apiKey)
+            } else if hasLocalModels {
+                selectedProvider = ProviderRegistry.shared.getLocalProvider()
+            } else {
+                showingAPIKeySetup = true
+            }
+        } catch {
+            if hasLocalModels {
+                selectedProvider = ProviderRegistry.shared.getLocalProvider()
+            } else {
+                showingError = error
+                showingAPIKeySetup = true
+            }
         }
     }
 
@@ -226,7 +236,7 @@ extension ChatView {
                         // Same provider, different model
                         provider2 = provider1
                         let models = try await provider1.listModels()
-                        model2 = models.first { $0.id != model1 }?.id ?? model1
+                        model2 = models.first(where: { $0.id != model1 })?.id ?? model1
                     }
                     let results = try await chatManager.compareModels(
                         text,

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 #if os(macOS)
     import AppKit
 #else
@@ -19,6 +20,7 @@ import Foundation
 @MainActor
 @Observable
 public final class BadgeManager {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "BadgeManager")
     public static let shared = BadgeManager()
 
     private let defaults = UserDefaults.standard
@@ -55,13 +57,16 @@ public final class BadgeManager {
         badgeEnabled = defaults.bool(forKey: "BadgeManager.badgeEnabled")
         badgeCount = defaults.integer(forKey: badgeCountKey)
 
-        if let data = defaults.data(forKey: categoryCountsKey),
-           let counts = try? JSONDecoder().decode([String: Int].self, from: data)
-        {
-            categoryCounts = counts.reduce(into: [:]) { result, pair in
-                if let category = NotificationCategory(rawValue: pair.key) {
-                    result[category] = pair.value
+        if let data = defaults.data(forKey: categoryCountsKey) {
+            do {
+                let counts = try JSONDecoder().decode([String: Int].self, from: data)
+                categoryCounts = counts.reduce(into: [:]) { result, pair in
+                    if let category = NotificationCategory(rawValue: pair.key) {
+                        result[category] = pair.value
+                    }
                 }
+            } catch {
+                logger.error("BadgeManager: failed to decode category counts: \(error.localizedDescription)")
             }
         }
 
@@ -76,8 +81,11 @@ public final class BadgeManager {
             result[pair.key.rawValue] = pair.value
         }
 
-        if let data = try? JSONEncoder().encode(stringKeyCounts) {
+        do {
+            let data = try JSONEncoder().encode(stringKeyCounts)
             defaults.set(data, forKey: categoryCountsKey)
+        } catch {
+            logger.error("BadgeManager: failed to encode category counts: \(error.localizedDescription)")
         }
     }
 

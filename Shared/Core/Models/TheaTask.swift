@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 import SwiftData
 #if canImport(UserNotifications)
 import UserNotifications
@@ -171,6 +172,7 @@ final class TheaTask {
 @MainActor
 final class TheaTaskManager: ObservableObject {
     static let shared = TheaTaskManager()
+    private let logger = Logger(subsystem: "com.thea.app", category: "TheaTaskManager")
 
     @Published var tasks: [TheaTask] = []
     private var modelContext: ModelContext?
@@ -188,10 +190,15 @@ final class TheaTaskManager: ObservableObject {
             sortBy: [
                 SortDescriptor(\.priorityRaw, order: .reverse),
                 SortDescriptor(\.dueDate, order: .forward),
-                SortDescriptor(\.createdDate, order: .reverse)
+                SortDescriptor(\.createdDate, order: .reverse),
             ]
         )
-        tasks = (try? modelContext.fetch(descriptor)) ?? []
+        do {
+            tasks = try modelContext.fetch(descriptor)
+        } catch {
+            logger.error("Failed to fetch tasks: \(error.localizedDescription)")
+            tasks = []
+        }
     }
 
     func addTask(
@@ -214,7 +221,11 @@ final class TheaTaskManager: ObservableObject {
             tags: tags
         )
         modelContext.insert(task)
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            logger.error("Failed to save task: \(error.localizedDescription)")
+        }
 
         if let reminderDate {
             scheduleReminder(for: task, at: reminderDate)
@@ -229,7 +240,11 @@ final class TheaTaskManager: ObservableObject {
         } else {
             task.markCompleted()
         }
-        try? modelContext?.save()
+        do {
+            try modelContext?.save()
+        } catch {
+            logger.error("Failed to save task completion toggle: \(error.localizedDescription)")
+        }
         fetchTasks()
     }
 
@@ -237,13 +252,21 @@ final class TheaTaskManager: ObservableObject {
         guard let modelContext else { return }
         cancelReminder(for: task)
         modelContext.delete(task)
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            logger.error("Failed to save after task deletion: \(error.localizedDescription)")
+        }
         fetchTasks()
     }
 
     func updateTask(_ task: TheaTask) {
         task.updatedDate = Date()
-        try? modelContext?.save()
+        do {
+            try modelContext?.save()
+        } catch {
+            logger.error("Failed to save task update: \(error.localizedDescription)")
+        }
         fetchTasks()
     }
 

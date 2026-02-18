@@ -148,16 +148,22 @@ public final class TemporalPatternEngine {
 
     private func loadPatterns() {
         // Load from UserDefaults or persistent storage
-        if let data = UserDefaults.standard.data(forKey: "TemporalPatterns"),
-           let decoded = try? JSONDecoder().decode([TemporalPattern].self, from: data) {
-            patterns = decoded
-            updateActivePatterns()
+        if let data = UserDefaults.standard.data(forKey: "TemporalPatterns") {
+            do {
+                patterns = try JSONDecoder().decode([TemporalPattern].self, from: data)
+                updateActivePatterns()
+            } catch {
+                logger.error("Failed to decode temporal patterns: \(error.localizedDescription)")
+            }
         }
     }
 
     private func savePatterns() {
-        if let encoded = try? JSONEncoder().encode(patterns) {
+        do {
+            let encoded = try JSONEncoder().encode(patterns)
             UserDefaults.standard.set(encoded, forKey: "TemporalPatterns")
+        } catch {
+            logger.error("Failed to encode temporal patterns: \(error.localizedDescription)")
         }
     }
 }

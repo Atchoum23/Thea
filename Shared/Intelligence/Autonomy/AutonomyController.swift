@@ -488,7 +488,11 @@ public final class AutonomyController: ObservableObject {
     private func startHourlyReset() {
         hourResetTask = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(3600))
+                do {
+                    try await Task.sleep(for: .seconds(3600)
+                } catch {
+                    break
+                })
                 await MainActor.run {
                     self.actionsThisHour = 0
                 }
@@ -508,8 +512,11 @@ public final class AutonomyController: ObservableObject {
         let overrideData = categoryOverrides.reduce(into: [String: String]()) { result, pair in
             result[pair.key.rawValue] = pair.value.rawValue
         }
-        if let encoded = try? JSONEncoder().encode(overrideData) {
+        do {
+            let encoded = try JSONEncoder().encode(overrideData)
             UserDefaults.standard.set(encoded, forKey: "thea.autonomy.overrides")
+        } catch {
+            logger.error("Failed to encode autonomy category overrides: \(error.localizedDescription)")
         }
     }
 
@@ -527,13 +534,17 @@ public final class AutonomyController: ObservableObject {
         if maxActionsPerHour == 0 { maxActionsPerHour = 50 }
 
         // Load category overrides
-        if let data = UserDefaults.standard.data(forKey: "thea.autonomy.overrides"),
-           let overrideData = try? JSONDecoder().decode([String: String].self, from: data) {
-            categoryOverrides = overrideData.reduce(into: [:]) { result, pair in
-                if let category = THEAActionCategory(rawValue: pair.key),
-                   let level = THEAAutonomyLevel(rawValue: pair.value) {
-                    result[category] = level
+        if let data = UserDefaults.standard.data(forKey: "thea.autonomy.overrides") {
+            do {
+                let overrideData = try JSONDecoder().decode([String: String].self, from: data)
+                categoryOverrides = overrideData.reduce(into: [:]) { result, pair in
+                    if let category = THEAActionCategory(rawValue: pair.key),
+                       let level = THEAAutonomyLevel(rawValue: pair.value) {
+                        result[category] = level
+                    }
                 }
+            } catch {
+                logger.error("Failed to decode autonomy category overrides: \(error.localizedDescription)")
             }
         }
 
@@ -541,15 +552,22 @@ public final class AutonomyController: ObservableObject {
     }
 
     private func saveHistory() {
-        if let encoded = try? JSONEncoder().encode(actionHistory) {
+        do {
+            let encoded = try JSONEncoder().encode(actionHistory)
             UserDefaults.standard.set(encoded, forKey: "thea.autonomy.history")
+        } catch {
+            logger.error("Failed to encode autonomy action history: \(error.localizedDescription)")
         }
     }
 
     private func loadHistory() {
-        if let data = UserDefaults.standard.data(forKey: "thea.autonomy.history"),
-           let decoded = try? JSONDecoder().decode([AutonomyActionHistoryEntry].self, from: data) {
-            actionHistory = decoded
+        if let data = UserDefaults.standard.data(forKey: "thea.autonomy.history") {
+            do {
+                let decoded = try JSONDecoder().decode([AutonomyActionHistoryEntry].self, from: data)
+                actionHistory = decoded
+            } catch {
+                logger.error("Failed to decode autonomy action history: \(error.localizedDescription)")
+            }
         }
     }
 }

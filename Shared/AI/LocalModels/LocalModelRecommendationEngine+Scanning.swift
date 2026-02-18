@@ -7,6 +7,9 @@
 //
 
 import Foundation
+import OSLog
+
+private let scanningLogger = Logger(subsystem: "ai.thea.app", category: "LocalModelRecommendationEngine")
 
 // MARK: - Scanning & Discovery
 
@@ -48,14 +51,25 @@ extension LocalModelRecommendationEngine {
         let url = URL(fileURLWithPath: mlxPath)
         let fileManager = FileManager.default
 
-        guard let contents = try? fileManager.contentsOfDirectory(
-            at: url,
-            includingPropertiesForKeys: [.isDirectoryKey, .fileSizeKey],
-            options: [.skipsHiddenFiles]
-        ) else { return [] }
+        let contents: [URL]
+        do {
+            contents = try fileManager.contentsOfDirectory(
+                at: url,
+                includingPropertiesForKeys: [.isDirectoryKey, .fileSizeKey],
+                options: [.skipsHiddenFiles]
+            )
+        } catch {
+            scanningLogger.error("Failed to scan MLX models directory at \(url.path): \(error.localizedDescription)")
+            return []
+        }
 
         for itemURL in contents {
-            let isDirectory = (try? itemURL.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
+            var isDirectory = false
+            do {
+                isDirectory = (try itemURL.resourceValues(forKeys: [.isDirectoryKey])).isDirectory ?? false
+            } catch {
+                scanningLogger.debug("Failed to read resource values for \(itemURL.lastPathComponent): \(error.localizedDescription)")
+            }
             if isDirectory {
                 // Check for MLX model files
                 let configPath = itemURL.appendingPathComponent("config.json")
@@ -68,7 +82,14 @@ extension LocalModelRecommendationEngine {
                         sizeBytes: calculateDirectorySize(url: itemURL),
                         quantization: detectQuantization(itemURL),
                         capabilities: detectCapabilities(itemURL),
-                        installedDate: (try? fileManager.attributesOfItem(atPath: itemURL.path)[.creationDate] as? Date) ?? Date()
+                        installedDate: {
+                            do {
+                                return (try fileManager.attributesOfItem(atPath: itemURL.path)[.creationDate] as? Date) ?? Date()
+                            } catch {
+                                scanningLogger.debug("Failed to read creation date for \(itemURL.lastPathComponent): \(error.localizedDescription)")
+                                return Date()
+                            }
+                        }()
                     )
                     models.append(model)
                 }

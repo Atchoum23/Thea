@@ -652,8 +652,8 @@ struct EntityExtractionTests {
         let entities = ExtractEntities.run("Contact us at hello@example.com or support@thea.app")
         let emails = entities.filter { $0.type == "email" }
         #expect(emails.count == 2)
-        #expect(emails.contains { $0.value == "hello@example.com" })
-        #expect(emails.contains { $0.value == "support@thea.app" })
+        #expect(emails.contains(where: { $0.value == "hello@example.com" }))
+        #expect(emails.contains(where: { $0.value == "support@thea.app" }))
     }
 
     @Test("URL extraction")
@@ -784,7 +784,7 @@ struct MessageRoutingTests {
             Chan(isEnabled: true, statusIsActive: true),
             Chan(isEnabled: true, statusIsActive: false),
             Chan(isEnabled: false, statusIsActive: true),
-            Chan(isEnabled: false, statusIsActive: false)
+            Chan(isEnabled: false, statusIsActive: false),
         ]
         let active = channels.filter { $0.isEnabled && $0.statusIsActive }
         #expect(active.count == 1)

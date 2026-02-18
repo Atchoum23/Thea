@@ -138,10 +138,11 @@ public class MediaMonitor: ObservableObject {
         pollingTask = Task {
             while !Task.isCancelled {
                 await pollMediaPlaybackState()
-                // Base 10s (was 2s); scaled by EnergyAdaptiveThrottler
-                let baseInterval: TimeInterval = 10.0
-                let interval = baseInterval * EnergyAdaptiveThrottler.shared.intervalMultiplier
-                try? await Task.sleep(for: .seconds(interval))
+                do {
+                    try await Task.sleep(nanoseconds: 2 * 1_000_000_000) // 2 seconds
+                } catch {
+                    break
+                }
             }
         }
     }

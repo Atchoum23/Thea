@@ -60,7 +60,7 @@ struct tvOSSettingsView: View {
                 } label: {
                     tvOSSettingsRow(
                         icon: "paintbrush.fill",
-                        iconColor: .theaInfo,
+                        iconColor: .blue,
                         title: "Theme & Display",
                         subtitle: config.theme.capitalized
                     )
@@ -99,7 +99,7 @@ struct tvOSSettingsView: View {
                 } label: {
                     tvOSSettingsRow(
                         icon: "info.circle.fill",
-                        iconColor: .theaInfo,
+                        iconColor: .blue,
                         title: "About THEA",
                         subtitle: "Version 1.0.0"
                     )

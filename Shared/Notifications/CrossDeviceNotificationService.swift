@@ -40,18 +40,22 @@ public actor CrossDeviceNotificationService {
 
     private var changeToken: CKServerChangeToken? {
         get {
-            guard let data = UserDefaults.standard.data(forKey: "thea.notifications.changeToken"),
-                  let token = try? NSKeyedUnarchiver.unarchivedObject(
-                      ofClass: CKServerChangeToken.self,
-                      from: data
-                  )
-            else { return nil }
-            return token
+            guard let data = UserDefaults.standard.data(forKey: "thea.notifications.changeToken") else { return nil }
+            do {
+                return try NSKeyedUnarchiver.unarchivedObject(ofClass: CKServerChangeToken.self, from: data)
+            } catch {
+                logger.error("Failed to unarchive change token: \(error.localizedDescription)")
+                return nil
+            }
         }
         set {
-            if let token = newValue,
-               let data = try? NSKeyedArchiver.archivedData(withRootObject: token, requiringSecureCoding: true) {
-                UserDefaults.standard.set(data, forKey: "thea.notifications.changeToken")
+            if let token = newValue {
+                do {
+                    let data = try NSKeyedArchiver.archivedData(withRootObject: token, requiringSecureCoding: true)
+                    UserDefaults.standard.set(data, forKey: "thea.notifications.changeToken")
+                } catch {
+                    logger.error("Failed to archive change token: \(error.localizedDescription)")
+                }
             } else {
                 UserDefaults.standard.removeObject(forKey: "thea.notifications.changeToken")
             }

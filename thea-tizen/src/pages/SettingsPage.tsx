@@ -93,7 +93,7 @@ function SettingsNavItem({ label, icon, isActive, onClick }: SettingsNavItemProp
       className={`
         w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left
         transition-all duration-200
-        ${isActive ? 'bg-blue-600 text-white' : 'text-gray-300'}
+        ${isActive ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800'}
         ${focused ? 'ring-2 ring-white' : ''}
       `}
     >
@@ -350,102 +350,24 @@ function TraktSection() {
  * Sync section
  */
 function SyncSection() {
-  const [bridgeUrl, setBridgeUrl] = useState('');
-  const [syncStatus, setSyncStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
-  const [lastSync, setLastSync] = useState<string | null>(
-    localStorage.getItem(STORAGE_KEYS.LAST_SYNC)
-  );
-
-  const currentBridgeUrl = localStorage.getItem('thea_sync_bridge_url') || '';
-
-  const handleConnect = async () => {
-    const url = (bridgeUrl.trim() || currentBridgeUrl).replace(/\/+$/, '');
-    if (!url) return;
-
-    setSyncStatus('connecting');
-    try {
-      const response = await fetch(`${url}/health`, {
-        signal: AbortSignal.timeout(5000),
-      });
-      if (response.ok) {
-        localStorage.setItem('thea_sync_bridge_url', url);
-        setSyncStatus('connected');
-        const now = new Date().toISOString();
-        localStorage.setItem(STORAGE_KEYS.LAST_SYNC, now);
-        setLastSync(now);
-      } else {
-        setSyncStatus('disconnected');
-      }
-    } catch {
-      setSyncStatus('disconnected');
-    }
-  };
-
-  const handleDisconnect = () => {
-    localStorage.removeItem('thea_sync_bridge_url');
-    setSyncStatus('disconnected');
-    setBridgeUrl('');
-  };
-
   return (
     <div>
-      <h2 className="text-3xl font-bold text-white mb-2">Sync Bridge</h2>
+      <h2 className="text-3xl font-bold text-white mb-2">iCloud Sync</h2>
       <p className="text-gray-400 mb-8">
-        Connect to a sync bridge to sync conversations across devices.
+        Sync conversations with your other Apple devices.
       </p>
 
-      {/* Connection status */}
-      <FocusableCard className="bg-gray-800 mb-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h3 className="text-xl font-semibold text-white">Status</h3>
-            <p className={
-              syncStatus === 'connected' ? 'text-green-400' :
-              syncStatus === 'connecting' ? 'text-yellow-400' :
-              'text-gray-400'
-            }>
-              {syncStatus === 'connected' && `Connected to ${currentBridgeUrl}`}
-              {syncStatus === 'connecting' && 'Connecting...'}
-              {syncStatus === 'disconnected' && (currentBridgeUrl ? `Configured: ${currentBridgeUrl}` : 'Not configured')}
-            </p>
-            {lastSync && (
-              <p className="text-sm text-gray-500 mt-1">
-                Last sync: {new Date(lastSync).toLocaleString()}
-              </p>
-            )}
-          </div>
-          {currentBridgeUrl && (
-            <div className="flex gap-3">
-              <FocusableButton onClick={handleConnect} variant="secondary" size="sm">
-                Test
-              </FocusableButton>
-              <FocusableButton onClick={handleDisconnect} variant="danger" size="sm">
-                Disconnect
-              </FocusableButton>
-            </div>
-          )}
-        </div>
-      </FocusableCard>
-
-      {/* Bridge URL input */}
       <FocusableCard className="bg-gray-800">
-        <h3 className="text-xl font-semibold text-white mb-4">Bridge URL</h3>
-        <p className="text-gray-400 text-sm mb-4">
-          Enter the URL of your Thea sync bridge (e.g., https://thea-sync.workers.dev)
-        </p>
-        <input
-          type="url"
-          value={bridgeUrl}
-          onChange={(e) => setBridgeUrl(e.target.value)}
-          placeholder={currentBridgeUrl || 'https://your-bridge.workers.dev'}
-          className="w-full bg-gray-900 text-white px-4 py-3 rounded-lg text-lg mb-4"
-        />
-        <FocusableButton
-          onClick={handleConnect}
-          disabled={!bridgeUrl.trim() && !currentBridgeUrl}
-        >
-          Connect
-        </FocusableButton>
+        <div className="text-center py-8">
+          <div className="text-4xl mb-4">☁️</div>
+          <h3 className="text-xl font-semibold text-white mb-2">
+            Sync Bridge Required
+          </h3>
+          <p className="text-gray-400 max-w-md mx-auto">
+            iCloud sync requires deploying a sync bridge service. This feature
+            will be available in a future update.
+          </p>
+        </div>
       </FocusableCard>
     </div>
   );

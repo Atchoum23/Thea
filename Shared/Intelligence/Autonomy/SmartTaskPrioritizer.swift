@@ -109,13 +109,21 @@ actor SmartTaskPrioritizer {
     private init() {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         let theaDir = appSupport.appendingPathComponent("Thea")
-        try? FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        } catch {
+            logger.debug("Could not create Thea directory: \(error.localizedDescription)")
+        }
         storageURL = theaDir.appendingPathComponent("task_priorities.json")
 
         // Load persisted history
-        if let data = try? Data(contentsOf: storageURL),
-           let history = try? JSONDecoder().decode([PrioritizedTask].self, from: data) {
-            taskHistory = history
+        if FileManager.default.fileExists(atPath: storageURL.path) {
+            do {
+                let data = try Data(contentsOf: storageURL)
+                taskHistory = try JSONDecoder().decode([PrioritizedTask].self, from: data)
+            } catch {
+                logger.debug("Could not load task history: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -275,15 +283,22 @@ actor SmartTaskPrioritizer {
         if taskHistory.count > 100 {
             taskHistory = Array(taskHistory.suffix(100))
         }
-        if let data = try? JSONEncoder().encode(taskHistory) {
-            try? data.write(to: storageURL)
+        do {
+            let data = try JSONEncoder().encode(taskHistory)
+            try data.write(to: storageURL)
+        } catch {
+            logger.error("Failed to save task history: \(error.localizedDescription)")
         }
     }
 
     private func loadHistory() {
-        guard let data = try? Data(contentsOf: storageURL),
-              let history = try? JSONDecoder().decode([PrioritizedTask].self, from: data) else { return }
-        taskHistory = history
+        guard FileManager.default.fileExists(atPath: storageURL.path) else { return }
+        do {
+            let data = try Data(contentsOf: storageURL)
+            taskHistory = try JSONDecoder().decode([PrioritizedTask].self, from: data)
+        } catch {
+            logger.debug("Could not load task history: \(error.localizedDescription)")
+        }
     }
 }
 #endif

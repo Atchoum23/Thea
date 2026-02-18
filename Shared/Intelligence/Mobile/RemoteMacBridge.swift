@@ -8,6 +8,7 @@
 import Foundation
 import Network
 import Observation
+import OSLog
 
 // MARK: - Remote Mac Info
 
@@ -43,6 +44,7 @@ public enum RemoteMacConnectionState: String, Sendable {
 @MainActor
 @Observable
 public final class RemoteMacBridge {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "RemoteMacBridge")
     public static let shared = RemoteMacBridge()
 
     // MARK: - State
@@ -298,11 +300,19 @@ public final class RemoteMacBridge {
         startDiscovery()
 
         // Wait for Bonjour discovery
-        try? await Task.sleep(for: .seconds(5))
+        do {
+            try await Task.sleep(for: .seconds(5))
+        } catch {
+            // Cancellation means caller is no longer waiting — proceed to fallback
+        }
 
         // If Bonjour found Macs, connect to the first one
         if let mac = discoveredMacs.first {
-            try? await connect(to: mac)
+            do {
+                try await connect(to: mac)
+            } catch {
+                logger.debug("Failed to connect to discovered Mac \(mac.name): \(error.localizedDescription)")
+            }
             return
         }
 
@@ -310,7 +320,11 @@ public final class RemoteMacBridge {
         addTailscaleEndpoints()
 
         if let mac = discoveredMacs.first {
-            try? await connect(to: mac)
+            do {
+                try await connect(to: mac)
+            } catch {
+                logger.debug("Failed to connect to Tailscale Mac \(mac.name): \(error.localizedDescription)")
+            }
         }
     }
 

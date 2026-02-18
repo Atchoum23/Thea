@@ -99,8 +99,8 @@ extension OrchestratorSettingsView {
                         .font(.caption2)
                         .padding(.horizontal, 4)
                         .padding(.vertical, 2)
-                        .background(model.hasPrefix("local-") ? Color.theaSuccess.opacity(0.2) : Color.theaInfo.opacity(0.2))
-                        .foregroundStyle(model.hasPrefix("local-") ? Color.theaSuccess : Color.theaInfo)
+                        .background(model.hasPrefix("local-") ? Color.green.opacity(0.2) : Color.blue.opacity(0.2))
+                        .foregroundStyle(model.hasPrefix("local-") ? .green : .blue)
                         .cornerRadius(4)
                 }
                 if models.count > 2 {

@@ -1,11 +1,13 @@
 import Foundation
 import KeychainAccess
+import OSLog
 
 @MainActor
 final class SecureStorage {
     static let shared = SecureStorage()
 
     private let keychain: Keychain
+    private let secureStorageLogger = Logger(subsystem: "ai.thea.app", category: "SecureStorage")
 
     private init() {
         // Use .whenUnlockedThisDeviceOnly to avoid iCloud sync issues
@@ -30,7 +32,12 @@ final class SecureStorage {
     }
 
     func hasAPIKey(for provider: String) -> Bool {
-        (try? keychain.contains("apikey.\(provider)")) ?? false
+        do {
+            return try keychain.contains("apikey.\(provider)")
+        } catch {
+            secureStorageLogger.error("Failed to check API key for '\(provider)': \(error.localizedDescription)")
+            return false
+        }
     }
 
     // MARK: - Financial Credentials

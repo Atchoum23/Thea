@@ -31,8 +31,11 @@ extension MissionOrchestrator {
         checkpointData["timestamp"] = Date()
 
         // Save to persistent storage
-        if let data = try? JSONSerialization.data(withJSONObject: checkpointData) {
+        do {
+            let data = try JSONSerialization.data(withJSONObject: checkpointData)
             UserDefaults.standard.set(data, forKey: "mission.checkpoint.\(mission.id)")
+        } catch {
+            logger.error("Failed to serialize checkpoint for mission \(mission.id): \(error.localizedDescription)")
         }
     }
 
@@ -181,18 +184,23 @@ extension MissionOrchestrator {
 @MainActor
 extension MissionOrchestrator {
     func loadMissionHistory() {
-        if let data = UserDefaults.standard.data(forKey: "mission.history"),
-           let history = try? JSONDecoder().decode([Mission].self, from: data)
-        {
-            missionHistory = history
+        if let data = UserDefaults.standard.data(forKey: "mission.history") {
+            do {
+                missionHistory = try JSONDecoder().decode([Mission].self, from: data)
+            } catch {
+                logger.error("Failed to decode mission history: \(error.localizedDescription)")
+            }
         }
     }
 
     func saveMissionHistory() {
         // Keep last 50 missions
         let toSave = Array(missionHistory.prefix(50))
-        if let data = try? JSONEncoder().encode(toSave) {
+        do {
+            let data = try JSONEncoder().encode(toSave)
             UserDefaults.standard.set(data, forKey: "mission.history")
+        } catch {
+            logger.error("Failed to encode mission history: \(error.localizedDescription)")
         }
     }
 }

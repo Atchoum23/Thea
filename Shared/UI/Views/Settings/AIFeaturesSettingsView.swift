@@ -5,6 +5,9 @@
 // Exposes toggles for semantic classification, adaptive routing, AI analysis, etc.
 
 import SwiftUI
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "AIFeaturesSettingsView")
 
 // MARK: - AI Features Settings View
 
@@ -387,10 +390,15 @@ struct AIFeaturesSettingsView: View {
 
     private func getLearningRecordCount() -> Int {
         // Read from UserDefaults learning storage
-        if let data = UserDefaults.standard.data(forKey: "ai_intelligence_learnings"),
-           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let modelPerformance = json["modelPerformance"] as? [[String: Any]] {
-            return modelPerformance.count
+        if let data = UserDefaults.standard.data(forKey: "ai_intelligence_learnings") {
+            do {
+                let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                if let modelPerformance = json?["modelPerformance"] as? [[String: Any]] {
+                    return modelPerformance.count
+                }
+            } catch {
+                logger.error("Failed to deserialize learning data: \(error.localizedDescription)")
+            }
         }
         return 0
     }

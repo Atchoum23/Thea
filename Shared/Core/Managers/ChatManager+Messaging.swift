@@ -13,14 +13,10 @@ extension ChatManager {
 
     // MARK: - Message Sending
 
-    // swiftlint:disable:next function_body_length
     func sendMessage(_ text: String, in conversation: Conversation) async throws {
         msgLogger.debug("📤 sendMessage: Starting with text '\(text.prefix(50))...'")
 
-        // Inject foreground app context if pairing enabled (macOS only)
-        let enhancedText = injectForegroundAppContext(into: text)
-
-        handlePlanModificationIfNeeded(enhancedText)
+        handlePlanModificationIfNeeded(text)
 
         guard let context = modelContext else {
             msgLogger.error("❌ No model context!")
@@ -29,22 +25,22 @@ extension ChatManager {
 
         // Offline — queue for later
         if !OfflineQueueService.shared.isOnline {
-            try queueOfflineMessage(enhancedText, in: conversation, context: context)
+            try queueOfflineMessage(text, in: conversation, context: context)
             return
         }
 
         // Classify task → route to optimal provider/model
-        let (provider, model, taskType) = try await selectProviderAndModel(for: enhancedText)
+        let (provider, model, taskType) = try await selectProviderAndModel(for: text)
         msgLogger.debug("✅ Selected provider '\(provider.metadata.name)' with model '\(model)'")
 
         // Auto-delegate complex tasks to sub-agents if enabled
-        if shouldAutoDelegate(taskType: taskType, text: enhancedText) {
+        if shouldAutoDelegate(taskType: taskType, text: text) {
             if let session = await delegateToAgent(
-                text: enhancedText, conversationID: conversation.id, taskType: taskType
+                text: text, conversationID: conversation.id, taskType: taskType
             ) {
                 // Create a user message to record the delegation in the conversation
                 let currentDevice = DeviceRegistry.shared.currentDevice
-                let userMessage = createUserMessage(enhancedText, in: conversation, device: currentDevice)
+                let userMessage = createUserMessage(text, in: conversation, device: currentDevice)
                 conversation.messages.append(userMessage)
                 context.insert(userMessage)
 
@@ -70,11 +66,11 @@ extension ChatManager {
             }
         }
 
-        configureAgentMode(for: taskType, text: enhancedText)
+        configureAgentMode(for: taskType, text: text)
 
         // Create and persist user message
         let currentDevice = DeviceRegistry.shared.currentDevice
-        let userMessage = createUserMessage(enhancedText, in: conversation, device: currentDevice)
+        let userMessage = createUserMessage(text, in: conversation, device: currentDevice)
         conversation.messages.append(userMessage)
         context.insert(userMessage)
         try context.save()
@@ -92,11 +88,9 @@ extension ChatManager {
         // Stream AI response
         isStreaming = true
         streamingText = ""
-        streamingThinkingText = ""
         defer {
             isStreaming = false
             streamingText = ""
-            streamingThinkingText = ""
         }
 
         let assistantMessage = createAssistantMessage(in: conversation, model: model, device: currentDevice)
@@ -106,7 +100,7 @@ extension ChatManager {
             do {
                 assistantMessage.metadataData = try JSONEncoder().encode(meta)
             } catch {
-                msgLogger.error("Failed to encode assistant message metadata: \(error.localizedDescription)")
+                msgLogger.debug("Could not encode metadata: \(error.localizedDescription)")
             }
         }
         conversation.messages.append(assistantMessage)
@@ -122,14 +116,10 @@ extension ChatManager {
             autoGenerateTitle(for: conversation)
             try context.save()
 
-            let responseContext = PostResponsePipeline.ResponseContext(
-                userQuery: enhancedText,
-                responseText: streamingText,
-                taskType: taskType,
-                assistantMessage: assistantMessage,
-                conversation: conversation
+            await runPostResponseActions(
+                text: text, taskType: taskType,
+                assistantMessage: assistantMessage, conversation: conversation
             )
-            await PostResponsePipeline.run(responseContext, agentState: agentState)
 
             processQueue()
         } catch {
@@ -235,20 +225,7 @@ extension ChatManager {
         device: DeviceInfo
     ) async -> [AIMessage] {
         var apiMessages: [AIMessage] = []
-        var systemPrompt = buildFullSystemPrompt(for: conversation, taskType: taskType)
-
-        // Proactive memory injection: retrieve relevant context from all memory tiers
-        let lastUserText = conversation.messages.last { $0.messageRole == .user }?.content.textValue ?? ""
-        if !lastUserText.isEmpty {
-            let memoryResult = await ActiveMemoryRetrieval.shared.retrieveContext(
-                for: lastUserText,
-                conversationId: conversation.id,
-                taskType: taskType
-            )
-            if !memoryResult.sources.isEmpty, memoryResult.confidence > 0.4 {
-                systemPrompt += "\n\n<memory_context>\n\(memoryResult.contextPrompt)\n</memory_context>"
-            }
-        }
+        let systemPrompt = buildFullSystemPrompt(for: conversation, taskType: taskType)
 
         apiMessages.append(AIMessage(
             id: UUID(),
@@ -259,8 +236,6 @@ extension ChatManager {
             model: model
         ))
 
-        // Build all conversation messages
-        var conversationMessages: [AIMessage] = []
         for msg in conversation.messages {
             var content = msg.content
 
@@ -280,7 +255,7 @@ extension ChatManager {
                 content = .text("[Sent from \(msgDeviceName)] \(content.textValue)")
             }
 
-            conversationMessages.append(AIMessage(
+            apiMessages.append(AIMessage(
                 id: msg.id,
                 conversationID: msg.conversationID,
                 role: msg.messageRole,
@@ -289,33 +264,6 @@ extension ChatManager {
                 model: msg.model ?? model
             ))
         }
-
-        // Context window management: trim old messages if approaching limit
-        // Reserve ~25% for system prompt + response; heuristic: ~4 chars per token
-        let maxContextTokens = model.contains("opus-4-6") ? 800_000 : 160_000
-        let systemTokensEstimate = systemPrompt.count / 4
-        let availableTokens = maxContextTokens - systemTokensEstimate - 16_000 // 16K reserved for response
-        var totalTokensEstimate = 0
-        var trimmedMessages: [AIMessage] = []
-
-        // Keep messages from newest to oldest, respecting token budget
-        for msg in conversationMessages.reversed() {
-            let msgTokens = msg.content.textValue.count / 4
-            if totalTokensEstimate + msgTokens > availableTokens && trimmedMessages.count >= 4 {
-                // Insert a truncation notice at the beginning
-                let notice = AIMessage(
-                    id: UUID(), conversationID: conversation.id,
-                    role: .system, content: .text("[Earlier messages in this conversation were trimmed to fit context window. \(conversationMessages.count - trimmedMessages.count) older messages omitted.]"),
-                    timestamp: Date.distantPast, model: model
-                )
-                trimmedMessages.append(notice)
-                break
-            }
-            totalTokensEstimate += msgTokens
-            trimmedMessages.append(msg)
-        }
-
-        apiMessages.append(contentsOf: trimmedMessages.reversed())
         return apiMessages
     }
 
@@ -341,8 +289,7 @@ extension ChatManager {
         agentState.transition(to: .takeAction)
 
         // Retry with exponential backoff, then fallback to alternative provider
-        // maxRetries is configurable via TheaConfig so it can be tuned without recompile
-        let maxRetries = TheaConfig.shared.providers.maxRetries
+        let maxRetries = 2
         var lastError: Error?
 
         for attempt in 0...maxRetries {
@@ -417,32 +364,21 @@ extension ChatManager {
             stream: true
         )
 
-        var accumulatedThinking = ""
-
         for try await chunk in responseStream {
             switch chunk.type {
             case let .delta(text):
                 streamingText += text
                 assistantMessage.contentData = try JSONEncoder().encode(MessageContent.text(streamingText))
 
-            case let .thinkingDelta(thinking):
-                accumulatedThinking += thinking
-                streamingThinkingText += thinking
-
             case let .complete(finalMessage):
                 assistantMessage.contentData = try JSONEncoder().encode(finalMessage.content)
                 assistantMessage.tokenCount = finalMessage.tokenCount
-
-                // Merge thinking trace from both stream accumulation and finalMessage
-                let thinkingTrace = finalMessage.thinkingTrace ?? (accumulatedThinking.isEmpty ? nil : accumulatedThinking)
-                var meta = finalMessage.metadata ?? assistantMessage.metadata ?? MessageMetadata()
-                if let trace = thinkingTrace {
-                    meta.thinkingTrace = trace
-                }
-                do {
-                    assistantMessage.metadataData = try JSONEncoder().encode(meta)
-                } catch {
-                    msgLogger.error("❌ Failed to encode message metadata: \(error.localizedDescription)")
+                if let metadata = finalMessage.metadata {
+                    do {
+                        assistantMessage.metadataData = try JSONEncoder().encode(metadata)
+                    } catch {
+                        msgLogger.error("❌ Failed to encode message metadata: \(error.localizedDescription)")
+                    }
                 }
 
             case let .error(error):
@@ -494,6 +430,128 @@ extension ChatManager {
         return false
     }
 
+    private func runPostResponseActions(
+        text: String, taskType: TaskType?,
+        assistantMessage: Message, conversation: Conversation
+    ) async {
+        // Confidence verification
+        #if os(macOS) || os(iOS)
+        do {
+            let responseText = streamingText
+            let verificationTaskType = taskType ?? .general
+            Task { @MainActor in
+                let result = await ConfidenceSystem.shared.validateResponse(
+                    responseText, query: text, taskType: verificationTaskType
+                )
+                var meta = assistantMessage.metadata ?? MessageMetadata()
+                meta.confidence = result.overallConfidence
+                do {
+                    assistantMessage.metadataData = try JSONEncoder().encode(meta)
+                    try assistantMessage.modelContext?.save()
+                } catch {
+                    msgLogger.error("❌ Failed to save confidence: \(error.localizedDescription)")
+                }
+                msgLogger.debug("🔍 Confidence: \(String(format: "%.0f%%", result.overallConfidence * 100))")
+            }
+        }
+        #endif
+
+        agentState.transition(to: .verifyResults)
+
+        // Autonomy evaluation
+        await evaluateAutonomy(for: taskType)
+
+        agentState.transition(to: .done)
+        agentState.currentTask?.status = .completed
+        agentState.updateProgress(1.0, message: "Response complete")
+
+        // Auto-create plan from planning responses
+        autoCreatePlanIfNeeded(text: text, taskType: taskType, conversation: conversation)
+
+        // Voice output routing
+        if AudioOutputRouter.shared.isVoiceOutputActive {
+            AudioOutputRouter.shared.routeResponse(streamingText)
+        }
+
+        // Follow-up suggestion generation (G1)
+        let responseForSuggestions = streamingText
+        let queryForSuggestions = text
+        let taskTypeRaw = taskType?.rawValue
+        Task { @MainActor in
+            let suggestions = FollowUpSuggestionService.shared.generate(
+                response: responseForSuggestions,
+                query: queryForSuggestions,
+                taskType: taskTypeRaw
+            )
+            if !suggestions.isEmpty {
+                var meta = assistantMessage.metadata ?? MessageMetadata()
+                meta.followUpSuggestions = suggestions
+                do {
+                    assistantMessage.metadataData = try JSONEncoder().encode(meta)
+                    try assistantMessage.modelContext?.save()
+                } catch {
+                    msgLogger.error("Failed to save follow-up suggestions: \(error.localizedDescription)")
+                }
+            }
+        }
+
+        // Response notifications
+        let preview = streamingText
+        Task {
+            await ResponseNotificationHandler.shared.notifyResponseComplete(
+                conversationId: conversation.id,
+                conversationTitle: conversation.title,
+                previewText: preview
+            )
+            do {
+                try await CrossDeviceNotificationService.shared.notifyAIResponseReady(
+                    conversationId: conversation.id.uuidString,
+                    preview: preview
+                )
+            } catch {
+                msgLogger.debug("Cross-device notification skipped: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func evaluateAutonomy(for taskType: TaskType?) async {
+        guard AutonomyController.shared.autonomyLevel != .disabled,
+              let taskType, taskType.isActionable
+        else { return }
+
+        let action = AutonomousAction(
+            category: .analysis,
+            title: "Execute suggested action from \(taskType.rawValue) response",
+            description: "AI response for \(taskType.description) may contain actionable steps",
+            riskLevel: .low
+        ) {
+            AutonomousAction.ActionResult(success: true, message: "Evaluated")
+        }
+        let decision = await AutonomyController.shared.requestAction(action)
+        switch decision {
+        case .autoExecute:
+            msgLogger.debug("🤖 Autonomy: auto-execute approved for \(taskType.rawValue)")
+        case let .requiresApproval(reason):
+            AutonomyController.shared.queueForApproval(action, reason: reason)
+        }
+    }
+
+    private func autoCreatePlanIfNeeded(text: String, taskType: TaskType?, conversation: Conversation) {
+        guard taskType == .planning, PlanManager.shared.activePlan == nil else { return }
+        let planSteps = Self.extractPlanSteps(from: streamingText)
+        guard planSteps.count >= 2 else { return }
+
+        let planTitle = String(text.prefix(60))
+        _ = PlanManager.shared.createSimplePlan(
+            title: planTitle,
+            steps: planSteps,
+            conversationId: conversation.id
+        )
+        PlanManager.shared.startExecution()
+        PlanManager.shared.showPanel()
+        msgLogger.debug("📋 Auto-created plan with \(planSteps.count) steps")
+    }
+
     // MARK: - Message Queue
 
     /// Queue a message for sending. If currently streaming, it will be sent after the
@@ -540,14 +598,14 @@ extension ChatManager {
         messages: [AIMessage], model: String, provider: any AIProvider
     ) async -> Int? {
         let isAnthropicModel = model.contains("claude")
-        let anthropicApiKey: String?
+        let anthropicAPIKey: String?
         do {
-            anthropicApiKey = try SecureStorage.shared.loadAPIKey(for: "anthropic")
+            anthropicAPIKey = isAnthropicModel ? try SecureStorage.shared.loadAPIKey(for: "anthropic") : nil
         } catch {
-            msgLogger.error("Failed to load Anthropic API key for token counting: \(error.localizedDescription)")
-            anthropicApiKey = nil
+            msgLogger.debug("Could not load Anthropic API key for token counting: \(error.localizedDescription)")
+            anthropicAPIKey = nil
         }
-        if isAnthropicModel, let apiKey = anthropicApiKey {
+        if isAnthropicModel, let apiKey = anthropicAPIKey {
             let counter = AnthropicTokenCounter(apiKey: apiKey)
             do {
                 let result = try await counter.countTokens(messages: messages, model: model)
@@ -665,17 +723,25 @@ extension ChatManager {
                 switch chunk.type {
                 case let .delta(text):
                     accumulated += text
-                    message.contentData = (try? JSONEncoder().encode(MessageContent.text(accumulated))) ?? Data()
-                case .thinkingDelta:
-                    break
+                    do {
+                        message.contentData = try JSONEncoder().encode(MessageContent.text(accumulated))
+                    } catch {
+                        msgLogger.debug("Could not encode streaming delta: \(error.localizedDescription)")
+                        message.contentData = Data()
+                    }
                 case let .complete(finalMessage):
-                    message.contentData = (try? JSONEncoder().encode(finalMessage.content)) ?? Data()
+                    do {
+                        message.contentData = try JSONEncoder().encode(finalMessage.content)
+                    } catch {
+                        msgLogger.debug("Could not encode final message content: \(error.localizedDescription)")
+                        message.contentData = Data()
+                    }
                     message.tokenCount = finalMessage.tokenCount
                     if let meta = finalMessage.metadata {
                         do {
                             message.metadataData = try JSONEncoder().encode(meta)
                         } catch {
-                            msgLogger.error("Failed to encode comparison response metadata: \(error.localizedDescription)")
+                            msgLogger.debug("Could not encode final message metadata: \(error.localizedDescription)")
                         }
                     }
                 case .error:
@@ -683,11 +749,21 @@ extension ChatManager {
                 }
             }
             if accumulated.isEmpty == false, message.content.textValue.isEmpty {
-                message.contentData = (try? JSONEncoder().encode(MessageContent.text(accumulated))) ?? Data()
+                do {
+                    message.contentData = try JSONEncoder().encode(MessageContent.text(accumulated))
+                } catch {
+                    msgLogger.debug("Could not encode accumulated content: \(error.localizedDescription)")
+                    message.contentData = Data()
+                }
             }
         } catch {
             let errorText = "Error from \(model): \(error.localizedDescription)"
-            message.contentData = (try? JSONEncoder().encode(MessageContent.text(errorText))) ?? Data()
+            do {
+                message.contentData = try JSONEncoder().encode(MessageContent.text(errorText))
+            } catch {
+                msgLogger.debug("Could not encode error message: \(error.localizedDescription)")
+                message.contentData = Data()
+            }
             msgLogger.error("Comparison stream failed for \(model): \(error.localizedDescription)")
         }
     }

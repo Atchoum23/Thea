@@ -66,7 +66,11 @@ final class OpenClawIntegration {
             lastError = nil
             logger.info("Connected to OpenClaw Gateway")
             // Request channel list on connect
-            try? await client.listChannels()
+            do {
+                try await client.listChannels()
+            } catch {
+                logger.error("Failed to list OpenClaw channels: \(error)")
+            }
 
         case let .disconnected(reason):
             connectionState = .disconnected

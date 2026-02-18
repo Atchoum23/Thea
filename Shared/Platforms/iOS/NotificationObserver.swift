@@ -109,17 +109,22 @@
         // MARK: - History Management
 
         private func loadHistory() {
-            if let data = UserDefaults.standard.data(forKey: historyKey),
-               let history = try? JSONDecoder().decode([TheaNotificationInfo].self, from: data)
-            {
-                notificationHistory = history
+            if let data = UserDefaults.standard.data(forKey: historyKey) {
+            do {
+                notificationHistory = try JSONDecoder().decode([TheaNotificationInfo].self, from: data)
+            } catch {
+                logger.error("Failed to decode notification history: \(error.localizedDescription)")
             }
+        }
         }
 
         private func saveHistory() {
             let trimmedHistory = Array(notificationHistory.prefix(maxHistorySize))
-            if let data = try? JSONEncoder().encode(trimmedHistory) {
+            do {
+                let data = try JSONEncoder().encode(trimmedHistory)
                 UserDefaults.standard.set(data, forKey: historyKey)
+            } catch {
+                logger.error("Failed to encode notification history: \(error.localizedDescription)")
             }
         }
 

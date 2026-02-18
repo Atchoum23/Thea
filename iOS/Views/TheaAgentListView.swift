@@ -77,7 +77,7 @@ struct TheaAgentListView: View {
                                         systemImage: session.state == .paused ? "play.fill" : "pause.fill"
                                     )
                                 }
-                                .tint(.theaWarning)
+                                .tint(.orange)
                             }
                     }
                 }
@@ -137,11 +137,11 @@ struct TheaAgentListView: View {
     private func stateColor(_ state: TheaAgentState) -> Color {
         switch state {
         case .idle: .gray
-        case .planning: .theaWarning
-        case .working: .theaSuccess
-        case .awaitingApproval, .paused: .theaWarning
-        case .completed: .theaInfo
-        case .failed: .theaError
+        case .planning: .orange
+        case .working: .green
+        case .awaitingApproval, .paused: .yellow
+        case .completed: .blue
+        case .failed: .red
         case .cancelled: .gray
         }
     }
@@ -227,13 +227,13 @@ private struct IOSAgentDetailView: View {
                     if let error = session.error {
                         HStack {
                             Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundStyle(.theaError)
+                                .foregroundStyle(.red)
                             Text(error)
                                 .font(.theaCaption1)
-                                .foregroundStyle(.theaError)
+                                .foregroundStyle(.red)
                         }
                         .padding(TheaSpacing.sm)
-                        .background(Color.theaError.opacity(0.08))
+                        .background(Color.red.opacity(0.08))
                         .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.sm))
                     }
 

@@ -10,6 +10,8 @@ import CloudKit
 import Foundation
 import os.log
 
+private let remoteCommandLogger = Logger(subsystem: "app.thea.remote", category: "RemoteCommand")
+
 // MARK: - Remote Command Service
 
 /// Execute commands on remote Thea instances across devices
@@ -97,7 +99,11 @@ public actor RemoteCommandService {
                 logger.error("Failed to poll commands: \(error)")
             }
 
-            try? await Task.sleep(for: .seconds(5)) // 5 seconds
+            do {
+                try await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+            } catch {
+                break
+            }
         }
     }
 
@@ -125,7 +131,7 @@ public actor RemoteCommandService {
             if let result = try await fetchRemoteCommandResult(commandId) {
                 return result
             }
-            try await Task.sleep(for: .milliseconds(500)) // 0.5 seconds
+            try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
         }
 
         throw RemoteCommandError.timeout
@@ -255,8 +261,11 @@ public actor RemoteCommandService {
             record["error"] = result.error
             record["completedAt"] = result.completedAt
 
-            if let resultData = try? JSONEncoder().encode(result.data) {
+            do {
+                let resultData = try JSONEncoder().encode(result.data)
                 record["resultData"] = resultData
+            } catch {
+                logger.error("Failed to encode command result data: \(error)")
             }
 
             _ = try await database.save(record)
@@ -280,7 +289,11 @@ public actor RemoteCommandService {
 
             var data: [String: String] = [:]
             if let resultData = record["resultData"] as? Data {
-                data = (try? JSONDecoder().decode([String: String].self, from: resultData)) ?? [:]
+                do {
+                    data = try JSONDecoder().decode([String: String].self, from: resultData)
+                } catch {
+                    logger.error("Failed to decode command result data: \(error)")
+                }
             }
 
             return RemoteCommandResult(success: success, data: data, error: error)
@@ -383,10 +396,13 @@ public struct RemoteCommand: Identifiable, Sendable {
         status = CommandStatus(rawValue: record["status"] as? String ?? "pending") ?? .pending
 
         // Decode parameters
-        if let paramData = record["parameters"] as? Data,
-           let params = try? JSONDecoder().decode([String: String].self, from: paramData)
-        {
-            parameters = params
+        if let paramData = record["parameters"] as? Data {
+            do {
+                parameters = try JSONDecoder().decode([String: String].self, from: paramData)
+            } catch {
+                remoteCommandLogger.error("Failed to decode command parameters: \(error)")
+                parameters = [:]
+            }
         } else {
             parameters = [:]
         }
@@ -402,8 +418,11 @@ public struct RemoteCommand: Identifiable, Sendable {
         record["status"] = status.rawValue
         record["createdAt"] = createdAt
 
-        if let paramData = try? JSONEncoder().encode(parameters) {
+        do {
+            let paramData = try JSONEncoder().encode(parameters)
             record["parameters"] = paramData
+        } catch {
+            remoteCommandLogger.error("Failed to encode command parameters: \(error)")
         }
 
         return record

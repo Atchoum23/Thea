@@ -8,6 +8,7 @@
 // - Multi-Agent memory sharing patterns
 
 import Foundation
+import OSLog
 
 // MARK: - Collaborative Memory System
 
@@ -17,6 +18,11 @@ import Foundation
 @Observable
 final class CollaborativeMemorySystem {
     static let shared = CollaborativeMemorySystem()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "CollaborativeMemory")
+
+    /// Last persistence error, observable by UI for user feedback
+    private(set) var lastPersistenceError: String?
 
     // MARK: - State
 
@@ -429,7 +435,12 @@ final class CollaborativeMemorySystem {
         // Schedule periodic consolidation
         Task {
             while true {
-                try? await Task.sleep(for: .seconds(1800)) // 30 minutes
+                do {
+                    try await Task.sleep(for: .seconds(1800)) // 30 minutes
+                } catch {
+                    logger.debug("Memory maintenance sleep cancelled")
+                    break
+                }
                 await consolidateMemories()
                 applyDecay()
             }
@@ -453,34 +464,51 @@ final class CollaborativeMemorySystem {
     }
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "CollaborativeMemory.config"),
-           let config = try? JSONDecoder().decode(Configuration.self, from: data) {
-            configuration = config
+        guard let data = UserDefaults.standard.data(forKey: "CollaborativeMemory.config") else { return }
+        do {
+            configuration = try JSONDecoder().decode(Configuration.self, from: data)
+        } catch {
+            logger.error("Failed to decode memory configuration: \(error.localizedDescription)")
         }
     }
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             UserDefaults.standard.set(data, forKey: "CollaborativeMemory.config")
+        } catch {
+            logger.error("Failed to encode memory configuration: \(error.localizedDescription)")
+            lastPersistenceError = "Failed to save configuration: \(error.localizedDescription)"
         }
     }
 
     // MARK: - Persistence
 
     private func loadMemory() {
-        if let data = UserDefaults.standard.data(forKey: "CollaborativeMemory.shortTerm"),
-           let memories = try? JSONDecoder().decode([MemoryFragment].self, from: data) {
-            shortTermMemory = memories
+        let decoder = JSONDecoder()
+
+        if let data = UserDefaults.standard.data(forKey: "CollaborativeMemory.shortTerm") {
+            do {
+                shortTermMemory = try decoder.decode([MemoryFragment].self, from: data)
+            } catch {
+                logger.error("Failed to decode short-term memory: \(error.localizedDescription)")
+            }
         }
 
-        if let data = UserDefaults.standard.data(forKey: "CollaborativeMemory.longTerm"),
-           let memories = try? JSONDecoder().decode([ConsolidatedMemory].self, from: data) {
-            longTermMemory = memories
+        if let data = UserDefaults.standard.data(forKey: "CollaborativeMemory.longTerm") {
+            do {
+                longTermMemory = try decoder.decode([ConsolidatedMemory].self, from: data)
+            } catch {
+                logger.error("Failed to decode long-term memory: \(error.localizedDescription)")
+            }
         }
 
-        if let data = UserDefaults.standard.data(forKey: "CollaborativeMemory.context"),
-           let memories = try? JSONDecoder().decode([ContextMemory].self, from: data) {
-            contextualMemory = memories
+        if let data = UserDefaults.standard.data(forKey: "CollaborativeMemory.context") {
+            do {
+                contextualMemory = try decoder.decode([ContextMemory].self, from: data)
+            } catch {
+                logger.error("Failed to decode context memory: \(error.localizedDescription)")
+            }
         }
 
         // Rebuild semantic index
@@ -492,16 +520,31 @@ final class CollaborativeMemorySystem {
     }
 
     private func saveMemory() {
-        if let data = try? JSONEncoder().encode(shortTermMemory) {
+        let encoder = JSONEncoder()
+        lastPersistenceError = nil
+
+        do {
+            let data = try encoder.encode(shortTermMemory)
             UserDefaults.standard.set(data, forKey: "CollaborativeMemory.shortTerm")
+        } catch {
+            logger.error("Failed to encode short-term memory: \(error.localizedDescription)")
+            lastPersistenceError = "Failed to save short-term memory: \(error.localizedDescription)"
         }
 
-        if let data = try? JSONEncoder().encode(longTermMemory) {
+        do {
+            let data = try encoder.encode(longTermMemory)
             UserDefaults.standard.set(data, forKey: "CollaborativeMemory.longTerm")
+        } catch {
+            logger.error("Failed to encode long-term memory: \(error.localizedDescription)")
+            lastPersistenceError = "Failed to save long-term memory: \(error.localizedDescription)"
         }
 
-        if let data = try? JSONEncoder().encode(contextualMemory) {
+        do {
+            let data = try encoder.encode(contextualMemory)
             UserDefaults.standard.set(data, forKey: "CollaborativeMemory.context")
+        } catch {
+            logger.error("Failed to encode context memory: \(error.localizedDescription)")
+            lastPersistenceError = "Failed to save context memory: \(error.localizedDescription)"
         }
     }
 }

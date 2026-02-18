@@ -6,6 +6,9 @@ import SwiftUI
 
 #if os(iOS)
 import VisionKit
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "QRIntelligenceView")
 #endif
 
 struct QRIntelligenceView: View {
@@ -207,7 +210,7 @@ struct QRIntelligenceView: View {
                         if !code.parsedData.isEmpty {
                             GroupBox("Parsed Data") {
                                 VStack(alignment: .leading, spacing: 8) {
-                                    ForEach(code.parsedData.sorted { $0.key < $1.key }, id: \.key) { key, value in
+                                    ForEach(code.parsedData.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
                                         HStack(alignment: .top) {
                                             Text(key.capitalized)
                                                 .font(.caption)
@@ -277,8 +280,13 @@ struct QRIntelligenceView: View {
         guard let image = NSImage(contentsOf: url),
               let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return }
         #else
-        guard let data = try? Data(contentsOf: url),
-              let image = UIImage(data: data),
+        let data: Data
+        do {
+            data = try Data(contentsOf: url)
+        } catch {
+            return
+        }
+        guard let image = UIImage(data: data),
               let cgImage = image.cgImage else { return }
         #endif
 
@@ -366,7 +374,11 @@ struct QRScannerSheet: UIViewControllerRepresentable {
             isHighlightingEnabled: true
         )
         scanner.delegate = context.coordinator
-        try? scanner.startScanning()
+        do {
+            try scanner.startScanning()
+        } catch {
+            logger.error("Failed to start QR scanner: \(error.localizedDescription)")
+        }
         return scanner
     }
 

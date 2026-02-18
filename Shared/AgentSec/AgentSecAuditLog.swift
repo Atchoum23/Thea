@@ -32,7 +32,11 @@ public final class AgentSecAuditLog: ObservableObject {
         guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
             // Fallback to temporary directory
             let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("Thea")
-            try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+            do {
+                try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+            } catch {
+                logger.debug("Could not create temp audit log directory: \(error.localizedDescription)")
+            }
             logFilePath = tempDir.appendingPathComponent("agentsec-audit.log")
             loadRecentEntries()
             return
@@ -40,7 +44,11 @@ public final class AgentSecAuditLog: ObservableObject {
         let theaDir = appSupport.appendingPathComponent("Thea", isDirectory: true)
 
         // Create directory if needed
-        try? FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        } catch {
+            logger.debug("Could not create audit log directory: \(error.localizedDescription)")
+        }
 
         logFilePath = theaDir.appendingPathComponent("agentsec-audit.log")
 
@@ -168,13 +176,24 @@ public final class AgentSecAuditLog: ObservableObject {
         guard let data = line.data(using: .utf8) else { return }
 
         if FileManager.default.fileExists(atPath: logFilePath.path) {
-            if let fileHandle = try? FileHandle(forWritingTo: logFilePath) {
+            do {
+                let fileHandle = try FileHandle(forWritingTo: logFilePath)
                 fileHandle.seekToEndOfFile()
                 fileHandle.write(data)
-                try? fileHandle.close()
+                do {
+                    try fileHandle.close()
+                } catch {
+                    logger.debug("Could not close audit log file handle: \(error.localizedDescription)")
+                }
+            } catch {
+                logger.debug("Could not open audit log for appending: \(error.localizedDescription)")
             }
         } else {
-            try? data.write(to: logFilePath)
+            do {
+                try data.write(to: logFilePath)
+            } catch {
+                logger.debug("Could not create audit log file: \(error.localizedDescription)")
+            }
         }
     }
 

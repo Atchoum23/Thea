@@ -1,5 +1,8 @@
 @preconcurrency import SwiftData
 import SwiftUI
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "SidebarView")
 
 struct SidebarView: View {
     @Binding var selection: Conversation?
@@ -173,7 +176,7 @@ struct ConversationRow: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
 
-                if let lastMessage = conversation.messages.max(by: { $0.timestamp < $1.timestamp }) {
+                if let lastMessage = conversation.messages.sorted(by: { $0.timestamp < $1.timestamp }).last {
                     Text(lastMessage.content.textValue)
                         .font(.theaCaption1)
                         .foregroundStyle(.secondary)
@@ -419,10 +422,11 @@ struct ConversationRow: View {
                 "exportedAt": Date().ISO8601Format(),
                 "messages": exportData
             ]
-            if let data = try? JSONSerialization.data(withJSONObject: wrapper, options: [.prettyPrinted, .sortedKeys]),
-               let json = String(data: data, encoding: .utf8) {
-                content = json
-            } else {
+            do {
+                let data = try JSONSerialization.data(withJSONObject: wrapper, options: [.prettyPrinted, .sortedKeys])
+                content = String(data: data, encoding: .utf8) ?? "[]"
+            } catch {
+                logger.error("Failed to serialize conversation JSON: \(error.localizedDescription)")
                 content = "[]"
             }
 

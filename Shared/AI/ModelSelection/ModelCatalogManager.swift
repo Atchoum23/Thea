@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import OSLog
 
 // MARK: - Model Catalog Manager
 
@@ -15,6 +16,7 @@ final class ModelCatalogManager {
     private(set) var lastFetchDate: Date?
     private(set) var fetchError: Error?
 
+    private let logger = Logger(subsystem: "ai.thea.app", category: "ModelCatalogManager")
     private let cacheKey = "ModelCatalogManager.cachedModels"
     private let cacheExpirationSeconds: TimeInterval = 3600 // 1 hour
 
@@ -68,8 +70,11 @@ final class ModelCatalogManager {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         // Get OpenRouter API key if available
-        if let apiKey = try? SecureStorage.shared.loadAPIKey(for: "openrouter") {
+        do {
+            let apiKey = try SecureStorage.shared.loadAPIKey(for: "openrouter")
             request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        } catch {
+            logger.debug("No OpenRouter API key available — fetching models without auth: \(error.localizedDescription)")
         }
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -97,9 +102,12 @@ final class ModelCatalogManager {
     // MARK: - Caching
 
     private func loadCachedModels() {
-        guard let data = UserDefaults.standard.data(forKey: cacheKey),
-              let cached = try? JSONDecoder().decode(CachedModels.self, from: data)
-        else {
+        guard let data = UserDefaults.standard.data(forKey: cacheKey) else { return }
+        let cached: CachedModels
+        do {
+            cached = try JSONDecoder().decode(CachedModels.self, from: data)
+        } catch {
+            logger.error("Failed to decode cached models: \(error.localizedDescription)")
             return
         }
 
@@ -114,8 +122,11 @@ final class ModelCatalogManager {
 
     private func cacheModels(_ models: [OpenRouterModel]) {
         let cached = CachedModels(models: models, timestamp: Date())
-        if let data = try? JSONEncoder().encode(cached) {
+        do {
+            let data = try JSONEncoder().encode(cached)
             UserDefaults.standard.set(data, forKey: cacheKey)
+        } catch {
+            logger.error("Failed to encode models for caching: \(error.localizedDescription)")
         }
     }
 }

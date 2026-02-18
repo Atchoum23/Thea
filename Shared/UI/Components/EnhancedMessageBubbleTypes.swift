@@ -5,6 +5,9 @@ import SwiftUI
 
 #if canImport(Highlightr)
 import Highlightr
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "EnhancedMessageBubbleTypes")
 #endif
 
 // MARK: - Supporting Views
@@ -121,7 +124,11 @@ struct EnhancedCodeBlock: View {
         }
 
         Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(1500))
+            do {
+                try await Task.sleep(nanoseconds: 1_500_000_000)
+            } catch {
+                return
+            }
             withAnimation { showCopied = false }
         }
     }
@@ -222,7 +229,6 @@ func parseResponseBlocks(_ text: String) -> [ParsedBlock] {
 
 // MARK: - Quick Actions
 
-/// Quick actions available on message bubbles for common operations like copy, regenerate, and translate.
 public enum MessageQuickAction: String, CaseIterable {
     case copy
     case regenerate

@@ -24,7 +24,11 @@ extension BackupManager {
         try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
 
         defer {
-            try? fileManager.removeItem(at: tempDir)
+            do {
+                try fileManager.removeItem(at: tempDir)
+            } catch {
+                logger.debug("Could not clean up temp directory: \(error.localizedDescription)")
+            }
         }
 
         // Copy archive to backup directory
@@ -40,20 +44,35 @@ extension BackupManager {
         var backupName = source.deletingPathExtension().lastPathComponent
         var backupDate = Date()
         if let metadataURL = URL(string: tempDir.appendingPathComponent("metadata.json").path),
-           FileManager.default.fileExists(atPath: metadataURL.path),
-           let data = try? Data(contentsOf: metadataURL),
-           let metadata = try? JSONDecoder().decode(BackupMetadata.self, from: data) {
-            backupName = metadata.name
-            backupDate = metadata.createdAt
-            // Verify compatibility
-            guard isCompatible(metadata: metadata) else {
-                try? fileManager.removeItem(at: destPath)
-                throw BackupError.incompatibleVersion(metadata.appVersion)
+           FileManager.default.fileExists(atPath: metadataURL.path) {
+            do {
+                let data = try Data(contentsOf: metadataURL)
+                let metadata = try JSONDecoder().decode(BackupMetadata.self, from: data)
+                backupName = metadata.name
+                backupDate = metadata.createdAt
+                // Verify compatibility
+                guard isCompatible(metadata: metadata) else {
+                    do {
+                        try fileManager.removeItem(at: destPath)
+                    } catch {
+                        logger.warning("Could not remove incompatible backup file: \(error.localizedDescription)")
+                    }
+                    throw BackupError.incompatibleVersion(metadata.appVersion)
+                }
+            } catch {
+                logger.debug("Could not read/decode metadata from imported backup: \(error.localizedDescription)")
             }
         }
 
-        let fileSize = (try? fileManager.attributesOfItem(atPath: destPath.path)[.size] as? Int64) ?? 0
-        let backupInfo = BackupInfo(
+        let fileSize: Int64
+        do {
+            let attributes = try fileManager.attributesOfItem(atPath: destPath.path)
+            fileSize = attributes[.size] as? Int64 ?? 0
+        } catch {
+            logger.debug("Could not read file size for imported backup: \(error.localizedDescription)")
+            fileSize = 0
+        }
+        let backupInfo = try BackupInfo(
             id: UUID().uuidString,
             name: backupName,
             type: .imported,

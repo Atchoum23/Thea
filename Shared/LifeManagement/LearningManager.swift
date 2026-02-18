@@ -214,7 +214,11 @@ final class LearningTracker: ObservableObject {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         let dir = appSupport.appendingPathComponent("Thea/LifeManagement", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            learnLogger.error("Failed to create storage directory: \(error.localizedDescription)")
+        }
         storageURL = dir.appendingPathComponent("learning.json")
         loadState()
     }
@@ -288,17 +292,28 @@ final class LearningTracker: ObservableObject {
     private func save() {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        if let data = try? encoder.encode(goals) {
-            try? data.write(to: storageURL, options: .atomic)
+        do {
+            let data = try encoder.encode(goals)
+            try data.write(to: storageURL, options: .atomic)
+        } catch {
+            learnLogger.error("Failed to save learning data: \(error.localizedDescription)")
         }
     }
 
     private func loadState() {
-        guard let data = try? Data(contentsOf: storageURL) else { return }
+        let data: Data
+        do {
+            data = try Data(contentsOf: storageURL)
+        } catch {
+            learnLogger.error("Failed to read learning data: \(error.localizedDescription)")
+            return
+        }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        if let loaded = try? decoder.decode([TrackedLearningGoal].self, from: data) {
-            goals = loaded
+        do {
+            goals = try decoder.decode([TrackedLearningGoal].self, from: data)
+        } catch {
+            learnLogger.error("Failed to decode learning data: \(error.localizedDescription)")
         }
     }
 }

@@ -15,16 +15,6 @@
         var error: String?
         var logs: [LogEntry]
 
-        /// Whether this step is considered high-risk (e.g. deletes files, modifies system state).
-        /// High-risk steps require explicit acknowledgement before the plan can execute.
-        var isHighRisk: Bool
-
-        /// Optional notes shown in the plan checklist; populated by the planner with context.
-        var notes: String?
-
-        /// Set to true when the user acknowledges a high-risk step in the plan preview.
-        var riskAcknowledged: Bool
-
         enum StepStatus: String, Codable, CaseIterable {
             case pending = "Pending"
             case inProgress = "In Progress"
@@ -89,9 +79,7 @@
             status: StepStatus = .pending,
             toolsUsed: [String] = [],
             inputFiles: [URL] = [],
-            outputFiles: [URL] = [],
-            isHighRisk: Bool = false,
-            notes: String? = nil
+            outputFiles: [URL] = []
         ) {
             self.id = id
             self.stepNumber = stepNumber
@@ -100,9 +88,6 @@
             self.toolsUsed = toolsUsed
             self.inputFiles = inputFiles
             self.outputFiles = outputFiles
-            self.isHighRisk = isHighRisk
-            self.notes = notes
-            self.riskAcknowledged = false
             logs = []
         }
 
@@ -169,8 +154,6 @@
             private var tools: [String] = []
             private var inputs: [URL] = []
             private var outputs: [URL] = []
-            private var highRisk: Bool = false
-            private var stepNotes: String?
 
             func number(_ n: Int) -> Builder {
                 stepNumber = n
@@ -202,25 +185,13 @@
                 return self
             }
 
-            func highRisk(_ flag: Bool = true) -> Builder {
-                highRisk = flag
-                return self
-            }
-
-            func notes(_ text: String) -> Builder {
-                stepNotes = text
-                return self
-            }
-
             func build() -> CoworkStep {
                 CoworkStep(
                     stepNumber: stepNumber,
                     description: description,
                     toolsUsed: tools,
                     inputFiles: inputs,
-                    outputFiles: outputs,
-                    isHighRisk: highRisk,
-                    notes: stepNotes
+                    outputFiles: outputs
                 )
             }
         }

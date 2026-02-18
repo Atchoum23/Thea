@@ -37,9 +37,7 @@
         private var onProcessTerminated: ((AppProcessInfo) -> Void)?
         private var onActiveProcessChanged: ((AppProcessInfo) -> Void)?
 
-        // Workspace observers — NSObjectProtocol tokens returned by NotificationCenter.
-        // nonisolated(unsafe): stored only from actor-isolated start(), removed only from stop()
-        // or deinit — no concurrent mutations possible.
+        // Workspace observers (accessed only from MainActor)
         nonisolated(unsafe) private var launchObserver: NSObjectProtocol?
         nonisolated(unsafe) private var terminateObserver: NSObjectProtocol?
         nonisolated(unsafe) private var activateObserver: NSObjectProtocol?
@@ -334,7 +332,11 @@
             pollTask = Task { [weak self] in
                 while let self, await self.isRunning {
                     await self.pollSystemProcesses()
-                    try? await Task.sleep(for: .seconds(5))
+                    do {
+                        try await Task.sleep(for: .seconds(5))
+                    } catch {
+                        break
+                    }
                 }
             }
         }

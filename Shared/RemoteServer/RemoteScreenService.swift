@@ -8,6 +8,7 @@
 
 import Combine
 import Foundation
+import OSLog
 #if os(macOS)
     import AppKit
     import CoreMedia
@@ -21,6 +22,8 @@ import Foundation
 /// Provides screen sharing capabilities for remote access
 @MainActor
 public class RemoteScreenService: ObservableObject {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "RemoteScreenService")
+
     // MARK: - Published State
 
     @Published public private(set) var isStreaming = false
@@ -341,7 +344,7 @@ public class RemoteScreenService: ObservableObject {
                     let elapsed = Date().timeIntervalSince(startTime)
                     let sleepTime = max(0, frameInterval - elapsed)
                     if sleepTime > 0 {
-                        try await Task.sleep(for: .seconds(sleepTime))
+                        try await Task.sleep(nanoseconds: UInt64(sleepTime * 1_000_000_000))
                     }
 
                     await MainActor.run {
@@ -350,7 +353,12 @@ public class RemoteScreenService: ObservableObject {
 
                 } catch {
                     if !Task.isCancelled {
-                        try? await Task.sleep(for: .milliseconds(100)) // 100ms retry delay
+                        logger.warning("Stream capture error: \(error.localizedDescription)")
+                        do {
+                            try await Task.sleep(nanoseconds: 100_000_000) // 100ms retry delay
+                        } catch {
+                            break
+                        }
                     }
                 }
             }
@@ -368,7 +376,11 @@ public class RemoteScreenService: ObservableObject {
         streamConfiguration = nil
 
         #if os(macOS)
-            try? await captureStream?.stopCapture()
+            do {
+                try await captureStream?.stopCapture()
+            } catch {
+                logger.warning("Failed to stop capture stream: \(error.localizedDescription)")
+            }
             captureStream = nil
             streamOutput = nil
         #endif

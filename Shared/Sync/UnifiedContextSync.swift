@@ -32,10 +32,16 @@ public actor UnifiedContextSync {
         guard let data = UserDefaults.standard.data(forKey: tokenKey) else {
             return nil
         }
-        return try? NSKeyedUnarchiver.unarchivedObject(
-            ofClass: CKServerChangeToken.self,
-            from: data
-        )
+        do {
+            return try NSKeyedUnarchiver.unarchivedObject(
+                ofClass: CKServerChangeToken.self,
+                from: data
+            )
+        } catch {
+            Logger(subsystem: "app.thea.sync", category: "ContextSync")
+                .debug("Failed to unarchive server change token: \(error.localizedDescription)")
+            return nil
+        }
     }()
 
     private var pendingChanges: [ContextChange] = []
@@ -104,13 +110,16 @@ public actor UnifiedContextSync {
         syncTimer?.cancel()
         syncTimer = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(syncInterval))
+                do {
+                    try await Task.sleep(nanoseconds: UInt64(syncInterval * 1_000_000_000))
+                } catch {
+                    break
+                }
                 await performDeltaSync()
             }
         }
     }
 
-    /// Stops the background context synchronization timer, halting periodic delta syncs.
     public func stopSync() {
         syncTimer?.cancel()
         syncTimer = nil
@@ -232,7 +241,11 @@ public actor UnifiedContextSync {
         // Trigger immediate sync if batch is full
         if pendingChanges.count >= batchSize {
             Task {
-                try? await pushPendingChanges()
+                do {
+                    try await self.pushPendingChanges()
+                } catch {
+                    self.logger.error("Failed to push pending changes: \(error.localizedDescription)")
+                }
             }
         }
     }

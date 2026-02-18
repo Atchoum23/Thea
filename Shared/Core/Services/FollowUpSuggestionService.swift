@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 #if canImport(TheaModels)
 import TheaModels
 #endif
@@ -11,6 +12,7 @@ import TheaModels
 @MainActor
 final class FollowUpSuggestionService: ObservableObject {
     static let shared = FollowUpSuggestionService()
+    private let logger = Logger(subsystem: "com.thea.app", category: "FollowUpSuggestionService")
 
     @Published var latestSuggestions: [FollowUpSuggestion] = []
 
@@ -34,7 +36,7 @@ final class FollowUpSuggestionService: ObservableObject {
     // MARK: - Generation
 
     /// Generate follow-up suggestions based on AI response content and task type.
-    func generate( // swiftlint:disable:this function_body_length
+    func generate(
         response: String,
         query: String,
         taskType: String?,
@@ -219,7 +221,11 @@ final class FollowUpSuggestionService: ObservableObject {
     private var stateURL: URL {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             .appendingPathComponent("Thea", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            logger.debug("Could not create Thea app support directory: \(error.localizedDescription)")
+        }
         return dir.appendingPathComponent("followup_suggestions.json")
     }
 
@@ -237,18 +243,25 @@ final class FollowUpSuggestionService: ObservableObject {
             totalDismissals: totalDismissals,
             consecutiveAutoAccepts: consecutiveAutoAccepts
         )
-        if let data = try? JSONEncoder().encode(state) {
-            try? data.write(to: stateURL)
+        do {
+            let data = try JSONEncoder().encode(state)
+            try data.write(to: stateURL)
+        } catch {
+            logger.debug("Could not save follow-up suggestion state: \(error.localizedDescription)")
         }
     }
 
     private func loadState() {
-        guard let data = try? Data(contentsOf: stateURL),
-              let state = try? JSONDecoder().decode(PersistentState.self, from: data)
-        else { return }
-        selectionCounts = state.selectionCounts
-        totalSelections = state.totalSelections
-        totalDismissals = state.totalDismissals
-        consecutiveAutoAccepts = state.consecutiveAutoAccepts
+        guard FileManager.default.fileExists(atPath: stateURL.path) else { return }
+        do {
+            let data = try Data(contentsOf: stateURL)
+            let state = try JSONDecoder().decode(PersistentState.self, from: data)
+            selectionCounts = state.selectionCounts
+            totalSelections = state.totalSelections
+            totalDismissals = state.totalDismissals
+            consecutiveAutoAccepts = state.consecutiveAutoAccepts
+        } catch {
+            logger.debug("Could not load follow-up suggestion state: \(error.localizedDescription)")
+        }
     }
 }

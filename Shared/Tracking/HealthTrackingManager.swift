@@ -4,6 +4,9 @@ import Observation
 
 #if os(iOS) || os(watchOS)
     import HealthKit
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "HealthTrackingManager")
 
     // MARK: - Health Tracking Manager
 
@@ -59,7 +62,11 @@ import Observation
             Task {
                 while isMonitoring {
                     await syncHealthData()
-                    try? await Task.sleep(for: .seconds(config.healthSyncInterval))
+                    do {
+                        try await Task.sleep(nanoseconds: UInt64(config.healthSyncInterval * 1_000_000_000))
+                    } catch {
+                        break
+                    }
                 }
             }
         }
@@ -103,74 +110,87 @@ import Observation
         // MARK: - Individual Metrics
 
         private func fetchSteps(from start: Date, to end: Date) async -> Int {
-            // Modern HKStatisticsQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
-            let stepsType = HKQuantityType(.stepCount)
+            guard let stepsType = HKQuantityType.quantityType(forIdentifier: .stepCount) else {
+                return 0
+            }
+
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
-            let descriptor = HKStatisticsQueryDescriptor(
-                predicate: .quantitySample(type: stepsType, predicate: predicate),
-                options: .cumulativeSum
-            )
-            let result = try? await descriptor.result(for: healthStore)
-            return Int(result?.sumQuantity()?.doubleValue(for: .count()) ?? 0)
+
+            return await withCheckedContinuation { continuation in
+                let query = HKStatisticsQuery(quantityType: stepsType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, _ in
+                    let steps = result?.sumQuantity()?.doubleValue(for: .count()) ?? 0
+                    continuation.resume(returning: Int(steps))
+                }
+                healthStore.execute(query)
+            }
         }
 
         private func fetchActiveCalories(from start: Date, to end: Date) async -> Double {
-            // Modern HKStatisticsQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
-            let caloriesType = HKQuantityType(.activeEnergyBurned)
+            guard let caloriesType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) else {
+                return 0
+            }
+
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
-            let descriptor = HKStatisticsQueryDescriptor(
-                predicate: .quantitySample(type: caloriesType, predicate: predicate),
-                options: .cumulativeSum
-            )
-            let result = try? await descriptor.result(for: healthStore)
-            return result?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+
+            return await withCheckedContinuation { continuation in
+                let query = HKStatisticsQuery(quantityType: caloriesType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, _ in
+                    let calories = result?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+                    continuation.resume(returning: calories)
+                }
+                healthStore.execute(query)
+            }
         }
 
         private func fetchHeartRateStatistics(from start: Date, to end: Date) async -> (average: Double?, min: Double?, max: Double?) {
-            // Modern HKStatisticsQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
-            let heartRateType = HKQuantityType(.heartRate)
+            guard let heartRateType = HKQuantityType.quantityType(forIdentifier: .heartRate) else {
+                return (nil, nil, nil)
+            }
+
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
-            let descriptor = HKStatisticsQueryDescriptor(
-                predicate: .quantitySample(type: heartRateType, predicate: predicate),
-                options: [.discreteAverage, .discreteMin, .discreteMax]
-            )
-            let result = try? await descriptor.result(for: healthStore)
-            let bpmUnit = HKUnit.count().unitDivided(by: .minute())
-            let average = result?.averageQuantity()?.doubleValue(for: bpmUnit)
-            let min = result?.minimumQuantity()?.doubleValue(for: bpmUnit)
-            let max = result?.maximumQuantity()?.doubleValue(for: bpmUnit)
-            return (average, min, max)
+
+            return await withCheckedContinuation { continuation in
+                let query = HKStatisticsQuery(quantityType: heartRateType, quantitySamplePredicate: predicate, options: [.discreteAverage, .discreteMin, .discreteMax]) { _, result, _ in
+                    let average = result?.averageQuantity()?.doubleValue(for: HKUnit.count().unitDivided(by: .minute()))
+                    let min = result?.minimumQuantity()?.doubleValue(for: HKUnit.count().unitDivided(by: .minute()))
+                    let max = result?.maximumQuantity()?.doubleValue(for: HKUnit.count().unitDivided(by: .minute()))
+                    continuation.resume(returning: (average, min, max))
+                }
+                healthStore.execute(query)
+            }
         }
 
         private func fetchSleepDuration(from start: Date, to end: Date) async -> TimeInterval {
-            // Modern HKSampleQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
-            let sleepType = HKCategoryType(.sleepAnalysis)
+            guard let sleepType = HKCategoryType.categoryType(forIdentifier: .sleepAnalysis) else {
+                return 0
+            }
+
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
-            let descriptor = HKSampleQueryDescriptor(
-                predicates: [.categorySample(type: sleepType, predicate: predicate)],
-                sortDescriptors: [SortDescriptor(\.startDate, order: .forward)],
-                limit: nil
-            )
-            let samples = (try? await descriptor.result(for: healthStore)) ?? []
-            return samples.reduce(0.0) { total, sample in
-                total + sample.endDate.timeIntervalSince(sample.startDate)
+
+            return await withCheckedContinuation { continuation in
+                let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, _ in
+                    let sleepSamples = samples as? [HKCategorySample] ?? []
+                    let totalDuration = sleepSamples.reduce(0.0) { total, sample in
+                        total + sample.endDate.timeIntervalSince(sample.startDate)
+                    }
+                    continuation.resume(returning: totalDuration)
+                }
+                healthStore.execute(query)
             }
         }
 
         private func fetchWorkoutMinutes(from start: Date, to end: Date) async -> Int {
-            // Modern HKSampleQueryDescriptor — native async/await (iOS 15.4+/watchOS 8.5+)
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
-            let descriptor = HKSampleQueryDescriptor(
-                predicates: [.sample(type: .workoutType(), predicate: predicate)],
-                sortDescriptors: [SortDescriptor(\.startDate, order: .forward)],
-                limit: nil
-            )
-            let samples = (try? await descriptor.result(for: healthStore)) ?? []
-            let workouts = samples.compactMap { $0 as? HKWorkout }
-            let totalMinutes = workouts.reduce(0.0) { total, workout in
-                total + workout.duration
-            } / 60.0
-            return Int(totalMinutes)
+
+            return await withCheckedContinuation { continuation in
+                let query = HKSampleQuery(sampleType: .workoutType(), predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, _ in
+                    let workouts = samples as? [HKWorkout] ?? []
+                    let totalMinutes = workouts.reduce(0.0) { total, workout in
+                        total + workout.duration
+                    } / 60.0
+                    continuation.resume(returning: Int(totalMinutes))
+                }
+                healthStore.execute(query)
+            }
         }
 
         // MARK: - Data Persistence
@@ -183,7 +203,13 @@ import Observation
             let startOfDay = calendar.startOfDay(for: snapshot.date)
 
             let descriptor = FetchDescriptor<HealthSnapshot>()
-            let allSnapshots = (try? context.fetch(descriptor)) ?? []
+            let allSnapshots: [HealthSnapshot]
+            do {
+                allSnapshots = try context.fetch(descriptor)
+            } catch {
+                ErrorLogger.log(error, context: "HealthTrackingManager.saveSnapshot.fetch")
+                allSnapshots = []
+            }
 
             if let existing = allSnapshots.first(where: { $0.date == startOfDay }) {
                 // Update existing
@@ -199,7 +225,11 @@ import Observation
                 context.insert(snapshot)
             }
 
-            try? context.save()
+            do {
+                try context.save()
+            } catch {
+                ErrorLogger.log(error, context: "HealthTrackingManager.saveSnapshot.save")
+            }
         }
 
         // MARK: - Data Retrieval
@@ -212,8 +242,13 @@ import Observation
 
             // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
             let descriptor = FetchDescriptor<HealthSnapshot>()
-            let allSnapshots = (try? context.fetch(descriptor)) ?? []
-            return allSnapshots.first { $0.date == startOfDay }
+            do {
+                let allSnapshots = try context.fetch(descriptor)
+                return allSnapshots.first { $0.date == startOfDay }
+            } catch {
+                ErrorLogger.log(error, context: "HealthTrackingManager.getSnapshot")
+                return nil
+            }
         }
 
         func getSnapshots(from start: Date, to end: Date) async -> [HealthSnapshot] {
@@ -221,10 +256,15 @@ import Observation
 
             // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
             let descriptor = FetchDescriptor<HealthSnapshot>()
-            let allSnapshots = (try? context.fetch(descriptor)) ?? []
-            return allSnapshots
-                .filter { $0.date >= start && $0.date <= end }
-                .sorted { $0.date > $1.date }
+            do {
+                let allSnapshots = try context.fetch(descriptor)
+                return allSnapshots
+                    .filter { $0.date >= start && $0.date <= end }
+                    .sorted { $0.date > $1.date }
+            } catch {
+                ErrorLogger.log(error, context: "HealthTrackingManager.getSnapshots")
+                return []
+            }
         }
     }
 

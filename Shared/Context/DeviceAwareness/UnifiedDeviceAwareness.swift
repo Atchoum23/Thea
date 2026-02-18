@@ -1,5 +1,6 @@
 import Foundation
 import Network
+import OSLog
 #if os(iOS) || os(watchOS)
 import UIKit
 import CoreMotion
@@ -17,6 +18,8 @@ import IOKit.ps
 @Observable
 final class UnifiedDeviceAwareness {
     static let shared = UnifiedDeviceAwareness()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "UnifiedDeviceAwareness")
 
     // MARK: - Device Information
 
@@ -83,7 +86,11 @@ final class UnifiedDeviceAwareness {
         updateTask?.cancel()
         updateTask = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(configuration.updateIntervalSeconds))
+                do {
+                    try await Task.sleep(for: .seconds(configuration.updateIntervalSeconds))
+                } catch {
+                    break
+                }
 
                 await gatherSystemState()
                 await gatherNetworkInfo()
@@ -120,16 +127,22 @@ final class UnifiedDeviceAwareness {
     }
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "UnifiedDeviceAwareness.config"),
-           let config = try? JSONDecoder().decode(Configuration.self, from: data)
-        {
-            configuration = config
+        if let data = UserDefaults.standard.data(forKey: "UnifiedDeviceAwareness.config") {
+            do {
+                let config = try JSONDecoder().decode(Configuration.self, from: data)
+                configuration = config
+            } catch {
+                logger.error("Failed to decode configuration: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             UserDefaults.standard.set(data, forKey: "UnifiedDeviceAwareness.config")
+        } catch {
+            logger.error("Failed to encode configuration: \(error.localizedDescription)")
         }
     }
 }

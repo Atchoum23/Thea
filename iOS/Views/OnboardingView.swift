@@ -69,8 +69,6 @@ struct OnboardingView: View {
                         }
                     }
                     .buttonStyle(.bordered)
-                    .accessibilityLabel("Back")
-                    .accessibilityHint("Goes to the previous onboarding page")
                 }
 
                 Spacer()
@@ -83,8 +81,6 @@ struct OnboardingView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(.theaPrimary)
-                    .accessibilityLabel("Next")
-                    .accessibilityHint("Goes to the next onboarding page")
                 } else {
                     Button {
                         completeOnboarding()
@@ -100,8 +96,6 @@ struct OnboardingView: View {
                     .buttonStyle(.borderedProminent)
                     .tint(.theaPrimary)
                     .disabled(isRequestingPermissions)
-                    .accessibilityLabel(isRequestingPermissions ? "Requesting permissions" : "Get Started")
-                    .accessibilityHint("Requests permissions and completes onboarding setup")
                 }
             }
             .padding()
@@ -217,7 +211,6 @@ struct OnboardingPageView: View {
                 .font(.system(size: 100))
                 .foregroundStyle(page.color)
                 .symbolEffect(.bounce, value: page.icon)
-                .accessibilityHidden(true)
 
             VStack(spacing: 16) {
                 Text(page.title)
@@ -252,7 +245,6 @@ struct OnboardingPermissionRow: View {
                 .font(.title2)
                 .foregroundStyle(statusColor)
                 .frame(width: 32)
-                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
@@ -265,8 +257,8 @@ struct OnboardingPermissionRow: View {
                             .font(.caption2)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Color.theaError.opacity(0.2))
-                            .foregroundStyle(.theaError)
+                            .background(Color.red.opacity(0.2))
+                            .foregroundStyle(.red)
                             .clipShape(Capsule())
                     }
                 }
@@ -279,38 +271,22 @@ struct OnboardingPermissionRow: View {
             Spacer()
 
             statusIndicator
-                .accessibilityHidden(true)
         }
         .padding(.vertical, 8)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(title), \(description)\(isRequired ? ", required" : ""), \(statusText)")
-    }
-
-    private var statusText: String {
-        switch status {
-        case .authorized: "granted"
-        case .denied: "denied"
-        case .restricted: "restricted"
-        case .limited: "limited access"
-        case .provisional: "provisional"
-        case .notDetermined: "not yet requested"
-        case .notAvailable: "not available"
-        case .unknown: "unknown"
-        }
     }
 
     private var statusColor: Color {
         switch status {
         case .authorized:
-            .theaSuccess
+            .green
         case .denied:
-            .theaError
+            .red
         case .restricted:
-            .theaWarning
+            .orange
         case .limited:
-            .theaWarning
+            .yellow
         case .provisional:
-            .theaInfo
+            .blue
         case .notDetermined, .notAvailable, .unknown:
             .gray
         }
@@ -321,19 +297,19 @@ struct OnboardingPermissionRow: View {
         switch status {
         case .authorized:
             Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(.theaSuccess)
+                .foregroundStyle(.green)
         case .denied:
             Image(systemName: "xmark.circle.fill")
-                .foregroundStyle(.theaError)
+                .foregroundStyle(.red)
         case .restricted:
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.theaWarning)
+                .foregroundStyle(.orange)
         case .limited:
             Image(systemName: "checkmark.circle.badge.questionmark")
-                .foregroundStyle(.theaWarning)
+                .foregroundStyle(.yellow)
         case .provisional:
             Image(systemName: "checkmark.circle")
-                .foregroundStyle(.theaInfo)
+                .foregroundStyle(.blue)
         case .notDetermined, .notAvailable, .unknown:
             Image(systemName: "circle")
                 .foregroundStyle(.gray)

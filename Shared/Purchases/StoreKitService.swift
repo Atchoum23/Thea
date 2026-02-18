@@ -138,25 +138,36 @@ public class StoreKitService: ObservableObject {
         // Get subscription status from subscribed products
         for product in products where product.type == .autoRenewable {
             if let subscriptionInfo = product.subscription {
-                let statuses = try? await subscriptionInfo.status
-                for verificationResult in statuses ?? [] {
+                let statuses: [Product.SubscriptionInfo.Status]
+                do {
+                    statuses = try await subscriptionInfo.status
+                } catch {
+                    logger.error("Failed to fetch subscription status for \(product.id): \(error.localizedDescription)")
+                    continue
+                }
+                for verificationResult in statuses {
                     switch verificationResult.state {
                     case .subscribed:
-                        // Get expiration date from the transaction, not renewalInfo
-                        if let transaction = try? verificationResult.transaction.payloadValue,
-                           let expirationDate = transaction.expirationDate
-                        {
-                            if product.id.contains("team") {
-                                status = .team(expiresAt: expirationDate)
-                            } else {
-                                status = .pro(expiresAt: expirationDate)
+                        do {
+                            let transaction = try verificationResult.transaction.payloadValue
+                            if let expirationDate = transaction.expirationDate {
+                                if product.id.contains("team") {
+                                    status = .team(expiresAt: expirationDate)
+                                } else {
+                                    status = .pro(expiresAt: expirationDate)
+                                }
                             }
+                        } catch {
+                            logger.error("Failed to verify subscription transaction for \(product.id): \(error.localizedDescription)")
                         }
                     case .expired:
-                        if let transaction = try? verificationResult.transaction.payloadValue,
-                           let expirationDate = transaction.expirationDate
-                        {
-                            status = .expired(expiredAt: expirationDate)
+                        do {
+                            let transaction = try verificationResult.transaction.payloadValue
+                            if let expirationDate = transaction.expirationDate {
+                                status = .expired(expiredAt: expirationDate)
+                            }
+                        } catch {
+                            logger.error("Failed to verify expired transaction for \(product.id): \(error.localizedDescription)")
                         }
                     default:
                         break
@@ -178,7 +189,12 @@ public class StoreKitService: ObservableObject {
     public func showManageSubscription() async {
         #if os(iOS)
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                try? await AppStore.showManageSubscriptions(in: windowScene)
+                do {
+                    try await AppStore.showManageSubscriptions(in: windowScene)
+                } catch {
+                    logger.error("Failed to show manage subscriptions UI: \(error.localizedDescription)")
+                    self.error = .purchaseFailed
+                }
             }
         #endif
     }
@@ -226,11 +242,15 @@ public class StoreKitService: ObservableObject {
         for product in products {
             if product.type == .autoRenewable {
                 if let subscription = product.subscription {
-                    let statuses = try? await subscription.status
-                    for status in statuses ?? [] {
-                        if status.state == .subscribed {
-                            purchased.insert(product.id)
+                    do {
+                        let statuses = try await subscription.status
+                        for status in statuses {
+                            if status.state == .subscribed {
+                                purchased.insert(product.id)
+                            }
                         }
+                    } catch {
+                        logger.error("Failed to check subscription status for \(product.id): \(error.localizedDescription)")
                     }
                 }
             } else {

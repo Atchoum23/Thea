@@ -11,7 +11,6 @@ import Foundation
 // MARK: - Tool Execution
 
 extension THEAMCPServer {
-    // Note: searchLocation/getDirections use deprecated MapKit APIs — update when MapKit provides replacements
     func executeTool(name: String, arguments: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         switch name {
         case "thea_execute_command":
@@ -114,7 +113,12 @@ extension THEAMCPServer {
 
         var listing = ""
         for item in contents.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
-            let isDir = (try? item.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false
+            let isDir: Bool
+            do {
+                isDir = try item.resourceValues(forKeys: [.isDirectoryKey]).isDirectory ?? false
+            } catch {
+                isDir = false
+            }
             listing += "\(isDir ? "\u{1F4C1}" : "\u{1F4C4}") \(item.lastPathComponent)\n"
         }
 
@@ -215,6 +219,8 @@ extension THEAMCPServer {
         return [.text("Created note: \(title)")]
     }
 
+    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
     func searchLocation(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let query = args["query"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("query")
@@ -228,12 +234,13 @@ extension THEAMCPServer {
             if !location.address.isEmpty {
                 result += ", \(location.address)"
             }
-            result += " (\(String(format: "%.5f", location.coordinate.latitude)), \(String(format: "%.5f", location.coordinate.longitude)))"
             result += "\n"
         }
         return [.text(result)]
     }
 
+    @available(macOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
+    @available(iOS, deprecated: 26.0, message: "Migrate to MKMapItem coordinate API")
     func getDirections(_ args: [String: THEAMCPValue]) async throws -> [THEAMCPContent] {
         guard let from = args["from"]?.stringValue else {
             throw THEAMCPToolError.missingArgument("from")

@@ -272,31 +272,39 @@ public final class UsageAnalyticsService {
 
     private func loadAnalytics() {
         // Load daily metrics
-        if let data = UserDefaults.standard.data(forKey: "analytics.dailyMetrics"),
-           let decoded = try? JSONDecoder().decode([Date: DailyMetrics].self, from: data)
-        {
-            dailyMetrics = decoded
+        if let data = UserDefaults.standard.data(forKey: "analytics.dailyMetrics") {
+            do {
+                dailyMetrics = try JSONDecoder().decode([Date: DailyMetrics].self, from: data)
+            } catch {
+                logger.debug("Could not decode daily metrics: \(error.localizedDescription)")
+            }
         }
 
         // Load feature usage
-        if let data = UserDefaults.standard.data(forKey: "analytics.featureUsage"),
-           let decoded = try? JSONDecoder().decode([String: Int].self, from: data)
-        {
-            featureUsage = decoded
+        if let data = UserDefaults.standard.data(forKey: "analytics.featureUsage") {
+            do {
+                featureUsage = try JSONDecoder().decode([String: Int].self, from: data)
+            } catch {
+                logger.debug("Could not decode feature usage: \(error.localizedDescription)")
+            }
         }
 
         // Load model usage
-        if let data = UserDefaults.standard.data(forKey: "analytics.modelUsage"),
-           let decoded = try? JSONDecoder().decode([String: ModelUsageStats].self, from: data)
-        {
-            modelUsage = decoded
+        if let data = UserDefaults.standard.data(forKey: "analytics.modelUsage") {
+            do {
+                modelUsage = try JSONDecoder().decode([String: ModelUsageStats].self, from: data)
+            } catch {
+                logger.debug("Could not decode model usage: \(error.localizedDescription)")
+            }
         }
 
         // Load session stats
-        if let data = UserDefaults.standard.data(forKey: "analytics.sessionStats"),
-           let decoded = try? JSONDecoder().decode(AnalyticsSessionStats.self, from: data)
-        {
-            sessionStats = decoded
+        if let data = UserDefaults.standard.data(forKey: "analytics.sessionStats") {
+            do {
+                sessionStats = try JSONDecoder().decode(AnalyticsSessionStats.self, from: data)
+            } catch {
+                logger.debug("Could not decode session stats: \(error.localizedDescription)")
+            }
         }
 
         // Clean up old data (keep last 90 days)
@@ -307,17 +315,29 @@ public final class UsageAnalyticsService {
     }
 
     private func saveAnalytics() {
-        if let data = try? JSONEncoder().encode(dailyMetrics) {
+        do {
+            let data = try JSONEncoder().encode(dailyMetrics)
             UserDefaults.standard.set(data, forKey: "analytics.dailyMetrics")
+        } catch {
+            logger.error("Failed to save daily metrics: \(error.localizedDescription)")
         }
-        if let data = try? JSONEncoder().encode(featureUsage) {
+        do {
+            let data = try JSONEncoder().encode(featureUsage)
             UserDefaults.standard.set(data, forKey: "analytics.featureUsage")
+        } catch {
+            logger.error("Failed to save feature usage: \(error.localizedDescription)")
         }
-        if let data = try? JSONEncoder().encode(modelUsage) {
+        do {
+            let data = try JSONEncoder().encode(modelUsage)
             UserDefaults.standard.set(data, forKey: "analytics.modelUsage")
+        } catch {
+            logger.error("Failed to save model usage: \(error.localizedDescription)")
         }
-        if let data = try? JSONEncoder().encode(sessionStats) {
+        do {
+            let data = try JSONEncoder().encode(sessionStats)
             UserDefaults.standard.set(data, forKey: "analytics.sessionStats")
+        } catch {
+            logger.error("Failed to save session stats: \(error.localizedDescription)")
         }
     }
 

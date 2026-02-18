@@ -328,7 +328,6 @@ public struct TodoistNotification: Codable, Identifiable, Sendable {
     }
 }
 
-// @unchecked Sendable: args is [String: Any] for Todoist Sync API flexibility; values are JSON primitives
 public struct TodoistCommand: @unchecked Sendable {
     public let type: String
     public let uuid: String

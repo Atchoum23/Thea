@@ -1,4 +1,3 @@
-import CoreSpotlight
 import os.log
 import SQLite3
 @preconcurrency import SwiftData
@@ -20,32 +19,81 @@ struct TheamacOSApp: App {
     @State private var showingFallbackAlert = false
 
     init() {
+        let schema = Schema([
+            Conversation.self, Message.self, Project.self,
+            TheaClipEntry.self, TheaClipPinboard.self, TheaClipPinboardEntry.self,
+            TheaHabit.self, TheaHabitEntry.self
+        ])
         let useInMemory = isUITesting || isUnitTesting
+
+        // Pre-flight: delete incompatible store before SwiftData touches it
+        if !useInMemory {
+            Self.deleteStoreIfSchemaOutdated()
+        }
 
         do {
             let config = ModelConfiguration(
+                schema: schema,
                 isStoredInMemoryOnly: useInMemory,
                 cloudKitDatabase: .none
             )
-            // Use TheaSchemaMigrationPlan so SwiftData migrates data in-place
-            // rather than deleting the store on schema changes. This preserves
-            // all user data (conversations, health records, knowledge graph, etc.)
-            // across app updates. New versions add SchemaV2, SchemaV3 etc. to
-            // TheaSchemaMigrationPlan in SchemaVersions.swift — never wipe data.
-            let container = try ModelContainer(
-                for: TheaSchemaMigrationPlan.currentSchema,
-                migrationPlan: TheaSchemaMigrationPlan.self,
-                configurations: [config]
-            )
+            let container = try ModelContainer(for: schema, configurations: [config])
             _modelContainer = State(initialValue: container)
             if useInMemory {
-                logger.info("⚡ Testing mode: Using in-memory storage")
-            } else {
-                logger.info("✅ ModelContainer initialised with migration plan")
+                print("⚡ Testing mode: Using in-memory storage")
             }
         } catch {
             _storageError = State(initialValue: error)
-            logger.error("❌ Failed to initialise ModelContainer: \(error.localizedDescription, privacy: .public)")
+            print("❌ Failed to initialize ModelContainer: \(error)")
+        }
+    }
+
+    /// Check if the SQLite store has all required columns; delete if outdated.
+    /// This runs BEFORE ModelContainer init to avoid CoreData caching failures.
+    private static func deleteStoreIfSchemaOutdated() {
+        guard let groupURL = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.app.theathe"
+        ) else { return }
+        let storeURL = groupURL
+            .appendingPathComponent("Library/Application Support")
+            .appendingPathComponent("default.store")
+        guard FileManager.default.fileExists(atPath: storeURL.path) else { return }
+
+        // Required columns that may be missing from older schemas
+        let requiredColumns = ["ZISARCHIVED", "ZISREAD", "ZSTATUS"]
+
+        // Open SQLite directly to inspect the schema
+        var db: OpaquePointer?
+        guard sqlite3_open_v2(storeURL.path, &db, SQLITE_OPEN_READONLY, nil) == SQLITE_OK else {
+            sqlite3_close(db)
+            return
+        }
+        defer { sqlite3_close(db) }
+
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, "PRAGMA table_info(ZCONVERSATION)", -1, &stmt, nil) == SQLITE_OK else {
+            return
+        }
+        defer { sqlite3_finalize(stmt) }
+
+        var existingColumns = Set<String>()
+        while sqlite3_step(stmt) == SQLITE_ROW {
+            if let namePtr = sqlite3_column_text(stmt, 1) {
+                existingColumns.insert(String(cString: namePtr))
+            }
+        }
+
+        let missingColumns = requiredColumns.filter { !existingColumns.contains($0) }
+        if !missingColumns.isEmpty {
+            logger.warning("Store schema outdated (missing: \(missingColumns.joined(separator: ", "), privacy: .public)). Deleting store.")
+            // Close DB before deleting
+            sqlite3_close(db)
+            for suffix in ["", "-shm", "-wal"] {
+                try? FileManager.default.removeItem(
+                    at: storeURL.deletingLastPathComponent()
+                        .appendingPathComponent("default.store" + suffix)
+                )
+            }
         }
     }
 
@@ -61,9 +109,6 @@ struct TheamacOSApp: App {
                     .onAppear {
                         setupManagers(container: container)
                         configureWindow()
-                    }
-                    .onContinueUserActivity(CSSearchableItemActionType) { activity in
-                        handleSpotlightActivity(activity)
                     }
                     .alert("Running in Temporary Mode", isPresented: $showingFallbackAlert) {
                         Button("Continue") { showingFallbackAlert = false }
@@ -175,7 +220,7 @@ struct TheamacOSApp: App {
 
         // PRIORITY: Initialize local model discovery FIRST (no Keychain required)
         Task {
-            try? await Task.sleep(for: .milliseconds(100)) // 0.1 seconds
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
 
             _ = LocalModelManager.shared
             _ = MLXModelManager.shared
@@ -188,37 +233,36 @@ struct TheamacOSApp: App {
             await DynamicModelRegistry.shared.refreshIfNeeded()
         }
 
-        // Apply saved font-size preference to theme config on startup (non-blocking)
+        // Pre-initialize StoreKit (starts transaction listener for in-app purchases)
+        _ = StoreKitService.shared
+
+        // Pre-initialize sync singletons so Settings > Sync doesn't beachball.
+        // Their inits now defer heavy work to Tasks, so this is non-blocking.
+        _ = CloudKitService.shared
+        _ = PreferenceSyncEngine.shared
+        _ = AppUpdateService.shared
+
+        // Apply saved font-size preference to theme config on startup
         AppConfiguration.applyFontSize(SettingsManager.shared.fontSize)
 
-        // Defer StoreKit + sync singletons — not needed until user opens Settings > Sync
-        // or triggers an in-app purchase. 150ms delay keeps launch fast.
-        Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(150))
-            _ = StoreKitService.shared
-            _ = CloudKitService.shared
-            _ = PreferenceSyncEngine.shared
-            _ = AppUpdateService.shared
-        }
-
-        // Defer ALL setModelContext() calls — each call may trigger SwiftData fetches
-        // on the main thread. Moving them async saves 200-900ms on first launch.
-        Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(200))
-            ChatManager.shared.setModelContext(context)
-            ProjectManager.shared.setModelContext(context)
-            KnowledgeManager.shared.setModelContext(context)
-            FinancialManager.shared.setModelContext(context)
-            MigrationManager.shared.setModelContext(context)
-            MigrationEngine.shared.setModelContext(context)
-            CodeIntelligenceManager.shared.setModelContext(context)
-            ClipboardHistoryManager.shared.setModelContext(context)
-            HabitManager.shared.setModelContext(context)
-            PromptOptimizer.shared.setModelContext(context)
-            WindowManager.shared.setModelContext(context)
-        }
-
+        // Existing managers
+        ChatManager.shared.setModelContext(context)
+        ProjectManager.shared.setModelContext(context)
+        KnowledgeManager.shared.setModelContext(context)
+        FinancialManager.shared.setModelContext(context)
+        MigrationManager.shared.setModelContext(context)
+        MigrationEngine.shared.setModelContext(context)
+        CodeIntelligenceManager.shared.setModelContext(context)
+        ClipboardHistoryManager.shared.setModelContext(context)
+        HabitManager.shared.setModelContext(context)
         ClipboardObserver.shared.start()
+
+        // TODO: Restore prompt engineering managers after Phase 5+
+        // PromptOptimizer.shared.setModelContext(context)
+        // ErrorKnowledgeBaseManager.shared.setModelContext(context)
+
+        // TODO: Restore window management after implementation
+        // WindowManager.shared.setModelContext(context)
 
         // Privacy monitoring — auto-start network tracking and load daily snapshots
         Task {
@@ -273,67 +317,6 @@ struct TheamacOSApp: App {
             try? await Task.sleep(for: .seconds(3))
             BackgroundServiceMonitor.shared.startMonitoring()
             logger.info("BackgroundServiceMonitor started")
-        }
-
-        // macOS memory pressure handler — clears URL cache and non-essential resources
-        // under OS-level memory warning/critical pressure signals.
-        let memorySource = DispatchSource.makeMemoryPressureSource(
-            eventMask: [.warning, .critical],
-            queue: .main
-        )
-        memorySource.setEventHandler {
-            let event = memorySource.mask
-            let level = event.contains(.critical) ? "critical" : "warning"
-            logger.warning("⚠️ Memory pressure (\(level, privacy: .public)) — purging URL cache")
-            URLCache.shared.removeAllCachedResponses()
-            // Notify EnergyAdaptiveThrottler to increase throttling under memory pressure
-            Task { @MainActor in
-                EnergyAdaptiveThrottler.shared.applyMemoryPressure(isCritical: event.contains(.critical))
-            }
-        }
-        memorySource.resume()
-        // Store source in a nonisolated(unsafe) static so it stays alive
-        TheamacOSApp.memoryPressureSource = memorySource
-    }
-
-    /// Retained memory pressure DispatchSource — must stay alive for handler to fire.
-    nonisolated(unsafe) private static var memoryPressureSource: DispatchSourceMemoryPressure?
-
-    // MARK: - Spotlight Navigation
-
-    /// Handles a CSSearchableItem activation from Spotlight.
-    /// Parses the uniqueIdentifier prefix to route to the correct view.
-    private func handleSpotlightActivity(_ activity: NSUserActivity) {
-        guard let identifier = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String else {
-            logger.warning("Spotlight activity missing uniqueIdentifier")
-            return
-        }
-
-        logger.info("Spotlight navigation: \(identifier, privacy: .public)")
-
-        if identifier.hasPrefix("conversation-") {
-            let idString = String(identifier.dropFirst("conversation-".count))
-            guard let conversationID = UUID(uuidString: idString) else { return }
-            NotificationCenter.default.post(
-                name: .spotlightNavigateToConversation,
-                object: conversationID
-            )
-        } else if identifier.hasPrefix("project-") {
-            let idString = String(identifier.dropFirst("project-".count))
-            guard let projectID = UUID(uuidString: idString) else { return }
-            NotificationCenter.default.post(
-                name: .spotlightNavigateToProject,
-                object: projectID
-            )
-        } else if identifier.hasPrefix("knowledge-") {
-            let idString = String(identifier.dropFirst("knowledge-".count))
-            guard let knowledgeID = UUID(uuidString: idString) else { return }
-            NotificationCenter.default.post(
-                name: .spotlightNavigateToKnowledge,
-                object: knowledgeID
-            )
-        } else {
-            logger.warning("Spotlight: unrecognised identifier prefix: \(identifier, privacy: .public)")
         }
     }
 

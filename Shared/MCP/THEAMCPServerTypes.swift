@@ -5,6 +5,9 @@
 // JSON-RPC 2.0 types, MCP capabilities, tool/resource definitions
 
 import Foundation
+import OSLog
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "THEAMCPServerTypes")
 
 #if os(macOS)
 
@@ -54,16 +57,23 @@ public enum THEAJSONRPCId: Codable, Sendable, Equatable {
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        if let intValue = try? container.decode(Int.self) {
-            self = .int(intValue)
-        } else if let stringValue = try? container.decode(String.self) {
-            self = .string(stringValue)
-        } else {
-            throw DecodingError.typeMismatch(
-                THEAJSONRPCId.self,
-                .init(codingPath: decoder.codingPath, debugDescription: "Expected string or int")
-            )
+        var intDecodeError: Error?
+        do {
+            self = .int(try container.decode(Int.self))
+            return
+        } catch {
+            intDecodeError = error
         }
+        do {
+            self = .string(try container.decode(String.self))
+            return
+        } catch {
+            logger.debug("THEAJSONRPCId: not int (\(String(describing: intDecodeError))), not string (\(error.localizedDescription))")
+        }
+        throw DecodingError.typeMismatch(
+            THEAJSONRPCId.self,
+            .init(codingPath: decoder.codingPath, debugDescription: "Expected string or int")
+        )
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -106,24 +116,18 @@ public enum THEAMCPValue: Codable, Sendable {
         let container = try decoder.singleValueContainer()
         if container.decodeNil() {
             self = .null
-        } else if let boolValue = try? container.decode(Bool.self) {
-            self = .bool(boolValue)
-        } else if let intValue = try? container.decode(Int.self) {
-            self = .int(intValue)
-        } else if let doubleValue = try? container.decode(Double.self) {
-            self = .double(doubleValue)
-        } else if let stringValue = try? container.decode(String.self) {
-            self = .string(stringValue)
-        } else if let arrayValue = try? container.decode([THEAMCPValue].self) {
-            self = .array(arrayValue)
-        } else if let objectValue = try? container.decode([String: THEAMCPValue].self) {
-            self = .object(objectValue)
-        } else {
-            throw DecodingError.typeMismatch(
-                THEAMCPValue.self,
-                .init(codingPath: decoder.codingPath, debugDescription: "Unsupported type")
-            )
+            return
         }
+        do { self = .bool(try container.decode(Bool.self)); return } catch {}
+        do { self = .int(try container.decode(Int.self)); return } catch {}
+        do { self = .double(try container.decode(Double.self)); return } catch {}
+        do { self = .string(try container.decode(String.self)); return } catch {}
+        do { self = .array(try container.decode([THEAMCPValue].self)); return } catch {}
+        do { self = .object(try container.decode([String: THEAMCPValue].self)); return } catch {}
+        throw DecodingError.typeMismatch(
+            THEAMCPValue.self,
+            .init(codingPath: decoder.codingPath, debugDescription: "Unsupported THEAMCPValue type")
+        )
     }
 
     public func encode(to encoder: Encoder) throws {

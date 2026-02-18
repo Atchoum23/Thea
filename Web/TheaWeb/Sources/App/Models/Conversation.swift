@@ -5,7 +5,6 @@ import Fluent
 import Vapor
 
 /// Persistent conversation model
-// @unchecked Sendable: Fluent Model — thread safety managed by database layer
 final class Conversation: Model, Content, @unchecked Sendable {
     static let schema = "conversations"
 
@@ -61,7 +60,6 @@ final class Conversation: Model, Content, @unchecked Sendable {
 }
 
 /// Chat message model
-// @unchecked Sendable: Fluent Model — thread safety managed by database layer
 final class Message: Model, Content, @unchecked Sendable {
     static let schema = "messages"
 

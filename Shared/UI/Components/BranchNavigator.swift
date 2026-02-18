@@ -26,7 +26,6 @@ struct BranchNavigator: View {
             .buttonStyle(.plain)
             .disabled(currentBranchIndex <= 0)
             .opacity(currentBranchIndex > 0 ? 1 : 0.3)
-            .accessibilityLabel("Previous branch")
 
             Text("\(currentBranchIndex + 1)/\(totalBranches)")
                 .font(.system(size: 11, weight: .medium, design: .rounded))
@@ -40,7 +39,6 @@ struct BranchNavigator: View {
             .buttonStyle(.plain)
             .disabled(currentBranchIndex >= totalBranches - 1)
             .opacity(currentBranchIndex < totalBranches - 1 ? 1 : 0.3)
-            .accessibilityLabel("Next branch")
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
@@ -78,14 +76,14 @@ struct MessageEditSheet: View {
             // Info banner
             HStack(spacing: 8) {
                 Image(systemName: "arrow.triangle.branch")
-                    .foregroundStyle(Color.theaInfo)
+                    .foregroundStyle(.blue)
                     .accessibilityHidden(true)
                 Text("Editing creates a new branch. The original message is preserved.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             .padding(12)
-            .background(Color.theaInfo.opacity(0.1))
+            .background(Color.blue.opacity(0.1))
             .clipShape(RoundedRectangle(cornerRadius: 8))
 
             // Text editor

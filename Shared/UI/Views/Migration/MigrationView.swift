@@ -6,6 +6,8 @@ struct MigrationView: View {
     @State private var isScanning = false
     @State private var selectedSource: (any MigrationSource)?
     @State private var showingMigrationProgress = false
+    @State private var errorMessage: String?
+    @State private var showError = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -48,7 +50,12 @@ struct MigrationView: View {
                         showingMigrationProgress = true
 
                         Task {
-                            _ = try? await migrationEngine.startMigration(from: sourceInfo.source)
+                            do {
+                                _ = try await migrationEngine.startMigration(from: sourceInfo.source)
+                            } catch {
+                                errorMessage = "Migration failed: \(error.localizedDescription)"
+                                showError = true
+                            }
                         }
                     }
                 }
@@ -65,6 +72,11 @@ struct MigrationView: View {
             if let source = selectedSource {
                 MigrationProgressView(source: source)
             }
+        }
+        .alert("Migration Error", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "An unknown error occurred")
         }
     }
 

@@ -29,8 +29,10 @@
 	<!-- ================================ -->
 	<key>WKApplication</key>
 	<true/>
-	<key>WKWatchOnly</key>
+	<key>WKRunsIndependentlyOfCompanionApp</key>
 	<true/>
+	<key>WKWatchOnly</key>
+	<false/>
 	<key>UIUserInterfaceStyle</key>
 	<string>Automatic</string>
 

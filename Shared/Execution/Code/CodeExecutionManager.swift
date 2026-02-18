@@ -285,7 +285,7 @@ public final class CodeExecutionManager: ObservableObject {
                 timeout: executionTimeout
             )
 
-            try? FileManager.default.removeItem(at: tempFile)
+            do { try FileManager.default.removeItem(at: tempFile) } catch { logger.debug("Could not remove temp file: \(error.localizedDescription)") }
 
             return CodeExecResultModel(
                 success: result.exitCode == 0,
@@ -295,7 +295,7 @@ public final class CodeExecutionManager: ObservableObject {
                 language: .swift
             )
         } catch {
-            try? FileManager.default.removeItem(at: tempFile)
+            do { try FileManager.default.removeItem(at: tempFile) } catch { logger.debug("Could not remove temp file: \(error.localizedDescription)") }
             return CodeExecResultModel(
                 success: false,
                 output: nil,
@@ -379,7 +379,7 @@ public final class CodeExecutionManager: ObservableObject {
                 timeout: executionTimeout
             )
 
-            try? FileManager.default.removeItem(at: tempFile)
+            do { try FileManager.default.removeItem(at: tempFile) } catch { logger.debug("Could not remove temp file: \(error.localizedDescription)") }
 
             return CodeExecResultModel(
                 success: result.exitCode == 0,
@@ -389,7 +389,7 @@ public final class CodeExecutionManager: ObservableObject {
                 language: .python
             )
         } catch {
-            try? FileManager.default.removeItem(at: tempFile)
+            do { try FileManager.default.removeItem(at: tempFile) } catch { logger.debug("Could not remove temp file: \(error.localizedDescription)") }
             return CodeExecResultModel(
                 success: false,
                 output: nil,
@@ -496,7 +496,7 @@ public final class CodeExecutionManager: ObservableObject {
 
             // Timeout task
             group.addTask {
-                try await Task.sleep(for: .seconds(timeout))
+                try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
                 throw CodeExecError.timeout
             }
 

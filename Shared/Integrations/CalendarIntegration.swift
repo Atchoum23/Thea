@@ -25,7 +25,6 @@ public actor CalendarIntegration: AppIntegrationModule {
 
     private init() {}
 
-    /// Requests full access to calendar events and marks the integration as connected.
     public func connect() async throws {
         let granted = try await eventStore.requestFullAccessToEvents()
         guard granted else {
@@ -34,10 +33,8 @@ public actor CalendarIntegration: AppIntegrationModule {
         isConnected = true
     }
 
-    /// Disconnects from the Calendar integration.
     public func disconnect() async { isConnected = false }
 
-    /// Returns whether the Calendar integration is available on this device.
     public func isAvailable() async -> Bool {
         EKEventStore.authorizationStatus(for: .event) != .restricted
     }

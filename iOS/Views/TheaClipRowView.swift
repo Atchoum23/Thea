@@ -11,7 +11,6 @@ struct TheaClipRowView: View {
             typeIcon
                 .frame(width: 28, height: 28)
                 .foregroundStyle(.secondary)
-                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.previewText)
@@ -36,21 +35,6 @@ struct TheaClipRowView: View {
             badges
         }
         .padding(.vertical, 2)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(rowAccessibilityLabel)
-    }
-
-    private var rowAccessibilityLabel: String {
-        var parts: [String] = []
-        parts.append("\(entry.contentType) clipboard entry")
-        parts.append(entry.previewText)
-        if let appName = entry.sourceAppName {
-            parts.append("from \(appName)")
-        }
-        if entry.isFavorite { parts.append("favorite") }
-        if entry.isPinned { parts.append("pinned") }
-        if entry.isSensitive { parts.append("sensitive") }
-        return parts.joined(separator: ", ")
     }
 
     @ViewBuilder
@@ -70,7 +54,6 @@ struct TheaClipRowView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .clipShape(RoundedRectangle(cornerRadius: 4))
-                            .accessibilityLabel("Clipboard image thumbnail")
                     }
                 #endif
             } else {
@@ -88,20 +71,17 @@ struct TheaClipRowView: View {
             if entry.isFavorite {
                 Image(systemName: "star.fill")
                     .font(.caption2)
-                    .foregroundStyle(.theaWarning)
-                    .accessibilityHidden(true)
+                    .foregroundStyle(.yellow)
             }
             if entry.isPinned {
                 Image(systemName: "pin.fill")
                     .font(.caption2)
-                    .foregroundStyle(.theaWarning)
-                    .accessibilityHidden(true)
+                    .foregroundStyle(.orange)
             }
             if entry.isSensitive {
                 Image(systemName: "lock.fill")
                     .font(.caption2)
-                    .foregroundStyle(.theaError)
-                    .accessibilityHidden(true)
+                    .foregroundStyle(.red)
             }
         }
     }

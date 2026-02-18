@@ -416,15 +416,22 @@ public final class VoiceModeController: NSObject, ObservableObject {
     // MARK: - Persistence
 
     private func saveSettings() {
-        if let encoded = try? JSONEncoder().encode(settings) {
+        do {
+            let encoded = try JSONEncoder().encode(settings)
             UserDefaults.standard.set(encoded, forKey: "thea.voice.settings")
+        } catch {
+            logger.error("Failed to encode voice settings: \(error.localizedDescription)")
         }
     }
 
     private func loadSettings() {
-        if let data = UserDefaults.standard.data(forKey: "thea.voice.settings"),
-           let decoded = try? JSONDecoder().decode(VoiceSettings.self, from: data) {
-            settings = decoded
+        if let data = UserDefaults.standard.data(forKey: "thea.voice.settings") {
+            do {
+                let decoded = try JSONDecoder().decode(VoiceSettings.self, from: data)
+                settings = decoded
+            } catch {
+                logger.error("Failed to decode voice settings: \(error.localizedDescription)")
+            }
         }
     }
 }
@@ -436,7 +443,12 @@ extension VoiceModeController: AVSpeechSynthesizerDelegate {
         Task { @MainActor in
             if self.isVoiceModeEnabled && self.settings.continuousListening {
                 self.state = .listening
-                try? await self.startListening()
+                do {
+                    try await self.startListening()
+                } catch {
+                    self.logger.error("Failed to restart listening after speech: \(error.localizedDescription)")
+                    self.state = .idle
+                }
             } else {
                 self.state = .idle
             }

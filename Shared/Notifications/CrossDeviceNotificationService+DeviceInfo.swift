@@ -23,10 +23,14 @@ import OSLog
 extension CrossDeviceNotificationService {
     func loadCurrentDeviceRegistration() async {
         // Try to load from UserDefaults first
-        if let data = UserDefaults.standard.data(forKey: "thea.notifications.deviceRegistration"),
-           let registration = try? JSONDecoder().decode(CrossDeviceRegistration.self, from: data) {
-            currentDeviceRegistration = registration
-            return
+        if let data = UserDefaults.standard.data(forKey: "thea.notifications.deviceRegistration") {
+            do {
+                let registration = try JSONDecoder().decode(CrossDeviceRegistration.self, from: data)
+                currentDeviceRegistration = registration
+                return
+            } catch {
+                logger.error("Failed to decode cached device registration: \(error.localizedDescription)")
+            }
         }
 
         // Check CloudKit for existing registration with this device name
@@ -43,8 +47,11 @@ extension CrossDeviceNotificationService {
                     currentDeviceRegistration = registration
 
                     // Cache locally
-                    if let data = try? JSONEncoder().encode(registration) {
+                    do {
+                        let data = try JSONEncoder().encode(registration)
                         UserDefaults.standard.set(data, forKey: "thea.notifications.deviceRegistration")
+                    } catch {
+                        logger.warning("Failed to cache device registration: \(error.localizedDescription)")
                     }
 
                     return

@@ -4,6 +4,7 @@ import Foundation
     import AppKit
     import CoreGraphics
     import IOKit
+    import OSLog
 
     // MARK: - Display Service
 
@@ -23,7 +24,6 @@ import Foundation
 
         // MARK: - Display Management
 
-        /// Fetches all active displays and populates the internal display cache.
         public func fetchDisplays() async throws -> [Display] {
             var displayList: [Display] = []
 
@@ -60,7 +60,6 @@ import Foundation
 
         // MARK: - Profile Management
 
-        /// Applies a display profile (brightness, contrast) to the specified display.
         public func applyProfile(_ profile: DisplayProfile, to displayID: CGDirectDisplayID) async throws {
             guard displays[displayID] != nil else {
                 throw DisplayError.displayNotFound(displayID)
@@ -76,7 +75,6 @@ import Foundation
             displays[displayID]?.currentProfile = profile
         }
 
-        /// Sets the brightness (0-100) for the specified display via DDC/CI or IOKit.
         public func setBrightness(_ value: Int, for displayID: CGDirectDisplayID) async throws {
             guard (0 ... 100).contains(value) else {
                 throw DisplayError.invalidBrightnessValue
@@ -98,7 +96,6 @@ import Foundation
             }
         }
 
-        /// Sets the contrast (0-100) for the specified display via DDC/CI. No-op for built-in displays.
         public func setContrast(_ value: Int, for displayID: CGDirectDisplayID) async throws {
             guard (0 ... 100).contains(value) else {
                 throw DisplayError.invalidBrightnessValue
@@ -120,7 +117,6 @@ import Foundation
             }
         }
 
-        /// Returns the current display profile for the specified display, or a default if none is set.
         public func getCurrentState(for displayID: CGDirectDisplayID) async throws -> DisplayProfile {
             guard let display = displays[displayID], let profile = display.currentProfile else {
                 // Return default profile
@@ -132,12 +128,10 @@ import Foundation
 
         // MARK: - Scheduling
 
-        /// Assigns a profile schedule to the specified display.
         public func setSchedule(_ schedule: DisplaySchedule, for displayID: CGDirectDisplayID) async throws {
             schedules[displayID] = schedule
         }
 
-        /// Evaluates all active schedules and applies matching profiles based on the current time.
         public func executeScheduledProfiles() async throws {
             let now = Date()
             let calendar = Calendar.current
@@ -204,7 +198,6 @@ import Foundation
     public actor DDCService: DDCProtocol {
         public init() {}
 
-        /// Sends a DDC/CI SET VCP FEATURE command to an external display via IOAVService I2C.
         public func sendCommand(displayID: CGDirectDisplayID, command: UInt8, value: UInt8) async throws {
             guard let avService = findIOAVService(for: displayID) else {
                 throw DDCError.displayNotFound
@@ -245,7 +238,6 @@ import Foundation
             guard writeResult == kIOReturnSuccess else { throw DDCError.commandFailed }
         }
 
-        /// Reads a VCP value from a display. Currently throws ``DDCError/readNotSupported`` due to macOS entitlement restrictions.
         public func readValue(displayID _: CGDirectDisplayID, command _: UInt8) async throws -> UInt8 {
             // DDC/CI read requires a write-then-read I2C transaction
             // On modern macOS, IOAVService read is limited and may not support
@@ -262,7 +254,6 @@ import Foundation
             throw DDCError.readNotSupported
         }
 
-        /// Returns whether the specified display supports DDC/CI (always `false` for built-in displays).
         public func supportsDDC(displayID: CGDirectDisplayID) async -> Bool {
             if CGDisplayIsBuiltin(displayID) != 0 {
                 return false
@@ -341,7 +332,6 @@ import Foundation
 
         public init() {}
 
-        /// Returns the current ambient light level (0-100) from the AppleLMUController sensor, or an estimate from display brightness.
         public func getCurrentLightLevel() async throws -> Int {
             let service = IOServiceGetMatchingService(
                 kIOMainPortDefault,
@@ -384,25 +374,32 @@ import Foundation
             return min(100, max(0, Int(combined / 10))) // Raw values can be 0-1000+
         }
 
-        /// Starts polling the ambient light sensor every 5 seconds, invoking the callback with the current level.
         public func startMonitoring(callback: @Sendable @escaping (Int) -> Void) async {
             currentCallback = callback
             isMonitoring = true
 
             // Poll ambient light sensor every 5 seconds
             monitoringTask = Task.detached { [weak self] in
+                let logger = Logger(subsystem: "ai.thea.app", category: "AmbientLightAdapter")
                 while !Task.isCancelled {
-                    try? await Task.sleep(for: .seconds(5)) // 5 seconds
+                    do {
+                        try await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+                    } catch {
+                        break // Task was cancelled
+                    }
                     guard let self, await self.isMonitoring else { break }
-                    if let level = try? await self.getCurrentLightLevel(),
-                       let cb = await self.currentCallback {
-                        cb(level)
+                    do {
+                        let level = try await self.getCurrentLightLevel()
+                        if let cb = await self.currentCallback {
+                            cb(level)
+                        }
+                    } catch {
+                        logger.error("Failed to read ambient light level: \(error.localizedDescription)")
                     }
                 }
             }
         }
 
-        /// Stops polling the ambient light sensor and cancels the monitoring task.
         public func stopMonitoring() async {
             isMonitoring = false
             currentCallback = nil

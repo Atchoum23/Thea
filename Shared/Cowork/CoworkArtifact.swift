@@ -1,6 +1,9 @@
 #if os(macOS)
     import Foundation
+    import OSLog
     import UniformTypeIdentifiers
+
+    private let coworkArtifactLogger = Logger(subsystem: "ai.thea.app", category: "CoworkArtifact")
 
     /// Represents a file artifact created during Cowork task execution
     struct CoworkArtifact: Identifiable, Codable, Equatable {
@@ -124,10 +127,13 @@
             guard fileManager.fileExists(atPath: url.path) else { return nil }
 
             var size: Int64 = 0
-            if let attrs = try? fileManager.attributesOfItem(atPath: url.path),
-               let fileSize = attrs[.size] as? Int64
-            {
-                size = fileSize
+            do {
+                let attrs = try fileManager.attributesOfItem(atPath: url.path)
+                if let fileSize = attrs[.size] as? Int64 {
+                    size = fileSize
+                }
+            } catch {
+                coworkArtifactLogger.error("Failed to get file attributes for \(url.lastPathComponent): \(error)")
             }
 
             return CoworkArtifact(
@@ -152,11 +158,14 @@
         }
 
         mutating func updateSize() {
-            if let attrs = try? FileManager.default.attributesOfItem(atPath: fileURL.path),
-               let fileSize = attrs[.size] as? Int64
-            {
-                size = fileSize
-                modifiedAt = Date()
+            do {
+                let attrs = try FileManager.default.attributesOfItem(atPath: fileURL.path)
+                if let fileSize = attrs[.size] as? Int64 {
+                    size = fileSize
+                    modifiedAt = Date()
+                }
+            } catch {
+                coworkArtifactLogger.error("Failed to get file size for \(fileURL.lastPathComponent): \(error)")
             }
         }
 

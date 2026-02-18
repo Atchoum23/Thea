@@ -466,9 +466,15 @@ extension AutonomousAgentV3 {
         #if os(macOS)
         logger.info("Verifying output matches pattern: \(pattern)")
         let output = try await runCommand("cd \"/Users/alexis/Documents/IT & Tech/MyApps/Thea\" && swift build 2>&1")
-        let regex = try? NSRegularExpression(pattern: pattern)
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern)
+        } catch {
+            logger.error("Failed to compile verification regex pattern: \(error)")
+            return false
+        }
         let range = NSRange(output.startIndex..., in: output)
-        let matches = regex?.numberOfMatches(in: output, range: range) ?? 0
+        let matches = regex.numberOfMatches(in: output, range: range) ?? 0
         let result = matches > 0 || output.contains(pattern)
         logger.info("Verification result: \(result)")
         return result
@@ -646,7 +652,6 @@ extension AutonomousAgentV3 {
             switch response.type {
             case .delta(let text):
                 result += text
-            case .thinkingDelta: break
             case .complete:
                 break
             case .error(let error):

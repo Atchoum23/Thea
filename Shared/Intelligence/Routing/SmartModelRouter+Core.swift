@@ -18,8 +18,7 @@ public final class SmartModelRouter: ObservableObject {
 
     @Published public private(set) var availableModels: [RouterModelCapability] = []
     @Published public private(set) var usageByModel: [String: ModelUsage] = [:]
-    /// Daily API budget in USD — initialized from SystemCapabilityService for hardware-aware scaling.
-    @Published public private(set) var dailyBudget: Double = SystemCapabilityService.shared.recommendedDailyBudget
+    @Published public private(set) var dailyBudget: Double = 10.0  // USD
     @Published public private(set) var dailySpent: Double = 0.0
     @Published public private(set) var defaultStrategy: RoutingStrategy = .balanced
 
@@ -36,7 +35,6 @@ public final class SmartModelRouter: ObservableObject {
 
     // MARK: - Model Registration
 
-    /// Registers a new AI model for routing. If a model with the same `modelId` is already registered, the call is ignored.
     public func registerModel(_ model: RouterModelCapability) {
         if !availableModels.contains(where: { $0.modelId == model.modelId }) {
             availableModels.append(model)
@@ -44,7 +42,6 @@ public final class SmartModelRouter: ObservableObject {
         }
     }
 
-    /// Removes the model with the given identifier from the routing pool. No-op if the model is not registered.
     public func removeModel(modelId: String) {
         availableModels.removeAll { $0.modelId == modelId }
     }
@@ -84,7 +81,7 @@ public final class SmartModelRouter: ObservableObject {
         guard !candidates.isEmpty else {
             // Fallback to cheapest available
             guard let fallbackModel = availableModels.min(by: { $0.costPerInputToken < $1.costPerInputToken }) ?? availableModels.first else {
-                // No models configured — return empty decision with zero confidence
+                // No models at all — return a placeholder decision
                 return SmartRoutingDecision(
                     taskType: complexity,
                     selectedModel: RouterModelCapability(modelId: "none", provider: "none", contextWindow: 0, maxOutputTokens: 0, capabilities: [], costPerInputToken: 0, costPerOutputToken: 0, averageLatency: 0, qualityScore: 0),
@@ -289,13 +286,6 @@ public final class SmartModelRouter: ObservableObject {
     public func resetDailySpending() {
         dailySpent = 0
         logger.info("Reset daily spending")
-    }
-
-    /// Update the daily budget cap.
-    /// - Parameter amount: New budget in USD.
-    public func updateBudget(_ amount: Double) {
-        dailyBudget = amount
-        logger.info("Daily budget updated to $\(String(format: "%.2f", amount))")
     }
 
     // MARK: - Statistics

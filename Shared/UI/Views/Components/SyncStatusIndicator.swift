@@ -16,6 +16,8 @@ struct SyncStatusIndicator: View {
     @State private var activeTransport: TheaTransport = .cloudKit
     @State private var transportSummary: [(transport: TheaTransport, available: Bool, latency: Double?, active: Bool)] = []
     @State private var isProbing = false
+    @State private var syncErrorMessage: String?
+    @State private var showSyncError = false
 
     var body: some View {
         Menu {
@@ -56,7 +58,12 @@ struct SyncStatusIndicator: View {
 
             Button {
                 Task {
-                    try? await cloudKit.syncAll()
+                    do {
+                        try await cloudKit.syncAll()
+                    } catch {
+                        syncErrorMessage = "Sync failed: \(error.localizedDescription)"
+                        showSyncError = true
+                    }
                 }
             } label: {
                 Label("Sync Now", systemImage: "arrow.triangle.2.circlepath")
@@ -71,6 +78,11 @@ struct SyncStatusIndicator: View {
         }
         .task {
             await refreshTransportInfo()
+        }
+        .alert("Sync Error", isPresented: $showSyncError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(syncErrorMessage ?? "An unknown error occurred")
         }
     }
 

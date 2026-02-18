@@ -160,7 +160,11 @@ final class ExternalSubscriptionManager: ObservableObject {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         let dir = appSupport.appendingPathComponent("Thea/LifeManagement", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            subLogger.error("Failed to create storage directory: \(error.localizedDescription)")
+        }
         storageURL = dir.appendingPathComponent("subscriptions.json")
         loadState()
     }
@@ -222,17 +226,28 @@ final class ExternalSubscriptionManager: ObservableObject {
     private func save() {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        if let data = try? encoder.encode(subscriptions) {
-            try? data.write(to: storageURL, options: .atomic)
+        do {
+            let data = try encoder.encode(subscriptions)
+            try data.write(to: storageURL, options: .atomic)
+        } catch {
+            subLogger.error("Failed to save subscription data: \(error.localizedDescription)")
         }
     }
 
     private func loadState() {
-        guard let data = try? Data(contentsOf: storageURL) else { return }
+        let data: Data
+        do {
+            data = try Data(contentsOf: storageURL)
+        } catch {
+            subLogger.error("Failed to read subscription data: \(error.localizedDescription)")
+            return
+        }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        if let loaded = try? decoder.decode([ExternalSubscription].self, from: data) {
-            subscriptions = loaded
+        do {
+            subscriptions = try decoder.decode([ExternalSubscription].self, from: data)
+        } catch {
+            subLogger.error("Failed to decode subscription data: \(error.localizedDescription)")
         }
     }
 }

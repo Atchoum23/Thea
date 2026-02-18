@@ -101,10 +101,10 @@ export function FocusableButton({
   });
 
   const variantStyles = {
-    primary: 'bg-blue-600 text-white',
-    secondary: 'bg-gray-700 text-white',
-    danger: 'bg-red-600 text-white',
-    ghost: 'bg-transparent text-white',
+    primary: 'bg-blue-600 text-white hover:bg-blue-700',
+    secondary: 'bg-gray-700 text-white hover:bg-gray-600',
+    danger: 'bg-red-600 text-white hover:bg-red-700',
+    ghost: 'bg-transparent text-white hover:bg-white/10',
   };
 
   const sizeStyles = {

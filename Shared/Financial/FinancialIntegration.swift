@@ -1,5 +1,6 @@
 import CryptoKit
 import Foundation
+import OSLog
 
 // MARK: - Financial Integration System
 
@@ -9,6 +10,7 @@ import Foundation
 @Observable
 final class FinancialIntegration {
     static let shared = FinancialIntegration()
+    private let logger = Logger(subsystem: "com.thea.app", category: "FinancialIntegration")
 
     private(set) var connectedAccounts: [ProviderAccount] = []
     private(set) var transactions: [Transaction] = []
@@ -210,7 +212,8 @@ final class FinancialIntegration {
             .reduce(0, +) / Double(max(transactions.count, 1))
 
         if let large = transactions
-            .first(where: { abs($0.amount) > averageTransaction * 3 })
+            .filter({ abs($0.amount) > averageTransaction * 3 })
+            .first
         {
             return FinancialInsight(
                 id: UUID(),
@@ -365,28 +368,38 @@ final class FinancialIntegration {
     // MARK: - Persistence
 
     private func loadAccounts() {
-        if let data = UserDefaults.standard.data(forKey: "FinancialIntegration.accounts"),
-           let accounts = try? JSONDecoder().decode([ProviderAccount].self, from: data)
-        {
-            connectedAccounts = accounts
+        guard let data = UserDefaults.standard.data(forKey: "FinancialIntegration.accounts") else { return }
+        do {
+            connectedAccounts = try JSONDecoder().decode([ProviderAccount].self, from: data)
+        } catch {
+            logger.debug("Could not load connected accounts: \(error.localizedDescription)")
         }
     }
 
     private func saveAccounts() {
-        if let data = try? JSONEncoder().encode(connectedAccounts) {
+        do {
+            let data = try JSONEncoder().encode(connectedAccounts)
             UserDefaults.standard.set(data, forKey: "FinancialIntegration.accounts")
+        } catch {
+            logger.debug("Could not save connected accounts: \(error.localizedDescription)")
         }
     }
 
     private func saveTransactions() {
-        if let data = try? JSONEncoder().encode(transactions) {
+        do {
+            let data = try JSONEncoder().encode(transactions)
             UserDefaults.standard.set(data, forKey: "FinancialIntegration.transactions")
+        } catch {
+            logger.debug("Could not save transactions: \(error.localizedDescription)")
         }
     }
 
     private func saveBudgets() {
-        if let data = try? JSONEncoder().encode(budgets) {
+        do {
+            let data = try JSONEncoder().encode(budgets)
             UserDefaults.standard.set(data, forKey: "FinancialIntegration.budgets")
+        } catch {
+            logger.debug("Could not save budgets: \(error.localizedDescription)")
         }
     }
 

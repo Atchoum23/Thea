@@ -1,6 +1,7 @@
 #if os(macOS)
     import AppKit
     import Foundation
+    import OSLog
 
     /// Manages folder access permissions for Cowork sessions
     @MainActor
@@ -11,6 +12,7 @@
         var allowedFolders: [AllowedFolder] = []
         var recentFolders: [URL] = []
 
+        private let logger = Logger(subsystem: "ai.thea.app", category: "FolderAccessManager")
         private let bookmarksKey = "cowork.folderBookmarks"
         private let recentFoldersKey = "cowork.recentFolders"
         private let maxRecentFolders = 10
@@ -42,11 +44,17 @@
                 addedAt = Date()
 
                 // Create security-scoped bookmark
-                bookmark = try? url.bookmarkData(
-                    options: .withSecurityScope,
-                    includingResourceValuesForKeys: nil,
-                    relativeTo: nil
-                )
+                do {
+                    bookmark = try url.bookmarkData(
+                        options: .withSecurityScope,
+                        includingResourceValuesForKeys: nil,
+                        relativeTo: nil
+                    )
+                } catch {
+                    Logger(subsystem: "ai.thea.app", category: "FolderAccessManager")
+                        .error("Failed to create security-scoped bookmark for \(url.lastPathComponent): \(error.localizedDescription)")
+                    bookmark = nil
+                }
             }
         }
 
@@ -306,13 +314,21 @@
 
                 // Verify bookmark is still valid
                 var isStale = false
-                if let _ = try? URL(
-                    resolvingBookmarkData: bookmark,
-                    options: .withSecurityScope,
-                    relativeTo: nil,
-                    bookmarkDataIsStale: &isStale
-                ), !isStale {
-                    return folder
+                do {
+                    _ = try URL(
+                        resolvingBookmarkData: bookmark,
+                        options: .withSecurityScope,
+                        relativeTo: nil,
+                        bookmarkDataIsStale: &isStale
+                    )
+                    if !isStale {
+                        return folder
+                    }
+                    Logger(subsystem: "ai.thea.app", category: "FolderAccessManager")
+                        .warning("Bookmark is stale for folder: \(folder.url.lastPathComponent)")
+                } catch {
+                    Logger(subsystem: "ai.thea.app", category: "FolderAccessManager")
+                        .error("Failed to resolve bookmark: \(error.localizedDescription)")
                 }
 
                 return nil

@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 // MARK: - AI Provider Protocol
 
@@ -94,9 +95,8 @@ struct ValidationResult: Sendable {
 
 struct ChatResponse: Sendable {
     enum ResponseType: Sendable {
-        case delta(String)           // Streaming text chunk
-        case thinkingDelta(String)   // Streaming thinking/reasoning chunk (extended thinking)
-        case complete(AIMessage)     // Final message
+        case delta(String) // Streaming chunk
+        case complete(AIMessage) // Final message
         case error(Error)
     }
 
@@ -104,10 +104,6 @@ struct ChatResponse: Sendable {
 
     static func delta(_ text: String) -> ChatResponse {
         ChatResponse(type: .delta(text))
-    }
-
-    static func thinkingDelta(_ text: String) -> ChatResponse {
-        ChatResponse(type: .thinkingDelta(text))
     }
 
     static func complete(_ message: AIMessage) -> ChatResponse {
@@ -496,19 +492,31 @@ struct TokenUsage: Codable, Sendable {
 
 // MARK: - Tool Definition
 
+private let toolDefinitionLogger = Logger(subsystem: "ai.thea.app", category: "ToolDefinition")
+
 struct ToolDefinition: Codable, Sendable {
     let name: String
     let description: String
     let parametersJSON: Data  // Store as JSON Data for Sendable compliance
 
     var parameters: [String: Any] {
-        (try? JSONSerialization.jsonObject(with: parametersJSON) as? [String: Any]) ?? [:]
+        do {
+            return (try JSONSerialization.jsonObject(with: parametersJSON) as? [String: Any]) ?? [:]
+        } catch {
+            toolDefinitionLogger.error("Failed to deserialize tool parameters: \(error.localizedDescription)")
+            return [:]
+        }
     }
 
     init(name: String, description: String, parameters: [String: Any] = [:]) {
         self.name = name
         self.description = description
-        self.parametersJSON = (try? JSONSerialization.data(withJSONObject: parameters)) ?? Data()
+        do {
+            self.parametersJSON = try JSONSerialization.data(withJSONObject: parameters)
+        } catch {
+            toolDefinitionLogger.error("Failed to serialize tool parameters: \(error.localizedDescription)")
+            self.parametersJSON = Data()
+        }
     }
 
     enum CodingKeys: String, CodingKey {

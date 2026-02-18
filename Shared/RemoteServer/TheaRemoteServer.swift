@@ -434,7 +434,11 @@ import Network
             case .listRecordings:
                 return .recordingList(sessionRecording.recordings)
             case let .deleteRecording(id):
-                sessionRecording.deleteRecording(id: id)
+                do {
+                    try sessionRecording.deleteRecording(id: id)
+                } catch {
+                    return .error("Failed to delete recording: \(error.localizedDescription)")
+                }
                 return .recordingList(sessionRecording.recordings)
             }
         }

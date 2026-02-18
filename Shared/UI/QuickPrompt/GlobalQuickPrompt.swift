@@ -3,6 +3,7 @@
 // Activated with Option+Space (configurable)
 
 import Combine
+import OSLog
 import SwiftUI
 #if os(macOS)
     import AppKit
@@ -15,6 +16,8 @@ import SwiftUI
 @MainActor
 public final class GlobalQuickPromptManager: ObservableObject {
     public static let shared = GlobalQuickPromptManager()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "GlobalQuickPromptManager")
 
     // MARK: - Published State
 
@@ -53,16 +56,21 @@ public final class GlobalQuickPromptManager: ObservableObject {
     // MARK: - Configuration
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "quickPrompt.configuration"),
-           let config = try? JSONDecoder().decode(QuickPromptConfiguration.self, from: data)
-        {
-            configuration = config
+        if let data = UserDefaults.standard.data(forKey: "quickPrompt.configuration") {
+            do {
+                configuration = try JSONDecoder().decode(QuickPromptConfiguration.self, from: data)
+            } catch {
+                logger.error("Failed to decode quick prompt configuration: \(error)")
+            }
         }
     }
 
     public func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             UserDefaults.standard.set(data, forKey: "quickPrompt.configuration")
+        } catch {
+            logger.error("Failed to encode quick prompt configuration: \(error)")
         }
 
         // Re-register hotkey with new configuration
@@ -73,16 +81,21 @@ public final class GlobalQuickPromptManager: ObservableObject {
     }
 
     private func loadRecentPrompts() {
-        if let data = UserDefaults.standard.data(forKey: "quickPrompt.recentPrompts"),
-           let prompts = try? JSONDecoder().decode([RecentPrompt].self, from: data)
-        {
-            recentPrompts = prompts
+        if let data = UserDefaults.standard.data(forKey: "quickPrompt.recentPrompts") {
+            do {
+                recentPrompts = try JSONDecoder().decode([RecentPrompt].self, from: data)
+            } catch {
+                logger.error("Failed to decode recent prompts: \(error)")
+            }
         }
     }
 
     private func saveRecentPrompts() {
-        if let data = try? JSONEncoder().encode(recentPrompts) {
+        do {
+            let data = try JSONEncoder().encode(recentPrompts)
             UserDefaults.standard.set(data, forKey: "quickPrompt.recentPrompts")
+        } catch {
+            logger.error("Failed to encode recent prompts: \(error)")
         }
     }
 
@@ -375,8 +388,6 @@ public final class GlobalQuickPromptManager: ObservableObject {
             switch chunk.type {
             case let .delta(delta):
                 result += delta
-            case .thinkingDelta:
-                break
             case let .complete(finalMessage):
                 result = finalMessage.content.textValue
             case let .error(error):

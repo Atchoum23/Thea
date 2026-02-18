@@ -83,13 +83,17 @@ struct AnthropicTokenCounter: Sendable {
         }
 
         if httpResponse.statusCode != 200 {
-            // try? OK: error response may not be valid JSON
-            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let error = json["error"] as? [String: Any],
-               let message = error["message"] as? String {
-                throw AnthropicError.serverError(status: httpResponse.statusCode, message: message)
+            var errorMessage: String? = nil
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let error = json["error"] as? [String: Any],
+                   let message = error["message"] as? String {
+                    errorMessage = message
+                }
+            } catch {
+                logger.debug("Could not parse error response body: \(error.localizedDescription)")
             }
-            throw AnthropicError.serverError(status: httpResponse.statusCode, message: nil)
+            throw AnthropicError.serverError(status: httpResponse.statusCode, message: errorMessage)
         }
 
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],

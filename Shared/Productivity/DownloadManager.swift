@@ -217,14 +217,30 @@ actor TheaDownloadManager {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         let theaDir = appSupport.appendingPathComponent("Thea/Downloads")
-        try? FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: theaDir, withIntermediateDirectories: true)
+        } catch {
+            dlLogger.error("Failed to create downloads directory: \(error.localizedDescription)")
+        }
         let file = theaDir.appendingPathComponent("download_history.json")
         self.historyFile = file
         self.downloadDirectory = theaDir
 
         // Inline loadHistory to avoid calling actor-isolated method from init
-        if let data = try? Data(contentsOf: file) {
-            self.downloads = (try? JSONDecoder().decode([DownloadItem].self, from: data)) ?? []
+        let historyData: Data?
+        do {
+            historyData = try Data(contentsOf: file)
+        } catch {
+            dlLogger.debug("No existing download history at \(file.path): \(error.localizedDescription)")
+            historyData = nil
+        }
+        if let data = historyData {
+            self.downloads = ErrorLogger.tryOrDefault(
+                [],
+                context: "DownloadManager.init.decodeHistory"
+            ) {
+                try JSONDecoder().decode([DownloadItem].self, from: data)
+            }
         }
     }
 
@@ -299,7 +315,11 @@ actor TheaDownloadManager {
 
         if let item = downloads.first(where: { $0.id == id }),
            let path = item.localPath {
-            try? FileManager.default.removeItem(atPath: path)
+            do {
+                try FileManager.default.removeItem(atPath: path)
+            } catch {
+                ErrorLogger.log(error, context: "DownloadManager.removeDownload.deleteFile(\(item.fileName))")
+            }
         }
 
         downloads.removeAll { $0.id == id }
@@ -326,7 +346,11 @@ actor TheaDownloadManager {
         var lastBytes: Int64 = 0
 
         while !Task.isCancelled {
-            try? await Task.sleep(for: .milliseconds(500)) // 0.5s
+            do {
+                try await Task.sleep(nanoseconds: 500_000_000) // 0.5s
+            } catch {
+                break
+            }
 
             guard var item = downloads.first(where: { $0.id == id }) else { break }
             guard item.status == .downloading else { break }
@@ -358,8 +382,14 @@ actor TheaDownloadManager {
                 // Move file to downloads directory
                 if let location = task.response?.url {
                     let destPath = downloadDirectory.appendingPathComponent(item.fileName)
-                    try? FileManager.default.moveItem(at: location, to: destPath)
-                    item.localPath = destPath.path
+                    do {
+                        try FileManager.default.moveItem(at: location, to: destPath)
+                        item.localPath = destPath.path
+                    } catch {
+                        item.status = .failed
+                        item.errorMessage = "Download completed but file move failed: \(error.localizedDescription)"
+                        ErrorLogger.log(error, context: "DownloadManager.monitorDownload.moveFile(\(item.fileName))")
+                    }
                 }
 
                 updateItem(item)
@@ -396,7 +426,16 @@ actor TheaDownloadManager {
             .sorted { $0.priority > $1.priority }
 
         if let next = queued.first {
-            try? await startDownload(next.id)
+            do {
+                try await startDownload(next.id)
+            } catch {
+                if var item = downloads.first(where: { $0.id == next.id }) {
+                    item.status = .failed
+                    item.errorMessage = "Auto-start failed: \(error.localizedDescription)"
+                    updateItem(item)
+                }
+                ErrorLogger.log(error, context: "DownloadManager.startNextQueued(\(next.fileName))")
+            }
         }
     }
 
@@ -454,7 +493,11 @@ actor TheaDownloadManager {
     }
 
     private func saveHistory() {
-        guard let data = try? JSONEncoder().encode(downloads) else { return }
-        try? data.write(to: historyFile, options: .atomic)
+        do {
+            let data = try JSONEncoder().encode(downloads)
+            try data.write(to: historyFile, options: .atomic)
+        } catch {
+            ErrorLogger.log(error, context: "DownloadManager.saveHistory")
+        }
     }
 }

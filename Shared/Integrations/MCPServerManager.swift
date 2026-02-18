@@ -8,6 +8,7 @@
 
 import Combine
 import Foundation
+import OSLog
 
 // MARK: - MCP Server Manager
 
@@ -16,6 +17,8 @@ import Foundation
     @MainActor
     public class MCPServerManager: ObservableObject {
         public static let shared = MCPServerManager()
+
+        private let logger = Logger(subsystem: "com.thea.app", category: "MCPServerManager")
 
         // MARK: - Published State
 
@@ -48,7 +51,11 @@ import Foundation
             serverCachePath = appSupport.appendingPathComponent("Thea/mcp_registry_cache.json")
 
             // Create directories
-            try? FileManager.default.createDirectory(at: theaConfigPath.deletingLastPathComponent(), withIntermediateDirectories: true)
+            do {
+                try FileManager.default.createDirectory(at: theaConfigPath.deletingLastPathComponent(), withIntermediateDirectories: true)
+            } catch {
+                logger.debug("Could not create Thea config directory: \(error.localizedDescription)")
+            }
 
             // Load servers
             Task {
@@ -86,23 +93,27 @@ import Foundation
         }
 
         private func loadClaudeServers() -> [String: MCPServerConfig]? {
-            guard FileManager.default.fileExists(atPath: claudeConfigPath.path),
-                  let data = try? Data(contentsOf: claudeConfigPath),
-                  let config = try? JSONDecoder().decode(ClaudeDesktopConfig.self, from: data)
-            else {
+            guard FileManager.default.fileExists(atPath: claudeConfigPath.path) else { return nil }
+            do {
+                let data = try Data(contentsOf: claudeConfigPath)
+                let config = try JSONDecoder().decode(ClaudeDesktopConfig.self, from: data)
+                return config.mcpServers
+            } catch {
+                logger.debug("Could not load Claude servers: \(error.localizedDescription)")
                 return nil
             }
-            return config.mcpServers
         }
 
         private func loadTheaServers() -> [MCPInstalledServer]? {
-            guard FileManager.default.fileExists(atPath: theaConfigPath.path),
-                  let data = try? Data(contentsOf: theaConfigPath),
-                  let servers = try? JSONDecoder().decode([MCPInstalledServer].self, from: data)
-            else {
+            guard FileManager.default.fileExists(atPath: theaConfigPath.path) else { return nil }
+            do {
+                let data = try Data(contentsOf: theaConfigPath)
+                let servers = try JSONDecoder().decode([MCPInstalledServer].self, from: data)
+                return servers
+            } catch {
+                logger.debug("Could not load Thea servers: \(error.localizedDescription)")
                 return nil
             }
-            return servers
         }
 
         // MARK: - Registry Discovery
@@ -133,20 +144,25 @@ import Foundation
         }
 
         private func loadRegistryCache() -> [MCPRegistryServer]? {
-            guard FileManager.default.fileExists(atPath: serverCachePath.path),
-                  let data = try? Data(contentsOf: serverCachePath),
-                  let cache = try? JSONDecoder().decode(MCPRegistryCache.self, from: data),
-                  Date().timeIntervalSince(cache.timestamp) < 86400
-            else { // 24 hour cache
+            guard FileManager.default.fileExists(atPath: serverCachePath.path) else { return nil }
+            do {
+                let data = try Data(contentsOf: serverCachePath)
+                let cache = try JSONDecoder().decode(MCPRegistryCache.self, from: data)
+                guard Date().timeIntervalSince(cache.timestamp) < 86400 else { return nil } // 24 hour cache
+                return cache.servers
+            } catch {
+                logger.debug("Could not load registry cache: \(error.localizedDescription)")
                 return nil
             }
-            return cache.servers
         }
 
         private func saveRegistryCache(_ servers: [MCPRegistryServer]) {
             let cache = MCPRegistryCache(servers: servers, timestamp: Date())
-            if let data = try? JSONEncoder().encode(cache) {
-                try? data.write(to: serverCachePath)
+            do {
+                let data = try JSONEncoder().encode(cache)
+                try data.write(to: serverCachePath)
+            } catch {
+                logger.debug("Could not save registry cache: \(error.localizedDescription)")
             }
         }
 
@@ -229,7 +245,11 @@ import Foundation
             let binPath = FileManager.default.homeDirectoryForCurrentUser
                 .appendingPathComponent(".local/bin/\(registry.packageName)")
 
-            try? FileManager.default.createDirectory(at: binPath.deletingLastPathComponent(), withIntermediateDirectories: true)
+            do {
+                try FileManager.default.createDirectory(at: binPath.deletingLastPathComponent(), withIntermediateDirectories: true)
+            } catch {
+                logger.debug("Could not create bin directory: \(error.localizedDescription)")
+            }
             try data.write(to: binPath)
 
             // Make executable
@@ -343,15 +363,9 @@ import Foundation
 
         private func discoverToolsFromInstalledServers() async {
             for server in installedServers where server.isEnabled {
-                // Try real MCP tool discovery via JSON-RPC first
-                let toolCountBefore = availableTools.count
-                await discoverTools(from: server.id)
-
-                // Fall back to defaults if discovery returned nothing
-                if availableTools.count == toolCountBefore {
-                    let tools = getDefaultTools(for: server)
-                    availableTools.append(contentsOf: tools)
-                }
+                // For now, add mock tools based on server type
+                let tools = getDefaultTools(for: server)
+                availableTools.append(contentsOf: tools)
             }
         }
 
@@ -373,7 +387,8 @@ import Foundation
 
                 // Read response (simplified - real implementation would use async reading)
                 let responseData = pipes.output.fileHandleForReading.availableData
-                if let response = try? JSONDecoder().decode(MCPToolsListResponse.self, from: responseData) {
+                do {
+                    let response = try JSONDecoder().decode(MCPToolsListResponse.self, from: responseData)
                     for tool in response.result.tools {
                         let mcpTool = MCPTool(
                             id: "\(serverId):\(tool.name)",
@@ -384,6 +399,8 @@ import Foundation
                         )
                         availableTools.append(mcpTool)
                     }
+                } catch {
+                    logger.debug("Could not decode tools list response: \(error.localizedDescription)")
                 }
             } catch {
                 // Tool discovery failed - use defaults
@@ -472,20 +489,27 @@ import Foundation
 
         private func saveTheaServers() {
             let theaServers = installedServers.filter { $0.source == .thea || $0.source == .registry }
-            if let data = try? JSONEncoder().encode(theaServers) {
-                try? data.write(to: theaConfigPath)
+            do {
+                let data = try JSONEncoder().encode(theaServers)
+                try data.write(to: theaConfigPath)
+            } catch {
+                logger.error("Failed to save Thea servers: \(error.localizedDescription)")
             }
         }
 
         /// Export server to Claude configuration
         public func exportToClaude(_ server: MCPInstalledServer) throws {
-            var config: ClaudeDesktopConfig = if FileManager.default.fileExists(atPath: claudeConfigPath.path),
-                                                 let data = try? Data(contentsOf: claudeConfigPath),
-                                                 let existing = try? JSONDecoder().decode(ClaudeDesktopConfig.self, from: data)
-            {
-                existing
+            var config: ClaudeDesktopConfig
+            if FileManager.default.fileExists(atPath: claudeConfigPath.path) {
+                do {
+                    let data = try Data(contentsOf: claudeConfigPath)
+                    config = try JSONDecoder().decode(ClaudeDesktopConfig.self, from: data)
+                } catch {
+                    logger.debug("Could not load existing Claude config, using empty: \(error.localizedDescription)")
+                    config = ClaudeDesktopConfig(mcpServers: [:])
+                }
             } else {
-                ClaudeDesktopConfig(mcpServers: [:])
+                config = ClaudeDesktopConfig(mcpServers: [:])
             }
 
             config.mcpServers[server.name] = MCPServerConfig(
@@ -521,37 +545,30 @@ import Foundation
 
         private init() {}
 
-        /// No-op on non-macOS platforms.
         public func discoverFromRegistry() async {
             // Not supported on iOS
         }
 
-        /// Throws; MCP server installation requires macOS.
         public func install(_: MCPRegistryServer) async throws {
             throw MCPServerError.executionFailed("MCP servers are not supported on this platform")
         }
 
-        /// Throws; MCP server execution requires macOS.
         public func start(_: MCPInstalledServer) async throws {
             throw MCPServerError.executionFailed("MCP servers are not supported on this platform")
         }
 
-        /// No-op on non-macOS platforms.
         public func stop(_: String) {
             // No-op on iOS
         }
 
-        /// No-op on non-macOS platforms.
         public func stopAll() {
             // No-op on iOS
         }
 
-        /// Throws; MCP tool execution requires macOS.
         public func executeTool(toolId _: String, arguments _: [String: Any]) async throws -> MCPServerToolResult {
             throw MCPServerError.executionFailed("MCP servers are not supported on this platform")
         }
 
-        /// Throws; exporting server config requires macOS.
         public func exportToClaude(_: MCPInstalledServer) throws {
             throw MCPServerError.executionFailed("MCP servers are not supported on this platform")
         }
@@ -694,7 +711,6 @@ struct MCPToolCallParams: Codable, Sendable {
 }
 
 /// Type-erased Codable wrapper for heterogeneous dictionary values in MCP context
-// @unchecked Sendable: wraps only primitive JSON types (String, Int, Double, Bool, Array, Dict)
 struct MCPAnyCodable: Codable, @unchecked Sendable {
     let value: Any
 

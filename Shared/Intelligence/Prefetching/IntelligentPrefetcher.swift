@@ -41,7 +41,11 @@ public final class IntelligentPrefetcher: ObservableObject {
         prefetchTask = Task {
             while !Task.isCancelled {
                 await processPrefetchQueue()
-                try? await Task.sleep(for: .milliseconds(100))
+                do {
+                    try await Task.sleep(for: .milliseconds(100))
+                } catch {
+                    break
+                }
             }
         }
         logger.info("Intelligent prefetching started")

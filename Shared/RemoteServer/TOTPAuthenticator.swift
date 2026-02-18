@@ -7,6 +7,7 @@
 
 import CryptoKit
 import Foundation
+import OSLog
 
 // MARK: - TOTP Authenticator
 
@@ -14,6 +15,8 @@ import Foundation
 @MainActor
 public class TOTPAuthenticator: ObservableObject {
     // MARK: - Published State
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "TOTPAuthenticator")
 
     @Published public private(set) var isEnabled = false
     @Published public private(set) var hasSecret = false
@@ -198,13 +201,22 @@ public class TOTPAuthenticator: ObservableObject {
     }
 
     private func saveRecoveryCodes(_ codes: [String]) {
-        guard let data = try? JSONEncoder().encode(codes) else { return }
-        saveKeychainItem(key: Self.recoveryCodesKey, data: data)
+        do {
+            let data = try JSONEncoder().encode(codes)
+            saveKeychainItem(key: Self.recoveryCodesKey, data: data)
+        } catch {
+            logger.error("Failed to encode recovery codes: \(error.localizedDescription)")
+        }
     }
 
     private func loadRecoveryCodes() -> [String]? {
         guard let data = loadKeychainItem(key: Self.recoveryCodesKey) else { return nil }
-        return try? JSONDecoder().decode([String].self, from: data)
+        do {
+            return try JSONDecoder().decode([String].self, from: data)
+        } catch {
+            logger.error("Failed to decode recovery codes: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     private func saveKeychainItem(key: String, data: Data) {

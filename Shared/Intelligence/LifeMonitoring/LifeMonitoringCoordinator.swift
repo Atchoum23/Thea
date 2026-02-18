@@ -39,8 +39,8 @@ public final class LifeMonitoringCoordinator: ObservableObject {
 
     // MARK: - Data Source References
 
-    // Browser activity is tracked via SafariContextExtractor and GenericContextExtractor
-    // in the AppPairing system rather than a dedicated BrowserActivityMonitor
+    // TODO: Create BrowserActivityMonitor for comprehensive browser monitoring
+    // private var browserMonitor: BrowserActivityMonitor?
     #if os(macOS)
     private var clipboardMonitor: ClipboardMonitor?
     private var messagesMonitor: MessagesMonitor?
@@ -65,9 +65,6 @@ public final class LifeMonitoringCoordinator: ObservableObject {
     private var inputActivityMonitor: InputActivityMonitor?
     private var behaviorPatternAnalyzer: BehaviorPatternAnalyzer?
     private var efficiencySuggestionEngine: EfficiencySuggestionEngine?
-
-    // V2.2 Environment monitors
-    private var weatherMonitor: WeatherMonitor?
 
     // V2.2 AI-Powered Intelligence (these are singletons, we just reference them)
     // - HolisticPatternIntelligence: Deep pattern recognition across all life aspects
@@ -149,7 +146,11 @@ public final class LifeMonitoringCoordinator: ObservableObject {
         logger.info("Stopping life monitoring services...")
 
         // Flush pending cloud sync before stopping
-        try? await cloudSync?.flushPendingEvents()
+        do {
+            try await cloudSync?.flushPendingEvents()
+        } catch {
+            logger.error("Failed to flush pending cloud sync events: \(error.localizedDescription)")
+        }
         cloudSyncTask?.cancel()
 
         // Stop AI analysis pipeline
@@ -181,9 +182,6 @@ public final class LifeMonitoringCoordinator: ObservableObject {
         inputActivityMonitor?.stopMonitoring()
         behaviorPatternAnalyzer?.stop()
         efficiencySuggestionEngine?.stop()
-
-        // Stop V2.2 environment monitors
-        weatherMonitor?.stop()
 
         // Stop V2.2 AI intelligence systems
         HolisticPatternIntelligence.shared.stop()
@@ -379,14 +377,6 @@ public final class LifeMonitoringCoordinator: ObservableObject {
             logger.info("Efficiency suggestion engine started")
         }
 
-        // Weather Monitoring (V2.2)
-        if configuration.weatherMonitoringEnabled {
-            weatherMonitor = WeatherMonitor.shared
-            weatherMonitor?.start()
-            activeDataSources.insert(.weather)
-            logger.info("Weather monitoring started")
-        }
-
         // V2.2 AI-Powered Intelligence Systems
         // These are singletons that subscribe to our event stream automatically
         if configuration.holisticPatternIntelligenceEnabled {
@@ -397,30 +387,6 @@ public final class LifeMonitoringCoordinator: ObservableObject {
         if configuration.predictiveEngineEnabled {
             PredictiveLifeEngine.shared.start()
             logger.info("Predictive life engine started")
-        }
-
-        // Mood Tracking (V2.3) — subscribes to eventStream via Combine
-        _ = MoodTracker.shared
-        logger.info("Mood tracker started")
-
-        // Stress Detection (V2.3) — subscribes to eventStream via Combine
-        StressDetector.shared.start()
-        logger.info("Stress detector started")
-
-        // Ambient Life Journal (V2.3) — captures daily snapshots
-        _ = AmbientLifeJournal.shared
-        logger.info("Ambient life journal initialized")
-
-        // Cross-Domain Correlation Engine (V2.3) — daily analysis
-        Task { @MainActor in
-            await CrossDomainCorrelationEngine.shared.captureToday()
-            logger.info("Cross-domain correlation engine captured today's snapshot")
-        }
-
-        // Personal Baseline Monitor (V2.3) — anomaly detection
-        Task { @MainActor in
-            await PersonalBaselineMonitor.shared.runDailyCheck()
-            logger.info("Personal baseline monitor ran daily check")
         }
     }
 
@@ -445,85 +411,20 @@ public final class LifeMonitoringCoordinator: ObservableObject {
         // 1. Store in memory system
         await storeInMemory(event)
 
-        // 2. Feed BehavioralFingerprint for temporal pattern learning
-        feedBehavioralFingerprint(event)
-
-        // 3. Run AI analysis if significant
+        // 2. Run AI analysis if significant
         if event.significance >= .moderate {
             await analyzeWithAI(event)
         }
 
-        // 4. Check for proactive opportunities
+        // 3. Check for proactive opportunities
         await checkProactiveOpportunities(event)
 
-        // 5. Publish to EventBus for UI updates
+        // 4. Publish to EventBus for UI updates
         publishToEventBus(event)
 
-        // 6. Queue for iCloud sync (significant events only to save bandwidth)
+        // 5. Queue for iCloud sync (significant events only to save bandwidth)
         if event.significance >= .minor {
             queueForCloudSync(event)
-        }
-    }
-
-    /// Maps life event types to BehavioralFingerprint activity types and records them
-    private func feedBehavioralFingerprint(_ event: LifeEvent) {
-        let activity: BehavioralActivityType = switch event.type {
-        // Communication
-        case .messageSent, .messageReceived, .emailReceived, .emailSent,
-             .socialCall, .socialVideoCall:
-            .communication
-        // Meetings / Calendar
-        case .eventStart, .calendarEventCreated, .calendarEventModified, .calendarEventDeleted:
-            .meetings
-        // Browsing
-        case .pageVisit, .pageRead, .linkClick, .searchQuery, .formSubmit:
-            .browsing
-        // Deep work (file/document/code activity)
-        case .fileActivity, .documentActivity, .inputActivity, .behaviorPattern:
-            .deepWork
-        // Health / Exercise
-        case .healthMetric, .activityGoal:
-            .exercise
-        // Leisure (social, media, TV, photos)
-        case .socialLike, .socialComment, .socialFollow, .socialMention, .socialMatch,
-             .socialStoryView,
-             .musicPlaying, .musicPaused, .musicStopped, .musicSessionEnded,
-             .videoPlaying, .videoPaused, .videoStopped, .videoSessionEnded,
-             .tvWatching, .tvAppLaunch, .tvChannelChange, .tvPowerState, .tvVolumeChange,
-             .photoTaken, .screenshotTaken, .photoEdited, .photoFavorited, .photoDeleted:
-            .leisure
-        // Weather — environmental, no direct user activity
-        case .weatherChange:
-            .idle
-        // App switch — categorize by app data
-        case .appSwitch:
-            mapAppToActivity(event.data)
-        // Everything else
-        default:
-            .idle
-        }
-
-        BehavioralFingerprint.shared.recordActivity(activity)
-    }
-
-    /// Maps app usage events to behavioral activity types based on app category
-    private func mapAppToActivity(_ data: [String: String]) -> BehavioralActivityType {
-        let category = data["category"] ?? ""
-        switch category {
-        case "productivity", "development", "developer_tools":
-            return .deepWork
-        case "communication", "email":
-            return .communication
-        case "social", "social_media":
-            return .leisure
-        case "entertainment", "music", "video", "games":
-            return .leisure
-        case "health", "fitness":
-            return .exercise
-        case "browser", "reference":
-            return .browsing
-        default:
-            return .idle
         }
     }
 
@@ -592,14 +493,20 @@ public final class LifeMonitoringCoordinator: ObservableObject {
         guard configuration.iCloudSyncEnabled else { return }
 
         // Convert to cloud-syncable format
-        let eventData = try? JSONEncoder().encode(event.data)
+        let eventData: Data
+        do {
+            eventData = try JSONEncoder().encode(event.data)
+        } catch {
+            logger.error("Failed to encode life event data for cloud sync: \(error.localizedDescription)")
+            eventData = Data()
+        }
 
         let cloudEvent = CloudLifeEvent(
             id: event.id,
             eventType: event.type.rawValue,
             sourceType: event.source.rawValue,
             timestamp: event.timestamp,
-            data: eventData ?? Data()
+            data: eventData
         )
 
         cloudSync?.queueEvent(cloudEvent)
@@ -612,15 +519,27 @@ public final class LifeMonitoringCoordinator: ObservableObject {
 
         // Initial sync to get events from other devices
         if configuration.iCloudSyncEnabled {
-            try? await cloudSync?.syncAll()
+            do {
+                try await cloudSync?.syncAll()
+            } catch {
+                logger.error("Initial cloud sync failed: \(error.localizedDescription)")
+            }
         }
 
         // Periodic sync every 5 minutes
         cloudSyncTask = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(300)) // 5 minutes
+                do {
+                    try await Task.sleep(nanoseconds: 5 * 60 * 1_000_000_000) // 5 minutes
+                } catch {
+                    break // Task cancelled
+                }
                 guard !Task.isCancelled, configuration.iCloudSyncEnabled else { continue }
-                try? await cloudSync?.syncAll()
+                do {
+                    try await cloudSync?.syncAll()
+                } catch {
+                    logger.error("Periodic cloud sync failed: \(error.localizedDescription)")
+                }
             }
         }
     }

@@ -32,14 +32,12 @@ public final class ModelRouter: ObservableObject {
 
     // MARK: - Configuration
 
-    /// Weight for quality vs cost vs speed (should sum to 1.0).
-    /// Initialized from TheaConfig if available; defaults to 0.5/0.3/0.2.
+    /// Weight for quality vs cost vs speed (should sum to 1.0)
     public var qualityWeight: Double = 0.5
     public var costWeight: Double = 0.3
     public var speedWeight: Double = 0.2
 
-    /// Exploration rate for trying different models.
-    /// Configurable via TheaConfig.ai; defaults to 0.1.
+    /// Exploration rate for trying different models
     public var explorationRate: Double = 0.1
 
     /// Enable adaptive routing based on learned performance (vs static rules)
@@ -157,21 +155,15 @@ extension ModelRouter {
     private func getCandidateModels(for taskType: TaskType) -> [AIModel] {
         let allModels = dynamicModels ?? AIModel.allKnownModels
 
-        // Filter local models by hardware capability — skip models that won't fit in RAM
-        let capabilityService = SystemCapabilityService.shared
-        let memoryFiltered = allModels.filter { model in
-            capabilityService.canRunLocalModel(model)
-        }
-
         // Filter by required capabilities
         let requiredCapabilities = taskType.preferredCapabilities
 
-        let suitable = memoryFiltered.filter { model in
+        let suitable = allModels.filter { model in
             !requiredCapabilities.isDisjoint(with: model.capabilities)
         }
 
-        // If we have suitable models, use them; otherwise fall back to all memory-filtered models
-        return suitable.isEmpty ? memoryFiltered : suitable
+        // If we have suitable models, use them; otherwise fall back to all models
+        return suitable.isEmpty ? allModels : suitable
     }
 
     // MARK: - Scoring
@@ -183,31 +175,14 @@ extension ModelRouter {
     ) -> [(model: AIModel, score: Double)] {
         var scored: [(model: AIModel, score: Double)] = []
 
-        // Adjust weights based on user's current behavioral state
-        let behavioralContext = BehavioralFingerprint.shared.currentContext()
-        var adjustedQualityWeight = qualityWeight
-        let adjustedCostWeight = costWeight
-        var adjustedSpeedWeight = speedWeight
-
-        // When user is in deep work (low receptivity), favor speed over quality
-        if behavioralContext.receptivity < 0.3 {
-            adjustedSpeedWeight += 0.1
-            adjustedQualityWeight -= 0.1
-        }
-        // When user is idle/receptive, favor quality
-        if behavioralContext.receptivity > 0.7 {
-            adjustedQualityWeight += 0.1
-            adjustedSpeedWeight -= 0.1
-        }
-
         for model in models {
             let qualityScore = calculateQualityScore(model, for: taskType)
             let costScore = calculateCostScore(model, context: context)
             let speedScore = calculateSpeedScore(model, for: taskType)
 
-            let totalScore = (adjustedQualityWeight * qualityScore) +
-                            (adjustedCostWeight * costScore) +
-                            (adjustedSpeedWeight * speedScore)
+            let totalScore = (qualityWeight * qualityScore) +
+                            (costWeight * costScore) +
+                            (speedWeight * speedScore)
 
             scored.append((model, totalScore))
         }
@@ -267,20 +242,10 @@ extension ModelRouter {
     }
 
     private func calculateCostScore(_ model: AIModel, context: RoutingContext) -> Double {
-        // Lower cost = higher score. Cost scoring uses 2026 pricing model:
-        // Most providers now offer tiered pricing — input tokens much cheaper than output.
-        // Flagship models (Opus, o1) ~$15-75/M output; mid-tier (Sonnet, GPT-4o) ~$3-15/M;
-        // Budget (Haiku, Flash, mini) <$1/M. Local models cost $0 (speed-only score).
+        // Lower cost = higher score
         guard let inputCost = model.inputCostPer1K,
               let outputCost = model.outputCostPer1K else {
-            // Use historical average if available, otherwise neutral
-            if let perf = modelPerformance[model.id],
-               let anyPerf = perf.values.first,
-               anyPerf.totalCost > 0 {
-                let avgCost = NSDecimalNumber(decimal: anyPerf.averageCost).doubleValue
-                return max(0.1, min(1.0, 1.0 / (1.0 + (avgCost * 100))))
-            }
-            return 0.5
+            return 0.5 // Unknown cost, neutral score
         }
 
         // Estimate total cost for expected token usage
@@ -341,19 +306,19 @@ extension ModelRouter {
             )
         }
 
-        // Last resort: create a minimal model reference from user defaults
-        let fallbackModel = AIModel(
+        // Last resort: create a placeholder
+        let placeholder = AIModel(
             id: defaultModel,
             name: "Default Model",
             provider: defaultProvider
         )
 
         return RoutingDecision(
-            model: fallbackModel,
+            model: placeholder,
             provider: defaultProvider,
             taskType: classification.taskType,
             confidence: 0.3,
-            reason: "Fallback to default configured model — no registered models matched",
+            reason: "Fallback - no models available",
             alternatives: [],
             timestamp: Date()
         )
@@ -672,12 +637,10 @@ extension ModelRouter {
 
     // MARK: - Statistics
 
-    /// Returns the performance statistics for the given model across all task types, or `nil` if no data has been recorded.
     public func getModelStatistics(for modelId: String) -> [TaskType: ModelTaskPerformance]? {
         modelPerformance[modelId]
     }
 
-    /// Returns the highest-scoring model for the given task type using the current routing weights and context, or `nil` if no candidates are available.
     public func getBestModel(for taskType: TaskType) -> AIModel? {
         let candidates = getCandidateModels(for: taskType)
         let scored = scoreModels(candidates, for: taskType, context: RoutingContext())
@@ -686,7 +649,6 @@ extension ModelRouter {
 
     // MARK: - Reset
 
-    /// Resets all accumulated model performance tracking data and clears the routing history.
     public func resetPerformanceData() {
         modelPerformance.removeAll()
         routingHistory.removeAll()

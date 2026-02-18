@@ -10,6 +10,7 @@ import Combine
 import CryptoKit
 import Foundation
 import Network
+import OSLog
 
 // Supporting types (ClientConnectionState, ClientCredentials, ClientError) are in TheaRemoteClientTypes.swift
 
@@ -18,6 +19,10 @@ import Network
 /// Client for connecting to Thea remote servers on other devices
 @MainActor
 public class TheaRemoteClient: ObservableObject {
+    // MARK: - Private
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "TheaRemoteClient")
+
     // MARK: - Published State
 
     @Published public private(set) var connectionState: ClientConnectionState = .disconnected
@@ -130,7 +135,11 @@ public class TheaRemoteClient: ObservableObject {
 
         // Send disconnect message
         if connectionState == .connected {
-            try? await send(message: .disconnect)
+            do {
+                try await send(message: .disconnect)
+            } catch {
+                logger.debug("Failed to send disconnect message: \(error.localizedDescription)")
+            }
         }
 
         connection?.cancel()
@@ -149,7 +158,7 @@ public class TheaRemoteClient: ObservableObject {
     private func waitForConnection() async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             let timeoutTask = Task {
-                try await Task.sleep(for: .seconds(10)) // 10 seconds
+                try await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
                 continuation.resume(throwing: ClientError.connectionTimeout)
             }
 
@@ -330,7 +339,12 @@ public class TheaRemoteClient: ObservableObject {
         pingTask = Task {
             while !Task.isCancelled, connectionState == .connected {
                 let pingTime = Date()
-                try? await send(message: .ping)
+                do {
+                    try await send(message: .ping)
+                } catch {
+                    logger.debug("Failed to send ping: \(error.localizedDescription)")
+                    break
+                }
 
                 // Wait for pong (with timeout)
                 do {
@@ -344,7 +358,11 @@ public class TheaRemoteClient: ObservableObject {
                     // Ping timeout - connection may be dead
                 }
 
-                try? await Task.sleep(for: .seconds(5)) // 5 seconds
+                do {
+                    try await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+                } catch {
+                    break
+                }
             }
         }
     }
@@ -391,7 +409,7 @@ public class TheaRemoteClient: ObservableObject {
             }
 
             group.addTask {
-                try await Task.sleep(for: .seconds(timeout))
+                try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
                 throw ClientError.timeout
             }
 

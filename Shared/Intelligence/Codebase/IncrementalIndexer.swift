@@ -203,8 +203,14 @@ public actor IncrementalIndexer {
             }
 
             // Only track regular files
-            guard let resourceValues = try? url.resourceValues(forKeys: [.isRegularFileKey, .contentModificationDateKey]),
-                  resourceValues.isRegularFile == true else {
+            let resourceValues: URLResourceValues
+            do {
+                resourceValues = try url.resourceValues(forKeys: [.isRegularFileKey, .contentModificationDateKey])
+            } catch {
+                logger.debug("Failed to read resource values for \(url.path): \(error.localizedDescription)")
+                continue
+            }
+            guard resourceValues.isRegularFile == true else {
                 continue
             }
 
@@ -268,7 +274,11 @@ public actor IncrementalIndexer {
 
         // Schedule new debounce task
         debounceTask = Task {
-            try? await Task.sleep(for: .seconds(debounceInterval))
+            do {
+                try await Task.sleep(nanoseconds: UInt64(debounceInterval * 1_000_000_000))
+            } catch {
+                return  // Task cancelled â skip flush
+            }
 
             guard !Task.isCancelled else { return }
 
@@ -297,8 +307,14 @@ public actor IncrementalIndexer {
                 continue
             }
 
-            guard let resourceValues = try? url.resourceValues(forKeys: [.isRegularFileKey, .contentModificationDateKey]),
-                  resourceValues.isRegularFile == true else {
+            let resourceValues: URLResourceValues
+            do {
+                resourceValues = try url.resourceValues(forKeys: [.isRegularFileKey, .contentModificationDateKey])
+            } catch {
+                logger.debug("Failed to read resource values for \(url.path): \(error.localizedDescription)")
+                continue
+            }
+            guard resourceValues.isRegularFile == true else {
                 continue
             }
 
@@ -401,7 +417,6 @@ public actor IncrementalIndexer {
 // MARK: - Directory Monitor
 
 /// Low-level directory monitor using GCD
-// @unchecked Sendable: mutable state serialized on dedicated DispatchQueue; GCD source lifecycle
 private final class DirectoryMonitor: @unchecked Sendable {
     private let path: String
     private let callback: () -> Void

@@ -75,17 +75,23 @@ struct BackupConfiguration: Equatable, Codable {
     private static let storageKey = "com.thea.backupConfiguration"
 
     static func load() -> BackupConfiguration {
-        if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(BackupConfiguration.self, from: data)
-        {
-            return config
+        if let data = UserDefaults.standard.data(forKey: storageKey) {
+            do {
+                let config = try JSONDecoder().decode(BackupConfiguration.self, from: data)
+                return config
+            } catch {
+                print("Failed to decode backup configuration: \(error.localizedDescription)")
+            }
         }
         return BackupConfiguration()
     }
 
     func save() {
-        if let data = try? JSONEncoder().encode(self) {
+        do {
+            let data = try JSONEncoder().encode(self)
             UserDefaults.standard.set(data, forKey: Self.storageKey)
+        } catch {
+            print("Failed to encode backup configuration: \(error.localizedDescription)")
         }
     }
 }
@@ -287,34 +293,42 @@ extension BackupSettingsView {
         backupProgress = 0
 
         Task {
-            for i in 1...10 {
-                try? await Task.sleep(for: .milliseconds(300))
-                await MainActor.run {
-                    backupProgress = Double(i) / 10.0
+            do {
+                for i in 1...10 {
+                    try await Task.sleep(nanoseconds: 300_000_000)
+                    await MainActor.run {
+                        backupProgress = Double(i) / 10.0
+                    }
                 }
-            }
 
-            await MainActor.run {
-                let newBackup = BackupSettingsEntry(
-                    id: UUID(),
-                    name: "Backup \(Date().formatted(date: .abbreviated, time: .shortened))",
-                    date: Date(),
-                    size: calculateEstimatedSize(),
-                    type: .manual,
-                    location: backupConfig.backupLocation,
-                    isAutoBackup: false,
-                    isEncrypted: backupConfig.encryptCloudBackups,
-                    isVerified: true,
-                    checksum: UUID().uuidString,
-                    contents: [
-                        BackupSettingsContent(name: "Conversations", count: 15, icon: "bubble.left.and.bubble.right"),
-                        BackupSettingsContent(name: "Settings", count: 1, icon: "gearshape"),
-                        BackupSettingsContent(name: "Knowledge", count: 42, icon: "brain")
-                    ]
-                )
+                await MainActor.run {
+                    let newBackup = BackupSettingsEntry(
+                        id: UUID(),
+                        name: "Backup \(Date().formatted(date: .abbreviated, time: .shortened))",
+                        date: Date(),
+                        size: calculateEstimatedSize(),
+                        type: .manual,
+                        location: backupConfig.backupLocation,
+                        isAutoBackup: false,
+                        isEncrypted: backupConfig.encryptCloudBackups,
+                        isVerified: true,
+                        checksum: UUID().uuidString,
+                        contents: [
+                            BackupSettingsContent(name: "Conversations", count: 15, icon: "bubble.left.and.bubble.right"),
+                            BackupSettingsContent(name: "Settings", count: 1, icon: "gearshape"),
+                            BackupSettingsContent(name: "Knowledge", count: 42, icon: "brain")
+                        ]
+                    )
 
-                backupConfig.backups.insert(newBackup, at: 0)
-                isCreatingBackup = false
+                    backupConfig.backups.insert(newBackup, at: 0)
+                    isCreatingBackup = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Failed to create backup: \(error.localizedDescription)"
+                    showError = true
+                    isCreatingBackup = false
+                }
             }
         }
     }
@@ -324,15 +338,23 @@ extension BackupSettingsView {
         restoreProgress = 0
 
         Task {
-            for i in 1...10 {
-                try? await Task.sleep(for: .milliseconds(400))
-                await MainActor.run {
-                    restoreProgress = Double(i) / 10.0
+            do {
+                for i in 1...10 {
+                    try await Task.sleep(nanoseconds: 400_000_000)
+                    await MainActor.run {
+                        restoreProgress = Double(i) / 10.0
+                    }
                 }
-            }
 
-            await MainActor.run {
-                isRestoringBackup = false
+                await MainActor.run {
+                    isRestoringBackup = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Failed to restore backup: \(error.localizedDescription)"
+                    showError = true
+                    isRestoringBackup = false
+                }
             }
         }
     }

@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { FocusContext, useFocusable, setFocus } from '@noriginmedia/norigin-spatial-navigation';
-import { FocusableButton, FocusableList } from '../components/ui/FocusableCard';
+import { FocusableCard, FocusableButton, FocusableList } from '../components/ui/FocusableCard';
 import { ColorButtonHints } from '../components/ui/ColorButtonHints';
 import { useTVRemote } from '../hooks/useTVRemote';
 import {
@@ -34,21 +34,15 @@ export function SmartHubPage() {
   const [showTorrentModal, setShowTorrentModal] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
 
-  const showNotification = useCallback((message: string) => {
-    setNotification(message);
-    setTimeout(() => setNotification(null), 3000);
+  // Load data on mount
+  useEffect(() => {
+    loadData();
+    // Refresh downloads periodically
+    const interval = setInterval(loadDownloads, 10000);
+    return () => clearInterval(interval);
   }, []);
 
-  const loadDownloads = useCallback(async () => {
-    try {
-      const status = await smartHubService.getDownloadStatus();
-      setDownloads(status);
-    } catch (error) {
-      console.error('Failed to load downloads:', error);
-    }
-  }, []);
-
-  const loadData = useCallback(async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
       const newReleases = await smartHubService.getNewReleases({
@@ -63,14 +57,21 @@ export function SmartHubPage() {
     }
     setLoading(false);
     await loadDownloads();
-  }, [loadDownloads, showNotification]);
+  };
 
-  // Load data on mount
-  useEffect(() => {
-    loadData();
-    const interval = setInterval(loadDownloads, 10000);
-    return () => clearInterval(interval);
-  }, [loadData, loadDownloads]);
+  const loadDownloads = async () => {
+    try {
+      const status = await smartHubService.getDownloadStatus();
+      setDownloads(status);
+    } catch (error) {
+      console.error('Failed to load downloads:', error);
+    }
+  };
+
+  const showNotification = (message: string) => {
+    setNotification(message);
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const handleItemSelect = async (item: SmartHubItem) => {
     setSelectedItem(item);

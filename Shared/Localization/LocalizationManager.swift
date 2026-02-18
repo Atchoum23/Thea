@@ -176,11 +176,14 @@ public final class LocalizationManager: ObservableObject {
         }
 
         // Also load from JSON files for dynamic content
-        if let url = Bundle.main.url(forResource: "Strings_\(languageCode)", withExtension: "json"),
-           let data = try? Data(contentsOf: url),
-           let strings = try? JSONDecoder().decode([String: String].self, from: data)
-        {
-            stringTables[languageCode] = strings
+        if let url = Bundle.main.url(forResource: "Strings_\(languageCode)", withExtension: "json") {
+            do {
+                let data = try Data(contentsOf: url)
+                let strings = try JSONDecoder().decode([String: String].self, from: data)
+                stringTables[languageCode] = strings
+            } catch {
+                logger.error("Failed to load string table for '\(languageCode)': \(error.localizedDescription)")
+            }
         }
     }
 

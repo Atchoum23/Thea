@@ -20,21 +20,20 @@ public final class OfflineQueueService {
     private let logger = Logger(subsystem: "app.thea.offline", category: "OfflineQueue")
     private let monitor = NWPathMonitor()
     private let monitorQueue = DispatchQueue(label: "app.thea.network.monitor")
-    let userDefaults: UserDefaults
 
     // MARK: - State
 
     /// Current network status
-    public internal(set) var isOnline: Bool = true
+    public private(set) var isOnline: Bool = true
 
     /// Queue of pending requests
-    public internal(set) var pendingRequests: [OfflineQueuedRequest] = []
+    public private(set) var pendingRequests: [OfflineQueuedRequest] = []
 
     /// Whether the queue is currently being processed
-    public internal(set) var isProcessing: Bool = false
+    public private(set) var isProcessing: Bool = false
 
     /// Statistics
-    public internal(set) var stats = OfflineQueueStats()
+    public private(set) var stats = OfflineQueueStats()
 
     // MARK: - Configuration
 
@@ -43,15 +42,8 @@ public final class OfflineQueueService {
     // MARK: - Initialization
 
     private init() {
-        self.userDefaults = .standard
         loadPendingRequests()
         startNetworkMonitoring()
-    }
-
-    /// Internal init for testing — skips network monitoring and UserDefaults loading
-    init(forTesting: Bool, userDefaults: UserDefaults = .standard) {
-        self.userDefaults = userDefaults
-        // Do not start network monitor or load from UserDefaults
     }
 
     deinit {
@@ -171,27 +163,33 @@ public final class OfflineQueueService {
             }
 
             // Small delay between requests
-            try? await Task.sleep(for: .milliseconds(100))
+            do {
+                try await Task.sleep(nanoseconds: 100_000_000)
+            } catch {
+                break // Task cancelled — stop processing queue
+            }
         }
 
         savePendingRequests()
     }
 
-    func processRequest(_ request: OfflineQueuedRequest) async throws {
+    private func processRequest(_ request: OfflineQueuedRequest) async throws {
         logger.info("Processing request: \(request.type.rawValue)")
 
         switch request.type {
         case .chat:
             // Chat requests are handled by the ChatManager when replayed
             // The payload contains serialized messages that can be restored
-            if let payload = request.payload,
-               let chatRequest = try? JSONDecoder().decode(ChatRequestPayload.self, from: payload)
-            {
-                // Post notification for ChatManager to handle
-                NotificationCenter.default.post(
-                    name: .offlineRequestReplay,
-                    object: chatRequest
-                )
+            if let payload = request.payload {
+                do {
+                    let chatRequest = try JSONDecoder().decode(ChatRequestPayload.self, from: payload)
+                    NotificationCenter.default.post(
+                        name: .offlineRequestReplay,
+                        object: chatRequest
+                    )
+                } catch {
+                    logger.warning("Could not decode chat request payload: \(error.localizedDescription)")
+                }
             }
 
         case .sync:
@@ -204,21 +202,28 @@ public final class OfflineQueueService {
 
         case .notification:
             // Re-post local notification from payload
-            if let payload = request.payload,
-               let info = try? JSONDecoder().decode([String: String].self, from: payload),
-               let title = info["title"],
-               let body = info["body"]
-            {
-                let content = UNMutableNotificationContent()
-                content.title = title
-                content.body = body
-                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-                let notifRequest = UNNotificationRequest(
-                    identifier: request.id.uuidString,
-                    content: content,
-                    trigger: trigger
-                )
-                try? await UNUserNotificationCenter.current().add(notifRequest)
+            if let payload = request.payload {
+                do {
+                    let info = try JSONDecoder().decode([String: String].self, from: payload)
+                    if let title = info["title"], let body = info["body"] {
+                        let content = UNMutableNotificationContent()
+                        content.title = title
+                        content.body = body
+                        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+                        let notifRequest = UNNotificationRequest(
+                            identifier: request.id.uuidString,
+                            content: content,
+                            trigger: trigger
+                        )
+                        do {
+                            try await UNUserNotificationCenter.current().add(notifRequest)
+                        } catch {
+                            logger.warning("Failed to post local notification: \(error.localizedDescription)")
+                        }
+                    }
+                } catch {
+                    logger.warning("Could not decode notification payload: \(error.localizedDescription)")
+                }
             }
 
         case .memory:
@@ -236,11 +241,11 @@ public final class OfflineQueueService {
         }
     }
 
-    func removeRequest(_ id: UUID) {
+    private func removeRequest(_ id: UUID) {
         pendingRequests.removeAll { $0.id == id }
     }
 
-    func updateRequest(_ request: OfflineQueuedRequest) {
+    private func updateRequest(_ request: OfflineQueuedRequest) {
         if let index = pendingRequests.firstIndex(where: { $0.id == request.id }) {
             pendingRequests[index] = request
         }
@@ -248,25 +253,23 @@ public final class OfflineQueueService {
 
     // MARK: - Persistence
 
-    func loadPendingRequests() {
-        guard let data = userDefaults.data(forKey: "offline.pendingRequests") else { return }
+    private func loadPendingRequests() {
+        guard let data = UserDefaults.standard.data(forKey: "offline.pendingRequests") else { return }
         do {
             let requests = try JSONDecoder().decode([OfflineQueuedRequest].self, from: data)
             pendingRequests = requests
             logger.info("Loaded \(requests.count) pending requests from storage")
         } catch {
-            // Corrupted data — clear so we don't block future queuing
-            logger.error("Failed to decode offline queue from UserDefaults: \(error.localizedDescription, privacy: .public)")
-            userDefaults.removeObject(forKey: "offline.pendingRequests")
+            logger.debug("Could not decode pending requests: \(error.localizedDescription)")
         }
     }
 
-    func savePendingRequests() {
+    private func savePendingRequests() {
         do {
             let data = try JSONEncoder().encode(pendingRequests)
-            userDefaults.set(data, forKey: "offline.pendingRequests")
+            UserDefaults.standard.set(data, forKey: "offline.pendingRequests")
         } catch {
-            logger.error("Failed to encode offline queue for persistence: \(error.localizedDescription, privacy: .public)")
+            logger.error("Failed to save pending requests: \(error.localizedDescription)")
         }
     }
 

@@ -8,7 +8,6 @@ import OSLog
 
 // MARK: - OpenRouter Provider
 
-// @unchecked Sendable: stateless provider — all stored properties are immutable configuration
 public final class OpenRouterProvider: AIProvider, @unchecked Sendable {
     public let id = "openrouter"
     public let name = "OpenRouter"

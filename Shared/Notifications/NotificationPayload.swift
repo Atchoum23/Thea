@@ -8,6 +8,9 @@
 
 import CloudKit
 import Foundation
+import OSLog
+
+private let payloadLogger = Logger(subsystem: "ai.thea.app", category: "NotificationPayload")
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -267,9 +270,13 @@ public struct CrossDeviceNotificationPayload: Codable, Sendable, Identifiable {
         }
 
         // Decode userInfo from JSON string
-        if let userInfoData = (record["userInfo"] as? String)?.data(using: .utf8),
-           let decoded = try? JSONDecoder().decode([String: String].self, from: userInfoData) {
-            userInfo = decoded
+        if let userInfoData = (record["userInfo"] as? String)?.data(using: .utf8) {
+            do {
+                userInfo = try JSONDecoder().decode([String: String].self, from: userInfoData)
+            } catch {
+                payloadLogger.debug("Could not decode userInfo: \(error.localizedDescription)")
+                userInfo = [:]
+            }
         } else {
             userInfo = [:]
         }
@@ -279,9 +286,14 @@ public struct CrossDeviceNotificationPayload: Codable, Sendable, Identifiable {
         sourceDeviceName = record["sourceDeviceName"] as? String ?? "Unknown"
 
         // Decode target device IDs
-        if let targetIdsData = (record["targetDeviceIds"] as? String)?.data(using: .utf8),
-           let decoded = try? JSONDecoder().decode([String].self, from: targetIdsData) {
-            targetDeviceIds = decoded.compactMap { UUID(uuidString: $0) }
+        if let targetIdsData = (record["targetDeviceIds"] as? String)?.data(using: .utf8) {
+            do {
+                let decoded = try JSONDecoder().decode([String].self, from: targetIdsData)
+                targetDeviceIds = decoded.compactMap { UUID(uuidString: $0) }
+            } catch {
+                payloadLogger.debug("Could not decode targetDeviceIds: \(error.localizedDescription)")
+                targetDeviceIds = nil
+            }
         } else {
             targetDeviceIds = nil
         }
@@ -321,19 +333,28 @@ public struct CrossDeviceNotificationPayload: Codable, Sendable, Identifiable {
         }
 
         // Encode userInfo as JSON string
-        if let userInfoData = try? JSONEncoder().encode(userInfo),
-           let userInfoString = String(data: userInfoData, encoding: .utf8) {
-            record["userInfo"] = userInfoString as CKRecordValue
+        do {
+            let userInfoData = try JSONEncoder().encode(userInfo)
+            if let userInfoString = String(data: userInfoData, encoding: .utf8) {
+                record["userInfo"] = userInfoString as CKRecordValue
+            }
+        } catch {
+            payloadLogger.debug("Could not encode userInfo: \(error.localizedDescription)")
         }
 
         record["sourceDeviceId"] = sourceDeviceId.uuidString as CKRecordValue
         record["sourceDeviceName"] = sourceDeviceName as CKRecordValue
 
         // Encode target device IDs
-        if let targetDeviceIds,
-           let targetIdsData = try? JSONEncoder().encode(targetDeviceIds.map(\.uuidString)),
-           let targetIdsString = String(data: targetIdsData, encoding: .utf8) {
-            record["targetDeviceIds"] = targetIdsString as CKRecordValue
+        if let targetDeviceIds {
+            do {
+                let targetIdsData = try JSONEncoder().encode(targetDeviceIds.map(\.uuidString))
+                if let targetIdsString = String(data: targetIdsData, encoding: .utf8) {
+                    record["targetDeviceIds"] = targetIdsString as CKRecordValue
+                }
+            } catch {
+                payloadLogger.debug("Could not encode targetDeviceIds: \(error.localizedDescription)")
+            }
         }
 
         record["createdAt"] = createdAt as CKRecordValue

@@ -8,6 +8,7 @@
 // - LoRA and adaptive fine-tuning techniques
 
 import Foundation
+import OSLog
 
 // MARK: - Self-Tuning Engine
 
@@ -170,6 +171,8 @@ final class SelfTuningEngine {
     }
 
     // MARK: - Initialization
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "SelfTuningEngine")
 
     private init() {
         loadState()
@@ -653,47 +656,71 @@ final class SelfTuningEngine {
     // MARK: - Persistence
 
     private func loadState() {
-        if let data = UserDefaults.standard.data(forKey: "SelfTuning.parameters"),
-           let params = try? JSONDecoder().decode(ModelParameters.self, from: data) {
-            currentParameters = params
+        if let data = UserDefaults.standard.data(forKey: "SelfTuning.parameters") {
+            do {
+                currentParameters = try JSONDecoder().decode(ModelParameters.self, from: data)
+            } catch {
+                logger.error("Failed to decode SelfTuning.parameters: \(error.localizedDescription)")
+            }
         }
 
-        if let data = UserDefaults.standard.data(forKey: "SelfTuning.history"),
-           let history = try? JSONDecoder().decode([OptimizationTrial].self, from: data) {
-            optimizationHistory = history
+        if let data = UserDefaults.standard.data(forKey: "SelfTuning.history") {
+            do {
+                optimizationHistory = try JSONDecoder().decode([OptimizationTrial].self, from: data)
+            } catch {
+                logger.error("Failed to decode SelfTuning.history: \(error.localizedDescription)")
+            }
         }
 
-        if let data = UserDefaults.standard.data(forKey: "SelfTuning.metrics"),
-           let metrics = try? JSONDecoder().decode(PerformanceMetrics.self, from: data) {
-            performanceMetrics = metrics
+        if let data = UserDefaults.standard.data(forKey: "SelfTuning.metrics") {
+            do {
+                performanceMetrics = try JSONDecoder().decode(PerformanceMetrics.self, from: data)
+            } catch {
+                logger.error("Failed to decode SelfTuning.metrics: \(error.localizedDescription)")
+            }
         }
     }
 
     private func saveState() {
-        if let data = try? JSONEncoder().encode(currentParameters) {
+        do {
+            let data = try JSONEncoder().encode(currentParameters)
             UserDefaults.standard.set(data, forKey: "SelfTuning.parameters")
+        } catch {
+            logger.error("Failed to encode SelfTuning.parameters: \(error.localizedDescription)")
         }
 
-        if let data = try? JSONEncoder().encode(optimizationHistory) {
+        do {
+            let data = try JSONEncoder().encode(optimizationHistory)
             UserDefaults.standard.set(data, forKey: "SelfTuning.history")
+        } catch {
+            logger.error("Failed to encode SelfTuning.history: \(error.localizedDescription)")
         }
 
-        if let data = try? JSONEncoder().encode(performanceMetrics) {
+        do {
+            let data = try JSONEncoder().encode(performanceMetrics)
             UserDefaults.standard.set(data, forKey: "SelfTuning.metrics")
+        } catch {
+            logger.error("Failed to encode SelfTuning.metrics: \(error.localizedDescription)")
         }
     }
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "SelfTuning.config"),
-           let config = try? JSONDecoder().decode(Configuration.self, from: data) {
-            configuration = config
+        if let data = UserDefaults.standard.data(forKey: "SelfTuning.config") {
+            do {
+                configuration = try JSONDecoder().decode(Configuration.self, from: data)
+            } catch {
+                logger.error("Failed to decode SelfTuning.config: \(error.localizedDescription)")
+            }
         }
     }
 
     func updateConfiguration(_ config: Configuration) {
         configuration = config
-        if let data = try? JSONEncoder().encode(config) {
+        do {
+            let data = try JSONEncoder().encode(config)
             UserDefaults.standard.set(data, forKey: "SelfTuning.config")
+        } catch {
+            logger.error("Failed to encode SelfTuning.config: \(error.localizedDescription)")
         }
     }
 }

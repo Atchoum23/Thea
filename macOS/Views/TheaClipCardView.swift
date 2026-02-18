@@ -27,23 +27,6 @@ struct TheaClipCardView: View {
         .onTapGesture(count: 2) {
             onPaste?()
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(clipAccessibilityLabel)
-        .accessibilityHint("Double-tap to paste this clipboard entry")
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
-    }
-
-    private var clipAccessibilityLabel: String {
-        var parts: [String] = []
-        parts.append("\(entry.contentType) clipboard entry")
-        parts.append(entry.previewText)
-        if let appName = entry.sourceAppName {
-            parts.append("from \(appName)")
-        }
-        if entry.isFavorite { parts.append("favorite") }
-        if entry.isPinned { parts.append("pinned") }
-        if entry.isSensitive { parts.append("sensitive") }
-        return parts.joined(separator: ", ")
     }
 
     // MARK: - Content Preview
@@ -61,12 +44,12 @@ struct TheaClipCardView: View {
             HStack(spacing: 4) {
                 Image(systemName: "link")
                     .font(.caption2)
-                    .foregroundStyle(.theaInfo)
+                    .foregroundStyle(.blue)
                     .accessibilityHidden(true)
                 Text(entry.urlString ?? entry.previewText)
                     .font(.caption)
                     .lineLimit(2)
-                    .foregroundStyle(.theaInfo)
+                    .foregroundStyle(.blue)
             }
 
         case .image:
@@ -78,7 +61,6 @@ struct TheaClipCardView: View {
                             .aspectRatio(contentMode: .fit)
                             .frame(maxHeight: 120)
                             .clipShape(RoundedRectangle(cornerRadius: 4))
-                            .accessibilityLabel("Clipboard image preview")
                     }
                 #endif
             } else {
@@ -133,21 +115,21 @@ struct TheaClipCardView: View {
             if entry.isFavorite {
                 Image(systemName: "star.fill")
                     .font(.system(size: 9))
-                    .foregroundStyle(.theaWarning)
+                    .foregroundStyle(.yellow)
                     .accessibilityHidden(true)
             }
 
             if entry.isPinned {
                 Image(systemName: "pin.fill")
                     .font(.system(size: 9))
-                    .foregroundStyle(.theaWarning)
+                    .foregroundStyle(.orange)
                     .accessibilityHidden(true)
             }
 
             if entry.isSensitive {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 9))
-                    .foregroundStyle(.theaError)
+                    .foregroundStyle(.red)
                     .accessibilityHidden(true)
             }
 

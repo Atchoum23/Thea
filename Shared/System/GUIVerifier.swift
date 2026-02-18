@@ -65,7 +65,7 @@
 
             // Wait for UI to settle
             if waitSeconds > 0 {
-                try await Task.sleep(for: .seconds(waitSeconds))
+                try await Task.sleep(nanoseconds: UInt64(waitSeconds * 1_000_000_000))
             }
 
             // Capture screenshot
@@ -99,9 +99,17 @@
             var screenshotData: Data?
             #if os(macOS)
                 let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("verification_\(UUID().uuidString).png")
-                try? await ScreenCapture.shared.saveToFile(screenshot, path: tempURL.path)
-                screenshotData = try? Data(contentsOf: tempURL)
-                try? FileManager.default.removeItem(at: tempURL)
+                do {
+                    try await ScreenCapture.shared.saveToFile(screenshot, path: tempURL.path)
+                    screenshotData = try Data(contentsOf: tempURL)
+                } catch {
+                    logger.debug("Failed to capture screenshot data: \(error.localizedDescription)")
+                }
+                do {
+                    try FileManager.default.removeItem(at: tempURL)
+                } catch {
+                    logger.debug("Failed to remove temp screenshot file: \(error.localizedDescription)")
+                }
             #endif
 
             let result = VerificationResult(
@@ -131,7 +139,7 @@
 
             // Wait for UI to settle
             if waitSeconds > 0 {
-                try await Task.sleep(for: .seconds(waitSeconds))
+                try await Task.sleep(nanoseconds: UInt64(waitSeconds * 1_000_000_000))
             }
 
             // Capture screenshot (top portion where title usually is)
@@ -177,7 +185,7 @@
 
             // Wait for build to complete
             if waitSeconds > 0 {
-                try await Task.sleep(for: .seconds(waitSeconds))
+                try await Task.sleep(nanoseconds: UInt64(waitSeconds * 1_000_000_000))
             }
 
             // Capture screenshot
@@ -214,7 +222,7 @@
             logger.info("Running custom verification")
 
             if waitSeconds > 0 {
-                try await Task.sleep(for: .seconds(waitSeconds))
+                try await Task.sleep(nanoseconds: UInt64(waitSeconds * 1_000_000_000))
             }
 
             let screenshot = try await ScreenCapture.shared.captureScreen()

@@ -11,7 +11,7 @@
  */
 
 import { secureConfigService } from '../config/SecureConfigService';
-import { traktCalendarService } from '../trakt/TraktCalendarService';
+import { traktCalendarService, TraktCalendarItem } from '../trakt/TraktCalendarService';
 
 export interface PredictedContent {
   id: string;

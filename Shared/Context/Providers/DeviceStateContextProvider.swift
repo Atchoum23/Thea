@@ -1,5 +1,5 @@
 import Foundation
-import os.log
+import OSLog
 #if canImport(UIKit)
     import UIKit
 #endif
@@ -55,7 +55,11 @@ public actor DeviceStateContextProvider: ContextProvider {
         updateTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.updateDeviceState()
-                try? await Task.sleep(for: .seconds(30))
+                do {
+                    try await Task.sleep(for: .seconds(30))
+                } catch {
+                    break // Task cancelled — stop periodic updates
+                }
             }
         }
 

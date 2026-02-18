@@ -1,5 +1,4 @@
 import Foundation
-import os.log
 
 #if os(macOS)
 import MLX
@@ -12,7 +11,6 @@ import MLXAudioCore
 // Enables private voice interaction without API calls
 
 /// Sendable wrapper for ML model references that are only accessed from @MainActor
-
 private struct SendableModelBox<T>: @unchecked Sendable {
     let model: T
 }
@@ -21,8 +19,6 @@ private struct SendableModelBox<T>: @unchecked Sendable {
 @Observable
 final class MLXAudioEngine {
     static let shared = MLXAudioEngine()
-
-    private let logger = Logger(subsystem: "ai.thea.app", category: "mlx-audio-engine")
 
     // MARK: - State
 
@@ -36,25 +32,7 @@ final class MLXAudioEngine {
     private(set) var isLoadingSTT = false
     private(set) var lastError: Error?
 
-    private var memoryPressureSource: DispatchSourceMemoryPressure?
-
-    private init() {
-        setupMemoryPressureHandler()
-    }
-
-    private func setupMemoryPressureHandler() {
-        let source = DispatchSource.makeMemoryPressureSource(eventMask: [.warning, .critical], queue: .main)
-        source.setEventHandler { [weak self] in
-            Task { @MainActor in
-                guard let self else { return }
-                self.logger.warning("MLXAudioEngine: Memory pressure detected, unloading models")
-                self.unloadTTSModel()
-                self.unloadSTTModel()
-            }
-        }
-        source.resume()
-        memoryPressureSource = source
-    }
+    private init() {}
 
     // MARK: - TTS Model Loading
 
@@ -69,10 +47,10 @@ final class MLXAudioEngine {
             let model = try await TTSModelUtils.loadModel(modelRepo: modelID)
             _ttsModel = SendableModelBox(model: model)
             ttsModelID = modelID
-            logger.info("MLXAudioEngine: Loaded TTS model \(modelID)")
+            print("MLXAudioEngine: Loaded TTS model \(modelID)")
         } catch {
             lastError = error
-            logger.error("MLXAudioEngine: Failed to load TTS \(modelID): \(error)")
+            print("MLXAudioEngine: Failed to load TTS \(modelID): \(error)")
             throw error
         }
     }
@@ -95,10 +73,10 @@ final class MLXAudioEngine {
             let model = try await GLMASRModel.fromPretrained(modelID)
             _sttModel = SendableModelBox(model: model)
             sttModelID = modelID
-            logger.info("MLXAudioEngine: Loaded STT model \(modelID)")
+            print("MLXAudioEngine: Loaded STT model \(modelID)")
         } catch {
             lastError = error
-            logger.error("MLXAudioEngine: Failed to load STT \(modelID): \(error)")
+            print("MLXAudioEngine: Failed to load STT \(modelID): \(error)")
             throw error
         }
     }

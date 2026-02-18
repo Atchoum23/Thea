@@ -12,8 +12,7 @@
 import CloudKit
 import Combine
 import Foundation
-import os.log
-
+import OSLog
 // MARK: - Draft Model
 
 /// Represents a draft input that persists across sessions and devices
@@ -327,7 +326,11 @@ public final class DraftSyncManager: ObservableObject {
         let delay = liveSyncEnabled ? 0.5 : syncDelaySeconds
 
         syncDebounceTask = Task {
-            try? await Task.sleep(for: .seconds(delay))
+            do {
+                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            } catch {
+                // Task cancelled — debounce cancelled
+            }
 
             if !Task.isCancelled {
                 await syncToCloud()

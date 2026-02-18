@@ -197,7 +197,11 @@ final class TravelManager: ObservableObject {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         let dir = appSupport.appendingPathComponent("Thea/LifeManagement", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        } catch {
+            travelLogger.error("Failed to create storage directory: \(error.localizedDescription)")
+        }
         storageURL = dir.appendingPathComponent("travel.json")
         loadState()
     }
@@ -248,17 +252,28 @@ final class TravelManager: ObservableObject {
     private func save() {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        if let data = try? encoder.encode(trips) {
-            try? data.write(to: storageURL, options: .atomic)
+        do {
+            let data = try encoder.encode(trips)
+            try data.write(to: storageURL, options: .atomic)
+        } catch {
+            travelLogger.error("Failed to save travel data: \(error.localizedDescription)")
         }
     }
 
     private func loadState() {
-        guard let data = try? Data(contentsOf: storageURL) else { return }
+        let data: Data
+        do {
+            data = try Data(contentsOf: storageURL)
+        } catch {
+            travelLogger.error("Failed to read travel data: \(error.localizedDescription)")
+            return
+        }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        if let loaded = try? decoder.decode([TravelTrip].self, from: data) {
-            trips = loaded
+        do {
+            trips = try decoder.decode([TravelTrip].self, from: data)
+        } catch {
+            travelLogger.error("Failed to decode travel data: \(error.localizedDescription)")
         }
     }
 }

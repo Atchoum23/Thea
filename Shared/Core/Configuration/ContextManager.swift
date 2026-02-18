@@ -49,22 +49,15 @@ public actor ContextManager {
     }
 
     /// Get context window for a conversation
-    /// - Parameters:
-    ///   - messages: Tokenized messages in the conversation.
-    ///   - provider: Provider identifier for context size lookup.
-    ///   - forMetaAI: Whether extra tokens should be reserved for MetaAI operations.
-    ///   - reservedForResponse: Override for response token reservation.
-    ///     Pass the result of `SystemCapabilityService.shared.recommendedReservedForResponse(for:)`
-    ///     from the `@MainActor` call site. Defaults to 4096.
     public func getContextWindow(
         messages: [TokenizedMessage],
         provider: String,
-        forMetaAI: Bool = false,
-        reservedForResponse: Int = 4096
+        forMetaAI: Bool = false
     ) -> ContextWindow {
         let totalTokens = config.getEffectiveContextSize(for: provider)
 
         // Calculate reserved space
+        let reservedForResponse = 4096 // Space for model's response
         let reservedForMetaAI = forMetaAI ? config.metaAIReservedTokens : 0
         let availableForMessages = totalTokens - reservedForResponse - reservedForMetaAI
 
@@ -84,19 +77,13 @@ public actor ContextManager {
     }
 
     /// Prepare messages for API call, respecting context limits
-    /// - Parameters:
-    ///   - messages: Tokenized messages.
-    ///   - provider: Provider identifier.
-    ///   - forMetaAI: Reserve extra tokens for MetaAI operations.
-    ///   - reservedForResponse: Response token reservation override (default 4096).
-    ///     Pass `SystemCapabilityService.shared.recommendedReservedForResponse(for:)` from call site.
     public func prepareMessagesForAPI(
         messages: [TokenizedMessage],
         provider: String,
-        forMetaAI: Bool = false,
-        reservedForResponse: Int = 4096
+        forMetaAI: Bool = false
     ) async -> [TokenizedMessage] {
         let totalTokens = config.getEffectiveContextSize(for: provider)
+        let reservedForResponse = 4096
         let reservedForMetaAI = forMetaAI ? config.metaAIReservedTokens : 0
         let availableForMessages = totalTokens - reservedForResponse - reservedForMetaAI
 
@@ -120,20 +107,15 @@ public actor ContextManager {
     }
 
     /// Check if adding a message would exceed context
-    /// - Parameters:
-    ///   - currentTokens: Current token count in context.
-    ///   - newMessageTokens: Tokens in the new message.
-    ///   - provider: Provider identifier.
-    ///   - reservedForResponse: Response token reservation override (default 4096).
     public func wouldExceedContext(
         currentTokens: Int,
         newMessageTokens: Int,
-        provider: String,
-        reservedForResponse: Int = 4096
+        provider: String
     ) -> Bool {
         guard config.contextStrategy != .unlimited else { return false }
 
         let maxTokens = config.getEffectiveContextSize(for: provider)
+        let reservedForResponse = 4096
         return (currentTokens + newMessageTokens) > (maxTokens - reservedForResponse)
     }
 

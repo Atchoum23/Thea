@@ -59,7 +59,11 @@
             logger.info("Setting up HomeKit orchestrator")
 
             // Wait for homes to be loaded
-            try? await Task.sleep(for: .seconds(1))
+            do {
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+            } catch {
+                // Cancellation is normal â continue setup
+            }
 
             // Use first available home as primary (primaryHome deprecated in iOS 16.1)
             if let primary = homeManager.homes.first {
@@ -295,14 +299,22 @@
             // Morning routine prediction
             if context.hour == 6, context.minute == 30, !context.isWeekend {
                 if hasHistoricalPattern(for: "morning_routine") {
-                    try? await executeScene(named: "Good Morning")
+                    do {
+                        try await executeScene(named: "Good Morning")
+                    } catch {
+                        logger.error("Predictive morning scene failed: \(error.localizedDescription)")
+                    }
                 }
             }
 
             // Evening prediction
             if context.hour == 18, context.sunPosition == .evening {
                 if hasHistoricalPattern(for: "evening_lights") {
-                    try? await executeScene(named: "Evening")
+                    do {
+                        try await executeScene(named: "Evening")
+                    } catch {
+                        logger.error("Predictive evening scene failed: \(error.localizedDescription)")
+                    }
                 }
             }
 
@@ -324,15 +336,27 @@
             for action in rule.actions {
                 switch action {
                 case let .setDevice(serviceId, characteristic, value):
-                    try? await controlDevice(serviceId: serviceId, characteristic: characteristic, value: value)
+                    do {
+                        try await controlDevice(serviceId: serviceId, characteristic: characteristic, value: value)
+                    } catch {
+                        logger.error("Automation rule '\(rule.name)' device control failed: \(error.localizedDescription)")
+                    }
                 case let .executeScene(sceneName):
-                    try? await executeScene(named: sceneName)
+                    do {
+                        try await executeScene(named: sceneName)
+                    } catch {
+                        logger.error("Automation rule '\(rule.name)' scene '\(sceneName)' failed: \(error.localizedDescription)")
+                    }
                 case let .notify(message):
-                    // Send notification
-                    try? await CrossDeviceNotificationRouter.shared.sendNotification(
+                    // Best-effort notification — logging failure of a notification is a dead end
+                    do {
+                    try await CrossDeviceNotificationRouter.shared.sendNotification(
                         title: "Thea Home",
                         body: message
                     )
+                    } catch {
+                        logger.error("Failed to send home automation notification: \(error.localizedDescription)")
+                    }
                 }
             }
         }
@@ -346,7 +370,11 @@
                 let lights = getLightServices()
                 if let randomLight = lights.randomElement() {
                     let shouldBeOn = Bool.random()
-                    try? await setDevicePower(serviceId: randomLight, on: shouldBeOn)
+                    do {
+                        try await setDevicePower(serviceId: randomLight, on: shouldBeOn)
+                    } catch {
+                        logger.error("Away mode presence simulation failed for \(randomLight): \(error.localizedDescription)")
+                    }
                 }
             }
         }
@@ -367,10 +395,14 @@
                 if state.serviceType == HMServiceTypeLightbulb, onDuration > 14400 {
                     logger.info("Suggesting to turn off \(state.accessoryName) - on for \(onDuration / 3600) hours")
 
-                    try? await CrossDeviceNotificationRouter.shared.sendNotification(
+                    do {
+                    try await CrossDeviceNotificationRouter.shared.sendNotification(
                         title: "Energy Optimization",
                         body: "\(state.accessoryName) has been on for \(Int(onDuration / 3600)) hours"
                     )
+                    } catch {
+                        logger.error("Failed to send energy optimization notification: \(error.localizedDescription)")
+                    }
                 }
             }
 

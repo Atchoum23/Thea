@@ -43,8 +43,8 @@ public actor MessagesMonitor {
         return "\(home)/Library/Messages/chat.db"
     }()
 
-    // Poll interval — base 15s (was 5s), scaled by EnergyAdaptiveThrottler
-    private let baseIntervalSeconds: Double = 15.0
+    // Poll interval
+    private let pollIntervalSeconds: UInt64 = 5
 
     public init() {}
 
@@ -133,9 +133,11 @@ public actor MessagesMonitor {
     private func monitorLoop() async {
         while isRunning && !Task.isCancelled {
             await checkForNewMessages()
-            let multiplier = await MainActor.run { EnergyAdaptiveThrottler.shared.intervalMultiplier }
-            let interval = baseIntervalSeconds * multiplier
-            try? await Task.sleep(for: .seconds(interval))
+            do {
+                try await Task.sleep(nanoseconds: pollIntervalSeconds * 1_000_000_000)
+            } catch {
+                break
+            }
         }
     }
 

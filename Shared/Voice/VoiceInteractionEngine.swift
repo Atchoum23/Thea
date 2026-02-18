@@ -5,6 +5,7 @@
 import Foundation
 import Speech
 import AVFoundation
+import OSLog
 
 // MARK: - Voice Interaction Engine
 
@@ -14,6 +15,8 @@ import AVFoundation
 @Observable
 final class VoiceInteractionEngine {
     static let shared = VoiceInteractionEngine()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "VoiceInteractionEngine")
 
     // MARK: - State
 
@@ -209,7 +212,11 @@ final class VoiceInteractionEngine {
 
         // Auto-stop after max duration
         Task {
-            try? await Task.sleep(for: .seconds(configuration.maxListeningDuration))
+            do {
+                try await Task.sleep(for: .seconds(configuration.maxListeningDuration))
+            } catch {
+                logger.debug("Auto-stop sleep interrupted: \(error)")
+            }
             if isListening {
                 stopListening()
             }
@@ -391,7 +398,11 @@ final class VoiceInteractionEngine {
 
     private func waitForSpeechCompletion() async {
         while isSpeaking {
-            try? await Task.sleep(for: .milliseconds(100))
+            do {
+                try await Task.sleep(for: .milliseconds(100))
+            } catch {
+                break
+            }
         }
     }
 
@@ -425,15 +436,21 @@ final class VoiceInteractionEngine {
     }
 
     private func loadConfiguration() {
-        if let data = UserDefaults.standard.data(forKey: "VoiceInteraction.config"),
-           let config = try? JSONDecoder().decode(Configuration.self, from: data) {
-            configuration = config
+        if let data = UserDefaults.standard.data(forKey: "VoiceInteraction.config") {
+            do {
+                configuration = try JSONDecoder().decode(Configuration.self, from: data)
+            } catch {
+                logger.error("Failed to decode voice configuration: \(error)")
+            }
         }
     }
 
     private func saveConfiguration() {
-        if let data = try? JSONEncoder().encode(configuration) {
+        do {
+            let data = try JSONEncoder().encode(configuration)
             UserDefaults.standard.set(data, forKey: "VoiceInteraction.config")
+        } catch {
+            logger.error("Failed to encode voice configuration: \(error)")
         }
     }
 
@@ -446,7 +463,6 @@ final class VoiceInteractionEngine {
 
 // MARK: - Synthesizer Delegate
 
-// @unchecked Sendable: NSObject delegate — callbacks forwarded to @MainActor engine
 private class SynthesizerDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
     weak var engine: VoiceInteractionEngine?
 

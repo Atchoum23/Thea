@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 #if os(macOS)
 import MLXLMCommon
 #endif
@@ -11,6 +12,8 @@ import MLXLMCommon
 @Observable
 final class LocalModelManager {
     static let shared = LocalModelManager()
+
+    private let logger = Logger(subsystem: "com.thea.app", category: "LocalModelManager")
 
     private(set) var availableModels: [LocalModel] = []
     private(set) var runningModels: [String: LocalModelInstance] = [:]
@@ -60,11 +63,14 @@ final class LocalModelManager {
     }
 
     private func loadCustomPaths() {
-        if let data = UserDefaults.standard.data(forKey: "LocalModelManager.customPaths"),
-           let paths = try? JSONDecoder().decode([URL].self, from: data)
-        {
-            customModelPaths = paths
-        } else {
+        if let data = UserDefaults.standard.data(forKey: "LocalModelManager.customPaths") {
+            do {
+                customModelPaths = try JSONDecoder().decode([URL].self, from: data)
+            } catch {
+                logger.debug("Could not decode custom model paths: \(error.localizedDescription)")
+            }
+        }
+        if customModelPaths.isEmpty {
             // Default to SharedLLMs from configuration
             #if os(macOS)
                 let sharedLLMs = FileManager.default.homeDirectoryForCurrentUser
@@ -85,8 +91,11 @@ final class LocalModelManager {
     }
 
     private func saveCustomPaths() {
-        if let data = try? JSONEncoder().encode(customModelPaths) {
+        do {
+            let data = try JSONEncoder().encode(customModelPaths)
             UserDefaults.standard.set(data, forKey: "LocalModelManager.customPaths")
+        } catch {
+            logger.error("Failed to save custom model paths: \(error.localizedDescription)")
         }
     }
 
@@ -253,18 +262,32 @@ final class LocalModelManager {
         let hubPath = mlxPath.appendingPathComponent("hub")
         guard FileManager.default.fileExists(atPath: hubPath.path) else { return }
 
-        guard let modelDirs = try? FileManager.default.contentsOfDirectory(
-            at: hubPath, includingPropertiesForKeys: [.isDirectoryKey]
-        ) else { return }
+        let modelDirs: [URL]
+        do {
+            modelDirs = try FileManager.default.contentsOfDirectory(
+                at: hubPath, includingPropertiesForKeys: [.isDirectoryKey]
+            )
+        } catch {
+            logger.debug("Could not list hub model directories: \(error.localizedDescription)")
+            return
+        }
 
         for modelDir in modelDirs {
             guard !modelDir.lastPathComponent.hasPrefix(".") else { continue }
 
             let snapshotsPath = modelDir.appendingPathComponent("snapshots")
-            guard FileManager.default.fileExists(atPath: snapshotsPath.path),
-                  let snapshots = try? FileManager.default.contentsOfDirectory(
-                      at: snapshotsPath, includingPropertiesForKeys: [.isDirectoryKey]),
-                  let snapshotDir = snapshots.first else { continue }
+            guard FileManager.default.fileExists(atPath: snapshotsPath.path) else { continue }
+            let snapshotDir: URL
+            do {
+                let snapshots = try FileManager.default.contentsOfDirectory(
+                    at: snapshotsPath, includingPropertiesForKeys: [.isDirectoryKey]
+                )
+                guard let first = snapshots.first else { continue }
+                snapshotDir = first
+            } catch {
+                logger.debug("Could not list snapshots for \(modelDir.lastPathComponent): \(error.localizedDescription)")
+                continue
+            }
 
             guard isValidMLXModelDirectory(snapshotDir) else { continue }
 
@@ -335,11 +358,15 @@ final class LocalModelManager {
     private func extractParameters(from name: String) -> String {
         let patterns = ["(\\d+\\.?\\d*)B", "(\\d+)b"]
         for pattern in patterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
-               let match = regex.firstMatch(in: name, range: NSRange(name.startIndex..., in: name)),
-               let range = Range(match.range(at: 1), in: name)
-            {
-                return String(name[range]) + "B"
+            do {
+                let regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+                if let match = regex.firstMatch(in: name, range: NSRange(name.startIndex..., in: name)),
+                   let range = Range(match.range(at: 1), in: name)
+                {
+                    return String(name[range]) + "B"
+                }
+            } catch {
+                logger.debug("Failed to compile parameter regex: \(error.localizedDescription)")
             }
         }
         return config.defaultParameters
@@ -403,8 +430,12 @@ extension LocalModelManager {
         ) else { return 0 }
 
         for case let fileURL as URL in enumerator {
-            if let size = try? fileURL.resourceValues(forKeys: [.fileSizeKey]).fileSize {
-                totalSize += Int64(size)
+            do {
+                if let size = try fileURL.resourceValues(forKeys: [.fileSizeKey]).fileSize {
+                    totalSize += Int64(size)
+                }
+            } catch {
+                logger.debug("Could not get file size for \(fileURL.lastPathComponent): \(error.localizedDescription)")
             }
         }
         return totalSize

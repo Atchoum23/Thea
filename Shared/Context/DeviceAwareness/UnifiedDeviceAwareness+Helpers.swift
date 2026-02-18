@@ -5,7 +5,10 @@ import UIKit
 #elseif os(macOS)
 import AppKit
 import IOKit.ps
+import OSLog
 #endif
+
+private let deviceAwarenessHelpersLogger = Logger(subsystem: "ai.thea.app", category: "UnifiedDeviceAwareness")
 
 // MARK: - Helper Methods
 
@@ -116,8 +119,6 @@ extension UnifiedDeviceAwareness {
         // Synchronous connectivity check using NWPathMonitor snapshot
         let monitor = NWPathMonitor()
         let semaphore = DispatchSemaphore(value: 0)
-        // nonisolated(unsafe): local variable shared between semaphore-synchronized blocks;
-        // write happens before semaphore.signal(), read after semaphore.wait() — no concurrent access
         nonisolated(unsafe) var isConnected = false
 
         monitor.pathUpdateHandler = { path in
@@ -183,8 +184,13 @@ extension UnifiedDeviceAwareness {
         guard let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
             return nil
         }
-        let attributes = try? FileManager.default.attributesOfItem(atPath: documentsPath.path)
-        return attributes?[.creationDate] as? Date
+        do {
+            let attributes = try FileManager.default.attributesOfItem(atPath: documentsPath.path)
+            return attributes[.creationDate] as? Date
+        } catch {
+            deviceAwarenessHelpersLogger.error("Failed to get app install date: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     func getEnabledFeatures() -> [String] {

@@ -45,28 +45,16 @@ public struct CloudConversation: Identifiable, Hashable, Sendable {
     init(from record: CKRecord) {
         id = UUID(uuidString: record.recordID.recordName.replacingOccurrences(of: "conversation-", with: "")) ?? UUID()
         title = record["title"] as? String ?? ""
+        messages = [] // Fetched separately
         aiModel = record["aiModel"] as? String ?? "Claude"
         createdAt = record["createdAt"] as? Date ?? Date()
         modifiedAt = record["modifiedAt"] as? Date ?? Date()
         tags = record["tags"] as? [String] ?? []
         participatingDeviceIDs = record["participatingDeviceIDs"] as? [String] ?? []
-
-        // Deserialize messages from JSON Data stored in CKRecord
-        if let messagesData = record["messagesData"] as? Data,
-           let decoded = try? JSONDecoder().decode([CloudMessage].self, from: messagesData) {
-            messages = decoded
-        } else {
-            messages = []
-        }
     }
 
-    func toRecord(in zoneID: CKRecordZone.ID? = nil) -> CKRecord {
-        let recordID: CKRecord.ID
-        if let zoneID {
-            recordID = CKRecord.ID(recordName: "conversation-\(id.uuidString)", zoneID: zoneID)
-        } else {
-            recordID = CKRecord.ID(recordName: "conversation-\(id.uuidString)")
-        }
+    func toRecord() -> CKRecord {
+        let recordID = CKRecord.ID(recordName: "conversation-\(id.uuidString)")
         let record = CKRecord(recordType: "Conversation", recordID: recordID)
         applyTo(record)
         return record
@@ -80,15 +68,10 @@ public struct CloudConversation: Identifiable, Hashable, Sendable {
         record["modifiedAt"] = modifiedAt as CKRecordValue
         record["tags"] = tags as CKRecordValue
         record["participatingDeviceIDs"] = participatingDeviceIDs as CKRecordValue
-
-        // Serialize messages as JSON Data (CKRecord doesn't support nested arrays of custom types)
-        if let messagesData = try? JSONEncoder().encode(messages) {
-            record["messagesData"] = messagesData as CKRecordValue
-        }
     }
 }
 
-public struct CloudMessage: Identifiable, Hashable, Codable, Sendable {
+public struct CloudMessage: Identifiable, Hashable, Sendable {
     public let id: UUID
     public let content: String
     public let role: String
@@ -152,25 +135,12 @@ public struct CloudSettings: Sendable {
     }
 
     static func current() -> CloudSettings {
-        // Load actual settings from SettingsManager/UserDefaults
-        let defaults = UserDefaults.standard
-        return CloudSettings(
-            theme: defaults.string(forKey: "appearance.theme") ?? "system",
-            aiModel: defaults.string(forKey: "ai.defaultModel") ?? "Claude",
-            autoSave: defaults.bool(forKey: "general.autoSave"),
-            syncEnabled: defaults.bool(forKey: "iCloudSyncEnabled"),
-            notificationsEnabled: defaults.bool(forKey: "notifications.enabled"),
-            modifiedAt: Date()
-        )
+        // Load from UserDefaults
+        CloudSettings()
     }
 
-    func toRecord(in zoneID: CKRecordZone.ID? = nil) -> CKRecord {
-        let recordID: CKRecord.ID
-        if let zoneID {
-            recordID = CKRecord.ID(recordName: "userSettings", zoneID: zoneID)
-        } else {
-            recordID = CKRecord.ID(recordName: "userSettings")
-        }
+    func toRecord() -> CKRecord {
+        let recordID = CKRecord.ID(recordName: "userSettings")
         let record = CKRecord(recordType: "Settings", recordID: recordID)
         record["theme"] = theme as CKRecordValue
         record["aiModel"] = aiModel as CKRecordValue
@@ -201,13 +171,8 @@ public struct CloudKnowledgeItem: Identifiable, Sendable {
         createdAt = record["createdAt"] as? Date ?? Date()
     }
 
-    func toRecord(in zoneID: CKRecordZone.ID? = nil) -> CKRecord {
-        let recordID: CKRecord.ID
-        if let zoneID {
-            recordID = CKRecord.ID(recordName: "knowledge-\(id.uuidString)", zoneID: zoneID)
-        } else {
-            recordID = CKRecord.ID(recordName: "knowledge-\(id.uuidString)")
-        }
+    func toRecord() -> CKRecord {
+        let recordID = CKRecord.ID(recordName: "knowledge-\(id.uuidString)")
         let record = CKRecord(recordType: "Knowledge", recordID: recordID)
         record["title"] = title as CKRecordValue
         record["content"] = content as CKRecordValue
@@ -236,13 +201,8 @@ public struct CloudProject: Identifiable, Sendable {
         lastModified = record["lastModified"] as? Date ?? Date()
     }
 
-    func toRecord(in zoneID: CKRecordZone.ID? = nil) -> CKRecord {
-        let recordID: CKRecord.ID
-        if let zoneID {
-            recordID = CKRecord.ID(recordName: "project-\(id.uuidString)", zoneID: zoneID)
-        } else {
-            recordID = CKRecord.ID(recordName: "project-\(id.uuidString)")
-        }
+    func toRecord() -> CKRecord {
+        let recordID = CKRecord.ID(recordName: "project-\(id.uuidString)")
         let record = CKRecord(recordType: "Project", recordID: recordID)
         record["name"] = name as CKRecordValue
         record["description"] = description as CKRecordValue

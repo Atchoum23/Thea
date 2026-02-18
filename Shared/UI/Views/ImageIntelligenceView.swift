@@ -510,7 +510,12 @@ struct ImageIntelligenceView: View {
         panel.allowedContentTypes = [.png, .jpeg]
         panel.nameFieldStringValue = "processed_image"
         if panel.runModal() == .OK, let url = panel.url {
-            try? data.write(to: url)
+            do {
+                try data.write(to: url)
+            } catch {
+                errorMessage = "Failed to save image: \(error.localizedDescription)"
+                showError = true
+            }
         }
         #endif
     }

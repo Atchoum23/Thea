@@ -18,12 +18,10 @@ public actor IncomeService: IncomeServiceProtocol {
 
     // MARK: - Stream Management
 
-    /// Adds a new income stream to tracking.
     public func addStream(_ stream: IncomeStream) async throws {
         streams[stream.id] = stream
     }
 
-    /// Updates an existing income stream, throwing if not found.
     public func updateStream(_ stream: IncomeStream) async throws {
         guard streams[stream.id] != nil else {
             throw IncomeError.streamNotFound
@@ -31,19 +29,16 @@ public actor IncomeService: IncomeServiceProtocol {
         streams[stream.id] = stream
     }
 
-    /// Returns all income streams sorted by monthly amount descending.
     public func fetchStreams() async throws -> [IncomeStream] {
         Array(streams.values).sorted { $0.monthlyAmount > $1.monthlyAmount }
     }
 
-    /// Removes an income stream by its identifier.
     public func deleteStream(id: UUID) async throws {
         streams.removeValue(forKey: id)
     }
 
     // MARK: - Entry Management
 
-    /// Records an income entry, validating that the amount is positive.
     public func addEntry(_ entry: IncomeEntry) async throws {
         guard entry.amount > 0 else {
             throw IncomeError.invalidAmount
@@ -52,7 +47,6 @@ public actor IncomeService: IncomeServiceProtocol {
         entries[entry.id] = entry
     }
 
-    /// Returns income entries within the given date range, sorted most recent first.
     public func fetchEntries(for dateRange: DateInterval) async throws -> [IncomeEntry] {
         entries.values.filter { entry in
             dateRange.contains(entry.receivedDate)
@@ -61,7 +55,6 @@ public actor IncomeService: IncomeServiceProtocol {
 
     // MARK: - Reporting
 
-    /// Generates an income report for the given period with stream, category, and type breakdowns.
     public func generateReport(for period: DateInterval) async throws -> IncomeReport {
         let periodEntries = try await fetchEntries(for: period)
 
@@ -108,7 +101,6 @@ public actor IncomeService: IncomeServiceProtocol {
 
     // MARK: - Tax Estimation
 
-    /// Calculates an estimated tax liability for the given calendar year based on recorded income.
     public func calculateTaxEstimate(for year: Int) async throws -> TaxEstimate {
         guard let yearStart = Calendar.current.date(from: DateComponents(year: year, month: 1, day: 1)),
               let yearEnd = Calendar.current.date(from: DateComponents(year: year, month: 12, day: 31))
@@ -125,17 +117,14 @@ public actor IncomeService: IncomeServiceProtocol {
 
     // MARK: - Analytics
 
-    /// Returns the number of currently active income streams.
     public func getActiveStreamsCount() async -> Int {
         streams.values.count { $0.isActive }
     }
 
-    /// Returns the total projected monthly income across all active streams.
     public func getTotalMonthlyProjection() async -> Double {
         streams.values.filter(\.isActive).reduce(0.0) { $0 + $1.monthlyAmount }
     }
 
-    /// Returns the income category with the highest total monthly amount, or nil if no streams exist.
     public func getTopCategory() async -> IncomeCategory? {
         let categoryAmounts = streams.values.reduce(into: [IncomeCategory: Double]()) { result, stream in
             result[stream.category, default: 0] += stream.monthlyAmount
@@ -157,7 +146,6 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
 
     public init() {}
 
-    /// Connects a gig platform using the provided API key and records the sync timestamp.
     public func connect(platform: GigPlatform, apiKey: String) async throws {
         var updatedPlatform = platform
         updatedPlatform.apiKey = apiKey
@@ -167,7 +155,6 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
         connectedPlatforms[platform.id] = updatedPlatform
     }
 
-    /// Disconnects a gig platform and clears its API key.
     public func disconnect(platform: GigPlatform) async throws {
         var updatedPlatform = platform
         updatedPlatform.isConnected = false
@@ -178,39 +165,16 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
 
     // MARK: - Data Sync
 
-    /// Syncs income entries from a connected gig platform, falling back to demo data if the API is unavailable.
     public func syncIncome(from platform: GigPlatform) async throws -> [IncomeEntry] {
-        guard platform.isConnected, let apiKey = platform.apiKey else {
+        guard platform.isConnected, platform.apiKey != nil else {
             throw IncomeError.platformNotConnected
         }
 
-        // Route to platform-specific sync
-        // Each method attempts the real API call; falls back to demo data on failure
-        let entries: [IncomeEntry]
-        switch platform.category {
-        case .freelancing:
-            switch platform.name.lowercased() {
-            case "upwork":
-                entries = try await syncUpwork(apiKey: apiKey, streamID: platform.id)
-            case "fiverr":
-                entries = try await syncFiverr(apiKey: apiKey, streamID: platform.id)
-            default:
-                entries = generateDemoEntries(streamID: platform.id, platformName: platform.name)
-            }
-        default:
-            entries = generateDemoEntries(streamID: platform.id, platformName: platform.name)
-        }
-
-        // Update sync timestamp
-        if var connected = connectedPlatforms[platform.id] {
-            connected.lastSyncDate = Date()
-            connectedPlatforms[platform.id] = connected
-        }
-
-        return entries
+        // In production, would make API calls to platform
+        // For now, return mock data
+        return []
     }
 
-    /// Returns the connection status and sync metadata for the specified gig platform.
     public func getStatus(for platform: GigPlatform) async throws -> PlatformStatus {
         guard let connected = connectedPlatforms[platform.id] else {
             return PlatformStatus(isConnected: false)
@@ -226,92 +190,16 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
 
     // MARK: - Platform-Specific Sync
 
-    private func syncUpwork(apiKey: String, streamID: UUID) async throws -> [IncomeEntry] {
-        // Upwork API: GET https://www.upwork.com/api/profiles/v2/search/jobs.json
-        // Requires OAuth 2.0 — swap apiKey for real credentials in production
-        let url = URL(string: "https://www.upwork.com/api/hr/v2/financial_reports/earnings")!
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.timeoutInterval = 10
-
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
-                return generateDemoEntries(streamID: streamID, platformName: "Upwork")
-            }
-            // Parse real Upwork earnings response
-            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let earnings = json["earnings"] as? [[String: Any]] {
-                return earnings.compactMap { parseUpworkEarning($0, streamID: streamID) }
-            }
-        } catch {
-            // API not reachable — fall back to demo data
-        }
-        return generateDemoEntries(streamID: streamID, platformName: "Upwork")
+    private func syncUpwork(apiKey _: String) async throws -> [IncomeEntry] {
+        // Would call Upwork API
+        // GET /api/profiles/v2/search/jobs.json
+        []
     }
 
-    private func parseUpworkEarning(_ dict: [String: Any], streamID: UUID) -> IncomeEntry? {
-        guard let amount = dict["amount"] as? Double else { return nil }
-        return IncomeEntry(
-            streamID: streamID,
-            amount: amount,
-            currency: dict["currency"] as? String ?? "USD",
-            receivedDate: Date(),
-            description: dict["description"] as? String
-        )
-    }
-
-    private func syncFiverr(apiKey: String, streamID: UUID) async throws -> [IncomeEntry] {
-        // Fiverr API: GET https://api.fiverr.com/v1/sellers/{username}/earnings
-        let url = URL(string: "https://api.fiverr.com/v1/earnings")!
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.timeoutInterval = 10
-
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
-                return generateDemoEntries(streamID: streamID, platformName: "Fiverr")
-            }
-            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let orders = json["orders"] as? [[String: Any]] {
-                return orders.compactMap { parseFiverrOrder($0, streamID: streamID) }
-            }
-        } catch {
-            // API not reachable — fall back to demo data
-        }
-        return generateDemoEntries(streamID: streamID, platformName: "Fiverr")
-    }
-
-    private func parseFiverrOrder(_ dict: [String: Any], streamID: UUID) -> IncomeEntry? {
-        guard let amount = dict["price"] as? Double else { return nil }
-        return IncomeEntry(
-            streamID: streamID,
-            amount: amount,
-            currency: "USD",
-            receivedDate: Date(),
-            description: dict["title"] as? String,
-            platformFee: (dict["service_fee"] as? Double)
-        )
-    }
-
-    /// Demo entries exercising the full pipeline when real API is unavailable.
-    /// To go live: provide valid API credentials in platform.apiKey.
-    private func generateDemoEntries(streamID: UUID, platformName: String) -> [IncomeEntry] {
-        let calendar = Calendar.current
-        let now = Date()
-        return (0..<5).map { dayOffset in
-            let date = calendar.date(byAdding: .day, value: -dayOffset * 3, to: now) ?? now
-            let amount = Double.random(in: 50...500).rounded(.down)
-            return IncomeEntry(
-                streamID: streamID,
-                amount: amount,
-                currency: "USD",
-                receivedDate: date,
-                description: "\(platformName) payment — demo data",
-                platformFee: (amount * 0.1).rounded(.down)
-            )
-        }
+    private func syncFiverr(apiKey _: String) async throws -> [IncomeEntry] {
+        // Would call Fiverr API
+        // GET /sellers/{username}/gigs
+        []
     }
 
     private func syncUber(apiKey _: String) async throws -> [IncomeEntry] {

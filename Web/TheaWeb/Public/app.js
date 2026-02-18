@@ -200,7 +200,7 @@
         let fullContent = '';
 
         try {
-            const res = await apiRequest('/chat/send', {
+            const res = await apiRequest('/chat/message', {
                 method: 'POST',
                 body: JSON.stringify({
                     message: text,

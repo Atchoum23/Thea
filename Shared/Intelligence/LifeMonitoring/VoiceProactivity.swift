@@ -2,17 +2,13 @@
 // THEA - Contextual Voice Interactions
 // Created by Claude - February 2026
 //
-// Main engine for proactive voice interactions. Manages context detection,
-// speech synthesis, speech recognition, interaction delivery, and device relay.
-//
-// Related files:
-//   VoiceProactivityModels.swift        — Model types (VoiceContext, VoiceInteraction, etc.)
-//   VoiceProactivity+Interactions.swift — Public interaction API & driving-mode helpers
-//   VoiceProactivity+Relay.swift        — Cross-device relay & direct messaging
-//   VoiceProactivity+Convenience.swift  — High-level convenience methods & SpeechDelegate
+// Proactively speaks to user in appropriate contexts (driving, etc.)
+// Can relay commands through Mac when iPhone is locked
+// Supports multiple messaging platforms (iMessage, WhatsApp, Telegram)
 
 import Foundation
 import AVFoundation
+import OSLog
 import UserNotifications
 #if canImport(Speech)
 import Speech
@@ -21,53 +17,297 @@ import Speech
 import UIKit
 #endif
 
+// MARK: - Voice Context
+
+/// Context that determines voice interaction appropriateness
+public enum VoiceContext: String, Sendable, CaseIterable {
+    case driving             // In vehicle, hands busy
+    case walking             // Walking, can listen
+    case exercising          // Working out
+    case working             // At work, be quiet
+    case sleeping            // Do not disturb
+    case meeting             // In a meeting
+    case home                // At home, normal volume
+    case transit             // Public transit
+    case unknown             // Default
+
+    public var isVoiceSafe: Bool {
+        switch self {
+        case .driving, .walking, .exercising, .home:
+            return true
+        case .working, .sleeping, .meeting, .transit, .unknown:
+            return false
+        }
+    }
+
+    public var preferredVolume: Float {
+        switch self {
+        case .driving: return 0.9
+        case .walking, .exercising: return 0.7
+        case .home: return 0.5
+        default: return 0.3
+        }
+    }
+
+    public var interruptionPolicy: InterruptionPolicy {
+        switch self {
+        case .driving: return .urgentOnly
+        case .working, .meeting: return .emergencyOnly
+        case .sleeping: return .never
+        default: return .normal
+        }
+    }
+
+    public enum InterruptionPolicy: String, Sendable {
+        case never       // Never interrupt
+        case emergencyOnly  // Only emergencies
+        case urgentOnly  // Urgent and above
+        case normal      // Normal threshold
+        case always      // Any notification
+    }
+}
+
+// MARK: - Voice Interaction Types
+
+/// Type of voice interaction
+public enum VoiceInteractionType: String, Sendable {
+    case notification         // One-way notification
+    case question             // Expecting yes/no response
+    case request              // Expecting action/data
+    case conversation         // Multi-turn
+    case alert                // Urgent alert
+    case reminder             // Scheduled reminder
+}
+
+/// Priority of voice interaction
+public enum VoiceInteractionPriority: Int, Sendable, Comparable {
+    case low = 1
+    case normal = 2
+    case high = 3
+    case urgent = 4
+    case emergency = 5
+
+    public static func < (lhs: VoiceInteractionPriority, rhs: VoiceInteractionPriority) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
+
+    public var allowedInContext: [VoiceContext] {
+        switch self {
+        case .emergency: return VoiceContext.allCases
+        case .urgent: return [.driving, .walking, .exercising, .home, .transit]
+        case .high: return [.driving, .walking, .home]
+        case .normal: return [.walking, .home]
+        case .low: return [.home]
+        }
+    }
+}
+
+// MARK: - Voice Interaction
+
+/// A voice interaction to deliver to user
+public struct VoiceInteraction: Identifiable, Sendable {
+    public let id: UUID
+    public let type: VoiceInteractionType
+    public let priority: VoiceInteractionPriority
+    public let message: String
+    public let ssml: String? // SSML for more natural speech
+    public let expectedResponses: [ExpectedResponse]?
+    public let followUpId: UUID? // Reference to follow-up interaction
+    public let context: [String: String]
+    public let createdAt: Date
+    public var deliveredAt: Date?
+    public var response: VoiceResponse?
+    public let expiresAt: Date?
+
+    public struct ExpectedResponse: Sendable {
+        public let keywords: [String]
+        public let action: String
+        public let nextInteractionId: UUID? // Reference instead of direct struct
+
+        public init(keywords: [String], action: String, nextInteractionId: UUID? = nil) {
+            self.keywords = keywords
+            self.action = action
+            self.nextInteractionId = nextInteractionId
+        }
+    }
+
+    public init(
+        id: UUID = UUID(),
+        type: VoiceInteractionType,
+        priority: VoiceInteractionPriority = .normal,
+        message: String,
+        ssml: String? = nil,
+        expectedResponses: [ExpectedResponse]? = nil,
+        followUpId: UUID? = nil,
+        context: [String: String] = [:],
+        expiresIn: TimeInterval? = nil
+    ) {
+        self.id = id
+        self.type = type
+        self.priority = priority
+        self.message = message
+        self.ssml = ssml
+        self.expectedResponses = expectedResponses
+        self.followUpId = followUpId
+        self.context = context
+        self.createdAt = Date()
+        self.deliveredAt = nil
+        self.response = nil
+        self.expiresAt = expiresIn.map { Date().addingTimeInterval($0) }
+    }
+
+    public var isExpired: Bool {
+        if let expires = expiresAt {
+            return Date() > expires
+        }
+        return false
+    }
+}
+
+/// User's voice response
+public struct VoiceResponse: Sendable {
+    public let transcription: String
+    public let confidence: Double
+    public let matchedExpectation: VoiceInteraction.ExpectedResponse?
+    public let timestamp: Date
+
+    public init(
+        transcription: String,
+        confidence: Double,
+        matchedExpectation: VoiceInteraction.ExpectedResponse? = nil
+    ) {
+        self.transcription = transcription
+        self.confidence = confidence
+        self.matchedExpectation = matchedExpectation
+        self.timestamp = Date()
+    }
+}
+
+// MARK: - Messaging Relay
+
+/// Platform for sending messages
+public enum MessagingPlatform: String, Sendable, CaseIterable {
+    case iMessage = "imessage"
+    case whatsApp = "whatsapp"
+    case telegram
+    case signal
+    case slack
+    case sms
+
+    public var displayName: String {
+        switch self {
+        case .iMessage: return "iMessage"
+        case .whatsApp: return "WhatsApp"
+        case .telegram: return "Telegram"
+        case .signal: return "Signal"
+        case .slack: return "Slack"
+        case .sms: return "SMS"
+        }
+    }
+
+    public var urlScheme: String? {
+        switch self {
+        case .iMessage: return "imessage://"
+        case .whatsApp: return "whatsapp://"
+        case .telegram: return "tg://"
+        case .signal: return nil // Uses Shortcuts
+        case .slack: return "slack://"
+        case .sms: return "sms://"
+        }
+    }
+}
+
+/// A message to relay
+public struct MessageRelay: Sendable {
+    public let platform: MessagingPlatform
+    public let recipient: String
+    public let recipientName: String?
+    public let message: String
+    public let attachments: [String]? // File paths
+    public let replyToMessageId: String?
+
+    public init(
+        platform: MessagingPlatform,
+        recipient: String,
+        recipientName: String? = nil,
+        message: String,
+        attachments: [String]? = nil,
+        replyToMessageId: String? = nil
+    ) {
+        self.platform = platform
+        self.recipient = recipient
+        self.recipientName = recipientName
+        self.message = message
+        self.attachments = attachments
+        self.replyToMessageId = replyToMessageId
+    }
+}
+
+// MARK: - Device Relay
+
+/// Relay commands between devices
+public enum DeviceRelayCommand: Sendable {
+    case sendMessage(MessageRelay)
+    case makeCall(to: String, platform: MessagingPlatform)
+    case readNotifications
+    case playMedia(String)
+    case pauseMedia
+    case navigate(to: String)
+    case searchWeb(query: String)
+    case setReminder(title: String, dueDate: Date)
+    case custom(action: String, parameters: [String: String])
+}
+
+/// Result of device relay
+public struct DeviceRelayResult: Sendable {
+    public let success: Bool
+    public let sourceDevice: String
+    public let targetDevice: String
+    public let command: String
+    public let message: String?
+    public let timestamp: Date
+
+    public init(
+        success: Bool,
+        sourceDevice: String,
+        targetDevice: String,
+        command: String,
+        message: String? = nil
+    ) {
+        self.success = success
+        self.sourceDevice = sourceDevice
+        self.targetDevice = targetDevice
+        self.command = command
+        self.message = message
+        self.timestamp = Date()
+    }
+}
+
 // MARK: - Voice Proactivity Engine
 
-/// Main engine for proactive voice interactions.
-///
-/// `VoiceProactivity` manages the full lifecycle of voice interactions:
-/// context detection, priority-based queue management, speech synthesis,
-/// speech recognition (wake word + response capture), and cross-device
-/// message relay.
-///
-/// Use the shared singleton via ``VoiceProactivity/shared``.
+/// Main engine for proactive voice interactions
 public actor VoiceProactivity {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "VoiceProactivity")
     // MARK: - Singleton
 
-    /// The shared voice proactivity engine.
     public static let shared = VoiceProactivity()
 
     // MARK: - Configuration
 
-    /// Configuration for the voice proactivity engine.
     public struct Configuration: Sendable {
-        /// Whether the engine is enabled.
         public var enabled: Bool = true
-        /// Whether voice output (speech synthesis) is enabled.
         public var voiceEnabled: Bool = true
-        /// Whether voice input (speech recognition) is enabled.
         public var listeningEnabled: Bool = true
-        /// The preferred `AVSpeechSynthesisVoice` identifier.
         public var preferredVoice: String = "com.apple.voice.compact.en-US.Samantha"
-        /// Speech rate (0.0–1.0).
         public var speechRate: Float = 0.5
-        /// Base volume (0.0–1.0), capped by context volume.
         public var volume: Float = 0.7
-        /// The phrase that activates voice listening.
         public var wakeWord: String = "Hey Thea"
-        /// Whether to automatically detect context from activity/location.
         public var autoContextDetection: Bool = true
-        /// The default context when auto-detection is unavailable.
         public var defaultContext: VoiceContext = .home
-        /// Hour (0–23) when quiet hours begin.
         public var quietHoursStart: Int = 22 // 10 PM
-        /// Hour (0–23) when quiet hours end.
         public var quietHoursEnd: Int = 7    // 7 AM
-        /// Whether to relay commands through a Mac when direct send fails.
         public var macRelayEnabled: Bool = true
-        /// Hostname of the Mac to relay commands to.
         public var macRelayHostname: String = ""
-        /// Per-contact preferred messaging platform overrides.
         public var preferredPlatformByContact: [String: MessagingPlatform] = [:]
 
         public init() {}
@@ -75,16 +315,16 @@ public actor VoiceProactivity {
 
     // MARK: - Properties
 
-    var configuration: Configuration
+    private var configuration: Configuration
     private var currentContext: VoiceContext = .unknown
     private var isListening = false
-    var isSpeaking = false
-    var pendingInteractions: [VoiceInteraction] = []
-    var activeInteraction: VoiceInteraction?
-    var interactionHistory: [VoiceInteraction] = []
+    private var isSpeaking = false
+    private var pendingInteractions: [VoiceInteraction] = []
+    private var activeInteraction: VoiceInteraction?
+    private var interactionHistory: [VoiceInteraction] = []
 
     // Speech
-    let synthesizer = AVSpeechSynthesizer()
+    private let synthesizer = AVSpeechSynthesizer()
     #if canImport(Speech)
     private var recognizer: SFSpeechRecognizer?
     private var audioEngine: AVAudioEngine?
@@ -94,10 +334,10 @@ public actor VoiceProactivity {
 
     // Callbacks
     private var onContextChanged: ((VoiceContext) -> Void)?
-    var onInteractionDelivered: ((VoiceInteraction) -> Void)?
+    private var onInteractionDelivered: ((VoiceInteraction) -> Void)?
     private var onResponseReceived: ((VoiceInteraction, VoiceResponse) -> Void)?
     private var onWakeWordDetected: (() -> Void)?
-    var onDeviceRelayResult: ((DeviceRelayResult) -> Void)?
+    private var onDeviceRelayResult: ((DeviceRelayResult) -> Void)?
 
     // MARK: - Initialization
 
@@ -111,19 +351,10 @@ public actor VoiceProactivity {
 
     // MARK: - Configuration
 
-    /// Apply a new configuration to the engine.
-    /// - Parameter config: The configuration to apply.
     public func configure(_ config: Configuration) {
         self.configuration = config
     }
 
-    /// Register event callbacks for voice interaction lifecycle events.
-    /// - Parameters:
-    ///   - onContextChanged: Called when the voice context changes.
-    ///   - onInteractionDelivered: Called after an interaction is spoken.
-    ///   - onResponseReceived: Called when a voice response is captured.
-    ///   - onWakeWordDetected: Called when the wake word is recognized.
-    ///   - onDeviceRelayResult: Called after a device relay attempt completes.
     public func configure(
         onContextChanged: @escaping @Sendable (VoiceContext) -> Void,
         onInteractionDelivered: @escaping @Sendable (VoiceInteraction) -> Void,
@@ -140,10 +371,6 @@ public actor VoiceProactivity {
 
     // MARK: - Lifecycle
 
-    /// Start the voice proactivity engine.
-    ///
-    /// Begins context detection (if auto-detection is enabled), starts
-    /// wake-word listening, and processes any pending interactions.
     public func start() async {
         guard configuration.enabled else { return }
 
@@ -161,7 +388,6 @@ public actor VoiceProactivity {
         await processPendingInteractions()
     }
 
-    /// Stop the voice proactivity engine.
     public func stop() async {
         await stopListening()
         isSpeaking = false
@@ -169,10 +395,7 @@ public actor VoiceProactivity {
 
     // MARK: - Context Management
 
-    /// Set the current voice context.
-    ///
-    /// Triggers re-evaluation of pending interactions if the context changes.
-    /// - Parameter context: The new context.
+    /// Set current context
     public func setContext(_ context: VoiceContext) {
         let oldContext = currentContext
         currentContext = context
@@ -187,13 +410,184 @@ public actor VoiceProactivity {
         }
     }
 
-    /// Get the current voice context.
-    /// - Returns: The active ``VoiceContext``.
+    /// Get current context
     public func getContext() -> VoiceContext {
         currentContext
     }
 
-    // MARK: - Context Detection (Private)
+    // MARK: - Voice Interactions
+
+    /// Queue a voice interaction
+    public func queueInteraction(_ interaction: VoiceInteraction) async {
+        pendingInteractions.append(interaction)
+        pendingInteractions.sort { $0.priority > $1.priority }
+
+        await processPendingInteractions()
+    }
+
+    /// Speak immediately (bypasses queue)
+    public func speakImmediate(
+        _ message: String,
+        priority: VoiceInteractionPriority = .urgent
+    ) async {
+        let interaction = VoiceInteraction(
+            type: .alert,
+            priority: priority,
+            message: message
+        )
+
+        await deliverInteraction(interaction)
+    }
+
+    /// Ask a question and wait for response
+    public func askQuestion(
+        _ question: String,
+        expectedResponses: [VoiceInteraction.ExpectedResponse],
+        priority: VoiceInteractionPriority = .normal,
+        timeout: TimeInterval = 10
+    ) async -> VoiceResponse? {
+        let interaction = VoiceInteraction(
+            type: .question,
+            priority: priority,
+            message: question,
+            expectedResponses: expectedResponses,
+            expiresIn: timeout
+        )
+
+        await deliverInteraction(interaction)
+
+        // Wait for response
+        return await waitForResponse(interaction: interaction, timeout: timeout)
+    }
+
+    /// Send message via voice interface
+    public func sendMessage(
+        to recipient: String,
+        recipientName: String?,
+        message: String,
+        platform: MessagingPlatform
+    ) async -> Bool {
+        let relay = MessageRelay(
+            platform: platform,
+            recipient: recipient,
+            recipientName: recipientName,
+            message: message
+        )
+
+        // Try to send directly if possible
+        if await canSendDirectly(platform: platform) {
+            return await sendMessageDirectly(relay)
+        }
+
+        // Otherwise relay through Mac
+        if configuration.macRelayEnabled {
+            return await relayThroughMac(.sendMessage(relay))
+        }
+
+        // Confirm message via voice
+        let name = recipientName ?? recipient
+        await speakImmediate("I'll prepare a message to \(name) on \(platform.displayName). The message is: \(message). Would you like me to send it?")
+
+        return false // Requires user confirmation
+    }
+
+    // MARK: - Driving Mode Helpers
+
+    /// Initiate a conversation-style messaging flow
+    public func startMessagingFlow() async {
+        // Ask who to message
+        let whoResponse = await askQuestion(
+            "Who would you like to message?",
+            expectedResponses: [],
+            priority: .high,
+            timeout: 15
+        )
+
+        guard let recipient = whoResponse?.transcription else {
+            await speakImmediate("I didn't catch that. Let me know when you want to send a message.")
+            return
+        }
+
+        // Ask what platform
+        let platformResponse = await askQuestion(
+            "Would you like to use iMessage, WhatsApp, or Telegram?",
+            expectedResponses: [
+                VoiceInteraction.ExpectedResponse(keywords: ["imessage", "message", "text"], action: "imessage"),
+                VoiceInteraction.ExpectedResponse(keywords: ["whatsapp", "whats app"], action: "whatsapp"),
+                VoiceInteraction.ExpectedResponse(keywords: ["telegram"], action: "telegram")
+            ],
+            priority: .high
+        )
+
+        let platform = determinePlatform(from: platformResponse)
+
+        // Ask for the message
+        let messageResponse = await askQuestion(
+            "What would you like to say?",
+            expectedResponses: [],
+            priority: .high,
+            timeout: 30
+        )
+
+        guard let message = messageResponse?.transcription else {
+            await speakImmediate("I didn't catch the message. Let's try again later.")
+            return
+        }
+
+        // Confirm and send
+        let confirmResponse = await askQuestion(
+            "I'll send '\(message)' to \(recipient) via \(platform.displayName). Should I send it?",
+            expectedResponses: [
+                VoiceInteraction.ExpectedResponse(keywords: ["yes", "yeah", "yep", "send", "confirm"], action: "send"),
+                VoiceInteraction.ExpectedResponse(keywords: ["no", "nope", "cancel", "don't"], action: "cancel")
+            ],
+            priority: .high
+        )
+
+        if confirmResponse?.matchedExpectation?.action == "send" {
+            let success = await sendMessage(to: recipient, recipientName: nil, message: message, platform: platform)
+            if success {
+                await speakImmediate("Message sent!")
+            } else {
+                await speakImmediate("I couldn't send that message. Please try again later.")
+            }
+        } else {
+            await speakImmediate("Message cancelled.")
+        }
+    }
+
+    /// Read recent notifications from the notification center
+    public func readNotifications(limit: Int = 5) async {
+        let center = UNUserNotificationCenter.current()
+        let delivered = await center.deliveredNotifications()
+
+        guard !delivered.isEmpty else {
+            await speakImmediate("You have no new notifications.")
+            return
+        }
+
+        let recent = delivered.prefix(limit)
+        await speakImmediate("You have \(delivered.count) notification\(delivered.count == 1 ? "" : "s"). Here are the most recent:")
+
+        for notification in recent {
+            let title = notification.request.content.title
+            let body = notification.request.content.body
+            let text = body.isEmpty ? title : "\(title): \(body)"
+            await speakImmediate(text)
+        }
+    }
+
+    /// Navigate to a destination
+    public func startNavigation(to destination: String) async {
+        await speakImmediate("Starting navigation to \(destination).")
+
+        // Would integrate with Maps
+        if configuration.macRelayEnabled {
+            _ = await relayThroughMac(.navigate(to: destination))
+        }
+    }
+
+    // MARK: - Private Methods
 
     private func startContextDetection() async {
         // Would integrate with:
@@ -204,8 +598,6 @@ public actor VoiceProactivity {
         // For now, default to home
         currentContext = configuration.defaultContext
     }
-
-    // MARK: - Speech Recognition (Private)
 
     private func startListening() async {
         #if canImport(Speech)
@@ -240,7 +632,12 @@ public actor VoiceProactivity {
         }
 
         audioEngine.prepare()
-        try? audioEngine.start()
+        do {
+            try audioEngine.start()
+        } catch {
+            logger.error("Failed to start audio engine: \(error.localizedDescription)")
+            return
+        }
 
         recognitionTask = recognizer.recognitionTask(with: recognitionRequest) { result, error in
             if let result = result {
@@ -330,10 +727,7 @@ public actor VoiceProactivity {
         }
     }
 
-    // MARK: - Interaction Delivery (Internal)
-
-    /// Process pending interactions, delivering the highest-priority eligible one.
-    func processPendingInteractions() async {
+    private func processPendingInteractions() async {
         guard !isSpeaking, activeInteraction == nil else { return }
 
         // Filter for current context
@@ -376,12 +770,7 @@ public actor VoiceProactivity {
         }
     }
 
-    /// Deliver an interaction via speech synthesis.
-    ///
-    /// Adjusts volume for the current context, speaks the message,
-    /// records it in history, and processes the next queued interaction.
-    /// - Parameter interaction: The interaction to deliver.
-    func deliverInteraction(_ interaction: VoiceInteraction) async {
+    private func deliverInteraction(_ interaction: VoiceInteraction) async {
         isSpeaking = true
         activeInteraction = interaction
 
@@ -397,7 +786,7 @@ public actor VoiceProactivity {
 
         // Use delegate pattern for completion
         await withCheckedContinuation { continuation in
-            let delegate = VoiceProactivitySpeechDelegate {
+            let delegate = SpeechDelegate {
                 continuation.resume()
             }
 
@@ -434,14 +823,7 @@ public actor VoiceProactivity {
         await processPendingInteractions()
     }
 
-    /// Wait for a spoken response to an active interaction.
-    ///
-    /// Polls ``activeInteraction`` until a response is captured or timeout.
-    /// - Parameters:
-    ///   - interaction: The interaction awaiting response.
-    ///   - timeout: Maximum seconds to wait.
-    /// - Returns: The captured response, or `nil` on timeout.
-    func waitForResponse(interaction: VoiceInteraction, timeout: TimeInterval) async -> VoiceResponse? {
+    private func waitForResponse(interaction: VoiceInteraction, timeout: TimeInterval) async -> VoiceResponse? {
         let deadline = Date().addingTimeInterval(timeout)
 
         while Date() < deadline {
@@ -449,11 +831,224 @@ public actor VoiceProactivity {
                 activeInteraction = nil
                 return response
             }
-            try? await Task.sleep(for: .milliseconds(100)) // 100ms
+            do {
+                try await Task.sleep(nanoseconds: 100_000_000) // 100ms
+            } catch {
+                break
+            }
         }
 
         // Timed out
         activeInteraction = nil
         return nil
+    }
+
+    private func canSendDirectly(platform: MessagingPlatform) async -> Bool {
+        // Check if we can send directly (e.g., device unlocked, app available)
+        #if os(iOS)
+        // On iOS, might need to check if unlocked
+        return false // Conservative - always relay or confirm
+        #else
+        return true
+        #endif
+    }
+
+    private func sendMessageDirectly(_ relay: MessageRelay) async -> Bool {
+        #if os(macOS)
+        // Use AppleScript to send iMessage on macOS
+        let escapedMessage = relay.message.replacingOccurrences(of: "\"", with: "\\\"")
+        let escapedRecipient = relay.recipient.replacingOccurrences(of: "\"", with: "\\\"")
+        let script = """
+        tell application "Messages"
+            set targetService to 1st service whose service type = iMessage
+            set targetBuddy to buddy "\(escapedRecipient)" of targetService
+            send "\(escapedMessage)" to targetBuddy
+        end tell
+        """
+
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.global().async {
+                var error: NSDictionary?
+                if let appleScript = NSAppleScript(source: script) {
+                    appleScript.executeAndReturnError(&error)
+                    continuation.resume(returning: error == nil)
+                } else {
+                    continuation.resume(returning: false)
+                }
+            }
+        }
+        #elseif os(iOS)
+        // On iOS, use URL scheme to open Messages with pre-filled content
+        let encodedBody = relay.message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let encodedRecipient = relay.recipient.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        guard let url = URL(string: "sms:\(encodedRecipient)&body=\(encodedBody)") else {
+            return false
+        }
+        return await MainActor.run {
+            UIApplication.shared.open(url)
+            return true
+        }
+        #else
+        return false
+        #endif
+    }
+
+    private func relayThroughMac(_ command: DeviceRelayCommand) async -> Bool {
+        guard configuration.macRelayEnabled, !configuration.macRelayHostname.isEmpty else {
+            return false
+        }
+
+        let hostname = configuration.macRelayHostname
+        let commandData: Data
+        do {
+            commandData = try JSONEncoder().encode(["command": String(describing: command)])
+        } catch {
+            return false
+        }
+
+        // Try Tailscale hostname first, then .local mDNS
+        let hosts = [hostname, "\(hostname).local"]
+
+        for host in hosts {
+            guard let url = URL(string: "http://\(host):18789/relay") else { continue }
+            var request = URLRequest(url: url, timeoutInterval: 5)
+            request.httpMethod = "POST"
+            request.httpBody = commandData
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+            do {
+                let (_, response) = try await URLSession.shared.data(for: request)
+                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                    let result = DeviceRelayResult(
+                        success: true,
+                        sourceDevice: ProcessInfo.processInfo.hostName,
+                        targetDevice: hostname,
+                        command: String(describing: command),
+                        message: "Relayed via \(host)"
+                    )
+                    onDeviceRelayResult?(result)
+                    return true
+                }
+            } catch {
+                continue
+            }
+        }
+
+        let result = DeviceRelayResult(
+            success: false,
+            sourceDevice: ProcessInfo.processInfo.hostName,
+            targetDevice: hostname,
+            command: String(describing: command),
+            message: "Mac relay failed — host unreachable"
+        )
+        onDeviceRelayResult?(result)
+        return false
+    }
+
+    private func determinePlatform(from response: VoiceResponse?) -> MessagingPlatform {
+        guard let action = response?.matchedExpectation?.action else {
+            return .iMessage // Default
+        }
+
+        switch action {
+        case "imessage": return .iMessage
+        case "whatsapp": return .whatsApp
+        case "telegram": return .telegram
+        default: return .iMessage
+        }
+    }
+}
+
+// MARK: - Speech Delegate Helper
+
+private class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
+    let completion: () -> Void
+
+    init(completion: @escaping () -> Void) {
+        self.completion = completion
+    }
+
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        completion()
+    }
+}
+
+// MARK: - Convenience Extensions
+
+extension VoiceProactivity {
+    /// Notify about an upcoming deadline
+    public func notifyDeadline(
+        title: String,
+        dueDate: Date,
+        urgency: DeadlineUrgency
+    ) async {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        let relative = formatter.localizedString(for: dueDate, relativeTo: Date())
+
+        let priority: VoiceInteractionPriority = switch urgency {
+        case .overdue: .urgent
+        case .critical: .urgent
+        case .urgent: .high
+        case .approaching: .normal
+        default: .low
+        }
+
+        let message: String
+        if urgency == .overdue {
+            message = "Reminder: \(title) is overdue. It was due \(relative)."
+        } else {
+            message = "Reminder: \(title) is due \(relative)."
+        }
+
+        let interaction = VoiceInteraction(
+            type: .reminder,
+            priority: priority,
+            message: message
+        )
+
+        await queueInteraction(interaction)
+    }
+
+    /// Notify about an incoming message
+    public func notifyMessage(
+        from sender: String,
+        platform: MessagingPlatform,
+        preview: String
+    ) async {
+        let message = "New \(platform.displayName) message from \(sender). They said: \(preview)"
+
+        let interaction = VoiceInteraction(
+            type: .notification,
+            priority: .normal,
+            message: message,
+            expectedResponses: [
+                VoiceInteraction.ExpectedResponse(keywords: ["reply", "respond", "answer"], action: "reply"),
+                VoiceInteraction.ExpectedResponse(keywords: ["ignore", "later", "dismiss"], action: "dismiss")
+            ]
+        )
+
+        await queueInteraction(interaction)
+    }
+
+    /// Ask user's preference for action
+    public func askPreference(
+        question: String,
+        options: [(name: String, keywords: [String])]
+    ) async -> String? {
+        let responses = options.map { option in
+            VoiceInteraction.ExpectedResponse(
+                keywords: option.keywords,
+                action: option.name
+            )
+        }
+
+        let response = await askQuestion(
+            question,
+            expectedResponses: responses,
+            priority: .normal
+        )
+
+        return response?.matchedExpectation?.action
     }
 }

@@ -608,7 +608,11 @@ extension GoalInferenceEngine {
     private func startConsolidationTimer() {
         Task.detached { [weak self] in
             while true {
-                try? await Task.sleep(for: .seconds(self?.consolidationInterval ?? 300))
+                do {
+                    try await Task.sleep(for: .seconds(self?.consolidationInterval ?? 300))
+                } catch {
+                    break
+                }
                 await self?.consolidateSignalsIntoGoals()
             }
         }

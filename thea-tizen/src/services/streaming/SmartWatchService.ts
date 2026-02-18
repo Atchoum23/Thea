@@ -11,6 +11,7 @@
 import {
   streamingAvailabilityService,
   StreamingAccount,
+  ContentAvailability,
   StreamingContentInfo,
 } from './StreamingAvailabilityService';
 import { nordVPNProxyService } from '../vpn/NordVPNProxyService';
@@ -266,7 +267,7 @@ class SmartWatchService {
   /**
    * Create option to set up SmartDNS
    */
-  private createSmartDNSSetupOption(_title: string): WatchOption {
+  private createSmartDNSSetupOption(title: string): WatchOption {
     const smartDNS = nordVPNProxyService.getSmartDNSConfig();
 
     return {
@@ -355,7 +356,7 @@ class SmartWatchService {
   /**
    * Create rent option
    */
-  private createRentOption(_title: string): WatchOption {
+  private createRentOption(title: string): WatchOption {
     return {
       id: 'rent',
       priority: 55,
@@ -378,7 +379,7 @@ class SmartWatchService {
   /**
    * Create buy option
    */
-  private createBuyOption(_title: string): WatchOption {
+  private createBuyOption(title: string): WatchOption {
     return {
       id: 'buy',
       priority: 60,

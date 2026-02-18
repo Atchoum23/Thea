@@ -256,10 +256,10 @@ private struct ConfidenceIndicator: View {
 
     private var confidenceColor: Color {
         switch confidence {
-        case 0.8...1.0: return .theaSuccess
-        case 0.6..<0.8: return .theaWarning
-        case 0.4..<0.6: return .theaWarning
-        default: return .theaError
+        case 0.8...1.0: return .green
+        case 0.6..<0.8: return .yellow
+        case 0.4..<0.6: return .orange
+        default: return .red
         }
     }
 }
@@ -293,25 +293,25 @@ private struct ContextFactorChip: View {
         switch factor.influence {
         case .critical:
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.theaError)
+                .foregroundStyle(.red)
         case .high:
             Image(systemName: "arrow.up.circle.fill")
-                .foregroundStyle(.theaWarning)
+                .foregroundStyle(.orange)
         case .medium:
             Image(systemName: "circle.fill")
-                .foregroundStyle(.theaWarning)
+                .foregroundStyle(.yellow)
         case .low:
             Image(systemName: "arrow.down.circle.fill")
-                .foregroundStyle(.theaSuccess)
+                .foregroundStyle(.green)
         }
     }
 
     private var chipBackground: Color {
         switch factor.influence {
-        case .critical: return .theaError.opacity(0.15)
-        case .high: return .theaWarning.opacity(0.15)
-        case .medium: return .theaWarning.opacity(0.15)
-        case .low: return .theaSuccess.opacity(0.15)
+        case .critical: return .red.opacity(0.15)
+        case .high: return .orange.opacity(0.15)
+        case .medium: return .yellow.opacity(0.15)
+        case .low: return .green.opacity(0.15)
         }
     }
 }

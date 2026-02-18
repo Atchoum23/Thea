@@ -18,7 +18,7 @@ import SwiftUI
 public final class AccessibilityManager: ObservableObject {
     public static let shared = AccessibilityManager()
 
-    private let logger = Logger(subsystem: "com.thea.app", category: "Accessibility")
+    private let logger = Logger(subsystem: "ai.thea.app", category: "AccessibilityManager")
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Published State
@@ -44,16 +44,20 @@ public final class AccessibilityManager: ObservableObject {
     }
 
     private func loadSettings() {
-        if let data = UserDefaults.standard.data(forKey: "accessibility.settings"),
-           let loaded = try? JSONDecoder().decode(AccessibilitySettings.self, from: data)
-        {
-            settings = loaded
+        guard let data = UserDefaults.standard.data(forKey: "accessibility.settings") else { return }
+        do {
+            settings = try JSONDecoder().decode(AccessibilitySettings.self, from: data)
+        } catch {
+            logger.error("Failed to decode accessibility settings: \(error.localizedDescription)")
         }
     }
 
     public func saveSettings() {
-        if let data = try? JSONEncoder().encode(settings) {
+        do {
+            let data = try JSONEncoder().encode(settings)
             UserDefaults.standard.set(data, forKey: "accessibility.settings")
+        } catch {
+            logger.error("Failed to encode accessibility settings: \(error.localizedDescription)")
         }
     }
 

@@ -16,6 +16,7 @@
 
 import Foundation
 import EventKit
+import OSLog
 #if canImport(NaturalLanguage)
 import NaturalLanguage
 #endif
@@ -124,6 +125,8 @@ public struct IntelligenceTask: Identifiable, Codable, Sendable {
 
 public actor TaskIntelligence {
     public static let shared = TaskIntelligence()
+
+    private let logger = Logger(subsystem: "ai.thea.app", category: "TaskIntelligence")
 
     // MARK: - Properties
 
@@ -271,29 +274,32 @@ public actor TaskIntelligence {
         ]
 
         for pattern in timePatterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
-               let match = regex.firstMatch(in: input, range: NSRange(input.startIndex..., in: input)) {
+            do {
+                let regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+                if let match = regex.firstMatch(in: input, range: NSRange(input.startIndex..., in: input)) {
+                    var hour = 0
+                    var minute = 0
 
-                var hour = 0
-                var minute = 0
+                    if let hourRange = Range(match.range(at: 1), in: input) {
+                        hour = Int(input[hourRange]) ?? 0
+                    }
+                    if match.numberOfRanges > 2, let minuteRange = Range(match.range(at: 2), in: input) {
+                        minute = Int(input[minuteRange]) ?? 0
+                    }
+                    if match.numberOfRanges > 3, let ampmRange = Range(match.range(at: 3), in: input) {
+                        let ampm = String(input[ampmRange]).lowercased()
+                        if ampm == "pm" && hour < 12 { hour += 12 }
+                        if ampm == "am" && hour == 12 { hour = 0 }
+                    }
 
-                if let hourRange = Range(match.range(at: 1), in: input) {
-                    hour = Int(input[hourRange]) ?? 0
+                    var components = calendar.dateComponents([.year, .month, .day], from: date ?? now)
+                    components.hour = hour
+                    components.minute = minute
+                    time = calendar.date(from: components)
+                    break
                 }
-                if match.numberOfRanges > 2, let minuteRange = Range(match.range(at: 2), in: input) {
-                    minute = Int(input[minuteRange]) ?? 0
-                }
-                if match.numberOfRanges > 3, let ampmRange = Range(match.range(at: 3), in: input) {
-                    let ampm = String(input[ampmRange]).lowercased()
-                    if ampm == "pm" && hour < 12 { hour += 12 }
-                    if ampm == "am" && hour == 12 { hour = 0 }
-                }
-
-                var components = calendar.dateComponents([.year, .month, .day], from: date ?? now)
-                components.hour = hour
-                components.minute = minute
-                time = calendar.date(from: components)
-                break
+            } catch {
+                logger.error("Invalid time extraction pattern '\(pattern)': \(error.localizedDescription)")
             }
         }
 
@@ -318,13 +324,16 @@ public actor TaskIntelligence {
         var contexts: [String] = []
         let pattern = "@(\\w+)"
 
-        if let regex = try? NSRegularExpression(pattern: pattern),
-           let matches = regex.matches(in: input, range: NSRange(input.startIndex..., in: input)) as [NSTextCheckingResult]? {
+        do {
+            let regex = try NSRegularExpression(pattern: pattern)
+            let matches = regex.matches(in: input, range: NSRange(input.startIndex..., in: input))
             for match in matches {
                 if let range = Range(match.range(at: 1), in: input) {
                     contexts.append(String(input[range]))
                 }
             }
+        } catch {
+            logger.error("Invalid context extraction pattern: \(error.localizedDescription)")
         }
 
         return contexts
@@ -334,13 +343,16 @@ public actor TaskIntelligence {
         var tags: [String] = []
         let pattern = "#(\\w+)"
 
-        if let regex = try? NSRegularExpression(pattern: pattern),
-           let matches = regex.matches(in: input, range: NSRange(input.startIndex..., in: input)) as [NSTextCheckingResult]? {
+        do {
+            let regex = try NSRegularExpression(pattern: pattern)
+            let matches = regex.matches(in: input, range: NSRange(input.startIndex..., in: input))
             for match in matches {
                 if let range = Range(match.range(at: 1), in: input) {
                     tags.append(String(input[range]))
                 }
             }
+        } catch {
+            logger.error("Invalid tag extraction pattern: \(error.localizedDescription)")
         }
 
         return tags
@@ -351,10 +363,14 @@ public actor TaskIntelligence {
         let patterns = ["project:(\\w+)", "\\[([^\\]]+)\\]"]
 
         for pattern in patterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
-               let match = regex.firstMatch(in: input, range: NSRange(input.startIndex..., in: input)),
-               let range = Range(match.range(at: 1), in: input) {
-                return String(input[range])
+            do {
+                let regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+                if let match = regex.firstMatch(in: input, range: NSRange(input.startIndex..., in: input)),
+                   let range = Range(match.range(at: 1), in: input) {
+                    return String(input[range])
+                }
+            } catch {
+                logger.error("Invalid project extraction pattern '\(pattern)': \(error.localizedDescription)")
             }
         }
 
@@ -401,8 +417,11 @@ public actor TaskIntelligence {
         ]
 
         for pattern in timePatterns {
-            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
+            do {
+                let regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
                 title = regex.stringByReplacingMatches(in: title, range: NSRange(title.startIndex..., in: title), withTemplate: "")
+            } catch {
+                logger.error("Invalid title cleaning pattern '\(pattern)': \(error.localizedDescription)")
             }
         }
 
@@ -684,7 +703,12 @@ public actor TaskIntelligence {
         // Check every minute for upcoming deadlines
         Task {
             while true {
-                try? await Task.sleep(for: .seconds(60))
+                do {
+                    try await Task.sleep(for: .seconds(60))
+                } catch {
+                    logger.debug("Deadline monitoring sleep cancelled")
+                    break
+                }
                 await checkDeadlines()
             }
         }
@@ -785,17 +809,21 @@ public actor TaskIntelligence {
     // MARK: - Persistence
 
     private func saveTasks() async {
-        if let defaults = UserDefaults(suiteName: "group.app.theathe"),
-           let encoded = try? JSONEncoder().encode(Array(tasks.values)) {
+        guard let defaults = UserDefaults(suiteName: "group.app.theathe") else { return }
+        do {
+            let encoded = try JSONEncoder().encode(Array(tasks.values))
             defaults.set(encoded, forKey: "theaTasks")
             defaults.synchronize()
+        } catch {
+            logger.error("Failed to encode tasks for save: \(error.localizedDescription)")
         }
     }
 
     public func loadTasks() async {
-        if let defaults = UserDefaults(suiteName: "group.app.theathe"),
-           let data = defaults.data(forKey: "theaTasks"),
-           let loadedTasks = try? JSONDecoder().decode([IntelligenceTask].self, from: data) {
+        guard let defaults = UserDefaults(suiteName: "group.app.theathe"),
+              let data = defaults.data(forKey: "theaTasks") else { return }
+        do {
+            let loadedTasks = try JSONDecoder().decode([IntelligenceTask].self, from: data)
             for task in loadedTasks {
                 tasks[task.id] = task
             }
@@ -805,6 +833,8 @@ public actor TaskIntelligence {
                 task.urgencyScore = calculateUrgencyScore(for: task)
                 tasks[id] = task
             }
+        } catch {
+            logger.error("Failed to decode stored tasks: \(error.localizedDescription)")
         }
     }
 }

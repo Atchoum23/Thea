@@ -113,28 +113,18 @@ public enum SendableValue: Codable, Sendable, Equatable, Hashable {
     }
 
     public init(from decoder: Decoder) throws {
-        // First, try single-value decoding for simple JSON compatibility
+        // Attempt single-value decoding for simple JSON compatibility.
+        // Each type is tried in order; the first successful decode wins.
         let container = try decoder.singleValueContainer()
-
-        if let intValue = try? container.decode(Int.self) {
-            self = .int(intValue)
-        } else if let doubleValue = try? container.decode(Double.self) {
-            self = .double(doubleValue)
-        } else if let stringValue = try? container.decode(String.self) {
-            self = .string(stringValue)
-        } else if let boolValue = try? container.decode(Bool.self) {
-            self = .bool(boolValue)
-        } else if let dateValue = try? container.decode(Date.self) {
-            self = .date(dateValue)
-        } else if let arrayValue = try? container.decode([SendableValue].self) {
-            self = .array(arrayValue)
-        } else if let dictValue = try? container.decode([String: SendableValue].self) {
-            self = .dictionary(dictValue)
-        } else if container.decodeNil() {
-            self = .null
-        } else {
-            self = .null
-        }
+        if container.decodeNil() { self = .null; return }
+        do { self = .int(try container.decode(Int.self)); return } catch {}
+        do { self = .double(try container.decode(Double.self)); return } catch {}
+        do { self = .string(try container.decode(String.self)); return } catch {}
+        do { self = .bool(try container.decode(Bool.self)); return } catch {}
+        do { self = .date(try container.decode(Date.self)); return } catch {}
+        do { self = .array(try container.decode([SendableValue].self)); return } catch {}
+        do { self = .dictionary(try container.decode([String: SendableValue].self)); return } catch {}
+        self = .null
     }
 
     public func encode(to encoder: Encoder) throws {

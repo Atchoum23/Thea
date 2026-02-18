@@ -414,7 +414,7 @@ public struct ToolCallDisplayView: View {
                 // Tool icon with animation
                 Image(systemName: "wrench.and.screwdriver")
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(isExecuting ? Color.theaWarning : .secondary)
+                    .foregroundStyle(isExecuting ? Color.orange : .secondary)
                     .symbolEffect(.bounce, options: .repeating, isActive: isExecuting)
                     .accessibilityHidden(true)
 
@@ -427,7 +427,7 @@ public struct ToolCallDisplayView: View {
                 if !isExecuting {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 12))
-                        .foregroundStyle(.theaSuccess)
+                        .foregroundStyle(.green)
                         .accessibilityLabel("Completed")
                 }
             }
@@ -435,7 +435,7 @@ public struct ToolCallDisplayView: View {
             .padding(.vertical, 8)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(isExecuting ? Color.theaWarning.opacity(0.1) : Color.secondary.opacity(0.08))
+                    .fill(isExecuting ? Color.orange.opacity(0.1) : Color.secondary.opacity(0.08))
             )
 
             // Expandable input/output (for debugging)

@@ -312,9 +312,13 @@ public final class TheaConfig {
             security: security
         )
 
-        if let data = try? encoder.encode(snapshot),
-           let json = String(data: data, encoding: .utf8) {
-            return json
+        do {
+            let data = try encoder.encode(snapshot)
+            if let json = String(data: data, encoding: .utf8) {
+                return json
+            }
+        } catch {
+            logger.error("Failed to encode config snapshot: \(error.localizedDescription)")
         }
         return "{}"
     }
