@@ -548,6 +548,8 @@ actor SmartTransportManager {
         return connectResult
     }
 
+    // @unchecked Sendable: internal NSLock synchronizes all mutable state (resumed flag);
+    // the lock ensures atomic tryResume() semantics across concurrent task completions
     /// Thread-safe one-shot guard for continuation resumption
     private final class ContinuationGuard: @unchecked Sendable {
         private let lock = NSLock()

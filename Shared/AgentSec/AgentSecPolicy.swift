@@ -163,7 +163,7 @@ public struct NetworkPolicy: Codable, Sendable {
                         return true
                     }
                 } catch {
-                    agentSecPolicyLogger.error("Invalid host wildcard pattern '\(blocked)': \(error)")
+                    logger.error("Invalid host wildcard pattern '\(blocked)': \(error)")
                 }
             } else if lowercaseHost == blocked.lowercased() || lowercaseHost.contains(blocked.lowercased()) {
                 return true
@@ -356,7 +356,7 @@ public struct TerminalPolicy: Codable, Sendable {
                     return (true, "Command matches blocked pattern: \(pattern)")
                 }
             } catch {
-                agentSecPolicyLogger.error("Invalid terminal blocked pattern '\(pattern)': \(error)")
+                logger.error("Invalid terminal blocked pattern '\(pattern)': \(error)")
                 if lowercaseCommand.contains(pattern.lowercased()) {
                     return (true, "Command contains blocked pattern: \(pattern)")
                 }
