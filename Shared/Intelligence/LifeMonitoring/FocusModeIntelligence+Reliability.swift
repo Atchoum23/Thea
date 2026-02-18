@@ -96,7 +96,7 @@ extension FocusModeIntelligence {
 
             // Wait before retry with exponential backoff
             let delay = Double(attempt) * 2.0
-            try? await Task.sleep(for: .seconds(delay))
+            try? await Task.sleep(for: .seconds(delay)) // Safe: backoff delay; sleep cancellation exits the retry loop; non-fatal
         }
 
         // All retries failed - notify user

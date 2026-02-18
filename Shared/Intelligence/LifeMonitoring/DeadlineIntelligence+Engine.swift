@@ -52,7 +52,7 @@ extension DeadlineIntelligence {
         scanTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.performPeriodicScan()
-                try? await Task.sleep(for: .seconds(3600)) // Every hour
+                try? await Task.sleep(for: .seconds(3600)) // Safe: sleep cancellation exits loop via Task.isCancelled; non-fatal // Every hour
             }
         }
 
@@ -60,7 +60,7 @@ extension DeadlineIntelligence {
         reminderTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.checkReminders()
-                try? await Task.sleep(for: .seconds(900)) // Every 15 minutes
+                try? await Task.sleep(for: .seconds(900)) // Safe: sleep cancellation exits loop via Task.isCancelled; non-fatal // Every 15 minutes
             }
         }
     }
