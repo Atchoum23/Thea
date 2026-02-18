@@ -32,6 +32,8 @@ protocol Rule: Sendable {
 
 // MARK: - Base Rule Implementation
 
+// @unchecked Sendable: all properties (id, name, patterns, etc.) are let constants set at init;
+// RegexRule is immutable after construction and safe to use from concurrent audit scan tasks
 /// Base class for regex-based rules
 class RegexRule: Rule, @unchecked Sendable {
     let id: String
@@ -130,6 +132,8 @@ class RegexRule: Rule, @unchecked Sendable {
 
 // MARK: - AST-based Rule (for Swift)
 
+// @unchecked Sendable: all properties are let constants set at init; ASTRule is immutable after
+// construction and safe for concurrent use in parallel audit scan tasks
 /// Base class for AST-based rules that analyze Swift code structure
 class ASTRule: Rule, @unchecked Sendable {
     let id: String
