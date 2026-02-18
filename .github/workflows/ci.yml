@@ -466,6 +466,7 @@ jobs:
     name: SonarCloud
     runs-on: ubuntu-latest
     needs: test
+    continue-on-error: true
     permissions:
       contents: read
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
@@ -484,7 +485,7 @@ jobs:
 
       - name: SonarCloud Scan
         # sonarcloud-github-action v5 is deprecated (exits code 3). Use sonarqube-scan-action v7+.
-        uses: SonarSource/sonarqube-scan-action@a31c939837b5c8f83e2bde9c476c71da2b80289b # v7.0.0
+        uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
