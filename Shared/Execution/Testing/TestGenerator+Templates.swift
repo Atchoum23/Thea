@@ -72,6 +72,7 @@ extension TestGenerator {
 
         // Extract code blocks
         let codeBlockPattern = "```(?:\(language.rawValue))?\\s*([\\s\\S]*?)```"
+        // Safe: compile-time known markdown code fence pattern; invalid regex → nil, enumerateMatches is a no-op
         let regex = try? NSRegularExpression(pattern: codeBlockPattern, options: [])
         let range = NSRange(response.startIndex..., in: response)
 

@@ -111,6 +111,7 @@ extension AIModel: Codable {
 
 // MARK: - Model Capability
 
+/// A discrete capability that an AI model may support.
 public enum ModelCapability: String, Codable, Sendable, CaseIterable {
     case chat           // Basic chat completion
     case completion     // Text completion
@@ -126,6 +127,7 @@ public enum ModelCapability: String, Codable, Sendable, CaseIterable {
 
 // MARK: - Model Category
 
+/// High-level category grouping for model selection and display.
 public enum ModelCategory: String, Codable, Sendable, CaseIterable {
     case flagship       // Most capable
     case standard       // General purpose
@@ -173,6 +175,7 @@ public struct ModelPerformance: Codable, Sendable {
         self.lastUsed = lastUsed
     }
 
+    /// Record a successful inference call and update running metrics.
     public mutating func recordSuccess(tokens: Int, cost: Decimal, latency: TimeInterval) {
         successCount += 1
         totalTokens += tokens
@@ -184,6 +187,7 @@ public struct ModelPerformance: Codable, Sendable {
         lastUsed = Date()
     }
 
+    /// Increment the failure counter and update the last-used timestamp.
     public mutating func recordFailure() {
         failureCount += 1
         lastUsed = Date()

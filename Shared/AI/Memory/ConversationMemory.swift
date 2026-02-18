@@ -289,6 +289,7 @@ final class ConversationMemory {
         var patterns: [(FactCategory, NSRegularExpression)] = []
 
         // "My name is..." pattern
+        // Safe: compile-time known pattern; invalid regex → skip this fact category (no matches)
         if let regex = try? NSRegularExpression(
             pattern: #"(?:my name is|I'm|I am)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)"#,
             options: .caseInsensitive
@@ -297,6 +298,7 @@ final class ConversationMemory {
         }
 
         // "I prefer..." pattern
+        // Safe: compile-time known pattern; invalid regex → skip this fact category (no matches)
         if let regex = try? NSRegularExpression(
             pattern: #"I (?:prefer|like|want|need)\s+(.+?)(?:\.|$)"#,
             options: .caseInsensitive
@@ -305,6 +307,7 @@ final class ConversationMemory {
         }
 
         // Tech stack patterns
+        // Safe: compile-time known pattern; invalid regex → skip this fact category (no matches)
         if let regex = try? NSRegularExpression(
             pattern: #"(?:using|work with|develop in|coding in)\s+(Swift|Python|JavaScript|TypeScript|Rust|Go|Ruby|Java|Kotlin|C\+\+)"#,
             options: .caseInsensitive
@@ -313,6 +316,7 @@ final class ConversationMemory {
         }
 
         // Project patterns
+        // Safe: compile-time known pattern; invalid regex → skip this fact category (no matches)
         if let regex = try? NSRegularExpression(
             pattern: #"(?:project|app|application)\s+(?:called|named)\s+([A-Za-z0-9]+)"#,
             options: .caseInsensitive
