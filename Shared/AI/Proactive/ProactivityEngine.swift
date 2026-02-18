@@ -34,7 +34,7 @@ public final class ProactivityEngine: ObservableObject {
 
     // MARK: - Internal State
 
-    private var lastSuggestionTimes: [String: Date] = [:]
+    var lastSuggestionTimes: [String: Date] = [:]
     var ambientAgentTasks: [String: Task<Void, Never>] = [:]
     var patternCache: [MemoryDetectedPattern] = []
     var lastPatternAnalysis: Date?
