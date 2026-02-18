@@ -172,19 +172,22 @@ public actor HealthContextProvider: ContextProvider {
             let heartRateType = HKQuantityType.quantityType(forIdentifier: .heartRate)!
 
             // Observer for steps
-            let stepQuery = HKObserverQuery(sampleType: stepType, predicate: nil) { [weak self] _, _, error in
+            // IMPORTANT: completionHandler MUST always be called or HealthKit stops background delivery
+            let stepQuery = HKObserverQuery(sampleType: stepType, predicate: nil) { [weak self] _, completionHandler, error in
                 if error == nil {
                     Task { await self?.fetchHealthData() }
                 }
+                completionHandler()
             }
             healthStore.execute(stepQuery)
             observerQueries.append(stepQuery)
 
             // Observer for heart rate
-            let hrQuery = HKObserverQuery(sampleType: heartRateType, predicate: nil) { [weak self] _, _, error in
+            let hrQuery = HKObserverQuery(sampleType: heartRateType, predicate: nil) { [weak self] _, completionHandler, error in
                 if error == nil {
                     Task { await self?.fetchHealthData() }
                 }
+                completionHandler()
             }
             healthStore.execute(hrQuery)
             observerQueries.append(hrQuery)
