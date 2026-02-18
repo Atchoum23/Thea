@@ -89,10 +89,12 @@ public struct AffectedResource: Identifiable, Sendable {
         self.changeType = changeType
     }
 
+    /// Category of system resource that can be affected by a risky action.
     public enum ResourceType: String, Sendable {
         case file, directory, database, configuration, system, network, credential, process
     }
 
+    /// Nature of the change that would be made to an affected resource.
     public enum ChangeType: String, Sendable {
         case create, read, update, delete, execute
     }
@@ -129,6 +131,7 @@ public struct RollbackPoint: Identifiable, Codable, Sendable {
     }
 }
 
+/// A recorded snapshot of a resource state for rollback or audit purposes.
 public struct SnapshotItem: Identifiable, Codable, Sendable {
     public let id: UUID
     public let resourceType: String
@@ -213,6 +216,7 @@ public struct HumanInterventionRequest: Identifiable, Sendable {
         self.defaultAction = defaultAction
     }
 
+/// Reason why a human intervention is being requested.
     public enum InterventionReason: String, Sendable {
         case highRiskAction
         case ambiguousRequest
@@ -224,6 +228,7 @@ public struct HumanInterventionRequest: Identifiable, Sendable {
         case budgetExceeded
     }
 
+/// How urgently a human intervention is needed.
     public enum InterventionUrgency: String, Sendable {
         case low       // Can wait indefinitely
         case normal    // Should respond within hours
@@ -232,6 +237,7 @@ public struct HumanInterventionRequest: Identifiable, Sendable {
     }
 }
 
+/// A specific action option presented to the user during a safety intervention.
 public struct InterventionOption: Identifiable, Sendable {
     public let id: UUID
     public let label: String
@@ -256,6 +262,7 @@ public struct InterventionOption: Identifiable, Sendable {
         self.riskLevel = riskLevel
     }
 
+/// The typed action to perform when an intervention option is selected.
     public enum InterventionAction: Sendable {
         case proceed
         case proceedWithModification(String)
@@ -266,6 +273,7 @@ public struct InterventionOption: Identifiable, Sendable {
     }
 }
 
+/// The user's response to a safety intervention request.
 public struct HumanInterventionResponse: Sendable {
     public let requestId: UUID
     public let selectedOptionId: UUID
@@ -333,6 +341,7 @@ public struct SafetyAuditEntry: Identifiable, Codable, Sendable {
         self.rollbackPointId = rollbackPointId
     }
 
+/// The outcome recorded in a safety audit log entry.
     public enum AuditOutcome: String, Codable, Sendable {
         case success
         case failure
@@ -367,6 +376,7 @@ public struct SafetyPolicy: Codable, Sendable {
     }
 }
 
+/// A configurable safety rule that can block or require approval for specific actions.
 public struct SafetyRule: Identifiable, Codable, Sendable {
     public let id: UUID
     public let name: String
@@ -388,6 +398,7 @@ public struct SafetyRule: Identifiable, Codable, Sendable {
         self.message = message
     }
 
+/// The trigger condition for a safety rule.
     public enum RuleCondition: Codable, Sendable {
         case actionCategory(String)
         case riskLevel(String)
@@ -396,6 +407,7 @@ public struct SafetyRule: Identifiable, Codable, Sendable {
         case custom(String)
     }
 
+/// The action taken when a safety rule condition is triggered.
     public enum RuleAction: String, Codable, Sendable {
         case allow
         case warn

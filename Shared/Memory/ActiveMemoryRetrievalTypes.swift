@@ -60,6 +60,7 @@ public struct RetrievalSource: Sendable {
     public let timestamp: Date
     public let metadata: [String: String]
 
+    /// The memory subsystem that contributed entries to a retrieval result.
     public enum SourceType: String, Sendable {
         case memorySystem = "Memory"
         case episodic = "Episodic"

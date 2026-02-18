@@ -12,6 +12,7 @@ import OSLog
 /// Learns from user feedback to improve confidence assessment over time
 /// Learns from user feedback to improve confidence calibration and response quality over time.
 @MainActor
+/// Learns from user corrections and ratings to improve confidence calibration over time.
 public final class UserFeedbackLearner {
     private let logger = Logger(subsystem: "com.thea.ai", category: "UserFeedbackLearner")
 

@@ -17,6 +17,7 @@ import UniformTypeIdentifiers
 
 /// Service for managing Spotlight search integration
 @MainActor
+/// Manages Core Spotlight indexing for Thea conversations, projects, knowledge items, and notes.
 public class SpotlightService: ObservableObject {
     public static let shared = SpotlightService()
 

@@ -6,6 +6,7 @@ import SwiftUI
 /// Handles user confirmation for sensitive operations with proper async continuation handling
 @MainActor
 @Observable
+/// Centralized manager for all user-approval gating — handles confirmation dialogs and timeout enforcement.
 public final class ApprovalManager {
     public static let shared = ApprovalManager()
 

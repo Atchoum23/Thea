@@ -167,6 +167,7 @@ public struct ConfidenceDecomposition: Sendable {
 
 /// Central AI-powered confidence validation system
 @MainActor
+/// Orchestrates multi-source confidence validation — combines model consensus, web verification, code execution, static analysis, and user feedback.
 public final class ConfidenceSystem {
     public static let shared = ConfidenceSystem()
 
@@ -404,6 +405,7 @@ public final class ConfidenceSystem {
 
 // MARK: - Validation Context
 
+/// Context passed to confidence validators describing the response being assessed.
 public struct ValidationContext: Sendable {
     public let allowMultiModel: Bool
     public let allowWebSearch: Bool
@@ -427,6 +429,7 @@ public struct ValidationContext: Sendable {
         maxLatency: 1.0
     )
 
+/// Programming language of the code being validated by the confidence system.
     public enum CodeLanguage: String, Sendable {
         case swift, javascript, python, unknown
     }
