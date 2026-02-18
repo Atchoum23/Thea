@@ -10,6 +10,7 @@ private let memTypeLogger = Logger(subsystem: "com.thea.app", category: "MemoryM
 
 // MARK: - Memory Record (File-based, not SwiftData)
 
+/// A file-persisted memory record with type, category, key-value content, and access tracking.
 public struct OmniMemoryRecord: Codable, Identifiable, Sendable {
     public let id: UUID
     public var type: OmniMemoryType
@@ -49,6 +50,7 @@ public struct OmniMemoryRecord: Codable, Identifiable, Sendable {
 
 // MARK: - Supporting Types (Prefixed with Omni to avoid conflicts)
 
+/// The functional category of a memory record.
 public enum OmniMemoryType: String, Codable, Sendable {
     case semantic    // Learned facts and patterns
     case episodic    // Specific experiences
@@ -56,12 +58,14 @@ public enum OmniMemoryType: String, Codable, Sendable {
     case prospective // Future intentions
 }
 
+/// How a memory record was originally created.
 public enum OmniMemorySource: String, Codable, Sendable {
     case explicit    // User explicitly stated
     case inferred    // THEA inferred from behavior
     case system      // System-generated
 }
 
+/// Importance level determining retention and retrieval priority for a memory record.
 public enum OmniMemoryPriority: String, Codable {
     case low
     case normal
@@ -69,6 +73,7 @@ public enum OmniMemoryPriority: String, Codable {
     case critical
 }
 
+/// Semantic domain classification for grouping related memories.
 public enum OmniSemanticCategory: String, Codable {
     case userPreference
     case taskPattern
@@ -78,6 +83,7 @@ public enum OmniSemanticCategory: String, Codable {
     case personality
 }
 
+/// Category of user preference captured in a memory record.
 public enum OmniPreferenceCategory: String, Codable {
     case responseStyle    // verbose, concise, technical
     case modelSelection   // preferred models by task
@@ -172,6 +178,7 @@ public struct MemoryDetectedPattern: Sendable {
 
 // MARK: - Memory Stats
 
+/// Statistical summary of the current memory store.
 public struct OmniMemoryStats: Sendable, CustomStringConvertible {
     public var semanticCount: Int = 0
     public var episodicCount: Int = 0
@@ -306,6 +313,7 @@ public struct MemoryHealthReport: Sendable {
 // MARK: - Memory Search Result
 
 /// Result from semantic or keyword search
+/// A single result from a semantic or keyword memory search, with relevance score.
 public struct MemorySearchResult: Identifiable, Sendable {
     public let id: UUID
     public let memory: OmniMemoryRecord
