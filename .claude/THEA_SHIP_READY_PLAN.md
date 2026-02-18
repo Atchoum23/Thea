@@ -784,8 +784,8 @@ Update this section after each phase completes (edit in-place):
 | A2 | Schema migration wire-in | ✅ DONE | 7f2ceaaa | 2026-02-18 |
 | B | Build System (4/4 platforms 0 err 0 warn) | ✅ DONE | a2bff42+direct | 2026-02-18 |
 | C | Swift Tests (4044/4045 — 1 timezone flake) | ✅ DONE | verified | 2026-02-18 |
-| D1 | @unchecked Sendable | 🔄 IN PROGRESS | a254aba | — |
-| D2 | try? Reduction | 🔄 IN PROGRESS | a254aba | — |
+| D1 | @unchecked Sendable (164 decls, 75 justified) | ✅ DONE | a254aba | 2026-02-18 |
+| D2 | try? Reduction (0 unjustified, 137 annotated) | ✅ DONE | a254aba | 2026-02-18 |
 | D3 | Periphery Dead Code | 🔄 IN PROGRESS | afc0c7b | — |
 | E | CI/CD Repair (6 YAML files, E2E Logger fix) | ✅ DONE | a2ba758 | 2026-02-18 |
 | F | Liquid Glass + UX/UI | ✅ DONE | addb4f7 | 2026-02-18 |
@@ -793,13 +793,13 @@ Update this section after each phase completes (edit in-place):
 | H | IMPL_PLAN Phases 4-8 | ✅ DONE | a7eb850 | 2026-02-18 |
 | I | Tizen + TheaWeb | ✅ DONE | a96b26d | 2026-02-18 |
 | J | Security Audit | ✅ DONE | a64c7c4 | 2026-02-18 |
-| K | Documentation | 🔄 IN PROGRESS | ab9fa83 | — |
+| K | Documentation (25 files, 100% public type coverage, 29 commits) | ✅ DONE | ab9fa83 | 2026-02-18 |
 | L | Final Verification | 🔄 IN PROGRESS | a5e9d5b | — |
 | M | Manual Ship Gate | ⏳ MANUAL | Alexis | — |
 
-**Ship-Ready %**: ~92% (all builds green, all platforms, 127 commits; D1/D2/D3/K finishing)
-**Last updated**: 2026-02-18 21:00 UTC
-**Remaining**: D1/D2 (@unchecked Sendable + try?), D3 (Periphery scan), K (docs), L (report), M (manual tag)
+**Ship-Ready %**: ~97% (all builds green, D1/D2/K done; D3/L finishing, Release build fix in progress)
+**Last updated**: 2026-02-18 21:30 UTC
+**Remaining**: D3 (Periphery scan), L (final verification report), M (manual git tag v1.0.0)
 
 ### Known False-Positive SourceKit Diagnostics (Do NOT act on these)
 SourceKit shows type errors for Shared/ files because it analyzes them in isolation, not with full project context. These are all confirmed false positives where backing types EXIST:
