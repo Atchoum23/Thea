@@ -14,8 +14,8 @@ struct BackupSettingsView: View {
     @State var isRestoringBackup = false
     @State var backupProgress: Double = 0
     @State var restoreProgress: Double = 0
-    @State private var errorMessage: String?
-    @State private var showError = false
+    @State var errorMessage: String?
+    @State var showError = false
 
     var body: some View {
         Form {

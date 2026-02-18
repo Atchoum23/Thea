@@ -194,7 +194,7 @@
                let childrenArray = children as? [AXUIElement]
             {
                 for child in childrenArray {
-                    if let text = try? findTextContent(in: child) {
+                    if let text = try? findTextContent(in: child) { // Safe: AX traversal failure → try next child; other children still searched
                         return text
                     }
                 }
@@ -295,7 +295,7 @@
         let monitor = Unmanaged<TerminalAccessibilityMonitor>.fromOpaque(refcon).takeUnretainedValue()
 
         // Read the new content
-        if let content = try? AccessibilityBridge.readTerminalText() {
+        if let content = try? AccessibilityBridge.readTerminalText() { // Safe: AX read failure → skip this notification; observer retries on next AX event
             // Capture the callback to avoid data race - execute on MainActor
             let callback = monitor.onChange
             Task { @MainActor in
