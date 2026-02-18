@@ -366,15 +366,33 @@ struct TaskModelTests {
 
     @Test("isDueToday false for tomorrow")
     func isDueTodayFalseTomorrow() {
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
-        let task = TestTask(title: "Test", dueDate: tomorrow)
+        // Noon-anchored for consistency — avoids midnight-crossing flake
+        let cal = Calendar.current
+        let noonTomorrow = cal.date(byAdding: .day, value: 1,
+                                    to: cal.date(bySettingHour: 12, minute: 0, second: 0, of: Date())!)!
+        let task = TestTask(title: "Test", dueDate: noonTomorrow)
+        #expect(!task.isDueToday)
+    }
+
+    @Test("isDueToday false for yesterday")
+    func isDueTodayFalseYesterday() {
+        // Noon-anchored past date — also not today
+        let cal = Calendar.current
+        let noonYesterday = cal.date(byAdding: .day, value: -1,
+                                     to: cal.date(bySettingHour: 12, minute: 0, second: 0, of: Date())!)!
+        let task = TestTask(title: "Test", dueDate: noonYesterday)
         #expect(!task.isDueToday)
     }
 
     @Test("isDueThisWeek detects current week tasks")
     func isDueThisWeek() {
-        // Create a date within this week
-        let task = TestTask(title: "Test", dueDate: Date())
+        // Anchor to noon Wednesday of this week — avoids week-boundary flake regardless of locale
+        let cal = Calendar.current
+        let weekday = cal.component(.weekday, from: Date())
+        let daysToWed = (4 - weekday + 7) % 7  // 4 = Wednesday in 1-based Gregorian
+        let wednesday = cal.date(byAdding: .day, value: daysToWed == 0 ? 0 : daysToWed, to: Date())!
+        let noonWed = cal.date(bySettingHour: 12, minute: 0, second: 0, of: wednesday)!
+        let task = TestTask(title: "Test", dueDate: noonWed)
         #expect(task.isDueThisWeek)
     }
 
