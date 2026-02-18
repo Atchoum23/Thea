@@ -97,8 +97,6 @@ struct LifeTrackingSettingsView: View {
             Button("OK") { }
         } message: { message in
             Text(message)
-        } message: {
-            Text("This will permanently delete all tracked life data. This action cannot be undone.")
         }
     }
 }
