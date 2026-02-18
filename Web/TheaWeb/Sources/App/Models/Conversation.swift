@@ -4,6 +4,8 @@
 import Fluent
 import Vapor
 
+// @unchecked Sendable: Fluent Model requires class reference semantics; Vapor/Fluent manage
+// database access through its own concurrency-safe EventLoop model; mutability is Fluent-managed
 /// Persistent conversation model
 final class Conversation: Model, Content, @unchecked Sendable {
     static let schema = "conversations"
@@ -59,6 +61,8 @@ final class Conversation: Model, Content, @unchecked Sendable {
     }
 }
 
+// @unchecked Sendable: Fluent Model requires class reference semantics; Vapor/Fluent manage
+// database access through its own concurrency-safe EventLoop model; mutability is Fluent-managed
 /// Chat message model
 final class Message: Model, Content, @unchecked Sendable {
     static let schema = "messages"

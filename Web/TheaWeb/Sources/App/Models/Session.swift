@@ -4,6 +4,8 @@
 import Fluent
 import Vapor
 
+// @unchecked Sendable: Fluent Model requires class reference semantics; Vapor/Fluent manage
+// database access through its own concurrency-safe EventLoop model; mutability is Fluent-managed
 /// Session model for tracking authenticated sessions
 final class Session: Model, Content, @unchecked Sendable {
     static let schema = "sessions"

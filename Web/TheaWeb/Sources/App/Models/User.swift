@@ -4,6 +4,8 @@
 import Fluent
 import Vapor
 
+// @unchecked Sendable: Fluent Model requires class reference semantics; Vapor/Fluent manage
+// database access through its own concurrency-safe EventLoop model; mutability is Fluent-managed
 /// User model for Sign in with Apple authentication
 final class User: Model, Content, @unchecked Sendable {
     static let schema = "users"

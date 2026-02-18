@@ -4,6 +4,8 @@
 import Fluent
 import Vapor
 
+// @unchecked Sendable: Fluent Model requires class reference semantics; Vapor/Fluent manage
+// database access through its own concurrency-safe EventLoop model; mutability is Fluent-managed
 /// API key for programmatic access to Thea
 final class APIKey: Model, Content, @unchecked Sendable {
     static let schema = "api_keys"
