@@ -214,6 +214,7 @@ public final class DeviceCapabilityRouter: ObservableObject {
     // MARK: - Quick Routing Methods
 
     /// Route AI processing task
+    /// Returns the best device for a standard AI inference task.
     public func routeAITask() -> DeviceRoutingDecision {
         let requirements = TaskRequirements(
             requiresHighCPU: true,
@@ -226,6 +227,7 @@ public final class DeviceCapabilityRouter: ObservableObject {
     }
 
     /// Route lightweight query
+    /// Returns the best device for a lightweight (low-resource) task.
     public func routeLightweightTask() -> DeviceRoutingDecision {
         let requirements = TaskRequirements(
             requiresHighCPU: false,
@@ -235,6 +237,7 @@ public final class DeviceCapabilityRouter: ObservableObject {
     }
 
     /// Route file processing task
+    /// Returns the best device for processing a file of the given byte size.
     public func routeFileProcessingTask(estimatedSize: Int) -> DeviceRoutingDecision {
         let requirements = TaskRequirements(
             requiresHighCPU: estimatedSize > 10_000_000, // > 10MB
@@ -246,6 +249,7 @@ public final class DeviceCapabilityRouter: ObservableObject {
     }
 
     /// Route background sync task
+    /// Returns the best device for a background (non-interactive) task.
     public func routeBackgroundTask() -> DeviceRoutingDecision {
         let requirements = TaskRequirements(
             requiresHighCPU: false,
@@ -258,6 +262,7 @@ public final class DeviceCapabilityRouter: ObservableObject {
 
 // MARK: - Task Requirements
 
+/// Hardware and capability requirements used to route a task to the best available device.
 public struct TaskRequirements: Sendable {
     public var requiresHighCPU: Bool
     public var requiresGPU: Bool
@@ -291,6 +296,7 @@ public struct TaskRequirements: Sendable {
 
 // MARK: - Routing Decision
 
+/// The result of routing a task: the selected target device, a confidence score, and human-readable reasoning.
 public struct DeviceRoutingDecision: Sendable {
     public let targetDevice: DeviceInfo
     public let score: Double // 0-1 confidence score
@@ -319,6 +325,7 @@ public struct DeviceRoutingDecision: Sendable {
         }
     }
 
+    /// Qualitative confidence band for a routing decision score.
     public enum ConfidenceLevel: String {
         case high = "High"
         case medium = "Medium"
