@@ -37,8 +37,8 @@ From MBAM2 terminal, start a new Claude Code session and say:
 ### Apple Platforms (4x)
 - [x] 16/16 builds pass: 4 platforms × Debug + Release × CLI build (0 errors, 0 warnings) ✅ Phase B
 - [ ] Xcode GUI builds pass for all 4 platforms (0 errors, 0 warnings) — *not yet verified via GUI*
-- [x] `swift test` passes: 0 failures, 0 flakes — all tests must be deterministic; fix flaky tests, never skip or accept them ✅ Phase C (1 timezone flake still open — must be fixed)
-- [x] SwiftLint: 0 violations, 0 warnings — warning_threshold must stay at 0, never raised to suppress real issues ✅ Phase C (threshold currently at 300 — must be reset to 0)
+- [x] `swift test` passes: 0 failures, 0 flakes — all tests must be deterministic; fix flaky tests, never skip or accept them ✅ Phase C + isDueToday timezone flake fixed (noon anchor, 4045/4045 passing)
+- [x] SwiftLint: 0 violations, 0 warnings — CI uses --strict (0 actual violations; warning_threshold: 0 removed — SwiftLint 0.63.2 self-fires at 0>=0) ✅ Phase C + agent a157b18
 - [ ] No stubs, TODOs, placeholders, or `fatalError` in production code paths — *D3 in progress*
 - [x] Schema migration wired (no data loss on upgrade) ✅ Phases A2 + G
 - [ ] Periphery: all flagged items either wired in or marked Reserved — *D3 in progress*
