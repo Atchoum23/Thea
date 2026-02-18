@@ -30,9 +30,13 @@ public actor DistributedTaskExecutor {
 
     // MARK: - Callbacks
 
+    /// Called when a task begins execution on a device.
     public var onTaskStarted: ((DistributedTask) -> Void)?
+    /// Called with task ID, progress fraction (0–1), and an optional status message.
     public var onTaskProgress: ((String, Double, String?) -> Void)?
+    /// Called when a task finishes successfully.
     public var onTaskCompleted: ((String, TaskResult) -> Void)?
+    /// Called when a task terminates with an error.
     public var onTaskFailed: ((String, Error) -> Void)?
 
     // MARK: - Initialization
@@ -263,6 +267,7 @@ public actor DistributedTaskExecutor {
 
 // MARK: - Distributed Task Model
 
+/// A task submitted for execution on the best-suited device, tracked via CloudKit progress sync.
 public struct DistributedTask: Identifiable, Sendable {
     public let id: String
     public let taskType: TaskType
@@ -278,6 +283,7 @@ public struct DistributedTask: Identifiable, Sendable {
     public let createdAt: Date
     public var updatedAt: Date
 
+    /// The category of work this distributed task performs.
     public enum TaskType: String, Codable, Sendable {
         case aiQuery = "ai_query"
         case fileProcess = "file_process"
@@ -289,6 +295,7 @@ public struct DistributedTask: Identifiable, Sendable {
         case custom
     }
 
+    /// Lifecycle status of the distributed task.
     public enum Status: String, Codable, Sendable {
         case pending
         case running
@@ -419,6 +426,7 @@ public struct DistributedTask: Identifiable, Sendable {
 
 // MARK: - Task Payload
 
+/// Input payload carried by a distributed task.
 public struct TaskPayload: Codable, Sendable {
     public var inputText: String?
     public var inputData: Data?
@@ -440,6 +448,7 @@ public struct TaskPayload: Codable, Sendable {
 
 // MARK: - Task Result
 
+/// The output produced after a distributed task completes.
 public struct TaskResult: Sendable {
     public let success: Bool
     public let data: [String: String]
@@ -460,6 +469,7 @@ public struct TaskResult: Sendable {
 
 // MARK: - Distributed Task Error
 
+/// Errors thrown during distributed task submission or execution.
 public enum DistributedTaskError: Error, LocalizedError {
     case taskNotFound
     case executionFailed(String)

@@ -61,7 +61,7 @@ public actor FocusModeIntelligence {
 
     public static let shared = FocusModeIntelligence()
 
-    private let logger = Logger(subsystem: "ai.thea.app", category: "FocusMode")
+    let logger = Logger(subsystem: "ai.thea.app", category: "FocusMode")
 
     // MARK: - Properties
 
@@ -316,6 +316,26 @@ public actor FocusModeIntelligence {
 
     func notifySettingsChanged(_ settings: FocusModeGlobalSettings) {
         onSettingsChanged?(settings)
+    }
+
+
+    // Accessors for Monitoring extension
+    #if os(macOS)
+    func setFocusDBMonitor(_ monitor: DispatchSourceFileSystemObject?) {
+        focusDBMonitor = monitor
+    }
+    #else
+    func setFocusDBMonitor(_ monitor: Any?) {}
+    #endif
+
+    func getFocusMode(_ modeId: String) -> FocusModeConfiguration? {
+        focusModes[modeId]
+    }
+    func setFocusMode(_ modeId: String, mode: FocusModeConfiguration) {
+        focusModes[modeId] = mode
+    }
+    func deleteFocusMode(_ modeId: String) {
+        focusModes.removeValue(forKey: modeId)
     }
 
 }
