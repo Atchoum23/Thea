@@ -11,46 +11,13 @@ final class ModelContainerFactory {
 
     private init() {}
 
-    /// Creates a ModelContainer with the application schema
+    /// Creates a ModelContainer with the application schema and migration plan.
+    /// Uses SchemaV1.models so the model list stays in sync with the versioned schema.
     /// - Returns: A configured ModelContainer
     /// - Throws: ModelContainerError if both persistent and in-memory initialization fail
     func createContainer() throws -> ModelContainer {
-        let schema = Schema([
-            // Core models
-            Conversation.self,
-            Message.self,
-            Project.self,
-            FinancialAccount.self,
-            FinancialTransaction.self,
-            IndexedFile.self,
-
-            // Clipboard History models
-            TheaClipEntry.self,
-            TheaClipPinboard.self,
-            TheaClipPinboardEntry.self,
-
-            // Prompt Engineering models
-            UserPromptPreference.self,
-            CodeErrorRecord.self,
-            CodeCorrection.self,
-            PromptTemplate.self,
-            CodeFewShotExample.self,
-
-            // Window Management models
-            WindowState.self,
-
-            // Life Tracking models
-            HealthSnapshot.self,
-            DailyScreenTimeRecord.self,
-            DailyInputStatistics.self,
-            BrowsingRecord.self,
-            LocationVisitRecord.self,
-            LifeInsight.self,
-
-            // Habit Tracker models
-            TheaHabit.self,
-            TheaHabitEntry.self
-        ])
+        // Use SchemaV1.models to stay in sync with the versioned schema definition
+        let schema = Schema(SchemaV1.models)
 
         let configuration = ModelConfiguration(
             schema: schema,
@@ -59,8 +26,11 @@ final class ModelContainerFactory {
         )
 
         do {
+            // Wire TheaSchemaMigrationPlan — SwiftData performs lightweight/custom
+            // migration instead of deleting the store on version mismatch.
             let container = try ModelContainer(
                 for: schema,
+                migrationPlan: TheaSchemaMigrationPlan.self,
                 configurations: [configuration]
             )
             self.container = container
