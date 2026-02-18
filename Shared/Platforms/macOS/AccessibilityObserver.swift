@@ -13,6 +13,8 @@
 
     // MARK: - Accessibility Observer
 
+    // @unchecked Sendable: all state accessed exclusively on dedicated serial DispatchQueue
+    // (queue label "app.thea.accessibility"); AXObserver callbacks are also delivered on that queue
     /// Observes system-wide accessibility events for deep context awareness
     /// Requires Accessibility permission to be granted by the user
     public final class AccessibilityObserver: @unchecked Sendable {

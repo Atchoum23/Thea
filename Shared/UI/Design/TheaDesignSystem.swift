@@ -389,7 +389,7 @@ public struct TheaGhostButtonStyle: ButtonStyle {
                 RoundedRectangle(cornerRadius: TheaRadius.sm)
                     .fill(configuration.isPressed ? TheaBrandColors.gold.opacity(0.1) : Color.clear)
             )
-            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
+            .animation(.spring(response: 0.2, dampingFraction: 0.8), value: configuration.isPressed)
     }
 }
 

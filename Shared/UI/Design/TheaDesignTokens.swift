@@ -186,9 +186,9 @@ public enum TheaShadow {
 /// Animation curves for smarter motion
 public enum TheaAnimation {
     /// Quick micro-interaction (hover, tap feedback)
-    public static let micro = Animation.easeOut(duration: 0.1)
+    public static let micro = Animation.spring(response: 0.2, dampingFraction: 0.9)
     /// Standard interaction response
-    public static let standard = Animation.easeInOut(duration: 0.2)
+    public static let standard = Animation.spring(response: 0.3, dampingFraction: 0.8)
     /// Smooth content transitions
     public static let smooth = Animation.easeInOut(duration: 0.35)
     /// Elegant entrance animations

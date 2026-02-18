@@ -460,6 +460,7 @@
         }
     }
 
-    // Extension for Sendable conformance
+    // @unchecked Sendable retroactive conformance: UIDevice.BatteryState is a frozen enum with only
+    // integer cases (unknown/unplugged/charging/full); safe to use across concurrency domains
     extension UIDevice.BatteryState: @retroactive @unchecked Sendable {}
 #endif

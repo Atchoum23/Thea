@@ -205,6 +205,9 @@ public class RemoteSessionManager: ObservableObject {
 
 // MARK: - Remote Session
 
+// @unchecked Sendable: NWConnection (non-Sendable) embedded in struct; the connection is
+// managed exclusively from the RemoteSessionManager actor; struct fields set at creation and
+// updated only from the manager's serialized context
 public struct RemoteSession: Identifiable, @unchecked Sendable {
     public let id: String
     public let connection: NWConnection
