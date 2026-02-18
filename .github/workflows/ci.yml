@@ -157,8 +157,9 @@ jobs:
           echo "warnings_count=$WARNINGS" >> $GITHUB_OUTPUT
           echo "Warnings found: $WARNINGS"
           if [ "$WARNINGS" -gt 0 ]; then
-            echo "::warning::${{ matrix.platform }} build has $WARNINGS warnings"
+            echo "::error::${{ matrix.platform }} build has $WARNINGS warning(s) — target is 0"
             grep " warning:" build-${{ matrix.platform }}.log | head -20 || true
+            exit 1
           fi
 
       - name: Upload Build Log
@@ -279,8 +280,8 @@ jobs:
             d=json.load(open('coverage-macos.json'))
             cov=d.get('lineCoverage',0)
             print(f'macOS line coverage: {cov:.1%}')
-            if cov < 0.40:
-              print(f'::warning::macOS coverage {cov:.1%} is below 40% threshold')
+            if cov < 0.80:
+              print(f'::warning::macOS coverage {cov:.1%} is below 80% target')
           except Exception as e:
             print(f'Could not parse coverage: {e}')
           " || true
@@ -350,8 +351,8 @@ jobs:
         continue-on-error: true
 
       - name: SonarCloud Scan
-        # TODO: Remove continue-on-error once SonarCloud Automatic Analysis is disabled in project settings
-        uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8 # v5.0.0
+        # sonarcloud-github-action v5 is deprecated (exits code 3). Use sonarqube-scan-action v7+.
+        uses: SonarSource/sonarqube-scan-action@a31c939837b5c8f83e2bde9c476c71da2b80289b # v7.0.0
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

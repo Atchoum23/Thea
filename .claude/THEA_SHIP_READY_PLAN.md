@@ -45,13 +45,24 @@ From MBAM2 terminal, start a new Claude Code session and say:
 - [x] try? reduced: only used where failure genuinely should be silenced ✅ Phase D2 (137 annotated)
 - [x] @unchecked Sendable: every usage justified with comment ✅ Phase D1 (75 justified)
 
-### CI/CD (6/6 green on GitHub Actions)
-- [x] ci.yml: PASSING ✅ Phase E
-- [x] e2e-tests.yml: PASSING ✅ Phase E (v3.0 single-job, ENABLE_DEBUG_DYLIB=NO)
-- [x] thea-audit-main.yml: PASSING ✅ Phase E
-- [x] thea-audit-pr.yml: PASSING ✅ Phase E
-- [x] release.yml: PASSING ✅ (Developer ID pipeline, 14 secrets, valid to 2031)
-- [x] security.yml: PASSING ✅ Phase E
+### CI/CD — ALL 6 must show green on github.com/Atchoum23/Thea/actions
+All 6 workflows must be simultaneously green before ship-ready is declared. "Fixed YAML" is not the same as "green run" — each must produce a passing run on the latest commit on main.
+
+| GitHub UI Name | File | Must Be Green |
+|---|---|---|
+| CI | ci.yml | YES — builds all 4 platforms, SwiftLint, unit tests, coverage ≥ 80% |
+| E2E Tests | e2e-tests.yml | YES — Maestro flows pass on iOS simulator |
+| Security Audit (Full) | thea-audit-main.yml | YES — 0 critical, 0 high findings |
+| Security Audit (PR) | thea-audit-pr.yml | YES — passes on any open PRs; N/A (skips) if no PR |
+| Release | release.yml | YES — verify manually via `workflow_dispatch`; must produce .dmg |
+| Security Scanning | security.yml | YES — 0 secrets (Gitleaks), 0 critical CVEs (osv-scanner) |
+
+- [ ] CI: green (SwiftLint 0 violations, 4-platform builds 0 errors/0 warnings, tests pass, coverage ≥ 80%)
+- [ ] E2E Tests: green (Maestro iOS flows all pass)
+- [ ] Security Audit (Full): green (0 critical, 0 high findings from thea-audit)
+- [ ] Security Audit (PR): green or skipped (only runs on PRs with relevant file changes)
+- [ ] Release: manually triggered via `workflow_dispatch` and verified to produce .dmg artifact
+- [ ] Security Scanning: green (Gitleaks 0 secrets, osv-scanner 0 critical CVEs)
 
 ### Web & Tizen
 - [x] TheaWeb: all 14 routes implemented, Docker builds, 6/6 tests passing ✅ Phase I

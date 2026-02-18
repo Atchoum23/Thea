@@ -775,15 +775,15 @@ struct DocumentCameraScannerView: UIViewControllerRepresentable {
                 }
             }
             onCapture(images)
-            Task { @MainActor in controller.dismiss(animated: true) }
+            controller.dismiss(animated: true)
         }
 
         func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
-            Task { @MainActor in controller.dismiss(animated: true) }
+            controller.dismiss(animated: true)
         }
 
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
-            Task { @MainActor in controller.dismiss(animated: true) }
+            controller.dismiss(animated: true)
         }
     }
 }

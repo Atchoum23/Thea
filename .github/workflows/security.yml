@@ -58,7 +58,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@cdcb36043654635082a3a68ef0dd1a68b0be0036 # v5.0.0
         with:
           go-version: 'stable'
           cache: false

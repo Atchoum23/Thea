@@ -71,11 +71,5 @@ struct TheaiOSApp: App {
             try? await Task.sleep(for: .seconds(1))
             _ = VoiceFirstModeManager.shared
         }
-
-        // iOS System Observer — coordinates all iOS-specific observers (motion, photos, health, notifications)
-        Task {
-            try? await Task.sleep(for: .milliseconds(800))
-            await iOSSystemObserver.shared.start()
-        }
     }
 }

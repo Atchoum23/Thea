@@ -244,9 +244,7 @@ public final class SystemCapabilityService {
         guard sysctlbyname("machdep.cpu.brand_string", &brand, &size, nil, 0) == 0 else {
             return .unknown
         }
-        // Truncate null terminator then decode as UTF-8 (String(cString:) deprecated)
-        let trimmedBrand = brand.prefix(while: { $0 != 0 }).map(UInt8.init)
-        let brandString = String(decoding: trimmedBrand, as: UTF8.self)
+        let brandString = String(cString: brand)
 
         if brandString.contains("M4") { return .m4 }
         if brandString.contains("M3") { return .m3 }
