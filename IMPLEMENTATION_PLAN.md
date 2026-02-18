@@ -20,11 +20,12 @@ Thea will become a "living" intelligence layer that:
 | 1 | Foundation & Unified Context Engine | ✅ COMPLETE | 100% |
 | 2 | App Extension Targets (12+ extensions) | ✅ COMPLETE | 100% |
 | 3 | Deep System Awareness - macOS | ✅ COMPLETE | 100% |
-| 4 | Deep System Awareness - iOS | 🔄 IN PROGRESS | 60% |
+| 4 | Deep System Awareness - iOS | ✅ COMPLETE | 100% |
 | 5 | System UI Omnipresence | ⏳ PENDING | 0% |
 | 6 | Cross-Device Intelligence | ⏳ PENDING | 0% |
 | 7 | System Control (Omnipotence) | ⏳ PENDING | 0% |
 | 8 | Advanced Features | ⏳ PENDING | 0% |
+| H | Build Repair (all 4 platforms 0 errors) | ✅ COMPLETE | 100% |
 
 ---
 
@@ -178,7 +179,7 @@ public struct MacSystemSnapshot: Equatable, Sendable {
 
 ---
 
-## Phase 4: Deep System Awareness - iOS 🔄
+## Phase 4: Deep System Awareness - iOS ✅
 
 ### Completed Components
 
@@ -187,14 +188,59 @@ public struct MacSystemSnapshot: Equatable, Sendable {
 | ScreenTimeObserver | `Shared/Platforms/iOS/ScreenTimeObserver.swift` | ✅ |
 | PhotoIntelligenceProvider | `Shared/Platforms/iOS/PhotoIntelligenceProvider.swift` | ✅ |
 | MotionContextProvider | `Shared/Platforms/iOS/MotionContextProvider.swift` | ✅ |
+| HealthKitProvider | `Shared/Platforms/iOS/HealthKitProvider.swift` | ✅ |
+| HealthKitProviderTypes | `Shared/Platforms/iOS/HealthKitProviderTypes.swift` | ✅ |
+| NotificationObserver | `Shared/Platforms/iOS/NotificationObserver.swift` | ✅ |
+| iOSSystemObserver | `Shared/Platforms/iOS/iOSSystemObserver.swift` | ✅ |
+| ActionButtonHandler | `Shared/Platforms/iOS/ActionButtonHandler.swift` | ✅ |
+| AssistantIntegration | `Shared/Platforms/iOS/AssistantIntegration.swift` | ✅ |
+| iOSFeatures | `Shared/Platforms/iOS/iOSFeatures.swift` | ✅ |
 
-### Remaining Components
+### Wiring
+`iOSSystemObserver.shared.start()` is called from `TheaiOSApp.setupManagers()` with a 800ms deferred Task — coordinates all iOS-specific observers (motion, photos, health, notifications).
 
-| Component | Purpose | Status |
-|-----------|---------|--------|
-| HealthKitProvider | Health data integration | ⏳ |
-| NotificationObserver | Notification patterns | ⏳ |
-| iOSSystemObserver | Unified iOS coordinator | ⏳ |
+---
+
+---
+
+## Phase H: Build Repair (All 4 Platforms) ✅
+
+**Completed 2026-02-18** — Fixed all compilation errors introduced when Phase K agents split large Swift files into extension files but left duplicate method bodies in the originals.
+
+### Root Cause
+Phase K created `Type+FeatureName.swift` extension files for many large classes/actors, but did NOT remove the original method bodies from the source files. This caused:
+- Duplicate type/method definitions
+- `private` visibility blocking cross-file extension access
+- `lazy var` incompatibility with `@Observable` macro
+- Missing properties on `SettingsManager` referenced by new settings views
+- Missing enum cases for new monitoring sources
+
+### Files Fixed
+
+| File | Issue | Fix |
+|------|-------|-----|
+| `PrivacyFirewallDashboardView.swift` | Duplicate `PrivacyTransparencyReportView` + `ExportDataSheet` | Replaced with comment redirect; canonical versions live in `PrivacyTransparencyReportView.swift` + `+Sections.swift` |
+| `PrivacySettingsViewSections.swift` | Duplicate `import OSLog` + `privacySettingsLogger` | Removed duplicates |
+| `PIISanitizer.swift` | `lazy var patterns` incompatible with `@Observable` | Converted to `static let compiledPatterns` + computed `var patterns { Self.compiledPatterns }` |
+| `ArtifactPanel.swift` | Missing `logger` in static function | Added file-level `Logger` with `import OSLog` |
+| `AsanaIntegration.swift` | `private workspaceGid` + `private func request` inaccessible from `+Goals.swift` | Changed to internal visibility |
+| `LifeTrackingSettingsView.swift` | Duplicate `message:` trailing closure on `.alert` | Removed second closure |
+| `MapsIntegration.swift` | All methods duplicated in `+Search/Geocoding/Routing/Utilities` split files | Trimmed to 34-line actor shell; made `logger` internal |
+| `VoiceProactivity.swift` | Public methods duplicated in `+Interactions/Relay/Convenience`; all `private` vars inaccessible | Rewrote as actor shell with internal properties; removed duplicated public methods |
+| `ProactivityEngine.swift` | `private lastSuggestionTimes` inaccessible from `+Suggestions.swift` | Changed to internal |
+| `SettingsManager.swift` | Missing `personalizationEnabled`, `personalizationContext`, `personalizationResponsePreference` | Added 3 `@Published` properties with UserDefaults persistence |
+| `SettingsManager.swift` | Missing `selectedResponseStyleID`, `customResponseStyles`, `activeResponseStyle` | Added with `ResponseStyle` type integration |
+| `QRIntelligence.swift` | `logger` reference but file used `qrLogger` name | Changed call site to `qrLogger.error(...)` |
+| `LifeMonitoringCoordinatorTypes.swift` | Missing `DataSourceType.weather` + `LifeEventType.weatherChange` for `WeatherMonitor` | Added both cases with display name + icon |
+| `RemoteServerSettingsView.swift` | `ServerStatusRow` (nested struct) referenced `@State` vars from outer struct | Added `@Binding var errorMessage` + `@Binding var showError` to `ServerStatusRow` |
+
+### Build Results (2026-02-18)
+```
+Thea-iOS:     BUILD SUCCEEDED (34.786 sec)
+Thea-macOS:   BUILD SUCCEEDED (45.921 sec)
+Thea-watchOS: BUILD SUCCEEDED (12.032 sec)
+Thea-tvOS:    BUILD SUCCEEDED (16.447 sec)
+```
 
 ---
 
@@ -431,21 +477,15 @@ pkill -9 xcodebuild
 
 ## Next Steps (Resume From Here)
 
-1. **Complete Phase 4**: Create remaining iOS observers
-   - HealthKitProvider
-   - NotificationObserver
-   - iOSSystemObserver (unified coordinator)
-
-2. **Build iOS target** to verify Phase 4 components
-
-3. **Start Phase 5**: System UI Omnipresence
-   - Menu bar app (macOS)
+1. **Start Phase 5**: System UI Omnipresence
+   - Menu bar app (macOS) with popover
    - Dynamic Island / Live Activities (iOS)
-   - Global hotkeys
+   - Global keyboard shortcuts (⌘⇧Space)
+   - Lock Screen widgets
 
-4. **Continue through Phases 6-8**
+2. **Continue through Phases 6-8**
 
-5. **Final verification**: Build all targets with zero errors/warnings
+3. **All 4 platforms build cleanly** — 0 errors baseline established (2026-02-18)
 
 ---
 
@@ -458,7 +498,8 @@ pkill -9 xcodebuild
 | 2026-01-27 | 0.3 | Phase 2 completed (12 extensions) |
 | 2026-01-27 | 0.4 | Phase 3 completed (macOS observers) |
 | 2026-01-27 | 0.5 | Phase 4 in progress (iOS observers) |
+| 2026-02-18 | 1.0 | Phase 4 complete; Phase H (build repair) complete — all 4 platforms build 0 errors; iOSSystemObserver wired into app lifecycle |
 
 ---
 
-*Last Updated: 2026-01-27*
+*Last Updated: 2026-02-18*
