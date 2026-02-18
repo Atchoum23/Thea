@@ -141,6 +141,7 @@ public actor MemoryService {
     // MARK: - Add Memory
 
     /// Add a new memory
+    /// Store a new memory entry with optional type, category, keywords, source, and confidence.
     public func remember(
         _ content: String,
         type: TheaMemoryType = .fact,
@@ -491,6 +492,7 @@ public actor MemoryService {
     // MARK: - Statistics
 
     /// Get memory statistics
+    /// Returns aggregate statistics about the current memory store.
     public func getStatistics() async -> MemoryStatistics {
         let typeDistribution = Dictionary(grouping: memories, by: \.type)
             .mapValues { $0.count }
@@ -511,6 +513,7 @@ public actor MemoryService {
 
 // MARK: - Memory Model
 
+/// A single persisted memory entry with content, type, source, and relevance metadata.
 public struct TheaMemory: Identifiable, Codable, Sendable {
     public let id: UUID
     public var content: String
@@ -595,6 +598,7 @@ public struct TheaMemory: Identifiable, Codable, Sendable {
 
 // MARK: - Memory Types
 
+/// Categories of memory that Thea can store and recall.
 public enum TheaMemoryType: String, Codable, Sendable, CaseIterable {
     case fact // User facts (name, location, etc.)
     case preference // User preferences (coding style, etc.)
@@ -603,6 +607,7 @@ public enum TheaMemoryType: String, Codable, Sendable, CaseIterable {
     case pattern // Learned patterns
 }
 
+/// How a memory entry was originally created.
 public enum MemorySource: String, Codable, Sendable {
     case manual // Explicitly added by user
     case userProvided // User mentioned in conversation
@@ -613,6 +618,7 @@ public enum MemorySource: String, Codable, Sendable {
 
 // MARK: - Memory Statistics
 
+/// Aggregate statistics about the current memory store.
 public struct MemoryStatistics: Sendable {
     public let totalMemories: Int
     public let typeDistribution: [TheaMemoryType: Int]
@@ -624,6 +630,7 @@ public struct MemoryStatistics: Sendable {
 
 // MARK: - Memory Error
 
+/// Errors thrown by MemoryService operations.
 public enum TheaMemoryError: Error, LocalizedError, Sendable {
     case memoryNotFound
     case syncFailed(String)

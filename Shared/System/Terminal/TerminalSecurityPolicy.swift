@@ -125,6 +125,7 @@
 
             // Check regex patterns
             for pattern in blockedPatterns {
+                // Safe: compile-time known block pattern; invalid regex → skip this pattern (allow-by-default for this pattern only)
                 if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
                     let range = NSRange(trimmedCommand.startIndex..., in: trimmedCommand)
                     if regex.firstMatch(in: trimmedCommand, options: [], range: range) != nil {

@@ -145,6 +145,7 @@
             ]
 
             for (pattern, replacement) in redactionPatterns {
+                // Safe: compile-time known redaction pattern; invalid regex → skip redaction for this pattern (partial redaction still safe)
                 if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
                     let range = NSRange(result.startIndex..., in: result)
                     result = regex.stringByReplacingMatches(in: result, options: [], range: range, withTemplate: replacement)

@@ -149,6 +149,7 @@ public actor MailIntegration: AppIntegrationModule {
     private func validateEmailAddress(_ email: String) throws {
         // Basic email validation
         let emailRegex = #"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"#
+        // Safe: compile-time known email pattern; invalid regex → throw invalidInput (email treated as invalid)
         guard let regex = try? NSRegularExpression(pattern: emailRegex),
               regex.firstMatch(in: email, range: NSRange(email.startIndex..., in: email)) != nil
         else {

@@ -250,6 +250,7 @@ extension ProactivityEngine {
         }
 
         // Check for version/date contradictions
+        // Safe: compile-time known version-number pattern; invalid regex → nil, version contradiction check is skipped
         let versionPattern = try? NSRegularExpression(
             pattern: "\\b(version|v)?\\s*(\\d+\\.\\d+(?:\\.\\d+)?)\\b",
             options: .caseInsensitive
