@@ -21,6 +21,11 @@ public struct DeviceSwitcherView: View {
     public init() {}
 
     public var body: some View {
+        Group {
+            if isLoading {
+                ProgressView("Loading devices...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
         List {
             // Current Device Section
             if let current = currentDevice {
