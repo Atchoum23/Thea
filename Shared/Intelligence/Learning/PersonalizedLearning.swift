@@ -492,8 +492,8 @@ public final class LearningManager: ObservableObject {
     // MARK: - Adaptive Response
 
     /// Get response style based on user profile
-    public func getResponseStyle() -> ResponseStyle {
-        ResponseStyle(
+    public func getResponseStyle() -> LearningResponseStyle {
+        LearningResponseStyle(
             verbosity: userProfile.experienceLevel == .novice ? .detailed : .concise,
             codeExamples: userProfile.preferredLearningStyle == .handson,
             visualAids: userProfile.preferredLearningStyle == .visual,
@@ -538,7 +538,7 @@ public struct DailyProgress: Sendable {
 // MARK: - Response Style
 
 /// Style configuration for AI responses based on user profile
-public struct ResponseStyle: Sendable {
+public struct LearningResponseStyle: Sendable {
     public let verbosity: Verbosity
     public let codeExamples: Bool
     public let visualAids: Bool
