@@ -51,6 +51,7 @@ public extension ContextProvider {
 
 // MARK: - Context Provider State
 
+/// Lifecycle state of a context provider.
 public enum ContextProviderState: String, Sendable {
     case idle
     case starting
@@ -62,6 +63,7 @@ public enum ContextProviderState: String, Sendable {
 
 // MARK: - Context Provider Error
 
+/// Errors thrown by context provider lifecycle and update operations.
 public enum ContextProviderError: Error, LocalizedError {
     case permissionDenied
     case notAvailable

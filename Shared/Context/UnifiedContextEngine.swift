@@ -6,6 +6,7 @@ import os.log
 
 /// Central actor that aggregates all context from various providers into a unified view
 @MainActor
+/// Central engine that aggregates context from all registered providers into a unified, observable snapshot.
 public final class UnifiedContextEngine: ObservableObject {
     public static let shared = UnifiedContextEngine()
 
@@ -343,6 +344,7 @@ public struct ContextInsight: Identifiable, Sendable {
     public let actionable: Bool
     public let suggestedAction: SuggestedAction?
 
+    /// The category of insight generated from context analysis.
     public enum InsightType: String, Sendable {
         case reminder
         case suggestion
@@ -352,6 +354,7 @@ public struct ContextInsight: Identifiable, Sendable {
         case anomaly
     }
 
+    /// Urgency level of a context insight.
     public enum Priority: Int, Sendable {
         case low = 0
         case normal = 1
@@ -359,6 +362,7 @@ public struct ContextInsight: Identifiable, Sendable {
         case urgent = 3
     }
 
+    /// An actionable suggestion attached to a context insight.
     public struct SuggestedAction: Sendable {
         public let title: String
         public let actionId: String
