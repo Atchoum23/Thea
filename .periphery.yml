@@ -1,0 +1,63 @@
+# Periphery configuration for Thea
+# =============================================
+# POLICY: NEVER delete unused code in Thea.
+# Every declaration must be wired in or annotated with:
+#   // periphery:ignore - reason
+# Only report; auto-remove is disabled.
+# =============================================
+
+project: Thea.xcodeproj
+
+schemes:
+  - Thea-macOS
+  - Thea-iOS
+  - Thea-watchOS
+  - Thea-tvOS
+
+targets:
+  - Thea-macOS
+  - Thea-iOS
+  - Thea-watchOS
+  - Thea-tvOS
+
+# Retain all public declarations (framework-style public API must be kept)
+retain_public: true
+
+# Retain @objc-annotated declarations (used for bridging)
+retain_objc_annotated: true
+
+# Retain all Codable/Encodable properties (JSON serialization)
+retain_codable_properties: true
+retain_encodable_properties: true
+
+# Retain SwiftUI #Preview declarations
+retain_swift_ui_previews: true
+
+# Retain unused protocol function parameters (protocol conformances may
+# have extra params that are required by the protocol signature)
+retain_unused_protocol_func_params: true
+
+# Do not auto-remove; report only for manual review
+# auto_remove: false  (default is false, no need to set)
+
+# Skip build if artifacts already exist from xcodebuild
+# skip_build: true  (commented out — run fresh build for accurate results)
+
+# Use relative paths for CI-friendly output
+relative_results: true
+
+# Report exclude patterns — exclude archived/v1 code that is intentionally preserved
+report_exclude:
+  - "**/*v1-archive*/**"
+  - "**/Tests/**"
+  - "**/UITests/**"
+
+# Index exclude — skip generated and test code from analysis
+index_exclude:
+  - "**/*v1-archive*/**"
+  - "**/Tests/**"
+  - "**/UITests/**"
+  - "**/project.yml"
+
+# Output format for Xcode integration
+format: xcode
