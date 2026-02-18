@@ -1,9 +1,9 @@
 //
-//  SettingsManager+FeatureFlags.swift
+//  SettingsManager+TheaFeatureFlags.swift
 //  Thea
 //
-//  Extension adding unified FeatureFlag query support to SettingsManager.
-//  Maps FeatureFlag enum cases to their corresponding @Published properties.
+//  Extension adding unified TheaFeatureFlag query support to SettingsManager.
+//  Maps TheaFeatureFlag enum cases to their corresponding @Published properties.
 //
 
 import Foundation
@@ -13,7 +13,7 @@ extension SettingsManager {
     /// Query whether a feature flag is enabled.
     ///
     /// Provides a unified API for runtime feature-flag queries, mapping each
-    /// `FeatureFlag` case to its corresponding `@Published` property.
+    /// `TheaFeatureFlag` case to its corresponding `@Published` property.
     ///
     /// Usage:
     /// ```swift
@@ -21,7 +21,7 @@ extension SettingsManager {
     ///     // Use local model inference
     /// }
     /// ```
-    func isFeatureEnabled(_ flag: FeatureFlag) -> Bool {
+    func isFeatureEnabled(_ flag: TheaFeatureFlag) -> Bool {
         switch flag {
         // AI & Models
         case .localModels: return preferLocalModels
@@ -61,7 +61,7 @@ extension SettingsManager {
     ///
     /// Useful for bulk operations, test setup, or applying feature flag
     /// configurations from a remote source.
-    func setFeatureEnabled(_ flag: FeatureFlag, enabled: Bool) {
+    func setFeatureEnabled(_ flag: TheaFeatureFlag, enabled: Bool) {
         switch flag {
         case .localModels: preferLocalModels = enabled
         case .ollama: ollamaEnabled = enabled
@@ -87,28 +87,28 @@ extension SettingsManager {
     }
 
     /// Returns a snapshot of all feature flag states for diagnostics.
-    var featureFlagSnapshot: [FeatureFlag: Bool] {
-        var snapshot: [FeatureFlag: Bool] = [:]
-        for flag in FeatureFlag.allCases {
+    var featureFlagSnapshot: [TheaFeatureFlag: Bool] {
+        var snapshot: [TheaFeatureFlag: Bool] = [:]
+        for flag in TheaFeatureFlag.allCases {
             snapshot[flag] = isFeatureEnabled(flag)
         }
         return snapshot
     }
 
     /// Returns all enabled feature flags.
-    var enabledFeatureFlags: [FeatureFlag] {
-        FeatureFlag.allCases.filter { isFeatureEnabled($0) }
+    var enabledTheaFeatureFlags: [TheaFeatureFlag] {
+        TheaFeatureFlag.allCases.filter { isFeatureEnabled($0) }
     }
 
     /// Reset a feature flag to its default value.
-    func resetFeatureFlag(_ flag: FeatureFlag) {
+    func resetTheaFeatureFlag(_ flag: TheaFeatureFlag) {
         setFeatureEnabled(flag, enabled: flag.defaultValue)
     }
 
     /// Reset all feature flags to their default values.
-    func resetAllFeatureFlags() {
-        for flag in FeatureFlag.allCases {
-            resetFeatureFlag(flag)
+    func resetAllTheaFeatureFlags() {
+        for flag in TheaFeatureFlag.allCases {
+            resetTheaFeatureFlag(flag)
         }
     }
 }

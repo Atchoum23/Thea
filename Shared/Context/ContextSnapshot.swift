@@ -114,6 +114,7 @@ public struct ContextSnapshot: Codable, Sendable, Identifiable {
 
 // MARK: - Location Context
 
+/// GPS and reverse-geocoded location data for the current device position.
 public struct LocationContext: Codable, Sendable {
     public let latitude: Double
     public let longitude: Double
@@ -159,6 +160,7 @@ public struct LocationContext: Codable, Sendable {
 
 // MARK: - App Activity Context
 
+/// Information about the currently active application and recent app usage.
 public struct AppActivityContext: Codable, Sendable {
     public let activeAppBundleID: String?
     public let activeAppName: String?
@@ -167,6 +169,7 @@ public struct AppActivityContext: Codable, Sendable {
     public let recentApps: [RecentApp]
     public let screenTimeToday: TimeInterval?
 
+    /// A recently used app entry with usage metrics.
     public struct RecentApp: Codable, Sendable {
         public let bundleID: String
         public let name: String
@@ -200,6 +203,7 @@ public struct AppActivityContext: Codable, Sendable {
 
 // MARK: - Health Context
 
+/// HealthKit-derived health and activity metrics for the current day.
 public struct HealthContext: Codable, Sendable {
     public let stepCount: Double?
     public let heartRate: Double?
@@ -213,14 +217,17 @@ public struct HealthContext: Codable, Sendable {
     public let bloodOxygen: Double?
     public let respiratoryRate: Double?
 
+    /// Subjective quality rating derived from sleep analysis.
     public enum SleepQuality: String, Codable, Sendable {
         case poor, fair, good, excellent
     }
 
+    /// Overall physical activity intensity for the current period.
     public enum ActivityLevel: String, Codable, Sendable {
         case sedentary, light, moderate, vigorous
     }
 
+    /// Inferred stress level from HRV and activity patterns.
     public enum StressLevel: String, Codable, Sendable {
         case low, moderate, high, veryHigh
     }
@@ -254,16 +261,19 @@ public struct HealthContext: Codable, Sendable {
 
 // MARK: - Calendar Context
 
+/// EventKit-derived calendar state including the current event and upcoming schedule.
 public struct CalendarContext: Codable, Sendable {
     public let currentEvent: CalendarEvent?
     public let upcomingEvents: [CalendarEvent]
     public let freeTimeUntilNextEvent: TimeInterval?
     public let busyLevel: BusyLevel
 
+    /// How busy the user's schedule is for the current day.
     public enum BusyLevel: String, Codable, Sendable {
         case free, light, moderate, busy, veryBusy
     }
 
+    /// A single calendar event with scheduling and attendance details.
     public struct CalendarEvent: Codable, Sendable, Identifiable {
         public let id: String
         public let title: String
@@ -313,6 +323,7 @@ public struct CalendarContext: Codable, Sendable {
 
 // MARK: - Communication Context
 
+/// Aggregate communication status: unread counts, missed calls, and recent contacts.
 public struct CommunicationContext: Codable, Sendable {
     public let unreadEmailCount: Int
     public let unreadMessageCount: Int
@@ -320,11 +331,13 @@ public struct CommunicationContext: Codable, Sendable {
     public let missedCallCount: Int
     public let pendingReplies: Int
 
+    /// A contact with a recent interaction and the communication channel used.
     public struct RecentContact: Codable, Sendable {
         public let name: String
         public let lastContactDate: Date
         public let communicationType: CommunicationType
 
+        /// The channel through which the most recent interaction occurred.
         public enum CommunicationType: String, Codable, Sendable {
             case email, message, call, videoCall
         }
@@ -353,6 +366,7 @@ public struct CommunicationContext: Codable, Sendable {
 
 // MARK: - Clipboard Context
 
+/// Metadata about the current clipboard contents without exposing the raw data.
 public struct ClipboardContext: Codable, Sendable {
     public let hasContent: Bool
     public let contentType: ClipboardContentType?
@@ -360,6 +374,7 @@ public struct ClipboardContext: Codable, Sendable {
     public let contentSize: Int?
     public let lastCopiedDate: Date?
 
+    /// The type of data currently on the clipboard.
     public enum ClipboardContentType: String, Codable, Sendable {
         case text, url, image, file, richText, html
     }
@@ -381,6 +396,7 @@ public struct ClipboardContext: Codable, Sendable {
 
 // MARK: - Focus Context
 
+/// The current system Focus mode state, including which apps are allowed or silenced.
 public struct FocusContext: Codable, Sendable {
     public let isActive: Bool
     public let modeName: String
@@ -411,6 +427,7 @@ public struct FocusContext: Codable, Sendable {
 
 // MARK: - Device State Context
 
+/// Comprehensive device hardware and OS state snapshot (battery, network, thermal, orientation, etc.).
 public struct DeviceStateContext: Codable, Sendable {
     public let batteryLevel: Float
     public let batteryState: BatteryState
@@ -427,22 +444,27 @@ public struct DeviceStateContext: Codable, Sendable {
     public let isHeadphonesConnected: Bool
     public let orientation: DeviceOrientation
 
+    /// Current battery charging state.
     public enum BatteryState: String, Codable, Sendable {
         case unknown, unplugged, charging, full
     }
 
+    /// Current device thermal throttling level.
     public enum ThermalState: String, Codable, Sendable {
         case nominal, fair, serious, critical
     }
 
+    /// The primary network connection type.
     public enum NetworkType: String, Codable, Sendable {
         case none, wifi, cellular, ethernet, unknown
     }
 
+    /// System memory pressure level reported by the OS.
     public enum MemoryPressure: String, Codable, Sendable {
         case normal, warning, critical
     }
 
+    /// Physical device orientation.
     public enum DeviceOrientation: String, Codable, Sendable {
         case portrait, portraitUpsideDown, landscapeLeft, landscapeRight, faceUp, faceDown, unknown
     }
@@ -482,6 +504,7 @@ public struct DeviceStateContext: Codable, Sendable {
 
 // MARK: - Media Context
 
+/// Now-playing media information from the system media session.
 public struct MediaContext: Codable, Sendable {
     public let isPlaying: Bool
     public let nowPlayingTitle: String?
@@ -512,6 +535,7 @@ public struct MediaContext: Codable, Sendable {
 
 // MARK: - Environment Context
 
+/// Ambient environmental signals: time of day, weather, light, sound, and connected accessories.
 public struct EnvironmentContext: Codable, Sendable {
     public let timeOfDay: TimeOfDay
     public let isWeekend: Bool
@@ -524,6 +548,7 @@ public struct EnvironmentContext: Codable, Sendable {
     public let weatherCondition: String?
     public let temperature: Double?
 
+    /// Broad time-of-day bucket for the current moment.
     public enum TimeOfDay: String, Codable, Sendable {
         case earlyMorning // 5-8
         case morning // 8-12
@@ -566,6 +591,7 @@ public struct ContextUpdate: Sendable {
     public let updateType: UpdateType
     public let priority: Priority
 
+    /// The typed payload delivered with this context update.
     public enum UpdateType: Sendable {
         case location(LocationContext)
         case appActivity(AppActivityContext)
@@ -579,6 +605,7 @@ public struct ContextUpdate: Sendable {
         case environment(EnvironmentContext)
     }
 
+    /// Dispatch priority for this context update.
     public enum Priority: Int, Sendable, Comparable {
         case low = 0
         case normal = 1

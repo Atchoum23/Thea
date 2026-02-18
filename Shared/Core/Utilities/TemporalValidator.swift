@@ -61,6 +61,7 @@ enum TemporalValidator {
                 ]
 
                 for pattern in patterns {
+                    // Safe: compile-time known pattern; invalid regex → skip this pattern (continue)
                     guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { continue }
                     let range = NSRange(corrected.startIndex..., in: corrected)
                     let matches = regex.matches(in: corrected, range: range)

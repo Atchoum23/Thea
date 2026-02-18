@@ -66,5 +66,5 @@ protocol SettingsProviding: AnyObject {
     /// Unified query for any feature flag by enum case.
     /// Preferred over accessing individual properties when the flag
     /// name is determined at runtime.
-    func isFeatureEnabled(_ flag: FeatureFlag) -> Bool
+    func isFeatureEnabled(_ flag: TheaFeatureFlag) -> Bool
 }

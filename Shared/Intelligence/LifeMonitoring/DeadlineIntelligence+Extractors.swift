@@ -64,6 +64,7 @@ struct DatePatternExtractor: DeadlineExtractor {
         ]
 
         for (pattern, prefix) in deadlinePatterns {
+            // Safe: compile-time known pattern; invalid regex → skip this pattern (no matches)
             if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
                 let nsContent = content as NSString
                 let matches = regex.matches(in: content, options: [], range: NSRange(location: 0, length: nsContent.length))
@@ -164,6 +165,7 @@ struct KeywordExtractor: DeadlineExtractor {
         ]
 
         for (pattern, prefix) in relativePatterns {
+            // Safe: compile-time known pattern; invalid regex → skip this pattern (no matches)
             if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
                 let nsContent = content as NSString
                 let matches = regex.matches(in: content, options: [], range: NSRange(location: 0, length: nsContent.length))
@@ -219,6 +221,7 @@ struct KeywordExtractor: DeadlineExtractor {
         }
 
         // Parse "in X days/weeks/months"
+        // Safe: compile-time known pattern; invalid regex → return nil (no match)
         if let regex = try? NSRegularExpression(pattern: #"in\s+(\d+)\s+(days?|weeks?|months?)"#, options: .caseInsensitive) {
             let nsText = text as NSString
             if let match = regex.firstMatch(in: text, options: [], range: NSRange(location: 0, length: nsText.length)) {
@@ -307,6 +310,7 @@ struct FinancialExtractor: DeadlineExtractor {
         let dateFormats = ["MMMM d, yyyy", "MMMM d yyyy", "MMM d, yyyy"]
 
         for (pattern, title, consequences) in patterns {
+            // Safe: compile-time known pattern; invalid regex → skip this pattern (no matches)
             if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
                 let nsContent = content as NSString
                 let matches = regex.matches(in: content, options: [], range: NSRange(location: 0, length: nsContent.length))

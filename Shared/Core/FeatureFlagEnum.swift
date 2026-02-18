@@ -23,7 +23,7 @@ import Foundation
 /// 2. Add a corresponding `@Published var` on SettingsManager
 /// 3. Add the mapping in `SettingsManager.isFeatureEnabled(_:)`
 /// 4. Add it to the FeatureFlag metadata (description, category, defaultValue)
-enum FeatureFlag: String, CaseIterable, Sendable {
+enum TheaFeatureFlag: String, CaseIterable, Sendable {
 
     // MARK: - AI & Models
     case localModels = "preferLocalModels"
@@ -157,8 +157,8 @@ enum FlagCategory: String, CaseIterable, Sendable {
     case debug = "Debug"
 
     /// All flags in this category
-    var flags: [FeatureFlag] {
-        FeatureFlag.allCases.filter { $0.category == self }
+    var flags: [TheaFeatureFlag] {
+        TheaFeatureFlag.allCases.filter { $0.category == self }
     }
 
     var icon: String {
