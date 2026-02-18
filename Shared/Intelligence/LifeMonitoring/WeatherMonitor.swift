@@ -49,7 +49,7 @@ public final class WeatherMonitor: NSObject, Sendable {
     private static let persistenceURL: URL = {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Thea/Weather", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true) // Safe: directory may already exist; error means no persistence directory (non-fatal)
         return dir.appendingPathComponent("weather.json")
     }()
 

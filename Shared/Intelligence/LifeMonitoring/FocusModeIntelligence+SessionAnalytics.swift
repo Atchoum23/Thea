@@ -141,7 +141,7 @@ extension FocusModeIntelligence {
     /// Persist historical analytics to UserDefaults (app group).
     func saveAnalytics() async {
         if let defaults = UserDefaults(suiteName: "group.app.theathe"),
-           let encoded = try? JSONEncoder().encode(getHistoricalAnalytics()) {
+           let encoded = try? JSONEncoder().encode(getHistoricalAnalytics()) { // Safe: encode failure → analytics not persisted this cycle; in-memory state intact
             defaults.set(encoded, forKey: "focusModeAnalytics")
             defaults.synchronize()
         }

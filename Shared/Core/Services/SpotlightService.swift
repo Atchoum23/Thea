@@ -318,6 +318,7 @@ public class SpotlightService: ObservableObject {
 
 // MARK: - Supporting Types
 
+/// Spotlight-indexable representation of a Thea conversation.
 public struct SpotlightConversation: Identifiable, Sendable {
     public let id: UUID
     public let title: String
@@ -352,6 +353,7 @@ public struct SpotlightConversation: Identifiable, Sendable {
     }
 }
 
+/// Spotlight-indexable representation of a code project.
 public struct SpotlightProject: Identifiable, Sendable {
     public let id: UUID
     public let name: String
@@ -386,6 +388,7 @@ public struct SpotlightProject: Identifiable, Sendable {
     }
 }
 
+/// Spotlight-indexable representation of a knowledge base entry.
 public struct SpotlightKnowledgeItem: Identifiable, Sendable {
     public let id: UUID
     public let title: String
@@ -417,6 +420,7 @@ public struct SpotlightKnowledgeItem: Identifiable, Sendable {
     }
 }
 
+/// Spotlight-indexable representation of a user note.
 public struct SpotlightNote: Identifiable, Sendable {
     public let id: UUID
     public let title: String
@@ -442,6 +446,7 @@ public struct SpotlightNote: Identifiable, Sendable {
     }
 }
 
+/// A single result returned from a Core Spotlight search query.
 public struct SpotlightSearchResult: Identifiable, Sendable {
     public let id: String
     public let identifier: String
@@ -458,6 +463,7 @@ public struct SpotlightSearchResult: Identifiable, Sendable {
     }
 }
 
+/// The decoded content of an NSUserActivity handed off from Spotlight.
 public struct SpotlightActivityResult: Sendable {
     public let type: String
     public let identifier: String

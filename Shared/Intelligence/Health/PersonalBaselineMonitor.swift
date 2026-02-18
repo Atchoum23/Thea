@@ -480,14 +480,14 @@ final class PersonalBaselineMonitor {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
 
-        if let data = try? Data(contentsOf: Self.baselinesFileURL),
-           let decoded = try? decoder.decode([String: MetricBaseline].self, from: data) {
+        if let data = try? Data(contentsOf: Self.baselinesFileURL), // Safe: file missing or unreadable → start with empty baselines; non-fatal
+           let decoded = try? decoder.decode([String: MetricBaseline].self, from: data) { // Safe: corrupt cache → start fresh; baselines rebuilt from HealthKit
             baselines = decoded
             logger.info("Loaded \(decoded.count) baselines from disk")
         }
 
-        if let data = try? Data(contentsOf: Self.alertHistoryFileURL),
-           let decoded = try? decoder.decode([AnomalyAlert].self, from: data) {
+        if let data = try? Data(contentsOf: Self.alertHistoryFileURL), // Safe: file missing → start with empty alert history; non-fatal
+           let decoded = try? decoder.decode([AnomalyAlert].self, from: data) { // Safe: corrupt cache → start fresh; alert history rebuilt from monitoring
             alertHistory = decoded
             logger.info("Loaded \(decoded.count) historical alerts from disk")
         }

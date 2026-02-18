@@ -76,7 +76,7 @@ extension FocusModeIntelligence {
     /// Sync all global settings to the paired iPhone via shared App Group UserDefaults.
     func syncSettingsToiPhone() async {
         if let defaults = UserDefaults(suiteName: "group.app.theathe") {
-            if let encoded = try? JSONEncoder().encode(getGlobalSettings()) {
+            if let encoded = try? JSONEncoder().encode(getGlobalSettings()) { // Safe: encode failure → settings not synced to iPhone; non-fatal, local state intact
                 defaults.set(encoded, forKey: "focusModeGlobalSettings")
             }
             defaults.synchronize()
@@ -147,7 +147,7 @@ extension FocusModeIntelligence {
     func loadSettings() async {
         if let defaults = UserDefaults(suiteName: "group.app.theathe"),
            let data = defaults.data(forKey: "focusModeGlobalSettings"),
-           let settings = try? JSONDecoder().decode(FocusModeGlobalSettings.self, from: data) {
+           let settings = try? JSONDecoder().decode(FocusModeGlobalSettings.self, from: data) { // Safe: decode failure → use default settings; non-fatal
             setGlobalSettings(settings)
             setEmergencyContacts(Set(settings.emergencyContacts))
         }
@@ -156,7 +156,7 @@ extension FocusModeIntelligence {
     /// Save global settings to shared UserDefaults.
     func saveSettings() async {
         if let defaults = UserDefaults(suiteName: "group.app.theathe"),
-           let encoded = try? JSONEncoder().encode(getGlobalSettings()) {
+           let encoded = try? JSONEncoder().encode(getGlobalSettings()) { // Safe: encode failure → settings not persisted; non-fatal, in-memory state unchanged
             defaults.set(encoded, forKey: "focusModeGlobalSettings")
             defaults.synchronize()
         }
@@ -166,7 +166,7 @@ extension FocusModeIntelligence {
     func loadFocusModes() async {
         if let defaults = UserDefaults(suiteName: "group.app.theathe"),
            let data = defaults.data(forKey: "focusModeConfigurations"),
-           let modes = try? JSONDecoder().decode([String: FocusModeConfiguration].self, from: data) {
+           let modes = try? JSONDecoder().decode([String: FocusModeConfiguration].self, from: data) { // Safe: decode failure → use in-memory defaults; non-fatal
             setAllFocusModes(modes)
         }
     }
@@ -175,7 +175,7 @@ extension FocusModeIntelligence {
     func loadContactLanguages() async {
         if let defaults = UserDefaults(suiteName: "group.app.theathe"),
            let data = defaults.data(forKey: "contactLanguages"),
-           let languages = try? JSONDecoder().decode([String: ContactLanguageInfo].self, from: data) {
+           let languages = try? JSONDecoder().decode([String: ContactLanguageInfo].self, from: data) { // Safe: decode failure → use in-memory defaults; non-fatal
             setAllContactLanguages(languages)
         }
     }
@@ -183,7 +183,7 @@ extension FocusModeIntelligence {
     /// Save contact language preferences to shared UserDefaults.
     func saveContactLanguages() async {
         if let defaults = UserDefaults(suiteName: "group.app.theathe"),
-           let encoded = try? JSONEncoder().encode(getAllContactLanguages()) {
+           let encoded = try? JSONEncoder().encode(getAllContactLanguages()) { // Safe: encode failure → contact languages not persisted; non-fatal, in-memory state intact
             defaults.set(encoded, forKey: "contactLanguages")
             defaults.synchronize()
         }
