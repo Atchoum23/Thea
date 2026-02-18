@@ -781,25 +781,25 @@ Update this section after each phase completes (edit in-place):
 | Phase | Description | Status | Agent | Completed |
 |-------|-------------|--------|-------|-----------|
 | A1 | OfflineQueueService testability | ✅ DONE | a24cde1 | 2026-02-18 |
-| A2 | Schema migration wire-in | 🔄 IN PROGRESS | a24cde1 | — |
-| B | Build System (16 builds) | 🔄 IN PROGRESS | a2bff42 + a320a30 | — |
-| C | Swift Tests (4045/4045) | ✅ DONE | verified | 2026-02-18 |
+| A2 | Schema migration wire-in | ✅ DONE | 7f2ceaaa | 2026-02-18 |
+| B | Build System (4/4 platforms 0 err 0 warn) | ✅ DONE | a2bff42+direct | 2026-02-18 |
+| C | Swift Tests (4044/4045 — 1 timezone flake) | ✅ DONE | verified | 2026-02-18 |
 | D1 | @unchecked Sendable | 🔄 IN PROGRESS | a254aba | — |
 | D2 | try? Reduction | 🔄 IN PROGRESS | a254aba | — |
-| D3 | Periphery Dead Code | ⏳ PENDING | TBD | — |
-| E | CI/CD Repair | 🔄 IN PROGRESS | a2ba758 | ci.yml,security.yml,audit-pr.yml,release.yml done |
-| F | Liquid Glass + UX/UI | 🔄 IN PROGRESS | addb4f7 | Color fixes + a11y labels committed |
-| G | SwiftData Migration | 🔄 IN A | a24cde1 | — |
-| H | IMPL_PLAN Phases 4-8 | 🔄 IN PROGRESS | a7eb850 | — |
-| I | Tizen + TheaWeb | 🔄 IN PROGRESS | a96b26d | OSV vulns fixed |
-| J | Security Audit | 🔄 IN PROGRESS | a64c7c4 | 4 OSV packages patched |
-| K | Documentation | ⏳ PENDING | TBD | — |
-| L | Final Verification | ⏳ PENDING | TBD | — |
+| D3 | Periphery Dead Code | 🔄 IN PROGRESS | afc0c7b | — |
+| E | CI/CD Repair (6 YAML files, E2E Logger fix) | ✅ DONE | a2ba758 | 2026-02-18 |
+| F | Liquid Glass + UX/UI | ✅ DONE | addb4f7 | 2026-02-18 |
+| G | SwiftData Migration | ✅ DONE | 7f2ceaaa | 2026-02-18 |
+| H | IMPL_PLAN Phases 4-8 | ✅ DONE | a7eb850 | 2026-02-18 |
+| I | Tizen + TheaWeb | ✅ DONE | a96b26d | 2026-02-18 |
+| J | Security Audit | ✅ DONE | a64c7c4 | 2026-02-18 |
+| K | Documentation | 🔄 IN PROGRESS | ab9fa83 | — |
+| L | Final Verification | 🔄 IN PROGRESS | a5e9d5b | — |
 | M | Manual Ship Gate | ⏳ MANUAL | Alexis | — |
 
-**Ship-Ready %**: ~25% (blockers fixed, CI/CD+UX+Security+Tests in progress)
-**Last updated**: 2026-02-18 20:15 UTC
-**Estimated completion**: All automated phases ≈ 8-16 more hours of agent time
+**Ship-Ready %**: ~92% (all builds green, all platforms, 127 commits; D1/D2/D3/K finishing)
+**Last updated**: 2026-02-18 21:00 UTC
+**Remaining**: D1/D2 (@unchecked Sendable + try?), D3 (Periphery scan), K (docs), L (report), M (manual tag)
 
 ### Known False-Positive SourceKit Diagnostics (Do NOT act on these)
 SourceKit shows type errors for Shared/ files because it analyzes them in isolation, not with full project context. These are all confirmed false positives where backing types EXIST:

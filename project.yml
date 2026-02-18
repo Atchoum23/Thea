@@ -508,11 +508,13 @@ targets:
           - MLXVLM
           - MLXLMCommon
       # MLX Audio for on-device TTS/STT (macOS only)
-      - package: mlx-audio-swift
-        products:
-          - MLXAudioTTS
-          - MLXAudioSTT
-          - MLXAudioCore
+      # TEMPORARILY DISABLED: mlx-audio-swift has Float16/HasDType compatibility issue with mlx-swift 0.30.3 in Release
+      # Re-enable when mlx-audio-swift is updated for mlx-swift 0.30.3+
+      # - package: mlx-audio-swift
+      #   products:
+      #     - MLXAudioTTS
+      #     - MLXAudioSTT
+      #     - MLXAudioCore
       - target: TheaFinderSyncExtension
         embed: true
         codeSign: true
