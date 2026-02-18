@@ -215,10 +215,7 @@ final class TransactionImporter {
             guard maxVariance < 0.3 else { continue } // Allow 30% variance
 
             let frequency: RecurringFrequency
-            if dayInterval < 10 { frequency = .weekly }
-            else if dayInterval < 45 { frequency = .monthly }
-            else if dayInterval < 100 { frequency = .quarterly }
-            else { frequency = .annually }
+            if dayInterval < 10 { frequency = .weekly } else if dayInterval < 45 { frequency = .monthly } else if dayInterval < 100 { frequency = .quarterly } else { frequency = .annually }
 
             let avgAmount = sorted.map(\.amount).reduce(0, +) / Double(sorted.count)
 

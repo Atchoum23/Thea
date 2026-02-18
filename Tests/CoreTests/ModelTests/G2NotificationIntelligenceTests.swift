@@ -828,6 +828,7 @@ struct G2StatsTests {
 
     @Test("Auto-action rate zero when no classified")
     func autoActionRateZero() {
+        // swiftlint:disable:next identical_operands
         let rate = 0 > 0 ? Double(5) / Double(0) : 0.0
         #expect(rate == 0)
     }

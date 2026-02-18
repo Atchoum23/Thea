@@ -13,6 +13,7 @@ extension ChatManager {
 
     // MARK: - Message Sending
 
+    // swiftlint:disable:next function_body_length
     func sendMessage(_ text: String, in conversation: Conversation) async throws {
         msgLogger.debug("📤 sendMessage: Starting with text '\(text.prefix(50))...'")
 

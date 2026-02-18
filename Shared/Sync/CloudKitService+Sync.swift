@@ -307,7 +307,7 @@ extension CloudKitService {
                 let remote = CloudConversation(from: serverRecord)
 
                 // Surface to UI if both sides have different titles (meaningful conflict)
-                if conversation.title != remote.title, conversation.title != "" {
+                if conversation.title != remote.title, !conversation.title.isEmpty {
                     let conflictItem = SyncConflictItem(
                         id: conversation.id,
                         itemType: .conversation,

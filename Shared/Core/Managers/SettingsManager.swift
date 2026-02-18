@@ -382,6 +382,7 @@ final class SettingsManager: ObservableObject {
 
     // MARK: - Init
 
+    // swiftlint:disable:next function_body_length
     private init() {
         let d = UserDefaults.standard
         defaultProvider = d.string(forKey: "defaultProvider") ?? "openrouter"

@@ -252,7 +252,8 @@ final class TelegramChannel: ObservableObject {
         return parseExportJSON(json)
     }
 
-    /// Parse Telegram export JSON structure.
+    // Parse Telegram export JSON structure.
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func parseExportJSON(_ json: [String: Any]) -> [TelegramMessage] {
         var messages: [TelegramMessage] = []
 

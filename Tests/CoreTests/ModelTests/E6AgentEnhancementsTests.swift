@@ -401,7 +401,7 @@ struct AgentMemoryKGTests {
             model: "local",
             cost: "Free"
         )
-        #expect(attrs["resultSummary"] == "")
+        #expect(attrs["resultSummary"]?.isEmpty == true)
     }
 
     @Test("Entity name format matches convention")
@@ -542,8 +542,8 @@ struct AgentCostByProviderTests {
 struct AgentFeedbackCommentTests {
     @Test("Feedback records comment")
     func feedbackWithComment() {
-        var rating: TestFeedbackRating? = nil
-        var comment: String? = nil
+        var rating: TestFeedbackRating?
+        var comment: String?
 
         rating = .positive
         comment = "Very helpful analysis"
@@ -554,8 +554,8 @@ struct AgentFeedbackCommentTests {
 
     @Test("Feedback without comment")
     func feedbackWithoutComment() {
-        var rating: TestFeedbackRating? = nil
-        var comment: String? = nil
+        var rating: TestFeedbackRating?
+        var comment: String?
 
         rating = .negative
         comment = nil

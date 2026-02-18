@@ -148,7 +148,7 @@ private struct TestCodeProjectInfo: Codable, Identifiable {
     }
 
     var primaryLanguage: String? {
-        languages.max(by: { $0.value < $1.value })?.key
+        languages.max { $0.value < $1.value }?.key
     }
 
     var formattedLines: String {

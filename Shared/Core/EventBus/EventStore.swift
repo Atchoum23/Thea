@@ -47,7 +47,8 @@ public actor EventStore {
 
     // MARK: - Replay
 
-    /// Replay all stored events
+    // Replay all stored events
+    // swiftlint:disable:next cyclomatic_complexity
     public func replayAll(handler: (any TheaEvent) async -> Void) async throws {
         guard fileManager.fileExists(atPath: eventFileURL.path) else { return }
 

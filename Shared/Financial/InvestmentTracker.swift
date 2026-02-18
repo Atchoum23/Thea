@@ -262,16 +262,13 @@ final class InvestmentTracker {
 
     private func loadData() {
         if let data = UserDefaults.standard.data(forKey: "thea.investment.portfolios") {
-            do { portfolios = try JSONDecoder().decode([InvestmentPortfolio].self, from: data) }
-            catch { logger.debug("Could not decode portfolios: \(error.localizedDescription)") }
+            do { portfolios = try JSONDecoder().decode([InvestmentPortfolio].self, from: data) } catch { logger.debug("Could not decode portfolios: \(error.localizedDescription)") }
         }
         if let data = UserDefaults.standard.data(forKey: "thea.investment.holdings") {
-            do { holdings = try JSONDecoder().decode([Holding].self, from: data) }
-            catch { logger.debug("Could not decode holdings: \(error.localizedDescription)") }
+            do { holdings = try JSONDecoder().decode([Holding].self, from: data) } catch { logger.debug("Could not decode holdings: \(error.localizedDescription)") }
         }
         if let data = UserDefaults.standard.data(forKey: "thea.investment.dividends") {
-            do { dividendHistory = try JSONDecoder().decode([DividendRecord].self, from: data) }
-            catch { logger.debug("Could not decode dividends: \(error.localizedDescription)") }
+            do { dividendHistory = try JSONDecoder().decode([DividendRecord].self, from: data) } catch { logger.debug("Could not decode dividends: \(error.localizedDescription)") }
         }
     }
 

@@ -323,7 +323,7 @@ final class MultiLayerOrchestrationTests: XCTestCase {
             MLTSession(agentType: .explore, parentSessionID: parentID),
             MLTSession(agentType: .debug, parentSessionID: parentID),
             MLTSession(agentType: .research, parentSessionID: UUID()),
-            MLTSession(parentSessionID: nil),
+            MLTSession(parentSessionID: nil)
         ]
         XCTAssertEqual(sessions.filter { $0.parentSessionID == parentID }.count, 2)
     }
@@ -347,7 +347,7 @@ final class MultiLayerOrchestrationTests: XCTestCase {
             MLTSession(tokenBudget: 16384, delegationDepth: 1),
             MLTSession(tokenBudget: 4096, delegationDepth: 2),
             MLTSession(tokenBudget: 12288, delegationDepth: 1),
-            MLTSession(tokenBudget: 4096, delegationDepth: 2),
+            MLTSession(tokenBudget: 4096, delegationDepth: 2)
         ]
         XCTAssertEqual(sessions.map(\.tokenBudget).reduce(0, +), 36864)
         sessions[1].state = .completed
