@@ -23,9 +23,13 @@ final class AuthTests: XCTestCase {
         try await app.test(.GET, "health") { res async in
             XCTAssertEqual(res.status, .ok)
 
-            let health = try res.content.decode(HealthResponse.self)
-            XCTAssertEqual(health.status, "healthy")
-            XCTAssertEqual(health.version, "1.0.0")
+            do {
+                let health = try res.content.decode(HealthResponse.self)
+                XCTAssertEqual(health.status, "healthy")
+                XCTAssertEqual(health.version, "1.0.0")
+            } catch {
+                XCTFail("Failed to decode health response: \(error)")
+            }
         }
     }
 

@@ -780,24 +780,34 @@ Update this section after each phase completes (edit in-place):
 
 | Phase | Description | Status | Agent | Completed |
 |-------|-------------|--------|-------|-----------|
-| A | Critical Blockers | ⏳ PENDING | TBD | — |
-| B | Build System (16 builds) | ⏳ PENDING | TBD | — |
-| C | Swift Tests + Coverage | ⏳ PENDING | TBD | — |
-| D1 | @unchecked Sendable | ⏳ PENDING | TBD | — |
-| D2 | try? Reduction | ⏳ PENDING | TBD | — |
+| A1 | OfflineQueueService testability | ✅ DONE | a24cde1 | 2026-02-18 |
+| A2 | Schema migration wire-in | 🔄 IN PROGRESS | a24cde1 | — |
+| B | Build System (16 builds) | 🔄 IN PROGRESS | a2bff42 + a320a30 | — |
+| C | Swift Tests (4045/4045) | ✅ DONE | verified | 2026-02-18 |
+| D1 | @unchecked Sendable | 🔄 IN PROGRESS | a254aba | — |
+| D2 | try? Reduction | 🔄 IN PROGRESS | a254aba | — |
 | D3 | Periphery Dead Code | ⏳ PENDING | TBD | — |
-| E | CI/CD Repair | ⏳ PENDING | TBD | — |
-| F | Liquid Glass + UX/UI | ⏳ PENDING | TBD | — |
-| G | SwiftData Migration | ✅ IN A | TBD | — |
-| H | IMPL_PLAN Phases 4-8 | ⏳ PENDING | TBD | — |
-| I | Tizen + TheaWeb | ⏳ PENDING | TBD | — |
-| J | Security Audit | ⏳ PENDING | TBD | — |
+| E | CI/CD Repair | 🔄 IN PROGRESS | a2ba758 | ci.yml,security.yml,audit-pr.yml,release.yml done |
+| F | Liquid Glass + UX/UI | 🔄 IN PROGRESS | addb4f7 | Color fixes + a11y labels committed |
+| G | SwiftData Migration | 🔄 IN A | a24cde1 | — |
+| H | IMPL_PLAN Phases 4-8 | 🔄 IN PROGRESS | a7eb850 | — |
+| I | Tizen + TheaWeb | 🔄 IN PROGRESS | a96b26d | OSV vulns fixed |
+| J | Security Audit | 🔄 IN PROGRESS | a64c7c4 | 4 OSV packages patched |
 | K | Documentation | ⏳ PENDING | TBD | — |
 | L | Final Verification | ⏳ PENDING | TBD | — |
 | M | Manual Ship Gate | ⏳ MANUAL | Alexis | — |
 
-**Ship-Ready %**: 0% (starting now)
-**Estimated completion**: All automated phases ≈ 12-24 hours of agent time
+**Ship-Ready %**: ~25% (blockers fixed, CI/CD+UX+Security+Tests in progress)
+**Last updated**: 2026-02-18 20:15 UTC
+**Estimated completion**: All automated phases ≈ 8-16 more hours of agent time
+
+### Known False-Positive SourceKit Diagnostics (Do NOT act on these)
+SourceKit shows type errors for Shared/ files because it analyzes them in isolation, not with full project context. These are all confirmed false positives where backing types EXIST:
+- `SecurityScannerView.swift` → types in `SecurityScanner.swift`
+- `ImageIntelligenceView.swift` → types in `ImageIntelligence.swift`
+- `CoworkView.swift` → types in `Shared/Cowork/CoworkManager.swift`
+- All `*Provider.swift` in excluded Providers/ folders → expected (excluded from builds)
+- All EXCLUDED Components (`EnhancedMessageBubble`, `StreamingTextView`, etc.) → expected
 
 ---
 

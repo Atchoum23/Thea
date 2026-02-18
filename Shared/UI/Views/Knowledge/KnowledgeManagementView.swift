@@ -26,6 +26,7 @@ struct KnowledgeManagementView: View {
                                 Image(systemName: "xmark.circle")
                             }
                             .buttonStyle(.borderless)
+                            .accessibilityLabel("Remove \(path.lastPathComponent) from indexed paths")
                         }
                     }
 

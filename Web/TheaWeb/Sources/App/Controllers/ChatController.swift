@@ -9,7 +9,8 @@ struct ChatController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let chat = routes.grouped("chat")
 
-        chat.post("send", use: sendMessage)
+        chat.post("message", use: sendMessage)
+        chat.post("send", use: sendMessage) // legacy alias
         chat.get("conversations", use: listConversations)
         chat.post("conversations", use: createConversation)
         chat.get("conversations", ":id", use: getConversation)
