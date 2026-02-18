@@ -78,6 +78,27 @@ final class SettingsManager: ObservableObject {
         didSet { persist(personalizationResponsePreference, forKey: "personalizationResponsePreference") }
     }
 
+    // MARK: - Response Style Settings
+
+    @Published var selectedResponseStyleID: String? {
+        didSet { persist(selectedResponseStyleID as Any, forKey: "selectedResponseStyleID") }
+    }
+
+    @Published var customResponseStyles: [ResponseStyle] {
+        didSet {
+            if let data = try? JSONEncoder().encode(customResponseStyles) {
+                persist(data, forKey: "customResponseStyles")
+            }
+        }
+    }
+
+    /// Returns the currently active ResponseStyle (built-in or custom), or nil if none selected.
+    var activeResponseStyle: ResponseStyle? {
+        guard let id = selectedResponseStyleID else { return nil }
+        return ResponseStyle.builtInStyles.first { $0.id == id }
+            ?? customResponseStyles.first { $0.id == id }
+    }
+
     // MARK: - Behavior Settings
 
     @Published var launchAtLogin: Bool {
@@ -440,6 +461,14 @@ final class SettingsManager: ObservableObject {
         personalizationEnabled = d.object(forKey: "personalizationEnabled") as? Bool ?? false
         personalizationContext = d.string(forKey: "personalizationContext") ?? ""
         personalizationResponsePreference = d.string(forKey: "personalizationResponsePreference") ?? ""
+        // Response style settings
+        selectedResponseStyleID = d.string(forKey: "selectedResponseStyleID")
+        if let data = d.data(forKey: "customResponseStyles"),
+           let styles = try? JSONDecoder().decode([ResponseStyle].self, from: data) {
+            customResponseStyles = styles
+        } else {
+            customResponseStyles = []
+        }
         // Remaining settings
         activeFocusMode = d.string(forKey: "activeFocusMode") ?? "general"
         enableSemanticSearch = d.object(forKey: "enableSemanticSearch") as? Bool ?? true
@@ -492,6 +521,13 @@ extension SettingsManager {
         personalizationEnabled = d.object(forKey: "personalizationEnabled") as? Bool ?? false
         personalizationContext = d.string(forKey: "personalizationContext") ?? ""
         personalizationResponsePreference = d.string(forKey: "personalizationResponsePreference") ?? ""
+        selectedResponseStyleID = d.string(forKey: "selectedResponseStyleID")
+        if let data = d.data(forKey: "customResponseStyles"),
+           let styles = try? JSONDecoder().decode([ResponseStyle].self, from: data) {
+            customResponseStyles = styles
+        } else {
+            customResponseStyles = []
+        }
     }
 
     private func reloadUISettings(from d: UserDefaults) {
