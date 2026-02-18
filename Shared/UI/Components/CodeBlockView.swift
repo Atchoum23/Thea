@@ -113,12 +113,12 @@ struct CodeBlockView: View {
             UIPasteboard.general.string = code
         #endif
 
-        withAnimation {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
             showCopied = true
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            withAnimation {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                 showCopied = false
             }
         }

@@ -407,6 +407,8 @@ final class SwiftExecutionEngine: @unchecked Sendable {
 
 // MARK: - Python Execution Engine (macOS only)
 
+// @unchecked Sendable: spawns a new Process per execute() call; logger is thread-safe;
+// no shared mutable state — each invocation is fully isolated via Process API
 /// Python execution using python3 command
 final class PythonExecutionEngine: @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.ai", category: "PythonExecutionEngine")

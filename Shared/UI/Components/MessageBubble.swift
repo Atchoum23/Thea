@@ -407,12 +407,12 @@ extension MessageBubble {
             UIPasteboard.general.string = message.content.textValue
         #endif
 
-        withAnimation {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
             showCopiedFeedback = true
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            withAnimation {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                 showCopiedFeedback = false
             }
         }
