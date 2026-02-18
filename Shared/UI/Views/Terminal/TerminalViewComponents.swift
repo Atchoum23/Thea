@@ -135,7 +135,7 @@
                 }
             }
             .padding()
-            .background(Color(nsColor: .controlBackgroundColor))
+            .background(Color.controlBackground)
             .cornerRadius(8)
         }
     }
@@ -202,7 +202,7 @@
                 .accessibilityHint("Select how commands are executed")
             }
             .padding()
-            .background(Color(nsColor: .controlBackgroundColor))
+            .background(Color.controlBackground)
         }
 
         func executeCommand() {

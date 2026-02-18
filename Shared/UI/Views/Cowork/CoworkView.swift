@@ -151,7 +151,7 @@
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(Color(nsColor: .controlBackgroundColor))
+            .background(Color.controlBackground)
         }
 
         private func iconForTab(_ tab: CoworkTab) -> String {
@@ -182,11 +182,11 @@
                         .font(.body)
                         .frame(minHeight: 60, maxHeight: 100)
                         .padding(8)
-                        .background(Color(nsColor: .textBackgroundColor))
+                        .background(Color.textBackground)
                         .cornerRadius(8)
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
+                                .stroke(Color.separatorColor, lineWidth: 1)
                         )
 
                     VStack(spacing: 8) {
@@ -229,7 +229,7 @@
                 }
             }
             .padding()
-            .background(Color(nsColor: .controlBackgroundColor))
+            .background(Color.controlBackground)
         }
 
         // MARK: - Plan Preview Sheet
@@ -261,7 +261,7 @@
                                         }
                                     }
                                     .padding()
-                                    .background(Color(nsColor: .controlBackgroundColor))
+                                    .background(Color.controlBackground)
                                     .cornerRadius(8)
                                 }
                             }
@@ -372,7 +372,7 @@
                 .font(.caption)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(Color(nsColor: .controlColor))
+                .background(Color(.controlColor))
                 .cornerRadius(4)
             }
             .buttonStyle(.plain)

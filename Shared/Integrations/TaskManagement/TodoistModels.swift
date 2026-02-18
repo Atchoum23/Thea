@@ -328,6 +328,8 @@ public struct TodoistNotification: Codable, Identifiable, Sendable {
     }
 }
 
+// @unchecked Sendable: [String: Any] args dict required for Todoist Sync API's flexible command
+// arguments; struct is value-typed, all fields set at init and only read for API serialization
 public struct TodoistCommand: @unchecked Sendable {
     public let type: String
     public let uuid: String

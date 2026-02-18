@@ -177,7 +177,7 @@
                 }
                 .frame(width: 120)
                 .padding(8)
-                .background(Color(nsColor: .controlBackgroundColor))
+                .background(Color.controlBackground)
                 .cornerRadius(8)
             }
             .buttonStyle(.plain)

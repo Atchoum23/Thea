@@ -46,7 +46,7 @@
                         .accessibilityLabel("Search skills")
                 }
                 .padding(8)
-                .background(Color(nsColor: .controlBackgroundColor))
+                .background(Color.controlBackground)
                 .cornerRadius(8)
                 .padding()
 

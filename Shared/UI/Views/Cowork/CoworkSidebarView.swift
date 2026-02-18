@@ -28,7 +28,7 @@
 
                 Spacer()
             }
-            .background(Color(nsColor: .controlBackgroundColor))
+            .background(Color.controlBackground)
             .fileImporter(
                 isPresented: $showingFolderPicker,
                 allowedContentTypes: [.folder],

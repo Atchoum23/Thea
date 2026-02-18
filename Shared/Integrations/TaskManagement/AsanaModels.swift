@@ -395,6 +395,8 @@ public struct AsanaCustomField: Codable, Sendable {
 
 // MARK: - Batch API Models
 
+// @unchecked Sendable: [String: Any]? data dict required for Asana batch API's dynamic payload;
+// struct is value-typed, all fields are set at init and only read thereafter
 public struct AsanaBatchAction: @unchecked Sendable {
     public let relativePath: String
     public let method: String
@@ -489,6 +491,8 @@ public struct AsanaWebhookResource: Codable, Sendable {
 
 // MARK: - Helper Types
 
+// @unchecked Sendable: type-erased Any storage for Asana's heterogeneous JSON field values;
+// values are Codable primitives (String, Int, Double, Bool, [String: Any], Array) in practice
 public struct AsanaAnyCodable: Codable, @unchecked Sendable {
     public let value: Any
 

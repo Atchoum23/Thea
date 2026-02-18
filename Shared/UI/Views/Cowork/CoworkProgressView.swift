@@ -73,7 +73,7 @@
                 }
             }
             .padding()
-            .background(Color(nsColor: .controlBackgroundColor))
+            .background(Color.controlBackground)
             .cornerRadius(12)
         }
 
@@ -88,7 +88,7 @@
                     stepExpandedContent(step)
                 }
             }
-            .background(Color(nsColor: .controlBackgroundColor))
+            .background(Color.controlBackground)
             .cornerRadius(8)
         }
 
@@ -237,7 +237,7 @@
                 }
             }
             .padding()
-            .background(Color(nsColor: .windowBackgroundColor))
+            .background(Color.windowBackground)
         }
 
         // MARK: - Summary Card

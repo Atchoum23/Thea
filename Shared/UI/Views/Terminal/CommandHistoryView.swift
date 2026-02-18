@@ -120,7 +120,7 @@
                     }
                 }
                 .padding(8)
-                .background(Color(nsColor: .controlBackgroundColor))
+                .background(Color.controlBackground)
                 .cornerRadius(8)
 
                 // Filter picker
@@ -172,7 +172,7 @@
             .font(.caption)
             .foregroundStyle(.secondary)
             .padding()
-            .background(Color(nsColor: .controlBackgroundColor))
+            .background(Color.controlBackground)
         }
 
         private func rerunCommand(_ command: TerminalCommand) {
@@ -293,7 +293,7 @@
                 }
             }
             .padding()
-            .background(Color(nsColor: .controlBackgroundColor))
+            .background(Color.controlBackground)
             .cornerRadius(8)
         }
 
