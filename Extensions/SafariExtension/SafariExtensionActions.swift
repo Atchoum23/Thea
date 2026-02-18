@@ -30,7 +30,7 @@ extension SafariWebExtensionHandler {
             return
         }
 
-        saveRequest([
+        try? saveRequest([
             "type": "askAI",
             "question": question,
             "context": String(context.prefix(10000)),
@@ -62,7 +62,7 @@ extension SafariWebExtensionHandler {
             return
         }
 
-        saveRequest([
+        try? saveRequest([
             "type": "deepResearch",
             "query": query,
             "sources": sources,
@@ -327,7 +327,7 @@ extension SafariWebExtensionHandler {
             return
         }
 
-        saveRequest([
+        try? saveRequest([
             "type": "rewriteText",
             "text": String(text.prefix(10000)),
             "style": style,
