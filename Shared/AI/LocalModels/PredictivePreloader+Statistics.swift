@@ -131,7 +131,7 @@ extension PredictivePreloader {
         }
 
         // Save recent tasks
-        if let data = try? JSONEncoder().encode(recentTasks) {
+        if let data = try? JSONEncoder().encode(recentTasks) { // Safe: encode failure → recent task history not persisted; in-memory queue intact
             UserDefaults.standard.set(data, forKey: recentTasksKey)
         }
     }

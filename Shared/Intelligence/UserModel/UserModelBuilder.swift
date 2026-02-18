@@ -15,6 +15,7 @@ private let userModelLogger = Logger(subsystem: "ai.thea.app", category: "UserMo
 
 // MARK: - User Profile
 
+/// A comprehensive model of the user built from behavioral patterns, technical expertise, and interaction history.
 public struct UserProfile: Sendable {
     public let id: UUID
     public var communicationStyle: CommunicationStyle
@@ -51,6 +52,7 @@ public struct UserProfile: Sendable {
 
 // MARK: - Communication Style
 
+/// How the user prefers to communicate: verbosity, formality, questioning style, and feedback preferences.
 public struct CommunicationStyle: Sendable {
     public var verbosityPreference: Double       // 0 = concise, 1 = detailed
     public var formalityLevel: Double            // 0 = casual, 1 = formal
@@ -62,6 +64,7 @@ public struct CommunicationStyle: Sendable {
     public var usesCodeBlocks: Bool
     public var prefersStructuredResponses: Bool
 
+    /// How the user typically asks questions.
     public enum QuestioningStyle: String, Sendable {
         case direct      // "How do I X?"
         case contextual  // "I'm trying to do Y, and need X"
@@ -69,6 +72,7 @@ public struct CommunicationStyle: Sendable {
         case debugging   // "X doesn't work, why?"
     }
 
+    /// How the user prefers to receive feedback.
     public enum FeedbackStyle: String, Sendable {
         case explicit    // Clear yes/no feedback
         case implicit    // Behavioral signals
@@ -101,6 +105,7 @@ public struct CommunicationStyle: Sendable {
 
 // MARK: - Technical Profile
 
+/// The user's technical expertise, preferred languages, and coding conventions.
 public struct TechnicalProfile: Sendable {
     public var overallLevel: ExpertiseLevel
     public var domainExpertise: [String: ExpertiseLevel]
@@ -110,6 +115,7 @@ public struct TechnicalProfile: Sendable {
     public var errorHandlingApproach: ErrorHandlingApproach
     public var debuggingSkill: Double             // 0 = needs help, 1 = self-sufficient
 
+    /// Self-assessed or inferred technical expertise level.
     public enum ExpertiseLevel: String, Sendable {
         case beginner     // Needs explanations
         case intermediate // Understands concepts
@@ -117,6 +123,7 @@ public struct TechnicalProfile: Sendable {
         case expert       // Deep knowledge
     }
 
+    /// How the user approaches and resolves errors.
     public enum ErrorHandlingApproach: String, Sendable {
         case cautious     // Lots of error checking
         case balanced     // Standard practices
@@ -124,6 +131,7 @@ public struct TechnicalProfile: Sendable {
         case robust       // Comprehensive handling
     }
 
+    /// User-specific coding style preferences.
     public struct CodeStylePreferences: Sendable {
         public var prefersFunctional: Bool
         public var prefersOOP: Bool
@@ -167,6 +175,7 @@ public struct TechnicalProfile: Sendable {
 
 // MARK: - Work Habits
 
+/// The user's work schedule, focus patterns, and task management style.
 public struct WorkHabits: Sendable {
     public var peakProductivityHours: [Int]      // 0-23
     public var averageSessionDuration: TimeInterval
@@ -221,6 +230,7 @@ public struct WorkHabits: Sendable {
 
 // MARK: - Learning Style
 
+/// How the user prefers to learn new material and retain information.
 public struct UserLearningStyle: Sendable {
     public var preferredMethod: LearningMethod
     public var pacingPreference: Double          // 0 = slow/thorough, 1 = fast/overview
@@ -266,6 +276,7 @@ public struct UserLearningStyle: Sendable {
 
 // MARK: - User Preferences
 
+/// User interface and interaction preferences (response format, notifications, language, etc.).
 public struct UserPreferences: Sendable {
     public var preferredAIModel: String?
     public var preferredResponseFormat: ResponseFormat
@@ -314,6 +325,7 @@ public struct UserPreferences: Sendable {
 
 // MARK: - Stress Indicators
 
+/// Signals of the user's current cognitive load or stress level inferred from interaction patterns.
 public struct StressIndicators: Sendable {
     public var currentStressLevel: Double        // 0 = relaxed, 1 = stressed
     public var frustrationPatterns: [String]
@@ -344,6 +356,7 @@ public struct StressIndicators: Sendable {
 
 // MARK: - Observation Record
 
+/// A timestamped behavioral observation used to update the user model.
 public struct ObservationRecord: Identifiable, Sendable {
     public let id: UUID
     public let type: ObservationType
@@ -352,6 +365,7 @@ public struct ObservationRecord: Identifiable, Sendable {
     public let timestamp: Date
     public let context: [String: String]
 
+    /// The category of behavior being recorded.
     public enum ObservationType: String, Sendable {
         case queryPattern
         case responseReaction
