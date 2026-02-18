@@ -10,6 +10,7 @@ import OSLog
 // MARK: - User Feedback Learner
 
 /// Learns from user feedback to improve confidence assessment over time
+/// Learns from user feedback to improve confidence calibration and response quality over time.
 @MainActor
 public final class UserFeedbackLearner {
     private let logger = Logger(subsystem: "com.thea.ai", category: "UserFeedbackLearner")
@@ -286,11 +287,13 @@ struct FeedbackContainer: Codable, Sendable {
     let patterns: [String: PatternAccuracy]
 }
 
+/// The system's assessment of user feedback and its impact on confidence calibration.
 public struct FeedbackAssessment: Sendable {
     public let source: ConfidenceSource
     public let factors: [ConfidenceDecomposition.DecompositionFactor]
 }
 
+/// Aggregate statistics describing feedback patterns and correction trends.
 public struct FeedbackStatistics: Sendable {
     public let totalResponses: Int
     public let correctResponses: Int
@@ -300,6 +303,7 @@ public struct FeedbackStatistics: Sendable {
     public let taskTypeAccuracy: [TaskType: Double]
     public let correctionsProvided: Int
 
+    /// Direction of change in a measured metric over time.
     public enum Trend: String, Sendable {
         case improving = "Improving"
         case stable = "Stable"
@@ -307,6 +311,7 @@ public struct FeedbackStatistics: Sendable {
     }
 }
 
+/// A recurring pattern of corrections that informs model and response improvements.
 public struct CorrectionPattern: Sendable {
     public let pattern: String
     public let frequency: Int
