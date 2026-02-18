@@ -138,7 +138,7 @@ struct EnhancedCodeBlock: View {
             } catch {
                 return
             }
-            withAnimation { showCopied = false }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { showCopied = false }
         }
     }
 }

@@ -90,6 +90,8 @@ struct MigrationSourceInfo {
     let isInstalled: Bool
 }
 
+// @unchecked Sendable: mutable state (endTime, status, progress) is updated exclusively from the
+// MigrationEngine actor context; class is used as a reference-typed progress container
 class MigrationJob: Identifiable, @unchecked Sendable {
     let id: UUID
     let source: String

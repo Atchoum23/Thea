@@ -381,7 +381,7 @@ public struct EnhancedMessageBubble: View {
             } catch {
                 return
             }
-            withAnimation {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                 showCopiedFeedback = false
             }
         }

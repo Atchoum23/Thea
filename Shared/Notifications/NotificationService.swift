@@ -469,6 +469,9 @@ public enum NotificationActionResult: Sendable {
 
 // MARK: - Notification Delegate
 
+// @unchecked Sendable: NSObject subclass required for UNUserNotificationCenterDelegate; callbacks
+// delivered by UNUserNotificationCenter on a background queue; closures stored as optionals and
+// called from delegate callbacks only — mutation happens during setup before concurrent access
 public class TheaNotificationDelegate: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
     public static let shared = TheaNotificationDelegate()
 

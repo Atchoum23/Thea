@@ -6,6 +6,8 @@ import OSLog
 
 // MARK: - Session Delegate
 
+// @unchecked Sendable: NSObject subclass required for URLSession delegate protocols; URLSession
+// delivers callbacks on its own internal queue; streamHandlers dict is only mutated from callbacks
 class NetworkSessionDelegate: NSObject, URLSessionDelegate, URLSessionDataDelegate, URLSessionDownloadDelegate, @unchecked Sendable {
     private var streamHandlers: [URLSessionTask: (onData: (Data) -> Void, onComplete: (Error?) -> Void)] = [:]
 
@@ -33,6 +35,8 @@ class NetworkSessionDelegate: NSObject, URLSessionDelegate, URLSessionDataDelega
 
 // MARK: - WebSocket Connection
 
+// @unchecked Sendable: URLSessionWebSocketTask is not Sendable; isConnected is only mutated
+// on the thread that calls connect()/disconnect(); ObservableObject requires class identity
 public final class WebSocketConnection: ObservableObject, @unchecked Sendable {
     private let task: URLSessionWebSocketTask
     @Published public private(set) var isConnected = false
