@@ -38,7 +38,7 @@ public final class MCPConnectionManager: ObservableObject {
             ?? FileManager.default.temporaryDirectory
         configURL = appSupport.appendingPathComponent("Thea/mcp_connections.json")
 
-        try? FileManager.default.createDirectory(at: configURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: configURL.deletingLastPathComponent(), withIntermediateDirectories: true) // Safe: directory may already exist; error means config not persisted (works in-memory)
 
         Task {
             await loadConnections()
@@ -258,8 +258,8 @@ public final class MCPConnectionManager: ObservableObject {
 
     private func loadConnections() async {
         guard FileManager.default.fileExists(atPath: configURL.path),
-              let data = try? Data(contentsOf: configURL),
-              let stored = try? JSONDecoder().decode(MCPConnectionStorage.self, from: data) else {
+              let data = try? Data(contentsOf: configURL), // Safe: file unreadable → start with empty connections; non-fatal
+              let stored = try? JSONDecoder().decode(MCPConnectionStorage.self, from: data) else { // Safe: corrupt config → start fresh; user re-adds connections
             return
         }
 

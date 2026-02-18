@@ -44,6 +44,7 @@ public struct ConfidenceResult: Sendable, Identifiable {
 
 // MARK: - Confidence Level
 
+/// Qualitative confidence band derived from the overall confidence score.
 public enum ConfidenceLevel: String, Sendable, CaseIterable {
     case high = "High Confidence"
     case medium = "Medium Confidence"
@@ -94,6 +95,7 @@ public struct ConfidenceSource: Sendable, Identifiable {
     public let details: String
     public let verified: Bool
 
+        /// The verification system that produced this confidence source.
     public enum SourceType: String, Sendable, CaseIterable {
         case modelConsensus = "Model Consensus"
         case webVerification = "Web Verification"
@@ -132,6 +134,7 @@ public struct ConfidenceDecomposition: Sendable {
     public let reasoning: String
     public let suggestions: [String]
 
+    /// A single factor contributing positively or negatively to the overall confidence.
     public struct DecompositionFactor: Sendable, Identifiable {
         public let id = UUID()
         public let name: String
@@ -139,6 +142,7 @@ public struct ConfidenceDecomposition: Sendable {
         public let explanation: String
     }
 
+    /// A detected conflict between two sources that reduces confidence.
     public struct ConflictInfo: Sendable, Identifiable {
         public let id = UUID()
         public let source1: String
@@ -146,6 +150,7 @@ public struct ConfidenceDecomposition: Sendable {
         public let description: String
         public let severity: ConflictSeverity
 
+        /// How significantly this conflict affects confidence.
         public enum ConflictSeverity: String, Sendable {
             case minor = "Minor"
             case moderate = "Moderate"
@@ -288,6 +293,46 @@ public final class ConfidenceSystem {
             userCorrection: userCorrection,
             taskType: taskType
         )
+    }
+
+
+    /// Detect potential hallucinations in a response.
+    ///
+    /// Performs lightweight heuristic checks for common hallucination patterns:
+    /// specific dates/statistics without citations, contradictions, or
+    /// implausible claims. Returns an array of flag strings (empty = no flags).
+    ///
+    /// - Parameters:
+    ///   - response: The AI response text to analyse.
+    ///   - query: The original user query for context.
+    /// - Returns: An array of hallucination flag descriptions.
+    public func detectHallucinations(_ response: String, query: String) async -> [String] {
+        var flags: [String] = []
+
+        // Flag overly precise statistics without citation
+        let statisticPattern = #"\b\d{1,3}(?:\.\d+)?\s*%\b"#
+        if let regex = try? NSRegularExpression(pattern: statisticPattern),
+           regex.numberOfMatches(in: response, range: NSRange(response.startIndex..., in: response)) > 2 {
+            flags.append("Multiple precise statistics without citations")
+        }
+
+        // Flag contradictions with common knowledge (simple heuristic)
+        let contradictoryPatterns = ["always", "never", "100%", "0%", "impossible", "guaranteed"]
+        for pattern in contradictoryPatterns {
+            if response.lowercased().contains(pattern) {
+                flags.append("Absolute claim detected: '\(pattern)'")
+                break
+            }
+        }
+
+        // Flag responses that are much longer than expected for simple queries
+        let queryWords = query.split(separator: " ").count
+        let responseWords = response.split(separator: " ").count
+        if queryWords < 5 && responseWords > 500 {
+            flags.append("Response length disproportionate to query complexity")
+        }
+
+        return flags
     }
 
     // MARK: - Private Methods
