@@ -2,7 +2,7 @@
 # Version: 5.0.0 - Tiered coverage gates: 70% overall / 100% critical classes / 100% branch on security files
 # Last Updated: February 18, 2026
 
-name: CI
+name: Thea CI
 
 on:
   push:

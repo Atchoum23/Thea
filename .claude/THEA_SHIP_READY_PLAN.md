@@ -50,19 +50,19 @@ All 6 workflows must be simultaneously green before ship-ready is declared. "Fix
 
 | GitHub UI Name | File | Must Be Green |
 |---|---|---|
-| CI | ci.yml | YES — builds all 4 platforms, SwiftLint 0 violations, tests pass, coverage: ≥70% overall / 100% critical classes / 100% branch on security files |
-| E2E Tests | e2e-tests.yml | YES — Maestro flows pass on iOS simulator |
-| Security Audit (Full) | thea-audit-main.yml | YES — 0 critical, 0 high findings |
-| Security Audit (PR) | thea-audit-pr.yml | YES — passes on any open PRs; N/A (skips) if no PR |
-| Release | release.yml | YES — verify manually via `workflow_dispatch`; must produce .dmg |
-| Security Scanning | security.yml | YES — 0 secrets (Gitleaks), 0 critical CVEs (osv-scanner) |
+| Thea CI | ci.yml | YES — builds all 4 platforms, SwiftLint 0 violations, tests pass, coverage: ≥70% overall / 100% critical classes / 100% branch on security files |
+| Thea E2E Tests | e2e-tests.yml | YES — Maestro flows pass on iOS simulator |
+| Thea Security Audit | thea-audit-main.yml | YES — 0 critical, 0 high findings |
+| Thea Security Audit (PR) | thea-audit-pr.yml | YES — passes on any open PRs; N/A (skips) if no PR |
+| Thea Release | release.yml | YES — verify manually via `workflow_dispatch`; must produce .dmg |
+| Thea Security Scanning | security.yml | YES — 0 secrets (Gitleaks), 0 critical CVEs (osv-scanner) |
 
-- [ ] CI: green (SwiftLint 0 violations, 4-platform builds 0 errors/0 warnings, tests pass, coverage ≥70% overall + 100% critical classes + 100% branch on security files)
-- [ ] E2E Tests: green (Maestro iOS flows all pass)
-- [ ] Security Audit (Full): green (0 critical, 0 high findings from thea-audit)
-- [ ] Security Audit (PR): green or skipped (only runs on PRs with relevant file changes)
-- [ ] Release: manually triggered via `workflow_dispatch` and verified to produce .dmg artifact
-- [ ] Security Scanning: green (Gitleaks 0 secrets, osv-scanner 0 critical CVEs)
+- [ ] Thea CI: green (SwiftLint 0 violations, 4-platform builds 0 errors/0 warnings, tests pass, coverage ≥70% overall + 100% critical classes + 100% branch on security files)
+- [ ] Thea E2E Tests: green (Maestro iOS flows all pass)
+- [ ] Thea Security Audit: green (0 critical, 0 high findings from thea-audit)
+- [ ] Thea Security Audit (PR): green or skipped (only runs on PRs with relevant file changes)
+- [ ] Thea Release: manually triggered via `workflow_dispatch` and verified to produce .dmg artifact
+- [ ] Thea Security Scanning: green (Gitleaks 0 secrets, osv-scanner 0 critical CVEs)
 
 ### Web & Tizen
 - [x] TheaWeb: all 14 routes implemented, Docker builds, 6/6 tests passing ✅ Phase I
