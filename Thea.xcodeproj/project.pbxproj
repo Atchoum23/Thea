@@ -433,6 +433,7 @@
 		2DA86B306094E43D76223FD2 /* PromptEngineeringSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BF97AC6017B13875B56F59 /* PromptEngineeringSettingsView.swift */; };
 		2DCCC47E9318F7692F267617 /* TaskPromptBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116EA71121875A7DB2F96160 /* TaskPromptBuilder.swift */; };
 		2DCE363B5F92B3BEFC4E18CE /* PermissionsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B98179C2572BBED4C0F018C2 /* PermissionsSettingsView.swift */; };
+		2DEA5AA5A4A363B3783B03AC /* LiveGuidanceSettingsViewStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA843460B99F1102F458848 /* LiveGuidanceSettingsViewStub.swift */; };
 		2DF04A44D6870904DCBFDC7F /* VehicleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D450949987D3392FA1C259FB /* VehicleManager.swift */; };
 		2E2962F3E018A8026A9A3414 /* MacSystemObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339927C307D1E770E3A63F42 /* MacSystemObserver.swift */; };
 		2E473A3ED47B3E18A1184A29 /* ArtifactManagerTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B16117438AF4B92C53E5F76 /* ArtifactManagerTypes.swift */; };
@@ -530,7 +531,6 @@
 		39457C5A56548874DFAA2D3F /* NotificationObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1054FC5B0A1436C178BE17A /* NotificationObserver.swift */; };
 		394E3A2BED6044BE6845A2E1 /* QuerySuggestionOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6BDEA69B67DAD3E651D9340 /* QuerySuggestionOverlay.swift */; };
 		394FA9E47D3C195534CA654B /* PermissionsManagerChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0C355093114FFE04F76749D /* PermissionsManagerChecks.swift */; };
-		39677850638E35B31958A4A7 /* LiveGuidanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E3F0DE037BD3B5042EE6B75 /* LiveGuidanceSettingsView.swift */; };
 		39768A3B19B7C624B1823B9C /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC3A413E9AB463D1B73AA95E /* HomeViewModel.swift */; };
 		3998E1DC34679C450553C454 /* DeadlineIntelligence+Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = B941480BA226458F5B182EF0 /* DeadlineIntelligence+Types.swift */; };
 		39CC6E3F8EC78B6A60EFDCBC /* RemoteInventoryMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E9AE3EF88A2473739C8DCA /* RemoteInventoryMessages.swift */; };
@@ -1622,6 +1622,7 @@
 		B89599559B3BCE08C49FB198 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA65CF6F48987A1BFB88CF3A /* Conversation.swift */; };
 		B8D575ADE3F955620BE5AA0F /* AgentEnhancements+Visibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9FDB7F3ACBD92C1F195F9E /* AgentEnhancements+Visibility.swift */; };
 		B8F704D7A1E25089C2010A4E /* MigrationEngineTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA8EEC178ECFD6336D93366 /* MigrationEngineTypes.swift */; };
+		B8FA94519D3530F1BD116CFD /* LiveGuidanceSettingsViewStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA843460B99F1102F458848 /* LiveGuidanceSettingsViewStub.swift */; };
 		B95848B2FDB92BFEFDFA4328 /* TerminalSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C485B7F1A5C11C81BC974B7 /* TerminalSettingsView.swift */; };
 		B95EF3055EBAE644732EFBBE /* PrivacySettingsViewSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 653DFB5BA5A429E7EDB8765A /* PrivacySettingsViewSections.swift */; };
 		B96BDADCA04A04BD9407CBEF /* PhysicalMailChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E9C14554173683DA0F6EF3 /* PhysicalMailChannel.swift */; };
@@ -1711,7 +1712,6 @@
 		C3E3AF72C499CB0D220BA8B7 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AA4B2213269B451EA532382 /* FeatureFlags.swift */; };
 		C3F6724F304421DA49C0DCEC /* CrossDeviceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7710713218AA8C2E59D66B3 /* CrossDeviceService.swift */; };
 		C3F88CDF91D6011E74A43824 /* FocusModeShortcutsIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB11CBC6AF2E42B7D4CC987A /* FocusModeShortcutsIntegration.swift */; };
-		C4603A0556A96A026A5DCB0D /* LocalVisionGuidance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F53601B07434C4E982A2B448 /* LocalVisionGuidance.swift */; };
 		C473CE34F9A69073E0CFF22C /* CalendarIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6CEC0EE99099390E972A4E5 /* CalendarIntegration.swift */; };
 		C483DBB904D4AFC18BA588B9 /* ProjectKnowledge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFB0818D878F283B3234A6D /* ProjectKnowledge.swift */; };
 		C4B70139AA6AF6A3716F6EF9 /* MapsIntegration+Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D76E3FDD603DE80F9DAAB5E /* MapsIntegration+Models.swift */; };
@@ -2557,6 +2557,7 @@
 		29E94F2374629E021C7D6E7C /* MCPServerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPServerManager.swift; sourceTree = "<group>"; };
 		2A0B0E0849263E42E0ABA6FD /* CausalPatternAnalyzer+Core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CausalPatternAnalyzer+Core.swift"; sourceTree = "<group>"; };
 		2A77D387CC5E5DD170256C6B /* FocusModeIntelligence+SessionAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FocusModeIntelligence+SessionAnalytics.swift"; sourceTree = "<group>"; };
+		2AA843460B99F1102F458848 /* LiveGuidanceSettingsViewStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveGuidanceSettingsViewStub.swift; sourceTree = "<group>"; };
 		2B340B98A1F83EFB3A973119 /* ProactiveEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProactiveEngine.swift; sourceTree = "<group>"; };
 		2B39A0163DC7AFE89CF85697 /* MediaContextProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaContextProvider.swift; sourceTree = "<group>"; };
 		2B51525C80519DE6AA5F721E /* PreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewViewController.swift; sourceTree = "<group>"; };
@@ -4357,6 +4358,7 @@
 				EE1AD68BD013E56DBC8A5D91 /* LifeJournalView.swift */,
 				60B75DBB338713F2D295F771 /* LifeTrackingSettingsView.swift */,
 				7E3F0DE037BD3B5042EE6B75 /* LiveGuidanceSettingsView.swift */,
+				2AA843460B99F1102F458848 /* LiveGuidanceSettingsViewStub.swift */,
 				50DB63898CAA005F46BE1F89 /* MemorySettingsView.swift */,
 				6511D0C3411ADF78113F30A3 /* MessagingHubView.swift */,
 				EED750FD427E77BFE04F76D0 /* ModelSettingsView.swift */,
@@ -8278,6 +8280,7 @@
 				90D028C63C9E65B6A18EFD55 /* LiveAutoCorrectTypes.swift in Sources */,
 				684A0E1B844F643C0A83E3F7 /* LiveAutoCorrectView.swift in Sources */,
 				EE24E2D878FE5BC6E159E46A /* LiveGuidanceSettingsView.swift in Sources */,
+				B8FA94519D3530F1BD116CFD /* LiveGuidanceSettingsViewStub.swift in Sources */,
 				E9A3C167755F60644D077374 /* LocalModelProvider.swift in Sources */,
 				11ACBA1FB551B2978E7F194F /* LocalModelProviderChat.swift in Sources */,
 				524C0881755BB2B0DF0CCE8C /* LocalModelProviderTypes.swift in Sources */,
@@ -9419,7 +9422,7 @@
 				215A54C185BCE78D94F9D179 /* LiveAutoCorrect.swift in Sources */,
 				E5F84838AB1F133AF6E9EA64 /* LiveAutoCorrectTypes.swift in Sources */,
 				078957F9E78E2E17433EE598 /* LiveAutoCorrectView.swift in Sources */,
-				39677850638E35B31958A4A7 /* LiveGuidanceSettingsView.swift in Sources */,
+				2DEA5AA5A4A363B3783B03AC /* LiveGuidanceSettingsViewStub.swift in Sources */,
 				62233E48B1B94614B660992C /* LocalModelProvider.swift in Sources */,
 				564E34BD7D4BF1E8145A841F /* LocalModelProviderChat.swift in Sources */,
 				FC70193C67A14AB3BD4F475B /* LocalModelProviderTypes.swift in Sources */,
@@ -9429,7 +9432,6 @@
 				DF183DB849CB4A78902EA0C4 /* LocalModelRecommendationEngine+Scanning.swift in Sources */,
 				104E797F8FB24B15C00A9F40 /* LocalModelRecommendationEngine.swift in Sources */,
 				4C8A51D6BEE6347D6F696FC3 /* LocalModelRecommendationTypes.swift in Sources */,
-				C4603A0556A96A026A5DCB0D /* LocalVisionGuidance.swift in Sources */,
 				01849EADB67552298B0C7A24 /* LocalizationManager.swift in Sources */,
 				56B27E95A7B1BB4D8FC59EFD /* LocationContextProvider.swift in Sources */,
 				BCB9C77527513F7E895783D6 /* LocationTrackingManager.swift in Sources */,

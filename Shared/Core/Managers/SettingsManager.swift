@@ -64,6 +64,20 @@ final class SettingsManager: ObservableObject {
         didSet { persist(cloudAPIPrivacyGuardEnabled, forKey: "cloudAPIPrivacyGuardEnabled") }
     }
 
+    // MARK: - Personalization Settings
+
+    @Published var personalizationEnabled: Bool {
+        didSet { persist(personalizationEnabled, forKey: "personalizationEnabled") }
+    }
+
+    @Published var personalizationContext: String {
+        didSet { persist(personalizationContext, forKey: "personalizationContext") }
+    }
+
+    @Published var personalizationResponsePreference: String {
+        didSet { persist(personalizationResponsePreference, forKey: "personalizationResponsePreference") }
+    }
+
     // MARK: - Behavior Settings
 
     @Published var launchAtLogin: Bool {
@@ -422,6 +436,10 @@ final class SettingsManager: ObservableObject {
         agentMaxConcurrent = d.integer(forKey: "agentMaxConcurrent") != 0
             ? d.integer(forKey: "agentMaxConcurrent") : 4
         agentDefaultAutonomy = d.string(forKey: "agentDefaultAutonomy") ?? "balanced"
+        // Personalization settings
+        personalizationEnabled = d.object(forKey: "personalizationEnabled") as? Bool ?? false
+        personalizationContext = d.string(forKey: "personalizationContext") ?? ""
+        personalizationResponsePreference = d.string(forKey: "personalizationResponsePreference") ?? ""
         // Remaining settings
         activeFocusMode = d.string(forKey: "activeFocusMode") ?? "general"
         enableSemanticSearch = d.object(forKey: "enableSemanticSearch") as? Bool ?? true
@@ -471,6 +489,9 @@ extension SettingsManager {
         launchAtLogin = d.bool(forKey: "launchAtLogin")
         showInMenuBar = d.object(forKey: "showInMenuBar") as? Bool ?? true
         notificationsEnabled = d.object(forKey: "notificationsEnabled") as? Bool ?? true
+        personalizationEnabled = d.object(forKey: "personalizationEnabled") as? Bool ?? false
+        personalizationContext = d.string(forKey: "personalizationContext") ?? ""
+        personalizationResponsePreference = d.string(forKey: "personalizationResponsePreference") ?? ""
     }
 
     private func reloadUISettings(from d: UserDefaults) {

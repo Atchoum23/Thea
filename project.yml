@@ -297,6 +297,8 @@ targets:
           # TEMPORARY: Exclude MLXAudioEngine + dependents causing Release build issues
           - "**/AI/Audio/MLXAudioEngine.swift"
           - "**/Voice/MLXVoiceBackend.swift"
+          - "**/AI/LiveGuidance/LocalVisionGuidance.swift"
+          - "**/Settings/LiveGuidanceSettingsView.swift"
           # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
           # AnthropicFilesAPI — ACTIVATED (ported to AnthropicError/AIMessage)
           # AnthropicTokenCounter — ACTIVATED (ported to AnthropicError/AIMessage)
