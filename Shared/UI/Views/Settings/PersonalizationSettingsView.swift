@@ -3,26 +3,6 @@
 
 import SwiftUI
 
-// MARK: - Platform Color Helpers
-
-private extension Color {
-    static var theaTextBackground: Color {
-        #if os(macOS)
-        Color(nsColor: .textBackgroundColor)
-        #else
-        Color(uiColor: .systemBackground)
-        #endif
-    }
-
-    static var theaSeparator: Color {
-        #if os(macOS)
-        Color(nsColor: .separatorColor)
-        #else
-        Color(uiColor: .separator)
-        #endif
-    }
-}
-
 // MARK: - Personalization Settings View
 
 struct PersonalizationSettingsView: View {
@@ -121,7 +101,7 @@ struct PersonalizationSettingsView: View {
             .font(.body)
             .frame(minHeight: 130, maxHeight: 240)
             .padding(8)
-            .background(Color.theaTextBackground)
+            .background(Color.textBackground)
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .overlay(aboutMeEditorBorder)
             .focused($focusedField, equals: .context)
@@ -141,7 +121,7 @@ struct PersonalizationSettingsView: View {
     private var aboutMeEditorBorder: some View {
         RoundedRectangle(cornerRadius: 8)
             .stroke(
-                focusedField == .context ? Color.accentColor : Color.theaSeparator,
+                focusedField == .context ? Color.accentColor : Color.separatorColor,
                 lineWidth: focusedField == .context ? 1.5 : 0.5
             )
     }
@@ -176,7 +156,7 @@ struct PersonalizationSettingsView: View {
             .font(.body)
             .frame(minHeight: 90, maxHeight: 160)
             .padding(8)
-            .background(Color.theaTextBackground)
+            .background(Color.textBackground)
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .overlay(responsePrefEditorBorder)
             .focused($focusedField, equals: .responsePreference)
@@ -196,7 +176,7 @@ struct PersonalizationSettingsView: View {
     private var responsePrefEditorBorder: some View {
         RoundedRectangle(cornerRadius: 8)
             .stroke(
-                focusedField == .responsePreference ? Color.accentColor : Color.theaSeparator,
+                focusedField == .responsePreference ? Color.accentColor : Color.separatorColor,
                 lineWidth: focusedField == .responsePreference ? 1.5 : 0.5
             )
     }
@@ -224,11 +204,11 @@ struct PersonalizationSettingsView: View {
                 .padding(10)
         }
         .frame(maxHeight: 120)
-        .background(Color.theaTextBackground)
+        .background(Color.textBackground)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.theaSeparator, lineWidth: 0.5)
+                .stroke(Color.separatorColor, lineWidth: 0.5)
         )
         .accessibilityLabel("System prompt preview")
         .accessibilityValue(preview.isEmpty ? "No personalization content yet" : preview)

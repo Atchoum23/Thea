@@ -127,7 +127,7 @@ struct LiveGuidanceSettingsView: View {
                     TextField("e.g., Clean up expired certificates in Apple Developer Portal", text: $currentTaskText, axis: .vertical)
                         .textFieldStyle(.plain)
                         .padding(8)
-                        .background(Color(nsColor: .textBackgroundColor))
+                        .background(Color.textBackground)
                         .cornerRadius(6)
                         .lineLimit(3...6)
                 }

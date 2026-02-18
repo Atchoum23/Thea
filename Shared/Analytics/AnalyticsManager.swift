@@ -423,7 +423,9 @@ public final class AnalyticsManager: ObservableObject {
 
 // MARK: - Timing Helper
 
-// MARK: - Sendable justification: [String: Any] properties are not Sendable
+// @unchecked Sendable: [String: Any] properties dict cannot satisfy Sendable; values are captured
+// at init, properties is only mutated before stop() is called, and stop() copies all values before
+// crossing the async boundary into the Task { @MainActor } block
 public final class AnalyticsTimer: @unchecked Sendable {
     private let startTime: Date
     private let category: String
@@ -455,7 +457,8 @@ public final class AnalyticsTimer: @unchecked Sendable {
 
 // MARK: - Types
 
-// MARK: - Sendable justification: AnyCodable wraps type-erased values
+// @unchecked Sendable: [String: AnyCodable] cannot be Sendable due to type-erased Any storage;
+// AnalyticsEvent is value-typed, all fields set at init, and only read after creation
 public struct AnalyticsEvent: Identifiable, Codable, @unchecked Sendable {
     public var id = UUID()
     public let name: String
@@ -543,6 +546,8 @@ public protocol AnalyticsProvider: Sendable {
 
 // MARK: - Local Analytics Provider
 
+// @unchecked Sendable: only mutable state is the fileURL (set once at init); file I/O is
+// serialized by the caller (AnalyticsManager) which uses @MainActor for all provider calls
 public final class LocalAnalyticsProvider: AnalyticsProvider, @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.app", category: "Analytics.Local")
     private let fileURL: URL
@@ -583,6 +588,7 @@ public final class LocalAnalyticsProvider: AnalyticsProvider, @unchecked Sendabl
 
 // MARK: - Console Analytics Provider (Debug)
 
+// @unchecked Sendable: stateless debug provider; Logger is thread-safe; no mutable state
 public final class ConsoleAnalyticsProvider: AnalyticsProvider, @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.app", category: "Analytics.Console")
 

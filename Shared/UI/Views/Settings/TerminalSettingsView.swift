@@ -312,7 +312,7 @@
                             .foregroundStyle(.secondary)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 2)
-                            .background(Color(nsColor: .controlBackgroundColor))
+                            .background(Color.controlBackground)
                             .cornerRadius(4)
                     }
                 }

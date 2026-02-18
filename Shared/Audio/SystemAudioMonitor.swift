@@ -314,6 +314,8 @@ final class SystemAudioMonitor {
 
 #if os(macOS)
 @available(macOS 13.0, *)
+// @unchecked Sendable: NSObject subclass required for SCStreamOutput protocol; SCStream delivers
+// callbacks on its own internal queue; weak monitor reference avoids retain cycles
 private class AudioStreamOutput: NSObject, SCStreamOutput, @unchecked Sendable {
     private weak var monitor: SystemAudioMonitor?
 
