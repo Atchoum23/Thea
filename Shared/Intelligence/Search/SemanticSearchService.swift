@@ -47,7 +47,7 @@ actor EmbeddingIndexActor {
         let theaDir = appSupport.appendingPathComponent("Thea", isDirectory: true)
         let embeddingsDir = theaDir.appendingPathComponent("embeddings", isDirectory: true)
 
-        try? FileManager.default.createDirectory(at: embeddingsDir, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: embeddingsDir, withIntermediateDirectories: true) // Safe: directory may already exist; error means index cannot be persisted (works in-memory)
         self.persistencePath = embeddingsDir.appendingPathComponent("embedding_index.json")
 
         // Load persisted data asynchronously

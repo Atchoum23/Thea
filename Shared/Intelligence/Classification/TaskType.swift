@@ -155,6 +155,7 @@ public enum TaskType: String, Codable, Sendable, CaseIterable {
 
 // MARK: - Response Length
 
+/// Expected length category for a model response, used to set max token limits.
 public enum ResponseLength: String, Codable, Sendable {
     case short   // < 100 tokens
     case medium  // 100-500 tokens

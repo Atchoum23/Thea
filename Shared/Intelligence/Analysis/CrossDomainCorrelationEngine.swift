@@ -141,7 +141,7 @@ final class CrossDomainCorrelationEngine {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Thea", isDirectory: true)
             .appendingPathComponent("Correlations", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true) // Safe: directory may already exist; error means storage unavailable (data simply not persisted)
         return dir
     }()
 

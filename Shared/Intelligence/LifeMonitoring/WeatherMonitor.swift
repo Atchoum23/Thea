@@ -173,8 +173,8 @@ public final class WeatherMonitor: NSObject, Sendable {
 
     private func loadPersistedSnapshot() {
         guard FileManager.default.fileExists(atPath: Self.persistenceURL.path),
-              let data = try? Data(contentsOf: Self.persistenceURL),
-              let snapshot = try? JSONDecoder().decode(WeatherSnapshot.self, from: data) else { return }
+              let data = try? Data(contentsOf: Self.persistenceURL), // Safe: file read failure → start with no cached snapshot; non-fatal
+              let snapshot = try? JSONDecoder().decode(WeatherSnapshot.self, from: data) else { return } // Safe: corrupt cache → start fresh from next API fetch
         currentWeather = snapshot
         logger.info("Loaded persisted weather snapshot")
     }
