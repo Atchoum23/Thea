@@ -272,7 +272,7 @@
                     // Start button
                     Button(action: {
                         Task {
-                            _ = try? await modelManager.loadModel(model)
+                            _ = try? await modelManager.loadModel(model) // Safe: model load failure → button returns to idle state; user can retry; non-fatal
                         }
                     }) {
                         Label("Start Model", systemImage: "play.circle")

@@ -211,7 +211,7 @@ public actor UIElementInspector {
             var elements: [UIElementInfo] = []
 
             for child in childArray {
-                if let info = try? await getElementInfo(child) {
+                if let info = try? await getElementInfo(child) { // Safe: inaccessible AX element → skip; other children still inspected
                     elements.append(info)
                     // Recursively get children
                     let childElements = try await getChildElements(of: child)

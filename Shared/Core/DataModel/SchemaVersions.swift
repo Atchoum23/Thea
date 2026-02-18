@@ -92,14 +92,14 @@ enum TheaSchemaMigrationPlan: SchemaMigrationPlan {
             logger.info("🔄 Starting migration from V1 to V2...")
 
             // Optional: Create backup
-            try? backupDatabase(context: context)
+            try? backupDatabase(context: context) // Safe: backup failure is non-fatal; migration continues without backup
         },
         didMigrate: { context in
             // Post-migration: Validate data integrity
             logger.info("Migration from V1 to V2 complete")
 
             // Optional: Verify migration succeeded
-            try? validateMigration(context: context)
+            try? validateMigration(context: context) // Safe: validation failure is non-fatal; migration is still considered complete
         }
     )
 

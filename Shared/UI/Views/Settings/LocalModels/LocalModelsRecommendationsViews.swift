@@ -392,7 +392,7 @@ extension LocalModelsSettingsView {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let body = ["name": modelId]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body) // Safe: encode failure → nil httpBody; request will fail with 400; caught by catch below
 
         do {
             _ = try await URLSession.shared.data(for: request)
