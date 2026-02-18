@@ -227,6 +227,8 @@ public final class CodeExecutionVerifier {
 
 // MARK: - JavaScript Engine (JavaScriptCore)
 
+// @unchecked Sendable: stateless engine — a fresh JSContext is created per execute() call on a
+// background DispatchQueue; no shared mutable state between concurrent invocations
 /// JavaScript execution using built-in JavaScriptCore
 final class JavaScriptEngine: @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.ai", category: "JavaScriptEngine")
@@ -303,6 +305,8 @@ final class JavaScriptEngine: @unchecked Sendable {
 // MARK: - Swift Execution Engine (macOS only)
 
 #if os(macOS)
+// @unchecked Sendable: spawns a new Process per execute() call; logger is thread-safe;
+// no shared mutable state — each invocation is fully isolated via Process API
 /// Swift execution using swift command
 final class SwiftExecutionEngine: @unchecked Sendable {
     private let logger = Logger(subsystem: "com.thea.ai", category: "SwiftExecutionEngine")

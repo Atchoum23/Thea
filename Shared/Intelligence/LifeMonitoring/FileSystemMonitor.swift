@@ -18,6 +18,8 @@ public protocol FileSystemMonitorDelegate: AnyObject, Sendable {
 
 // MARK: - File System Monitor
 
+// @unchecked Sendable: FSEventStream callbacks arrive on eventQueue (serial DispatchQueue);
+// all mutable state (eventStream, isRunning, recentEvents) is exclusively accessed on that queue
 /// Monitors file system changes on macOS
 public final class FileSystemMonitor: @unchecked Sendable {
     private let logger = Logger(subsystem: "ai.thea.app", category: "FileSystemMonitor")

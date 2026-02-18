@@ -695,6 +695,8 @@ public actor VoiceProactivity {
 
 // MARK: - Speech Delegate Helper
 
+// @unchecked Sendable: NSObject subclass bridging AVSpeechSynthesizerDelegate; AVSpeechSynthesizer
+// dispatches didFinish on main thread; stored completion closure is called from that callback only
 private class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
     let completion: () -> Void
 

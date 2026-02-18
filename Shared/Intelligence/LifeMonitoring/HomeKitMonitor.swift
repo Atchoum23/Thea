@@ -348,6 +348,8 @@ public class HomeKitMonitor: NSObject, ObservableObject {
 // MARK: - Accessory Delegate
 
 #if canImport(HomeKit)
+    // @unchecked Sendable: NSObject subclass required for HMAccessoryDelegate; HomeKit delivers
+    // callbacks on its own private queue; lastKnownValues only mutated from those callbacks
     private final class AccessoryDelegate: NSObject, HMAccessoryDelegate, @unchecked Sendable {
         let accessoryId: String
         let homeName: String

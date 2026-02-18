@@ -1,4 +1,5 @@
 @preconcurrency import SwiftData
+import OSLog
 import SwiftUI
 
 // MARK: - macOS Chat Detail View
@@ -113,7 +114,10 @@ struct MacChatDetailView: View {
                                 var metadata = conversation.metadata
                                 metadata.systemPrompt = nil
                                 conversation.metadata = metadata
-                                try? modelContext.save()
+                                do { try modelContext.save() } catch {
+                                    Logger(subsystem: "ai.thea.app", category: "SwiftData")
+                                        .error("Save failed clearing system prompt: \(error)")
+                                }
                             }
                             .foregroundStyle(.secondary)
                             .accessibilityLabel("Clear system prompt")
@@ -124,7 +128,10 @@ struct MacChatDetailView: View {
                                 var metadata = conversation.metadata
                                 metadata.systemPrompt = systemPromptText.isEmpty ? nil : systemPromptText
                                 conversation.metadata = metadata
-                                try? modelContext.save()
+                                do { try modelContext.save() } catch {
+                                    Logger(subsystem: "ai.thea.app", category: "SwiftData")
+                                        .error("Save failed storing system prompt: \(error)")
+                                }
                                 showingSystemPrompt = false
                             }
                             .buttonStyle(.borderedProminent)
