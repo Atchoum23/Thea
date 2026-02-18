@@ -124,7 +124,7 @@ extension PredictiveLifeEngine {
     /// If no saved accuracy exists, defaults to 0.7.
     func loadState() {
         if let historyData = UserDefaults.standard.data(forKey: Self.predictionHistoryKey),
-           let history = try? JSONDecoder().decode([LifePrediction].self, from: historyData) {
+           let history = try? JSONDecoder().decode([LifePrediction].self, from: historyData) { // Safe: corrupt cache → start fresh; accuracy defaults to 0.7 below
             predictionHistory = history
         }
         predictionAccuracy = UserDefaults.standard.double(forKey: Self.accuracyKey)
