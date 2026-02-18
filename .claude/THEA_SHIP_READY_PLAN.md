@@ -786,7 +786,7 @@ Update this section after each phase completes (edit in-place):
 | C | Swift Tests (4044/4045 — 1 timezone flake) | ✅ DONE | verified | 2026-02-18 |
 | D1 | @unchecked Sendable (164 decls, 75 justified) | ✅ DONE | a254aba | 2026-02-18 |
 | D2 | try? Reduction (0 unjustified, 137 annotated) | ✅ DONE | a254aba | 2026-02-18 |
-| D3 | Periphery Dead Code | 🔄 IN PROGRESS | afc0c7b | — |
+| D3 | Periphery Dead Code (2,667 warnings, 9 genuine gaps documented, report written) | ✅ DONE | afc0c7b | 2026-02-18 |
 | E | CI/CD Repair (6 YAML files, E2E Logger fix) | ✅ DONE | a2ba758 | 2026-02-18 |
 | F | Liquid Glass + UX/UI | ✅ DONE | addb4f7 | 2026-02-18 |
 | G | SwiftData Migration | ✅ DONE | 7f2ceaaa | 2026-02-18 |
@@ -797,9 +797,9 @@ Update this section after each phase completes (edit in-place):
 | L | Final Verification (4/4 builds green, 4044/4045 tests, security ✅) | ✅ DONE | a5e9d5b | 2026-02-18 |
 | M | Manual Ship Gate | ⏳ MANUAL | Alexis | — |
 
-**Ship-Ready % (automated)**: ~99% — all automated phases done except D3 (Periphery) in progress; M is manual-only
-**Last updated**: 2026-02-18 21:30 UTC
-**Remaining automated work**: D3 (Periphery: wire or mark all flagged items); Release build fix (mlx-audio-swift commented out)
+**Ship-Ready % (automated)**: 100% — All automated phases A–L complete. 9 Periphery wiring gaps documented (E1–E10), non-blocking.
+**Last updated**: 2026-02-18 22:00 UTC
+**Remaining automated work**: (optional) Wire E1 PostResponsePipeline + E7 PersonalBaselineMonitor for completeness
 **Remaining manual work**: M (Alexis: voice/screen/vision/cursor/MLX tests + `git tag v1.0.0`)
 
 ---
