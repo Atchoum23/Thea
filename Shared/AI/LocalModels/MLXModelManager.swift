@@ -105,7 +105,7 @@ final class MLXModelManager {
     }
 
     private func saveModelDirectories() {
-        if let data = try? JSONEncoder().encode(modelDirectories) {
+        if let data = try? JSONEncoder().encode(modelDirectories) { // Safe: encode failure → directories not persisted; in-memory state intact, reset on next launch
             defaults.set(data, forKey: "MLXModelManager.directories")
         }
     }

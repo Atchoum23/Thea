@@ -175,6 +175,7 @@ public struct AutonomousAction: Identifiable, Sendable {
     public let rollback: (@Sendable () async throws -> Void)?
     public let createdAt: Date
 
+    /// How the action received user approval.
     public enum ApprovalType: String, Sendable {
         case userConfirmation
         case biometricAuth
@@ -182,6 +183,7 @@ public struct AutonomousAction: Identifiable, Sendable {
         case none
     }
 
+    /// The outcome of an executed autonomous action.
     public struct ActionResult: Sendable {
         public let success: Bool
         public let message: String
@@ -227,6 +229,7 @@ public struct THEAPendingAction: Identifiable {
     public let reason: String
     public var status: Status
 
+    /// Current approval state of the pending action.
     public enum Status: String {
         case pending
         case approved
@@ -248,6 +251,7 @@ public struct THEAPendingAction: Identifiable {
 // MARK: - Autonomy Controller
 
 /// Controls THEA's autonomous behavior and task execution
+/// Central controller for THEA's autonomous task execution, managing approvals and action history.
 @MainActor
 public final class AutonomyController: ObservableObject {
     public static let shared = AutonomyController()
@@ -574,17 +578,20 @@ public final class AutonomyController: ObservableObject {
 
 // MARK: - Supporting Types
 
+/// The outcome of evaluating whether an action should proceed autonomously or require approval.
 public enum ActionDecision: Sendable {
     case autoExecute
     case requiresApproval(reason: String)
 }
 
+/// A record of an action that was executed, with timing and result details.
 public struct ExecutedAction {
     let action: AutonomousAction
     let result: AutonomousAction.ActionResult
     let rollback: @Sendable () async throws -> Void
 }
 
+/// A persistable history entry for a completed autonomous action.
 public struct AutonomyActionHistoryEntry: Identifiable, Codable, Sendable {
     public let id: UUID
     public let category: THEAActionCategory

@@ -64,7 +64,7 @@ extension PredictivePreloader {
     func loadPersistedState() {
         // Load transition matrix
         if let data = UserDefaults.standard.data(forKey: transitionMatrixKey),
-           let decoded = try? JSONDecoder().decode([String: [String: Double]].self, from: data) {
+           let decoded = try? JSONDecoder().decode([String: [String: Double]].self, from: data) { // Safe: corrupt cache → start with empty Markov matrix; learns from scratch
             // Convert string keys back to TaskType
             for (fromKey, toDict) in decoded {
                 if let fromTask = TaskType(rawValue: fromKey) {
@@ -80,7 +80,7 @@ extension PredictivePreloader {
 
         // Load time-of-day patterns
         if let data = UserDefaults.standard.data(forKey: timeOfDayPatternsKey),
-           let decoded = try? JSONDecoder().decode([Int: [String: Double]].self, from: data) {
+           let decoded = try? JSONDecoder().decode([Int: [String: Double]].self, from: data) { // Safe: corrupt cache → start with empty time-of-day patterns; learns from scratch
             for (hour, taskDict) in decoded {
                 timeOfDayPatterns[hour] = [:]
                 for (taskKey, value) in taskDict {
@@ -93,7 +93,7 @@ extension PredictivePreloader {
 
         // Load recent tasks
         if let data = UserDefaults.standard.data(forKey: recentTasksKey),
-           let decoded = try? JSONDecoder().decode([TaskTypeTimestamp].self, from: data) {
+           let decoded = try? JSONDecoder().decode([TaskTypeTimestamp].self, from: data) { // Safe: corrupt cache → start with empty task history; learns from current session
             recentTasks = decoded
         }
 
