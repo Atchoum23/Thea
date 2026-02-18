@@ -231,6 +231,9 @@ struct MessageMetadata: Codable, Sendable {
     // Verification confidence score (0.0-1.0) from ConfidenceSystem
     var confidence: Double?
 
+    // Hallucination detection flags from ConfidenceSystem.detectHallucinations
+    var hallucinationFlags: [String]?
+
     // Token usage (input tokens counted before send, output tokens from response)
     var inputTokens: Int?
 
