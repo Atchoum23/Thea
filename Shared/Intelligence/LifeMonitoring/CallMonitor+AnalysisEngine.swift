@@ -94,6 +94,7 @@ actor CallAnalysisEngine {
         ]
 
         for pattern in patterns {
+            // Safe: compile-time known pattern; invalid regex → skip this pattern (no matches)
             if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
                 let nsText = text as NSString
                 let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
@@ -138,6 +139,7 @@ actor CallAnalysisEngine {
         ]
 
         for (pattern, priority) in patterns {
+            // Safe: compile-time known pattern; invalid regex → skip this pattern (no matches)
             if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
                 let nsText = text as NSString
                 let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
@@ -191,6 +193,7 @@ actor CallAnalysisEngine {
         ]
 
         for pattern in patterns {
+            // Safe: compile-time known pattern; invalid regex → skip this pattern (no matches)
             if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
                 let nsText = text as NSString
                 let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
@@ -237,6 +240,7 @@ actor CallAnalysisEngine {
         ]
 
         for (pattern, type) in patterns {
+            // Safe: compile-time known pattern; invalid regex → skip this pattern (no matches)
             if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
                 let nsText = text as NSString
                 let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
@@ -276,6 +280,7 @@ actor CallAnalysisEngine {
         ]
 
         for pattern in patterns {
+            // Safe: compile-time known pattern; invalid regex → skip this pattern (no matches)
             if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
                 let nsText = text as NSString
                 let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
@@ -401,6 +406,7 @@ actor CallAnalysisEngine {
         ]
 
         for pattern in patterns {
+            // Safe: compile-time known pattern; invalid regex → skip this pattern (no matches)
             if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
                 let nsText = text as NSString
                 let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
