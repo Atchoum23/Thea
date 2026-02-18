@@ -149,6 +149,7 @@
                         Image(systemName: "ellipsis.circle")
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Manage quick commands")
                 }
 
                 ScrollView {
@@ -190,6 +191,7 @@
                         Image(systemName: "plus")
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("New terminal session")
                 }
 
                 ScrollView {
