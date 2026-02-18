@@ -423,8 +423,8 @@
         }
 
         func loadCommandHistory() -> [TerminalCommand] {
-            guard let data = try? Data(contentsOf: commandHistoryURL),
-                  let history = try? JSONDecoder().decode([TerminalCommand].self, from: data)
+            guard let data = try? Data(contentsOf: commandHistoryURL), // Safe: file missing → return empty history; non-fatal
+                  let history = try? JSONDecoder().decode([TerminalCommand].self, from: data) // Safe: corrupt history → return empty; rebuilt from current session
             else {
                 return []
             }
