@@ -240,6 +240,12 @@ struct MessageMetadata: Codable, Sendable {
     // Follow-up suggestions generated after AI response
     var followUpSuggestions: [FollowUpSuggestion]?
 
+    /// Raw Anthropic content blocks (JSON-encoded `[[String: Any]]`) for assistant messages
+    /// that contain extended thinking. The Anthropic API requires these blocks to be passed
+    /// back verbatim in subsequent turns — they must never be stripped or replaced with
+    /// plain text when thinking was active. Nil for messages without thinking blocks.
+    var rawContentBlocksData: Data?
+
     init(
         finishReason: String? = nil,
         systemFingerprint: String? = nil,
@@ -250,7 +256,8 @@ struct MessageMetadata: Codable, Sendable {
         respondingDeviceType: String? = nil,
         confidence: Double? = nil,
         inputTokens: Int? = nil,
-        followUpSuggestions: [FollowUpSuggestion]? = nil
+        followUpSuggestions: [FollowUpSuggestion]? = nil,
+        rawContentBlocksData: Data? = nil
     ) {
         self.finishReason = finishReason
         self.systemFingerprint = systemFingerprint
@@ -262,6 +269,7 @@ struct MessageMetadata: Codable, Sendable {
         self.confidence = confidence
         self.inputTokens = inputTokens
         self.followUpSuggestions = followUpSuggestions
+        self.rawContentBlocksData = rawContentBlocksData
     }
 }
 
