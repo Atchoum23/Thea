@@ -560,15 +560,22 @@ final class MediaPlayer: ObservableObject {
             let languages = try await asset.load(.availableChapterLocales)
             guard let locale = languages.first else { return [] }
             let groups = try await asset.loadChapterMetadataGroups(bestMatchingPreferredLanguages: [locale.identifier])
-            return groups.map { group in
-                let title = group.items.compactMap { item -> String? in
-                    guard item.commonKey == .commonKeyTitle else { return nil }
-                    return item.stringValue
-                }.first ?? "Chapter"
+            var chapters: [MediaChapter] = []
+            for group in groups {
+                // Load title string using async API (stringValue deprecated in macOS 13+)
+                let titleItems = group.items.filter { $0.commonKey == .commonKeyTitle }
+                var title = "Chapter"
+                for item in titleItems {
+                    if let s = try? await item.load(.stringValue) {
+                        title = s
+                        break
+                    }
+                }
                 let start = CMTimeGetSeconds(group.timeRange.start)
                 let end = start + CMTimeGetSeconds(group.timeRange.duration)
-                return MediaChapter(title: title, startTime: start, endTime: end)
+                chapters.append(MediaChapter(title: title, startTime: start, endTime: end))
             }
+            return chapters
         } catch {
             return []
         }

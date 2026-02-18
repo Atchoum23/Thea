@@ -13,28 +13,30 @@ struct MediaServerView: View {
     @State private var showError = false
 
     var body: some View {
-        #if os(macOS)
-        HSplitView {
-            sidebarContent
-                .frame(minWidth: 200, maxWidth: 280)
-            libraryContent
-                .frame(minWidth: 400)
-        }
-        #else
-        NavigationStack {
-            libraryList
-                .navigationTitle("Media Server")
-                .toolbar {
-                    ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            showAddFolder = true
-                        } label: {
-                            Image(systemName: "plus")
+        Group {
+            #if os(macOS)
+            HSplitView {
+                sidebarContent
+                    .frame(minWidth: 200, maxWidth: 280)
+                libraryContent
+                    .frame(minWidth: 400)
+            }
+            #else
+            NavigationStack {
+                libraryList
+                    .navigationTitle("Media Server")
+                    .toolbar {
+                        ToolbarItem(placement: .primaryAction) {
+                            Button {
+                                showAddFolder = true
+                            } label: {
+                                Image(systemName: "plus")
+                            }
                         }
                     }
-                }
+            }
+            #endif
         }
-        #endif
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) {}
         } message: {
