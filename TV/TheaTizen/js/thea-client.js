@@ -371,7 +371,7 @@ var TheaClient = (function () {
             body.familySafe = true;
         }
 
-        apiRequest('POST', '/chat/send', body)
+        apiRequest('POST', '/chat/message', body)
             .then(function (res) {
                 if (res && res.response) {
                     var assistantMsg = {
