@@ -11,6 +11,8 @@ import Speech
 
 // MARK: - Audio Buffer Wrapper
 
+// @unchecked Sendable: AVAudioPCMBuffer is not Sendable; used for real-time audio processing
+// where copying would be too slow; caller must ensure the buffer is not used after the transfer
 /// Wrapper to make AVAudioPCMBuffer sendable across actor boundaries
 /// Safety: The buffer should only be accessed while it's still valid
 /// This is used for real-time audio processing where copying would be too slow
