@@ -530,6 +530,7 @@
 		39457C5A56548874DFAA2D3F /* NotificationObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1054FC5B0A1436C178BE17A /* NotificationObserver.swift */; };
 		394E3A2BED6044BE6845A2E1 /* QuerySuggestionOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6BDEA69B67DAD3E651D9340 /* QuerySuggestionOverlay.swift */; };
 		394FA9E47D3C195534CA654B /* PermissionsManagerChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0C355093114FFE04F76749D /* PermissionsManagerChecks.swift */; };
+		39677850638E35B31958A4A7 /* LiveGuidanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E3F0DE037BD3B5042EE6B75 /* LiveGuidanceSettingsView.swift */; };
 		39768A3B19B7C624B1823B9C /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC3A413E9AB463D1B73AA95E /* HomeViewModel.swift */; };
 		3998E1DC34679C450553C454 /* DeadlineIntelligence+Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = B941480BA226458F5B182EF0 /* DeadlineIntelligence+Types.swift */; };
 		39CC6E3F8EC78B6A60EFDCBC /* RemoteInventoryMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E9AE3EF88A2473739C8DCA /* RemoteInventoryMessages.swift */; };
@@ -1710,6 +1711,7 @@
 		C3E3AF72C499CB0D220BA8B7 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AA4B2213269B451EA532382 /* FeatureFlags.swift */; };
 		C3F6724F304421DA49C0DCEC /* CrossDeviceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7710713218AA8C2E59D66B3 /* CrossDeviceService.swift */; };
 		C3F88CDF91D6011E74A43824 /* FocusModeShortcutsIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB11CBC6AF2E42B7D4CC987A /* FocusModeShortcutsIntegration.swift */; };
+		C4603A0556A96A026A5DCB0D /* LocalVisionGuidance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F53601B07434C4E982A2B448 /* LocalVisionGuidance.swift */; };
 		C473CE34F9A69073E0CFF22C /* CalendarIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6CEC0EE99099390E972A4E5 /* CalendarIntegration.swift */; };
 		C483DBB904D4AFC18BA588B9 /* ProjectKnowledge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CFB0818D878F283B3234A6D /* ProjectKnowledge.swift */; };
 		C4B70139AA6AF6A3716F6EF9 /* MapsIntegration+Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D76E3FDD603DE80F9DAAB5E /* MapsIntegration+Models.swift */; };
@@ -2081,6 +2083,7 @@
 		EE1A4FAAD99E2CE905D8A1BD /* UnifiedSuggestionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B008A8ECD107BA625AEA7F /* UnifiedSuggestionCoordinator.swift */; };
 		EE1CF9E21924DD33600174BD /* ContextualMultiArmedBandit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFDB048804A6C8CC1D372B /* ContextualMultiArmedBandit.swift */; };
 		EE201BA26121C1D1F6C5E72C /* IntelligenceOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F96EF19C9806E7825C16053B /* IntelligenceOrchestrator.swift */; };
+		EE24E2D878FE5BC6E159E46A /* LiveGuidanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E3F0DE037BD3B5042EE6B75 /* LiveGuidanceSettingsView.swift */; };
 		EE4E4E84B075C3A8A480DE62 /* HealthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20FFEC451BD40BDCEF955614 /* HealthModels.swift */; };
 		EE61FE704D12D216B0DF8C81 /* AIProvidersSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C9098F568BA3E6811318B4C /* AIProvidersSettingsView.swift */; };
 		EE72CA99A6EA84B8191508BF /* IncomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 270E9C14561580AE91CD94C0 /* IncomeViewModel.swift */; };
@@ -2184,6 +2187,7 @@
 		FB572C7EA44B4D745E533151 /* ImageIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFECAC467C52964F17DF3D8B /* ImageIntelligence.swift */; };
 		FBA2FCB0D6986EBA347D3606 /* VoiceActivationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 176BD7CF6262029435705C7D /* VoiceActivationEngine.swift */; };
 		FBB77FF3A1F892DE83F607CE /* FocusModeIntelligence+VIP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 290923DAE98B50F9E1709BA2 /* FocusModeIntelligence+VIP.swift */; };
+		FBBF353AC520A27B5132A9BD /* LocalVisionGuidance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F53601B07434C4E982A2B448 /* LocalVisionGuidance.swift */; };
 		FBD197765019C520294C1E0E /* SafetyGuardrails+Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68F46D925BAB5788860C9A15 /* SafetyGuardrails+Core.swift */; };
 		FBEC56CA11AD36C306D97246 /* APIGenerator+OpenAPIParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33DA88E7A998B1E9DEF4B971 /* APIGenerator+OpenAPIParsing.swift */; };
 		FC35BB558BC42CE5F92FB478 /* BackupManager+ExportImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30810571DD5132CF64112C8D /* BackupManager+ExportImport.swift */; };
@@ -2988,6 +2992,7 @@
 		7DB879C3AB26803AC14A800C /* ThrottlingEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThrottlingEngine.swift; sourceTree = "<group>"; };
 		7E1037E9CC13A3597A08FFBF /* ForegroundAppMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForegroundAppMonitor.swift; sourceTree = "<group>"; };
 		7E1D6EB42E995C87638173EE /* VerificationPipelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerificationPipelineTests.swift; sourceTree = "<group>"; };
+		7E3F0DE037BD3B5042EE6B75 /* LiveGuidanceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveGuidanceSettingsView.swift; sourceTree = "<group>"; };
 		7E4D20B8CC5B942F10499D9C /* TestGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestGenerator.swift; sourceTree = "<group>"; };
 		7E58FF99D17021B04ECB5DD6 /* MultiModalCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiModalCoordinator.swift; sourceTree = "<group>"; };
 		7E84DFD47051BC4063B6D3CC /* TheaAgentRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaAgentRunner.swift; sourceTree = "<group>"; };
@@ -3543,6 +3548,7 @@
 		F4AC31159725D5E6CDD80F0A /* ConversationContextManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationContextManager.swift; sourceTree = "<group>"; };
 		F4B9081D50C18C318D7E018E /* PriorityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriorityManager.swift; sourceTree = "<group>"; };
 		F50BBA77C706BDFACD80323A /* CompilerError+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CompilerError+Convenience.swift"; sourceTree = "<group>"; };
+		F53601B07434C4E982A2B448 /* LocalVisionGuidance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalVisionGuidance.swift; sourceTree = "<group>"; };
 		F5576ADFDD39D4DA9B03E286 /* OpenClawBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawBridge.swift; sourceTree = "<group>"; };
 		F5E02EA6AECE36D7E34C5540 /* DocumentScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentScannerView.swift; sourceTree = "<group>"; };
 		F5E6B4F13AFFD1C1A5293E53 /* ChatInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInputView.swift; sourceTree = "<group>"; };
@@ -3822,6 +3828,14 @@
 				7649196BB0D02A1BC30277E5 /* TouchBarSupport.swift */,
 			);
 			path = macOS;
+			sourceTree = "<group>";
+		};
+		0876DEB592887564C0297096 /* LiveGuidance */ = {
+			isa = PBXGroup;
+			children = (
+				F53601B07434C4E982A2B448 /* LocalVisionGuidance.swift */,
+			);
+			path = LiveGuidance;
 			sourceTree = "<group>";
 		};
 		09EE860348B8C7B5AC34071B /* PromptEngineering */ = {
@@ -4342,6 +4356,7 @@
 				B4C5F97877D99A75F25FCF8C /* LearningDashboardView.swift */,
 				EE1AD68BD013E56DBC8A5D91 /* LifeJournalView.swift */,
 				60B75DBB338713F2D295F771 /* LifeTrackingSettingsView.swift */,
+				7E3F0DE037BD3B5042EE6B75 /* LiveGuidanceSettingsView.swift */,
 				50DB63898CAA005F46BE1F89 /* MemorySettingsView.swift */,
 				6511D0C3411ADF78113F30A3 /* MessagingHubView.swift */,
 				EED750FD427E77BFE04F76D0 /* ModelSettingsView.swift */,
@@ -4713,6 +4728,7 @@
 				E98F91C93B907061FA432799 /* Discovery */,
 				D61A7BFA090679439FD7521B /* Documents */,
 				E564EA5CB1C47DDA6475E25E /* Learning */,
+				0876DEB592887564C0297096 /* LiveGuidance */,
 				00E1EC61BE70B60E463F9309 /* LocalModels */,
 				73C1044E233A22EF71EFCC3D /* ModelSelection */,
 				72F1EED3840BD182A4750188 /* MultiModal */,
@@ -8261,6 +8277,7 @@
 				D5F04F5D59D9F407DF12E6E8 /* LiveAutoCorrect.swift in Sources */,
 				90D028C63C9E65B6A18EFD55 /* LiveAutoCorrectTypes.swift in Sources */,
 				684A0E1B844F643C0A83E3F7 /* LiveAutoCorrectView.swift in Sources */,
+				EE24E2D878FE5BC6E159E46A /* LiveGuidanceSettingsView.swift in Sources */,
 				E9A3C167755F60644D077374 /* LocalModelProvider.swift in Sources */,
 				11ACBA1FB551B2978E7F194F /* LocalModelProviderChat.swift in Sources */,
 				524C0881755BB2B0DF0CCE8C /* LocalModelProviderTypes.swift in Sources */,
@@ -8270,6 +8287,7 @@
 				CFB14317449EBEAC1E317E48 /* LocalModelRecommendationEngine+Scanning.swift in Sources */,
 				B16E1DA8029F4F75E83C12AF /* LocalModelRecommendationEngine.swift in Sources */,
 				80E9B68D96EEB49215008625 /* LocalModelRecommendationTypes.swift in Sources */,
+				FBBF353AC520A27B5132A9BD /* LocalVisionGuidance.swift in Sources */,
 				82D66EB9406BE1A064A202F0 /* LocalizationManager.swift in Sources */,
 				96266D488EFE32382FCC592C /* LocationContextProvider.swift in Sources */,
 				023BDDEAB2303FBB4A941EE1 /* LocationTrackingManager.swift in Sources */,
@@ -9401,6 +9419,7 @@
 				215A54C185BCE78D94F9D179 /* LiveAutoCorrect.swift in Sources */,
 				E5F84838AB1F133AF6E9EA64 /* LiveAutoCorrectTypes.swift in Sources */,
 				078957F9E78E2E17433EE598 /* LiveAutoCorrectView.swift in Sources */,
+				39677850638E35B31958A4A7 /* LiveGuidanceSettingsView.swift in Sources */,
 				62233E48B1B94614B660992C /* LocalModelProvider.swift in Sources */,
 				564E34BD7D4BF1E8145A841F /* LocalModelProviderChat.swift in Sources */,
 				FC70193C67A14AB3BD4F475B /* LocalModelProviderTypes.swift in Sources */,
@@ -9410,6 +9429,7 @@
 				DF183DB849CB4A78902EA0C4 /* LocalModelRecommendationEngine+Scanning.swift in Sources */,
 				104E797F8FB24B15C00A9F40 /* LocalModelRecommendationEngine.swift in Sources */,
 				4C8A51D6BEE6347D6F696FC3 /* LocalModelRecommendationTypes.swift in Sources */,
+				C4603A0556A96A026A5DCB0D /* LocalVisionGuidance.swift in Sources */,
 				01849EADB67552298B0C7A24 /* LocalizationManager.swift in Sources */,
 				56B27E95A7B1BB4D8FC59EFD /* LocationContextProvider.swift in Sources */,
 				BCB9C77527513F7E895783D6 /* LocationTrackingManager.swift in Sources */,

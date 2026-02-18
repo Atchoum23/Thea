@@ -5,6 +5,12 @@
 // Proactively speaks to user in appropriate contexts (driving, etc.)
 // Can relay commands through Mac when iPhone is locked
 // Supports multiple messaging platforms (iMessage, WhatsApp, Telegram)
+//
+// Public API is split into extension files:
+// - VoiceProactivity+Interactions.swift: queueInteraction, speakImmediate, askQuestion, sendMessage,
+//   startMessagingFlow, readNotifications, startNavigation
+// - VoiceProactivity+Relay.swift: canSendDirectly, sendMessageDirectly, relayThroughMac, determinePlatform
+// - VoiceProactivity+Convenience.swift: notifyDeadline, notifyMessage, askPreference
 
 import Foundation
 import AVFoundation
@@ -21,7 +27,7 @@ import UIKit
 
 /// Main engine for proactive voice interactions
 public actor VoiceProactivity {
-    private let logger = Logger(subsystem: "ai.thea.app", category: "VoiceProactivity")
+    let logger = Logger(subsystem: "ai.thea.app", category: "VoiceProactivity")
     // MARK: - Singleton
 
     public static let shared = VoiceProactivity()
@@ -47,31 +53,31 @@ public actor VoiceProactivity {
         public init() {}
     }
 
-    // MARK: - Properties
+    // MARK: - Properties (internal for extension access)
 
-    private var configuration: Configuration
-    private var currentContext: VoiceContext = .unknown
-    private var isListening = false
-    private var isSpeaking = false
-    private var pendingInteractions: [VoiceInteraction] = []
-    private var activeInteraction: VoiceInteraction?
-    private var interactionHistory: [VoiceInteraction] = []
+    var configuration: Configuration
+    var currentContext: VoiceContext = .unknown
+    var isListening = false
+    var isSpeaking = false
+    var pendingInteractions: [VoiceInteraction] = []
+    var activeInteraction: VoiceInteraction?
+    var interactionHistory: [VoiceInteraction] = []
 
     // Speech
-    private let synthesizer = AVSpeechSynthesizer()
+    let synthesizer = AVSpeechSynthesizer()
     #if canImport(Speech)
-    private var recognizer: SFSpeechRecognizer?
-    private var audioEngine: AVAudioEngine?
-    private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
-    private var recognitionTask: SFSpeechRecognitionTask?
+    var recognizer: SFSpeechRecognizer?
+    var audioEngine: AVAudioEngine?
+    var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
+    var recognitionTask: SFSpeechRecognitionTask?
     #endif
 
     // Callbacks
-    private var onContextChanged: ((VoiceContext) -> Void)?
-    private var onInteractionDelivered: ((VoiceInteraction) -> Void)?
-    private var onResponseReceived: ((VoiceInteraction, VoiceResponse) -> Void)?
-    private var onWakeWordDetected: (() -> Void)?
-    private var onDeviceRelayResult: ((DeviceRelayResult) -> Void)?
+    var onContextChanged: ((VoiceContext) -> Void)?
+    var onInteractionDelivered: ((VoiceInteraction) -> Void)?
+    var onResponseReceived: ((VoiceInteraction, VoiceResponse) -> Void)?
+    var onWakeWordDetected: (() -> Void)?
+    var onDeviceRelayResult: ((DeviceRelayResult) -> Void)?
 
     // MARK: - Initialization
 
@@ -149,179 +155,7 @@ public actor VoiceProactivity {
         currentContext
     }
 
-    // MARK: - Voice Interactions
-
-    /// Queue a voice interaction
-    public func queueInteraction(_ interaction: VoiceInteraction) async {
-        pendingInteractions.append(interaction)
-        pendingInteractions.sort { $0.priority > $1.priority }
-
-        await processPendingInteractions()
-    }
-
-    /// Speak immediately (bypasses queue)
-    public func speakImmediate(
-        _ message: String,
-        priority: VoiceInteractionPriority = .urgent
-    ) async {
-        let interaction = VoiceInteraction(
-            type: .alert,
-            priority: priority,
-            message: message
-        )
-
-        await deliverInteraction(interaction)
-    }
-
-    /// Ask a question and wait for response
-    public func askQuestion(
-        _ question: String,
-        expectedResponses: [VoiceInteraction.ExpectedResponse],
-        priority: VoiceInteractionPriority = .normal,
-        timeout: TimeInterval = 10
-    ) async -> VoiceResponse? {
-        let interaction = VoiceInteraction(
-            type: .question,
-            priority: priority,
-            message: question,
-            expectedResponses: expectedResponses,
-            expiresIn: timeout
-        )
-
-        await deliverInteraction(interaction)
-
-        // Wait for response
-        return await waitForResponse(interaction: interaction, timeout: timeout)
-    }
-
-    /// Send message via voice interface
-    public func sendMessage(
-        to recipient: String,
-        recipientName: String?,
-        message: String,
-        platform: MessagingPlatform
-    ) async -> Bool {
-        let relay = MessageRelay(
-            platform: platform,
-            recipient: recipient,
-            recipientName: recipientName,
-            message: message
-        )
-
-        // Try to send directly if possible
-        if await canSendDirectly(platform: platform) {
-            return await sendMessageDirectly(relay)
-        }
-
-        // Otherwise relay through Mac
-        if configuration.macRelayEnabled {
-            return await relayThroughMac(.sendMessage(relay))
-        }
-
-        // Confirm message via voice
-        let name = recipientName ?? recipient
-        await speakImmediate("I'll prepare a message to \(name) on \(platform.displayName). The message is: \(message). Would you like me to send it?")
-
-        return false // Requires user confirmation
-    }
-
-    // MARK: - Driving Mode Helpers
-
-    /// Initiate a conversation-style messaging flow
-    public func startMessagingFlow() async {
-        // Ask who to message
-        let whoResponse = await askQuestion(
-            "Who would you like to message?",
-            expectedResponses: [],
-            priority: .high,
-            timeout: 15
-        )
-
-        guard let recipient = whoResponse?.transcription else {
-            await speakImmediate("I didn't catch that. Let me know when you want to send a message.")
-            return
-        }
-
-        // Ask what platform
-        let platformResponse = await askQuestion(
-            "Would you like to use iMessage, WhatsApp, or Telegram?",
-            expectedResponses: [
-                VoiceInteraction.ExpectedResponse(keywords: ["imessage", "message", "text"], action: "imessage"),
-                VoiceInteraction.ExpectedResponse(keywords: ["whatsapp", "whats app"], action: "whatsapp"),
-                VoiceInteraction.ExpectedResponse(keywords: ["telegram"], action: "telegram")
-            ],
-            priority: .high
-        )
-
-        let platform = determinePlatform(from: platformResponse)
-
-        // Ask for the message
-        let messageResponse = await askQuestion(
-            "What would you like to say?",
-            expectedResponses: [],
-            priority: .high,
-            timeout: 30
-        )
-
-        guard let message = messageResponse?.transcription else {
-            await speakImmediate("I didn't catch the message. Let's try again later.")
-            return
-        }
-
-        // Confirm and send
-        let confirmResponse = await askQuestion(
-            "I'll send '\(message)' to \(recipient) via \(platform.displayName). Should I send it?",
-            expectedResponses: [
-                VoiceInteraction.ExpectedResponse(keywords: ["yes", "yeah", "yep", "send", "confirm"], action: "send"),
-                VoiceInteraction.ExpectedResponse(keywords: ["no", "nope", "cancel", "don't"], action: "cancel")
-            ],
-            priority: .high
-        )
-
-        if confirmResponse?.matchedExpectation?.action == "send" {
-            let success = await sendMessage(to: recipient, recipientName: nil, message: message, platform: platform)
-            if success {
-                await speakImmediate("Message sent!")
-            } else {
-                await speakImmediate("I couldn't send that message. Please try again later.")
-            }
-        } else {
-            await speakImmediate("Message cancelled.")
-        }
-    }
-
-    /// Read recent notifications from the notification center
-    public func readNotifications(limit: Int = 5) async {
-        let center = UNUserNotificationCenter.current()
-        let delivered = await center.deliveredNotifications()
-
-        guard !delivered.isEmpty else {
-            await speakImmediate("You have no new notifications.")
-            return
-        }
-
-        let recent = delivered.prefix(limit)
-        await speakImmediate("You have \(delivered.count) notification\(delivered.count == 1 ? "" : "s"). Here are the most recent:")
-
-        for notification in recent {
-            let title = notification.request.content.title
-            let body = notification.request.content.body
-            let text = body.isEmpty ? title : "\(title): \(body)"
-            await speakImmediate(text)
-        }
-    }
-
-    /// Navigate to a destination
-    public func startNavigation(to destination: String) async {
-        await speakImmediate("Starting navigation to \(destination).")
-
-        // Would integrate with Maps
-        if configuration.macRelayEnabled {
-            _ = await relayThroughMac(.navigate(to: destination))
-        }
-    }
-
-    // MARK: - Private Methods
+    // MARK: - Private Implementation
 
     private func startContextDetection() async {
         // Would integrate with:
@@ -455,13 +289,10 @@ public actor VoiceProactivity {
             activeInteraction = updated
 
             onResponseReceived?(active, voiceResponse)
-
-            // Process follow-up if any (using IDs)
-            // Note: Follow-up interactions would need to be stored and retrieved by ID
         }
     }
 
-    private func processPendingInteractions() async {
+    func processPendingInteractions() async {
         guard !isSpeaking, activeInteraction == nil else { return }
 
         // Filter for current context
@@ -504,7 +335,7 @@ public actor VoiceProactivity {
         }
     }
 
-    private func deliverInteraction(_ interaction: VoiceInteraction) async {
+    func deliverInteraction(_ interaction: VoiceInteraction) async {
         isSpeaking = true
         activeInteraction = interaction
 
@@ -525,7 +356,6 @@ public actor VoiceProactivity {
             }
 
             // Store delegate to prevent deallocation
-            // In real implementation, use proper delegate management
             self.synthesizer.speak(utterance)
 
             // Simulate completion for now
@@ -557,7 +387,7 @@ public actor VoiceProactivity {
         await processPendingInteractions()
     }
 
-    private func waitForResponse(interaction: VoiceInteraction, timeout: TimeInterval) async -> VoiceResponse? {
+    func waitForResponse(interaction: VoiceInteraction, timeout: TimeInterval) async -> VoiceResponse? {
         let deadline = Date().addingTimeInterval(timeout)
 
         while Date() < deadline {
@@ -576,121 +406,6 @@ public actor VoiceProactivity {
         activeInteraction = nil
         return nil
     }
-
-    private func canSendDirectly(platform: MessagingPlatform) async -> Bool {
-        // Check if we can send directly (e.g., device unlocked, app available)
-        #if os(iOS)
-        // On iOS, might need to check if unlocked
-        return false // Conservative - always relay or confirm
-        #else
-        return true
-        #endif
-    }
-
-    private func sendMessageDirectly(_ relay: MessageRelay) async -> Bool {
-        #if os(macOS)
-        // Use AppleScript to send iMessage on macOS
-        let escapedMessage = relay.message.replacingOccurrences(of: "\"", with: "\\\"")
-        let escapedRecipient = relay.recipient.replacingOccurrences(of: "\"", with: "\\\"")
-        let script = """
-        tell application "Messages"
-            set targetService to 1st service whose service type = iMessage
-            set targetBuddy to buddy "\(escapedRecipient)" of targetService
-            send "\(escapedMessage)" to targetBuddy
-        end tell
-        """
-
-        return await withCheckedContinuation { continuation in
-            DispatchQueue.global().async {
-                var error: NSDictionary?
-                if let appleScript = NSAppleScript(source: script) {
-                    appleScript.executeAndReturnError(&error)
-                    continuation.resume(returning: error == nil)
-                } else {
-                    continuation.resume(returning: false)
-                }
-            }
-        }
-        #elseif os(iOS)
-        // On iOS, use URL scheme to open Messages with pre-filled content
-        let encodedBody = relay.message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let encodedRecipient = relay.recipient.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        guard let url = URL(string: "sms:\(encodedRecipient)&body=\(encodedBody)") else {
-            return false
-        }
-        return await MainActor.run {
-            UIApplication.shared.open(url)
-            return true
-        }
-        #else
-        return false
-        #endif
-    }
-
-    private func relayThroughMac(_ command: DeviceRelayCommand) async -> Bool {
-        guard configuration.macRelayEnabled, !configuration.macRelayHostname.isEmpty else {
-            return false
-        }
-
-        let hostname = configuration.macRelayHostname
-        let commandData: Data
-        do {
-            commandData = try JSONEncoder().encode(["command": String(describing: command)])
-        } catch {
-            return false
-        }
-
-        // Try Tailscale hostname first, then .local mDNS
-        let hosts = [hostname, "\(hostname).local"]
-
-        for host in hosts {
-            guard let url = URL(string: "http://\(host):18789/relay") else { continue }
-            var request = URLRequest(url: url, timeoutInterval: 5)
-            request.httpMethod = "POST"
-            request.httpBody = commandData
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-            do {
-                let (_, response) = try await URLSession.shared.data(for: request)
-                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                    let result = DeviceRelayResult(
-                        success: true,
-                        sourceDevice: ProcessInfo.processInfo.hostName,
-                        targetDevice: hostname,
-                        command: String(describing: command),
-                        message: "Relayed via \(host)"
-                    )
-                    onDeviceRelayResult?(result)
-                    return true
-                }
-            } catch {
-                continue
-            }
-        }
-
-        let result = DeviceRelayResult(
-            success: false,
-            sourceDevice: ProcessInfo.processInfo.hostName,
-            targetDevice: hostname,
-            command: String(describing: command),
-            message: "Mac relay failed — host unreachable"
-        )
-        onDeviceRelayResult?(result)
-        return false
-    }
-
-    private func determinePlatform(from response: VoiceResponse?) -> MessagingPlatform {
-        guard let action = response?.matchedExpectation?.action else {
-            return .iMessage // Default
-        }
-
-        switch action {
-        case "imessage": return .iMessage
-        case "whatsapp": return .whatsApp
-        case "telegram": return .telegram
-        default: return .iMessage
-        }
-    }
 }
 
 // MARK: - Speech Delegate Helper
@@ -706,85 +421,5 @@ private class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked 
 
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
         completion()
-    }
-}
-
-// MARK: - Convenience Extensions
-
-extension VoiceProactivity {
-    /// Notify about an upcoming deadline
-    public func notifyDeadline(
-        title: String,
-        dueDate: Date,
-        urgency: DeadlineUrgency
-    ) async {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .full
-        let relative = formatter.localizedString(for: dueDate, relativeTo: Date())
-
-        let priority: VoiceInteractionPriority = switch urgency {
-        case .overdue: .urgent
-        case .critical: .urgent
-        case .urgent: .high
-        case .approaching: .normal
-        default: .low
-        }
-
-        let message: String
-        if urgency == .overdue {
-            message = "Reminder: \(title) is overdue. It was due \(relative)."
-        } else {
-            message = "Reminder: \(title) is due \(relative)."
-        }
-
-        let interaction = VoiceInteraction(
-            type: .reminder,
-            priority: priority,
-            message: message
-        )
-
-        await queueInteraction(interaction)
-    }
-
-    /// Notify about an incoming message
-    public func notifyMessage(
-        from sender: String,
-        platform: MessagingPlatform,
-        preview: String
-    ) async {
-        let message = "New \(platform.displayName) message from \(sender). They said: \(preview)"
-
-        let interaction = VoiceInteraction(
-            type: .notification,
-            priority: .normal,
-            message: message,
-            expectedResponses: [
-                VoiceInteraction.ExpectedResponse(keywords: ["reply", "respond", "answer"], action: "reply"),
-                VoiceInteraction.ExpectedResponse(keywords: ["ignore", "later", "dismiss"], action: "dismiss")
-            ]
-        )
-
-        await queueInteraction(interaction)
-    }
-
-    /// Ask user's preference for action
-    public func askPreference(
-        question: String,
-        options: [(name: String, keywords: [String])]
-    ) async -> String? {
-        let responses = options.map { option in
-            VoiceInteraction.ExpectedResponse(
-                keywords: option.keywords,
-                action: option.name
-            )
-        }
-
-        let response = await askQuestion(
-            question,
-            expectedResponses: responses,
-            priority: .normal
-        )
-
-        return response?.matchedExpectation?.action
     }
 }

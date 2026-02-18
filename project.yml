@@ -297,8 +297,6 @@ targets:
           # TEMPORARY: Exclude MLXAudioEngine + dependents causing Release build issues
           - "**/AI/Audio/MLXAudioEngine.swift"
           - "**/Voice/MLXVoiceBackend.swift"
-          - "**/AI/LiveGuidance/LocalVisionGuidance.swift"
-          - "**/Settings/LiveGuidanceSettingsView.swift"
           # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
           # AnthropicFilesAPI — ACTIVATED (ported to AnthropicError/AIMessage)
           # AnthropicTokenCounter — ACTIVATED (ported to AnthropicError/AIMessage)
@@ -545,8 +543,6 @@ targets:
           - "System/Input/PointerTracker.swift"
           - "System/Input/ActionExecutor.swift"
           - "Integrations/ForegroundAppMonitor.swift"
-          - "AI/LiveGuidance/LocalVisionGuidance.swift"
-          - "UI/Views/Settings/LiveGuidanceSettingsView.swift"
           - "UI/Views/Settings/AppPairingSettingsView.swift"
           - "**/InputTrackingManager.swift"
           - "**/*AutomationEngine.swift"
