@@ -92,13 +92,13 @@ class MediaLibraryService {
   }
 
   generateMovieFolderName(m: { title: string; year?: number }): string {
-    let name = `${m.title} (${m.year || ''})`.replace(/:/g, ' - ').replace(/[<>"|?*\/\\]/g, '').trim();
+    const name = `${m.title} (${m.year || ''})`.replace(/:/g, ' - ').replace(/[<>"|?*\/\\]/g, '').trim();
     return name.replace(/\s+/g, ' ');
   }
 
   generateMovieFileName(m: { title: string; year?: number }, r: ParsedRelease, ext = 'mkv'): string {
     const quality = this.buildQualityTags(r);
-    let name = `${m.title} (${m.year || ''}) ${quality}`.replace(/:/g, ' - ').replace(/[<>"|?*\/\\]/g, '').trim();
+    const name = `${m.title} (${m.year || ''}) ${quality}`.replace(/:/g, ' - ').replace(/[<>"|?*\/\\]/g, '').trim();
     return `${name}.${ext}`;
   }
 

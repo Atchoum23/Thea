@@ -79,7 +79,7 @@ struct DataStorageErrorView: View {
         .padding(40)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background {
-            Color.theaWindowBackground
+            Color.windowBackground
                 .ignoresSafeArea()
         }
     }

@@ -16,9 +16,17 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "EnhancedMessage
 struct IconActionButton: View {
     let icon: String
     let color: Color
+    let label: String
     let action: () -> Void
 
     @State private var isPressed = false
+
+    init(icon: String, color: Color, label: String = "", action: @escaping () -> Void) {
+        self.icon = icon
+        self.color = color
+        self.label = label
+        self.action = action
+    }
 
     var body: some View {
         Button(action: action) {
@@ -31,6 +39,7 @@ struct IconActionButton: View {
         }
         .buttonStyle(.plain)
         .scaleEffect(isPressed ? 0.9 : 1.0)
+        .accessibilityLabel(label.isEmpty ? icon : label)
     }
 }
 
