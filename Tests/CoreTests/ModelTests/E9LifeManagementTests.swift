@@ -358,9 +358,9 @@ struct TaskModelTests {
 
     @Test("isDueToday detects today's tasks")
     func isDueToday() {
-        // Use a time later today
-        let laterToday = Calendar.current.date(byAdding: .hour, value: 3, to: Date()) ?? Date()
-        let task = TestTask(title: "Test", dueDate: laterToday)
+        // Anchor to noon today — avoids midnight-crossing flake when +3h wraps to tomorrow
+        let noonToday = Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: Date())!
+        let task = TestTask(title: "Test", dueDate: noonToday)
         #expect(task.isDueToday)
     }
 
