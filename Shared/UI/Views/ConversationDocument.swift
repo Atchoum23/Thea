@@ -2,6 +2,8 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 // MARK: - Conversation Document (for export)
+// @unchecked Sendable: Conversation SwiftData model is not Sendable across contexts; this document
+// is created on the main actor and only accessed from FileDocument protocol callbacks on main thread
 
 struct ConversationDocument: FileDocument, @unchecked Sendable {
     static var readableContentTypes: [UTType] { [.json] }
