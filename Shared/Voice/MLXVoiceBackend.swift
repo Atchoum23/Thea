@@ -6,6 +6,8 @@ import AVFoundation
 // MARK: - MLX Voice Backend
 // Wraps MLXAudioEngine to provide VoiceSynthesisBackend conformance
 // Uses Soprano-80M for TTS and GLM-ASR-Nano for STT
+// @unchecked Sendable: audioPlayer (AVAudioPlayer) is not Sendable; all audio playback operations
+// are serialized through the withCheckedThrowingContinuation block with @MainActor Task dispatch
 
 final class MLXVoiceBackend: VoiceSynthesisBackend, VoiceRecognitionBackend, @unchecked Sendable {
 
@@ -113,6 +115,8 @@ final class MLXVoiceBackend: VoiceSynthesisBackend, VoiceRecognitionBackend, @un
 }
 
 // MARK: - Audio Player Completion Delegate
+// @unchecked Sendable: NSObject subclass required for AVAudioPlayerDelegate; AVAudioPlayer delivers
+// callbacks on the main thread; the @Sendable completion closure is safely invoked from main thread
 
 private final class AudioPlayerCompletionDelegate: NSObject, AVAudioPlayerDelegate, @unchecked Sendable {
     private let completion: @Sendable () -> Void
