@@ -87,6 +87,7 @@ public final class AnthropicFilesAPI: Sendable {
         }
 
         if httpResponse.statusCode != 200 && httpResponse.statusCode != 201 {
+            // Safe: JSON error body parsing — if unparseable, fallback to generic status-code error below
             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let error = json["error"] as? [String: Any],
                let message = error["message"] as? String {

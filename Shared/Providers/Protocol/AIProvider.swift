@@ -267,7 +267,7 @@ public enum OutputFormat: Sendable {
 
     /// Create JSON schema output format
     public static func schema(_ schema: [String: Any]) -> OutputFormat {
-        let data = (try? JSONSerialization.data(withJSONObject: schema)) ?? Data()
+        let data = (try? JSONSerialization.data(withJSONObject: schema)) ?? Data() // Safe: invalid schema dict → empty Data; caller's schema validation catches this upstream
         return .jsonSchema(data)
     }
 }
@@ -278,13 +278,13 @@ public struct ToolDefinition: Codable, Sendable {
     public let parametersJSON: Data  // Store as JSON Data for Sendable compliance
 
     public var parameters: [String: Any] {
-        (try? JSONSerialization.jsonObject(with: parametersJSON) as? [String: Any]) ?? [:]
+        (try? JSONSerialization.jsonObject(with: parametersJSON) as? [String: Any]) ?? [:] // Safe: corrupt parametersJSON → empty params dict (tool still callable, no parameters sent)
     }
 
     public init(name: String, description: String, parameters: [String: Any] = [:]) {
         self.name = name
         self.description = description
-        self.parametersJSON = (try? JSONSerialization.data(withJSONObject: parameters)) ?? Data()
+        self.parametersJSON = (try? JSONSerialization.data(withJSONObject: parameters)) ?? Data() // Safe: invalid parameters dict → empty Data (tool has no parameters); callers use valid Codable types
     }
 
     enum CodingKeys: String, CodingKey {

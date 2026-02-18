@@ -66,7 +66,7 @@ final class MLXModelManager {
 
     private func loadModelDirectories() {
         if let data = defaults.data(forKey: "MLXModelManager.directories"),
-           let urls = try? JSONDecoder().decode([URL].self, from: data)
+           let urls = try? JSONDecoder().decode([URL].self, from: data) // Safe: corrupt cache → use default HuggingFace directories in else branch
         {
             modelDirectories = urls
         } else {

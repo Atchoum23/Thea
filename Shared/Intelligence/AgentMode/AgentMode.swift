@@ -90,6 +90,7 @@ public enum AgentPhase: String, Codable, Sendable {
 // MARK: - Agent Execution State
 
 /// Current state of agent execution
+/// Observable state machine tracking the current agent execution progress and all active tasks.
 @MainActor
 public final class AgentExecutionState: ObservableObject {
     @Published public var mode: AgentMode = .auto
@@ -192,6 +193,7 @@ public struct TaskGroup: Identifiable, Codable, Sendable {
     }
 }
 
+/// Lifecycle status of a task group within the agent execution pipeline.
 public enum TaskGroupStatus: String, Codable, Sendable {
     case pending
     case inProgress
@@ -231,6 +233,7 @@ public struct AgentSubtask: Identifiable, Codable, Sendable {
     }
 }
 
+/// Execution status of a single subtask within a task group.
 public enum SubtaskStatus: String, Codable, Sendable {
     case pending
     case inProgress
@@ -264,6 +267,7 @@ public struct AgentStep: Identifiable, Codable, Sendable {
     }
 }
 
+/// Execution status of an individual step within a subtask.
 public enum AgentStepStatus: String, Codable, Sendable {
     case pending
     case running
@@ -305,6 +309,7 @@ public struct AgentModeTask: Identifiable, Codable, Sendable {
     }
 }
 
+/// Top-level execution status of an agent mode task.
 public enum AgentModeTaskStatus: String, Codable, Sendable {
     case pending
     case running
@@ -343,6 +348,7 @@ public struct AgentModeArtifact: Identifiable, Codable, Sendable {
     }
 }
 
+/// The category of content produced by an agent artifact.
 public enum AgentArtifactType: String, Codable, Sendable, CaseIterable {
     case implementationPlan   // Planning document
     case taskList             // List of tasks to complete
