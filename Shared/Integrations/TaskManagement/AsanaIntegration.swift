@@ -18,7 +18,7 @@ public actor AsanaClient {
     private let mcpURL = "https://mcp.asana.com/v2/mcp"
 
     private var accessToken: String?
-    private var workspaceGid: String?
+    var workspaceGid: String?
 
     public init() {}
 
@@ -50,7 +50,7 @@ public actor AsanaClient {
 
     // MARK: - Private Helpers
 
-    private func request<T: Decodable>(
+    func request<T: Decodable>(
         endpoint: String,
         method: String = "GET",
         queryParams: [String: String] = [:],

@@ -7,7 +7,10 @@
 //  Uses existing Artifact types from ArtifactManager.swift
 //
 
+import OSLog
 import SwiftUI
+
+private let logger = Logger(subsystem: "ai.thea.app", category: "ArtifactPanel")
 
 // MARK: - Artifact Panel View
 
