@@ -6,14 +6,12 @@ appId: app.thea.ios
 # Navigate to Health tab
 - tapOn:
     text: "Health"
-    timeout: 10000
 
 - takeScreenshot: health_tab_initial
 
 # Verify health overview is visible
 - assertVisible:
     text: "Health"
-    timeout: 5000
 
 - takeScreenshot: health_tab_loaded
 

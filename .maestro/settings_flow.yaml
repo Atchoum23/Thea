@@ -6,7 +6,6 @@ appId: app.thea.ios
 # Navigate to Settings tab
 - tapOn:
     text: "Settings"
-    timeout: 10000
 
 - takeScreenshot: settings_main
 
@@ -27,7 +26,6 @@ appId: app.thea.ios
     element:
       text: "Appearance"
     direction: DOWN
-    timeout: 5000
 
 - takeScreenshot: settings_appearance
 
@@ -41,7 +39,6 @@ appId: app.thea.ios
     element:
       text: "About"
     direction: DOWN
-    timeout: 5000
 
 - takeScreenshot: settings_about
 

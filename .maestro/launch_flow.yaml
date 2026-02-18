@@ -7,7 +7,6 @@ appId: app.thea.ios
 # Verify app launched successfully - should show tab bar
 - assertVisible:
     text: "Chat"
-    timeout: 15000
 
 - assertVisible:
     text: "Settings"

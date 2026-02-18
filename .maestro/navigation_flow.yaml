@@ -6,7 +6,6 @@ appId: app.thea.ios
 # Start on Chat tab
 - assertVisible:
     text: "Chat"
-    timeout: 10000
 
 # Navigate to Projects tab
 - tapOn:

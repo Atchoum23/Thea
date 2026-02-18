@@ -6,7 +6,6 @@ appId: app.thea.ios
 # Navigate to Chat tab
 - tapOn:
     text: "Chat"
-    timeout: 10000
 
 # Look for model selector (typically in toolbar or input area)
 - tapOn:
