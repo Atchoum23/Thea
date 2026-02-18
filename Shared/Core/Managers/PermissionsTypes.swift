@@ -10,6 +10,7 @@ import Foundation
 
 // MARK: - Permission Status
 
+/// The current authorization state for a system permission.
 public enum PermissionStatus: String, Codable, Sendable, CaseIterable {
     case notDetermined = "Not Set"
     case authorized = "Authorized"
@@ -72,6 +73,7 @@ public enum PermissionCategory: String, CaseIterable, Identifiable, Sendable {
 
 // MARK: - Permission Type
 
+/// All permission types that Thea may request, covering both macOS and iOS platforms.
 public enum PermissionType: String, CaseIterable, Identifiable, Sendable {
     // Data & Privacy (Group 1)
     case calendars = "Calendars"
@@ -235,6 +237,7 @@ public enum PermissionType: String, CaseIterable, Identifiable, Sendable {
 
 // MARK: - Permission Info
 
+/// A resolved permission entry combining type, current status, and computed display metadata.
 public struct PermissionInfo: Identifiable, Sendable {
     public let id: String
     public let type: PermissionType
