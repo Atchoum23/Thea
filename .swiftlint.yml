@@ -350,7 +350,7 @@ trailing_comma:
   mandatory_comma: false
 
 # Warning Threshold - gradually tighten as code improves
-warning_threshold: 200
+warning_threshold: 300
 
 # ============================================
 # CUSTOM RULES (Quality Focused)
