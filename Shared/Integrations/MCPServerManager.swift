@@ -722,6 +722,9 @@ struct MCPAnyCodable: Codable, @unchecked Sendable {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
+        // Safe: type-probing cascade — try? is the correct pattern here; each attempt tests if the
+        // JSON value is that type. Only throws if ALL types fail (final else branch). This is the
+        // standard Codable type-erasure pattern for heterogeneous JSON (Bool/Int/Double/String/Array/Dict).
         if container.decodeNil() {
             value = NSNull()
         } else if let bool = try? container.decode(Bool.self) {
