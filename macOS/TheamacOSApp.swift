@@ -1,5 +1,4 @@
 import os.log
-import SQLite3
 @preconcurrency import SwiftData
 import SwiftUI
 
@@ -19,17 +18,10 @@ struct TheamacOSApp: App {
     @State private var showingFallbackAlert = false
 
     init() {
-        let schema = Schema([
-            Conversation.self, Message.self, Project.self,
-            TheaClipEntry.self, TheaClipPinboard.self, TheaClipPinboardEntry.self,
-            TheaHabit.self, TheaHabitEntry.self
-        ])
+        // Use the full model list from SchemaV1 to ensure the migration plan
+        // can apply to all registered models (prevents data loss on schema upgrade).
+        let schema = Schema(SchemaV1.models)
         let useInMemory = isUITesting || isUnitTesting
-
-        // Pre-flight: delete incompatible store before SwiftData touches it
-        if !useInMemory {
-            Self.deleteStoreIfSchemaOutdated()
-        }
 
         do {
             let config = ModelConfiguration(
@@ -37,7 +29,13 @@ struct TheamacOSApp: App {
                 isStoredInMemoryOnly: useInMemory,
                 cloudKitDatabase: .none
             )
-            let container = try ModelContainer(for: schema, configurations: [config])
+            // Wire TheaSchemaMigrationPlan — SwiftData performs lightweight/custom
+            // migration instead of deleting the store on version mismatch.
+            let container = try ModelContainer(
+                for: schema,
+                migrationPlan: TheaSchemaMigrationPlan.self,
+                configurations: [config]
+            )
             _modelContainer = State(initialValue: container)
             if useInMemory {
                 print("⚡ Testing mode: Using in-memory storage")
@@ -45,55 +43,6 @@ struct TheamacOSApp: App {
         } catch {
             _storageError = State(initialValue: error)
             print("❌ Failed to initialize ModelContainer: \(error)")
-        }
-    }
-
-    /// Check if the SQLite store has all required columns; delete if outdated.
-    /// This runs BEFORE ModelContainer init to avoid CoreData caching failures.
-    private static func deleteStoreIfSchemaOutdated() {
-        guard let groupURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.app.theathe"
-        ) else { return }
-        let storeURL = groupURL
-            .appendingPathComponent("Library/Application Support")
-            .appendingPathComponent("default.store")
-        guard FileManager.default.fileExists(atPath: storeURL.path) else { return }
-
-        // Required columns that may be missing from older schemas
-        let requiredColumns = ["ZISARCHIVED", "ZISREAD", "ZSTATUS"]
-
-        // Open SQLite directly to inspect the schema
-        var db: OpaquePointer?
-        guard sqlite3_open_v2(storeURL.path, &db, SQLITE_OPEN_READONLY, nil) == SQLITE_OK else {
-            sqlite3_close(db)
-            return
-        }
-        defer { sqlite3_close(db) }
-
-        var stmt: OpaquePointer?
-        guard sqlite3_prepare_v2(db, "PRAGMA table_info(ZCONVERSATION)", -1, &stmt, nil) == SQLITE_OK else {
-            return
-        }
-        defer { sqlite3_finalize(stmt) }
-
-        var existingColumns = Set<String>()
-        while sqlite3_step(stmt) == SQLITE_ROW {
-            if let namePtr = sqlite3_column_text(stmt, 1) {
-                existingColumns.insert(String(cString: namePtr))
-            }
-        }
-
-        let missingColumns = requiredColumns.filter { !existingColumns.contains($0) }
-        if !missingColumns.isEmpty {
-            logger.warning("Store schema outdated (missing: \(missingColumns.joined(separator: ", "), privacy: .public)). Deleting store.")
-            // Close DB before deleting
-            sqlite3_close(db)
-            for suffix in ["", "-shm", "-wal"] {
-                try? FileManager.default.removeItem(
-                    at: storeURL.deletingLastPathComponent()
-                        .appendingPathComponent("default.store" + suffix)
-                )
-            }
         }
     }
 

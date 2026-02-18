@@ -1,11 +1,11 @@
 import Foundation
 import Network
+import OSLog
 #if os(iOS) || os(tvOS)
 import UIKit
 #elseif os(macOS)
 import AppKit
 import IOKit.ps
-import OSLog
 #endif
 
 private let deviceAwarenessHelpersLogger = Logger(subsystem: "ai.thea.app", category: "UnifiedDeviceAwareness")
