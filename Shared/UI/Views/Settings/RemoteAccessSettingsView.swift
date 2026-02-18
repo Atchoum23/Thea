@@ -1,6 +1,7 @@
 // RemoteAccessSettingsView.swift
 // Settings for remote session and device management - wired to TheaRemoteServer
 
+import OSLog
 import SwiftUI
 
 struct RemoteAccessSettingsView: View {
@@ -457,9 +458,4 @@ struct RemoteAccessSettingsView: View {
     #endif
 }
 
-#if os(iOS)
-    import UIKit
-import OSLog
-
 private let logger = Logger(subsystem: "ai.thea.app", category: "RemoteAccessSettingsView")
-#endif
