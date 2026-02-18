@@ -103,7 +103,7 @@
                 Spacer()
             }
             .padding()
-            .background(Color(nsColor: .controlBackgroundColor))
+            .background(Color.controlBackground)
         }
 
         private var connectionStatusView: some View {
@@ -166,7 +166,7 @@
                                 }
                                 .padding(.vertical, 4)
                                 .padding(.horizontal, 8)
-                                .background(Color(nsColor: .controlColor))
+                                .background(Color(.controlColor))
                                 .cornerRadius(4)
                             }
                             .buttonStyle(.plain)
@@ -235,7 +235,7 @@
                 }
                 Spacer()
             }
-            .background(Color(nsColor: .controlBackgroundColor))
+            .background(Color.controlBackground)
         }
 
         // MARK: - Output View
@@ -283,7 +283,7 @@
                     }
                 }
             }
-            .background(Color(nsColor: .textBackgroundColor))
+            .background(Color.textBackground)
         }
 
         private func commandOutputRow(_ command: TerminalCommand) -> some View {

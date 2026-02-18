@@ -4,8 +4,11 @@ import MapKit
 import OSLog
 // MARK: - Sendable Wrapper
 
-/// Wrapper to safely transfer non-Sendable types across isolation boundaries
-/// Use with caution - caller must ensure thread safety
+// @unchecked Sendable: intentional escape hatch to transfer CLLocation (non-Sendable) and other
+// CoreLocation types across async actor boundaries; callers ensure the wrapped value is not
+// accessed concurrently after transfer (bridge to structured concurrency)
+/// Wrapper to safely transfer non-Sendable types across isolation boundaries.
+/// Use with caution - caller must ensure thread safety.
 private struct UncheckedSendableWrapper<T>: @unchecked Sendable {
     let value: T
 }
