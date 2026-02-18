@@ -2,6 +2,8 @@
     import AppKit
     import Foundation
 
+    // @unchecked Sendable: stateless reader — each method creates its own NSAppleScript; AppKit
+    // types used (NSWorkspace, NSRunningApplication) are accessed on the calling thread safely
     /// Reads content from Terminal.app windows using AppleScript
     /// This is the core component for "Work with Apps" style Terminal reading
     final class TerminalWindowReader: @unchecked Sendable {
