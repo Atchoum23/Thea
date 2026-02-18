@@ -8,6 +8,7 @@ import Foundation
 
 // MARK: - Plan Step Status
 
+/// Execution state of a single step within a plan.
 public enum PlanStepStatus: String, Codable, Sendable {
     case pending
     case inProgress
@@ -19,6 +20,7 @@ public enum PlanStepStatus: String, Codable, Sendable {
 
 // MARK: - Plan Step
 
+/// A single unit of work within a plan, tracking status, result, timing, and which model executed it.
 public struct PlanStep: Identifiable, Codable, Sendable {
     public let id: UUID
     public var title: String
@@ -66,6 +68,7 @@ public struct PlanStep: Identifiable, Codable, Sendable {
 
 // MARK: - Plan Phase
 
+/// A logical grouping of related steps within a plan.
 public struct PlanPhase: Identifiable, Codable, Sendable {
     public let id: UUID
     public var title: String
@@ -103,6 +106,7 @@ public struct PlanPhase: Identifiable, Codable, Sendable {
 
 // MARK: - Plan Status
 
+/// Overall lifecycle status of an execution plan.
 public enum PlanStatus: String, Codable, Sendable {
     case creating
     case executing
@@ -127,6 +131,7 @@ public enum PlanStatus: String, Codable, Sendable {
 
 // MARK: - Plan State
 
+/// The complete state of an AI-generated execution plan, including phases, steps, and progress metrics.
 public struct PlanState: Identifiable, Codable, Sendable {
     public let id: UUID
     public var title: String
