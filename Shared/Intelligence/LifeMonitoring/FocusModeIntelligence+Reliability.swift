@@ -147,7 +147,7 @@ extension FocusModeIntelligence {
         content.body = "Failed to execute: \(actionType.rawValue). Please check manually."
         content.sound = .default
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-        try? await UNUserNotificationCenter.current().add(request)
+        try? await UNUserNotificationCenter.current().add(request) // Safe: notification delivery failure is non-fatal; reliability tracking continues
 
         print("[Reliability] Action failed after all retries: \(actionType.rawValue)")
     }

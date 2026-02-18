@@ -144,7 +144,7 @@ extension FocusModeIntelligence {
         content.body = "Contact \(contactKey) has confirmed this is urgent."
         content.sound = .default
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-        try? await UNUserNotificationCenter.current().add(request)
+        try? await UNUserNotificationCenter.current().add(request) // Safe: notification delivery failure is non-fatal; focus mode continues
 
         print("[Escalation] User notified about urgent contact: \(contactKey)")
     }

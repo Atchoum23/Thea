@@ -193,7 +193,7 @@ extension FocusModeIntelligence {
             content.sound = .default
             content.categoryIdentifier = "FOCUS_SUGGESTION"
             let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-            try? await UNUserNotificationCenter.current().add(request)
+            try? await UNUserNotificationCenter.current().add(request) // Safe: notification scheduling failure is non-fatal; prediction continues
         }
     }
 }
