@@ -116,7 +116,7 @@ class MediaLibraryService {
     const quality = this.buildQualityTags(r);
     const s = ep.season.toString().padStart(2, '0');
     const e = ep.episode.toString().padStart(2, '0');
-    let name = `${show.title} - S${s}E${e} - ${ep.title || 'Episode'} ${quality}`;
+    const name = `${show.title} - S${s}E${e} - ${ep.title || 'Episode'} ${quality}`;
     return `${name.replace(/:/g, ' - ').replace(/[<>"|?*\/\\]/g, '').trim()}.${ext}`;
   }
 

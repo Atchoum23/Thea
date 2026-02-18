@@ -304,18 +304,18 @@ public struct EnhancedMessageBubble: View {
 
     private var hoverActions: some View {
         HStack(spacing: TheaSpacing.xs) {
-            IconActionButton(icon: showCopiedFeedback ? "checkmark" : "doc.on.doc", color: showCopiedFeedback ? .green : .secondary) {
+            IconActionButton(icon: showCopiedFeedback ? "checkmark" : "doc.on.doc", color: showCopiedFeedback ? .green : .secondary, label: showCopiedFeedback ? "Copied" : "Copy message") {
                 copyToClipboard()
             }
 
             if message.messageRole == .user, let onEdit {
-                IconActionButton(icon: "pencil", color: .secondary) {
+                IconActionButton(icon: "pencil", color: .secondary, label: "Edit message") {
                     onEdit(message)
                 }
             }
 
             if message.messageRole == .assistant {
-                IconActionButton(icon: "arrow.clockwise", color: .secondary) {
+                IconActionButton(icon: "arrow.clockwise", color: .secondary, label: "Regenerate response") {
                     onRegenerate?(message)
                 }
             }
