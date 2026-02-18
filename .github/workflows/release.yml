@@ -136,6 +136,7 @@ jobs:
           echo "Building version: $VERSION"
 
       - name: Import Code Signing Certificate
+        continue-on-error: true
         env:
           CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
           CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
