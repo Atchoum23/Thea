@@ -7,6 +7,7 @@ import Foundation
 
 // MARK: - Supporting Types
 
+/// The result of a model routing decision: which model and provider to use, and why.
 public struct RoutingDecision: Identifiable, Sendable {
     public let id: UUID
     public let model: AIModel
@@ -38,6 +39,7 @@ public struct RoutingDecision: Identifiable, Sendable {
     }
 }
 
+/// Contextual constraints that influence model routing (urgency, budget, required capabilities).
 public struct RoutingContext: Sendable {
     public let urgency: Urgency
     public let budgetConstraint: Decimal?
@@ -65,6 +67,7 @@ public struct RoutingContext: Sendable {
         self.requiresFunctions = requiresFunctions
     }
 
+    /// How urgently a response is needed, affecting the speed-vs-quality tradeoff.
     public enum Urgency: String, Sendable {
         case low       // Quality matters more
         case normal    // Balanced
@@ -72,6 +75,7 @@ public struct RoutingContext: Sendable {
     }
 }
 
+/// Cumulative performance metrics for a specific model-task type combination.
 public struct ModelTaskPerformance: Codable, Sendable {
     public let modelId: String
     public let taskType: TaskType
