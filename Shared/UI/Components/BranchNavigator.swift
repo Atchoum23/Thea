@@ -91,13 +91,10 @@ struct MessageEditSheet: View {
                 .font(.body)
                 .frame(minHeight: 100, maxHeight: 300)
                 .padding(8)
-                #if os(macOS)
-                    .background(Color(nsColor: .controlBackgroundColor))
-                #else
-                    .background(Color(uiColor: .secondarySystemBackground))
-                #endif
+                .background(Color.controlBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .focused($isFocused)
+                .accessibilityLabel("Edit message text")
 
             // Actions
             HStack {

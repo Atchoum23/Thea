@@ -10,6 +10,8 @@ import OSLog
 
 // MARK: - DeepSeek Provider
 
+// @unchecked Sendable: all mutable state (apiKey, baseURL) is set once at init; network requests
+// use URLSession which manages its own thread safety; callbacks dispatched via async/await
 public final class DeepSeekProvider: AIProvider, @unchecked Sendable {
     public let id = "deepseek"
     public let name = "DeepSeek"

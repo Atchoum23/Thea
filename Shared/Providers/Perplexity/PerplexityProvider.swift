@@ -8,6 +8,8 @@ import OSLog
 
 // MARK: - Perplexity Provider
 
+// @unchecked Sendable: all mutable state (apiKey, baseURL) is set once at init; network requests
+// use URLSession which manages its own thread safety; callbacks dispatched via async/await
 public final class PerplexityProvider: AIProvider, @unchecked Sendable {
     public let id = "perplexity"
     public let name = "Perplexity"

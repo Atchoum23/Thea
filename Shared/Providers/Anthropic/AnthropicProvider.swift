@@ -8,6 +8,8 @@ import OSLog
 
 // MARK: - Anthropic Provider
 
+// @unchecked Sendable: all mutable state (apiKey, session) is set once at init; network requests
+// use URLSession which manages its own thread safety; callbacks dispatched via async/await
 public final class AnthropicProvider: AIProvider, @unchecked Sendable {
     public let id = "anthropic"
     public let name = "Anthropic"

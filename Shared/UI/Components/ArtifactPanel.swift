@@ -45,11 +45,7 @@ struct ArtifactPanel: View {
             }
         }
         .frame(minWidth: 300, idealWidth: 400)
-        #if os(macOS)
-            .background(Color(nsColor: .windowBackgroundColor))
-        #else
-            .background(Color(uiColor: .systemBackground))
-        #endif
+        .background(Color.windowBackground)
     }
 
     // MARK: - Header
@@ -181,11 +177,7 @@ struct ArtifactRow: View {
                 .foregroundStyle(.tertiary)
         }
         .padding(12)
-        #if os(macOS)
-            .background(Color(nsColor: .controlBackgroundColor))
-        #else
-            .background(Color(uiColor: .secondarySystemBackground))
-        #endif
+        .background(Color.controlBackground)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 

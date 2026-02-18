@@ -287,9 +287,5 @@ public enum MessageQuickAction: String, CaseIterable {
         .padding()
     }
     .frame(width: 600, height: 800)
-    #if os(macOS)
-    .background(Color(nsColor: .windowBackgroundColor))
-    #else
-    .background(Color(uiColor: .systemBackground))
-    #endif
+    .background(Color.windowBackground)
 }
