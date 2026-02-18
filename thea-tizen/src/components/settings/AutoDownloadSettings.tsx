@@ -571,30 +571,39 @@ interface QualitySelectorProps {
   onChange: (value: '4K' | '1080p' | '720p' | 'any') => void;
 }
 
+interface QualityOptionProps {
+  opt: '4K' | '1080p' | '720p' | 'any';
+  selected: boolean;
+  onChange: (value: '4K' | '1080p' | '720p' | 'any') => void;
+}
+
+function QualityOption({ opt, selected, onChange }: QualityOptionProps) {
+  const { ref, focused } = useFocusable({
+    onEnterPress: () => onChange(opt),
+  });
+  return (
+    <button
+      ref={ref}
+      onClick={() => onChange(opt)}
+      className={`
+        px-4 py-2 text-sm transition-colors
+        ${selected ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'}
+        ${focused ? 'ring-2 ring-white ring-inset' : ''}
+      `}
+    >
+      {opt}
+    </button>
+  );
+}
+
 function QualitySelector({ value, onChange }: QualitySelectorProps) {
   const options: Array<'4K' | '1080p' | '720p' | 'any'> = ['4K', '1080p', '720p', 'any'];
 
   return (
     <div className="flex rounded-lg overflow-hidden">
-      {options.map((opt) => {
-        const { ref, focused } = useFocusable({
-          onEnterPress: () => onChange(opt),
-        });
-        return (
-          <button
-            key={opt}
-            ref={ref}
-            onClick={() => onChange(opt)}
-            className={`
-              px-4 py-2 text-sm transition-colors
-              ${value === opt ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'}
-              ${focused ? 'ring-2 ring-white ring-inset' : ''}
-            `}
-          >
-            {opt}
-          </button>
-        );
-      })}
+      {options.map((opt) => (
+        <QualityOption key={opt} opt={opt} selected={value === opt} onChange={onChange} />
+      ))}
     </div>
   );
 }
