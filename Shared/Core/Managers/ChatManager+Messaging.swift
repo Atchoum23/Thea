@@ -434,84 +434,18 @@ extension ChatManager {
         text: String, taskType: TaskType?,
         assistantMessage: Message, conversation: Conversation
     ) async {
-        // Confidence verification
-        #if os(macOS) || os(iOS)
-        do {
-            let responseText = streamingText
-            let verificationTaskType = taskType ?? .general
-            Task { @MainActor in
-                let result = await ConfidenceSystem.shared.validateResponse(
-                    responseText, query: text, taskType: verificationTaskType
-                )
-                var meta = assistantMessage.metadata ?? MessageMetadata()
-                meta.confidence = result.overallConfidence
-                do {
-                    assistantMessage.metadataData = try JSONEncoder().encode(meta)
-                    try assistantMessage.modelContext?.save()
-                } catch {
-                    msgLogger.error("❌ Failed to save confidence: \(error.localizedDescription)")
-                }
-                msgLogger.debug("🔍 Confidence: \(String(format: "%.0f%%", result.overallConfidence * 100))")
-            }
-        }
-        #endif
-
-        agentState.transition(to: .verifyResults)
-
-        // Autonomy evaluation
-        await evaluateAutonomy(for: taskType)
-
-        agentState.transition(to: .done)
-        agentState.currentTask?.status = .completed
-        agentState.updateProgress(1.0, message: "Response complete")
-
-        // Auto-create plan from planning responses
-        autoCreatePlanIfNeeded(text: text, taskType: taskType, conversation: conversation)
-
-        // Voice output routing
-        if AudioOutputRouter.shared.isVoiceOutputActive {
-            AudioOutputRouter.shared.routeResponse(streamingText)
-        }
-
-        // Follow-up suggestion generation (G1)
-        let responseForSuggestions = streamingText
-        let queryForSuggestions = text
-        let taskTypeRaw = taskType?.rawValue
-        Task { @MainActor in
-            let suggestions = FollowUpSuggestionService.shared.generate(
-                response: responseForSuggestions,
-                query: queryForSuggestions,
-                taskType: taskTypeRaw
-            )
-            if !suggestions.isEmpty {
-                var meta = assistantMessage.metadata ?? MessageMetadata()
-                meta.followUpSuggestions = suggestions
-                do {
-                    assistantMessage.metadataData = try JSONEncoder().encode(meta)
-                    try assistantMessage.modelContext?.save()
-                } catch {
-                    msgLogger.error("Failed to save follow-up suggestions: \(error.localizedDescription)")
-                }
-            }
-        }
-
-        // Response notifications
-        let preview = streamingText
-        Task {
-            await ResponseNotificationHandler.shared.notifyResponseComplete(
-                conversationId: conversation.id,
-                conversationTitle: conversation.title,
-                previewText: preview
-            )
-            do {
-                try await CrossDeviceNotificationService.shared.notifyAIResponseReady(
-                    conversationId: conversation.id.uuidString,
-                    preview: preview
-                )
-            } catch {
-                msgLogger.debug("Cross-device notification skipped: \(error.localizedDescription)")
-            }
-        }
+        // Delegate all post-response processing to PostResponsePipeline, which owns
+        // the canonical pipeline (confidence verification, autonomy evaluation, agent state
+        // transitions, plan creation, voice routing, follow-up suggestions, behavioral
+        // fingerprinting, memory extraction, response notifications, classifier learning).
+        let pipelineContext = PostResponsePipeline.ResponseContext(
+            userQuery: text,
+            responseText: streamingText,
+            taskType: taskType,
+            assistantMessage: assistantMessage,
+            conversation: conversation
+        )
+        await PostResponsePipeline.run(pipelineContext, agentState: agentState)
     }
 
     private func evaluateAutonomy(for taskType: TaskType?) async {
