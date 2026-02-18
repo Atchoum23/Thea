@@ -436,6 +436,8 @@ targets:
           # Theme exclusions (canonical DesignTokens exclusion is at line 333)
           # Exclude design stubs on macOS (TheaDesignSystem is included on macOS)
           - "**/Design/DesignSystemStubs.swift"
+          # Exclude DashboardView duplicate — same types as HealthInsightsDetailView (TimeRange, TrendDataPoint, etc.)
+          - "**/Integrations/Health/Views/HealthInsightsDashboardView.swift"
       - path: macOS
       - path: Shared/Resources/Assets.xcassets
       - path: Shared/Resources/Localizable.xcstrings
@@ -699,6 +701,8 @@ targets:
           - "**/Design/LiquidGlassDesign.swift"
           # Exclude stubs since TheaDesignSystem is included
           - "**/Design/DesignSystemStubs.swift"
+          # Exclude DashboardView duplicate — same types as HealthInsightsDetailView (TimeRange, TrendDataPoint, etc.)
+          - "**/Integrations/Health/Views/HealthInsightsDashboardView.swift"
       - path: iOS
       - path: Shared/Resources/Assets.xcassets
       - path: Shared/Resources/Localizable.xcstrings

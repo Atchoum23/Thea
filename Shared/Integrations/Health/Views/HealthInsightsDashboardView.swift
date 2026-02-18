@@ -4,7 +4,7 @@ import SwiftUI
 
 /// Aggregated health insights dashboard with AI-powered recommendations
 @MainActor
-public struct HealthInsightsView: View {
+public struct HealthInsightsDashboardView: View {
     @State private var viewModel = HealthInsightsViewModel()
     @State private var selectedTimeRange: TimeRange = .week
 
@@ -887,6 +887,6 @@ final class HealthInsightsViewModel {
 
 #Preview {
     NavigationStack {
-        HealthInsightsView()
+        HealthInsightsDashboardView()
     }
 }
