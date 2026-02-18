@@ -417,7 +417,11 @@ public final class AnthropicProvider: AIProvider, @unchecked Sendable {
             "max_tokens": 1,
             "messages": [["role": "user", "content": "hi"]]
         ]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {
+            return .unhealthy("Failed to serialize health check body: \(error)")
+        }
 
         let start = Date()
 
