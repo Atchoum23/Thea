@@ -140,10 +140,14 @@ enum PostResponsePipeline {
 
         // Also register in TaskPlanDAG for DAG-based execution tracking
         Task { @MainActor in
-            _ = try? await TaskPlanDAG.shared.createPlan(
-                goal: context.userQuery,
-                context: context.responseText.prefix(2000).description
-            )
+            do {
+                _ = try await TaskPlanDAG.shared.createPlan(
+                    goal: context.userQuery,
+                    context: context.responseText.prefix(2000).description
+                )
+            } catch {
+                pipelineLogger.error("TaskPlanDAG.createPlan failed: \(error)")
+            }
         }
 
         pipelineLogger.debug("Auto-created plan with \(planSteps.count) steps")
