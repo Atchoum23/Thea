@@ -327,12 +327,16 @@ extension PasskeysService: ASAuthorizationControllerPresentationContextProviding
                 if let scene = scenes.first {
                     return UIWindow(windowScene: scene)
                 }
-                // Last resort — create from any available scene (always exists on modern iOS)
-                if let anyScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                // On iOS 13+, UIWindowScene is always available; use it exclusively
+                if let anyScene = UIApplication.shared.connectedScenes
+                    .compactMap({ $0 as? UIWindowScene })
+                    .first(where: { $0.activationState == .foregroundActive })
+                    ?? UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first {
                     return UIWindow(windowScene: anyScene)
                 }
-                // Fallback — create a bare UIWindow (satisfies protocol, won't be visible)
-                return UIWindow(frame: .zero)
+                // Should never reach here on iOS 13+
+                assertionFailure("No UIWindowScene available")
+                return UIWindow(windowScene: UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first!)
             #elseif os(macOS)
                 return NSApplication.shared.keyWindow ?? NSWindow()
             #else
@@ -489,12 +493,16 @@ public struct SignInWithAppleButton: View {
                 if let scene = scenes.first {
                     return UIWindow(windowScene: scene)
                 }
-                // Last resort — create from any available scene (always exists on modern iOS)
-                if let anyScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                // On iOS 13+, UIWindowScene is always available; use it exclusively
+                if let anyScene = UIApplication.shared.connectedScenes
+                    .compactMap({ $0 as? UIWindowScene })
+                    .first(where: { $0.activationState == .foregroundActive })
+                    ?? UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first {
                     return UIWindow(windowScene: anyScene)
                 }
-                // Fallback — create a bare UIWindow (satisfies protocol, won't be visible)
-                return UIWindow(frame: .zero)
+                // Should never reach here on iOS 13+
+                assertionFailure("No UIWindowScene available")
+                return UIWindow(windowScene: UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first!)
             }
 
             func authorizationController(controller _: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
