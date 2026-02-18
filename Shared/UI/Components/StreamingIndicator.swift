@@ -211,11 +211,7 @@ struct TypingIndicator: View {
     }
 
     private var backgroundColor: Color {
-        #if os(macOS)
-            Color(nsColor: .controlBackgroundColor)
-        #else
-            Color(uiColor: .secondarySystemBackground)
-        #endif
+        Color.controlBackground
     }
 }
 

@@ -5,6 +5,8 @@ import MLXLMCommon
 
 // MARK: - Local Model Provider
 
+// @unchecked Sendable: modelName and instance are let constants set once at init and never mutated;
+// LocalModelInstance manages MLX model lifecycle internally with actor-based isolation
 final class LocalModelProvider: AIProvider, @unchecked Sendable {
     private let modelName: String
     private let instance: LocalModelInstance

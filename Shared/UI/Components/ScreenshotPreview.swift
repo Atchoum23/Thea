@@ -57,7 +57,7 @@ import SwiftUI
                     TextField("Describe what you'd like help with...", text: $annotation, axis: .vertical)
                         .textFieldStyle(.plain)
                         .padding(8)
-                        .background(Color(nsColor: .controlBackgroundColor))
+                        .background(Color.controlBackground)
                         .cornerRadius(6)
                         .lineLimit(1 ... 5)
                 }
@@ -81,7 +81,7 @@ import SwiftUI
             }
             .padding(20)
             .frame(width: 500)
-            .background(Color(nsColor: .windowBackgroundColor))
+            .background(Color.windowBackground)
             .cornerRadius(12)
             .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
         }

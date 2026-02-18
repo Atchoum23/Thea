@@ -340,9 +340,5 @@ public struct ExecutableCodeBlock: View {
     }
     .padding()
     .frame(width: 500)
-    #if os(macOS)
-    .background(Color(nsColor: .windowBackgroundColor))
-    #else
-    .background(Color(uiColor: .systemBackground))
-    #endif
+    .background(Color.windowBackground)
 }
