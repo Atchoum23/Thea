@@ -11,6 +11,7 @@
 //   - BehavioralFingerprint (temporal user patterns)
 //   - SmartNotificationScheduler (optimal delivery timing)
 //   - HealthCoachingPipeline (health data → coaching)
+//   - PersonalBaselineMonitor (rolling health baselines + anomaly detection)
 //   - ProactiveEngagementEngine (autonomous initiative)
 //   - ChatReflexionIntegration (response quality improvement)
 //   - ConversationMemoryExtractor (session-to-session memory)
@@ -91,6 +92,9 @@ final class TheaIntelligenceOrchestrator {
         Task {
             await PersonalKnowledgeGraph.shared.load()
             BehavioralFingerprint.shared.load()
+            // Touch PersonalBaselineMonitor.shared to trigger loadFromDisk()
+            // and pruneAlertHistory() on first access.
+            _ = PersonalBaselineMonitor.shared.baselines.count
         }
 
         logger.info("Subsystems initialized")
@@ -125,6 +129,10 @@ final class TheaIntelligenceOrchestrator {
 
         // 2. Run health coaching analysis (respects its own cooldown)
         await HealthCoachingPipeline.shared.runAnalysis()
+
+        // 2b. Run personal baseline check (queries HealthKit, updates rolling
+        //     baselines, runs z-score + CUSUM anomaly detection).
+        await PersonalBaselineMonitor.shared.runDailyCheck()
 
         // 3. Evaluate proactive engagement opportunities
         await ProactiveEngagementEngine.shared.evaluate()
