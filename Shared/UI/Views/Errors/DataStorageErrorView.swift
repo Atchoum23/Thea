@@ -79,13 +79,8 @@ struct DataStorageErrorView: View {
         .padding(40)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background {
-            #if os(macOS)
-                Color(nsColor: .windowBackgroundColor)
-                    .ignoresSafeArea()
-            #else
-                Color(uiColor: .systemBackground)
-                    .ignoresSafeArea()
-            #endif
+            Color.windowBackground
+                .ignoresSafeArea()
         }
     }
 

@@ -339,11 +339,7 @@ public struct AccessibleGlassModifier: ViewModifier {
             content
                 .background {
                     RoundedRectangle(cornerRadius: 12)
-                        #if os(macOS)
-                        .fill(Color(nsColor: .controlBackgroundColor))
-                        #else
-                        .fill(Color(.systemBackground))
-                        #endif
+                        .fill(Color.controlBackground)
                 }
         } else if #available(iOS 26.0, macOS 26.0, *) {
             content

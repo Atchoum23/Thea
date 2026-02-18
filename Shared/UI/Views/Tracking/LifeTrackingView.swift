@@ -144,7 +144,7 @@ struct LifeTrackingView: View {
             }
             .padding()
             #if os(macOS)
-            .background(Color(NSColor.controlBackgroundColor))
+            .background(Color.controlBackground)
             #else
             .background(Color(.secondarySystemBackground))
             #endif
@@ -362,7 +362,7 @@ private struct LifeStatCard: View {
         }
         .padding()
         #if os(macOS)
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.controlBackground)
         #else
         .background(Color(.secondarySystemBackground))
         #endif
@@ -404,7 +404,7 @@ private struct InsightRow: View {
         }
         .padding()
         #if os(macOS)
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.controlBackground)
         #else
         .background(Color(.secondarySystemBackground))
         #endif

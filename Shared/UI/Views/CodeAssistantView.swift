@@ -50,7 +50,7 @@ struct CodeAssistantView: View {
         VStack(spacing: 0) {
             projectListContent
         }
-        .background(Color(nsColor: .controlBackgroundColor))
+        .background(Color.controlBackground)
     }
     #endif
 

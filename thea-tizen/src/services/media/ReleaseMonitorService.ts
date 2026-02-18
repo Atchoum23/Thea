@@ -157,9 +157,10 @@ class ReleaseMonitorService {
       const content = m[1];
       const title = this.extractTag(content, 'title');
       const link = this.extractTag(content, 'link');
-      const guid = this.extractTag(content, 'guid') || link;
+      const guidRaw = this.extractTag(content, 'guid') || link;
       const pubDate = this.extractTag(content, 'pubDate');
       if (title && link) {
+        const guid = guidRaw ?? link;
         items.push({ title, link, guid, pubDate: pubDate ? new Date(pubDate) : new Date() });
       }
     }
@@ -197,7 +198,7 @@ class ReleaseMonitorService {
     if (wanted.type === 'episode') {
       if (wanted.season !== undefined && release.season !== wanted.season) return false;
       if (wanted.episode !== undefined && release.episode !== wanted.episode) {
-        if (release.episodeEnd && wanted.episode >= release.episode && wanted.episode <= release.episodeEnd) return true;
+        if (release.episodeEnd && release.episode !== undefined && wanted.episode >= release.episode && wanted.episode <= release.episodeEnd) return true;
         return false;
       }
     }
