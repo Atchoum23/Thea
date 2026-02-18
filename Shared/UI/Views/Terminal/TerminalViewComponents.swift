@@ -34,8 +34,6 @@
 
     private let terminalViewComponentsLogger = Logger(subsystem: "ai.thea.app", category: "TerminalViewComponents")
 
-    private let terminalViewComponentsLogger = Logger(subsystem: "ai.thea.app", category: "TerminalViewComponents")
-
     // MARK: - Windows List View
 
     extension TerminalView {
