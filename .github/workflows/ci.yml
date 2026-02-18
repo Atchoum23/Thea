@@ -60,7 +60,9 @@ jobs:
 
       - name: Run SwiftLint
         run: |
-          swiftlint lint --reporter github-actions-logging
+          # --strict converts warnings to errors; exit 2 means violations found.
+          # warning_threshold: 0 was removed from .swiftlint.yml (0.63.2 self-fires at 0 >= 0).
+          swiftlint lint --strict --reporter github-actions-logging
           EXIT=$?
           if [ $EXIT -eq 2 ]; then
             echo "::error::SwiftLint found violations (exit code 2)"

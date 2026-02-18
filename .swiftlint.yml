@@ -349,8 +349,8 @@ type_name:
 trailing_comma:
   mandatory_comma: false
 
-# Warning Threshold - gradually tighten as code improves
-warning_threshold: 0
+# warning_threshold removed: 0.63.2 quirk fires even at 0 actual warnings (0 >= 0).
+# CI enforces zero-tolerance via `swiftlint lint --strict` (exit 2 on any warning).
 
 # ============================================
 # CUSTOM RULES (Quality Focused)
