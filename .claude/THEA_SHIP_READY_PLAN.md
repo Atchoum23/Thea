@@ -37,8 +37,8 @@ From MBAM2 terminal, start a new Claude Code session and say:
 ### Apple Platforms (4x)
 - [x] 16/16 builds pass: 4 platforms × Debug + Release × CLI build (0 errors, 0 warnings) ✅ Phase B
 - [ ] Xcode GUI builds pass for all 4 platforms (0 errors, 0 warnings) — *not yet verified via GUI*
-- [x] `swift test` passes: 4044/4045 (1 timezone flake, non-blocking) ✅ Phase C
-- [x] SwiftLint: 0 violations, 0 warnings ✅ (warning_threshold raised to 300)
+- [x] `swift test` passes: 0 failures, 0 flakes — all tests must be deterministic; fix flaky tests, never skip or accept them ✅ Phase C (1 timezone flake still open — must be fixed)
+- [x] SwiftLint: 0 violations, 0 warnings — warning_threshold must stay at 0, never raised to suppress real issues ✅ Phase C (threshold currently at 300 — must be reset to 0)
 - [ ] No stubs, TODOs, placeholders, or `fatalError` in production code paths — *D3 in progress*
 - [x] Schema migration wired (no data loss on upgrade) ✅ Phases A2 + G
 - [ ] Periphery: all flagged items either wired in or marked Reserved — *D3 in progress*
@@ -77,8 +77,8 @@ From MBAM2 terminal, start a new Claude Code session and say:
 - [x] OutboundPrivacyGuard credential patterns intact ✅ Phase J verified
 
 ### Test Coverage
-- [ ] Swift Package test coverage ≥ 60% — *coverage % not yet confirmed; L verification pending*
-- [x] All critical services have init + happy path + error path tests ✅ Phase H (per UNIVERSAL IMPLEMENTATION STANDARD)
+- [ ] Swift Package test coverage: 100% of all service, manager, actor, and engine classes covered; overall line coverage ≥ 80% (app entry points and UI scaffolding excluded from denominator)
+- [ ] All critical services have init + happy path + error path tests — 100% of services, no exceptions
 
 ### IMPLEMENTATION_PLAN.md
 - [x] Phase 4 (Deep System Awareness iOS): 100% ✅ Phase H
@@ -811,9 +811,10 @@ Update this section after each phase completes (edit in-place):
 | Task | Effort | Blocker? |
 |------|--------|----------|
 | **D3 — Periphery dead code** (8,821 items to wire or mark Reserved) | 4–8 hours | No (runs standalone) |
-| **L — Final verification** (run Phase L script, confirm coverage ≥ 60%, fix any gaps) | 1–2 hours | After D3 |
+| **L — Final verification** (run Phase L script, confirm 100% test pass rate, fix all gaps) | 1–2 hours | After D3 |
 | **Xcode GUI build verify** (4 platforms in Xcode UI, 0 errors/warnings) | 30 min | After D3 |
-| **Test coverage confirm** (swift test --enable-code-coverage → ≥ 60%) | 30 min | After D3 |
+| **Test coverage** (swift test --enable-code-coverage → 100% of critical services covered; write tests for any gap) | 2–4 hours | After D3 |
+| **Flaky test fix** (timezone test must be made deterministic — zero flakes, no skips accepted) | 30–60 min | Parallel with D3 |
 
 ### Timeline
 
@@ -827,9 +828,9 @@ Update this section after each phase completes (edit in-place):
 
 For Phase L to declare 100% (excluding Phase M):
 ```
-[ ] swift test: 0 failures (timezone flake is acceptable — it is environment-dependent)
-[ ] swift test --enable-code-coverage: ≥ 60% line coverage
-[ ] swiftlint lint: 0 errors, 0 warnings
+[ ] swift test: 0 failures, 0 flakes — every test deterministic; fix the timezone test, do not skip it
+[ ] swift test --enable-code-coverage: 100% of critical service/manager/actor/engine classes covered; no untested service allowed to ship
+[ ] swiftlint lint: 0 errors, 0 warnings — warning_threshold = 0 (never raised)
 [ ] All 16 builds: BUILD SUCCEEDED, 0 errors, 0 warnings (8 CLI + 8 Release)
 [ ] Periphery: 0 unaddressed items (all wired or marked Reserved)
 [ ] Xcode GUI: all 4 schemes build cleanly in Xcode UI
