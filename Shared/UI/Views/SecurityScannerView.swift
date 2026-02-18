@@ -311,25 +311,35 @@ struct SecurityScannerView: View {
     }
 
     private var scanHistoryView: some View {
-        List(scanHistory.reversed()) { report in
-            HStack {
-                Image(systemName: report.overallThreatLevel.icon)
-                    .foregroundStyle(threatColor(report.overallThreatLevel))
-                VStack(alignment: .leading) {
-                    Text("\(report.findings.count) findings")
-                        .font(.subheadline)
-                    Text("\(report.filesScanned) files scanned")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+        Group {
+            if scanHistory.isEmpty {
+                ContentUnavailableView(
+                    "No Scan History",
+                    systemImage: "shield.slash",
+                    description: Text("Run a security scan to see results here.")
+                )
+            } else {
+                List(scanHistory.reversed()) { report in
+                    HStack {
+                        Image(systemName: report.overallThreatLevel.icon)
+                            .foregroundStyle(threatColor(report.overallThreatLevel))
+                        VStack(alignment: .leading) {
+                            Text("\(report.findings.count) findings")
+                                .font(.subheadline)
+                            Text("\(report.filesScanned) files scanned")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Text(report.completedAt, style: .relative)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        lastReport = report
+                    }
                 }
-                Spacer()
-                Text(report.completedAt, style: .relative)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .contentShape(Rectangle())
-            .onTapGesture {
-                lastReport = report
             }
         }
     }

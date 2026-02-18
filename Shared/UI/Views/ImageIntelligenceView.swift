@@ -391,6 +391,14 @@ struct ImageIntelligenceView: View {
     }
 
     private var historyListView: some View {
+        Group {
+            if processingHistory.isEmpty {
+                ContentUnavailableView(
+                    "No Processing History",
+                    systemImage: "photo.badge.clock",
+                    description: Text("Processed images will appear here.")
+                )
+            } else {
         List(processingHistory.suffix(50).reversed()) { record in
             HStack {
                 Image(systemName: record.operation.icon)

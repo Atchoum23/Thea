@@ -92,20 +92,20 @@ class MediaLibraryService {
   }
 
   generateMovieFolderName(m: { title: string; year?: number }): string {
-    const name = `${m.title} (${m.year || ''})`.replace(/:/g, ' - ').replace(/[<>"|?*\/\\]/g, '').trim();
+    const name = `${m.title} (${m.year || ''})`.replace(/:/g, ' - ').replace(/[<>"|?*/\\]/g, '').trim();
     return name.replace(/\s+/g, ' ');
   }
 
   generateMovieFileName(m: { title: string; year?: number }, r: ParsedRelease, ext = 'mkv'): string {
     const quality = this.buildQualityTags(r);
-    const name = `${m.title} (${m.year || ''}) ${quality}`.replace(/:/g, ' - ').replace(/[<>"|?*\/\\]/g, '').trim();
+    const name = `${m.title} (${m.year || ''}) ${quality}`.replace(/:/g, ' - ').replace(/[<>"|?*/\\]/g, '').trim();
     return `${name}.${ext}`;
   }
 
   generateSeriesFolderName(s: { title: string; year?: number }): string {
     let name = s.title;
     if (s.year) name = `${name} (${s.year})`;
-    return name.replace(/:/g, ' - ').replace(/[<>"|?*\/\\]/g, '').trim();
+    return name.replace(/:/g, ' - ').replace(/[<>"|?*/\\]/g, '').trim();
   }
 
   generateSeasonFolderName(seasonNumber: number): string {
@@ -117,7 +117,7 @@ class MediaLibraryService {
     const s = ep.season.toString().padStart(2, '0');
     const e = ep.episode.toString().padStart(2, '0');
     const name = `${show.title} - S${s}E${e} - ${ep.title || 'Episode'} ${quality}`;
-    return `${name.replace(/:/g, ' - ').replace(/[<>"|?*\/\\]/g, '').trim()}.${ext}`;
+    return `${name.replace(/:/g, ' - ').replace(/[<>"|?*/\\]/g, '').trim()}.${ext}`;
   }
 
   private buildQualityTags(r: ParsedRelease): string {
