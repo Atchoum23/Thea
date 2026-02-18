@@ -1,6 +1,8 @@
 #if os(macOS)
     import Foundation
 
+    // @unchecked Sendable: securityPolicy is a let constant set at init; the executor spawns
+    // a fresh Process per command; no shared mutable state between concurrent invocations
     /// Executes terminal commands either directly via Process or through Terminal.app
     final class TerminalCommandExecutor: @unchecked Sendable {
         enum ExecutorError: LocalizedError {
