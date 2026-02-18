@@ -113,7 +113,7 @@ extension PredictiveLifeEngine {
     ///
     /// Saves the most recent 500 predictions and the current accuracy score.
     func saveState() {
-        if let historyData = try? JSONEncoder().encode(Array(predictionHistory.suffix(500))) {
+        if let historyData = try? JSONEncoder().encode(Array(predictionHistory.suffix(500))) { // Safe: encode failure → history not persisted this cycle; in-memory state intact
             UserDefaults.standard.set(historyData, forKey: Self.predictionHistoryKey)
         }
         UserDefaults.standard.set(predictionAccuracy, forKey: Self.accuracyKey)

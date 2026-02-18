@@ -55,7 +55,7 @@ final class MoodTracker {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             .appendingPathComponent("Thea", isDirectory: true)
             .appendingPathComponent("MoodTracker", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true) // Safe: directory may already exist; error means mood history not persisted (works in-memory)
         return dir.appendingPathComponent("mood_history.json")
     }()
 
