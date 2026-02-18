@@ -358,6 +358,7 @@ public struct RetrievalProceduralEntry: Sendable {
 
 // MARK: - Memory System Stats
 
+/// Statistics about the current state of the multi-tier memory system.
 public struct MemorySystemStats: Sendable {
     public let shortTermCount: Int
     public let maxShortTerm: Int

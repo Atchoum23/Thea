@@ -118,7 +118,7 @@ struct AdvancedSettingsConfiguration: Equatable, Codable {
     }
 
     func save() {
-        if let data = try? JSONEncoder().encode(self) {
+        if let data = try? JSONEncoder().encode(self) { // Safe: encode failure → settings not persisted this save; in-memory state intact
             UserDefaults.standard.set(data, forKey: Self.storageKey)
         }
     }

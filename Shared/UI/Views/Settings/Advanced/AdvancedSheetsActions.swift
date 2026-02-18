@@ -235,7 +235,7 @@ extension AdvancedSettingsView {
             guard let dir = dirOpt, fm.fileExists(atPath: dir.path) else { continue }
             if let enumerator = fm.enumerator(at: dir, includingPropertiesForKeys: [.fileSizeKey]) {
                 for case let fileURL as URL in enumerator {
-                    if let values = try? fileURL.resourceValues(forKeys: [.fileSizeKey]),
+                    if let values = try? fileURL.resourceValues(forKeys: [.fileSizeKey]), // Safe: file attribute read failure → skip this file in size calculation; non-fatal
                        let size = values.fileSize {
                         totalBytes += UInt64(size)
                     }
@@ -260,9 +260,9 @@ extension AdvancedSettingsView {
         ]
         for dirOpt in cacheDirs {
             guard let dir = dirOpt, fm.fileExists(atPath: dir.path) else { continue }
-            if let contents = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) {
+            if let contents = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) { // Safe: directory listing failure → skip this cache dir; partial clear is still useful
                 for item in contents {
-                    try? fm.removeItem(at: item)
+                    try? fm.removeItem(at: item) // Safe: file removal failure → skip this item; other items still cleared
                 }
             }
         }

@@ -51,7 +51,7 @@ struct PrivacySettingsConfiguration: Equatable, Codable {
 
     static func load() -> PrivacySettingsConfiguration {
         if let data = UserDefaults.standard.data(forKey: storageKey),
-           let config = try? JSONDecoder().decode(PrivacySettingsConfiguration.self, from: data)
+           let config = try? JSONDecoder().decode(PrivacySettingsConfiguration.self, from: data) // Safe: corrupt UserDefaults → return default configuration (fallback below)
         {
             return config
         }
