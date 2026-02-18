@@ -108,11 +108,7 @@ public struct ConfidenceDetailView: View {
             }
             .padding()
         }
-        #if os(macOS)
-        .background(Color(nsColor: .windowBackgroundColor))
-        #else
-        .background(Color(uiColor: .systemBackground))
-        #endif
+        .background(Color.windowBackground)
     }
 
     private var headerSection: some View {

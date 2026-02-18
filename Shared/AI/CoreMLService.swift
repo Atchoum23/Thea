@@ -13,7 +13,10 @@ import OSLog
 
 // MARK: - MLModel Wrapper
 
-/// Wrapper to handle MLModel prediction synchronously to avoid Sendable issues
+/// Wrapper to handle MLModel prediction synchronously to avoid Sendable issues.
+// @unchecked Sendable: wraps MLModel (non-Sendable) to cross async boundaries; the underlying
+// model is immutable after init (set once in init, never mutated) and MLModel is thread-safe
+// for concurrent prediction calls per Apple documentation
 private final class MLModelWrapper: @unchecked Sendable {
     private let model: MLModel
 

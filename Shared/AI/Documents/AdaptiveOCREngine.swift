@@ -130,7 +130,9 @@ protocol OCRProvider: Sendable {
 
 // MARK: - Apple Vision OCR Provider
 
-/// Built-in Apple Vision framework provider
+/// Built-in Apple Vision framework provider.
+// @unchecked Sendable: all properties (providerName, accuracyTier, requiresNetwork) are let
+// constants set at init; Vision framework requests are stateless and created fresh per call
 final class VisionOCRProvider: OCRProvider, @unchecked Sendable {
     let providerName = "Apple Vision"
     let accuracyTier = OCRAccuracyTier.standard

@@ -563,9 +563,5 @@ private struct THEAFlowLayout: Layout {
         .padding()
     }
     .frame(width: 400)
-    #if os(macOS)
-    .background(Color(nsColor: .windowBackgroundColor))
-    #else
-    .background(Color(uiColor: .systemBackground))
-    #endif
+    .background(Color.windowBackground)
 }

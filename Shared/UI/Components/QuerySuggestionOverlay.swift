@@ -62,7 +62,7 @@ public struct QuerySuggestionOverlay: View {
         .cornerRadius(8)
         .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
         .opacity(isVisible && !suggestions.isEmpty ? 1 : 0)
-        .animation(.easeInOut(duration: 0.2), value: isVisible)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isVisible)
         .task {
             await fetchSuggestions()
         }
@@ -72,13 +72,7 @@ public struct QuerySuggestionOverlay: View {
     }
 
     private var suggestionBackground: some View {
-        #if os(iOS)
-        Color(uiColor: .secondarySystemBackground)
-        #elseif os(macOS)
-        Color(nsColor: .controlBackgroundColor)
-        #else
-        Color.gray.opacity(0.1)
-        #endif
+        Color.controlBackground
     }
 
     @MainActor

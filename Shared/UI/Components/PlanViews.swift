@@ -142,11 +142,7 @@ private struct PhaseSection: View {
             }
         }
         .padding(TheaSpacing.sm)
-        #if os(macOS)
-        .background(Color(NSColor.controlBackgroundColor), in: RoundedRectangle(cornerRadius: TheaCornerRadius.md))
-        #else
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: TheaCornerRadius.md))
-        #endif
+        .background(Color.controlBackground, in: RoundedRectangle(cornerRadius: TheaCornerRadius.md))
     }
 
     @ViewBuilder

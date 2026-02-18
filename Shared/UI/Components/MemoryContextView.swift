@@ -105,11 +105,7 @@ public struct MemorySourcesView: View {
             }
             .padding()
         }
-        #if os(macOS)
-        .background(Color(nsColor: .windowBackgroundColor))
-        #else
-        .background(Color(uiColor: .systemBackground))
-        #endif
+        .background(Color.windowBackground)
     }
 }
 
