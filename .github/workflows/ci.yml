@@ -1,5 +1,5 @@
 # Thea CI/CD Pipeline
-# Version: 4.2.0 - Phase E: All P0/P1/P2 fixes applied
+# Version: 5.0.0 - Tiered coverage gates: 70% overall / 100% critical classes / 100% branch on security files
 # Last Updated: February 18, 2026
 
 name: CI

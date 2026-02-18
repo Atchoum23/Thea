@@ -59,7 +59,7 @@ jobs:
             });
             const ciRun = runs.workflow_runs.find(r => r.name === 'CI' && r.head_sha === ref);
             if (!ciRun) {
-              core.warning('No successful CI run found for this commit. Proceeding anyway (workflow_dispatch or tag push).');
+              core.setFailed(`No successful CI run found for commit ${ref}. A passing CI run is required before releasing. Trigger CI first, then re-run this workflow.`);
             } else {
               console.log('CI passed:', ciRun.html_url);
             }
@@ -136,12 +136,16 @@ jobs:
           echo "Building version: $VERSION"
 
       - name: Import Code Signing Certificate
-        if: ${{ secrets.APPLE_CERTIFICATE_BASE64 != '' }}
         env:
           CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
           CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
+          # Skip if no certificate configured (secrets context can't be used in if: conditions)
+          if [ -z "$CERTIFICATE_BASE64" ]; then
+            echo "No signing certificate configured — building unsigned (CI validation only)"
+            exit 0
+          fi
           KEYCHAIN_PATH=$RUNNER_TEMP/signing.keychain-db
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
