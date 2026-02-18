@@ -122,6 +122,7 @@ private struct TestAutoApprovalConfig {
     }
 }
 
+// @unchecked Sendable: test helper class used in single-threaded test context; no concurrent access
 /// Approval queue for testing lifecycle
 private final class TestApprovalQueue: @unchecked Sendable {
     var pendingApprovals: [TestApprovalRequest] = []

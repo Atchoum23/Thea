@@ -80,6 +80,7 @@ private struct BFTimeContext: Sendable {
 
 // MARK: - Fingerprint Service (mirrors production logic)
 
+// @unchecked Sendable: test helper class used in single-threaded test context; no concurrent access
 private final class TestBehavioralFingerprint: @unchecked Sendable {
     var timeSlots: [[BFTimeSlot]] // [dayOfWeek][hour]
     var typicalWakeTime: Int = 7
