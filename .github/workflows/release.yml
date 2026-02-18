@@ -91,7 +91,7 @@ jobs:
           - platform: tvOS
             scheme: Thea-tvOS
             destination: 'generic/platform=tvOS'
-            artifact_path: 'build/Build/Products/Release-appletvos/Thea.app'
+            artifact_path: 'build/Build/Products/Release-appletvos/Thea TV.app'
 
     steps:
       - name: Checkout
