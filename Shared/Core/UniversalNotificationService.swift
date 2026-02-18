@@ -358,6 +358,7 @@ public actor UniversalNotificationService {
 
 // MARK: - Notification Priority
 
+/// Priority level for cross-device notifications.
 public enum TheaNotificationPriority: String, Codable, Sendable {
     case low
     case normal
@@ -367,6 +368,7 @@ public enum TheaNotificationPriority: String, Codable, Sendable {
 
 // MARK: - Notification Sound
 
+/// Sound played when a cross-device notification is delivered.
 public enum NotificationSound: String, Codable, Sendable {
     case `default`
     case message
@@ -378,6 +380,7 @@ public enum NotificationSound: String, Codable, Sendable {
 
 // MARK: - Notification Device
 
+/// A device registered to receive cross-device notifications from Thea.
 public struct NotificationDevice: Identifiable, Sendable {
     public let id: String
     public let name: String
@@ -392,6 +395,7 @@ public struct NotificationDevice: Identifiable, Sendable {
 
 // MARK: - Universal Notification Error
 
+/// Errors thrown by UniversalNotificationService.
 public enum UniversalNotificationError: Error, LocalizedError, Sendable {
     case iCloudNotAvailable
     case deviceNotRegistered

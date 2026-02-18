@@ -121,7 +121,7 @@ extension FocusModeIntelligence {
     func startPeriodicTasks() async {
         Task {
             while getIsRunning() {
-                try? await Task.sleep(for: .seconds(3600))
+                try? await Task.sleep(for: .seconds(3600)) // Safe: sleep cancellation is non-fatal; loop exits via isRunning flag
                 await analyzeUsagePatterns()
             }
         }

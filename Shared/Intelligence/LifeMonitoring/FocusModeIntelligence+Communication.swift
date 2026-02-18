@@ -59,7 +59,7 @@ extension FocusModeIntelligence {
         appendRecentCommunication(communication)
 
         // Wait a moment to see if this becomes a missed call
-        try? await Task.sleep(for: .seconds(30))
+        try? await Task.sleep(for: .seconds(30)) // Safe: sleep cancellation means task was cancelled; monitoring continues normally
 
         // If still in our list as a call, it was likely declined/missed
         if let comm = findRecentCommunication(by: communication.id),
@@ -71,7 +71,7 @@ extension FocusModeIntelligence {
             // Send missed call notification
             let settings = getGlobalSettings()
             if settings.callerNotificationEnabled && settings.sendSMSAfterMissedCall {
-                try? await Task.sleep(for: .seconds(settings.smsDelayAfterMissedCall))
+                try? await Task.sleep(for: .seconds(settings.smsDelayAfterMissedCall)) // Safe: sleep cancellation skips SMS delay; non-fatal
                 await sendMissedCallNotification(for: missedCall)
             }
         }

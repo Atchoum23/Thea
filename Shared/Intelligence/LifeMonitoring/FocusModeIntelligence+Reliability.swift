@@ -82,7 +82,7 @@ extension FocusModeIntelligence {
             if success {
                 // Verify the action actually worked
                 if verificationMethod == .pollStatus {
-                    try? await Task.sleep(for: .seconds(2))
+                    try? await Task.sleep(for: .seconds(2)) // Safe: verification delay; sleep cancellation means task was cancelled; non-fatal
                     let verified = await verifyAction(actionType)
                     if verified {
                         markActionVerified(pendingAction.id)
