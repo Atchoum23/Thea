@@ -118,7 +118,7 @@ final class TVInferenceClient: ObservableObject {
             // Timeout after 60 seconds
             Task {
                 try? await Task.sleep(for: .seconds(60))
-                if let cont = await self.pendingRequests.removeValue(forKey: request.requestId) {
+                if let cont = self.pendingRequests.removeValue(forKey: request.requestId) {
                     cont.resume(throwing: TVInferenceError.timeout)
                 }
             }

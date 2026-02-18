@@ -11,6 +11,7 @@
 // All supporting types are in LocalModelRecommendationTypes.swift
 
 import Foundation
+import OSLog
 #if os(macOS)
 import IOKit.ps
 #elseif os(iOS) || os(watchOS) || os(tvOS)
@@ -86,6 +87,9 @@ final class LocalModelRecommendationEngine {
 
     var configuration = Configuration()
     var systemProfile: SystemHardwareProfile?
+
+    // Logger (used by +Helpers and other extension files)
+    let logger = Logger(subsystem: "com.thea.ai", category: "LocalModelRecommendationEngine")
 
     // Monitoring task (used by +Helpers extension)
     var monitoringTask: Task<Void, Never>?

@@ -443,7 +443,7 @@ final class WatchHealthViewModel {
                     activityName: Self.activityName(for: workout.workoutActivityType),
                     icon: Self.activityIcon(for: workout.workoutActivityType),
                     duration: workout.duration,
-                    caloriesBurned: workout.totalEnergyBurned?.doubleValue(for: .kilocalorie()),
+                    caloriesBurned: workout.statistics(for: HKQuantityType(.activeEnergyBurned))?.sumQuantity()?.doubleValue(for: .kilocalorie()),
                     startDate: workout.startDate
                 )
                 continuation.resume(returning: summary)
@@ -454,7 +454,7 @@ final class WatchHealthViewModel {
 
     // MARK: - Workout Helpers
 
-    private static func activityName(for type: HKWorkoutActivityType) -> String {
+    nonisolated private static func activityName(for type: HKWorkoutActivityType) -> String {
         switch type {
         case .running: "Running"
         case .walking: "Walking"
@@ -474,7 +474,7 @@ final class WatchHealthViewModel {
         }
     }
 
-    private static func activityIcon(for type: HKWorkoutActivityType) -> String {
+    nonisolated private static func activityIcon(for type: HKWorkoutActivityType) -> String {
         switch type {
         case .running: "figure.run"
         case .walking: "figure.walk"
