@@ -388,7 +388,9 @@ final class WakeWordEngine {
 
 // MARK: - Audio Processor (Nonisolated)
 
-/// Handles all audio processing off the main thread
+/// Handles all audio processing off the main thread.
+/// - Note: @unchecked Sendable — all mutable state (audioEngine, audioBuffer) is exclusively
+///   accessed on the dedicated processingQueue serial DispatchQueue; NSLock guards cross-queue paths
 private final class AudioProcessor: @unchecked Sendable {
     private var audioEngine: AVAudioEngine?
     private let processingQueue = DispatchQueue(label: "app.thea.wakeword.processing", qos: .userInteractive)
@@ -578,6 +580,8 @@ private final class AudioProcessor: @unchecked Sendable {
 
 // MARK: - Speaker Trainer (Nonisolated)
 
+// @unchecked Sendable: stateless trainer — embeddingSize is a constant; train() and verify()
+// create temporary local state only; safe for concurrent calls from different tasks
 private final class SpeakerTrainer: @unchecked Sendable {
     private let embeddingSize = 128
 
