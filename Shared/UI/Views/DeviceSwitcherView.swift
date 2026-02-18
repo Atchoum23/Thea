@@ -85,6 +85,8 @@ public struct DeviceSwitcherView: View {
         .sheet(isPresented: $showSyncSettings) {
             DeviceSyncSettingsSheet()
         }
+            } // end else isLoading
+        } // end Group
     }
 
     // MARK: - Computed Properties
