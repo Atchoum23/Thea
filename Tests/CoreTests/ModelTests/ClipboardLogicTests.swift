@@ -7,6 +7,7 @@ import Foundation
 
 // MARK: - Clipboard Test Doubles
 
+// @unchecked Sendable: test helper class used in single-threaded test context; no concurrent access
 /// Mirrors paste stack FIFO behavior
 private final class TestPasteStack: @unchecked Sendable {
     var items: [String] = []

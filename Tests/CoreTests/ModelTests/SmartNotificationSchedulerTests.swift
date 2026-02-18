@@ -44,6 +44,7 @@ private struct SNSContext: Sendable {
 
 // MARK: - Scheduler (mirrors production logic)
 
+// @unchecked Sendable: test helper class used in single-threaded test context; no concurrent access
 private final class TestSmartNotificationScheduler: @unchecked Sendable {
     var isEnabled = true
     var maxDelayHours = 4

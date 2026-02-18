@@ -75,6 +75,7 @@ private struct TestKGEdge: Sendable, Equatable {
 
 // MARK: - Graph Logic (standalone, testable)
 
+// @unchecked Sendable: test helper class used in single-threaded test context; no concurrent access
 private final class TestKnowledgeGraph: @unchecked Sendable {
     private var entities: [String: TestKGEntity] = [:]
     private var edges: [TestKGEdge] = []

@@ -65,6 +65,7 @@ private struct TestLongTermMemory: Identifiable, Sendable, Equatable {
 
 // MARK: - Memory Store Logic (standalone, testable)
 
+// @unchecked Sendable: test helper class used in single-threaded test context; no concurrent access
 private final class TestMemoryStore: @unchecked Sendable {
     private var memories: [UUID: TestLongTermMemory] = [:]
     private var categoryIndex: [String: Set<UUID>] = [:]

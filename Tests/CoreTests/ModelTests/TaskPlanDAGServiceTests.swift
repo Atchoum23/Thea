@@ -68,6 +68,7 @@ private struct TPlanResult: Sendable {
 
 // MARK: - Plan Manager (mirrors production TaskPlanDAG service logic)
 
+// @unchecked Sendable: test helper class used in single-threaded test context; no concurrent access
 private final class TestTaskPlanManager: @unchecked Sendable {
     var activePlans: [TPlan] = []
 

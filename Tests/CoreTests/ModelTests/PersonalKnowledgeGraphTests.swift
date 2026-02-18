@@ -74,6 +74,7 @@ private enum PKGMatchType: String, Sendable {
 
 // MARK: - Graph Implementation (mirrors production logic)
 
+// @unchecked Sendable: test helper class used in single-threaded test context; no concurrent access
 private final class TestPersonalKnowledgeGraph: @unchecked Sendable {
     var entities: [String: PKGEntity] = [:]
     var edges: [PKGEdge] = []
