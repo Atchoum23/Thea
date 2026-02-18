@@ -503,10 +503,10 @@ public final class CausalPatternAnalyzer {
         Task.detached { [weak self] in
             while true {
                 do {
-                    try await Task.sleep(for: .seconds(600)
+                    try await Task.sleep(for: .seconds(600))
                 } catch {
                     break
-                }) // Every 10 minutes
+                } // Every 10 minutes
                 await self?.performPeriodicAnalysis()
             }
         }

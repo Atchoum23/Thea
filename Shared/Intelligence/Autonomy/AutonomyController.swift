@@ -489,10 +489,10 @@ public final class AutonomyController: ObservableObject {
         hourResetTask = Task {
             while !Task.isCancelled {
                 do {
-                    try await Task.sleep(for: .seconds(3600)
+                    try await Task.sleep(for: .seconds(3600))
                 } catch {
                     break
-                })
+                }
                 await MainActor.run {
                     self.actionsThisHour = 0
                 }

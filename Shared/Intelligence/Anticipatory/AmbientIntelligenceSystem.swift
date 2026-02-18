@@ -101,10 +101,10 @@ public final class AmbientIntelligenceSystem {
             while !Task.isCancelled {
                 await self?.updateAmbientContext()
                 do {
-                    try await Task.sleep(for: .seconds(10)
+                    try await Task.sleep(for: .seconds(10))
                 } catch {
                     break
-                })
+                }
             }
         }
     }

@@ -529,9 +529,6 @@ enum ArtifactExtractor {
                 type: .code(language: .swift),
                 content: """
                 import Foundation
-import OSLog
-
-private let logger = Logger(subsystem: "ai.thea.app", category: "ArtifactPanel")
 
                 struct Example {
                     let value: Int

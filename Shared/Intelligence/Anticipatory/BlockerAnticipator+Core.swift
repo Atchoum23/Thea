@@ -447,10 +447,10 @@ public final class BlockerAnticipator {
         Task.detached { [weak self] in
             while true {
                 do {
-                    try await Task.sleep(for: .seconds(30)
+                    try await Task.sleep(for: .seconds(30))
                 } catch {
                     break
-                })
+                }
                 await self?.checkTaskDuration()
                 await self?.checkIdleTime()
             }

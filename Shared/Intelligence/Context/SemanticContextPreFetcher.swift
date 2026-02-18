@@ -557,10 +557,10 @@ public final class SemanticContextPreFetcher {
         Task.detached { [weak self] in
             while true {
                 do {
-                    try await Task.sleep(for: .seconds(60)
+                    try await Task.sleep(for: .seconds(60))
                 } catch {
                     break
-                })
+                }
                 await self?.performCleanup()
             }
         }

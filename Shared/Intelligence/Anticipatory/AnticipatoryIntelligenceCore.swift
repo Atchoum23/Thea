@@ -136,10 +136,10 @@ public final class AnticipatoryIntelligenceCore {
             while !Task.isCancelled {
                 await self?.runAnticipationCycle()
                 do {
-                    try await Task.sleep(for: .seconds(5)
+                    try await Task.sleep(for: .seconds(5))
                 } catch {
                     break
-                })
+                }
             }
         }
     }

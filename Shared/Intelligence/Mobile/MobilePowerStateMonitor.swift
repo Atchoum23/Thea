@@ -112,7 +112,7 @@ public struct InferenceBudget: Sendable {
 @MainActor
 @Observable
 public final class MobilePowerStateMonitor {
-    private let logger = Logger(subsystem: \"ai.thea.app\", category: \"MobilePowerStateMonitor\")
+    private let logger = Logger(subsystem: "ai.thea.app", category: "MobilePowerStateMonitor")
     public static let shared = MobilePowerStateMonitor()
 
     // MARK: - State

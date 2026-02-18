@@ -8,7 +8,7 @@
 import Foundation
 import OSLog
 
-private let msgComprehensionLogger = Logger(subsystem: \"ai.thea.app\", category: \"MessageComprehension\")
+private let msgComprehensionLogger = Logger(subsystem: "ai.thea.app", category: "MessageComprehension")
 
 /// Analyzes messages to extract structured understanding.
 enum MsgComprehensionEngine {
@@ -210,7 +210,7 @@ enum MsgComprehensionEngine {
         }
 
         // URLs
-        let urlPattern = #"https?://[^\s<>\"')\]]+"#
+        let urlPattern = #"https?://[^\s<>"')\]]+"#
         for match in matches(for: urlPattern, in: text) {
             entities.append(MsgEntity(type: .url, value: match))
         }

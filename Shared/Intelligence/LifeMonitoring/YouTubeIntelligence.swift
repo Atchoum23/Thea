@@ -309,7 +309,7 @@ public struct ContentPreferences: Sendable {
 
 /// Main engine for learning from YouTube content
 public actor YouTubeIntelligence {
-    private let logger = Logger(subsystem: \"ai.thea.app\", category: \"YouTubeIntelligence\")
+    private let logger = Logger(subsystem: "ai.thea.app", category: "YouTubeIntelligence")
     // MARK: - Singleton
 
     public static let shared = YouTubeIntelligence()
