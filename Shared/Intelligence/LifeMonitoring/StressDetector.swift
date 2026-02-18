@@ -139,7 +139,7 @@ final class StressDetector {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             .appendingPathComponent("Thea", isDirectory: true)
             .appendingPathComponent("LifeMonitoring", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true) // Safe: directory may already exist; error means state not persisted (works in-memory)
         return dir.appendingPathComponent("stress_state.json")
     }()
 

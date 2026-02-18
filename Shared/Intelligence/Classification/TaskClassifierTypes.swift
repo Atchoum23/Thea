@@ -66,6 +66,7 @@ struct AlternativeClassification: Codable {
     let confidence: Double
 }
 
+/// A logged record of a single classification event, including correctness feedback when available.
 public struct ClassificationRecord: Codable, Sendable, Identifiable {
     public let id: UUID
     public let query: String
@@ -93,6 +94,7 @@ public struct ClassificationRecord: Codable, Sendable, Identifiable {
 
 // MARK: - Errors
 
+/// Errors thrown during task classification.
 public enum ClassificationError: Error, LocalizedError {
     case invalidResponse(String)
     case unknownTaskType(String)

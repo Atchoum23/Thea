@@ -76,7 +76,7 @@ final class AmbientLifeJournal: @unchecked Sendable {
     private static let journalDirectory: URL = {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Thea/Journal", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true) // Safe: directory may already exist; error means journal not persisted (works in-memory)
         return dir
     }()
 
@@ -348,7 +348,7 @@ final class AmbientLifeJournal: @unchecked Sendable {
         let fm = FileManager.default
         let dir = Self.journalDirectory
 
-        guard let files = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else {
+        guard let files = try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else { // Safe: directory missing or unreadable → start fresh; non-fatal
             logger.info("No journal directory contents found — starting fresh")
             return
         }

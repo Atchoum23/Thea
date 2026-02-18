@@ -338,4 +338,38 @@ public actor FocusModeIntelligence {
         focusModes.removeValue(forKey: modeId)
     }
 
+    // MARK: - Callback Setters (used by +Configuration.swift)
+
+    func setOnFocusModeChanged(_ handler: (@Sendable (FocusModeConfiguration?) -> Void)?) {
+        onFocusModeChanged = handler
+    }
+
+    func setOnAutoReplySent(_ handler: (@Sendable (IncomingCommunication, String) -> Void)?) {
+        onAutoReplySent = handler
+    }
+
+    func setOnUrgentDetected(_ handler: (@Sendable (IncomingCommunication) -> Void)?) {
+        onUrgentDetected = handler
+    }
+
+    func setOnEmergencyDetected(_ handler: (@Sendable (IncomingCommunication) -> Void)?) {
+        onEmergencyDetected = handler
+    }
+
+    func setOnSettingsChanged(_ handler: (@Sendable (FocusModeGlobalSettings) -> Void)?) {
+        onSettingsChanged = handler
+    }
+
+    // MARK: - Emergency Contact Internals (used by +Configuration.swift)
+
+    func addEmergencyContactInternal(_ contactId: String) {
+        emergencyContacts.insert(contactId)
+        globalSettings.emergencyContacts.append(contactId)
+    }
+
+    func removeEmergencyContactInternal(_ contactId: String) {
+        emergencyContacts.remove(contactId)
+        globalSettings.emergencyContacts.removeAll { $0 == contactId }
+    }
+
 }
