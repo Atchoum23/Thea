@@ -216,24 +216,29 @@ public final class PlanManager {
 
     // MARK: - Panel Control
 
+    /// Show the plan execution panel.
     public func showPanel() {
         isPanelVisible = true
         isPanelCollapsed = false
     }
 
+    /// Hide the plan execution panel.
     public func hidePanel() {
         isPanelVisible = false
     }
 
+    /// Collapse the plan panel to its minimized state.
     public func collapsePanel() {
         isPanelCollapsed = true
     }
 
+    /// Expand the plan panel to its full state.
     public func expandPanel() {
         isPanelCollapsed = false
         isPanelVisible = true
     }
 
+    /// Toggle the plan panel visibility.
     public func togglePanel() {
         if isPanelVisible {
             isPanelVisible = false

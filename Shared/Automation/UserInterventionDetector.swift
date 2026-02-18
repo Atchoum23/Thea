@@ -194,7 +194,7 @@
 
             // Start new timeout
             timeoutTask = Task { [weak self, activityTimeout] in
-                try? await Task.sleep(for: .seconds(activityTimeout))
+                try? await Task.sleep(for: .seconds(activityTimeout)) // Safe: inactivity timeout; cancellation means a new activity reset the timer; non-fatal
 
                 guard !Task.isCancelled else { return }
                 self?.isUserActive = false

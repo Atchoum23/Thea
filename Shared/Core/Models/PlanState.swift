@@ -186,7 +186,9 @@ public struct PlanState: Identifiable, Codable, Sendable {
 
 // MARK: - Plan Modification
 
+/// A user- or AI-initiated change to an active plan (add/remove/reorder steps or phases).
 public struct PlanModification: Sendable {
+    /// The specific type of structural change being applied to the plan.
     public enum ModificationType: Sendable {
         case insertSteps([PlanStep], afterStepId: UUID?)
         case removeSteps([UUID])

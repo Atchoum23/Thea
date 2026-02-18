@@ -49,6 +49,7 @@ public struct InputDraft: Codable, Identifiable, Sendable {
 }
 
 /// Attachment in a draft
+/// A file or media attachment associated with an input draft.
 public struct DraftAttachment: Codable, Identifiable, Sendable {
     public let id: UUID
     public let type: AttachmentType
@@ -58,6 +59,7 @@ public struct DraftAttachment: Codable, Identifiable, Sendable {
     public let fileSize: Int64
     public let mimeType: String?
 
+    /// The kind of content represented by this draft attachment.
     public enum AttachmentType: String, Codable, Sendable {
         case image
         case file

@@ -269,7 +269,7 @@ struct PersonalizationSettingsView: View {
 
         showSavedBanner = true
         Task { @MainActor in
-            try? await Task.sleep(for: .seconds(2))
+            try? await Task.sleep(for: .seconds(2)) // Safe: UI banner dismiss delay; cancellation hides banner immediately; non-fatal
             showSavedBanner = false
         }
     }

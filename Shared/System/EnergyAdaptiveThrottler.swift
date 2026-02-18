@@ -49,7 +49,7 @@ public final class EnergyAdaptiveThrottler {
         monitorTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.updateMultiplier()
-                try? await Task.sleep(for: .seconds(10))
+                try? await Task.sleep(for: .seconds(10)) // Safe: monitoring poll interval; cancellation exits loop; non-fatal
             }
         }
 
@@ -109,7 +109,7 @@ public final class EnergyAdaptiveThrottler {
         setMultiplier(multiplier, reason: reason)
         // Auto-restore after 60s — thermalState check will normalise if pressure eases
         Task { @MainActor [weak self] in
-            try? await Task.sleep(for: .seconds(60))
+            try? await Task.sleep(for: .seconds(60)) // Safe: auto-restore timer; sleep cancellation means task was cancelled; non-fatal
             await self?.updateMultiplier()
         }
     }

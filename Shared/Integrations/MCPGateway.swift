@@ -617,7 +617,7 @@ public final class MCPGateway: ObservableObject {
 
                 // Wait before retry
                 let delay = request.retryPolicy.delay(forAttempt: retryCount)
-                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000)) // Safe: retry backoff delay; cancellation exits retry loop; non-fatal
                 retryCount += 1
 
                 logger.debug("Retrying request \(request.id) (attempt \(retryCount))")

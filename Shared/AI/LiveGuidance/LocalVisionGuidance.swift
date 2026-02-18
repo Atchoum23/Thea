@@ -126,7 +126,7 @@ final class LocalVisionGuidance {
         let intro = "Starting live guidance for: \(task)"
         currentInstruction = intro
         if voiceGuidanceEnabled {
-            try? await voiceBackend.speak(text: intro)
+            try? await voiceBackend.speak(text: intro) // Safe: intro speech is optional UX enhancement; failure doesn't block guidance
         }
 
         // Start pointer tracking (if control handoff enabled)
@@ -158,7 +158,7 @@ final class LocalVisionGuidance {
 
         let outro = "Guidance stopped"
         if voiceGuidanceEnabled {
-            try? await voiceBackend.speak(text: outro)
+            try? await voiceBackend.speak(text: outro) // Safe: outro speech is optional UX enhancement; failure doesn't block shutdown
         }
 
         print("[LocalVisionGuidance] Stopped guidance")
@@ -191,13 +191,13 @@ final class LocalVisionGuidance {
                     currentInstruction = instruction
 
                     if voiceGuidanceEnabled && !instruction.isEmpty {
-                        try? await voiceBackend.speak(text: instruction)
+                        try? await voiceBackend.speak(text: instruction) // Safe: voice guidance is optional; text display remains; non-fatal
                     }
                 }
 
                 // Execute action if control handoff enabled and analysis suggests action
                 if allowControlHandoff {
-                    try? await executeActionIfSuggested(analysis: analysis)
+                    try? await executeActionIfSuggested(analysis: analysis) // Safe: control action is best-effort; non-execution means user takes manual control
                 }
 
             } catch {
@@ -206,7 +206,7 @@ final class LocalVisionGuidance {
             }
 
             // Wait before next iteration
-            try? await Task.sleep(for: .seconds(guidanceIntervalSeconds))
+            try? await Task.sleep(for: .seconds(guidanceIntervalSeconds)) // Safe: guidance loop interval; cancellation exits loop when isGuiding becomes false; non-fatal
         }
     }
 

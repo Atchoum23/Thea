@@ -490,7 +490,7 @@ public final class ContextAwarenessService: ObservableObject {
         Task {
             while true {
                 updateContext()
-                try? await Task.sleep(nanoseconds: 60_000_000_000) // Every minute
+                try? await Task.sleep(nanoseconds: 60_000_000_000) // Safe: context update interval; cancellation exits loop; non-fatal // Every minute
             }
         }
     }

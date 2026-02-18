@@ -146,7 +146,7 @@ import Foundation
 
             // Check again after a delay
             Task {
-                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                try? await Task.sleep(nanoseconds: 2_000_000_000) // Safe: permission re-check delay; cancellation means task was dropped; non-fatal
                 checkAccessibilityPermissions()
             }
         }

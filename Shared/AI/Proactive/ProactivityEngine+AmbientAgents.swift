@@ -63,7 +63,7 @@ extension ProactivityEngine {
                 }
 
                 // Wait for next check interval
-                try? await Task.sleep(for: .seconds(agent.checkIntervalSeconds))
+                try? await Task.sleep(for: .seconds(agent.checkIntervalSeconds)) // Safe: poll interval sleep; cancellation exits agent loop; non-fatal
             }
         }
 
