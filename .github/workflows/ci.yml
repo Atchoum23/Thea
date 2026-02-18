@@ -269,23 +269,81 @@ jobs:
           xcrun xccov view --report --json build/test-results-macos.xcresult > coverage-macos.json 2>/dev/null || true
           xcrun xccov view --report --json build/test-results-ios.xcresult > coverage-ios.json 2>/dev/null || true
 
-      - name: Check Coverage Threshold
+      - name: Check Coverage Threshold (≥80% overall)
         if: always()
         run: |
-          # Check macOS coverage is at least 40%
           if [ -f coverage-macos.json ]; then
             python3 -c "
           import json,sys
           try:
             d=json.load(open('coverage-macos.json'))
             cov=d.get('lineCoverage',0)
-            print(f'macOS line coverage: {cov:.1%}')
+            print(f'macOS overall line coverage: {cov:.1%}')
             if cov < 0.80:
-              print(f'::warning::macOS coverage {cov:.1%} is below 80% target')
+              print(f'::error::macOS overall coverage {cov:.1%} is below 80% minimum')
+              sys.exit(1)
           except Exception as e:
             print(f'Could not parse coverage: {e}')
-          " || true
+          "
           fi
+
+      - name: Check Critical Class Coverage (100% target)
+        if: always()
+        run: |
+          # Service/Manager/Engine/Pipeline/Orchestrator/Controller/Coordinator classes
+          # must have 100% line coverage — no business logic ships untested.
+          if [ ! -f coverage-macos.json ]; then
+            echo "::warning::No coverage-macos.json — skipping critical class check"
+            exit 0
+          fi
+          python3 << 'PYEOF'
+import json, sys
+
+CRITICAL_SUFFIXES = (
+    'Service.swift', 'Manager.swift', 'Engine.swift',
+    'Pipeline.swift', 'Orchestrator.swift', 'Controller.swift',
+    'Coordinator.swift',
+)
+THRESHOLD = 1.0  # 100%
+
+try:
+    d = json.load(open('coverage-macos.json'))
+    targets = d.get('targets', [])
+
+    checked = []
+    failures = []
+
+    for target in targets:
+        for file in target.get('files', []):
+            name = file.get('name', '')
+            if not name.endswith(CRITICAL_SUFFIXES):
+                continue
+            cov = file.get('lineCoverage', 0.0)
+            checked.append((name, cov))
+            if cov < THRESHOLD:
+                failures.append((name, cov))
+
+    if not checked:
+        print('No critical class files found in coverage data — nothing to check')
+        sys.exit(0)
+
+    print(f'Critical class coverage ({len(checked)} files):')
+    for name, cov in sorted(checked):
+        mark = 'PASS' if cov >= THRESHOLD else 'FAIL'
+        print(f'  [{mark}] {name}: {cov:.1%}')
+
+    if failures:
+        print(f'\n::error::{len(failures)} critical class file(s) below 100% coverage:')
+        for name, cov in sorted(failures):
+            print(f'  {name}: {cov:.1%}')
+        sys.exit(1)
+    else:
+        print(f'\nAll {len(checked)} critical class files at 100% coverage')
+
+except Exception as e:
+    print(f'::warning::Could not parse coverage data: {e}')
+    sys.exit(0)
+PYEOF
 
       - name: Upload Test Results
         if: always()
