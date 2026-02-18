@@ -724,7 +724,7 @@ final class HealthInsightsDetailViewModel {
         // Fetch sleep data
         var sleepMinutes: [Double] = []
         let sleepRange = DateInterval(start: startDate.addingTimeInterval(-30 * 3600), end: endDate)
-        if let records = try? await healthKitService.fetchSleepData(for: sleepRange) {
+        if let records = try? await healthKitService.fetchSleepData(for: sleepRange) { // Safe: nil = no data, view shows empty state
             for record in records {
                 sleepMinutes.append(record.endDate.timeIntervalSince(record.startDate) / 60)
             }
@@ -740,7 +740,7 @@ final class HealthInsightsDetailViewModel {
         var activityPoints: [TrendDataPoint] = []
         for dayOffset in 0 ..< timeRange.days {
             let date = calendar.date(byAdding: .day, value: -dayOffset, to: endDate) ?? endDate
-            if let summary = try? await healthKitService.fetchActivityData(for: date) {
+            if let summary = try? await healthKitService.fetchActivityData(for: date) { // Safe: nil = no activity data for this day, skip
                 stepValues.append(Double(summary.steps))
                 calorieValues.append(Double(summary.activeCalories))
                 activityPoints.append(TrendDataPoint(date: date, value: Double(summary.steps)))
@@ -757,7 +757,7 @@ final class HealthInsightsDetailViewModel {
 
         // Fetch heart rate data
         let hrRange = DateInterval(start: startDate, end: endDate)
-        if let hrRecords = try? await healthKitService.fetchHeartRateData(for: hrRange) {
+        if let hrRecords = try? await healthKitService.fetchHeartRateData(for: hrRange) { // Safe: nil = no HR data, view shows dashes
             let restingHR = hrRecords.filter { $0.context == .resting || $0.context == .sleep }
             averageRestingHR = restingHR.isEmpty ? 0 : restingHR.map(\.beatsPerMinute).reduce(0, +) / restingHR.count
             heartScore = averageRestingHR > 0 ? min(100, max(0, 100 - Double(averageRestingHR - 50))) : 0
