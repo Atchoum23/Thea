@@ -76,7 +76,9 @@
             // swiftlint:disable:next force_cast
             let windowElement = window as! AXUIElement
             do {
-                let textContent = try findTextContent(in: windowElement)
+                guard let textContent = try findTextContent(in: windowElement) else {
+                    throw AccessibilityError.elementNotFound
+                }
                 return textContent
             } catch {
                 throw AccessibilityError.elementNotFound
@@ -305,13 +307,12 @@
 
         // Read the new content
         do {
-            if let content = try AccessibilityBridge.readTerminalText() {
+            let content = try AccessibilityBridge.readTerminalText()
                 // Capture the callback to avoid data race - execute on MainActor
                 let callback = monitor.onChange
                 Task { @MainActor in
                     callback?(content)
                 }
-            }
         } catch {
             accessibilityBridgeLogger.debug("Failed to read terminal text in notification callback: \(error.localizedDescription)")
         }

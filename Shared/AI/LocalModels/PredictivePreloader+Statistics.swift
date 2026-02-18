@@ -114,7 +114,7 @@ extension PredictivePreloader {
                 encodableMatrix[fromTask.rawValue]?[toTask.rawValue] = value
             }
         }
-        if let data = try? JSONEncoder().encode(encodableMatrix) {
+        if let data = try? JSONEncoder().encode(encodableMatrix) { // Safe: encode failure → matrix not persisted this cycle; in-memory learning continues
             UserDefaults.standard.set(data, forKey: transitionMatrixKey)
         }
 
@@ -126,7 +126,7 @@ extension PredictivePreloader {
                 encodableToD[hour]?[task.rawValue] = value
             }
         }
-        if let data = try? JSONEncoder().encode(encodableToD) {
+        if let data = try? JSONEncoder().encode(encodableToD) { // Safe: encode failure → time-of-day patterns not persisted; in-memory learning continues
             UserDefaults.standard.set(data, forKey: timeOfDayPatternsKey)
         }
 
