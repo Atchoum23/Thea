@@ -68,7 +68,7 @@
             let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
                 ?? FileManager.default.temporaryDirectory
             let theaFolder = appSupport.appendingPathComponent("Thea", isDirectory: true)
-            try? FileManager.default.createDirectory(at: theaFolder, withIntermediateDirectories: true)
+            try? FileManager.default.createDirectory(at: theaFolder, withIntermediateDirectories: true) // Safe: directory may already exist; error means history cannot be persisted (works in-memory)
             commandHistoryURL = theaFolder.appendingPathComponent("terminal_history.json")
 
             // Load saved configuration

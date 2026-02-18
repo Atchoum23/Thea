@@ -10,6 +10,7 @@ import Foundation
 // MARK: - Models
 // All types prefixed with "Blueprint" to avoid conflicts with existing models
 
+/// Lifecycle status of a blueprint execution run.
 public enum BlueprintExecutionStatus: String, Sendable {
     case idle
     case running
@@ -18,6 +19,7 @@ public enum BlueprintExecutionStatus: String, Sendable {
     case cancelled
 }
 
+/// The outcome of a completed blueprint execution, including per-phase results and diagnostics.
 public struct BlueprintExecutionResult: Sendable {
     public let success: Bool
     public var phaseResults: [BlueprintPhaseResult] = []
@@ -25,6 +27,7 @@ public struct BlueprintExecutionResult: Sendable {
     public var executionTime: TimeInterval = 0
 }
 
+/// The execution result for a single phase within a blueprint.
 public struct BlueprintPhaseResult: Sendable {
     public let phase: String
     public let success: Bool

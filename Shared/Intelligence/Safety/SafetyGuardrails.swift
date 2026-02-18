@@ -44,6 +44,7 @@ public struct ActionClassification: Sendable {
     }
 }
 
+/// High-level category of an action evaluated by the safety guardrail system.
 public enum SafetyActionCategory: String, Codable, Sendable {
     case fileRead
     case fileWrite
@@ -60,6 +61,7 @@ public enum SafetyActionCategory: String, Codable, Sendable {
     case other
 }
 
+/// Risk classification assigned to an action by the safety guardrails.
 public enum SafetyRiskLevel: String, Codable, Sendable, Comparable {
     case safe       // No risk, fully reversible
     case low        // Minimal risk, easily reversible
@@ -73,6 +75,7 @@ public enum SafetyRiskLevel: String, Codable, Sendable, Comparable {
     }
 }
 
+/// A specific resource that would be affected if a risky action were executed.
 public struct AffectedResource: Identifiable, Sendable {
     public let id: UUID
     public let type: ResourceType

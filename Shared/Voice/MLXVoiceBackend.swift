@@ -100,6 +100,7 @@ final class MLXVoiceBackend: VoiceSynthesisBackend, VoiceRecognitionBackend, @un
         )
 
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
+            // Safe: audio buffer write failure → skip this frame; recording continues; incomplete audio still useful
             try? audioFile.write(from: buffer)
         }
 

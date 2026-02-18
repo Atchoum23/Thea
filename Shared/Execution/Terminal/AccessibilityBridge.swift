@@ -72,7 +72,7 @@
             // Find the text area (scroll area > text area)
             // swiftlint:disable:next force_cast
             let windowElement = window as! AXUIElement
-            if let textContent = try? findTextContent(in: windowElement) {
+            if let textContent = try? findTextContent(in: windowElement) { // Safe: AX traversal failure → try next window; throws if no window has text
                 return textContent
             }
 
