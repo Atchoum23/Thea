@@ -141,6 +141,7 @@ public final class PerplexityProvider: AIProvider, @unchecked Sendable {
                             }
 
                             guard let data = jsonString.data(using: .utf8),
+                                  // Safe: malformed SSE line → skip (continue); stream parsing is best-effort
                                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                                   let choices = json["choices"] as? [[String: Any]],
                                   let delta = choices.first?["delta"] as? [String: Any],

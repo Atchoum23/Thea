@@ -906,10 +906,7 @@ private struct ExportDataSheet: View {
         String(data: data, encoding: .utf8) ?? ""
     }
 }
-
-// MARK: - Firewall Audit Detail View
-
-struct FirewallAuditDetailView: View {
+// FirewallAuditDetailView is defined in FirewallAuditDetailView.swift
     @State private var auditEntries: [PrivacyAuditEntry] = []
     @State private var stats: PrivacyAuditStatistics?
 

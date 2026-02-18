@@ -14,6 +14,7 @@ private let hubLogger = Logger(subsystem: "ai.thea.app", category: "UnifiedIntel
 
 // MARK: - Intelligence Event Types
 
+/// Events emitted by intelligence subsystems and processed by the hub for cross-system coordination.
 public enum IntelligenceEvent: Sendable {
     case queryReceived(query: String, conversationId: UUID)
     case responseGenerated(quality: Double, latency: TimeInterval)
@@ -30,6 +31,7 @@ public enum IntelligenceEvent: Sendable {
 
 // MARK: - Intelligence Pattern (renamed to avoid conflict with PatternDetector.IntelligencePattern)
 
+/// A recurring behavioral or workflow pattern detected across user interactions.
 public struct IntelligencePattern: Identifiable, Sendable {
     public let id: UUID
     public let type: PatternType
@@ -40,6 +42,7 @@ public struct IntelligencePattern: Identifiable, Sendable {
     public let lastSeen: Date
     public let metadata: [String: String]
 
+    /// The category of detected pattern.
     public enum PatternType: String, Sendable {
         case workflow          // Sequence of actions
         case temporal          // Time-based habit
@@ -74,6 +77,7 @@ public struct IntelligencePattern: Identifiable, Sendable {
 
 // MARK: - Unified Suggestion
 
+/// A proactive suggestion surfaced by an intelligence subsystem for the user.
 public struct UnifiedSuggestion: Identifiable, Sendable {
     public let id: UUID
     public let source: SuggestionSource
@@ -87,6 +91,7 @@ public struct UnifiedSuggestion: Identifiable, Sendable {
     public let expiresAt: Date?
     public let metadata: [String: String]
 
+    /// The intelligence subsystem that generated this suggestion.
     public enum SuggestionSource: String, Sendable {
         case proactiveEngine
         case blockerAnticipator
@@ -97,6 +102,7 @@ public struct UnifiedSuggestion: Identifiable, Sendable {
         case causalAnalysis
     }
 
+    /// The action to perform when the suggestion is accepted.
     public enum SuggestionAction: Sendable {
         case showMessage(String)
         case executeWorkflow(workflowId: String)
@@ -107,6 +113,7 @@ public struct UnifiedSuggestion: Identifiable, Sendable {
         case preloadResources([String])
     }
 
+    /// How urgently the suggestion should be shown.
     public enum TimeSensitivity: String, Sendable {
         case immediate    // Show now
         case soon         // Within 5 minutes
@@ -115,6 +122,7 @@ public struct UnifiedSuggestion: Identifiable, Sendable {
         case lowPriority  // Whenever convenient
     }
 
+    /// Estimated cognitive effort required to act on this suggestion.
     public enum CognitiveLoad: String, Sendable {
         case minimal      // Quick glance
         case low          // Simple action
@@ -148,7 +156,7 @@ public struct UnifiedSuggestion: Identifiable, Sendable {
         self.metadata = metadata
     }
 
-    /// Combined score for ranking suggestions
+    /// Combined score for ranking suggestions (weighted relevance, confidence, urgency, and cognitive load).
     public var combinedScore: Double {
         let weights = (relevance: 0.4, confidence: 0.3, timeFactor: 0.2, loadFactor: 0.1)
 
@@ -176,6 +184,7 @@ public struct UnifiedSuggestion: Identifiable, Sendable {
 
 // MARK: - Detected Blocker
 
+/// A blocker that is preventing the user from making progress on their current task.
 public struct DetectedBlocker: Identifiable, Sendable {
     public let id: UUID
     public let type: BlockerType
@@ -185,6 +194,7 @@ public struct DetectedBlocker: Identifiable, Sendable {
     public let context: BlockerContext
     public let suggestedResolutions: [String]
 
+    /// The category of detected blocker.
     public enum BlockerType: String, Sendable {
         case stuckOnTask       // Task taking too long
         case repeatedQuery     // Rephrasing same question
@@ -195,6 +205,7 @@ public struct DetectedBlocker: Identifiable, Sendable {
         case toolFailure       // Tool not working
     }
 
+    /// How severely the blocker is impeding progress.
     public enum Severity: String, Sendable {
         case low       // Mild slowdown
         case medium    // Noticeable issue
@@ -202,6 +213,7 @@ public struct DetectedBlocker: Identifiable, Sendable {
         case critical  // Complete stop
     }
 
+    /// Contextual details captured at the moment the blocker was detected.
     public struct BlockerContext: Sendable {
         public let taskType: String?
         public let timeSpent: TimeInterval
@@ -245,6 +257,7 @@ public struct DetectedBlocker: Identifiable, Sendable {
 
 // MARK: - Inferred Goal
 
+/// A user goal inferred from conversation and task history, tracked with progress and confidence.
 public struct InferredGoal: Identifiable, Sendable {
     public let id: UUID
     public let title: String
@@ -260,6 +273,7 @@ public struct InferredGoal: Identifiable, Sendable {
     public let inferredAt: Date
     public let lastUpdated: Date
 
+    /// The high-level category this goal belongs to.
     public enum GoalCategory: String, Sendable {
         case project       // Complete a project
         case learning      // Learn a skill
@@ -270,6 +284,7 @@ public struct InferredGoal: Identifiable, Sendable {
         case exploration   // Research/discover
     }
 
+    /// Priority level for goal completion.
     public enum GoalPriority: String, Sendable {
         case critical   // Must complete ASAP
         case high       // Important
@@ -311,6 +326,7 @@ public struct InferredGoal: Identifiable, Sendable {
 
 // MARK: - Preloaded Resource
 
+/// A resource preloaded into context ahead of predicted need, with an expiry window.
 public struct PreloadedResource: Identifiable, Sendable {
     public let id: UUID
     public let type: ResourceType
@@ -319,6 +335,7 @@ public struct PreloadedResource: Identifiable, Sendable {
     public let loadedAt: Date
     public let expiresAt: Date
 
+    /// The kind of resource that was preloaded.
     public enum ResourceType: String, Sendable {
         case file
         case conversation
@@ -347,6 +364,7 @@ public struct PreloadedResource: Identifiable, Sendable {
 
 // MARK: - User Model Aspect
 
+/// A dimension of the user model that can be updated as new behavioral signals are observed.
 public enum UserModelAspect: String, Sendable {
     case communicationStyle
     case technicalLevel
@@ -360,6 +378,7 @@ public enum UserModelAspect: String, Sendable {
 
 // MARK: - Intelligence Subsystem Protocol
 
+/// Protocol that all intelligence subsystems must implement to participate in the hub's event loop.
 public protocol IntelligenceSubsystem: Sendable {
     var subsystemId: String { get }
     func processEvent(_ event: IntelligenceEvent) async
@@ -369,6 +388,7 @@ public protocol IntelligenceSubsystem: Sendable {
 
 // MARK: - Intelligence Context
 
+/// The current user context snapshot passed to subsystems when requesting suggestions.
 public struct IntelligenceContext: Sendable {
     public let currentQuery: String?
     public let conversationId: UUID?
@@ -379,6 +399,7 @@ public struct IntelligenceContext: Sendable {
     public let timeOfDay: Date
     public let sessionDuration: TimeInterval
 
+    /// A lightweight snapshot of the inferred user model dimensions.
     public struct UserModelSnapshot: Sendable {
         public let technicalLevel: Double
         public let preferredVerbosity: Double
