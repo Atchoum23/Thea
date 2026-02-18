@@ -171,6 +171,7 @@ public final class ApprovalManager {
 
 // MARK: - Error Types
 
+/// Errors thrown by ApprovalManager when a request is cancelled, times out, or is invalid.
 public enum ApprovalError: LocalizedError {
     case cancelled
     case timeout
@@ -190,6 +191,7 @@ public enum ApprovalError: LocalizedError {
 
 // MARK: - Operation Types
 
+/// The type of system operation requiring user approval before execution.
 public enum OperationType: String, Codable, Sendable, CaseIterable {
     case readFile = "Read File"
     case writeFile = "Write File"
@@ -229,6 +231,7 @@ public enum OperationType: String, Codable, Sendable, CaseIterable {
 
 // MARK: - Decision Types
 
+/// The user's decision in response to an approval request.
 public enum ApprovalDecision: String, Codable, Sendable {
     case approved = "Approved"
     case rejected = "Rejected"
@@ -247,6 +250,7 @@ public enum ApprovalDecision: String, Codable, Sendable {
 
 // MARK: - Request Model
 
+/// A pending request for user approval of a sensitive operation.
 public struct ApprovalRequest: Identifiable, Sendable {
     public let id: UUID
     public let operation: OperationType

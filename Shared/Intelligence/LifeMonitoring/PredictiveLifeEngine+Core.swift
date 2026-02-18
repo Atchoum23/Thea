@@ -98,7 +98,7 @@ public final class PredictiveLifeEngine: ObservableObject {
 
         predictionTask = Task {
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(configuration.predictionInterval))
+                try? await Task.sleep(for: .seconds(configuration.predictionInterval)) // Safe: sleep cancellation exits loop via Task.isCancelled guard; non-fatal
                 guard !Task.isCancelled else { break }
                 await runPredictionCycle()
             }

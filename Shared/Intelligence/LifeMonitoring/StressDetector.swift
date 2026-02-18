@@ -257,7 +257,7 @@ final class StressDetector {
 
             // Decay after 30 minutes
             Task { @MainActor [weak self] in
-                try? await Task.sleep(for: .seconds(1800))
+                try? await Task.sleep(for: .seconds(1800)) // Safe: decay timer; sleep cancellation means task was cancelled; non-fatal
                 guard let self else { return }
                 self.overlappingCalendarEvents = max(0, self.overlappingCalendarEvents - 1)
             }

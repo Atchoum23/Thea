@@ -70,7 +70,7 @@ public final class WeatherMonitor: NSObject, Sendable {
             guard let self else { return }
             await self.fetchWeather()
             while !Task.isCancelled {
-                try? await Task.sleep(for: self.pollInterval)
+                try? await Task.sleep(for: self.pollInterval) // Safe: sleep cancellation exits loop via Task.isCancelled guard; non-fatal
                 guard !Task.isCancelled else { break }
                 await self.fetchWeather()
             }
