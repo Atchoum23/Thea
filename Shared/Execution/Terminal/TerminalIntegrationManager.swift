@@ -371,14 +371,14 @@
             }
 
             if let policyData = defaults.data(forKey: "terminal.securityPolicy"),
-               let policy = try? JSONDecoder().decode(TerminalSecurityPolicy.self, from: policyData)
+               let policy = try? JSONDecoder().decode(TerminalSecurityPolicy.self, from: policyData) // Safe: corrupt UserDefaults → use default restrictive policy; non-fatal
             {
                 securityPolicy = policy
                 executor = TerminalCommandExecutor(securityPolicy: policy)
             }
 
             if let commandsData = defaults.data(forKey: "terminal.quickCommands"),
-               let commands = try? JSONDecoder().decode([QuickCommand].self, from: commandsData)
+               let commands = try? JSONDecoder().decode([QuickCommand].self, from: commandsData) // Safe: corrupt UserDefaults → use empty quick commands list; non-fatal
             {
                 quickCommands = commands
             }
@@ -396,11 +396,11 @@
             defaults.set(showOutputIn.rawValue, forKey: "terminal.outputDisplay")
             defaults.set(isEnabled, forKey: "terminal.isEnabled")
 
-            if let policyData = try? JSONEncoder().encode(securityPolicy) {
+            if let policyData = try? JSONEncoder().encode(securityPolicy) { // Safe: encode failure → policy not persisted; reset to default on next launch
                 defaults.set(policyData, forKey: "terminal.securityPolicy")
             }
 
-            if let commandsData = try? JSONEncoder().encode(quickCommands) {
+            if let commandsData = try? JSONEncoder().encode(quickCommands) { // Safe: encode failure → quick commands not persisted; in-memory list intact
                 defaults.set(commandsData, forKey: "terminal.quickCommands")
             }
 
@@ -416,8 +416,8 @@
             let historyToSave = Array(session.commandHistory.suffix(1000))
 
             Task.detached {
-                if let data = try? JSONEncoder().encode(historyToSave) {
-                    try? data.write(to: historyURL)
+                if let data = try? JSONEncoder().encode(historyToSave) { // Safe: encode failure → history not written this cycle; in-memory history intact
+                    try? data.write(to: historyURL) // Safe: write failure → history not persisted; non-fatal, will retry next save cycle
                 }
             }
         }

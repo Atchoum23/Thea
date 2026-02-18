@@ -5,12 +5,15 @@
 // Extracted from BlueprintExecutor.swift for file length compliance.
 
 import Foundation
+import OSLog
 
 // MARK: - Build Verification Agent
 
 /// Verifies builds and runs tests with error parsing
 @MainActor
 final class BuildVerificationAgent {
+    private let logger = Logger(subsystem: "ai.thea.app", category: "BuildVerificationAgent")
+
     func verifyBuild(scheme: String, configuration: String = "Debug") async -> BlueprintBuildResult {
         #if os(macOS)
         let command = "xcodebuild -scheme \(scheme) -configuration \(configuration) build 2>&1"

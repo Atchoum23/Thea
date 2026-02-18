@@ -21,6 +21,7 @@ import os.log
 
 /// Generates proactive insights based on aggregated context
 @MainActor
+/// Analyzes context snapshots and behavioral patterns to surface actionable insights for the user.
 public final class InsightEngine: ObservableObject {
     public static let shared = InsightEngine()
 
@@ -213,6 +214,7 @@ public final class InsightEngine: ObservableObject {
 
 // MARK: - Insight Model
 
+/// A single actionable insight generated from context or behavioral analysis.
 public struct Insight: Identifiable, Sendable {
     public let id: String
     public let title: String
@@ -252,6 +254,7 @@ public struct Insight: Identifiable, Sendable {
     }
 }
 
+/// The domain category of a generated insight.
 public enum InsightCategory: String, Codable, Sendable, CaseIterable {
     case productivity
     case health

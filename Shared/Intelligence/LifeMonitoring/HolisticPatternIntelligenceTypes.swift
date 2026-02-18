@@ -142,6 +142,7 @@ public struct DetectedLifePattern: Identifiable, Codable, Sendable {
     }
 }
 
+/// How often a behavioral pattern recurs.
 public enum PatternFrequency: String, Codable, Sendable {
     case rare                        // Less than once a month
     case occasional                  // A few times a month
@@ -152,6 +153,7 @@ public enum PatternFrequency: String, Codable, Sendable {
     case continuous                  // Ongoing pattern
 }
 
+/// Temporal context associated with a detected behavioral pattern.
 public struct PatternTimeContext: Codable, Sendable {
     public var timeOfDay: [Int]?           // Hours when pattern occurs (0-23)
     public var daysOfWeek: [Int]?          // Days when pattern occurs (1-7)
@@ -173,6 +175,7 @@ public struct PatternTimeContext: Codable, Sendable {
         self.peakTime = peakTime
     }
 
+/// Seasonal cycle in which a behavioral pattern most commonly occurs.
     public enum Seasonality: String, Codable, Sendable {
         case spring, summer, fall, winter
         case weekday, weekend
