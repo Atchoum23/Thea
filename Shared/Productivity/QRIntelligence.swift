@@ -356,7 +356,7 @@ final class QRIntelligence {
         do {
             try fileManager.createDirectory(at: storageDir, withIntermediateDirectories: true)
         } catch {
-            logger.error("Failed to create QR storage directory: \(error.localizedDescription)")
+            qrLogger.error("Failed to create QR storage directory: \(error.localizedDescription)")
         }
         loadCodes()
     }
