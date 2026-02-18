@@ -233,6 +233,8 @@
 
     // MARK: - Accessibility Monitoring
 
+    // @unchecked Sendable: AXObserver (OpaquePointer-based C type) cannot conform to Sendable;
+    // monitoring state is only mutated from startMonitoring/stopMonitoring, called sequentially
     /// Monitor for Terminal content changes using Accessibility observers
     final class TerminalAccessibilityMonitor: @unchecked Sendable {
         private var observer: AXObserver?
