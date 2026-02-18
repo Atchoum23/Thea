@@ -727,17 +727,17 @@ struct MCPAnyCodable: Codable, @unchecked Sendable {
         // standard Codable type-erasure pattern for heterogeneous JSON (Bool/Int/Double/String/Array/Dict).
         if container.decodeNil() {
             value = NSNull()
-        } else if let bool = try? container.decode(Bool.self) {
+        } else if let bool = try? container.decode(Bool.self) { // Safe: see block comment above
             value = bool
-        } else if let int = try? container.decode(Int.self) {
+        } else if let int = try? container.decode(Int.self) { // Safe: see block comment above
             value = int
-        } else if let double = try? container.decode(Double.self) {
+        } else if let double = try? container.decode(Double.self) { // Safe: see block comment above
             value = double
-        } else if let string = try? container.decode(String.self) {
+        } else if let string = try? container.decode(String.self) { // Safe: see block comment above
             value = string
-        } else if let array = try? container.decode([MCPAnyCodable].self) {
+        } else if let array = try? container.decode([MCPAnyCodable].self) { // Safe: see block comment above
             value = array.map(\.value)
-        } else if let dict = try? container.decode([String: MCPAnyCodable].self) {
+        } else if let dict = try? container.decode([String: MCPAnyCodable].self) { // Safe: see block comment above
             value = dict.mapValues { $0.value }
         } else {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode value")
