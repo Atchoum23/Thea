@@ -186,6 +186,7 @@ public struct WorkHabits: Sendable {
     public var deadlineResponse: DeadlineResponse
     public var preferredWorkBlocks: TimeInterval  // preferred uninterrupted work time
 
+    /// How the user organizes and plans their work.
     public enum PlanningStyle: String, Sendable {
         case detailed    // Plans everything
         case flexible    // General direction
@@ -193,6 +194,7 @@ public struct WorkHabits: Sendable {
         case structured  // Follows frameworks
     }
 
+    /// How the user prefers to tackle tasks.
     public enum TaskApproach: String, Sendable {
         case sequential  // One at a time
         case parallel    // Multiple streams
@@ -200,6 +202,7 @@ public struct WorkHabits: Sendable {
         case focused     // Deep work on one thing
     }
 
+    /// How the user responds to deadlines and time pressure.
     public enum DeadlineResponse: String, Sendable {
         case early       // Finishes ahead
         case steady      // Consistent pace
@@ -240,6 +243,7 @@ public struct UserLearningStyle: Sendable {
     public var learnsFromErrors: Bool
     public var seeksFeedback: Bool
 
+    /// The user's preferred method for acquiring new knowledge.
     public enum LearningMethod: String, Sendable {
         case reading      // Documentation/articles
         case examples     // Code samples
@@ -248,6 +252,7 @@ public struct UserLearningStyle: Sendable {
         case discussion   // Q&A style
     }
 
+    /// How the user best retains and recalls information.
     public enum RetentionStyle: String, Sendable {
         case notes        // Takes notes
         case practice     // Learns by doing
@@ -287,6 +292,7 @@ public struct UserPreferences: Sendable {
     public var notificationPreference: NotificationPreference
     public var proactivityLevel: Double          // 0 = only when asked, 1 = highly proactive
 
+    /// The user's preferred format for AI responses.
     public enum ResponseFormat: String, Sendable {
         case conversational  // Natural language
         case structured      // Headers, lists
@@ -295,6 +301,7 @@ public struct UserPreferences: Sendable {
         case codeFirst       // Lead with code
     }
 
+    /// How the user prefers to receive proactive notifications and suggestions.
     public enum NotificationPreference: String, Sendable {
         case all             // Everything
         case important       // Key updates only

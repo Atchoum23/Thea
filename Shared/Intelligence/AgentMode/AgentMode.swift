@@ -92,6 +92,7 @@ public enum AgentPhase: String, Codable, Sendable {
 /// Current state of agent execution
 /// Observable state machine tracking the current agent execution progress and all active tasks.
 @MainActor
+/// Observable state machine tracking current agent execution progress, phases, and active tasks.
 public final class AgentExecutionState: ObservableObject {
     @Published public var mode: AgentMode = .auto
     @Published public var phase: AgentPhase = .gatherContext

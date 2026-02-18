@@ -173,6 +173,7 @@ public struct ContextualRoutingPattern: Identifiable, Codable, Sendable {
     public var sampleCount: Int
     public var lastSeen: Date
 
+    /// Category of contextual pattern detected in routing behavior.
     public enum PatternType: String, Codable, Sendable {
         case taskSequence = "task_sequence"
         case timeOfDay = "time_of_day"

@@ -320,6 +320,7 @@ public struct MemorySearchResult: Identifiable, Sendable {
     public let relevanceScore: Double
     public let matchType: MemoryMatchType
 
+/// How a memory record matched a search query.
     public enum MemoryMatchType: String, Sendable {
         case semantic    // Found via embedding similarity
         case keyword     // Found via keyword matching

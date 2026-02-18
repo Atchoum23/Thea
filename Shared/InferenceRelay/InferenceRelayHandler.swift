@@ -189,7 +189,7 @@ public final class InferenceRelayHandler {
 
             // Try all providers
             for (_, provider) in ProviderRegistry.shared.allProviders {
-                let models: [AIModel]
+                let models: [ProviderAIModel]
                 do {
                     models = try await provider.listModels()
                 } catch {

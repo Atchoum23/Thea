@@ -253,6 +253,7 @@ public struct THEAPendingAction: Identifiable {
 /// Controls THEA's autonomous behavior and task execution
 /// Central controller for THEA's autonomous task execution, managing approvals and action history.
 @MainActor
+/// Controls THEA's autonomous task execution — manages approvals, tracks history, and enforces autonomy level policy.
 public final class AutonomyController: ObservableObject {
     public static let shared = AutonomyController()
 

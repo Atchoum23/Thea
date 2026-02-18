@@ -289,6 +289,7 @@ public enum DataFormat: String, Codable, Sendable, CaseIterable {
 
 // MARK: - Artifact Error
 
+/// Errors thrown by ArtifactManager operations.
 public enum ArtifactError: Error, LocalizedError, Sendable {
     case notFound
     case saveFailed(String)
