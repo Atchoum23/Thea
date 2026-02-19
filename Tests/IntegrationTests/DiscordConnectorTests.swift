@@ -8,8 +8,12 @@ final class DiscordConnectorTests: XCTestCase {
 
     // MARK: - Initial State
 
+    private func makeConnector() -> DiscordConnector {
+        DiscordConnector(credentials: MessagingCredentials())
+    }
+
     func testConnectorInitiallyDisconnected() async {
-        let connector = DiscordConnector()
+        let connector = makeConnector()
         let isConn = await connector.isConnected
         XCTAssertFalse(isConn)
     }
@@ -17,15 +21,15 @@ final class DiscordConnectorTests: XCTestCase {
     // MARK: - Platform Identity
 
     func testPlatformIsDiscord() async {
-        let connector = DiscordConnector()
+        let connector = makeConnector()
         let platform = await connector.platform
-        XCTAssertEqual(platform, .discord)
+        XCTAssertEqual(platform, MessagingPlatform.discord)
     }
 
     // MARK: - Connect Without Token
 
     func testConnectWithNoTokenFails() async {
-        let connector = DiscordConnector()
+        let connector = makeConnector()
         do {
             try await connector.connect()
         } catch {
@@ -38,7 +42,7 @@ final class DiscordConnectorTests: XCTestCase {
     // MARK: - Disconnect When Not Connected
 
     func testDisconnectWhenNotConnectedIsNoOp() async {
-        let connector = DiscordConnector()
+        let connector = makeConnector()
         await connector.disconnect()
         let isConn = await connector.isConnected
         XCTAssertFalse(isConn)
@@ -47,7 +51,7 @@ final class DiscordConnectorTests: XCTestCase {
     // MARK: - Send Throws When Disconnected
 
     func testSendThrowsWhenDisconnected() async {
-        let connector = DiscordConnector()
+        let connector = makeConnector()
         let msg = OutboundMessagingMessage(chatId: "channel-123", content: "Hello")
         do {
             try await connector.send(msg)

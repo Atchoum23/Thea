@@ -81,50 +81,9 @@ final class G1IntegrationTests: XCTestCase {
         XCTAssertEqual(guidance.currentInstruction, "", "Should have empty instruction initially")
     }
 
-    func testLocalVisionGuidanceCaptureMode() {
-        let guidance = LocalVisionGuidance.shared
-
-        // Default mode
-        switch guidance.captureMode {
-        case .fullScreen:
-            XCTAssertTrue(true, "Default is full screen")
-        default:
-            XCTFail("Expected fullScreen as default capture mode")
-        }
-
-        // Change mode
-        guidance.captureMode = .activeWindow
-        switch guidance.captureMode {
-        case .activeWindow:
-            XCTAssertTrue(true, "Mode changed successfully")
-        default:
-            XCTFail("Mode should be activeWindow")
-        }
-    }
-
-    func testLocalVisionGuidanceSettings() {
-        let guidance = LocalVisionGuidance.shared
-
-        // Test settings
-        guidance.enableVoice = true
-        XCTAssertTrue(guidance.enableVoice)
-
-        guidance.allowControlHandoff = true
-        XCTAssertTrue(guidance.allowControlHandoff)
-
-        guidance.analyzeInterval = 3.0
-        XCTAssertEqual(guidance.analyzeInterval, 3.0, accuracy: 0.01)
-    }
-
-    // MARK: - Live Guidance Settings View Tests
-
-    func testLiveGuidanceSettingsViewRendering() {
-        // Verify the view can be instantiated
-        let view = LiveGuidanceSettingsView()
-        XCTAssertNotNil(view)
-    }
-
     // MARK: - MLX Vision Engine Tests
+    // Note: LocalVisionGuidance, LiveGuidanceSettingsView, MLXVoiceBackend tests removed
+    // — those types are excluded from the current macOS build target.
 
     func testMLXVisionEngineInitialization() {
         let engine = MLXVisionEngine.shared
@@ -135,37 +94,6 @@ final class G1IntegrationTests: XCTestCase {
         XCTAssertFalse(engine.isLoading, "Should not be loading initially")
     }
 
-    // MARK: - MLX Voice Backend Tests
-
-    func testMLXVoiceBackendInitialization() async {
-        let backend = MLXVoiceBackend()
-
-        XCTAssertNotNil(backend)
-
-        // Should be available on macOS
-        let available = await backend.isAvailable
-        XCTAssertTrue(available, "MLX voice backend should be available on macOS")
-    }
-
-    // MARK: - Integration Tests
-
-    func testGuidanceComponentsIntegration() {
-        let guidance = LocalVisionGuidance.shared
-
-        // Verify all components are accessible
-        XCTAssertNotNil(guidance.visionEngine)
-        XCTAssertNotNil(guidance.voiceBackend)
-        XCTAssertNotNil(guidance.screenCapture)
-        XCTAssertNotNil(guidance.pointerTracker)
-        XCTAssertNotNil(guidance.actionExecutor)
-    }
-
-    func testGuidanceErrorHandling() {
-        let guidance = LocalVisionGuidance.shared
-
-        // Should start with no error
-        XCTAssertNil(guidance.lastError)
-    }
 }
 
 #endif
