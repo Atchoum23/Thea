@@ -211,7 +211,9 @@ public final class OfflineQueueService {
             logger.info("Replaying analytics event (no-op)")
 
         case .notification:
-            // Re-post local notification from payload
+            // Re-post local notification from payload.
+            // UNUserNotificationCenter requires an app host; guard prevents ObjC crash in SPM tests.
+            guard Bundle.main.bundleIdentifier != nil else { return }
             if let payload = request.payload {
                 do {
                     let info = try JSONDecoder().decode([String: String].self, from: payload)
