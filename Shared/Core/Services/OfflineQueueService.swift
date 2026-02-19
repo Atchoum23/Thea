@@ -212,8 +212,10 @@ public final class OfflineQueueService {
 
         case .notification:
             // Re-post local notification from payload.
-            // UNUserNotificationCenter requires an app host; guard prevents ObjC crash in SPM tests.
-            guard Bundle.main.bundleIdentifier != nil else { return }
+            // UNUserNotificationCenter requires an .app host bundle. The xctest binary has a
+            // CFBundleIdentifier ("com.apple.dt.xctest.tool") so bundleIdentifier != nil is
+            // insufficient; check pathExtension instead — only .app bundles satisfy this.
+            guard Bundle.main.bundleURL.pathExtension == "app" else { return }
             if let payload = request.payload {
                 do {
                     let info = try JSONDecoder().decode([String: String].self, from: payload)
