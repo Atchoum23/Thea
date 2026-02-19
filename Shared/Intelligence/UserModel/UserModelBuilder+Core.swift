@@ -73,6 +73,7 @@ public final class UserModelBuilder {
     }
 
     /// Observe user response to AI output
+    // periphery:ignore:parameters wasAccepted,responseLength - Reserved: parameter(s) kept for API compatibility
     public func observeResponseReaction(
         wasHelpful: Bool,
         wasAccepted: Bool,

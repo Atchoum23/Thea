@@ -198,6 +198,7 @@ public final class MobileIntelligenceOrchestrator {
         )
     }
 
+    // periphery:ignore:parameters budget - Reserved: parameter(s) kept for API compatibility
     private func scoreMode(
         _ mode: InferenceMode,
         power: MobilePowerState,
@@ -327,6 +328,7 @@ public final class MobileIntelligenceOrchestrator {
     // MARK: - Learning
 
     /// Record outcome of an inference to improve future routing
+    // periphery:ignore:parameters latency,userSatisfaction - Reserved: parameter(s) kept for API compatibility
     public func recordOutcome(
         mode: InferenceMode,
         taskType: TaskType,

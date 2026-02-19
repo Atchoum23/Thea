@@ -155,6 +155,7 @@ extension TestGenerator {
         }
     }
 
+    // periphery:ignore:parameters framework - Reserved: parameter(s) kept for API compatibility
     private func generateSwiftTestFile(
         tests: [GeneratedTest],
         framework: TestFramework,

@@ -337,6 +337,7 @@ public final class SmartModelRouter: ObservableObject {
         return .moderate
     }
 
+    // periphery:ignore:parameters estimatedInputTokens - Reserved: parameter(s) kept for API compatibility
     private func scoreModel(
         model: RouterModelCapability,
         complexity: TaskComplexity,

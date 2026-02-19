@@ -306,6 +306,7 @@ public final class LifeInsightsAnalyzer: ObservableObject {
 
     // MARK: - Insight Generation
 
+    // periphery:ignore:parameters _events - Reserved: parameter(s) kept for API compatibility
     private func generateInsights(
         from _events: [LifeEvent],
         patterns: [InsightDetectedLifePattern]
@@ -454,6 +455,7 @@ public final class LifeInsightsAnalyzer: ObservableObject {
 
     // MARK: - Proactive Opportunities
 
+    // periphery:ignore:parameters _events - Reserved: parameter(s) kept for API compatibility
     private func checkProactiveOpportunities(
         from _events: [LifeEvent],
         // periphery:ignore - Reserved: _events parameter kept for API compatibility

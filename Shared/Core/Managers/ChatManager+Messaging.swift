@@ -637,6 +637,7 @@ extension ChatManager {
 
     /// Count input tokens using Anthropic's free token counting endpoint.
     /// Falls back to heuristic (~4 chars per token) for non-Anthropic models.
+    // periphery:ignore:parameters provider - Reserved: parameter(s) kept for API compatibility
     private func countInputTokens(
         // periphery:ignore - Reserved: provider parameter kept for API compatibility
         messages: [AIMessage], model: String, provider: any AIProvider

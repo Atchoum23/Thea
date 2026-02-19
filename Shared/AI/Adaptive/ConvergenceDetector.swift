@@ -337,6 +337,7 @@ public final class ConvergenceDetector: ObservableObject {
     // MARK: - Decision Making
 
     /// Decide whether to apply a proposed change
+    // periphery:ignore:parameters changeRisk - Reserved: parameter(s) kept for API compatibility
     public func shouldApplyChange(
         expectedImprovement: Double,
         // periphery:ignore - Reserved: changeRisk parameter kept for API compatibility

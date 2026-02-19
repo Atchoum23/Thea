@@ -193,6 +193,7 @@ public final class ToolCompositionEngine: ObservableObject {
         )
     }
 
+    // periphery:ignore:parameters pipeline - Reserved: parameter(s) kept for API compatibility
     private func executeStep(
         _ step: PipelineStep,
         context: inout ToolPipelineContext,

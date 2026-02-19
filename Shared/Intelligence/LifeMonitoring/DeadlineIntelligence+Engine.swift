@@ -195,6 +195,7 @@ extension DeadlineIntelligence {
     ///   - sender: Sender address or name.
     ///   - receivedDate: When the email was received.
     /// - Returns: Deadlines extracted from the email.
+    // periphery:ignore:parameters receivedDate - Reserved: parameter(s) kept for API compatibility
     public func processEmail(
         subject: String,
         body: String,
@@ -232,6 +233,7 @@ extension DeadlineIntelligence {
     ///   - participants: Names or identifiers of call participants.
     ///   - callDate: When the call took place.
     /// - Returns: Deadlines extracted from the transcript.
+    // periphery:ignore:parameters participants,callDate - Reserved: parameter(s) kept for API compatibility
     public func processCallTranscript(
         transcript: String,
         participants: [String],

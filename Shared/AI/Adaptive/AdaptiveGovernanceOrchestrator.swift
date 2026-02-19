@@ -304,8 +304,8 @@ public actor AdaptiveGovernanceOrchestrator {
     // MARK: - Feedback
 
     /// Record feedback event
+    // periphery:ignore:parameters context - Reserved: parameter(s) kept for API compatibility
     @MainActor
-    // periphery:ignore - Reserved: context parameter kept for API compatibility
     public func recordFeedback(source: FeedbackSource, value: Double, context: GovernanceFeedbackContext) {
         // Record to hyperparameter tuner based on source type
         let id: HyperparameterID

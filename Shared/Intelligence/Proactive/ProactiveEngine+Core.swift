@@ -42,6 +42,7 @@ public final class ProactiveEngine: ObservableObject {
     // MARK: - Analysis
 
     /// Analyze current context and generate suggestions
+    // periphery:ignore:parameters recentQuery - Reserved: parameter(s) kept for API compatibility
     public func analyzeContext(
         currentFile: String? = nil,
         recentQuery: String? = nil,
@@ -127,6 +128,7 @@ public final class ProactiveEngine: ObservableObject {
     // MARK: - Intent Prediction
 
     /// Predict user's likely intent based on context
+    // periphery:ignore:parameters recentQuery - Reserved: parameter(s) kept for API compatibility
     public func predictIntent(
         currentFile: String? = nil,
         // periphery:ignore - Reserved: recentQuery parameter kept for API compatibility

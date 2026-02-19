@@ -281,6 +281,7 @@ extension ReflexionEngine {
     // MARK: - Failure Analysis
 
     /// Analyze a failure and extract learnings
+    // periphery:ignore:parameters context - Reserved: parameter(s) kept for API compatibility
     public func analyzeFailure(
         task: String,
         error: String,

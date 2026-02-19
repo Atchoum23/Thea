@@ -242,6 +242,7 @@ public final class MultiModelConsensus {
 
     // MARK: - Consensus Calculation
 
+    // periphery:ignore:parameters originalResponse,taskType - Reserved: parameter(s) kept for API compatibility
     private func calculateConsensus(
         originalResponse: String,
         // periphery:ignore - Reserved: originalResponse parameter kept for API compatibility

@@ -285,6 +285,7 @@ extension ModelRouter {
 
     // MARK: - Fallback
 
+    // periphery:ignore:parameters _context - Reserved: parameter(s) kept for API compatibility
     private func fallbackDecision(
         for classification: ClassificationResult,
         context _context: RoutingContext
@@ -467,6 +468,7 @@ extension ModelRouter {
     }
 
     /// Store routing outcome to MemoryManager for persistent learning
+    // periphery:ignore:parameters tokens,cost - Reserved: parameter(s) kept for API compatibility
     private func storeRoutingOutcomeToMemory(
         decision: RoutingDecision,
         success: Bool,
@@ -557,6 +559,7 @@ extension ModelRouter {
     }
 
     /// Detect contextual patterns in routing decisions
+    // periphery:ignore:parameters success - Reserved: parameter(s) kept for API compatibility
     private func detectAndStoreContextualPatterns(
         decision: RoutingDecision,
         // periphery:ignore - Reserved: success parameter kept for API compatibility

@@ -390,6 +390,7 @@ public actor AdaptiveIntervalScheduler {
     // MARK: - Learning
 
     /// Record outcome of a governance cycle for learning
+    // periphery:ignore:parameters actualInterval - Reserved: parameter(s) kept for API compatibility
     public func recordGovernanceOutcome(
         actualInterval: TimeInterval,
         // periphery:ignore - Reserved: actualInterval parameter kept for API compatibility
@@ -567,6 +568,7 @@ public actor AdaptiveIntervalScheduler {
         return max(0, min(1, score))
     }
 
+    // periphery:ignore:parameters _predictedActivity - Reserved: parameter(s) kept for API compatibility
     private func buildReason(
         activity: AdaptiveActivityLevel,
         stability: StabilityState,

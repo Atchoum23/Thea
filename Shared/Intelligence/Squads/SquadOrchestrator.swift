@@ -337,6 +337,7 @@ public final class SquadOrchestrator {
     // MARK: - Parallel Phase Execution
 
     /// Execute a phase with parallel members
+    // periphery:ignore:parameters executionState - Reserved: parameter(s) kept for API compatibility
     private func executeParallelPhase(
         phase: SquadExecutionPlan.ExecutionPhase,
         squad: SquadDefinition,

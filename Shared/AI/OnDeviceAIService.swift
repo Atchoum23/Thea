@@ -155,6 +155,7 @@ public class OnDeviceAIService: ObservableObject {
     // MARK: - Tool Calling (iOS 26 Feature)
 
     /// Execute a tool-augmented prompt (Foundation Models tool calling)
+    // periphery:ignore:parameters tools - Reserved: parameter(s) kept for API compatibility
     public func generateWithTools(
         prompt: String,
         // periphery:ignore - Reserved: tools parameter kept for API compatibility

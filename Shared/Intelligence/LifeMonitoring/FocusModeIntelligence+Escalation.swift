@@ -353,6 +353,7 @@ extension FocusModeIntelligence {
     ///   - platform: The communication platform.
     ///   - messageContent: The message text.
     ///   - isMention: Whether the user was directly mentioned/tagged.
+    // periphery:ignore:parameters groupName - Reserved: parameter(s) kept for API compatibility
     public func handleIncomingGroupMessage(
         groupId: String,
         groupName: String?,

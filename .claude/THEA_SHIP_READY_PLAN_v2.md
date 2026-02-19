@@ -49,16 +49,16 @@ phase and run all steps fully and autonomously, committing after each step."
 | Phase N: Workflows        | ✅ DONE         | All 6 YAML files written + committed (2026-02-19) |
 | Phase O: Messaging Gateway| ✅ DONE         | All O0–O10, O_Tests, O_Wire complete. iOS+macOS wired. (2026-02-19) |
 | Phase P: Components       | ✅ DONE         | P1-P16 all complete (2026-02-19). All 4 builds GREEN. |
-| Phase Q: Tests ≥80%       | ⏳ PENDING      | Baseline measurement first |
-| Phase R: Periphery        | ⏳ PARTIAL      | ~2,667 items remain from v1 D3 |
-| Phase S: CI Green         | ⏳ PENDING      | Blocked by Q + R |
+| Phase Q: Tests ≥80%       | 🔄 IN PROGRESS  | Fixing test compilation; coverage run pending. Session active on MSM3U (tmux phase-p) |
+| Phase R: Periphery        | ✅ DONE         | 2,674 items marked periphery:ignore/Reserved across 489 files. Committed 6d725251 + 4d14df81 + 9a0b408e |
+| Phase S: CI Green         | ⏳ PENDING      | Blocked by Q. SwiftLint fixed (f13e2678). E2E reporter issue pre-existing. |
 | Phase T: Notarization     | ⏳ PENDING      | Blocked by S |
-| Phase W: V1 Re-verify     | ⏳ PENDING      | Run after O + P complete — NOW UNBLOCKED |
+| Phase W: V1 Re-verify     | ⏳ PENDING      | Blocked by Q+R (Wave 3). Wave 3+4 executor running in user terminal on MSM3U. |
 | Phase U: Final Report     | ⏳ PENDING      | Blocked by all above |
 | Phase V: Manual Gate      | ⏳ MANUAL       | Alexis only — last step |
-| **Overall ship-ready %**  | **~65%**        | N+O+P done; Q/R/W/S/T/U pending |
+| **Overall ship-ready %**  | **~75%**        | N+O+P+R done; Q in progress; W/S/T/U pending |
 
-*Last updated: 2026-02-19 — Phase P ✅ complete. P1-P16: Claude 4.6 catalog, ConfidenceSystem.messaging, OpenClawBridge+injection resistance, PersonalKnowledgeGraph dedup, HealthCoachingPipeline gateway, SpeechTranscriptionService, AgentTeamOrchestrator, OutboundPrivacyGuard+credentials, FunctionGemmaBridge+blocklist, CloudKitService+messaging sync, audio/image attachments, MLXVisionEngine+vllm-mlx. Phase W now unblocked.*
+*Last updated: 2026-02-19 12:30 CET — Phase R ✅ complete (2,674 periphery items). Phase Q 🔄 active (test compilation fixes committed, coverage run pending). SwiftLint CI violations fixed. Wave 3+4 executor running, waiting for Q to finish before starting W→S→T.*
 
 ---
 

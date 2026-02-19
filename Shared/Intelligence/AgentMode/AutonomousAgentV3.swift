@@ -266,6 +266,7 @@ extension AutonomousAgentV3 {
         return stepSuccess
     }
 
+    // periphery:ignore:parameters _plan - Reserved: parameter(s) kept for API compatibility
     private func recordStepFailure(
         step: AutonomousPlan.PlanStep,
         state: inout AutonomousExecutionState,
@@ -317,6 +318,7 @@ extension AutonomousAgentV3 {
 
 extension AutonomousAgentV3 {
 
+    // periphery:ignore:parameters state - Reserved: parameter(s) kept for API compatibility
     private func executeStep(
         _ step: AutonomousPlan.PlanStep,
         state: inout AutonomousExecutionState
@@ -517,6 +519,7 @@ extension AutonomousAgentV3 {
 
 extension AutonomousAgentV3 {
 
+    // periphery:ignore:parameters step - Reserved: parameter(s) kept for API compatibility
     private func verifyStep(
         // periphery:ignore - Reserved: step parameter kept for API compatibility
         _ step: AutonomousPlan.PlanStep,

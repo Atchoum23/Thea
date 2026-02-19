@@ -250,6 +250,7 @@ public final class ContextAggregator: ObservableObject {
     }
 
     /// Get best performing model for a context
+    // periphery:ignore:parameters context - Reserved: parameter(s) kept for API compatibility
     public func getBestModelForContext(
         taskType: TaskType,
         // periphery:ignore - Reserved: context parameter kept for API compatibility

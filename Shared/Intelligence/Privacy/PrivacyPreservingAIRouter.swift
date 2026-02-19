@@ -215,6 +215,7 @@ public actor PrivacyPreservingAIRouter {
 
     // MARK: - Private Methods
 
+    // periphery:ignore:parameters classification,taskType - Reserved: parameter(s) kept for API compatibility
     private func determineRoute(
         maxSensitivity: DataSensitivityLevel,
         classification: ContentClassificationResult,

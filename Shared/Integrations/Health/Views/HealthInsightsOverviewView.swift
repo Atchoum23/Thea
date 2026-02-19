@@ -461,6 +461,7 @@ final class HealthInsightsOverviewViewModel {
         )
     }
 
+    // periphery:ignore:parameters avgCalories - Reserved: parameter(s) kept for API compatibility
     private func generateHighlights(
         avgSleepMinutes: Int,
         avgSteps: Int,

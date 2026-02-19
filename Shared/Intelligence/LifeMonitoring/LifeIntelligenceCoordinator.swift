@@ -183,6 +183,7 @@ public actor LifeIntelligenceCoordinator {
     // MARK: - Unified Decision Making
 
     /// Make a unified decision about how to handle incoming communication
+    // periphery:ignore:parameters contactName,isCall - Reserved: parameter(s) kept for API compatibility
     public func decideCommunicationResponse(
         contactId: String?,
         contactName: String?,

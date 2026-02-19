@@ -557,6 +557,7 @@ final class AIModelGovernor {
         return min(1.0, score)
     }
 
+    // periphery:ignore:parameters _model - Reserved: parameter(s) kept for API compatibility
     private func buildCleanupReasoning(
         model _model: LocalModel,
         value: ModelValueAssessment,

@@ -85,6 +85,7 @@ public final class UsageAnalyticsService {
     }
 
     /// Track a chat interaction
+    // periphery:ignore:parameters provider - Reserved: parameter(s) kept for API compatibility
     public func trackChat(
         model: String,
         provider: String,
@@ -119,6 +120,7 @@ public final class UsageAnalyticsService {
     }
 
     /// Track a task completion
+    // periphery:ignore:parameters durationMs - Reserved: parameter(s) kept for API compatibility
     public func trackTask(
         type: String,
         durationMs: Int,

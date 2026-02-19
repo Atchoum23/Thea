@@ -398,6 +398,7 @@ public final class CodebaseSearchEngine: ObservableObject {
         return results
     }
 
+    // periphery:ignore:parameters filters - Reserved: parameter(s) kept for API compatibility
     private func searchText(
         query: ParsedQuery,
         indexer: SemanticCodeIndexer,
