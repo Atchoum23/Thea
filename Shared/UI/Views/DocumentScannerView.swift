@@ -766,6 +766,7 @@ struct DocumentCameraScannerView: UIViewControllerRepresentable {
             self.onCapture = onCapture
         }
 
+        @MainActor
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
             var images: [Data] = []
             for i in 0..<scan.pageCount {
@@ -778,10 +779,12 @@ struct DocumentCameraScannerView: UIViewControllerRepresentable {
             controller.dismiss(animated: true)
         }
 
+        @MainActor
         func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
             controller.dismiss(animated: true)
         }
 
+        @MainActor
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
             controller.dismiss(animated: true)
         }
