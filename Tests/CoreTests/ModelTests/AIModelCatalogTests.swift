@@ -94,7 +94,8 @@ final class AIModelCatalogIntegrityTests: XCTestCase {
 final class AIModelCatalogProviderTests: XCTestCase {
 
     func testAnthropicModelsCount() {
-        XCTAssertEqual(AIModel.anthropicModels.count, 6)
+        // Updated for Phase P: Claude 4.6 family + Agent Teams models added to catalog
+        XCTAssertEqual(AIModel.anthropicModels.count, 8)
     }
 
     func testAnthropicModelsAllHaveCorrectProvider() {
@@ -187,7 +188,8 @@ final class AIModelCatalogProviderTests: XCTestCase {
     }
 
     func testOpenRouterModelsCount() {
-        XCTAssertEqual(AIModel.openRouterModels.count, 5)
+        // Updated for Phase P: additional OpenRouter models added to catalog
+        XCTAssertEqual(AIModel.openRouterModels.count, 7)
     }
 
     func testOpenRouterModelsAllHaveCorrectProvider() {
