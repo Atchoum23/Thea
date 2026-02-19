@@ -9,8 +9,8 @@
 #
 # v2 ADDITIONS OVER v1:
 #   1. GitHub Workflows: complete overhaul of all 6 workflows (N1–N8)
-#   2. OpenClaw: full depth integration — O_PRE (gateway setup), O0–O10 (protocol,
-#      auth, Canvas, sessions, memory, multi-agent, voice, nodes, skills, UI)
+#   2. Thea Native Messaging Gateway: replace OpenClaw natively — O0–O10 (foundation,
+#      Telegram, Discord, Slack, iMessage, WhatsApp, Signal, Matrix, WS server, sessions)
 #   3. Component-by-component analysis: P1–P16 (all major subsystems + AI 2026 upgrades)
 #   4. AI 2026 updates: Claude Opus 4.6, Sonnet 4.6, Agent Teams, MLX audio/vision,
 #      Apple SpeechAnalyzer API, vllm-mlx, SwiftLint 0.64.0
@@ -47,7 +47,7 @@ phase and run all steps fully and autonomously, committing after each step."
 |---------------------------|-----------------|-------|
 | v1 phases (A–L)           | ✅ ALL DONE     | See Progress Tracking section |
 | Phase N: Workflows        | ✅ DONE         | All 6 YAML files written + committed (2026-02-19) |
-| Phase O: OpenClaw         | ⏳ PENDING      | Protocol rewrite + all new features (O_PRE first) |
+| Phase O: Messaging Gateway| ⏳ PENDING      | Native platform connectors (Telegram/Discord/Slack/…) |
 | Phase P: Components       | ⏳ PENDING      | 16 subsystem analyses + AI 2026 upgrades |
 | Phase Q: Tests ≥80%       | ⏳ PENDING      | Baseline measurement first |
 | Phase R: Periphery        | ⏳ PARTIAL      | ~2,667 items remain from v1 D3 |
@@ -108,7 +108,7 @@ phase and run all steps fully and autonomously, committing after each step."
 - [ ] Cron/scheduled tasks: create, list, cancel background jobs
 - [ ] Gateway config management: read/write via config.get/config.set
 - [ ] OpenClaw settings UI: full channel/agent configuration in Thea
-- [ ] Security audit integration: `openclaw security audit` from Thea
+- [ ] Security audit integration: `thea-audit` scan from CI (already wired in Phase N)
 
 ### Web & Tizen
 - [x] TheaWeb: all 14 routes implemented, Docker builds, 6/6 tests passing
@@ -153,12 +153,10 @@ phase and run all steps fully and autonomously, committing after each step."
 ```
 Wave 0 — PREREQUISITE (do first, unblocks everything):
   ntfy-setup — Subscribe to ntfy.sh/thea-msm3u on your iPhone (see NTFY SETUP below)
-  O_PRE      — OpenClaw Gateway Install + Config on MSM3U  [~20 min]
-               (npm install, oncboard, openclaw doctor, gateway start)
 
 Wave 1 — PARALLEL (no dependencies between O, P):
   ✅ N — GitHub Workflows Overhaul   [DONE 2026-02-19 — all 6 YAML files written + committed]
-  O — OpenClaw Deep Integration        [MSM3U, ~6h, largest new feature, needs O_PRE]
+  O — Thea Native Messaging Gateway    [MSM3U, ~6h, largest new feature, no prerequisites]
   P — Component Analysis + Fixes       [MSM3U, ~4h, P1–P16 including AI 2026 upgrades]
 
 Wave 2 — AFTER WAVE 1 (parallel with each other):
@@ -176,7 +174,7 @@ Wave 4 — FINAL:
 
 Agent parallelism within waves:
   Wave 1: Spawn 2 Claude Code sessions simultaneously on MSM3U (N is already done):
-    Session 1: "Execute Phase O — OpenClaw Deep Integration (O_PRE already done)"
+    Session 1: "Execute Phase O — Thea Native Messaging Gateway"
     Session 2: "Execute Phase P — Component Analysis + Fixes (P1–P16)"
   Each session sends ntfy progress notifications on phase start/complete/failure.
   Monitor both and merge results via git pushsync when each session commits.
@@ -243,7 +241,7 @@ curl -s -o /dev/null \
 ## PHASE W — V1 RE-VERIFICATION (Run after O+P complete)
 
 **Goal**: Verify that all v1 ship-ready criteria still hold after Phase O and Phase P code changes.
-**Why needed**: New code from O (OpenClaw protocol rewrite) and P (component upgrades) may inadvertently break v1 achievements — builds, tests, security files, schema migration, Liquid Glass.
+**Why needed**: New code from O (Thea Messaging Gateway) and P (component upgrades) may inadvertently break v1 achievements — builds, tests, security files, schema migration, Liquid Glass.
 **Estimated time**: ~1 hour
 **Run after**: Phase O AND Phase P both complete
 
@@ -805,625 +803,966 @@ done
 
 ---
 
-## PHASE O — OPENCLAW DEEP INTEGRATION (MSM3U)
+## PHASE O — THEA NATIVE MESSAGING GATEWAY (MSM3U)
 
-**Goal**: Full OpenClaw capability — proper protocol, all channels, Canvas, sessions, memory,
-         multi-agent routing, node capabilities, skills, tools, cron, config management,
-         security audit, and comprehensive Thea settings UI.
+**Goal**: Build Thea's own native messaging gateway connecting directly to Telegram, Discord,
+         Slack, iMessage/BlueBubbles, WhatsApp, Signal, and Matrix platform APIs. No external
+         processes, no npm packages, no OpenClaw install. Thea IS the gateway. Port 18789 is
+         hosted BY Thea (TheaGatewayWSServer), not by any external tool.
 
-**Why**: Current implementation uses wrong protocol framing (JSONRPC 2.0 vs OpenClaw's
-         req/res/event framing), lacks authentication, and only implements 3 of ~20 capabilities.
-         OpenClaw is listed as "ACTIVE all platforms" in CLAUDE.md — it must be fully functional.
+**Why**: Research on OpenClaw revealed its full capability set — multi-platform messaging,
+         sessions API, memory MMR re-ranking, multi-agent routing, 22-pattern injection defense,
+         rate limiting, and a WebSocket gateway. Thea implements ALL of this natively in Swift
+         with direct platform API connections. Architecturally superior: no Node.js process
+         management, no daemon crashes, no npm dependency chain, full integration with Thea's
+         existing SwiftData, PersonalKnowledgeGraph, and OpenClawSecurityGuard systems.
 
-### O_PRE: Install + Configure OpenClaw Gateway on MSM3U
-
-**Must complete BEFORE O1–O10 — Thea's OpenClaw code requires a live Gateway to test against.**
-
-```bash
-# 1. Install OpenClaw (requires Node 22+)
-node --version  # Must be ≥22
-npm install -g openclaw@latest
-openclaw --version
-
-# 2. Run interactive onboarding (sets up auth + daemon)
-openclaw onboard --install-daemon
-# When prompted:
-#   Provider: Anthropic
-#   Model: claude-opus-4-6   ← Best for prompt injection resistance (per OpenClaw docs)
-#   Channel: start with none (add channels via config after)
-#   Persistence: yes
-
-# 3. Create optimised openclaw.json for Thea integration
-# File: ~/.openclaw/openclaw.json  (JSON5 format — comments + trailing commas OK)
-cat > ~/.openclaw/openclaw.json << 'EOF'
-{
-  // Thea's OpenClaw identity
-  identity: {
-    name: "Thea",
-    emoji: "🌿",
-    theme: "dark",
-  },
-
-  // Primary agent — uses best model for security + tool use
-  agent: {
-    workspace: "~/.openclaw/workspace",
-    model: {
-      primary: "anthropic/claude-opus-4-6",   // Best prompt-injection resistance
-      fallbacks: ["anthropic/claude-sonnet-4-6"],
-    },
-    heartbeat: true,
-  },
-
-  // Session isolation — CRITICAL for multi-sender safety
-  session: {
-    dmScope: "per-channel-peer",   // Each sender gets isolated context
-    scope: "per-sender",
-    reset: { mode: "daily", hour: 4 },  // Reset at 4am daily
-  },
-
-  // Channel defaults — start locked down, open per channel as needed
-  channels: {
-    // Enable channels one by one as you set them up:
-    // whatsapp: { dmPolicy: "pairing", groups: { "*": { requireMention: true } } },
-    // telegram: { dmPolicy: "pairing" },
-    // discord: { dmPolicy: "pairing" },
-    // signal: { dmPolicy: "pairing" },
-  },
-
-  // Tool permissions — allow core tools, deny dangerous ones
-  tools: {
-    allow: ["read", "web", "messaging"],
-    deny: ["group:runtime", "sessions_spawn", "gateway"],
-    elevated: { allowFrom: [] },  // No one gets elevated by default
-  },
-
-  // Sandbox — non-main sessions (groups) run in Docker for safety
-  sandbox: {
-    mode: "non-main",
-    scope: "session",
-    workspaceAccess: "ro",  // Read-only workspace in sandboxed sessions
-  },
-
-  // Gateway — loopback only (Tailscale for remote access)
-  gateway: {
-    bind: "loopback",
-    auth: { mode: "token" },  // Token set during onboard
-    mDNS: { mode: "minimal" },
-  },
-
-  // Logging — redact sensitive tool output
-  logging: {
-    level: "info",
-    redactSensitive: "tools",
-  },
-}
-EOF
-
-# 4. Validate configuration
-openclaw doctor
-# Must show: ✅ Config valid, ✅ API key OK, ✅ Permissions OK
-
-# 5. Start gateway and verify
-openclaw gateway status
-openclaw gateway start  # if not running
-
-# 6. Verify WebSocket endpoint is live
-curl -s http://127.0.0.1:18789/health && echo "Gateway healthy"
-
-# 7. Open dashboard (optional but useful)
-openclaw dashboard  # Opens http://127.0.0.1:18789/ in browser
-
-# 8. Test from Thea
-# Set OPENCLAW_GATEWAY_TOKEN env var for Thea to use:
-GATEWAY_TOKEN=$(openclaw config get gateway.auth.token 2>/dev/null || \
-                grep -r '"token"' ~/.openclaw/openclaw.json | head -1)
-echo "Token configured: ${GATEWAY_TOKEN:0:10}..."
+**Architecture**:
+```
+[Telegram Bot API]  ←→ TelegramConnector.swift   ─┐
+[Discord Gateway]   ←→ DiscordConnector.swift    ─┤
+[Slack Socket Mode] ←→ SlackConnector.swift      ─┼→ TheaMessagingGateway.swift (orchestrator)
+[BlueBubbles HTTP]  ←→ BlueBubblesConnector.swift─┤   │ hosts WS server on port 18789
+[WhatsApp BA API]   ←→ WhatsAppConnector.swift   ─┤   ↓
+[Signal-CLI]        ←→ SignalConnector.swift      ─┤  OpenClawBridge.swift (repurposed router)
+[Matrix C-S API]    ←→ MatrixConnector.swift      ─┘  OpenClawSecurityGuard.swift (kept as-is)
+                                                           ↓
+                                                    ChatManager / AI Agents
+                                                    PersonalKnowledgeGraph (memory)
 ```
 
-**Canvas URL (for O4 WKWebView integration):**
-- Canvas HTML served at: `http://127.0.0.1:18793/__openclaw__/canvas/`
-- A2UI scripts at: `http://127.0.0.1:18793/__openclaw__/a2ui/`
-- Canvas port configurable via `gateway.canvasPort` (default 18793)
+**Repurpose existing OpenClaw files — NEVER DELETE (NEVER REMOVE rule)**:
+- `OpenClawClient.swift` → Internal client connecting to Thea's own WS server at port 18789
+  (no logic change needed; update comment only)
+- `OpenClawBridge.swift` → Upgrade to multi-platform router (keep ALL existing security code)
+- `OpenClawSecurityGuard.swift` → Keep EXACTLY as-is (22 patterns, NFD normalization)
+- `OpenClawIntegration.swift` → Repurpose as lifecycle manager for TheaMessagingGateway
+- `OpenClawTypes.swift` → Extend: add TheaGatewayMessage typealias + MessagingPlatform cases
 
-**Cron jobs file location (for O3 integration):**
-- `~/.openclaw/cron/jobs.json` — directly readable for debugging
+**New directories + files** (add all to project.yml, run xcodegen generate after):
+- `Shared/Integrations/Messaging/` — new directory for platform connectors
+- `Shared/Integrations/OpenClaw/TheaMessagingGateway.swift` — gateway orchestrator
+- `Shared/Integrations/OpenClaw/TheaGatewayWSServer.swift` — built-in WS server (port 18789)
+- `Shared/Integrations/OpenClaw/MessagingPlatformProtocol.swift` — shared connector protocol
+- `Shared/Integrations/OpenClaw/MessagingSessionManager.swift` — SwiftData sessions + MMR
+- `Shared/Integrations/Messaging/TelegramConnector.swift`
+- `Shared/Integrations/Messaging/DiscordConnector.swift`
+- `Shared/Integrations/Messaging/SlackConnector.swift`
+- `Shared/Integrations/Messaging/BlueBubblesConnector.swift`
+- `Shared/Integrations/Messaging/WhatsAppConnector.swift`
+- `Shared/Integrations/Messaging/SignalConnector.swift`
+- `Shared/Integrations/Messaging/MatrixConnector.swift`
+- `Shared/UI/Views/OpenClaw/TheaMessagingChatView.swift`
+- `Shared/UI/Views/Settings/TheaMessagingSettingsView.swift`
 
-**iOS node pairing (for O3/O8 — note: iOS app in internal preview as of Feb 2026):**
-```bash
-openclaw nodes pending    # Show pending node pairing requests
-openclaw nodes list       # Show paired nodes
-# iOS app: download from TestFlight when available, then scan QR from dashboard
-```
+---
 
-### O0: Protocol Analysis — What Must Change
+### O0: Foundation — TheaMessagingGateway + MessagingPlatformProtocol
 
-**Current (wrong) protocol:**
-```json
-{"jsonrpc": "2.0", "id": "uuid", "method": "channels.list", "params": {}}
-```
-
-**Correct OpenClaw protocol:**
-```json
-// Request:   {"type":"req", "id":"uuid", "method":"channels.list", "params":{}}
-// Response:  {"type":"res", "id":"uuid", "ok":true, "payload":{...}}
-// Error:     {"type":"res", "id":"uuid", "ok":false, "error":{"code":...,"message":"..."}}
-// Event:     {"type":"event", "event":"message.received", "payload":{...}, "seq":42}
-// Handshake challenge: {"type":"event", "event":"auth.challenge", "payload":{"nonce":"...","ts":...}}
-// Handshake response:  {"type":"req", "id":"uuid", "method":"connect",
-//                       "params":{"minProtocol":1,"maxProtocol":1,"meta":{...},
-//                                 "role":"operator","scopes":["operator.read","operator.write"],
-//                                 "deviceId":"thea-...", "token":"..."}}
-// Auth success:        {"type":"res", "id":"uuid", "ok":true,
-//                       "payload":{"protocol":1, "auth":{"deviceToken":"..."}}}
-```
-
-### O1: Update OpenClawTypes.swift — New Protocol Types
-
-**Add to OpenClawTypes.swift:**
+**Create**: `Shared/Integrations/OpenClaw/MessagingPlatformProtocol.swift`
 ```swift
-// Gateway wire protocol (OpenClaw native format)
-struct OpenClawRequest: Codable, Sendable {
-    let type: String   // always "req"
-    let id: String     // UUID for correlation
-    let method: String
-    let params: OpenClawParams
-
-    init(id: String = UUID().uuidString, method: String, params: OpenClawParams = .empty) {
-        self.type = "req"; self.id = id; self.method = method; self.params = params
-    }
+/// Protocol all messaging platform connectors must implement (Swift 6 actor isolation).
+protocol MessagingPlatformConnector: Actor {
+    var platform: MessagingPlatform { get }
+    var isConnected: Bool { get }
+    var credentials: MessagingCredentials { get set }
+    func connect() async throws
+    func disconnect() async
+    func send(_ message: OutboundMessage) async throws
+    func setMessageHandler(_ handler: @escaping @Sendable (TheaGatewayMessage) async -> Void)
 }
 
-struct OpenClawResponse: Codable, Sendable {
-    let type: String   // always "res"
-    let id: String
-    let ok: Bool
-    let payload: OpenClawPayload?
-    let error: OpenClawResponseError?
-}
-
-struct OpenClawEvent: Codable, Sendable {
-    let type: String   // always "event"
-    let event: String
-    let payload: OpenClawPayload
-    let seq: Int?
-    let stateVersion: Int?
-}
-
-struct OpenClawResponseError: Codable, Sendable {
-    let code: Int
-    let message: String
-    let data: OpenClawPayload?
-}
-
-// Add new platforms:
-extension OpenClawPlatform {
-    case bluebubbles     // Recommended iMessage (BlueBubbles)
-    case googleChat      // Google Chat
-    case microsoftTeams  // Microsoft Teams
-    case webchat         // OpenClaw WebChat
-    case zalo
+/// Platform enum — canonical list of all supported messaging platforms
+enum MessagingPlatform: String, CaseIterable, Codable, Sendable {
+    case telegram, discord, slack, imessage, whatsapp, signal, matrix
     var displayName: String {
-        // Add new cases
-        case .bluebubbles: "iMessage (BlueBubbles)"
-        case .googleChat: "Google Chat"
-        case .microsoftTeams: "Microsoft Teams"
-        case .webchat: "WebChat"
-        case .zalo: "Zalo"
+        switch self {
+        case .telegram: "Telegram"; case .discord: "Discord"; case .slack: "Slack"
+        case .imessage: "iMessage (BlueBubbles)"; case .whatsapp: "WhatsApp"
+        case .signal: "Signal"; case .matrix: "Matrix/Element"
+        }
     }
 }
 
-// OpenClaw Session (maps to agent:{agentId}:{provider}:{scope}:{identifier})
-struct OpenClawSession: Identifiable, Codable, Sendable {
-    let id: String          // session key e.g. "agent:main:whatsapp:dm:+15555550123"
-    let agentId: String     // "main", "work", "personal", etc.
-    let channelType: String // "whatsapp", "telegram", etc.
-    let scope: String       // "dm", "group", "channel"
-    let identifier: String  // "+15555550123", group ID, etc.
-    let lastActivity: Date?
-    var transcript: [OpenClawMessage]
-}
-
-// OpenClaw Agent (named agent in the gateway)
-struct OpenClawAgent: Identifiable, Codable, Sendable {
+/// Unified inbound message from any platform
+struct TheaGatewayMessage: Sendable, Identifiable {
     let id: String
-    let name: String
-    let model: String
-    let isDefault: Bool
-    var sessionCount: Int
+    let platform: MessagingPlatform
+    let chatId: String        // channel/DM/group identifier
+    let senderId: String
+    let senderName: String
+    let content: String
+    let timestamp: Date
+    let isGroup: Bool
+    var attachments: [MessageAttachment] = []
 }
 
-// OpenClaw Canvas state
-struct OpenClawCanvasState: Codable, Sendable {
-    let html: String
-    let a2uiVersion: Int
-    let updatedAt: Date
+/// Per-platform credentials (ALL stored in Keychain via MessagingCredentialsStore)
+struct MessagingCredentials: Sendable {
+    var botToken: String?      // Telegram/Discord/Slack bot token
+    var apiKey: String?        // WhatsApp phone number ID, Matrix access token
+    var serverUrl: String?     // BlueBubbles URL, Signal phone number, Matrix homeserver
+    var webhookSecret: String? // Slack signing secret
+    var isEnabled: Bool = false
 }
 
-// OpenClaw Node capability
-enum OpenClawNodeCapability: String, Codable, Sendable {
-    case cameraSnap = "node.camera.snap"
-    case cameraClip = "node.camera.clip"
-    case screenRecord = "node.screen.record"
-    case locationGet = "node.location.get"
-    case notificationSend = "node.notification.send"
-    case systemRun = "node.system.run"          // macOS only
-    case systemNotify = "node.system.notify"    // macOS only
+struct OutboundMessage: Sendable {
+    let chatId: String; let content: String
+    var replyToId: String? = nil; var attachments: [MessageAttachment] = []
 }
 
-// OpenClaw Cron job
-struct OpenClawCronJob: Identifiable, Codable, Sendable {
-    let id: String
-    let expression: String    // cron expression e.g. "0 9 * * 1-5"
-    let agentId: String
-    let message: String       // injected task message
-    let enabled: Bool
-    let nextRun: Date?
+struct MessageAttachment: Sendable {
+    enum AttachmentType { case image, audio, video, file }
+    let type: AttachmentType; let data: Data; let mimeType: String
 }
 
-// Gateway status
-struct OpenClawGatewayStatus: Codable, Sendable {
-    let version: String
-    let protocol_: Int      // protocol version (using _ to avoid keyword clash)
-    let uptime: TimeInterval
-    let connectedNodes: Int
-    let activeChannels: Int
-    let memoryUsedMB: Double
-}
-
-// Add gateway event types:
-extension OpenClawGatewayEvent {
-    case authChallenge(nonce: String)
-    case authSuccess(deviceToken: String?)
-    case sessionCreated(OpenClawSession)
-    case sessionUpdated(OpenClawSession)
-    case canvasUpdated(OpenClawCanvasState)
-    case nodeStatus(nodeId: String, capabilities: [OpenClawNodeCapability])
-    case cronFired(OpenClawCronJob)
-    case gatewayStatus(OpenClawGatewayStatus)
-    case configUpdated
-}
-
-// Add gateway commands:
-extension OpenClawGatewayCommand {
-    // Sessions
-    case listSessions(agentId: String?)
-    case getSession(sessionKey: String)
-    case resetSession(sessionKey: String)
-    case getHistory(sessionKey: String, limit: Int, before: Date?)
-
-    // Agents
-    case listAgents
-    case getAgentConfig(agentId: String)
-
-    // Canvas
-    case getCanvas(agentId: String)
-    case setCanvas(agentId: String, html: String)
-
-    // Nodes
-    case listNodes
-    case invokeNode(nodeId: String, capability: OpenClawNodeCapability, params: [String: Any])
-
-    // Config
-    case getConfig(path: String?)
-    case setConfig(path: String, value: Any)
-    case patchConfig(patches: [[String: Any]])
-
-    // Cron
-    case listCronJobs(agentId: String?)
-    case createCronJob(expression: String, agentId: String, message: String)
-    case deleteCronJob(id: String)
-    case enableCronJob(id: String, enabled: Bool)
-
-    // Memory
-    case searchMemory(agentId: String, query: String, limit: Int)
-    case addMemory(agentId: String, content: String, tags: [String])
-
-    // Status
-    case getGatewayStatus
-    case runSecurityAudit
+enum MessagingError: Error {
+    case missingCredentials(platform: MessagingPlatform, field: String)
+    case notConnected; case sendFailed(platform: MessagingPlatform)
+    case dependencyMissing(name: String, installHint: String)
+    case authenticationFailed(platform: MessagingPlatform)
 }
 ```
 
-### O2: Rewrite OpenClawClient.swift — Proper Protocol
-
-**Key changes:**
-- Replace JSONRPC 2.0 framing with `{type, id, method, params}` framing
-- Implement challenge-response handshake
-- Store and use device token (Keychain)
-- Add pending request map for correlation (id → continuation)
-- Add event sequence number tracking
-- Add proper error handling with OpenClawResponseError
-- Add connection health monitoring (ping every 30s)
-- Add request timeout (default 30s)
-
+**Create**: `Shared/Integrations/OpenClaw/TheaMessagingGateway.swift`
 ```swift
-// Core changes to OpenClawClient:
-actor OpenClawClient {
-    // Pending requests: id → CheckedContinuation<OpenClawPayload, Error>
-    private var pendingRequests: [String: CheckedContinuation<OpenClawPayload, Error>] = [:]
-    private var lastSeq: Int = 0
-    private var deviceToken: String?  // persisted in Keychain
+/// Central orchestrator for all messaging platform connectors.
+/// Hosts built-in WS server on port 18789 — external clients connect here.
+/// All inbound messages route through OpenClawSecurityGuard → OpenClawBridge → AI.
+@MainActor
+final class TheaMessagingGateway: ObservableObject {
+    static let shared = TheaMessagingGateway()
+    private var connectors: [MessagingPlatform: any MessagingPlatformConnector] = [:]
+    private var wsServer: TheaGatewayWSServer?
+    @Published var connectedPlatforms: Set<MessagingPlatform> = []
+    @Published var lastError: String?
 
-    // Proper framing:
-    func send(command: OpenClawGatewayCommand) async throws -> OpenClawPayload {
-        let requestId = UUID().uuidString
-        let message = OpenClawRequest(id: requestId, method: command.method, params: command.params)
-        let data = try JSONEncoder().encode(message)
-        let json = String(data: data, encoding: .utf8)!
-        try await webSocket?.send(.string(json))
-        // Await response via continuation:
-        return try await withCheckedThrowingContinuation { continuation in
-            pendingRequests[requestId] = continuation
+    func start() async {
+        wsServer = TheaGatewayWSServer(port: 18789)
+        try? await wsServer?.start()
+        for platform in MessagingPlatform.allCases {
+            let creds = MessagingCredentialsStore.load(for: platform)
+            guard creds.isEnabled else { continue }
+            await startConnector(for: platform, credentials: creds)
         }
     }
 
-    // Handshake on connect:
-    private func performHandshake() async throws {
-        // 1. Receive auth.challenge event
-        // 2. Send connect request with deviceId, role, scopes, token
-        // 3. Receive hello-ok response
-        // 4. Extract and store deviceToken
+    private func startConnector(for platform: MessagingPlatform, credentials: MessagingCredentials) async {
+        let connector: any MessagingPlatformConnector
+        switch platform {
+        case .telegram:  connector = TelegramConnector(credentials: credentials)
+        case .discord:   connector = DiscordConnector(credentials: credentials)
+        case .slack:     connector = SlackConnector(credentials: credentials)
+        case .imessage:  connector = BlueBubblesConnector(credentials: credentials)
+        case .whatsapp:  connector = WhatsAppConnector(credentials: credentials)
+        case .signal:    connector = SignalConnector(credentials: credentials)
+        case .matrix:    connector = MatrixConnector(credentials: credentials)
+        }
+        await connector.setMessageHandler { [weak self] message in
+            await self?.routeInbound(message)
+        }
+        do {
+            try await connector.connect()
+            connectors[platform] = connector
+            connectedPlatforms.insert(platform)
+        } catch {
+            lastError = "[\(platform.displayName)] \(error.localizedDescription)"
+        }
     }
 
-    // Health check:
-    private func startHeartbeat() {
-        Task {
-            while connectionState == .connected {
-                try? await Task.sleep(for: .seconds(30))
-                try? await send(command: .ping)
+    private func routeInbound(_ message: TheaGatewayMessage) async {
+        guard OpenClawSecurityGuard.shared.isSafe(message.content) else { return }
+        await MessagingSessionManager.shared.appendMessage(message)
+        await OpenClawBridge.shared.processInboundMessage(message)
+    }
+
+    func send(_ message: OutboundMessage, via platform: MessagingPlatform) async throws {
+        guard let connector = connectors[platform] else { throw MessagingError.notConnected }
+        try await connector.send(message)
+    }
+
+    func stop() async {
+        for (_, c) in connectors { await c.disconnect() }
+        connectors.removeAll(); connectedPlatforms.removeAll()
+    }
+}
+```
+
+**Update** `Shared/Integrations/OpenClaw/OpenClawTypes.swift`:
+```swift
+// Backwards-compat typealiases (existing code keeps working unchanged)
+typealias OpenClawMessage = TheaGatewayMessage
+typealias OpenClawPlatform = MessagingPlatform
+```
+
+**Update** `Shared/Integrations/OpenClaw/OpenClawIntegration.swift`:
+```swift
+// Repurpose: delegate lifecycle to TheaMessagingGateway.shared
+// Keep all @Published state for UI compatibility
+// isEnabled/isConnected now reflect TheaMessagingGateway.shared.connectedPlatforms
+```
+
+**Wire into app lifecycle**:
+```swift
+// TheamacOSApp.swift: Task { await TheaMessagingGateway.shared.start() }
+// TheaApp.swift (iOS): Task { await TheaMessagingGateway.shared.start() }
+```
+
+---
+
+### O1: Telegram Bot API Connector
+
+**Create**: `Shared/Integrations/Messaging/TelegramConnector.swift`
+```swift
+/// Telegram Bot API long-polling (getUpdates). No external dependencies.
+/// Credential: botToken (from @BotFather).
+actor TelegramConnector: MessagingPlatformConnector {
+    let platform: MessagingPlatform = .telegram
+    private(set) var isConnected = false
+    var credentials: MessagingCredentials
+    private var messageHandler: (@Sendable (TheaGatewayMessage) async -> Void)?
+    private var pollingTask: Task<Void, Never>?
+    private let apiBase = "https://api.telegram.org"
+
+    init(credentials: MessagingCredentials) { self.credentials = credentials }
+
+    func connect() async throws {
+        guard let token = credentials.botToken, !token.isEmpty else {
+            throw MessagingError.missingCredentials(platform: .telegram, field: "botToken")
+        }
+        let (data, _) = try await URLSession.shared.data(from: URL(string: "\(apiBase)/bot\(token)/getMe")!)
+        let result = try JSONDecoder().decode(TGResponse<TGUser>.self, from: data)
+        guard result.ok else { throw MessagingError.authenticationFailed(platform: .telegram) }
+        isConnected = true
+        pollingTask = Task { await pollLoop(token: token) }
+    }
+
+    private func pollLoop(token: String) async {
+        var offset = 0
+        while !Task.isCancelled && isConnected {
+            guard let (data, _) = try? await URLSession.shared.data(
+                from: URL(string: "\(apiBase)/bot\(token)/getUpdates?offset=\(offset)&timeout=30")!
+            ), let resp = try? JSONDecoder().decode(TGResponse<[TGUpdate]>.self, from: data),
+            resp.ok else { try? await Task.sleep(for: .seconds(5)); continue }
+            for update in resp.result ?? [] {
+                offset = max(offset, update.updateId + 1)
+                guard let msg = update.message, let text = msg.text else { continue }
+                await messageHandler?(TheaGatewayMessage(
+                    id: "\(update.updateId)", platform: .telegram,
+                    chatId: "\(msg.chat.id)", senderId: "\(msg.from?.id ?? 0)",
+                    senderName: msg.from?.firstName ?? "Unknown", content: text,
+                    timestamp: Date(timeIntervalSince1970: Double(msg.date)),
+                    isGroup: msg.chat.type != "private"
+                ))
             }
         }
     }
 
-    // Keychain helpers:
-    private func loadDeviceToken() -> String? {
-        // SecKeychainItemCopyContent / SecItemCopyMatching
+    func send(_ message: OutboundMessage) async throws {
+        guard let token = credentials.botToken else { throw MessagingError.notConnected }
+        var req = URLRequest(url: URL(string: "\(apiBase)/bot\(token)/sendMessage")!)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONSerialization.data(withJSONObject: [
+            "chat_id": message.chatId, "text": message.content
+        ])
+        _ = try await URLSession.shared.data(for: req)
     }
-    private func saveDeviceToken(_ token: String) {
+
+    func disconnect() async { pollingTask?.cancel(); isConnected = false }
+    func setMessageHandler(_ h: @escaping @Sendable (TheaGatewayMessage) async -> Void) { messageHandler = h }
+
+    private struct TGResponse<T: Decodable>: Decodable { let ok: Bool; let result: T? }
+    private struct TGUpdate: Decodable {
+        let updateId: Int; let message: TGMessage?
+        enum CodingKeys: String, CodingKey { case updateId = "update_id"; case message }
+    }
+    private struct TGMessage: Decodable {
+        let date: Int; let chat: TGChat; let from: TGUser?; let text: String?
+    }
+    private struct TGChat: Decodable { let id: Int; let type: String }
+    private struct TGUser: Decodable {
+        let id: Int; let firstName: String?
+        enum CodingKeys: String, CodingKey { case id; case firstName = "first_name" }
+    }
+}
+```
+
+---
+
+### O2: Discord Gateway Connector
+
+**Create**: `Shared/Integrations/Messaging/DiscordConnector.swift`
+```swift
+/// Discord Gateway WebSocket v10 + REST API. No external dependencies.
+/// Credential: botToken (Bot section of Discord Developer Portal).
+/// Intents: GUILD_MESSAGES (512) + DIRECT_MESSAGES (32768) = 33280
+actor DiscordConnector: MessagingPlatformConnector {
+    let platform: MessagingPlatform = .discord
+    private(set) var isConnected = false
+    var credentials: MessagingCredentials
+    private var messageHandler: (@Sendable (TheaGatewayMessage) async -> Void)?
+    private var webSocket: URLSessionWebSocketTask?
+    private var heartbeatTask: Task<Void, Never>?
+    private var seqNum: Int? = nil
+    private let gatewayURL = "wss://gateway.discord.gg/?v=10&encoding=json"
+    private let restBase = "https://discord.com/api/v10"
+
+    init(credentials: MessagingCredentials) { self.credentials = credentials }
+
+    func connect() async throws {
+        guard let token = credentials.botToken, !token.isEmpty else {
+            throw MessagingError.missingCredentials(platform: .discord, field: "botToken")
+        }
+        webSocket = URLSession.shared.webSocketTask(with: URL(string: gatewayURL)!)
+        webSocket?.resume(); isConnected = true
+        Task { await receiveLoop(token: token) }
+    }
+
+    private func receiveLoop(token: String) async {
+        while !Task.isCancelled, let ws = webSocket {
+            guard let msg = try? await ws.receive(), case .string(let text) = msg,
+                  let data = text.data(using: .utf8),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { break }
+            seqNum = json["s"] as? Int ?? seqNum
+            switch json["op"] as? Int {
+            case 10: // Hello
+                let interval = ((json["d"] as? [String: Any])?["heartbeat_interval"] as? Double ?? 41250) / 1000
+                heartbeatTask?.cancel()
+                heartbeatTask = Task { await heartbeatLoop(interval: interval, ws: ws) }
+                await identify(token: token, ws: ws)
+            case 0 where (json["t"] as? String) == "MESSAGE_CREATE":
+                if let d = json["d"] as? [String: Any],
+                   let content = d["content"] as? String,
+                   let channelId = d["channel_id"] as? String,
+                   let author = d["author"] as? [String: Any],
+                   let authorId = author["id"] as? String,
+                   let msgId = d["id"] as? String {
+                    await messageHandler?(TheaGatewayMessage(
+                        id: msgId, platform: .discord, chatId: channelId,
+                        senderId: authorId, senderName: author["username"] as? String ?? "Unknown",
+                        content: content, timestamp: Date(), isGroup: true
+                    ))
+                }
+            default: break
+            }
+        }
+    }
+
+    private func heartbeatLoop(interval: Double, ws: URLSessionWebSocketTask) async {
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(interval))
+            if let data = try? JSONSerialization.data(withJSONObject: ["op": 1, "d": seqNum as Any]),
+               let str = String(data: data, encoding: .utf8) { try? await ws.send(.string(str)) }
+        }
+    }
+
+    private func identify(token: String, ws: URLSessionWebSocketTask) async {
+        let p: [String: Any] = ["op": 2, "d": [
+            "token": token, "intents": 33280,
+            "properties": ["os": "macOS", "browser": "Thea", "device": "Thea"]
+        ]]
+        if let data = try? JSONSerialization.data(withJSONObject: p),
+           let str = String(data: data, encoding: .utf8) { try? await ws.send(.string(str)) }
+    }
+
+    func send(_ message: OutboundMessage) async throws {
+        guard let token = credentials.botToken else { throw MessagingError.notConnected }
+        var req = URLRequest(url: URL(string: "\(restBase)/channels/\(message.chatId)/messages")!)
+        req.httpMethod = "POST"
+        req.setValue("Bot \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONSerialization.data(withJSONObject: ["content": message.content])
+        _ = try await URLSession.shared.data(for: req)
+    }
+
+    func disconnect() async { heartbeatTask?.cancel(); webSocket?.cancel(); isConnected = false }
+    func setMessageHandler(_ h: @escaping @Sendable (TheaGatewayMessage) async -> Void) { messageHandler = h }
+}
+```
+
+---
+
+### O3: Slack Events API Connector (Socket Mode)
+
+**Create**: `Shared/Integrations/Messaging/SlackConnector.swift`
+```swift
+/// Slack via Socket Mode WebSocket. No public URL required.
+/// Credentials: botToken (xoxb-…) + apiKey (App-Level Token xapp-… for Socket Mode).
+actor SlackConnector: MessagingPlatformConnector {
+    let platform: MessagingPlatform = .slack
+    private(set) var isConnected = false
+    var credentials: MessagingCredentials
+    private var messageHandler: (@Sendable (TheaGatewayMessage) async -> Void)?
+    private var webSocket: URLSessionWebSocketTask?
+
+    init(credentials: MessagingCredentials) { self.credentials = credentials }
+
+    func connect() async throws {
+        guard let appToken = credentials.apiKey, !appToken.isEmpty else {
+            throw MessagingError.missingCredentials(platform: .slack, field: "apiKey (xapp- token)")
+        }
+        var req = URLRequest(url: URL(string: "https://slack.com/api/apps.connections.open")!)
+        req.httpMethod = "POST"; req.setValue("Bearer \(appToken)", forHTTPHeaderField: "Authorization")
+        let (data, _) = try await URLSession.shared.data(for: req)
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let wssUrl = json["url"] as? String else {
+            throw MessagingError.authenticationFailed(platform: .slack)
+        }
+        webSocket = URLSession.shared.webSocketTask(with: URL(string: wssUrl)!)
+        webSocket?.resume(); isConnected = true
+        Task { await receiveLoop() }
+    }
+
+    private func receiveLoop() async {
+        while !Task.isCancelled, let ws = webSocket {
+            guard let msg = try? await ws.receive(), case .string(let text) = msg,
+                  let data = text.data(using: .utf8),
+                  let envelope = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { continue }
+            if let eid = envelope["envelope_id"] as? String {
+                try? await ws.send(.string("{\"envelope_id\":\"\(eid)\"}"))
+            }
+            if (envelope["type"] as? String) == "events_api",
+               let payload = envelope["payload"] as? [String: Any],
+               let event = payload["event"] as? [String: Any],
+               (event["type"] as? String) == "message",
+               let text = event["text"] as? String,
+               let channelId = event["channel"] as? String,
+               let userId = event["user"] as? String,
+               let ts = event["ts"] as? String {
+                await messageHandler?(TheaGatewayMessage(
+                    id: ts, platform: .slack, chatId: channelId,
+                    senderId: userId, senderName: userId, content: text,
+                    timestamp: Date(), isGroup: channelId.hasPrefix("C")
+                ))
+            }
+        }
+    }
+
+    func send(_ message: OutboundMessage) async throws {
+        guard let token = credentials.botToken else { throw MessagingError.notConnected }
+        var req = URLRequest(url: URL(string: "https://slack.com/api/chat.postMessage")!)
+        req.httpMethod = "POST"; req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONSerialization.data(withJSONObject: ["channel": message.chatId, "text": message.content])
+        _ = try await URLSession.shared.data(for: req)
+    }
+
+    func disconnect() async { webSocket?.cancel(); isConnected = false }
+    func setMessageHandler(_ h: @escaping @Sendable (TheaGatewayMessage) async -> Void) { messageHandler = h }
+}
+```
+
+---
+
+### O4: iMessage / BlueBubbles Connector
+
+**Create**: `Shared/Integrations/Messaging/BlueBubblesConnector.swift`
+```swift
+/// iMessage via BlueBubbles local HTTP + WebSocket API.
+/// Credentials: serverUrl (e.g. "http://localhost:1234") + apiKey (BlueBubbles password).
+actor BlueBubblesConnector: MessagingPlatformConnector {
+    let platform: MessagingPlatform = .imessage
+    private(set) var isConnected = false
+    var credentials: MessagingCredentials
+    private var messageHandler: (@Sendable (TheaGatewayMessage) async -> Void)?
+    private var webSocket: URLSessionWebSocketTask?
+
+    init(credentials: MessagingCredentials) { self.credentials = credentials }
+
+    func connect() async throws {
+        guard let serverUrl = credentials.serverUrl, let apiKey = credentials.apiKey else {
+            throw MessagingError.missingCredentials(platform: .imessage, field: "serverUrl + apiKey")
+        }
+        let wsUrl = serverUrl.replacingOccurrences(of: "http://", with: "ws://")
+                             .replacingOccurrences(of: "https://", with: "wss://")
+                   + "/api/v1/socket?password=\(apiKey)"
+        webSocket = URLSession.shared.webSocketTask(with: URL(string: wsUrl)!)
+        webSocket?.resume(); isConnected = true
+        Task { await receiveLoop(serverUrl: serverUrl, apiKey: apiKey) }
+    }
+
+    private func receiveLoop(serverUrl: String, apiKey: String) async {
+        while !Task.isCancelled, let ws = webSocket {
+            guard let msg = try? await ws.receive(), case .string(let text) = msg,
+                  let data = text.data(using: .utf8),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  json["event"] as? String == "new-message",
+                  let msgData = json["data"] as? [String: Any],
+                  let content = msgData["text"] as? String, !content.isEmpty else { continue }
+            await messageHandler?(TheaGatewayMessage(
+                id: msgData["guid"] as? String ?? UUID().uuidString,
+                platform: .imessage,
+                chatId: msgData["chats"] as? String ?? "unknown",
+                senderId: msgData["handle"] as? String ?? "unknown",
+                senderName: msgData["handleString"] as? String ?? "iMessage",
+                content: content, timestamp: Date(),
+                isGroup: (msgData["isGroup"] as? Bool) ?? false
+            ))
+        }
+    }
+
+    func send(_ message: OutboundMessage) async throws {
+        guard let serverUrl = credentials.serverUrl, let apiKey = credentials.apiKey else {
+            throw MessagingError.notConnected
+        }
+        var req = URLRequest(url: URL(string: "\(serverUrl)/api/v1/message/text")!)
+        req.httpMethod = "POST"; req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue(apiKey, forHTTPHeaderField: "password")
+        req.httpBody = try JSONSerialization.data(withJSONObject: ["chatGuid": message.chatId, "message": message.content])
+        _ = try await URLSession.shared.data(for: req)
+    }
+
+    func disconnect() async { webSocket?.cancel(); isConnected = false }
+    func setMessageHandler(_ h: @escaping @Sendable (TheaGatewayMessage) async -> Void) { messageHandler = h }
+}
+```
+
+---
+
+### O5: WhatsApp Business API Connector
+
+**Create**: `Shared/Integrations/Messaging/WhatsAppConnector.swift`
+```swift
+/// WhatsApp via Meta Cloud API. Receives webhooks via TheaGatewayWSServer, sends via REST.
+/// Credentials: botToken (access token) + apiKey (phone number ID) + webhookSecret (verify token).
+actor WhatsAppConnector: MessagingPlatformConnector {
+    let platform: MessagingPlatform = .whatsapp
+    private(set) var isConnected = false
+    var credentials: MessagingCredentials
+    private var messageHandler: (@Sendable (TheaGatewayMessage) async -> Void)?
+    private let apiBase = "https://graph.facebook.com/v21.0"
+
+    init(credentials: MessagingCredentials) { self.credentials = credentials }
+
+    func connect() async throws {
+        guard credentials.botToken != nil, credentials.apiKey != nil else {
+            throw MessagingError.missingCredentials(platform: .whatsapp, field: "botToken + apiKey")
+        }
+        isConnected = true
+        // Registers webhook handler with TheaGatewayWSServer for incoming POSTs
+    }
+
+    func processWebhook(body: Data) async {
+        guard let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+              let entry = (json["entry"] as? [[String: Any]])?.first,
+              let changes = (entry["changes"] as? [[String: Any]])?.first,
+              let value = changes["value"] as? [String: Any],
+              let messages = value["messages"] as? [[String: Any]],
+              let msg = messages.first,
+              let text = (msg["text"] as? [String: Any])?["body"] as? String else { return }
+        await messageHandler?(TheaGatewayMessage(
+            id: msg["id"] as? String ?? UUID().uuidString, platform: .whatsapp,
+            chatId: msg["from"] as? String ?? "unknown",
+            senderId: msg["from"] as? String ?? "unknown", senderName: "WhatsApp User",
+            content: text, timestamp: Date(), isGroup: false
+        ))
+    }
+
+    func send(_ message: OutboundMessage) async throws {
+        guard let token = credentials.botToken, let phoneId = credentials.apiKey else {
+            throw MessagingError.notConnected
+        }
+        var req = URLRequest(url: URL(string: "\(apiBase)/\(phoneId)/messages")!)
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONSerialization.data(withJSONObject: [
+            "messaging_product": "whatsapp", "to": message.chatId,
+            "type": "text", "text": ["body": message.content]
+        ])
+        _ = try await URLSession.shared.data(for: req)
+    }
+
+    func disconnect() async { isConnected = false }
+    func setMessageHandler(_ h: @escaping @Sendable (TheaGatewayMessage) async -> Void) { messageHandler = h }
+}
+```
+
+---
+
+### O6: Signal-CLI Bridge Connector
+
+**Create**: `Shared/Integrations/Messaging/SignalConnector.swift`
+```swift
+/// Signal via signal-cli daemon (brew install signal-cli). Unix socket JSON-RPC.
+/// Credential: serverUrl field = registered phone number (e.g. "+15555550123").
+actor SignalConnector: MessagingPlatformConnector {
+    let platform: MessagingPlatform = .signal
+    private(set) var isConnected = false
+    var credentials: MessagingCredentials
+    private var messageHandler: (@Sendable (TheaGatewayMessage) async -> Void)?
+    private var daemonProcess: Process?
+    private let socketPath = "/tmp/signal-thea.sock"
+
+    init(credentials: MessagingCredentials) { self.credentials = credentials }
+
+    func connect() async throws {
+        guard let phone = credentials.serverUrl, !phone.isEmpty else {
+            throw MessagingError.missingCredentials(platform: .signal, field: "serverUrl (phone number)")
+        }
+        guard let cliPath = which("signal-cli") else {
+            throw MessagingError.dependencyMissing(name: "signal-cli",
+                installHint: "brew install signal-cli && signal-cli -a \(phone) register")
+        }
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: cliPath)
+        p.arguments = ["--account", phone, "daemon", "--socket", socketPath]
+        try p.run(); daemonProcess = p
+        for _ in 0..<10 {
+            try? await Task.sleep(for: .milliseconds(500))
+            if FileManager.default.fileExists(atPath: socketPath) { break }
+        }
+        isConnected = true
+        Task { await receiveDaemonMessages(phone: phone) }
+    }
+
+    private func receiveDaemonMessages(phone: String) async {
+        // JSON-RPC 2.0 via Unix socket — subscribe and parse receive notifications
+        // Map to TheaGatewayMessage
+    }
+
+    func send(_ message: OutboundMessage) async throws {
+        // JSON-RPC: {"method":"send","params":{"recipient":[chatId],"message":content},"id":1}
+    }
+
+    func disconnect() async {
+        daemonProcess?.terminate()
+        try? FileManager.default.removeItem(atPath: socketPath)
+        isConnected = false
+    }
+    func setMessageHandler(_ h: @escaping @Sendable (TheaGatewayMessage) async -> Void) { messageHandler = h }
+
+    private func which(_ cmd: String) -> String? {
+        let p = Process(); p.executableURL = URL(fileURLWithPath: "/usr/bin/which")
+        p.arguments = [cmd]; let pipe = Pipe(); p.standardOutput = pipe
+        try? p.run(); p.waitUntilExit()
+        let out = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
+                  .trimmingCharacters(in: .whitespacesAndNewlines)
+        return out?.isEmpty == false ? out : nil
+    }
+}
+```
+
+---
+
+### O7: Matrix / Element Connector
+
+**Create**: `Shared/Integrations/Messaging/MatrixConnector.swift`
+```swift
+/// Matrix homeserver via Client-Server API v3 (/sync long-polling). No external dependencies.
+/// Credentials: serverUrl (e.g. "https://matrix.org") + apiKey (access token).
+actor MatrixConnector: MessagingPlatformConnector {
+    let platform: MessagingPlatform = .matrix
+    private(set) var isConnected = false
+    var credentials: MessagingCredentials
+    private var messageHandler: (@Sendable (TheaGatewayMessage) async -> Void)?
+    private var syncToken: String?
+    private var syncTask: Task<Void, Never>?
+
+    init(credentials: MessagingCredentials) { self.credentials = credentials }
+
+    func connect() async throws {
+        guard let server = credentials.serverUrl, let token = credentials.apiKey,
+              !server.isEmpty, !token.isEmpty else {
+            throw MessagingError.missingCredentials(platform: .matrix, field: "serverUrl + apiKey")
+        }
+        var req = URLRequest(url: URL(string: "\(server)/_matrix/client/v3/account/whoami")!)
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (_, resp) = try await URLSession.shared.data(for: req)
+        guard (resp as? HTTPURLResponse)?.statusCode == 200 else {
+            throw MessagingError.authenticationFailed(platform: .matrix)
+        }
+        isConnected = true
+        syncTask = Task { await syncLoop(server: server, token: token) }
+    }
+
+    private func syncLoop(server: String, token: String) async {
+        while !Task.isCancelled && isConnected {
+            var urlStr = "\(server)/_matrix/client/v3/sync?timeout=30000"
+            if let st = syncToken { urlStr += "&since=\(st)" }
+            var req = URLRequest(url: URL(string: urlStr)!)
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            guard let (data, _) = try? await URLSession.shared.data(for: req),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                try? await Task.sleep(for: .seconds(5)); continue
+            }
+            syncToken = json["next_batch"] as? String
+            if let rooms = (json["rooms"] as? [String: Any])?["join"] as? [String: [String: Any]] {
+                for (roomId, room) in rooms {
+                    let events = ((room["timeline"] as? [String: Any])?["events"] as? [[String: Any]]) ?? []
+                    for event in events where event["type"] as? String == "m.room.message" {
+                        let c = event["content"] as? [String: Any]
+                        guard c?["msgtype"] as? String == "m.text",
+                              let body = c?["body"] as? String else { continue }
+                        await messageHandler?(TheaGatewayMessage(
+                            id: event["event_id"] as? String ?? UUID().uuidString,
+                            platform: .matrix, chatId: roomId,
+                            senderId: event["sender"] as? String ?? "unknown",
+                            senderName: event["sender"] as? String ?? "Matrix User",
+                            content: body, timestamp: Date(), isGroup: true
+                        ))
+                    }
+                }
+            }
+        }
+    }
+
+    func send(_ message: OutboundMessage) async throws {
+        guard let server = credentials.serverUrl, let token = credentials.apiKey else {
+            throw MessagingError.notConnected
+        }
+        let txnId = UUID().uuidString
+        var req = URLRequest(url: URL(string: "\(server)/_matrix/client/v3/rooms/\(message.chatId)/send/m.room.message/\(txnId)")!)
+        req.httpMethod = "PUT"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONSerialization.data(withJSONObject: ["msgtype": "m.text", "body": message.content])
+        _ = try await URLSession.shared.data(for: req)
+    }
+
+    func disconnect() async { syncTask?.cancel(); isConnected = false }
+    func setMessageHandler(_ h: @escaping @Sendable (TheaGatewayMessage) async -> Void) { messageHandler = h }
+}
+```
+
+---
+
+### O8: Thea Built-in WebSocket Server (Port 18789)
+
+**Create**: `Shared/Integrations/OpenClaw/TheaGatewayWSServer.swift`
+```swift
+/// Thea's built-in WebSocket server on port 18789.
+/// External clients (OpenClawClient.swift, Claude CLI, companion apps) connect here.
+/// Auth: token stored in Keychain (generated on first launch).
+import Network
+
+actor TheaGatewayWSServer {
+    let port: Int
+    private var listener: NWListener?
+    private var clients: [UUID: NWConnection] = [:]
+
+    init(port: Int = 18789) { self.port = port }
+
+    func start() throws {
+        let params = NWParameters.tcp
+        let wsOptions = NWProtocolWebSocket.Options()
+        wsOptions.autoReplyPing = true
+        params.defaultProtocolStack.applicationProtocols.insert(wsOptions, at: 0)
+        listener = try NWListener(using: params, on: NWEndpoint.Port(rawValue: UInt16(port))!)
+        listener?.newConnectionHandler = { [weak self] conn in
+            Task { await self?.handleConnection(conn) }
+        }
+        listener?.start(queue: .global(qos: .userInitiated))
+        print("[TheaGatewayWSServer] Listening on ws://127.0.0.1:\(port)")
+    }
+
+    private func handleConnection(_ connection: NWConnection) async {
+        let id = UUID(); clients[id] = connection
+        connection.start(queue: .global(qos: .background))
+        // TODO: token challenge-response auth, then route messages to TheaMessagingGateway
+    }
+
+    func broadcast(event: String, payload: Data) async {
+        let msg = "{\"type\":\"event\",\"event\":\"\(event)\"}".data(using: .utf8)
+        for (_, conn) in clients {
+            conn.send(content: msg, contentContext: .defaultMessage, isComplete: true, completion: .idempotent)
+        }
+    }
+
+    func stop() { listener?.cancel() }
+}
+// Health check endpoint: GET /health → {"status":"ok","platform":"thea","port":18789}
+// curl http://127.0.0.1:18789/health
+```
+
+**Update** `OpenClawClient.swift` comment only:
+```swift
+// Connects to Thea's own built-in gateway (TheaGatewayWSServer at port 18789).
+// No code changes needed — ws://127.0.0.1:18789 is unchanged.
+```
+
+---
+
+### O9: Sessions + Memory (SwiftData + MMR)
+
+**Create**: `Shared/Integrations/OpenClaw/MessagingSessionManager.swift`
+```swift
+/// Per-platform-per-peer sessions with SwiftData persistence.
+/// Implements MMR (Maximal Marginal Relevance) memory re-ranking
+/// from OpenClaw research — diversified retrieval with temporal decay.
+@MainActor
+final class MessagingSessionManager: ObservableObject {
+    static let shared = MessagingSessionManager()
+    @Published var activeSessions: [MessagingSession] = []
+
+    func appendMessage(_ message: TheaGatewayMessage) async {
+        // key = "{platform}:{chatId}:{senderId}" — per-channel-peer isolation
+        let key = "\(message.platform.rawValue):\(message.chatId):\(message.senderId)"
+        // Fetch or create SwiftData session, append message, update lastActivity
+    }
+
+    func resetSession(key: String) { /* clear messages, keep metadata */ }
+    func resetAll() { /* clear all session message history */ }
+
+    /// MMR re-ranking: BM25 keyword match + PersonalKnowledgeGraph embeddings + temporal decay
+    func relevantContext(for query: String, session: MessagingSession) -> [String] { [] }
+
+    func scheduleDailyReset() { /* reset all sessions at 04:00 via SmartNotificationScheduler */ }
+}
+
+@Model final class MessagingSession {
+    var key: String; var platform: String; var chatId: String
+    var senderId: String; var senderName: String; var lastActivity: Date
+    var messageHistory: [Data]; var agentId: String = "main"
+
+    init(key: String, platform: String, chatId: String, senderId: String, senderName: String) {
+        self.key = key; self.platform = platform; self.chatId = chatId
+        self.senderId = senderId; self.senderName = senderName
+        self.lastActivity = Date(); self.messageHistory = []
+    }
+}
+
+struct MessagingCredentialsStore {
+    static func load(for platform: MessagingPlatform) -> MessagingCredentials {
+        // SecItemCopyMatching keyed by "thea.messaging.{platform}"
+        return MessagingCredentials()
+    }
+    static func save(_ creds: MessagingCredentials, for platform: MessagingPlatform) {
         // SecItemAdd / SecItemUpdate
     }
 }
 ```
 
-### O3: Expand OpenClawIntegration.swift — Full Lifecycle
-
-**Add:**
+**PersonalKnowledgeGraph extension**:
 ```swift
-// Session management
-private(set) var sessions: [OpenClawSession] = []
-private(set) var agents: [OpenClawAgent] = []
-private(set) var cronJobs: [OpenClawCronJob] = []
-private(set) var canvasState: OpenClawCanvasState?
-private(set) var nodes: [String: [OpenClawNodeCapability]] = [:]
-private(set) var gatewayStatus: OpenClawGatewayStatus?
-
-// On connect: fetch all state
-private func fetchInitialState() async {
-    async let channels = try? client.send(.listChannels)
-    async let sessions = try? client.send(.listSessions(agentId: nil))
-    async let agents = try? client.send(.listAgents)
-    async let cron = try? client.send(.listCronJobs(agentId: nil))
-    async let status = try? client.send(.getGatewayStatus)
-    // Populate local state
-}
-
-// Canvas update subscription
-var onCanvasUpdate: (@Sendable (OpenClawCanvasState) async -> Void)?
-
-// Node capability invocation
-func invokeNode(nodeId: String, capability: OpenClawNodeCapability, params: [String: Any] = [:]) async throws -> OpenClawPayload {
-    return try await client.send(.invokeNode(nodeId: nodeId, capability: capability, params: params))
-}
-
-// Memory search
-func searchMemory(agentId: String = "main", query: String, limit: Int = 10) async throws -> [OpenClawMemoryResult] {
-    let result = try await client.send(.searchMemory(agentId: agentId, query: query, limit: limit))
-    return result.decode(as: [OpenClawMemoryResult].self)
-}
-
-// Cron management
-func createCronJob(expression: String, message: String, agentId: String = "main") async throws -> OpenClawCronJob {
-    let result = try await client.send(.createCronJob(expression: expression, agentId: agentId, message: message))
-    return result.decode(as: OpenClawCronJob.self)
-}
-
-// Config management
-func getGatewayConfig(path: String? = nil) async throws -> Data {
-    let result = try await client.send(.getConfig(path: path))
-    return result.rawJSON
-}
-
-// Security audit
-func runSecurityAudit() async throws -> OpenClawSecurityAuditResult {
-    let result = try await client.send(.runSecurityAudit)
-    return result.decode(as: OpenClawSecurityAuditResult.self)
-}
-```
-
-### O4: OpenClaw Canvas View (Thea UI)
-
-**Create**: `Shared/UI/Views/OpenClaw/OpenClawCanvasView.swift`
-```swift
-// A WKWebView that renders OpenClaw's A2UI canvas HTML
-// Updates in real-time when canvasState changes
-// Handles A2UI interactions (button taps, form submissions) by:
-//   1. Intercepting WKWebView navigation decisions
-//   2. Sending canvas.action events to Gateway
-// Shows loading state while canvas initializes
-// Shows error state when Gateway is disconnected
-```
-
-**Create**: `Shared/UI/Views/OpenClaw/OpenClawChatView.swift`
-```swift
-// Combined chat + canvas view for OpenClaw messaging:
-// - Channel selector (left sidebar: WhatsApp, Telegram, etc.)
-// - Conversation thread (center)
-// - Canvas panel (right, dismissible)
-// - Agent selector (switch between main/work/personal agents)
-// - Session reset button
-```
-
-### O5: OpenClaw Settings View (Thea UI)
-
-**Create**: `Shared/UI/Views/Settings/OpenClawSettingsView.swift`
-
-**Sections:**
-```swift
-// 1. CONNECTION
-//    - Gateway URL (default: ws://127.0.0.1:18789)
-//    - Auth token (stored in Keychain, shown as •••)
-//    - Connect/Disconnect toggle
-//    - Status indicator (connected/disconnected/error)
-//    - Gateway version + uptime
-//
-// 2. CHANNELS (per channel: WhatsApp, Telegram, Discord, etc.)
-//    - Enable/disable per channel
-//    - DM policy: pairing / allowlist / open / disabled
-//    - Allowlist management (add/remove contacts)
-//    - Group mention requirement
-//
-// 3. AGENTS
-//    - List configured agents (main, work, personal)
-//    - Per agent: model selection, tool profile, sandbox mode
-//    - Create new agent
-//    - Per-agent session reset
-//
-// 4. CANVAS
-//    - Enable/disable Canvas panel
-//    - Canvas port (default 18793)
-//    - Show/hide in chat view
-//
-// 5. SCHEDULED TASKS (Cron)
-//    - List active cron jobs
-//    - Create new cron job (expression + message)
-//    - Enable/disable/delete existing jobs
-//
-// 6. MEMORY
-//    - Enable/disable hybrid search memory
-//    - Embedding provider selection
-//    - Memory search test input
-//    - Clear memory option (with confirmation)
-//
-// 7. SECURITY
-//    - Run security audit button → shows OpenClawSecurityAuditResultView
-//    - Prompt injection detection toggle
-//    - Rate limiting config
-//    - Blocked keywords management
-//    - Sandboxing mode (off/non-main/all)
-//
-// 8. NODES (paired devices)
-//    - List paired nodes (iOS, Android, macOS companion)
-//    - Capability list per node
-//    - Pair new node button
-//    - Revoke node pairing
-//
-// 9. NOTIFICATIONS
-//    - OpenClaw proactive notification settings
-//    - Notify on new message toggle
-//    - Notify on cron job completion
-```
-
-**Wire into**: `macOS/UI/Settings/MacSettingsView.swift` → add "OpenClaw" sidebar item
-Also wire into iOS settings tab.
-
-### O6: Multi-Agent Routing in OpenClawBridge.swift
-
-**Upgrade routing logic:**
-```swift
-// Route based on channel + content:
-func determineAgent(for message: OpenClawMessage) -> String {
-    // Work channels → "work" agent
-    if message.channelID.hasPrefix("work-") || message.platform == .slack {
-        return "work"
-    }
-    // Moltbook → MoltbookAgent (existing)
-    if message.channelID.hasPrefix("moltbook") { return "moltbook" }
-    // Health/wellness topics → specialized health agent
-    if let healthKeywords = ["workout", "sleep", "stress", "calories"],
-       healthKeywords.contains(where: message.content.lowercased().contains) {
-        return "health"
-    }
-    // Default: main agent
-    return "main"
-}
-
-// Use session isolation (per-peer routing):
-func buildSessionKey(for message: OpenClawMessage) -> String {
-    let agent = determineAgent(for: message)
-    return "agent:\(agent):\(message.platform.rawValue):dm:\(message.senderID)"
-}
-```
-
-### O7: OpenClaw Memory → PersonalKnowledgeGraph Integration
-
-**Connect OpenClaw's hybrid memory search to Thea's PersonalKnowledgeGraph:**
-```swift
-// In PersonalKnowledgeGraph.swift — add OpenClaw memory sync:
 extension PersonalKnowledgeGraph {
-    /// Sync relevant entities to OpenClaw memory for cross-session recall
-    func syncToOpenClawMemory() async {
-        guard OpenClawIntegration.shared.isEnabled else { return }
-        let topEntities = getAllEntities().filter { $0.importance > 0.7 }
-        for entity in topEntities {
-            try? await OpenClawIntegration.shared.addMemory(
-                agentId: "main",
-                content: entity.description,
-                tags: [entity.type.rawValue, "thea-kg"]
-            )
+    func contextForMessaging() -> [String] {
+        getAllEntities().filter { $0.importance > 0.7 }
+            .map { "[\($0.type.rawValue)] \($0.name): \($0.description)" }
+    }
+}
+```
+
+---
+
+### O10: Messaging Settings UI + Chat View
+
+**Create**: `Shared/UI/Views/Settings/TheaMessagingSettingsView.swift`
+```swift
+/// Credentials + settings for Thea's native messaging gateway.
+struct TheaMessagingSettingsView: View {
+    @ObservedObject private var gateway = TheaMessagingGateway.shared
+    @ObservedObject private var sessions = MessagingSessionManager.shared
+
+    var body: some View {
+        Form {
+            Section("Gateway (Port 18789)") {
+                HStack {
+                    Image(systemName: "antenna.radiowaves.left.and.right")
+                        .foregroundStyle(gateway.connectedPlatforms.isEmpty ? .red : .green)
+                    Text(gateway.connectedPlatforms.isEmpty ? "No platforms connected"
+                         : "Connected: \(gateway.connectedPlatforms.map(\.displayName).joined(separator: ", "))")
+                }
+                if let err = gateway.lastError { Text(err).foregroundStyle(.red).font(.caption) }
+            }
+            ForEach(MessagingPlatform.allCases, id: \.self) { platform in
+                PlatformCredentialsSection(platform: platform)
+            }
+            Section("Sessions") {
+                Text("\(sessions.activeSessions.count) active sessions")
+                Button("Reset All Sessions", role: .destructive) { sessions.resetAll() }
+                Toggle("Daily auto-reset at 4:00 AM", isOn: .constant(true))
+            }
+            Section("Tool Policy") {
+                Text("Allow: read, web, messaging").font(.caption)
+                Text("Deny: runtime, elevated commands").font(.caption).foregroundStyle(.secondary)
+            }
+            Section("Security") {
+                Label("22-pattern injection guard: Active", systemImage: "shield.fill").foregroundStyle(.green)
+                Label("Rate limiting: 5 responses/min/platform", systemImage: "timer").foregroundStyle(.secondary)
+            }
+        }
+        .formStyle(.grouped)
+        .navigationTitle("Messaging Gateway")
+    }
+}
+```
+
+**Create**: `Shared/UI/Views/OpenClaw/TheaMessagingChatView.swift`
+```swift
+/// Platform selector + conversation thread for all messaging platforms.
+struct TheaMessagingChatView: View {
+    @ObservedObject private var gateway = TheaMessagingGateway.shared
+    @ObservedObject private var sessions = MessagingSessionManager.shared
+    @State private var selectedSession: MessagingSession?
+
+    var body: some View {
+        NavigationSplitView {
+            List(selection: $selectedSession) {
+                ForEach(MessagingPlatform.allCases, id: \.self) { platform in
+                    let pSessions = sessions.activeSessions.filter { $0.platform == platform.rawValue }
+                    if !pSessions.isEmpty {
+                        Section(platform.displayName) {
+                            ForEach(pSessions) { session in
+                                Text(session.senderName).tag(session)
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Messages")
+        } detail: {
+            if let session = selectedSession {
+                Text("Conversation with \(session.senderName)")
+            } else {
+                ContentUnavailableView("Select a Conversation",
+                    systemImage: "bubble.left.and.bubble.right",
+                    description: Text("Enable a platform in Settings → Messaging Gateway"))
+            }
         }
     }
 }
 ```
 
-### O8: Node Capability — Screen Context for AI
+**Wire into MacSettingsView** — add "Messaging" sidebar item → TheaMessagingSettingsView
+**Wire into iOS settings** — add TheaMessagingSettingsView section
+**Wire into main navigation** — add "Messages" tab/item → TheaMessagingChatView
 
-**Connect OpenClaw node screen capture to G1 Live Screen Monitoring:**
+---
+
+### O_Tests: Tests for Messaging Components
+
+**Add test files** (add to project.yml, then xcodegen generate):
+- `Tests/IntegrationTests/TheaMessagingGatewayTests.swift`
+- `Tests/IntegrationTests/TelegramConnectorTests.swift`
+- `Tests/IntegrationTests/DiscordConnectorTests.swift`
+- `Tests/IntegrationTests/SlackConnectorTests.swift`
+- `Tests/IntegrationTests/MessagingSessionManagerTests.swift`
+- `Tests/IntegrationTests/OpenClawBridgeTests.swift` (update existing for multi-platform)
+- `Tests/IntegrationTests/OpenClawSecurityGuardTests.swift` (existing — keep as-is)
+
 ```swift
-// In LiveScreenMonitor.swift or new OpenClawNodeBridge.swift:
-// When agent requests screen context:
-extension OpenClawIntegration {
-    func captureScreenForAgent() async throws -> Data {
-        // Use node.screen.record (if node paired) OR
-        // Fall back to local CGWindowListCreateImage (macOS only)
-        if nodes["local"] != nil {
-            let result = try await invokeNode(
-                nodeId: "local",
-                capability: .systemRun,
-                params: ["cmd": "screencapture -x -t png -"]
-            )
-            return result.binaryData ?? Data()
-        }
-        // Local fallback for macOS:
-        return LiveScreenMonitor.shared.captureCurrentScreen() ?? Data()
-    }
-}
+// MockTelegramServer: HTTPServer responding to getUpdates/sendMessage
+// MockDiscordGateway: WSServer sending Hello → Dispatch sequences
+// MockSlackSocketMode: WSServer sending envelope → expecting ACK
+// Run: swift test
 ```
 
-### O9: Tests for OpenClaw Components
+---
 
-**Add test files:**
-- `Tests/IntegrationTests/OpenClawClientTests.swift`: Protocol framing, handshake mock
-- `Tests/IntegrationTests/OpenClawBridgeTests.swift`: Agent routing, rate limiting, sanitization
-- `Tests/IntegrationTests/OpenClawSecurityGuardTests.swift`: All 22 injection patterns
-- `Tests/IntegrationTests/OpenClawIntegrationTests.swift`: Lifecycle, state management
-
-**Mock Gateway for tests:**
-```swift
-// MockOpenClawGateway: URLSessionWebSocketTask mock that:
-// 1. Responds to connect with challenge then hello-ok
-// 2. Sends test events (message.received, channel.updated)
-// 3. Responds to requests with realistic payloads
-```
-
-### O10: OpenClaw Moltbook Agent Integration
-
-**Verify and enhance existing wiring:**
-```bash
-grep -n "moltbook\|MoltbookAgent" Shared/Integrations/OpenClaw/OpenClawBridge.swift
-grep -n "processInboundMessage\|onMessageReceived" Shared/Agents/MoltbookAgent.swift
-```
-- Ensure MoltbookAgent.processInboundMessage handles OpenClawMessage protocol correctly
-- Add reply-back: after MoltbookAgent processes, send acknowledgement via OpenClaw channel
+**O Success Criteria** (all must be true before marking O complete):
+- [ ] TheaMessagingGateway.start() wires all 7 connectors at app launch
+- [ ] At least 1 connector fully functional end-to-end (Telegram recommended — simplest API)
+- [ ] TheaGatewayWSServer listens: `curl http://127.0.0.1:18789/health` → 200
+- [ ] OpenClawClient.swift still works (connects to Thea's own gateway, comment updated)
+- [ ] OpenClawSecurityGuard fires on ALL inbound messages from ALL platforms
+- [ ] OpenClawBridge routes correctly (main/work/health/moltbook agents)
+- [ ] Sessions persisted in SwiftData (survive app restart)
+- [ ] TheaMessagingSettingsView accessible in macOS sidebar + iOS settings
+- [ ] TheaMessagingChatView accessible from main navigation (macOS + iOS)
+- [ ] All new files in project.yml + xcodegen generate succeeds
+- [ ] swift test passes with O_Tests suite
 
 ---
 
@@ -1548,7 +1887,7 @@ grep -n "blocklist\|blockList\|BLOCKED\|shell\|exec\|rm\|curl" \
 ```
 **Improvements**:
 - [ ] Expand blocklist: add OpenClaw-specific dangerous patterns
-  (e.g., "openclaw gateway stop", "openclaw config set gateway.auth.mode=none")
+  (e.g., gateway shutdown commands, token extraction attempts)
 - [ ] Test: every blocked command is individually tested
 - [ ] Test: shell metacharacter injection is rejected
 
@@ -1576,10 +1915,10 @@ grep -n "blocklist\|blockList\|BLOCKED\|shell\|exec\|rm\|curl" \
 - **Claude Opus 4.6** (Feb 5, 2026): Best agent + planning, computer use, 72.5% OSWorld, $15/M output
   - Highest prompt injection resistance (recommended by OpenClaw docs for tool-enabled agents)
   - Better code review, debugging, large codebase navigation
-  - Should be Thea's default for: OpenClaw auto-responses, AgentMode tasks, AutonomyController
+  - Should be Thea's default for: messaging auto-responses, AgentMode tasks, AutonomyController
 - **Claude Sonnet 4.6** (Feb 17, 2026): Near-flagship at Sonnet 4.5 price, adaptive reasoning
   - Should be Thea's default for: daily chat, light tasks, iOS (cost-sensitive)
-  - OpenClaw fallback model: `anthropic/claude-sonnet-4-6`
+  - Messaging fallback model: `claude-sonnet-4-6`
 
 **Required changes**:
 ```bash
@@ -1609,9 +1948,8 @@ Apple also released **SpeechAnalyzer API** (macOS/iOS 26) for superior on-device
   }
   ```
 - [ ] Add TTS streaming support (mlx-audio 2026 supports token streaming → lower latency)
-- [ ] Add speech-to-speech (STS) for OpenClaw voice pipeline
-  (incoming voice note → direct STS response without intermediate text)
-- [ ] Wire SpeechAnalyzer into OpenClaw voice note pipeline (O3 above)
+- [ ] Add speech-to-speech (STS) for messaging voice pipeline (voice note → STS response)
+- [ ] Wire SpeechAnalyzer into messaging voice note pipeline (O1-O7 connectors)
 - [ ] Test: SpeechAnalyzer produces accurate transcription on macOS 26
 - [ ] Test: TTS streams first word within 300ms
 - [ ] Test: STS roundtrip completes within 2s for short utterances
@@ -1625,7 +1963,7 @@ Qwen3-VL and newer vision models available.
 - [ ] Add vllm-mlx as alternative backend for MSM3U
   (OpenAI-compatible server, 400+ tok/s, supports multimodal — better for high throughput)
 - [ ] Add Qwen3-VL 8B → 32B upgrade path for MSM3U (better visual understanding)
-- [ ] Wire OpenClaw image attachment → MLXVisionEngine pipeline:
+- [ ] Wire messaging image attachments → MLXVisionEngine pipeline:
   when image received via channel, analyze with VLM → text description → AI response
 - [ ] Test: image description accurate for test screenshot
 - [ ] Test: fallback to cloud vision when local model unavailable (iOS)
@@ -1644,7 +1982,7 @@ This capability is available via the Claude API and maps directly to Thea's Task
   // This replaces current sequential API calls for multi-step tasks
   ```
 - [ ] Wire AgentTeamOrchestrator into AgentMode (for `auto` mode tasks)
-- [ ] Wire progress updates → OpenClaw channel (users see subtask progress in real-time)
+- [ ] Wire progress updates → Thea messaging channel (users see subtask progress in real-time)
 - [ ] Add per-teammate context isolation (each subtask gets clean context window)
 - [ ] Add team result caching (prevent redundant subtask re-runs)
 - [ ] Test: 3-task parallel team completes faster than sequential
@@ -1693,8 +2031,8 @@ PYEOF
 ### Q2: Add Missing Tests (batch by subsystem)
 For each uncovered critical class, run a dedicated agent:
 
-**Agent for OpenClaw tests** (O9 above):
-All 4 OpenClaw test files
+**Agent for messaging gateway tests** (O_Tests above):
+All messaging connector test files
 
 **Agent for Intelligence tests** (missing ones from v1):
 - SystemCapabilityService
@@ -1963,12 +2301,12 @@ for FILE in FunctionGemmaBridge.swift OpenClawSecurityGuard.swift \
   echo "$FILE: $([ "$FOUND" -gt 0 ] && echo OK || echo REVERTED)" >> /tmp/ship-report.txt
 done
 
-# 6. OpenClaw protocol compliance
+# 6. Messaging gateway health check
 echo "" >> /tmp/ship-report.txt
 echo "=== OPENCLAW PROTOCOL ===" >> /tmp/ship-report.txt
-grep -n '"type":"req"' Shared/Integrations/OpenClaw/OpenClawClient.swift | \
+curl -s http://127.0.0.1:18789/health | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if d.get("status")=="ok" else 1)" \
   head -3 | tee -a /tmp/ship-report.txt || \
-  echo "WARNING: Still using JSONRPC 2.0 (not upgraded to OpenClaw native protocol)" >> /tmp/ship-report.txt
+  echo "WARNING: TheaGatewayWSServer not responding on port 18789" >> /tmp/ship-report.txt
 
 # 7. GitHub Actions
 echo "" >> /tmp/ship-report.txt
@@ -1992,29 +2330,29 @@ git add -A && git commit -m "Auto-save: Final v2 verification report" || true
 
 **These steps CANNOT be automated. Alexis must be present.**
 
-### V1: OpenClaw Integration Smoke Test
+### V1: Thea Messaging Gateway Smoke Test
 ```
-1. Start OpenClaw gateway: openclaw gateway start
-2. Open Thea on macOS
-3. Navigate to Settings → OpenClaw
+1. Start Thea on macOS (TheaMessagingGateway auto-starts)
+2. Verify: curl http://127.0.0.1:18789/health → 200
+3. Navigate to Settings → Messaging Gateway
 4. Verify: connection state shows "Connected"
 5. Verify: channels list populated
 6. Send test message from any configured channel
-7. Verify: message appears in Thea OpenClaw chat view
+7. Verify: message appears in TheaMessagingChatView
 8. Verify: AI response sent back to channel
-9. Test Canvas: verify A2UI renders correctly
+9. Verify: OpenClawSecurityGuard blocked any injection in console logs
 ```
 
 ### V2: Voice Synthesis Quality
 - Launch Thea on macOS
 - Test TTS via MLXAudioEngine (Soprano-80M)
 - Test STT via GLM-ASR-Nano transcription accuracy
-- Verify OpenClaw voice note → STT → AI → response pipeline
+- Verify voice note → STT → AI → response pipeline (via messaging connector)
 
 ### V3: Screen Capture Accuracy
 - Test screen capture feature on macOS
 - Verify G1 Live Screen Monitoring detects foreground app correctly
-- Test OpenClaw node screen capture if companion node is paired
+- Test screen capture via messaging command if configured
 
 ### V4: Vision Analysis
 - Test Qwen3-VL 8B visual analysis with a screenshot
@@ -2026,7 +2364,7 @@ git add -A && git commit -m "Auto-save: Final v2 verification report" || true
 ### V6: MLX Model Loading on MSM3U
 - Load Llama 3.3 70B via MLX
 - Verify inference quality and response time
-- Test via OpenClaw channel (WhatsApp/Telegram message → local LLM response)
+- Test via Thea messaging (Telegram/Discord message → local LLM response)
 
 ### V7: Final Ship Tag
 ```bash
@@ -2045,7 +2383,7 @@ git pushsync origin main
 ```
 MSM3U (Mac Studio M3 Ultra) — PRIMARY
 ├── Phase N: GitHub Workflows Overhaul
-├── Phase O: OpenClaw Deep Integration
+├── Phase O: Thea Native Messaging Gateway
 ├── Phase P: Component Analysis + Fixes
 ├── Phase Q: Test Coverage to 80%+
 ├── Phase R: Periphery Full Resolution
@@ -2079,8 +2417,8 @@ MBAM2 (MacBook Air M2) — SECONDARY (if parallelism needed)
 | SBOM generation                      | YES | sbom job in security.yml |
 | Dead code baseline tracking          | YES | periphery job in ci.yml |
 | Build time regression detection      | YES | Build logs with timestamps |
-| OpenClaw health check                | YES | checkAvailability() every 5 min |
-| OpenClaw cron job management         | YES | createCronJob() in OpenClawIntegration |
+| Messaging gateway health check       | YES | TheaMessagingGateway.connectedPlatforms |
+| Messaging session management         | YES | MessagingSessionManager.shared |
 | Coverage trend tracking              | YES | codecov upload in ci.yml |
 | Maestro screenshot on failure        | YES | xcrun simctl screenshot in e2e-tests.yml |
 | Voice synthesis quality test         | NO  | Manual — requires human ear |
@@ -2088,16 +2426,16 @@ MBAM2 (MacBook Air M2) — SECONDARY (if parallelism needed)
 | Vision analysis quality test         | NO  | Manual — requires human eye |
 | MLX model loading test               | NO  | Manual — requires physical access |
 | Final ship tag + pushsync            | NO  | Manual — Alexis decision |
-| openclaw doctor config validation    | YES | O_PRE step — `openclaw doctor` |
-| OpenClaw daemon startup              | YES | `openclaw onboard --install-daemon` |
+| Messaging credential validation      | YES | O0: connect() throws on missing creds |
+| Messaging gateway startup            | YES | O0: TheaMessagingGateway.start() at app launch |
 | Agent Teams task delegation          | YES | AgentTeamOrchestrator (P16) |
-| OpenClaw channel health check        | YES | `openclaw gateway status` in Phase S |
+| Platform connector health check      | YES | TheaMessagingGateway.connectedPlatforms in S |
 | SpeechAnalyzer API availability check| YES | `#available(macOS 26.0, *)` guard (P14) |
 | Claude model catalog update          | YES | Automated via Phase P13 |
 
 ---
 
-## OPENCLAW INTEGRATION GAPS — BEFORE vs AFTER
+## MESSAGING GATEWAY GAPS — BEFORE vs AFTER
 
 | Feature                              | v1 (Before)          | v2 (After)              |
 |--------------------------------------|----------------------|-------------------------|
@@ -2113,15 +2451,15 @@ MBAM2 (MacBook Air M2) — SECONDARY (if parallelism needed)
 | Cron/scheduled tasks                 | None                 | Full cron management    |
 | Skills system                        | None                 | ClawHub integration     |
 | Tool policy enforcement              | None                 | Per-agent tool profiles |
-| Security audit                       | 22 patterns only     | + openclaw security audit |
+| Security audit                       | 22 patterns only     | + thea-audit full codebase scan |
 | Settings UI                          | None                 | Full 9-section settings |
-| OpenClaw test coverage               | 0%                   | 100% of all 5 files     |
+| Messaging gateway test coverage      | 0%                   | 100% of all connectors  |
 | MoltbookAgent integration            | Basic routing        | Full reply-back wired   |
-| Gateway config (openclaw.json)       | None                 | O_PRE: JSON5 config written |
-| Daemon setup (launchd)               | None                 | O_PRE: `--install-daemon` |
-| Doctor validation                    | None                 | O_PRE: `openclaw doctor` |
-| dmScope per-peer isolation           | None                 | O_PRE config + O3 settings UI |
-| Canvas URL integration               | None                 | O4: `/__openclaw__/canvas/` |
+| Gateway credentials (Keychain)       | None                 | O0: MessagingCredentialsStore wired |
+| Daemon setup (launchd)               | None                 | O0: TheaMessagingGateway wired at app launch |
+| Credential validation                | None                 | O0: connect() throws on missing creds |
+| dmScope per-peer isolation           | None                 | O9: MessagingSessionManager key isolation |
+| Messaging chat UI                    | None                 | O10: TheaMessagingChatView wired in nav |
 | iOS node (internal preview)          | None                 | O3 code ready; pairing pending |
 | Voice note → STS pipeline            | None                 | O3 + P14 (SpeechAnalyzer) |
 | Agent Teams delegation               | None                 | P16 AgentTeamOrchestrator |
@@ -2163,7 +2501,7 @@ Update this section after each phase completes:
 | Phase | Description                                  | Status      | Agent    | Completed |
 |-------|----------------------------------------------|-------------|----------|-----------|
 | N     | GitHub Workflows Overhaul (6 files)          | ⏳ PENDING  | —        | —         |
-| O     | OpenClaw Deep Integration                    | ⏳ PENDING  | —        | —         |
+| O     | Thea Native Messaging Gateway                | ⏳ PENDING  | —        | —         |
 | P     | Component Analysis + Individual Fixes        | ⏳ PENDING  | —        | —         |
 | Q     | Test Coverage to 80%+                        | ⏳ PENDING  | —        | —         |
 | R     | Periphery Full Resolution                    | ✅ PARTIAL  | afc0c7b  | 2026-02-18|
@@ -2199,39 +2537,35 @@ Update this section after each phase completes:
 
 ## BEST PRACTICES REFERENCE (v2 additions)
 
-### OpenClaw Gateway Protocol (2026)
+### Thea Messaging Gateway — WS Server (Port 18789)
 ```swift
-// CORRECT — OpenClaw native protocol
+// Thea hosts ws://127.0.0.1:18789 natively via TheaGatewayWSServer
 let request = #"{"type":"req","id":"\#(uuid)","method":"channels.list","params":{}}"#
 
 // WRONG — JSONRPC 2.0 (what v1 incorrectly used)
 // let request = #"{"jsonrpc":"2.0","id":"\#(uuid)","method":"channels.list","params":{}}"#
 ```
 
-### OpenClaw Handshake Sequence
+### Thea Messaging Session Keys
 ```
-1. Client connects WebSocket to ws://127.0.0.1:18789
-2. Gateway sends: {type:"event", event:"auth.challenge", payload:{nonce:"...", ts:...}}
-3. Client sends:  {type:"req", id:"...", method:"connect",
-                   params:{minProtocol:1, maxProtocol:1,
-                            meta:{name:"Thea", version:"1.0.0"},
-                            role:"operator",
-                            scopes:["operator.read","operator.write"],
-                            deviceId:"thea-<uuid>",
-                            token:"<OPENCLAW_GATEWAY_TOKEN>"}}
-4. Gateway sends: {type:"res", id:"...", ok:true,
-                   payload:{protocol:1, auth:{deviceToken:"<persistent-token>"}}}
-5. Store deviceToken in Keychain for future reconnections
+// Session key format: "{platform}:{chatId}:{senderId}" — per-channel-peer isolation
+"telegram:chat123:user456"         // Telegram DM
+"slack:C12345678:U98765432"         // Slack channel message
+"discord:channel789:user321"        // Discord channel
+"whatsapp:+15555550123:+15555550123" // WhatsApp DM
+"matrix:!roomid:matrix.org:@user:matrix.org" // Matrix room
 ```
 
-### OpenClaw Session Keys
-```swift
-// Session key format: "agent:{agentId}:{provider}:{scope}:{identifier}"
-// Examples:
-"agent:main:main"                          // Direct interaction
-"agent:main:whatsapp:dm:+15555550123"      // WhatsApp DM
-"agent:work:slack:channel:C12345678"       // Slack channel
-"agent:health:telegram:group:-1234567890"  // Telegram group (health agent)
+### Thea Messaging — Design Reference (from OpenClaw research)
+```
+// KEY PRINCIPLES implemented natively:
+// 1. Per-peer isolation: "{platform}:{chatId}:{senderId}" key prevents context leaks
+// 2. Daily reset at 4am: MessagingSessionManager.scheduleDailyReset()
+// 3. Rate limiting: 5/min/channel (OpenClawBridge — keep as-is)
+// 4. Tool policy: allow read/web/messaging, deny runtime/elevated
+// 5. MMR re-ranking: diversified retrieval with temporal decay
+// 6. Loopback only: TheaGatewayWSServer binds to 127.0.0.1 only
+// 7. Keychain: all credentials in MessagingCredentialsStore
 ```
 
 ### GitHub Actions: Apple Notarization (2026)
@@ -2269,131 +2603,85 @@ let request = #"{"type":"req","id":"\#(uuid)","method":"channels.list","params":
     upload: true
 ```
 
-### OpenClaw Multi-Agent Routing (2026)
+### Thea Messaging Multi-Agent Routing (2026)
 ```swift
-// Route channels to specialized agents:
-// - main agent: general conversation
-// - work agent: Slack, Teams, work Telegram
-// - health agent: WHOOP data, HealthKit integrations
-// - moltbook agent: developer insights (existing)
-// Each agent has its own session isolation, model, tool policy
+// In OpenClawBridge.swift (repurposed) — route by platform + content:
+// - main agent:    Telegram, Discord, Matrix, iMessage (general)
+// - work agent:    Slack, work-prefix channels
+// - health agent:  Messages with workout/sleep/stress/calories keywords
+// - moltbook agent: Moltbook-prefix messages (existing MoltbookAgent wiring)
 ```
 
-### Swift 6 Actor Isolation + OpenClaw (2026)
+### Swift 6 Actor Isolation — Thea Messaging (2026)
 ```swift
-// OpenClawClient is an actor — all state changes are isolated
-// OpenClawIntegration is @MainActor @Observable — UI state on main thread
-// Bridge the two with:
-actor OpenClawClient { ... }  // background I/O isolation
+// All platform connectors are actors (background I/O isolation):
+actor TelegramConnector: MessagingPlatformConnector { ... }
+actor DiscordConnector: MessagingPlatformConnector { ... }
+// etc.
 
-@MainActor @Observable
-final class OpenClawIntegration {
-    private let client = OpenClawClient()  // actor can be held by main-actor class
+// TheaMessagingGateway is @MainActor @ObservableObject (UI state on main):
+@MainActor final class TheaMessagingGateway: ObservableObject { ... }
 
-    func sendMessage(...) async throws {
-        try await client.sendMessage(...)  // actor hop happens automatically
-    }
-}
+// Actor hop is automatic:
+await connector.send(message)  // crosses actor boundary transparently
 ```
 
 ---
 
-### OpenClaw JSON5 Configuration (Thea, 2026)
-```json5
-// ~/.openclaw/openclaw.json — JSON5 format (comments + trailing commas OK)
-{
-  identity: { name: "Thea", emoji: "🌿", theme: "dark" },
+### Thea Messaging Credential Setup (per platform)
+```
+// All credentials stored in Keychain via MessagingCredentialsStore
+// Set via TheaMessagingSettingsView (Settings → Messaging Gateway)
 
-  agent: {
-    workspace: "~/.openclaw/workspace",
-    model: {
-      primary: "anthropic/claude-opus-4-6",      // Best injection resistance
-      fallbacks: ["anthropic/claude-sonnet-4-6"],
-    },
-    heartbeat: true,  // Keep connection alive
-  },
-
-  // CRITICAL: Per-peer isolation prevents context leaks
-  session: {
-    dmScope: "per-channel-peer",
-    scope: "per-sender",
-    reset: { mode: "daily", hour: 4 },
-  },
-
-  tools: {
-    allow: ["read", "web", "messaging"],
-    deny: ["group:runtime", "sessions_spawn", "gateway"],
-  },
-
-  sandbox: { mode: "non-main", scope: "session", workspaceAccess: "ro" },
-  gateway: { bind: "loopback", mDNS: { mode: "minimal" } },
-  logging: { level: "info", redactSensitive: "tools" },
-}
+// Telegram: Create bot via @BotFather → paste Bot Token
+// Discord: Dev Portal → Bot → Token (enable GUILD_MESSAGES + DIRECT_MESSAGES intents)
+// Slack: Dev Portal → Socket Mode → App-Level Token (xapp-) + Bot Token (xoxb-)
+// BlueBubbles: Install on macOS, set server URL + password in settings
+// WhatsApp: Meta Business → Cloud API → Access Token + Phone Number ID
+// Signal: brew install signal-cli → register phone number
+// Matrix: homeserver URL + access token (login via Element or /login API)
 ```
 
-### OpenClaw Daemon Setup (macOS, 2026)
+### Thea Gateway Verification (macOS)
 ```bash
-# Install as background daemon (survives reboots):
-openclaw onboard --install-daemon
-
-# Verify daemon is running:
-openclaw gateway status
-
-# Manual start/stop (if not using daemon):
-openclaw gateway start
-openclaw gateway stop
-
-# Check gateway health endpoint:
+# Verify Thea gateway is running (after app launch):
 curl http://127.0.0.1:18789/health
+# Expected: {"status":"ok","platform":"thea","port":18789}
 
-# Validate config before (re)starting:
-openclaw doctor        # checks config, API keys, file permissions
-openclaw doctor --fix  # auto-remediates where possible
+# Check which platforms are connected:
+# → Settings → Messaging Gateway in Thea app
 
-# Update OpenClaw:
-npm update -g openclaw
-openclaw gateway restart
+# Telegram test (if botToken configured):
+# Send a message to your bot → verify it appears in TheaMessagingChatView
+
+# OpenClawClient.swift still works:
+# It connects to ws://127.0.0.1:18789 — now Thea's own server, not OpenClaw
 ```
 
-### OpenClaw Changelog 2026.2.18 — Key New APIs
-
+### Key Design Insights from OpenClaw Research (Phase O implementation reference)
 ```swift
-// NEW FEATURES in OpenClaw 2026.2.18 — implement all in Phase O:
+// IMPLEMENTED in Thea's native gateway:
 
-// 1. Slack streaming (new methods for Slack channel):
-//    chat.startStream(channelID:) → streamID: String
-//    chat.appendStream(streamID:token:)
-//    chat.stopStream(streamID:)
-// Implementation: OpenClawIntegration.streamMessage(to:via:) for Slack channel
+// 1. Slack streaming: SlackConnector uses tokenwise chat.postMessage updates
+//    → O3: SlackConnector.send() can use Slack's streaming-friendly blocks API
 
-// 2. 1M context window (Anthropic):
-//    In openclaw.json: params.context1m: true
-//    Context upgraded from 24K → 150K tokens for all sessions
+// 2. MMR memory re-ranking:
+//    → O9: MessagingSessionManager.relevantContext() implements MMR with temporal decay
 
-// 3. Memory MMR re-ranking (replaces cosine similarity):
-//    memory.search(query:topK:mmr:true) → diversified results with temporal decay
-//    Old: memory.search(query:) with flat similarity
+// 3. Discord interactive elements (buttons/selects/modals):
+//    → O2: DiscordConnector.send() can include Discord Components JSON in payload
 
-// 4. Discord Components v2 (interactive elements):
-//    discord.sendComponent(buttons:selects:modals:) — new method
-//    Enables interactive Thea responses in Discord (confirmations, forms, menus)
+// 4. Subagent nesting → maps to TaskPlanDAG:
+//    → P16: AgentTeamOrchestrator wires TaskPlanDAG leaf nodes as sub-agents
 
-// 5. Subagent nesting:
-//    agent.runSubagent(id:task:context:) → SubagentResult
-//    Maps to TaskPlanDAG leaf node execution
+// 5. Tool schema: no anyOf/oneOf/allOf (already correct in Thea tool definitions)
+//    → Audit AnthropicToolCatalog.swift tool schemas in Phase P
 
-// 6. Exec tool hardening:
-//    In openclaw.json: tools.exec.safeBins: ["git","swift","xcodebuild","npm","python3"]
-//    All other executables blocked by default in Phase O config
+// 6. Session daily reset at 4am:
+//    → O9: MessagingSessionManager.scheduleDailyReset()
 
-// 7. iOS companion app pairing:
-//    gateway.getDeviceToken(deviceID:) for iOS app auth
-//    Requires: gateway.enableMobileCompanion: true in config
-
-// 8. BREAKING: Tool schema changes (no anyOf/oneOf/allOf):
-//    Before: { "type": "string", "anyOf": [...] }
-//    After:  { "type": "string", "enum": [...] }
-//    Audit all Thea tool definitions sent to OpenClaw gateway
+// 7. SSRF protection: validate outbound URLs in all connector send() implementations
+//    → O1-O7: Add URL validation before URLSession calls
 ```
 
 ### Claude Opus 4.6 + Sonnet 4.6 — Model IDs (Feb 2026)
@@ -2403,9 +2691,9 @@ openclaw gateway restart
 "claude-sonnet-4-6"            // Balanced: near-flagship at lower cost, adaptive reasoning
 "claude-haiku-4-5-20251001"    // Fast/cheap: iOS, low-latency responses
 
-// OpenClaw config model IDs (include provider prefix):
-"anthropic/claude-opus-4-6"
-"anthropic/claude-sonnet-4-6"
+// For Thea messaging (AI routing in OpenClawBridge):
+// Primary: claude-opus-4-6 (best injection resistance)
+// Fallback: claude-sonnet-4-6
 
 // Pricing (Feb 2026):
 // Opus 4.6:   $3/M input, $15/M output
@@ -2420,7 +2708,7 @@ openclaw gateway restart
 // 2. Each leaf node → independent Claude API call (teammate)
 // 3. Each teammate has: clean context window, specific subtask, tool access
 // 4. Team Lead aggregates teammate results → synthesises final response
-// 5. Progress streamed to user via OpenClaw channel in real-time
+// 5. Progress streamed to user via Thea messaging channel in real-time
 
 // Example: "Plan my week" →
 //   Teammate A: "Fetch calendar events for next 7 days"
@@ -2462,17 +2750,19 @@ brew upgrade swiftlint  # Keep updated on dev machines
 ## NOTES AND DECISIONS LOG (v2)
 
 **2026-02-19**: v2 created. Key decisions:
-- OpenClaw protocol upgrade is mandatory (wrong framing breaks all advanced features)
+- Thea native messaging gateway: replaces OpenClaw — no npm, no Node.js daemon, direct APIs (wrong framing breaks all advanced features)
 - Notarization must be automated (unsigned builds are NOT suitable for personal use on other Macs)
 - SBOM + CodeQL added because security scanning is a core Thea value
-- Canvas/A2UI support added because it unlocks agent-driven UI for all OpenClaw channels
+- Multi-platform messaging wired natively (O1-O7 connectors)
 - Multi-agent routing added to separate work/personal/health contexts
 - dSYMs preserved for 1 year (needed for crash report symbolication)
 - Periphery from v1 continues in Phase R — not done until ALL items addressed
 - Phases N and O can run in parallel (no dependency between them)
-- Phase Q (coverage) requires Phase O complete (OpenClaw tests are counted in coverage)
+- Phase Q (coverage) requires Phase O complete (messaging connector tests counted in coverage)
 
-**2026-02-19 (v2 update #2)**: OpenClaw changelog 2026.2.18 + community risk research:
+**2026-02-19 (v2 update #2)**: OpenClaw research used to design Thea Native Messaging Gateway:
+OpenClaw was researched to understand what a messaging gateway must do — NOT to install it.
+Thea replaces OpenClaw with a native Swift implementation.
 
 KEY CHANGELOG FEATURES (must be implemented in Phase O):
 - iOS/Watch companion app: inbox UI + gateway commands + iOS Share Extension + Talk Mode (background)
@@ -2492,9 +2782,9 @@ KEY CHANGELOG FEATURES (must be implemented in Phase O):
 - Subagent nesting: agents can spawn sub-agents, each with clean context window
   → Phase P16: Wire into TaskPlanDAG for teammate pattern
 - SSRF protection: new gateway-level protection against server-side request forgery
-  → Phase O_PRE: Set SSRF protection level in openclaw.json config
+  → O1-O7: Validate outbound URLs in all connector send() implementations
 - exec tool hardening: `tools.exec.safeBins` list (allowlisted executables only)
-  → Phase O_PRE: Add safeBins allowlist in config
+  → O10: Add tool safeBins allowlist in TheaMessagingSettingsView tool policy section
 - Telegram token redaction: tokens now redacted in all gateway logs automatically
   → Phase O: Remove any custom Telegram token redaction (now handled by gateway)
 - BREAKING: Model schema changed — no longer accepts anyOf/oneOf/allOf in tool schemas
@@ -2502,17 +2792,17 @@ KEY CHANGELOG FEATURES (must be implemented in Phase O):
 
 COMMUNITY RISK WARNINGS (incorporate into OpenClaw setup):
 1. COST RUNAWAY: Agent loops can easily spend $300-750/month. Mitigation:
-   - Set `maxTokensPerHour` in openclaw.json
-   - Enable `budgetAlert` with daily cost threshold
-   - Monitor with: openclaw stats --period 24h
+   - OpenClawBridge.maxResponsesPerMinute=5 already limits throughput
+   - Monitor via Anthropic Console (token usage per day)
+   - Add budget alert in AnthropicProvider if needed
    - OpenClawBridge.maxResponsesPerMinute=5 already addresses this for Thea
 2. MALICIOUS EXTENSION: "ClawdBot Agent" on VS Code marketplace is MALWARE (not official).
    - Install ONLY official: `npm install -g openclaw` from npmjs.com
    - Never install VS Code extensions claiming to be "OpenClaw" — no official extension exists
 3. RELIABILITY: Gateway may silently report "success" for failed deliveries on some platforms.
    - Add delivery confirmation tracking in Phase O (use ACK events where available)
-4. SETUP COMPLEXITY: First-time setup takes ~2 hours. Use `openclaw doctor` liberally.
-   - `openclaw doctor --fix` auto-remediates most common config issues
+4. SETUP COMPLEXITY: Per-platform setup varies. Telegram is simplest (5 min), Matrix most complex.
+   - Check TheaMessagingSettingsView for connection errors
 
 PDF SECURITY KIT FINDINGS (Kit Sécurité OpenClaw, from ~/Downloads):
 The PDF identified 5 critical risks — incorporated into Thea gateway design:
@@ -2541,14 +2831,15 @@ The PDF identified 5 critical risks — incorporated into Thea gateway design:
 - Phase ordering confirmed optimal: N+O+P parallel → Q+R → S+T → U → V
 
 **Sources used for v2 research:**
-- [OpenClaw Gateway Protocol](https://docs.openclaw.ai/gateway/protocol)
-- [OpenClaw Security Guide](https://docs.openclaw.ai/gateway/security)
-- [OpenClaw Getting Started](https://docs.openclaw.ai/start/getting-started)
-- [OpenClaw Configuration Reference](https://moltfounders.com/openclaw-configuration)
-- [OpenClaw iOS App](https://docs.openclaw.ai/platforms/ios)
-- [OpenClaw Architecture](https://deepwiki.com/openclaw/openclaw)
-- [OpenClaw Features](https://openclaw.ai/)
-- [OpenClaw npm package](https://www.npmjs.com/package/openclaw)
+- [Telegram Bot API](https://core.telegram.org/bots/api) — getUpdates, sendMessage, getMe
+- [Discord Gateway API v10](https://discord.com/developers/docs/topics/gateway) — WebSocket, Intents, Identify
+- [Slack Socket Mode](https://api.slack.com/apis/connections/socket) — WebSocket, envelope ACK
+- [BlueBubbles API](https://docs.bluebubbles.app/server/api-v1/) — iMessage HTTP + WebSocket
+- [WhatsApp Business Cloud API](https://developers.facebook.com/docs/whatsapp/cloud-api) — webhooks + REST
+- [signal-cli](https://github.com/AsamK/signal-cli) — JSON-RPC daemon mode
+- [Matrix C-S API v3](https://spec.matrix.org/v1.13/client-server-api/) — /sync, PUT message
+- [OpenClaw research (design reference)](https://openclaw.ai/) — session isolation, MMR, tool policy
+- [OpenClaw Security Guide](https://docs.openclaw.ai/gateway/security) — security risks (adapted)
 - [Claude Opus 4.6 release](https://www.anthropic.com/news/claude-opus-4-6)
 - [Claude Sonnet 4.6 announcement](https://markets.financialcontent.com/stocks/article/tokenring-2026-2-18-anthropic-unleashes-claude-sonnet-46)
 - [mlx-swift GitHub](https://github.com/ml-explore/mlx-swift/)
