@@ -308,22 +308,122 @@ CURRENT STATUS:
 
 ## SESSION SAFETY PROTOCOL — MANDATORY FOR ALL v3 SESSIONS
 
-Identical to v2 protocol. Copy from THEA_SHIP_READY_PLAN_v2.md Session Safety Protocol section.
-Key rules:
+### Core Rules (same as v2)
 1. Suspend thea-sync at start: `launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist`
 2. Pull latest plan before executing anything: `git pull`
-3. Commit every file individually — never batch
+3. Commit every file individually — never batch with `git add -A`
 4. Verify plan state before starting a phase — never assume
-5. Clean exit protocol: commit, restore thea-sync, pushsync
+5. Clean exit: commit, restore thea-sync, pushsync
 
-**ADDITIONAL v3 RULE — Meta-AI Pre-flight:**
-Before any phase that touches MetaAI or Intelligence/, run:
+### Rule 6 — MANDATORY PLAN FILE UPDATE
+**Every phase start AND end MUST update this plan file's status table and commit the change.**
+
+```bash
+# At phase start: mark IN PROGRESS
+sed -i '' 's/| X3  | Test Coverage.*⏳ PENDING/| X3  | Test Coverage...    | 🔄 IN PROGRESS | .../' \
+  .claude/THEA_CAPABILITY_PLAN_v3.md
+git add .claude/THEA_CAPABILITY_PLAN_v3.md && git commit -m "Auto-save: X3 — phase started"
+
+# At phase end: mark DONE
+sed -i '' 's/| X3  | Test Coverage.*🔄 IN PROGRESS/| X3  | Test Coverage... | ✅ DONE/' \
+  .claude/THEA_CAPABILITY_PLAN_v3.md
+git add .claude/THEA_CAPABILITY_PLAN_v3.md && git commit -m "Auto-save: X3 — phase complete"
+```
+
+Both v3 and v2 plan files must be updated — status tables must always reflect real state.
+Do NOT skip this step for any phase, even quick ones.
+
+### Rule 7 — RESILIENCE & AUTO-RECOVERY
+
+**Heartbeat (every 30 min):**
+```bash
+# In tmux session, run alongside executor:
+while true; do
+  echo "$(date '+%Y-%m-%d %H:%M:%S') — v3 executor alive, phase: $(cat /tmp/v3_phase.txt 2>/dev/null || echo 'unknown')" \
+    >> /tmp/v3_heartbeat.log
+  sleep 1800
+done &
+```
+
+**State file (updated at every phase transition):**
+```bash
+# /tmp/v3_state.json — written by executor at each phase boundary
+echo "{\"phase\": \"A3\", \"status\": \"in_progress\", \"started\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" \
+  > /tmp/v3_state.json
+```
+
+**Auto-recovery on build failure (try once before stopping):**
+```bash
+if ! xcodebuild ... | grep -q "BUILD SUCCEEDED"; then
+  echo "Build failed — attempting auto-recovery: clean DerivedData"
+  find ~/Library/Developer/Xcode/DerivedData -maxdepth 1 -name "Thea-*" -type d -exec rm -rf {} + 2>/dev/null
+  xcodegen generate
+  # Retry once
+  if ! xcodebuild ... | grep -q "BUILD SUCCEEDED"; then
+    echo "FATAL: Build failed after recovery — STOPPING. Check errors before resuming."
+    exit 1
+  fi
+fi
+```
+
+**Git index check after multi-file operations:**
+```bash
+# Run after any phase that touches >3 files:
+git status --short | grep "^D " && echo "WARNING: deletions detected — check git index" && \
+  rm -f .git/index && git read-tree HEAD
+```
+
+**Build gate before EVERY phase:**
+Every phase description below must start with a build gate check. Do not proceed with any
+phase's steps if the build gate fails.
+
+### Rule 8 — PARALLEL MACHINE ASSIGNMENT
+
+v3 phases can run on BOTH MSM3U and MBAM2 in parallel. Assign based on capability:
+
+**MSM3U (Mac Studio M3 Ultra, 256 GB RAM) — HEAVY PHASES:**
+- All 4-platform builds (macOS + iOS + watchOS + tvOS)
+- ML-heavy phases: A3 (Intelligence), B3 (Tool Execution), E3 (Skills), F3 (Squads)
+- Phases requiring large models: L3 (Computer Use), M3 (MLX Audio)
+- Wave 4 phases (L3, M3, N3, O3) — need local LLMs
+- Wave 6 verification (X3–AD3) — full build + periphery + CI
+
+**MBAM2 (MacBook Air M2, 24 GB RAM) — LIGHTWEIGHT PHASES:**
+- UI-focused phases (no ML dependency): I3 (Excluded UI Components), K3 (Config UI)
+- Integration phases: T3 (Integration Backends — pure Swift, no ML)
+- Transparency UIs: V3 (no ML dependency, pure SwiftUI)
+- Chat UI: W3 (no ML dependency)
+- Plan file edits and coordination tasks
+- Single-scheme macOS/iOS builds for UI verification
+
+**Coordination rule:** MSM3U is PRIMARY. MBAM2 runs complementary lightweight phases.
+Never run the same phase on both machines simultaneously.
+After each MBAM2 phase: `git pushsync` immediately so MSM3U picks up changes.
+
+**CPU temperature monitoring (mandatory for heavy MSM3U phases):**
+```bash
+# Monitor CPU temperature during builds (run in background tmux pane):
+while true; do
+  TEMP=$(sudo powermetrics --samplers smc -n1 -i 1 2>/dev/null | grep "CPU die temperature" | awk '{print $NF}')
+  echo "$(date '+%H:%M:%S') CPU: ${TEMP}°C"
+  # Auto-throttle: if >90°C, pause current build for 2 min
+  if [[ -n "$TEMP" ]] && (( $(echo "$TEMP > 90" | bc -l) )); then
+    echo "THERMAL ALERT: CPU ${TEMP}°C — pausing 2 min"
+    sleep 120
+  fi
+  sleep 60
+done
+```
+
+Threshold: >85°C = warning (log only). >90°C = pause 2 min. >95°C = stop executor, alert.
+
+### Pre-flight Build Gate (BEFORE EVERY PHASE)
 ```bash
 xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
   -destination 'platform=macOS' build -derivedDataPath /tmp/TheaBuild \
   CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "error:|BUILD" | tail -5
+# Must be "BUILD SUCCEEDED" before proceeding.
 ```
-Must be "BUILD SUCCEEDED" before proceeding.
 
 ---
 
@@ -372,131 +472,165 @@ Must be "BUILD SUCCEEDED" before proceeding.
 
 ---
 
-## PHASE A3: META-AI REINTEGRATION
+## PHASE A3: META-AI DASHBOARD (UI LAYER + CHERRY-PICK)
 
 **Status: ⏳ PENDING (starts after v2 Phase U auto-transition)**
 
-**Goal**: Restore all ~73 MetaAI files to active builds. Fix type conflicts. Wire Meta-AI as
-a higher-order intelligence layer on top of IntelligenceOrchestrator. Preserve the "Meta-AI"
-brand throughout the app.
+**Goal**: Surface "Meta-AI" as a branded, visible UI layer over IntelligenceOrchestrator.
+Do NOT wholesale restore all ~73 archived MetaAI files — most duplicate canonical Intelligence/
+functionality and would introduce hundreds of type conflicts. Instead: create
+`MetaAIDashboardView` presenting IntelligenceOrchestrator's subsystems under the Meta-AI brand,
+then cherry-pick the 6 files with genuinely unique capabilities.
 
 **Run after**: v2 Phase U complete (executor auto-transitions to v3)
 
-**Why Meta-AI was excluded (and why it's wrong to leave it excluded):**
-The folder was archived because ~73 Swift files defined types that conflicted with canonical
-types in `Shared/Intelligence/`. Rather than fix the conflicts, the whole folder was excluded.
-This is ~30K LOC of capability — model benchmarking, ReAct reasoning, tool views, agent
-orchestration, hypothesis testing — all wasted. v3 fixes this properly.
+**Why NOT wholesale restoration:**
+The ~73 archived files largely duplicate `Shared/Intelligence/` (ConfidenceSystem, ModelRouter,
+SmartModelRouter, TaskClassifier, etc. already supersede them). Restoring all 73 requires
+renaming ~30+ conflicting types for zero functional gain. The 6 cherry-picked files below are
+the ONLY ones with capabilities not already present in canonical Intelligence/.
 
-**Meta-AI brand:** The user explicitly wants "Meta-AI" as a visible concept in Thea.
-All UI surfaces should label this system as "Meta-AI", not "Intelligence" or "Orchestrator".
+**Meta-AI brand:** The user wants "Meta-AI" as a visible concept in Thea's UI.
+IntelligenceOrchestrator stays unchanged — Meta-AI IS its branded UI face.
 
-### A3-0: Audit MetaAI Files
-
-```bash
-ls .v1-archive/Shared/AI/MetaAI/ | wc -l  # should be ~73
-ls .v1-archive/Shared/AI/MetaAI/
-```
-
-For each file, identify:
-1. What types does it define?
-2. Do any of those types conflict with Shared/Intelligence/?
-3. Resolution: (a) use canonical type via import, or (b) prefix with MetaAI
-
-**Known conflicts (from original exclusion):**
-- `MCPServerInfo` → conflicts with AnthropicProvider. Resolution: Use canonical or prefix `MetaAIMCPServerInfo`
-- `AIErrorContext` → check if canonical exists. Resolution: Prefix `MetaAIErrorContext`
-- `ModelCapabilityRecord` → check against SmartModelRouter. Resolution: Prefix `MetaAIModelCapabilityRecord`
-- `ReActActionResult` → likely unique to MetaAI. Keep as-is.
-- `HypothesisEvidence` → likely unique to MetaAI. Keep as-is.
-
-### A3-1: Copy Files Back
+### A3-0: Audit Archive for Unique Capabilities
 
 ```bash
-# Copy all MetaAI files back to Shared/
-mkdir -p Shared/AI/MetaAI
-cp -r .v1-archive/Shared/AI/MetaAI/* Shared/AI/MetaAI/
-# Also check for views:
-mkdir -p Shared/UI/Views/MetaAI
-cp -r .v1-archive/Shared/UI/Views/MetaAI/* Shared/UI/Views/MetaAI/ 2>/dev/null || true
+ls .v1-archive/Shared/AI/MetaAI/ 2>/dev/null || ls .v1-archive/MetaAI/ 2>/dev/null
 ```
 
-### A3-2: Fix Type Conflicts
+**6 files to cherry-pick (unique capabilities not in canonical Intelligence/):**
+1. `ModelBenchmarkService.swift` — per-model latency/quality tracking (no canonical equivalent)
+2. `QueryDecomposer.swift` — multi-step query breakdown before routing
+3. `LogicalInferenceEngine.swift` — deductive reasoning chains (distinct from ReAct)
+4. `THEASelfAwareness.swift` — self-model: what Thea knows about its own capabilities
+5. `ToolCallView.swift` (or equivalent) — dedicated tool call visualization component
+6. `WorkflowTemplates.swift` — pre-built agentic workflow definitions
 
-For each conflicting type:
-```swift
-// Pattern A: Replace definition with import
-// Before: public struct MCPServerInfo { ... }
-// After: // MetaAI uses canonical MCPServerInfo from AnthropicProvider
-//        typealias MetaAIMCPServerInfo = MCPServerInfo
+For each file, grep Shared/ for conflicting type names BEFORE copying.
 
-// Pattern B: Rename the MetaAI type
-// Before: public struct ModelCapabilityRecord { ... }
-// After: public struct MetaAIModelCapabilityRecord { ... }
-//        // Update all usages in MetaAI files
-```
+### A3-1: Create MetaAIDashboardView
 
-Run xcodebuild after each conflict fix and iterate until BUILD SUCCEEDED.
-
-### A3-3: Add MetaAI to project.yml
-
-```yaml
-# In macOS target sources, add:
-# Remove any blanket MetaAI exclusion from the macOS excludes block
-# (The exclusion comment says "No files remain in Shared/" — but after A3-1 they do)
-
-# In iOS target, add MetaAI with platform guards:
-# Most MetaAI files use #if os(macOS) guards — add them where missing
-```
-
-Run `xcodegen generate` and verify all 4 platforms build.
-
-### A3-4: Wire Meta-AI into IntelligenceOrchestrator
-
-Meta-AI should be a "meta" layer that observes and enhances IntelligenceOrchestrator
-decisions, not replaces them.
+New file: `Shared/UI/Views/MetaAI/MetaAIDashboardView.swift`
 
 ```swift
-// In IntelligenceOrchestrator.swift, add MetaAI observation:
-extension IntelligenceOrchestrator {
-    func processWithMetaAI(_ query: String, classification: TaskType) async -> MetaAIEnhancement? {
-        // Ask MetaAI for: routing suggestions, confidence adjustments,
-        // ReAct step decomposition, hypothesis generation
-        return await MetaAIOrchestrator.shared.enhance(
-            query: query,
-            classification: classification,
-            currentContext: contextWindow
-        )
+import SwiftUI
+
+struct MetaAIDashboardView: View {
+    @StateObject private var orchestrator = IntelligenceOrchestrator.shared
+    @State private var selectedTab: MetaAITab = .overview
+
+    enum MetaAITab: String, CaseIterable {
+        case overview = "Overview"
+        case routing = "Routing"
+        case confidence = "Confidence"
+        case benchmarks = "Benchmarks"
+        case reasoning = "Reasoning"
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Image(systemName: "brain.head.profile").foregroundStyle(.purple)
+                Text("Meta-AI Intelligence Layer").font(.headline)
+                Spacer()
+                Circle().fill(orchestrator.isActive ? .green : .gray).frame(width: 8, height: 8)
+                Text(orchestrator.isActive ? "Active" : "Idle")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            .padding()
+            Picker("Tab", selection: $selectedTab) {
+                ForEach(MetaAITab.allCases, id: \.self) { tab in
+                    Text(tab.rawValue).tag(tab)
+                }
+            }
+            .pickerStyle(.segmented).padding(.horizontal)
+            TabView(selection: $selectedTab) {
+                MetaAIOverviewPanel(orchestrator: orchestrator).tag(MetaAITab.overview)
+                MetaAIRoutingPanel(orchestrator: orchestrator).tag(MetaAITab.routing)
+                MetaAIConfidencePanel().tag(MetaAITab.confidence)
+                MetaAIBenchmarksPanel().tag(MetaAITab.benchmarks)
+                MetaAIReasoningPanel().tag(MetaAITab.reasoning)
+            }
+        }
+        .navigationTitle("Meta-AI")
     }
 }
 ```
 
-### A3-5: Add Meta-AI UI Surface
+Supporting panels read LIVE data from IntelligenceOrchestrator, ConfidenceSystem,
+SmartModelRouter. No mocked data. Each panel has a `.task {}` loader.
 
-In MacSettingsView, add a "Meta-AI" section:
-```
-├─ Meta-AI
-│   ├─ Overview (what Meta-AI is doing right now)
-│   ├─ Model Benchmarks (MetaAI benchmarking results)
-│   ├─ Reasoning Log (ReAct steps, hypotheses, evidence)
-│   ├─ Configuration (enable/disable MetaAI layers)
-│   └─ About Meta-AI
+### A3-2: Wire into MacSettingsView Sidebar
+
+```swift
+// In MacSettingsView.swift sidebar NavigationLink list, after Intelligence section:
+NavigationLink(destination: MetaAIDashboardView()) {
+    Label("Meta-AI", systemImage: "brain.head.profile")
+}
 ```
 
-In iOS tab bar: "Meta-AI" tab (inspector panel showing active reasoning).
+### A3-3: Cherry-Pick 6 Unique Files
+
+For each of the 6 files:
+```bash
+# 1. Check for type conflicts first
+grep -rn "struct ModelBenchmarkService\|class ModelBenchmarkService" Shared/ --include="*.swift"
+# 2. If no conflict, copy to new subfolder (NOT the blanket-excluded AI/MetaAI/)
+mkdir -p Shared/Intelligence/MetaAI
+cp .v1-archive/.../ModelBenchmarkService.swift Shared/Intelligence/MetaAI/
+```
+
+Repeat for all 6. Run `xcodegen generate` after all copies are done.
+
+### A3-4: Add to project.yml (Targeted — NOT Blanket)
+
+```yaml
+# Add ONLY these new paths — do NOT remove the blanket **/AI/MetaAI/** exclusion:
+# - Shared/Intelligence/MetaAI/**          (6 cherry-picked files)
+# - Shared/UI/Views/MetaAI/MetaAIDashboardView.swift
+# Add to macOS + iOS targets; use #if os(macOS) guards where needed
+```
+
+The archived `**/AI/MetaAI/**` blanket exclusion stays. Only the new
+`Shared/Intelligence/MetaAI/` subfolder is added to builds.
+
+### A3-5: Wire Cherry-Picked Files into Dashboard Panels
+
+```swift
+// MetaAIBenchmarksPanel reads ModelBenchmarkService:
+struct MetaAIBenchmarksPanel: View {
+    @State private var benchmarks: [ModelBenchmark] = []
+    var body: some View {
+        List(benchmarks) { b in
+            HStack {
+                Text(b.modelId); Spacer()
+                Text(String(format: "%.0fms", b.avgLatencyMs)).foregroundStyle(.secondary)
+            }
+        }
+        .task { benchmarks = await ModelBenchmarkService.shared.recentBenchmarks() }
+    }
+}
+
+// MetaAIReasoningPanel reads LogicalInferenceEngine:
+struct MetaAIReasoningPanel: View {
+    @StateObject private var engine = LogicalInferenceEngine.shared
+    var body: some View {
+        ScrollView { ForEach(engine.recentChains) { chain in InferenceChainView(chain: chain) } }
+    }
+}
+```
 
 ### A3-6: Verify
 
 ```bash
-# Build all 4 platforms
 for scheme in Thea-macOS Thea-iOS Thea-watchOS Thea-tvOS; do
   xcodebuild -project Thea.xcodeproj -scheme "$scheme" -configuration Debug \
     -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO build 2>&1 | \
     grep -E "error:|BUILD (SUCCEEDED|FAILED)" | tail -3
 done
-
-# Check MetaAI types are accessible
-grep -r "MetaAIOrchestrator" Shared/ --include="*.swift" | wc -l  # should be >0
+# MetaAIDashboardView wired in at least 2 places:
+grep -r "MetaAIDashboardView" Shared/ macOS/ --include="*.swift" | wc -l  # ≥2
 ```
 
 Commit after each sub-step: `git add <file> && git commit -m "Auto-save: A3-N — ..."`
