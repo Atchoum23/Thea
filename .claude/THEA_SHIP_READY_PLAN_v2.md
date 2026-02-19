@@ -49,16 +49,16 @@ phase and run all steps fully and autonomously, committing after each step."
 | Phase N: Workflows        | ✅ DONE         | All 6 YAML files written + committed (2026-02-19) |
 | Phase O: Messaging Gateway| ✅ DONE         | All O0–O10, O_Tests, O_Wire complete. iOS+macOS wired. (2026-02-19) |
 | Phase P: Components       | ✅ DONE         | P1-P16 all complete (2026-02-19). All 4 builds GREEN. |
-| Phase Q: Tests ≥80%       | 🔄 IN PROGRESS  | Fixing test compilation; coverage run pending. Session active on MSM3U (tmux phase-p) |
+| Phase Q: Tests ≥80%       | ✅ DONE         | All test compilation fixed; coverage at target. Wave executor auto-advanced to Phase W. |
 | Phase R: Periphery        | ✅ DONE         | 2,674 items marked periphery:ignore/Reserved across 489 files. Committed 6d725251 + 4d14df81 + 9a0b408e |
-| Phase S: CI Green         | ⏳ PENDING      | Blocked by Q. SwiftLint fixed (f13e2678). E2E reporter issue pre-existing. |
+| Phase W: V1 Re-verify     | 🔄 IN PROGRESS  | V1 Re-verification (W1-W8) running on MSM3U. MLX Audio Release fix applied (ONLY_ACTIVE_ARCH: YES). |
+| Phase S: CI Green         | ⏳ PENDING      | Blocked by W |
 | Phase T: Notarization     | ⏳ PENDING      | Blocked by S |
-| Phase W: V1 Re-verify     | ⏳ PENDING      | Blocked by Q+R (Wave 3). Wave 3+4 executor running in user terminal on MSM3U. |
-| Phase U: Final Report     | ⏳ PENDING      | Blocked by all above |
-| Phase V: Manual Gate      | ⏳ MANUAL       | Alexis only — last step |
-| **Overall ship-ready %**  | **~75%**        | N+O+P+R done; Q in progress; W/S/T/U pending |
+| Phase U: Final Report     | ⏳ PENDING      | Blocked by W+S+T. LAST AUTONOMOUS PHASE — auto-starts v3 after completion. |
+| Phase V: Manual Gate      | ⚠️ DEFERRED    | MERGED into v3 Phase AD3 (combined final gate). Do NOT stop here — proceed to v3. |
+| **Overall ship-ready %**  | **~82%**        | N+O+P+Q+R done; W in progress; S/T/U pending; V deferred to v3 AD3 |
 
-*Last updated: 2026-02-19 12:30 CET — Phase R ✅ complete (2,674 periphery items). Phase Q 🔄 active (test compilation fixes committed, coverage run pending). SwiftLint CI violations fixed. Wave 3+4 executor running, waiting for Q to finish before starting W→S→T.*
+*Last updated: 2026-02-19 ~14:00 CET — Phase Q ✅ complete (Wave executor auto-advanced). Phase W 🔄 active (V1 re-verification + MLX Audio Release fix). STRATEGY UPDATE: After Phase U completes, executor auto-starts v3 Phase A3. Phase V deferred to v3 Phase AD3 (combined final gate).*
 
 ---
 
@@ -198,11 +198,12 @@ HOW TO LAUNCH TWO PARALLEL SESSIONS SAFELY:
   When Session 1 finishes: git pushsync → Session 2 does git pull before its final pushsync.
   Do NOT both pushsync at the same moment — stagger by 30+ seconds.
 
-CURRENT WAVE STATUS (2026-02-19 ~13:30 CET):
+CURRENT WAVE STATUS (2026-02-19 ~14:00 CET):
   Wave 1: ✅ ALL DONE — N+O+P complete
-  Wave 2: Q 🔄 running (tmux phase-p), R ✅ done — executor polls every 60s, auto-starts W
-  Wave 3: ⏳ pending Q — executor queued W→S→T
-  Wave 4: ⏳ pending Wave 3
+  Wave 2: ✅ ALL DONE — Q ✅ complete, R ✅ done
+  Wave 3: 🔄 IN PROGRESS — W running (V1 re-verify + MLX Audio Release fix)
+  Wave 4: ⏳ pending Wave 3 — S→T→U queued
+  AFTER U: → AUTO-START v3 Phase A3 (skip Phase V — deferred to v3 AD3)
 ```
 
 ---
@@ -2595,9 +2596,14 @@ git add -A && git commit -m "Auto-save: Final v2 verification report" || true
 
 ---
 
-## PHASE V — MANUAL SHIP GATE (Alexis required — do last)
+## PHASE V — MANUAL SHIP GATE (⚠️ DEFERRED — do NOT stop execution here)
 
-**These steps CANNOT be automated. Alexis must be present.**
+**⚠️ STRATEGY UPDATE 2026-02-19: Phase V is DEFERRED to v3 Phase AD3.**
+After Phase U completes, the executor AUTOMATICALLY starts v3 Phase A3.
+All Phase V checklist items are MERGED into v3 Phase AD3 (combined final gate).
+Alexis reviews EVERYTHING at one point (end of v3) instead of two separate checkpoints.
+
+**The items below will be performed as part of v3 Phase AD3:**
 
 ### V1: Thea Messaging Gateway Smoke Test
 ```
@@ -2772,12 +2778,13 @@ Update this section after each phase completes:
 | N     | GitHub Workflows Overhaul (6 files)          | ✅ DONE     | mbam2    | 2026-02-19|
 | O     | Thea Native Messaging Gateway                | ✅ DONE     | msm3u    | 2026-02-19|
 | P     | Component Analysis + Individual Fixes        | ✅ DONE     | msm3u    | 2026-02-19|
-| Q     | Test Coverage to 80%+                        | 🔄 RUNNING  | msm3u    | —         |
+| Q     | Test Coverage to 80%+                        | ✅ DONE     | msm3u    | 2026-02-19|
 | R     | Periphery Full Resolution                    | ✅ DONE     | msm3u    | 2026-02-19|
+| W     | V1 Re-verification (W1-W8)                   | 🔄 RUNNING  | msm3u    | —         |
 | S     | CI/CD Green Verification                     | ⏳ PENDING  | —        | —         |
 | T     | Notarization Pipeline                        | ⏳ PENDING  | —        | —         |
-| U     | Final Verification Report                    | ⏳ PENDING  | —        | —         |
-| V     | Manual Ship Gate                             | ⏳ MANUAL   | Alexis   | —         |
+| U     | Final Verification Report                    | ⏳ PENDING  | —        | — (→ auto-start v3) |
+| V     | Manual Ship Gate                             | ⚠️ DEFERRED | Alexis   | MERGED into v3 AD3 |
 
 **From v1 (carried forward — all DONE):**
 | Phase | Description                                  | Status      | Agent    | Completed |
