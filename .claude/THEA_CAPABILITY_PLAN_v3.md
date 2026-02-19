@@ -28,7 +28,7 @@
 # Transform Thea from 30% to 100% realized capability.
 #
 # v3 ADDITIONS OVER v2:
-#   1. Meta-AI Reintegration — fix type conflicts, add 73 files back, brand preserved
+#   1. Meta-AI Full Activation — cherry-pick ~45 unique files (skip 15 superseded), MetaAIDashboard UI, MetaAICoordinator, multi-agent/reasoning/autonomy/workflow/plugin suites all activated
 #   2. AnthropicToolCatalog Execution — wire 50+ tools to actually execute
 #   3. SemanticSearchService RAG — integrate into every request
 #   4. ConfidenceSystem Feedback Loop — self-improving model selection
@@ -478,46 +478,152 @@ xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
 
 ---
 
-## PHASE A3: META-AI DASHBOARD (UI LAYER + CHERRY-PICK)
+## PHASE A3: META-AI FULL ACTIVATION (UI LAYER + ~45 CHERRY-PICKED FILES)
 
 **Status: ⏳ PENDING (starts after v2 Phase U auto-transition)**
 
-**Goal**: Surface "Meta-AI" as a branded, visible UI layer over IntelligenceOrchestrator.
-Do NOT wholesale restore all ~73 archived MetaAI files — most duplicate canonical Intelligence/
-functionality and would introduce hundreds of type conflicts. Instead: create
-`MetaAIDashboardView` presenting IntelligenceOrchestrator's subsystems under the Meta-AI brand,
-then cherry-pick the 6 files with genuinely unique capabilities.
+**Goal**: Activate ALL ~45 MetaAI files with genuinely unique capabilities. Create
+`MetaAIDashboardView` as the branded UI face. Skip only the ~15 files superseded by canonical
+Intelligence/. This unlocks Thea's full multi-agent, reasoning, autonomous-build, workflow,
+and plugin capabilities — all previously silenced by blanket exclusion.
 
 **Run after**: v2 Phase U complete (executor auto-transitions to v3)
 
-**Why NOT wholesale restoration:**
-The ~73 archived files largely duplicate `Shared/Intelligence/` (ConfidenceSystem, ModelRouter,
-SmartModelRouter, TaskClassifier, etc. already supersede them). Restoring all 73 requires
-renaming ~30+ conflicting types for zero functional gain. The 6 cherry-picked files below are
-the ONLY ones with capabilities not already present in canonical Intelligence/.
+**Audited file classification (all 73 files reviewed 2026-02-19):**
 
-**Meta-AI brand:** The user wants "Meta-AI" as a visible concept in Thea's UI.
-IntelligenceOrchestrator stays unchanged — Meta-AI IS its branded UI face.
+SKIP — superseded by canonical Intelligence/ (15 files):
+- `MetaAIModelRouter.swift` → SmartModelRouter supersedes (file header confirms this)
+- `MetaAITaskClassifier.swift` → TaskClassifier supersedes (file header confirms this)
+- `KnowledgeGraph.swift` → PersonalKnowledgeGraph supersedes
+- `MemorySystem.swift` → Memory/ folder supersedes
+- `TaskTypes.swift` → TaskType.swift supersedes (check for `TaskContext` type conflict first)
+- Build docs: `BUILD_ISSUES_RESOLUTION.md`, `SESSION_SUMMARY.md`, `PHASE_*.md`, `verify-*.sh`
 
-### A3-0: Audit Archive for Unique Capabilities
+CHERRY-PICK — ~45 files with unique capabilities (grouped by category):
+
+TIER 1 — HIGHEST VALUE (wire into IntelligenceOrchestrator + ChatManager):
+  Multi-Agent: MultiAgentOrchestrator, SubAgentOrchestrator, AgentSwarm, AgentRegistry,
+               AgentCommunication, AgentCommunicationHub, DeepAgentEngine
+  Reasoning:   ReActExecutor, ReasoningEngine, ChainOfThought, LogicalInference,
+               HypothesisTesting, ReflectionEngine
+  Autonomy:    AutonomousBuildLoop, AICodeFixGenerator, CodeFixer, CodeSandbox, SwiftCodeAnalyzer
+  Resilience:  ResilienceManager (circuit breakers + exponential backoff — wire into providers)
+
+TIER 2 — HIGH VALUE (add to builds, wire into dashboard):
+  Error AI:    ErrorKnowledgeBase, ErrorParser, KnownFixes, ImprovementSuggestions
+  Workflow:    WorkflowBuilder, WorkflowPersistence, WorkflowTemplates
+  Plugins:     PluginSystem
+  Parallel:    ParallelQueryExecutor, QueryDecomposer, ResultAggregator
+  Tools:       ToolCall (SwiftData model), ToolCallView, ToolFramework, SystemToolBridge
+  Benchmarks:  ModelBenchmarkService, ModelCapabilityDatabase, ModelCapabilityView, PerformanceMetrics
+  Self-Model:  THEASelfAwareness
+  Directives:  UserDirectivesConfiguration, UserDirectivesView
+
+TIER 3 — ADD TO BUILDS (wire in Phase B3/later):
+  MCP:         MCPBrowserView, MCPServerLifecycleManager, MCPToolBridge, MCPToolList
+  UI Views:    KnowledgeGraphViewer, MemoryInspectorView, PluginManagerView, WorkflowBuilderView
+  Utility:     FileOperations, ExecutionPipeline, InteractionAnalyzer, MultiModalAI
+  Coordinator: THEAOrchestrator → RENAME to `MetaAICoordinator` (conflicts with IntelligenceOrchestrator)
+  Training:    ModelTraining (fine-tuning + few-shot)
+
+**Meta-AI brand:** IntelligenceOrchestrator stays unchanged — `MetaAICoordinator` wraps it,
+adding multi-agent dispatch, ReAct reasoning, and autonomous build capabilities on top.
+
+### A3-0: Pre-flight — Confirm Archive Location + Conflict Check
 
 ```bash
-ls .v1-archive/Shared/AI/MetaAI/ 2>/dev/null || ls .v1-archive/MetaAI/ 2>/dev/null
+ls .v1-archive/Shared/AI/MetaAI/ | wc -l   # should be ~65 Swift files
+ls .v1-archive/Shared/UI/Views/MetaAI/      # should be 4 view files
+
+# Check for known type conflicts before copying anything:
+grep -rn "struct TaskContext\|class TaskContext" Shared/ --include="*.swift"
+grep -rn "class THEAOrchestrator\|final class THEAOrchestrator" Shared/ --include="*.swift"
+grep -rn "struct ModelCapabilityRecord" Shared/ --include="*.swift"
+grep -rn "final class MultiAgentOrchestrator" Shared/ --include="*.swift"
 ```
 
-**6 files to cherry-pick (unique capabilities not in canonical Intelligence/):**
-1. `ModelBenchmarkService.swift` — per-model latency/quality tracking (no canonical equivalent)
-2. `QueryDecomposer.swift` — multi-step query breakdown before routing
-3. `LogicalInferenceEngine.swift` — deductive reasoning chains (distinct from ReAct)
-4. `THEASelfAwareness.swift` — self-model: what Thea knows about its own capabilities
-5. `ToolCallView.swift` (or equivalent) — dedicated tool call visualization component
-6. `WorkflowTemplates.swift` — pre-built agentic workflow definitions
+### A3-1: Copy Tier 1 Files (Multi-Agent + Reasoning + Autonomy + Resilience)
 
-For each file, grep Shared/ for conflicting type names BEFORE copying.
+```bash
+mkdir -p Shared/Intelligence/MetaAI
 
-### A3-1: Create MetaAIDashboardView
+# Tier 1 — Multi-Agent
+for f in MultiAgentOrchestrator SubAgentOrchestrator AgentSwarm AgentRegistry \
+          AgentCommunication AgentCommunicationHub DeepAgentEngine; do
+  cp ".v1-archive/Shared/AI/MetaAI/${f}.swift" Shared/Intelligence/MetaAI/
+done
+
+# Tier 1 — Reasoning
+for f in ReActExecutor ReasoningEngine ChainOfThought LogicalInference \
+          HypothesisTesting ReflectionEngine; do
+  cp ".v1-archive/Shared/AI/MetaAI/${f}.swift" Shared/Intelligence/MetaAI/
+done
+
+# Tier 1 — Autonomy
+for f in AutonomousBuildLoop AICodeFixGenerator CodeFixer CodeSandbox SwiftCodeAnalyzer; do
+  cp ".v1-archive/Shared/AI/MetaAI/${f}.swift" Shared/Intelligence/MetaAI/
+done
+
+# Tier 1 — Resilience
+cp ".v1-archive/Shared/AI/MetaAI/ResilienceManager.swift" Shared/Intelligence/MetaAI/
+```
+
+For THEAOrchestrator: copy then rename class to `MetaAICoordinator`:
+```bash
+cp ".v1-archive/Shared/AI/MetaAI/THEAOrchestrator.swift" Shared/Intelligence/MetaAI/MetaAICoordinator.swift
+sed -i '' 's/class THEAOrchestrator/class MetaAICoordinator/g; s/THEAOrchestrator\.shared/MetaAICoordinator.shared/g' \
+  Shared/Intelligence/MetaAI/MetaAICoordinator.swift
+```
+
+Build after Tier 1 copy. Fix any type conflicts before proceeding to Tier 2.
+
+### A3-2: Copy Tier 2 + Tier 3 Files
+
+```bash
+# Tier 2
+for f in ErrorKnowledgeBase ErrorParser KnownFixes ImprovementSuggestions \
+          WorkflowBuilder WorkflowPersistence WorkflowTemplates PluginSystem \
+          ParallelQueryExecutor QueryDecomposer ResultAggregator \
+          ToolCall ToolCallView ToolFramework SystemToolBridge \
+          ModelBenchmarkService ModelCapabilityDatabase ModelCapabilityView PerformanceMetrics \
+          THEASelfAwareness UserDirectivesConfiguration UserDirectivesView; do
+  cp ".v1-archive/Shared/AI/MetaAI/${f}.swift" Shared/Intelligence/MetaAI/
+done
+
+# Tier 3
+for f in MCPBrowserView MCPServerLifecycleManager MCPToolBridge MCPToolList \
+          FileOperations ExecutionPipeline InteractionAnalyzer MultiModalAI ModelTraining; do
+  cp ".v1-archive/Shared/AI/MetaAI/${f}.swift" Shared/Intelligence/MetaAI/
+done
+
+# UI Views (separate folder)
+mkdir -p Shared/UI/Views/MetaAI
+for f in KnowledgeGraphViewer MemoryInspectorView PluginManagerView WorkflowBuilderView; do
+  cp ".v1-archive/Shared/UI/Views/MetaAI/${f}.swift" Shared/UI/Views/MetaAI/
+done
+```
+
+Check for TaskContext conflict: if `TaskTypes.swift` conflicts, copy but rename `TaskContext`
+to `MetaAITaskContext` in the MetaAI copy only.
+
+### A3-3: Add to project.yml (Targeted)
+
+```yaml
+# Add these new paths to macOS + iOS targets:
+# - Shared/Intelligence/MetaAI/**           (all cherry-picked files)
+# - Shared/UI/Views/MetaAI/**               (4 view files)
+# Do NOT touch the **/AI/MetaAI/** exclusion — archive stays excluded
+# Use #if os(macOS) guards in files that use AppKit/IOKit (AutonomousBuildLoop, SystemToolBridge)
+```
+
+Run `xcodegen generate` after project.yml update.
+
+### A3-4: Create MetaAIDashboardView
 
 New file: `Shared/UI/Views/MetaAI/MetaAIDashboardView.swift`
+
+Dashboard tabs: Overview · Routing · Confidence · Benchmarks · Reasoning ·
+Agents · Workflows · Plugins · Self-Model · Directives
 
 ```swift
 import SwiftUI
@@ -527,36 +633,45 @@ struct MetaAIDashboardView: View {
     @State private var selectedTab: MetaAITab = .overview
 
     enum MetaAITab: String, CaseIterable {
-        case overview = "Overview"
-        case routing = "Routing"
-        case confidence = "Confidence"
-        case benchmarks = "Benchmarks"
-        case reasoning = "Reasoning"
+        case overview = "Overview", routing = "Routing", confidence = "Confidence"
+        case benchmarks = "Benchmarks", reasoning = "Reasoning", agents = "Agents"
+        case workflows = "Workflows", plugins = "Plugins"
+        case selfModel = "Self-Model", directives = "Directives"
     }
 
     var body: some View {
         VStack(spacing: 0) {
+            // Header — Meta-AI brand
             HStack {
                 Image(systemName: "brain.head.profile").foregroundStyle(.purple)
                 Text("Meta-AI Intelligence Layer").font(.headline)
                 Spacer()
-                Circle().fill(orchestrator.isActive ? .green : .gray).frame(width: 8, height: 8)
-                Text(orchestrator.isActive ? "Active" : "Idle")
-                    .font(.caption).foregroundStyle(.secondary)
+                Circle().fill(orchestrator.isActive ? Color.green : Color.gray).frame(width: 8, height: 8)
+                Text(orchestrator.isActive ? "Active" : "Idle").font(.caption).foregroundStyle(.secondary)
             }
             .padding()
-            Picker("Tab", selection: $selectedTab) {
-                ForEach(MetaAITab.allCases, id: \.self) { tab in
-                    Text(tab.rawValue).tag(tab)
-                }
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack { ForEach(MetaAITab.allCases, id: \.self) { tab in
+                    Button(tab.rawValue) { selectedTab = tab }
+                        .buttonStyle(.bordered)
+                        .tint(selectedTab == tab ? .purple : .secondary)
+                } }
+                .padding(.horizontal)
             }
-            .pickerStyle(.segmented).padding(.horizontal)
-            TabView(selection: $selectedTab) {
-                MetaAIOverviewPanel(orchestrator: orchestrator).tag(MetaAITab.overview)
-                MetaAIRoutingPanel(orchestrator: orchestrator).tag(MetaAITab.routing)
-                MetaAIConfidencePanel().tag(MetaAITab.confidence)
-                MetaAIBenchmarksPanel().tag(MetaAITab.benchmarks)
-                MetaAIReasoningPanel().tag(MetaAITab.reasoning)
+            Divider()
+            Group {
+                switch selectedTab {
+                case .overview:    MetaAIOverviewPanel(orchestrator: orchestrator)
+                case .routing:     MetaAIRoutingPanel(orchestrator: orchestrator)
+                case .confidence:  MetaAIConfidencePanel()
+                case .benchmarks:  MetaAIBenchmarksPanel()
+                case .reasoning:   MetaAIReasoningPanel()
+                case .agents:      MetaAIAgentsPanel()
+                case .workflows:   WorkflowBuilderView()
+                case .plugins:     PluginManagerView()
+                case .selfModel:   MetaAISelfModelPanel()
+                case .directives:  UserDirectivesView()
+                }
             }
         }
         .navigationTitle("Meta-AI")
@@ -564,70 +679,39 @@ struct MetaAIDashboardView: View {
 }
 ```
 
-Supporting panels read LIVE data from IntelligenceOrchestrator, ConfidenceSystem,
-SmartModelRouter. No mocked data. Each panel has a `.task {}` loader.
+Each panel reads LIVE data — no mocked data. See individual panel files for implementations.
 
-### A3-2: Wire into MacSettingsView Sidebar
+### A3-5: Wire MetaAICoordinator into IntelligenceOrchestrator
 
 ```swift
-// In MacSettingsView.swift sidebar NavigationLink list, after Intelligence section:
+// In IntelligenceOrchestrator.swift, add MetaAI coordination:
+extension IntelligenceOrchestrator {
+    /// Route through MetaAI when multi-agent or deep reasoning is needed
+    func processWithMetaAI(_ query: String, classification: TaskType) async -> String? {
+        guard classification.requiresMetaAI else { return nil }
+        return await MetaAICoordinator.shared.process(query: query, classification: classification)
+    }
+}
+```
+
+Wire ResilienceManager into AnthropicProvider:
+```swift
+// Wrap API calls with circuit breaker:
+let result = try await ResilienceManager.shared.execute(provider: "anthropic") {
+    try await self.callAPI(...)
+}
+```
+
+### A3-6: Wire into MacSettingsView + iOS Navigation
+
+```swift
+// MacSettingsView sidebar:
 NavigationLink(destination: MetaAIDashboardView()) {
     Label("Meta-AI", systemImage: "brain.head.profile")
 }
 ```
 
-### A3-3: Cherry-Pick 6 Unique Files
-
-For each of the 6 files:
-```bash
-# 1. Check for type conflicts first
-grep -rn "struct ModelBenchmarkService\|class ModelBenchmarkService" Shared/ --include="*.swift"
-# 2. If no conflict, copy to new subfolder (NOT the blanket-excluded AI/MetaAI/)
-mkdir -p Shared/Intelligence/MetaAI
-cp .v1-archive/.../ModelBenchmarkService.swift Shared/Intelligence/MetaAI/
-```
-
-Repeat for all 6. Run `xcodegen generate` after all copies are done.
-
-### A3-4: Add to project.yml (Targeted — NOT Blanket)
-
-```yaml
-# Add ONLY these new paths — do NOT remove the blanket **/AI/MetaAI/** exclusion:
-# - Shared/Intelligence/MetaAI/**          (6 cherry-picked files)
-# - Shared/UI/Views/MetaAI/MetaAIDashboardView.swift
-# Add to macOS + iOS targets; use #if os(macOS) guards where needed
-```
-
-The archived `**/AI/MetaAI/**` blanket exclusion stays. Only the new
-`Shared/Intelligence/MetaAI/` subfolder is added to builds.
-
-### A3-5: Wire Cherry-Picked Files into Dashboard Panels
-
-```swift
-// MetaAIBenchmarksPanel reads ModelBenchmarkService:
-struct MetaAIBenchmarksPanel: View {
-    @State private var benchmarks: [ModelBenchmark] = []
-    var body: some View {
-        List(benchmarks) { b in
-            HStack {
-                Text(b.modelId); Spacer()
-                Text(String(format: "%.0fms", b.avgLatencyMs)).foregroundStyle(.secondary)
-            }
-        }
-        .task { benchmarks = await ModelBenchmarkService.shared.recentBenchmarks() }
-    }
-}
-
-// MetaAIReasoningPanel reads LogicalInferenceEngine:
-struct MetaAIReasoningPanel: View {
-    @StateObject private var engine = LogicalInferenceEngine.shared
-    var body: some View {
-        ScrollView { ForEach(engine.recentChains) { chain in InferenceChainView(chain: chain) } }
-    }
-}
-```
-
-### A3-6: Verify
+### A3-7: Verify
 
 ```bash
 for scheme in Thea-macOS Thea-iOS Thea-watchOS Thea-tvOS; do
@@ -635,8 +719,13 @@ for scheme in Thea-macOS Thea-iOS Thea-watchOS Thea-tvOS; do
     -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO build 2>&1 | \
     grep -E "error:|BUILD (SUCCEEDED|FAILED)" | tail -3
 done
-# MetaAIDashboardView wired in at least 2 places:
+# All Tier 1 types accessible:
+grep -r "MultiAgentOrchestrator\|ReActExecutor\|ResilienceManager" Shared/ --include="*.swift" | grep -v archive | wc -l
+# Dashboard wired:
 grep -r "MetaAIDashboardView" Shared/ macOS/ --include="*.swift" | wc -l  # ≥2
+```
+
+Commit after each sub-step: `git add <file> && git commit -m "Auto-save: A3-N — ..."`
 ```
 
 Commit after each sub-step: `git add <file> && git commit -m "Auto-save: A3-N — ..."`
