@@ -95,8 +95,8 @@ protocol GenericContextExtractorPlugin: Sendable {
 /// for a given bundle ID. Extractors self-register at app startup.
 ///
 /// **Thread safety:** All access is MainActor-isolated (same as ForegroundAppMonitor).
-@MainActor
 // periphery:ignore - Reserved: ContextExtractorRegistry class — reserved for future feature activation
+@MainActor
 final class ContextExtractorRegistry {
     static let shared = ContextExtractorRegistry()
 

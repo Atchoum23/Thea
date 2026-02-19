@@ -21,8 +21,8 @@ import Foundation
 /// - Feature flags can swap between real and stub registries
 /// - New provider sources (e.g., remote model catalogs) can conform without
 ///   modifying existing consumers
-@MainActor
 // periphery:ignore - Reserved: ProviderRegistryProtocol protocol — reserved for future feature activation
+@MainActor
 protocol ProviderRegistryProtocol: AnyObject {
 
 // periphery:ignore - Reserved: ProviderRegistryProtocol protocol reserved for future feature activation

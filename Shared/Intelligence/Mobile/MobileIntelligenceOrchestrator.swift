@@ -314,7 +314,7 @@ public final class MobileIntelligenceOrchestrator {
                 timeoutSeconds: 60,
                 allowStreaming: true
             )
-        // periphery:ignore - Reserved: latency parameter — kept for API compatibility
+        // periphery:ignore - Reserved: userSatisfaction parameter — kept for API compatibility
         case .hybrid:
             return .init(
                 maxTokens: budget.maxTokensPerQuery,

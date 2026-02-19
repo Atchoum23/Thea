@@ -191,8 +191,8 @@ public class CloudKitService: ObservableObject {
     /// **Privacy guarantee**: Credentials (botToken, apiKey, webhookSecret, serverUrl) are NEVER
     /// written to CloudKit. Only the enabled/disabled state per platform and auto-respond
     /// configuration are synced. Sensitive credentials remain in Keychain only.
+    // periphery:ignore - Reserved: pushMessagingSettings() instance method — reserved for future feature activation
     @discardableResult
-    // periphery:ignore - Reserved: pushMessagingSettings() instance method reserved for future feature activation
     func pushMessagingSettings() async -> Bool {
         guard syncEnabled, iCloudAvailable, let db = privateDatabase else {
             logger.debug("P12: Skipping messaging settings push (sync disabled or iCloud unavailable)")

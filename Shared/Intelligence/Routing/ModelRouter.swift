@@ -455,7 +455,7 @@ extension ModelRouter {
                let successRate = Double(valueParts[0]),
                let avgLatency = Double(valueParts[1]),
                let sampleCount = Int(valueParts[2]) {
-                // periphery:ignore - Reserved: tokens parameter — kept for API compatibility
+                // periphery:ignore - Reserved: cost parameter — kept for API compatibility
                 let successCount = Int(Double(sampleCount) * successRate)
                 self.modelPerformance[modelId]?[taskType]?.successCount = successCount
                 self.modelPerformance[modelId]?[taskType]?.failureCount = sampleCount - successCount

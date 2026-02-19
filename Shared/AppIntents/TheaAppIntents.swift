@@ -58,8 +58,8 @@ public struct QuickChatIntent: AppIntent {
     @Parameter(title: "Message")
     var message: String
 
-    @Parameter(title: "Conversation", optionsProvider: ConversationOptionsProvider())
     // periphery:ignore - Reserved: conversationId property — reserved for future feature activation
+    @Parameter(title: "Conversation", optionsProvider: ConversationOptionsProvider())
     var conversationId: String?
 
     public init() {}
@@ -104,8 +104,8 @@ public struct CreateProjectIntent: AppIntent {
     @Parameter(title: "Project Name")
     var name: String
 
-    @Parameter(title: "Description")
     // periphery:ignore - Reserved: projectDescription property — reserved for future feature activation
+    @Parameter(title: "Description")
     var projectDescription: String?
 
     // periphery:ignore - Reserved: projectDescription property reserved for future feature activation
@@ -150,8 +150,8 @@ public struct LogHealthDataIntent: AppIntent {
     @Parameter(title: "Value")
     var value: String
 
-    @Parameter(title: "Notes")
     // periphery:ignore - Reserved: notes property — reserved for future feature activation
+    @Parameter(title: "Notes")
     var notes: String?
 
 // periphery:ignore - Reserved: notes property reserved for future feature activation
@@ -302,8 +302,8 @@ public enum HealthDataTypeEntity: String, AppEnum {
 
 // MARK: - Options Providers
 
+// periphery:ignore - Reserved: ConversationOptionsProvider type — reserved for future feature activation
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
-// periphery:ignore - Reserved: ConversationOptionsProvider type reserved for future feature activation
 struct ConversationOptionsProvider: DynamicOptionsProvider {
     func results() async throws -> [String] {
         // Return list of conversation IDs

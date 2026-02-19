@@ -314,6 +314,7 @@ public final class ConvergenceDetector: ObservableObject {
             confidence = 0.5
         }
 
+        // periphery:ignore - Reserved: changeRisk parameter — kept for API compatibility
         let timeSinceConverged: TimeInterval?
         if let lastConverged = lastConvergedAt {
             timeSinceConverged = Date().timeIntervalSince(lastConverged)

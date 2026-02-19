@@ -201,8 +201,8 @@ struct DocumentSuiteView: View {
         }
     }
 
-    @ViewBuilder
     // periphery:ignore - Reserved: documentsSection property — reserved for future feature activation
+    @ViewBuilder
     private var documentsSection: some View {
         // periphery:ignore - Reserved: documentsSection property reserved for future feature activation
         if documents.isEmpty {

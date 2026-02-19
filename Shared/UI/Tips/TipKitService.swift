@@ -81,8 +81,8 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
 
     @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
     struct VoiceCommandTip: Tip {
-        @Parameter
         // periphery:ignore - Reserved: hasUsedVoice static property — reserved for future feature activation
+        @Parameter
         static var hasUsedVoice: Bool = false
 
         var title: Text {
@@ -149,8 +149,8 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
 
     // MARK: - Feature Discovery Tips
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
     // periphery:ignore - Reserved: SharePlayTip type — reserved for future feature activation
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
     struct SharePlayTip: Tip {
         var title: Text {
             Text("Collaborate with SharePlay")
@@ -170,8 +170,8 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
     // periphery:ignore - Reserved: WidgetTip type — reserved for future feature activation
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
     struct WidgetTip: Tip {
         var title: Text {
             Text("Add Thea Widgets")
@@ -191,8 +191,8 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
     // periphery:ignore - Reserved: ShortcutsTip type — reserved for future feature activation
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
     struct ShortcutsTip: Tip {
         var title: Text {
             Text("Automate with Shortcuts")
@@ -210,8 +210,8 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
 
     @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
     struct FocusModeTip: Tip {
-        @Parameter
         // periphery:ignore - Reserved: hasFocusModeEnabled static property — reserved for future feature activation
+        @Parameter
         static var hasFocusModeEnabled: Bool = false
 
         var title: Text {
@@ -236,8 +236,8 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
 
     @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
     struct MCPServersTip: Tip {
-        @Parameter
         // periphery:ignore - Reserved: isAdvancedUser static property — reserved for future feature activation
+        @Parameter
         static var isAdvancedUser: Bool = false
 
         var title: Text {
@@ -258,8 +258,8 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
         }
     }
 
-    @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
     // periphery:ignore - Reserved: LocalModelTip type — reserved for future feature activation
+    @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
     struct LocalModelTip: Tip {
         var title: Text {
             // periphery:ignore - Reserved: LocalModelTip type reserved for future feature activation
@@ -304,8 +304,8 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
     // MARK: - Platform-Specific Tips
 
     #if os(macOS)
-        @available(macOS 14.0, *)
         // periphery:ignore - Reserved: MenuBarTip type — reserved for future feature activation
+        @available(macOS 14.0, *)
         struct MenuBarTip: Tip {
             // periphery:ignore - Reserved: MenuBarTip type reserved for future feature activation
             var title: Text {
@@ -321,8 +321,8 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
             }
         }
 
+        // periphery:ignore - Reserved: TerminalIntegrationTip type — reserved for future feature activation
         @available(macOS 14.0, *)
-        // periphery:ignore - Reserved: TerminalIntegrationTip type reserved for future feature activation
         struct TerminalIntegrationTip: Tip {
             var title: Text {
                 Text("Terminal Integration")

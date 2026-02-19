@@ -314,8 +314,8 @@ final class ResponseNotificationHandler: ObservableObject {
 
 // @unchecked Sendable: @MainActor provides isolation for all state; NSObject subclass required for
 // UNUserNotificationCenterDelegate; delegate methods are nonisolated with explicit MainActor dispatch
+// periphery:ignore - Reserved: ResponseNotificationDelegate class — reserved for future feature activation
 @MainActor
-// periphery:ignore - Reserved: ResponseNotificationDelegate type reserved for future feature activation
 final class ResponseNotificationDelegate: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
     static let shared = ResponseNotificationDelegate()
 

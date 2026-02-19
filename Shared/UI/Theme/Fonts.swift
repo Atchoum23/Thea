@@ -43,8 +43,8 @@ extension Font {
 
     // MARK: - Configurable Fonts (MainActor required)
 
-    @MainActor
     // periphery:ignore - Reserved: theaDisplay static property — reserved for future feature activation
+    @MainActor
     static var theaDisplay: Font {
         let config = AppConfiguration.shared.themeConfig
         return scalableFont(
@@ -144,8 +144,8 @@ extension Font {
         return scalableFont(size: config.caption2Size, weight: .regular, relativeTo: .caption2)
     }
 
-    @MainActor
     // periphery:ignore - Reserved: theaCode static property — reserved for future feature activation
+    @MainActor
     static var theaCode: Font {
         let config = AppConfiguration.shared.themeConfig
         return scalableFont(
@@ -156,8 +156,8 @@ extension Font {
         )
     }
 
-    @MainActor
     // periphery:ignore - Reserved: theaCodeInline static property — reserved for future feature activation
+    @MainActor
     static var theaCodeInline: Font {
         let config = AppConfiguration.shared.themeConfig
         return scalableFont(

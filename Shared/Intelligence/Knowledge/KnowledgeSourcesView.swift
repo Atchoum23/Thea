@@ -233,8 +233,8 @@ public struct KnowledgeSourcesView: View {
         .disabled(manager.isAuditing)
     }
 
+    // periphery:ignore - Reserved: toolbarMenuItems property — reserved for future feature activation
     @ViewBuilder
-    // periphery:ignore - Reserved: toolbarMenuItems property reserved for future feature activation
     private var toolbarMenuItems: some View {
         Button {
             Task {

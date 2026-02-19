@@ -176,8 +176,8 @@ struct SecurityScannerView: View {
         }
     }
 
-    @ViewBuilder
     // periphery:ignore - Reserved: lastScanSummary property — reserved for future feature activation
+    @ViewBuilder
     private var lastScanSummary: some View {
         if let report = lastReport {
             // periphery:ignore - Reserved: lastScanSummary property reserved for future feature activation
@@ -216,8 +216,8 @@ struct SecurityScannerView: View {
         }
     }
 
-    @ViewBuilder
     // periphery:ignore - Reserved: findingsSection property — reserved for future feature activation
+    @ViewBuilder
     private var findingsSection: some View {
         // periphery:ignore - Reserved: findingsSection property reserved for future feature activation
         if let report = lastReport, !report.findings.isEmpty {

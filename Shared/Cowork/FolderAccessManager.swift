@@ -72,8 +72,8 @@
         // MARK: - Folder Access
 
         /// Request access to a folder via system dialog
-        @MainActor
         // periphery:ignore - Reserved: requestFolderAccess(initialDirectory:) instance method — reserved for future feature activation
+        @MainActor
         func requestFolderAccess(initialDirectory: URL? = nil) -> URL? {
             let panel = NSOpenPanel()
             // periphery:ignore - Reserved: requestFolderAccess(initialDirectory:) instance method reserved for future feature activation

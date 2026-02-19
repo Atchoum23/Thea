@@ -217,7 +217,7 @@ extension DeadlineIntelligence {
         documentType: String,
         filePath: String
     ) async -> [Deadline] {
-        // periphery:ignore - Reserved: participants parameter — kept for API compatibility
+        // periphery:ignore - Reserved: callDate parameter — kept for API compatibility
         let source: DeadlineSource = documentType.lowercased().contains("tax") ? .taxDocument :
                                      documentType.lowercased().contains("bill") ? .bill :
                                      documentType.lowercased().contains("invoice") ? .invoice :

@@ -218,8 +218,8 @@ struct DownloadManagerView: View {
         }
     }
 
-    @ViewBuilder
     // periphery:ignore - Reserved: activeSection property — reserved for future feature activation
+    @ViewBuilder
     private var activeSection: some View {
         // periphery:ignore - Reserved: activeSection property reserved for future feature activation
         let active = downloads.filter { !$0.status.isTerminal }
@@ -242,8 +242,8 @@ struct DownloadManagerView: View {
         }
     }
 
+    // periphery:ignore - Reserved: completedSection property — reserved for future feature activation
     @ViewBuilder
-    // periphery:ignore - Reserved: completedSection property reserved for future feature activation
     private var completedSection: some View {
         let completed = downloads.filter { $0.status.isTerminal }
         if !completed.isEmpty {

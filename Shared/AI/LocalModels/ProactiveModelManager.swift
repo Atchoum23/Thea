@@ -38,16 +38,16 @@ final class ProactiveModelManager {
     // AIModelGovernor makes intelligent decisions based on actual value analysis
     // These are kept for backward compatibility only
 
-    @available(*, deprecated, message: "Use AIModelGovernor for intelligent storage management")
     // periphery:ignore - Reserved: maxDiskSpaceGB property — reserved for future feature activation
+    @available(*, deprecated, message: "Use AIModelGovernor for intelligent storage management")
     var maxDiskSpaceGB: Double {
         get { 0 } // AI-determined
         // swiftlint:disable:next unused_setter_value
         set { } // No-op - AI-determined
     }
 
-    @available(*, deprecated, message: "Use AIModelGovernor for value-based cleanup decisions")
     // periphery:ignore - Reserved: inactiveDaysThreshold property — reserved for future feature activation
+    @available(*, deprecated, message: "Use AIModelGovernor for value-based cleanup decisions")
     var inactiveDaysThreshold: Int {
         get { 0 } // AI-determined
         // swiftlint:disable:next unused_setter_value
@@ -499,8 +499,8 @@ final class ProactiveModelManager {
     }
 
     /// Legacy method - now delegates to AI-guided cleanup
-    @available(*, deprecated, message: "Use performAIGuidedCleanup for intelligent cleanup")
     // periphery:ignore - Reserved: checkAndPerformCleanup() instance method — reserved for future feature activation
+    @available(*, deprecated, message: "Use performAIGuidedCleanup for intelligent cleanup")
     private func checkAndPerformCleanup() async {
         await performAIGuidedCleanup()
     }
@@ -584,8 +584,8 @@ final class ProactiveModelManager {
     // MARK: - User Consent
 
     /// Request user consent for autonomous model management
-    @available(*, deprecated, message: "Use AIModelGovernor for consent management")
     // periphery:ignore - Reserved: requestAutonomousConsent() instance method — reserved for future feature activation
+    @available(*, deprecated, message: "Use AIModelGovernor for consent management")
     func requestAutonomousConsent() -> AutonomousConsentRequest {
         AutonomousConsentRequest(
             enableAutoDownload: enableAutoDownload,
@@ -595,8 +595,8 @@ final class ProactiveModelManager {
         )
     }
 
-    @available(*, deprecated, message: "Use AIModelGovernor for consent management")
     // periphery:ignore - Reserved: applyConsentSettings(_:) instance method — reserved for future feature activation
+    @available(*, deprecated, message: "Use AIModelGovernor for consent management")
     func applyConsentSettings(_ settings: AutonomousConsentRequest) {
         enableAutoDownload = settings.enableAutoDownload
         enableAutoCleanup = settings.enableAutoCleanup

@@ -15,14 +15,14 @@ extension Color {
 
     // MARK: - Secondary Colors (Configurable)
 
-    @MainActor
     // periphery:ignore - Reserved: theaPurple static property — reserved for future feature activation
+    @MainActor
     static var theaPurple: Color {
         Color(hex: AppConfiguration.shared.themeConfig.purpleColor)
     }
 
-    @MainActor
     // periphery:ignore - Reserved: theaGold static property — reserved for future feature activation
+    @MainActor
     static var theaGold: Color {
         Color(hex: AppConfiguration.shared.themeConfig.goldColor)
     }
@@ -59,8 +59,8 @@ extension Color {
         )
     }
 
+    // periphery:ignore - Reserved: theaHeroGradient static property — reserved for future feature activation
     @MainActor
-    // periphery:ignore - Reserved: theaPrimaryGradient static property reserved for future feature activation
     static var theaHeroGradient: LinearGradient {
         LinearGradient(
             colors: [theaPurple, theaPrimary, theaAccent],

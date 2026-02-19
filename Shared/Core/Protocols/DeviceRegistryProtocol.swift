@@ -20,8 +20,8 @@ import Foundation
 /// - Unit tests can inject a mock registry with simulated multi-device scenarios
 /// - Cross-device features can be tested without needing physical devices
 /// - Alternative device discovery backends (e.g., CloudKit-based) can conform
+// periphery:ignore - Reserved: DeviceRegistryProtocol protocol — reserved for future feature activation
 @MainActor
-// periphery:ignore - Reserved: DeviceRegistryProtocol protocol reserved for future feature activation
 protocol DeviceRegistryProtocol: AnyObject {
 
     // MARK: - Current Device

@@ -247,8 +247,8 @@ actor PersonalKnowledgeGraph {
 
     /// Add entity with deduplication: if a similar entity exists, update it instead of creating duplicate.
     /// Returns the entity ID (existing or new).
-    @discardableResult
     // periphery:ignore - Reserved: addOrMergeEntity(_:) instance method — reserved for future feature activation
+    @discardableResult
     func addOrMergeEntity(_ entity: KGEntity) -> String {
         if let existing = findSimilarEntity(name: entity.name, type: entity.type) {
             // Merge: update lastUpdated and increment referenceCount
