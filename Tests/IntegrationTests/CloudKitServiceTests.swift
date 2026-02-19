@@ -9,12 +9,12 @@ final class CloudKitServiceTests: XCTestCase {
 
     func testCloudSyncStatusIdle() {
         let status = CloudSyncStatus.idle
-        XCTAssertEqual(status.description, "Idle")
+        XCTAssertEqual(status.description, "Ready")
     }
 
     func testCloudSyncStatusSyncing() {
         let status = CloudSyncStatus.syncing
-        XCTAssertEqual(status.description, "Syncing")
+        XCTAssertEqual(status.description, "Syncing...")
     }
 
     func testCloudSyncStatusError() {

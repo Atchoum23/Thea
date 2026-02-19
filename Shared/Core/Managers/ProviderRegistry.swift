@@ -59,6 +59,22 @@ final class ProviderRegistry {
             self.isConfigured = isConfigured
             metadata = provider.metadata
         }
+
+        /// Lightweight init for registering provider metadata without an active API key.
+        /// Used during app startup to populate `availableProviders` regardless of Keychain state.
+        init(id: String, displayName: String, isConfigured: Bool) {
+            self.id = id
+            self.name = id
+            self.displayName = displayName
+            self.requiresAPIKey = true
+            self.isConfigured = isConfigured
+            self.metadata = ProviderMetadata(
+                name: id,
+                displayName: displayName,
+                websiteURL: URL(string: "https://\(id).com") ?? URL(string: "https://example.com")!,
+                documentationURL: URL(string: "https://\(id).com/docs") ?? URL(string: "https://example.com")!
+            )
+        }
     }
 
     // MARK: - Setup
@@ -66,27 +82,26 @@ final class ProviderRegistry {
     private func setupBuiltInProviders() {
         debugLog("🔧 Setting up built-in providers...")
 
-        let providerNames = [
-            "openai": "OpenAI",
-            "anthropic": "Anthropic",
-            "google": "Google",
-            "perplexity": "Perplexity",
-            "openrouter": "OpenRouter",
-            "groq": "Groq"
+        let providerNames: [(id: String, displayName: String)] = [
+            ("openai", "OpenAI"),
+            ("anthropic", "Anthropic"),
+            ("google", "Google"),
+            ("perplexity", "Perplexity"),
+            ("openrouter", "OpenRouter"),
+            ("groq", "Groq")
         ]
 
-        // Create provider instances without checking Keychain yet
-        // This avoids Keychain prompts blocking app startup
-        for (id, _) in providerNames {
-            // Defer Keychain access - check lazily when provider is first used
+        for (id, displayName) in providerNames {
             let isConfigured = checkAPIKeyConfigured(for: id)
             debugLog("  Provider \(id): isConfigured=\(isConfigured)")
 
-            if let provider = createProvider(id: id) {
-                availableProviders.append(ProviderInfo(provider: provider, isConfigured: isConfigured))
-                if isConfigured {
-                    providers[id] = provider
-                }
+            // Always register provider metadata so availableProviders is populated
+            // even when no API key is configured (e.g., first launch, test environment)
+            if isConfigured, let provider = createProvider(id: id) {
+                availableProviders.append(ProviderInfo(provider: provider, isConfigured: true))
+                providers[id] = provider
+            } else {
+                availableProviders.append(ProviderInfo(id: id, displayName: displayName, isConfigured: false))
             }
         }
 

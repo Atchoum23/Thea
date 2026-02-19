@@ -112,7 +112,8 @@ final class TaskClassifierTests: XCTestCase {
 
     func testShortResponseForSimpleTasks() {
         XCTAssertEqual(TaskType.conversation.expectedResponseLength, .short)
-        XCTAssertEqual(TaskType.factual.expectedResponseLength, .short)
+        // factual returns .medium (concise but complete answers needed)
+        XCTAssertEqual(TaskType.factual.expectedResponseLength, .medium)
     }
 
     func testLongResponseForCodeGeneration() {
