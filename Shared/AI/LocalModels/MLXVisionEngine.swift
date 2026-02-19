@@ -220,7 +220,6 @@ final class MLXVisionEngine {
             }
         }
     }
-}
 
     // MARK: - vllm-mlx HTTP Backend (MSM3U high-throughput path)
 
