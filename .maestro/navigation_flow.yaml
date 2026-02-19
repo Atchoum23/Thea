@@ -3,7 +3,10 @@ appId: app.thea.ios
 ---
 - launchApp
 
-# Start on Chat tab
+# Wait for app UI to settle
+- waitForAnimationToEnd
+
+# Verify Chat tab is selected by default
 - assertVisible:
     text: "Chat"
 
@@ -12,10 +15,10 @@ appId: app.thea.ios
     text: "Projects"
 - takeScreenshot: projects_tab
 
-# Navigate to Knowledge tab
+# Navigate to Health tab
 - tapOn:
-    text: "Knowledge"
-- takeScreenshot: knowledge_tab
+    text: "Health"
+- takeScreenshot: health_tab
 
 # Navigate to Settings tab
 - tapOn:

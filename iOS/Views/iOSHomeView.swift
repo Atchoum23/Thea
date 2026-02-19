@@ -11,11 +11,12 @@ struct iOSHomeView: View {
     @State private var projectManager = ProjectManager.shared
     @State private var voiceManager = VoiceActivationManager.shared
 
-    @State private var selectedTab: Tab = .chat
+    @State private var selectedTab: AppTab = .chat
     @State private var showingNewConversation = false
     @State private var showingVoiceSettings = false
 
-    enum Tab: String, CaseIterable, Identifiable {
+    // Renamed from Tab to AppTab to avoid conflict with SwiftUI's iOS 18+ Tab type.
+    enum AppTab: String, CaseIterable, Identifiable {
         case chat = "Chat"
         case projects = "Projects"
         case health = "Health"
@@ -40,21 +41,53 @@ struct iOSHomeView: View {
     }
 
     var body: some View {
+        // iOS 18+ Tab API: correctly exposes tab labels in the iOS 26 liquid glass
+        // tab bar accessibility tree (old .tabItem{} API hides text on iOS 26).
         TabView(selection: $selectedTab) {
-            ForEach(Tab.allCases) { tab in
+            Tab("Chat", systemImage: AppTab.chat.icon, value: AppTab.chat) {
                 NavigationStack {
-                    viewForTab(tab)
-                        .navigationTitle(tab.rawValue)
-                        .toolbar {
-                            ToolbarItem(placement: .topBarTrailing) {
-                                toolbarButtonForTab(tab)
-                            }
-                        }
+                    viewForTab(.chat)
+                        .navigationTitle("Chat")
+                        .toolbar { ToolbarItem(placement: .topBarTrailing) { toolbarButtonForTab(.chat) } }
                 }
-                .tabItem {
-                    Label(tab.rawValue, systemImage: tab.icon)
+            }
+            Tab("Projects", systemImage: AppTab.projects.icon, value: AppTab.projects) {
+                NavigationStack {
+                    viewForTab(.projects)
+                        .navigationTitle("Projects")
+                        .toolbar { ToolbarItem(placement: .topBarTrailing) { toolbarButtonForTab(.projects) } }
                 }
-                .tag(tab)
+            }
+            Tab("Health", systemImage: AppTab.health.icon, value: AppTab.health) {
+                NavigationStack {
+                    viewForTab(.health)
+                        .navigationTitle("Health")
+                }
+            }
+            Tab("Knowledge", systemImage: AppTab.knowledge.icon, value: AppTab.knowledge) {
+                NavigationStack {
+                    viewForTab(.knowledge)
+                        .navigationTitle("Knowledge")
+                        .toolbar { ToolbarItem(placement: .topBarTrailing) { toolbarButtonForTab(.knowledge) } }
+                }
+            }
+            Tab("Translate", systemImage: AppTab.translation.icon, value: AppTab.translation) {
+                NavigationStack {
+                    viewForTab(.translation)
+                        .navigationTitle("Translate")
+                }
+            }
+            Tab("Financial", systemImage: AppTab.financial.icon, value: AppTab.financial) {
+                NavigationStack {
+                    viewForTab(.financial)
+                        .navigationTitle("Financial")
+                }
+            }
+            Tab("Settings", systemImage: AppTab.settings.icon, value: AppTab.settings) {
+                NavigationStack {
+                    viewForTab(.settings)
+                        .navigationTitle("Settings")
+                }
             }
         }
         .sheet(isPresented: $showingNewConversation) {
@@ -69,7 +102,7 @@ struct iOSHomeView: View {
     }
 
     @ViewBuilder
-    private func viewForTab(_ tab: Tab) -> some View {
+    private func viewForTab(_ tab: AppTab) -> some View {
         switch tab {
         case .chat:
             iOSChatListView(showingNewConversation: $showingNewConversation)
@@ -89,7 +122,7 @@ struct iOSHomeView: View {
     }
 
     @ViewBuilder
-    private func toolbarButtonForTab(_ tab: Tab) -> some View {
+    private func toolbarButtonForTab(_ tab: AppTab) -> some View {
         switch tab {
         case .chat:
             Button {

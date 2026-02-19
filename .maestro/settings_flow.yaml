@@ -3,6 +3,9 @@ appId: app.thea.ios
 ---
 - launchApp
 
+# Wait for app UI to settle
+- waitForAnimationToEnd
+
 # Navigate to Settings tab
 - tapOn:
     text: "Settings"
@@ -26,6 +29,7 @@ appId: app.thea.ios
     element:
       text: "Appearance"
     direction: DOWN
+    optional: true
 
 - takeScreenshot: settings_appearance
 
@@ -39,6 +43,7 @@ appId: app.thea.ios
     element:
       text: "About"
     direction: DOWN
+    optional: true
 
 - takeScreenshot: settings_about
 

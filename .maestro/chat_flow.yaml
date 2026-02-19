@@ -3,6 +3,9 @@ appId: app.thea.ios
 ---
 - launchApp
 
+# Wait for app UI to settle
+- waitForAnimationToEnd
+
 # Ensure we're on Chat tab
 - tapOn:
     text: "Chat"

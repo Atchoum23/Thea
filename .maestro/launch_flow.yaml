@@ -4,7 +4,10 @@ appId: app.thea.ios
 - launchApp:
     clearState: true
 
-# Verify app launched successfully - should show tab bar
+# Wait for app UI to fully settle after fresh install
+- waitForAnimationToEnd
+
+# Verify app launched successfully - should show tab bar with Chat selected
 - assertVisible:
     text: "Chat"
 
@@ -13,11 +16,11 @@ appId: app.thea.ios
 
 - takeScreenshot: launch_initial_state
 
-# Verify all 5 tabs are visible
+# Verify additional tabs are accessible
 - assertVisible:
     text: "Projects"
 
 - assertVisible:
-    text: "Knowledge"
+    text: "Health"
 
 - takeScreenshot: launch_tabs_visible
