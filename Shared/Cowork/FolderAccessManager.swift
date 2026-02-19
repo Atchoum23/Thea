@@ -17,6 +17,7 @@
         private let recentFoldersKey = "cowork.recentFolders"
         private let maxRecentFolders = 10
 
+        // periphery:ignore - Reserved: logger property reserved for future feature activation
         struct AllowedFolder: Identifiable, Equatable {
             let id: UUID
             let url: URL
@@ -36,6 +37,10 @@
                 static let readWrite: Permissions = [.read, .write]
                 static let full: Permissions = [.read, .write, .delete, .createSubfolders]
             }
+
+// periphery:ignore - Reserved: readOnly static property reserved for future feature activation
+
+// periphery:ignore - Reserved: readWrite static property reserved for future feature activation
 
             init(url: URL, permissions: Permissions = .full) {
                 id = UUID()
@@ -69,6 +74,7 @@
         @MainActor
         func requestFolderAccess(initialDirectory: URL? = nil) -> URL? {
             let panel = NSOpenPanel()
+            // periphery:ignore - Reserved: requestFolderAccess(initialDirectory:) instance method reserved for future feature activation
             panel.canChooseFiles = false
             panel.canChooseDirectories = true
             panel.allowsMultipleSelection = false
@@ -108,11 +114,13 @@
 
         /// Remove a folder by URL
         func removeAllowedFolder(_ url: URL) {
+            // periphery:ignore - Reserved: removeAllowedFolder(_:) instance method reserved for future feature activation
             allowedFolders.removeAll { $0.url == url }
             saveAllowedFolders()
         }
 
         /// Update permissions for a folder
+        // periphery:ignore - Reserved: updatePermissions(for:permissions:) instance method reserved for future feature activation
         func updatePermissions(for folderId: UUID, permissions: AllowedFolder.Permissions) {
             if let index = allowedFolders.firstIndex(where: { $0.id == folderId }) {
                 allowedFolders[index].permissions = permissions

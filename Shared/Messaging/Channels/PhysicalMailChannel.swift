@@ -30,10 +30,12 @@ private let pmLogger = Logger(subsystem: "ai.thea.app", category: "PhysicalMailC
 
 // MARK: - Physical Mail Item
 
+// periphery:ignore - Reserved: pmLogger global var reserved for future feature activation
 /// A piece of physical mail that has been scanned and processed.
 struct PhysicalMailItem: Codable, Sendable, Identifiable {
     let id: UUID
     let title: String
+    // periphery:ignore - Reserved: PhysicalMailItem type reserved for future feature activation
     let sender: String?
     let receivedDate: Date
     let scannedDate: Date
@@ -174,6 +176,7 @@ struct ExtractedMailAmount: Codable, Sendable, Identifiable {
 
     init(value: Double, currency: String = "CHF", label: String? = nil) {
         self.id = UUID()
+        // periphery:ignore - Reserved: init(value:currency:label:) initializer reserved for future feature activation
         self.value = value
         self.currency = currency
         self.label = label
@@ -191,6 +194,7 @@ struct ExtractedMailAmount: Codable, Sendable, Identifiable {
 // MARK: - Error Types
 
 enum PhysicalMailError: LocalizedError, Sendable {
+    // periphery:ignore - Reserved: PhysicalMailError type reserved for future feature activation
     case storageDirectoryCreationFailed(Error)
     case saveItemsFailed(Error)
     case loadItemsFailed(Error)
@@ -211,6 +215,7 @@ enum PhysicalMailError: LocalizedError, Sendable {
 
 /// Bridges physical mail scanning into MessagingHub.
 @MainActor
+// periphery:ignore - Reserved: PhysicalMailChannel type reserved for future feature activation
 final class PhysicalMailChannel: ObservableObject {
     static let shared = PhysicalMailChannel()
 

@@ -24,6 +24,8 @@ import Foundation
 @MainActor
 protocol ProviderRegistryProtocol: AnyObject {
 
+// periphery:ignore - Reserved: ProviderRegistryProtocol protocol reserved for future feature activation
+
     // MARK: - Discovery
 
     /// All known providers (cloud + local), keyed by provider ID
@@ -82,6 +84,7 @@ protocol ProviderRegistryProtocol: AnyObject {
 
 // MARK: - Default Implementation (for optional methods)
 
+// periphery:ignore - Reserved: ProviderRegistryProtocol protocol extension reserved for future feature activation
 extension ProviderRegistryProtocol {
     func getLocalProvider(modelName: String? = nil) -> AIProvider? {
         getLocalProvider(modelName: modelName)

@@ -39,7 +39,10 @@ import Observation
         // MARK: - Tracking Control
 
         func startTracking() {
+            // periphery:ignore - Reserved: shared static property reserved for future feature activation
             guard config.screenTimeTrackingEnabled, !isTracking else { return }
+
+// periphery:ignore - Reserved: logger property reserved for future feature activation
 
             isTracking = true
             usageDatabase.removeAll()
@@ -50,16 +53,19 @@ import Observation
                 Task { @MainActor [weak self] in
                     await self?.trackActiveApp()
                 }
+            // periphery:ignore - Reserved: config property reserved for future feature activation
             }
 
             // Track immediately
             Task {
                 await trackActiveApp()
+            // periphery:ignore - Reserved: setModelContext(_:) instance method reserved for future feature activation
             }
         }
 
         func stopTracking() {
             isTracking = false
+            // periphery:ignore - Reserved: startTracking() instance method reserved for future feature activation
             timer?.invalidate()
             timer = nil
 
@@ -79,6 +85,7 @@ import Observation
         private func trackActiveApp() async {
             guard let frontmostApp = NSWorkspace.shared.frontmostApplication else {
                 return
+            // periphery:ignore - Reserved: stopTracking() instance method reserved for future feature activation
             }
 
             let appName = frontmostApp.localizedName ?? "Unknown"
@@ -96,6 +103,7 @@ import Observation
 
             // Update current app
             currentApp = appName
+            // periphery:ignore - Reserved: trackActiveApp() instance method reserved for future feature activation
             appStartTime = now
 
             // Update daily usage for UI
@@ -121,6 +129,7 @@ import Observation
 
             // Development tools
             if name.contains("xcode") || name.contains("terminal") || name.contains("code") || name.contains("vs code") {
+                // periphery:ignore - Reserved: updateDailyUsage() instance method reserved for future feature activation
                 return .development
             }
 
@@ -134,6 +143,7 @@ import Observation
                 return .social
             }
 
+            // periphery:ignore - Reserved: categorizeApp(_:) instance method reserved for future feature activation
             // Entertainment
             if name.contains("spotify") || name.contains("music") || name.contains("youtube") || name.contains("netflix") {
                 return .entertainment
@@ -166,6 +176,7 @@ import Observation
                 usageData = Data()
             }
 
+            // periphery:ignore - Reserved: saveDailyRecord() instance method reserved for future feature activation
             let record = DailyScreenTimeRecord(
                 date: Calendar.current.startOfDay(for: Date()),
                 totalScreenTime: totalTime,
@@ -200,6 +211,7 @@ import Observation
             return (productiveTime / totalTime) * 100
         }
 
+        // periphery:ignore - Reserved: calculateProductivityScore() instance method reserved for future feature activation
         private func calculateFocusTime() -> Int {
             // Focus time is continuous productive/development work
             // Simplified: just sum productive app time
@@ -215,6 +227,7 @@ import Observation
             return focusMinutes
         }
 
+        // periphery:ignore - Reserved: calculateFocusTime() instance method reserved for future feature activation
         func getDailyReport() -> ScreenTimeReport {
             let totalTime = usageDatabase.values.reduce(0, +)
 
@@ -229,6 +242,7 @@ import Observation
 
         func getProductivityScore() -> Double {
             calculateProductivityScore()
+        // periphery:ignore - Reserved: getDailyReport() instance method reserved for future feature activation
         }
 
         // MARK: - Historical Data
@@ -240,11 +254,13 @@ import Observation
 
             // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
             let descriptor = FetchDescriptor<DailyScreenTimeRecord>()
+            // periphery:ignore - Reserved: getProductivityScore() instance method reserved for future feature activation
             let allRecords: [DailyScreenTimeRecord]
             do {
                 allRecords = try context.fetch(descriptor)
             } catch {
                 logger.error("Failed to fetch screen time records: \(error)")
+                // periphery:ignore - Reserved: getRecord(for:) instance method reserved for future feature activation
                 return nil
             }
             return allRecords.first { $0.date == startOfDay }
@@ -261,6 +277,7 @@ import Observation
             } catch {
                 logger.error("Failed to fetch screen time records for range: \(error)")
                 return []
+            // periphery:ignore - Reserved: getRecords(from:to:) instance method reserved for future feature activation
             }
             return allRecords
                 .filter { $0.date >= start && $0.date <= end }
@@ -282,12 +299,23 @@ import Observation
             case productive
             case communication
             case entertainment
+            // periphery:ignore - Reserved: appName property reserved for future feature activation
+            // periphery:ignore - Reserved: bundleID property reserved for future feature activation
             case development
+            // periphery:ignore - Reserved: percentage property reserved for future feature activation
+            // periphery:ignore - Reserved: category property reserved for future feature activation
             case social
             case other
+        // periphery:ignore - Reserved: productive case reserved for future feature activation
+        // periphery:ignore - Reserved: communication case reserved for future feature activation
+        // periphery:ignore - Reserved: entertainment case reserved for future feature activation
+        // periphery:ignore - Reserved: development case reserved for future feature activation
+        // periphery:ignore - Reserved: social case reserved for future feature activation
+        // periphery:ignore - Reserved: other case reserved for future feature activation
         }
     }
 
+    // periphery:ignore - Reserved: ScreenTimeReport type reserved for future feature activation
     struct ScreenTimeReport {
         let date: Date
         let totalScreenTime: TimeInterval

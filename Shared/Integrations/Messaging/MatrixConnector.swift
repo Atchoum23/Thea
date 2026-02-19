@@ -8,6 +8,7 @@ import OSLog
 // Register/login via: curl -X POST "https://matrix.org/_matrix/client/v3/login"
 
 actor MatrixConnector: MessagingPlatformConnector {
+    // periphery:ignore - Reserved: platform property reserved for future feature activation
     let platform: MessagingPlatform = .matrix
     private(set) var isConnected = false
     var credentials: MessagingCredentials

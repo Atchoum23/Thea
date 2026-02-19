@@ -28,6 +28,7 @@ import os.log
 public final class DeviceCapabilityRouter: ObservableObject {
     public static let shared = DeviceCapabilityRouter()
 
+    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let logger = Logger(subsystem: "app.thea.router", category: "DeviceCapabilityRouter")
 
     // MARK: - State

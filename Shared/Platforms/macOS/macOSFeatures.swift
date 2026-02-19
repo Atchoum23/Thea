@@ -338,6 +338,7 @@
     public final class MacOSFinderIntegration: ObservableObject {
         public static let shared = MacOSFinderIntegration()
 
+        // periphery:ignore - Reserved: logger property reserved for future feature activation
         private let logger = Logger(subsystem: "com.thea.app", category: "Finder")
 
         // MARK: - Get Selection

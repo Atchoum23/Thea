@@ -19,6 +19,7 @@ public final class QuickLauncher: ObservableObject {
     public static let shared = QuickLauncher()
 
     private let logger = Logger(subsystem: "com.thea.app", category: "QuickLauncher")
+    // periphery:ignore - Reserved: cancellables property reserved for future feature activation
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Published State

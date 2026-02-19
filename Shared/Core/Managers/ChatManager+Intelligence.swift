@@ -67,6 +67,7 @@ extension ChatManager {
     /// Switch the visible branch for a message position
     func switchToBranch(
         _ branchIndex: Int,
+        // periphery:ignore - Reserved: switchToBranch(_:for:in:) instance method reserved for future feature activation
         for message: Message,
         in conversation: Conversation
     ) -> Message? {
@@ -146,6 +147,7 @@ extension ChatManager {
         text: String,
         conversationID: UUID,
         taskType: TaskType?
+    // periphery:ignore - Reserved: taskType parameter kept for API compatibility
     ) async -> TheaAgentSession? {
         let orchestrator = TheaAgentOrchestrator.shared
         let session = await orchestrator.delegateTask(
@@ -220,6 +222,7 @@ extension ChatManager {
     // MARK: - Device Context for AI
 
     /// Builds a device-aware context supplement for the system prompt.
+    // periphery:ignore - Reserved: buildDeviceContextPrompt() instance method reserved for future feature activation
     func buildDeviceContextPrompt() -> String {
         let current = DeviceRegistry.shared.currentDevice
         let allDevices = DeviceRegistry.shared.registeredDevices

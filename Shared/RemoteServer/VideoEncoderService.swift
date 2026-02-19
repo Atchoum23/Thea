@@ -122,6 +122,7 @@ public struct EncodedFrame: Sendable {
         private var frameCallback: ((EncodedFrame) -> Void)?
         private var width: Int = 0
         private var height: Int = 0
+        // periphery:ignore - Reserved: frameIndex property reserved for future feature activation
         private var frameIndex: Int64 = 0
 
         // MARK: - Adaptive Bitrate

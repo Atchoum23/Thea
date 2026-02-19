@@ -22,6 +22,8 @@ public actor AppIntegrationFramework {
 
     private let appStateMonitor = AppStateMonitor.shared
     private let elementInspector = UIElementInspector.shared
+    // periphery:ignore - Reserved: elementInspector property reserved for future feature activation
+    // periphery:ignore - Reserved: capabilityRegistry property reserved for future feature activation
     private let capabilityRegistry = AppCapabilityRegistry.shared
 
     // MARK: - State

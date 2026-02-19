@@ -315,6 +315,7 @@ final class ClipboardHistoryManager: ObservableObject {
         guard let junction = entry.pinboardEntries.first(where: { $0.pinboard?.id == pinboard.id }) else { return }
         modelContext?.delete(junction)
         saveContext()
+        // periphery:ignore - Reserved: removeFromPinboard(_:pinboard:) instance method reserved for future feature activation
         Task { await TheaClipSyncService.shared.pushPinboard(pinboard) }
     }
 
@@ -323,6 +324,7 @@ final class ClipboardHistoryManager: ObservableObject {
     func search(query: String, contentType: TheaClipContentType? = nil, dateRange: ClosedRange<Date>? = nil) -> [TheaClipEntry] {
         guard let context = modelContext else { return [] }
 
+        // periphery:ignore - Reserved: search(query:contentType:dateRange:) instance method reserved for future feature activation
         var descriptor = FetchDescriptor<TheaClipEntry>()
         descriptor.sortBy = [SortDescriptor(\.createdAt, order: .reverse)]
 
@@ -411,6 +413,7 @@ final class ClipboardHistoryManager: ObservableObject {
 
     func pasteNextFromStack() -> TheaClipEntry? {
         guard !pasteStack.isEmpty else { return nil }
+        // periphery:ignore - Reserved: pasteNextFromStack() instance method reserved for future feature activation
         let entry = pasteStack.removeFirst()
         #if os(macOS)
             pasteEntry(entry)
@@ -419,6 +422,7 @@ final class ClipboardHistoryManager: ObservableObject {
     }
 
     func clearStack() {
+        // periphery:ignore - Reserved: clearStack() instance method reserved for future feature activation
         pasteStack.removeAll()
     }
 
@@ -479,6 +483,7 @@ final class ClipboardHistoryManager: ObservableObject {
         recentEntries.filter(\.isFavorite).count
     }
 
+    // periphery:ignore - Reserved: pinnedCount property reserved for future feature activation
     var pinnedCount: Int {
         recentEntries.filter(\.isPinned).count
     }

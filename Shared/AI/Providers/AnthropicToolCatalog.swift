@@ -4,6 +4,7 @@ import Foundation
 // Builds a dynamic tool catalog from Thea's active integration modules
 // Used with Claude's Tool Search for efficient tool discovery without context consumption
 
+// periphery:ignore - Reserved: AnthropicToolCatalog type reserved for future feature activation
 final class AnthropicToolCatalog: Sendable {
     static let shared = AnthropicToolCatalog()
 

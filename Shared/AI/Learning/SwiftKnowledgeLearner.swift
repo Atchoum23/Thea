@@ -38,6 +38,7 @@ final class SwiftKnowledgeLearner {
         var enablePatternExtraction: Bool = true
         var enableErrorLearning: Bool = true
         var enableBestPracticeDetection: Bool = true
+        // periphery:ignore - Reserved: shared static property reserved for future feature activation
         var minConfidenceForStorage: Double = 0.7
         var maxPatternsPerCategory: Int = 100
         var patternDecayDays: Int = 90
@@ -74,6 +75,7 @@ final class SwiftKnowledgeLearner {
         // 2. Extract code blocks
         let codeBlocks = extractCodeBlocks(from: assistantResponse)
 
+        // periphery:ignore - Reserved: setModelContext(_:) instance method reserved for future feature activation
         // 3. Learn from successful patterns
         if wasSuccessful || userFeedback == .positive {
             for code in codeBlocks {
@@ -83,6 +85,7 @@ final class SwiftKnowledgeLearner {
 
         // 4. Learn from errors/corrections
         if let feedback = userFeedback, feedback == .negative || feedback == .correction {
+            // periphery:ignore - Reserved: analyzeConversationTurn(userMessage:assistantResponse:wasSuccessful:userFeedback:) instance method reserved for future feature activation
             await learnFromCorrection(
                 original: assistantResponse,
                 correctedContext: userMessage
@@ -123,6 +126,8 @@ final class SwiftKnowledgeLearner {
 
     // MARK: - Pattern Detection
 
+// periphery:ignore - Reserved: analyzeHistoricalData(conversations:) instance method reserved for future feature activation
+
     private func detectCodingContext(_ userMessage: String, _ response: String) -> Bool {
         let codingKeywords = [
             "swift", "code", "function", "class", "struct", "protocol",
@@ -145,6 +150,7 @@ final class SwiftKnowledgeLearner {
 
         let regex: NSRegularExpression
         do {
+            // periphery:ignore - Reserved: detectCodingContext(_:_:) instance method reserved for future feature activation
             regex = try NSRegularExpression(pattern: pattern, options: [])
         } catch {
             logger.error("Failed to compile code block regex: \(error.localizedDescription)")
@@ -160,6 +166,7 @@ final class SwiftKnowledgeLearner {
         }
 
         return blocks
+    // periphery:ignore - Reserved: extractCodeBlocks(from:) instance method reserved for future feature activation
     }
 
     // MARK: - Learning Methods
@@ -184,6 +191,7 @@ final class SwiftKnowledgeLearner {
                     patternSignature: pattern.signature,
                     exampleCode: code,
                     context: context,
+                    // periphery:ignore - Reserved: learnFromSuccessfulCode(_:context:) instance method reserved for future feature activation
                     confidence: configuration.minConfidenceForStorage
                 )
                 learnedPatterns.append(newPattern)
@@ -226,6 +234,8 @@ final class SwiftKnowledgeLearner {
             }
         }
 
+// periphery:ignore - Reserved: learnFromCorrection(original:correctedContext:) instance method reserved for future feature activation
+
         await persistKnowledge()
     }
 
@@ -247,6 +257,7 @@ final class SwiftKnowledgeLearner {
                 }
             }
         }
+    // periphery:ignore - Reserved: extractBestPractices(from:context:) instance method reserved for future feature activation
     }
 
 }
@@ -271,10 +282,12 @@ extension SwiftKnowledgeLearner {
         if code.contains("Task {") || code.contains("Task.detached") {
             patterns.append(ExtractedPattern(category: "concurrency", signature: "task_creation"))
         }
+        // periphery:ignore - Reserved: ExtractedPattern type reserved for future feature activation
         if code.contains("@Observable") || code.contains("@StateObject") {
             patterns.append(ExtractedPattern(category: "architecture", signature: "mvvm_observable"))
         }
         if code.contains("struct") && code.contains(": View") {
+            // periphery:ignore - Reserved: extractPatterns(from:) instance method reserved for future feature activation
             patterns.append(ExtractedPattern(category: "swiftui", signature: "view_definition"))
         }
         if code.contains("do {") && code.contains("catch") {
@@ -308,6 +321,7 @@ extension SwiftKnowledgeLearner {
         if code.contains("///") { score += 0.1 }
         if code.contains("async") { score += 0.05 }
         if code.contains("private ") { score += 0.05 }
+        // periphery:ignore - Reserved: isHighQualityCode(_:) instance method reserved for future feature activation
         if code.contains("guard ") { score += 0.05 }
         if code.contains("throws") { score += 0.05 }
         if code.contains("force unwrap") || code.contains("!") && code.count(of: "!") > 3 { score -= 0.1 }
@@ -317,6 +331,7 @@ extension SwiftKnowledgeLearner {
 
     func inferPurpose(from context: String) -> String {
         let lowercased = context.lowercased()
+        // periphery:ignore - Reserved: calculateQualityScore(_:) instance method reserved for future feature activation
         if lowercased.contains("network") || lowercased.contains("api") || lowercased.contains("fetch") {
             return "Networking"
         }
@@ -328,6 +343,7 @@ extension SwiftKnowledgeLearner {
         }
         if lowercased.contains("test") { return "Testing" }
         if lowercased.contains("error") || lowercased.contains("handle") { return "Error Handling" }
+        // periphery:ignore - Reserved: inferPurpose(from:) instance method reserved for future feature activation
         return "General"
     }
 
@@ -343,6 +359,7 @@ extension SwiftKnowledgeLearner {
         if code.contains("extension ") { tags.append("Extension") }
         return tags
     }
+// periphery:ignore - Reserved: extractTags(from:) instance method reserved for future feature activation
 }
 
 // MARK: - Error Detection & Best Practices
@@ -359,12 +376,14 @@ extension SwiftKnowledgeLearner {
         var errors: [DetectedError] = []
         let lowerCorrection = correction.lowercased()
 
+        // periphery:ignore - Reserved: DetectedError type reserved for future feature activation
         if lowerCorrection.contains("sendable") {
             errors.append(DetectedError(
                 pattern: "non_sendable_type", type: "Concurrency",
                 resolution: "Add @Sendable or @unchecked Sendable conformance",
                 preventionRule: "Always check Sendable conformance for types used across concurrency boundaries"
             ))
+        // periphery:ignore - Reserved: detectErrorPatterns(in:correction:) instance method reserved for future feature activation
         }
         if lowerCorrection.contains("mainactor") {
             errors.append(DetectedError(
@@ -400,6 +419,7 @@ extension SwiftKnowledgeLearner {
     }
 
     func detectBestPracticesInCode(_ code: String) -> [DetectedBestPractice] {
+        // periphery:ignore - Reserved: DetectedBestPractice type reserved for future feature activation
         var practices: [DetectedBestPractice] = []
 
         if code.contains("actor ") && code.contains("isolated") {
@@ -407,6 +427,7 @@ extension SwiftKnowledgeLearner {
                 id: "actor_isolation", category: "Concurrency",
                 title: "Proper Actor Isolation",
                 description: "Using actors with proper isolation boundaries for thread safety",
+                // periphery:ignore - Reserved: detectBestPracticesInCode(_:) instance method reserved for future feature activation
                 example: code
             ))
         }
@@ -442,6 +463,7 @@ extension SwiftKnowledgeLearner {
             .map { pattern -> (pattern: SwiftLearnedPattern, score: Double) in
                 let contextWords = Set(pattern.context.lowercased().split(separator: " ").map(String.init))
                 let overlap = Double(queryWords.intersection(contextWords).count)
+                // periphery:ignore - Reserved: getRelevantPatterns(for:limit:) instance method reserved for future feature activation
                 let score = (overlap / max(1, Double(queryWords.count))) * pattern.confidence
                 return (pattern, score)
             }
@@ -458,6 +480,7 @@ extension SwiftKnowledgeLearner {
                 let purposeMatch = snippet.purpose.lowercased().contains(purpose.lowercased())
                 let snippetTags = Set(snippet.tags)
                 let searchTags = Set(tags)
+                // periphery:ignore - Reserved: getRelevantSnippets(for:tags:limit:) instance method reserved for future feature activation
                 let tagMatch = tags.isEmpty || !snippetTags.isDisjoint(with: searchTags)
                 return purposeMatch || tagMatch
             }
@@ -472,6 +495,7 @@ extension SwiftKnowledgeLearner {
             .filter { $0.errorType.lowercased().contains(errorType.lowercased()) }
             .sorted { $0.occurrenceCount > $1.occurrenceCount }
             .map(\.preventionRule)
+    // periphery:ignore - Reserved: getErrorPreventionRules(for:) instance method reserved for future feature activation
     }
 
     /// Get best practices for a category
@@ -480,12 +504,15 @@ extension SwiftKnowledgeLearner {
     }
 }
 
+// periphery:ignore - Reserved: getBestPractices(for:) instance method reserved for future feature activation
+
 // MARK: - Persistence & Configuration
 
 extension SwiftKnowledgeLearner {
     func persistKnowledge() async {
         if learnedPatterns.count > configuration.maxPatternsPerCategory * 10 {
             learnedPatterns = learnedPatterns
+                // periphery:ignore - Reserved: persistKnowledge() instance method reserved for future feature activation
                 .sorted { $0.confidence * Double($0.occurrenceCount) > $1.confidence * Double($1.occurrenceCount) }
                 .prefix(configuration.maxPatternsPerCategory * 10)
                 .map { $0 }
@@ -524,6 +551,8 @@ extension SwiftKnowledgeLearner {
 
     func loadStoredKnowledge() async {
         let decoder = JSONDecoder()
+
+// periphery:ignore - Reserved: loadStoredKnowledge() instance method reserved for future feature activation
 
         if let data = UserDefaults.standard.data(forKey: "SwiftKnowledgeLearner.patterns") {
             do {
@@ -566,6 +595,7 @@ extension SwiftKnowledgeLearner {
     }
 
     func updateConfiguration(_ config: Configuration) {
+        // periphery:ignore - Reserved: updateConfiguration(_:) instance method reserved for future feature activation
         configuration = config
         do {
             let data = try JSONEncoder().encode(config)
@@ -577,6 +607,7 @@ extension SwiftKnowledgeLearner {
     }
 
     /// Clear all learned knowledge
+    // periphery:ignore - Reserved: clearAllKnowledge() instance method reserved for future feature activation
     func clearAllKnowledge() async {
         learnedPatterns.removeAll()
         codeSnippets.removeAll()

@@ -55,6 +55,7 @@ public final class SemanticSearchService: ObservableObject {
 
     private init() {
         // Schedule periodic saves
+        // periphery:ignore - Reserved: lastSearchResults property reserved for future feature activation
         schedulePeriodicSave()
 
         // Load initial stats
@@ -65,6 +66,7 @@ public final class SemanticSearchService: ObservableObject {
 
     // MARK: - Search API
 
+    // periphery:ignore - Reserved: apiAvailable property reserved for future feature activation
     /// Search messages in a specific conversation by semantic similarity
     /// - Parameters:
     ///   - query: Search query text
@@ -85,6 +87,7 @@ public final class SemanticSearchService: ObservableObject {
                 threshold: similarityThreshold,
                 limit: maxResults,
                 conversationFilter: conversation.id
+            // periphery:ignore - Reserved: searchMessages(query:in:) instance method reserved for future feature activation
             )
 
             if !results.isEmpty {
@@ -114,6 +117,7 @@ public final class SemanticSearchService: ObservableObject {
         if let queryEmbedding = await getQueryEmbedding(for: query) {
             let results = await embeddingIndex.findSimilar(
                 to: queryEmbedding,
+                // periphery:ignore - Reserved: searchAllConversations(query:) instance method reserved for future feature activation
                 threshold: similarityThreshold,
                 limit: maxResults * 2,
                 conversationFilter: nil
@@ -150,6 +154,8 @@ public final class SemanticSearchService: ObservableObject {
         isSearching = true
         lastError = nil
         defer { isSearching = false }
+
+// periphery:ignore - Reserved: search(query:in:mode:limit:) instance method reserved for future feature activation
 
         let effectiveLimit = limit ?? maxResults
 
@@ -190,6 +196,7 @@ public final class SemanticSearchService: ObservableObject {
 
         guard needsUpdate else { return }
 
+        // periphery:ignore - Reserved: indexMessage(_:in:) instance method reserved for future feature activation
         if let embedding = await fetchEmbedding(for: content) {
             await embeddingIndex.store(
                 messageID: message.id,
@@ -213,6 +220,7 @@ public final class SemanticSearchService: ObservableObject {
 
         defer {
             isIndexing = false
+            // periphery:ignore - Reserved: indexConversations(_:) instance method reserved for future feature activation
             indexingProgress = 1.0
         }
 
@@ -328,6 +336,7 @@ extension SemanticSearchService {
 
         for conversation in conversations {
             for message in conversation.messages {
+                // periphery:ignore - Reserved: textSearch(query:in:limit:) instance method reserved for future feature activation
                 let content = message.content.textValue.lowercased()
 
                 if content.contains(lowercasedQuery) {
@@ -360,6 +369,7 @@ extension SemanticSearchService {
             searchLogger.warning("Failed to get query embedding, falling back to text search")
             lastError = .embeddingGenerationFailed
             return textSearch(query: query, in: conversations, limit: limit)
+        // periphery:ignore - Reserved: semanticSearch(query:in:limit:) instance method reserved for future feature activation
         }
 
         // Build message lookup
@@ -406,6 +416,8 @@ extension SemanticSearchService {
         let textResults = textSearch(query: query, in: conversations, limit: limit * 2)
         let semanticResults = await semanticSearch(query: query, in: conversations, limit: limit * 2)
 
+// periphery:ignore - Reserved: hybridSearch(query:in:limit:) instance method reserved for future feature activation
+
         // Merge results
         var combinedScores: [UUID: (result: SemanticSearchResult, textScore: Double, semanticScore: Double)] = [:]
 
@@ -445,6 +457,7 @@ extension SemanticSearchService {
         var scored: [(id: UUID, score: Double)] = []
 
         for message in messages {
+            // periphery:ignore - Reserved: keywordSearch(query:messages:) instance method reserved for future feature activation
             let content = message.content.textValue.lowercased()
             var matchScore = 0.0
 
@@ -477,6 +490,7 @@ extension SemanticSearchService {
         let words = content.components(separatedBy: .whitespacesAndNewlines)
         if words.contains(query) {
             score += 0.3
+        // periphery:ignore - Reserved: calculateTextRelevance(query:in:) instance method reserved for future feature activation
         }
 
         if content.hasPrefix(query) {
@@ -494,6 +508,7 @@ extension SemanticSearchService {
         let lowercasedText = text.lowercased()
         var searchStart = lowercasedText.startIndex
 
+        // periphery:ignore - Reserved: findHighlightRanges(query:in:) instance method reserved for future feature activation
         while let range = lowercasedText.range(of: query, range: searchStart..<lowercasedText.endIndex) {
             let startOffset = lowercasedText.distance(from: lowercasedText.startIndex, to: range.lowerBound)
             let endOffset = lowercasedText.distance(from: lowercasedText.startIndex, to: range.upperBound)
@@ -513,10 +528,13 @@ extension SemanticSearchService {
         return await fetchEmbedding(for: query)
     }
 
+// periphery:ignore - Reserved: getQueryEmbedding(for:) instance method reserved for future feature activation
+
     /// Fetch single embedding from OpenAI
     private func fetchEmbedding(for text: String) async -> [Float]? {
         guard let apiKey = getOpenAIKey(), !apiKey.isEmpty else {
             searchLogger.debug("No OpenAI API key available")
+            // periphery:ignore - Reserved: fetchEmbedding(for:) instance method reserved for future feature activation
             apiAvailable = false
             return nil
         }
@@ -561,6 +579,7 @@ extension SemanticSearchService {
     /// Fetch batch embeddings from OpenAI
     private func fetchBatchEmbeddings(for texts: [String]) async -> [[Float]]? {
         guard !texts.isEmpty else { return [] }
+        // periphery:ignore - Reserved: fetchBatchEmbeddings(for:) instance method reserved for future feature activation
         guard let apiKey = getOpenAIKey(), !apiKey.isEmpty else {
             searchLogger.debug("No OpenAI API key available for batch embedding")
             apiAvailable = false
@@ -620,6 +639,7 @@ extension SemanticSearchService {
     // MARK: - API Key Access
 
     private func getOpenAIKey() -> String? {
+        // periphery:ignore - Reserved: getOpenAIKey() instance method reserved for future feature activation
         // Try THEA-prefixed key first
         do {
             return try SecureStorage.shared.loadAPIKey(for: "openai")
@@ -651,6 +671,7 @@ extension SemanticSearchService {
 
 // MARK: - Search Result
 
+// periphery:ignore - Reserved: SemanticSearchResult type reserved for future feature activation
 struct SemanticSearchResult: Identifiable, Sendable {
     let id: UUID
     let messageID: UUID

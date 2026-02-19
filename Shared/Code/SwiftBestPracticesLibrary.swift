@@ -5,6 +5,7 @@ import Foundation
 // Curated library of Swift 6.0 best practices for code generation
 
 final class SwiftBestPracticesLibrary: Sendable {
+    // periphery:ignore - Reserved: SwiftBestPracticesLibrary type reserved for future feature activation
     static let shared = SwiftBestPracticesLibrary()
 
     private let practices: [SwiftBestPractice]
@@ -339,6 +340,7 @@ struct SwiftBestPractice: Hashable, Identifiable {
     let explanation: String
     let goodExample: String
     let badExample: String
+    // periphery:ignore - Reserved: swiftVersion property reserved for future feature activation
     let swiftVersion: String = "6.0"
     let priority: Priority
 

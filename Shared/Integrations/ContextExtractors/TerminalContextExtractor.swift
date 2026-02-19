@@ -5,7 +5,10 @@ import os.log
 
 private let terminalLogger = Logger(subsystem: "ai.thea.app", category: "TerminalContextExtractor")
 
+// periphery:ignore - Reserved: terminalLogger global var reserved for future feature activation
+
 /// Extracts context from Terminal/iTerm/Warp using Accessibility API
+// periphery:ignore - Reserved: TerminalContextExtractor type reserved for future feature activation
 enum TerminalContextExtractor {
     /// Extract context from frontmost terminal window
     static func extract(

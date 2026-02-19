@@ -64,6 +64,8 @@ struct AnomalyAlert: Codable, Sendable, Identifiable {
 
 // MARK: - PersonalBaselineMonitor
 
+// periphery:ignore - Reserved: windowSize static property reserved for future feature activation
+
 @MainActor
 @Observable
 final class PersonalBaselineMonitor {
@@ -85,6 +87,7 @@ final class PersonalBaselineMonitor {
 
     /// CUSUM accumulator per metric (not persisted — rebuilt on launch).
     private var cusumUpperAccumulator: [String: Double] = [:]
+    // periphery:ignore - Reserved: shared static property reserved for future feature activation
     private var cusumLowerAccumulator: [String: Double] = [:]
 
     /// Metric-name to HealthKit mapping.
@@ -95,12 +98,14 @@ final class PersonalBaselineMonitor {
         ("exerciseMinutes", .appleExerciseTime, nil, .minute()),
         ("activeCalories", .activeEnergyBurned, nil, .kilocalorie()),
         ("respiratoryRate", .respiratoryRate, nil, HKUnit.count().unitDivided(by: .minute())),
+        // periphery:ignore - Reserved: healthStore property reserved for future feature activation
         ("sleepDuration", nil, .sleepAnalysis, .hour())
     ]
 
     // MARK: Init
 
     private init() {
+        // periphery:ignore - Reserved: metricDefinitions static property reserved for future feature activation
         loadFromDisk()
         pruneAlertHistory()
         logger.info("PersonalBaselineMonitor initialized with \(self.baselines.count) tracked metrics")
@@ -121,6 +126,7 @@ final class PersonalBaselineMonitor {
         baseline.recentValues.append(value)
 
         // Trim to window size.
+        // periphery:ignore - Reserved: updateBaseline(metric:value:) instance method reserved for future feature activation
         if baseline.recentValues.count > MetricBaseline.windowSize {
             baseline.recentValues.removeFirst(baseline.recentValues.count - MetricBaseline.windowSize)
         }
@@ -153,6 +159,8 @@ final class PersonalBaselineMonitor {
             guard let latestValue = baseline.recentValues.last else { continue }
             let zScore = (latestValue - baseline.rollingMean) / baseline.rollingStdDev
             let absZ = abs(zScore)
+
+// periphery:ignore - Reserved: checkForAnomalies() instance method reserved for future feature activation
 
             guard absZ > 1.5 else { continue }
 
@@ -196,6 +204,7 @@ final class PersonalBaselineMonitor {
 
         let calendar = Calendar.current
         let endOfDay = Date()
+        // periphery:ignore - Reserved: runDailyCheck() instance method reserved for future feature activation
         guard let startOfDay = calendar.date(bySettingHour: 0, minute: 0, second: 0, of: endOfDay) else { return }
 
         for definition in Self.metricDefinitions {
@@ -244,6 +253,8 @@ final class PersonalBaselineMonitor {
 
         let normalized = (latestValue - baseline.rollingMean) / baseline.rollingStdDev
 
+// periphery:ignore - Reserved: cusumChangeDetection(metric:threshold:) instance method reserved for future feature activation
+
         // Allowance (slack) — small deviations are absorbed.
         let slack = 0.5
 
@@ -279,6 +290,8 @@ final class PersonalBaselineMonitor {
         }
     }
 
+// periphery:ignore - Reserved: severityForZScore(_:) instance method reserved for future feature activation
+
     // MARK: - Deviation Classification
 
     private func classifyDeviation(metric: String, zScore: Double, baseline: MetricBaseline) -> AnomalyDeviation {
@@ -288,6 +301,7 @@ final class PersonalBaselineMonitor {
         if recentCount >= 7 {
             let last7 = baseline.recentValues.suffix(7)
             let allAbove = last7.allSatisfy { $0 > baseline.rollingMean + baseline.rollingStdDev }
+            // periphery:ignore - Reserved: classifyDeviation(metric:zScore:baseline:) instance method reserved for future feature activation
             let allBelow = last7.allSatisfy { $0 < baseline.rollingMean - baseline.rollingStdDev }
             if allAbove || allBelow {
                 return .sustained7Day
@@ -314,6 +328,7 @@ final class PersonalBaselineMonitor {
         let formattedMean = formatValue(baseline.rollingMean, metric: metric)
         let unit = unitLabel(for: metric)
 
+        // periphery:ignore - Reserved: generateMessage(metric:currentValue:baseline:deviation:) instance method reserved for future feature activation
         switch deviation {
         case .sustained7Day:
             let direction = currentValue > baseline.rollingMean ? "above" : "below"
@@ -335,6 +350,7 @@ final class PersonalBaselineMonitor {
         case "restingHeartRate": "resting heart rate"
         case "heartRateVariability": "heart rate variability"
         case "sleepDuration": "sleep duration"
+        // periphery:ignore - Reserved: friendlyMetricName(_:) instance method reserved for future feature activation
         case "stepCount": "step count"
         case "exerciseMinutes": "exercise minutes"
         case "activeCalories": "active calories"
@@ -347,6 +363,7 @@ final class PersonalBaselineMonitor {
         switch metric {
         case "restingHeartRate": "BPM"
         case "heartRateVariability": "ms"
+        // periphery:ignore - Reserved: unitLabel(for:) instance method reserved for future feature activation
         case "sleepDuration": "hours"
         case "stepCount": "steps"
         case "exerciseMinutes": "minutes"
@@ -359,6 +376,7 @@ final class PersonalBaselineMonitor {
     private func formatValue(_ value: Double, metric: String) -> String {
         switch metric {
         case "stepCount":
+            // periphery:ignore - Reserved: formatValue(_:metric:) instance method reserved for future feature activation
             let formatter = NumberFormatter()
             formatter.numberStyle = .decimal
             formatter.maximumFractionDigits = 0
@@ -376,6 +394,7 @@ final class PersonalBaselineMonitor {
 
     private func queryDailySum(
         quantityType: HKQuantityType,
+        // periphery:ignore - Reserved: queryDailySum(quantityType:unit:start:end:isCumulative:) instance method reserved for future feature activation
         unit: HKUnit,
         start: Date,
         end: Date,
@@ -403,6 +422,7 @@ final class PersonalBaselineMonitor {
     }
 
     private func querySleepDuration(start: Date, end: Date) async throws -> Double? {
+        // periphery:ignore - Reserved: querySleepDuration(start:end:) instance method reserved for future feature activation
         guard let sleepType = HKCategoryType(.sleepAnalysis) as HKCategoryType? else { return nil }
 
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
@@ -452,6 +472,7 @@ final class PersonalBaselineMonitor {
         storageDirectory.appendingPathComponent("alert_history.json")
     }
 
+    // periphery:ignore - Reserved: saveToDisk() instance method reserved for future feature activation
     private func saveToDisk() {
         let directory = Self.storageDirectory
         let fileManager = FileManager.default

@@ -298,17 +298,20 @@ final class AmbientLifeJournal: @unchecked Sendable {
     /// Find the journal entry for a specific date.
     func entryFor(date: Date) -> JournalEntry? {
         let calendar = Calendar.current
+        // periphery:ignore - Reserved: entryFor(date:) instance method reserved for future feature activation
         return entries.first { calendar.isDate($0.date, inSameDayAs: date) }
     }
 
     /// Return the most recent N entries (sorted by date descending).
     func recentEntries(limit: Int = 7) -> [JournalEntry] {
+        // periphery:ignore - Reserved: recentEntries(limit:) instance method reserved for future feature activation
         Array(entries.prefix(limit))
     }
 
     // MARK: - User Annotation
 
     /// Allow the user to add or edit a personal note on a journal entry.
+    // periphery:ignore - Reserved: annotateEntry(for:annotation:) instance method reserved for future feature activation
     func annotateEntry(for date: Date, annotation: String) {
         let calendar = Calendar.current
         guard let index = entries.firstIndex(where: {

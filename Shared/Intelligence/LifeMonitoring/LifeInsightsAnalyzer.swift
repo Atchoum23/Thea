@@ -308,6 +308,7 @@ public final class LifeInsightsAnalyzer: ObservableObject {
     private func generateInsights(
         from _events: [LifeEvent],
         patterns: [InsightDetectedLifePattern]
+    // periphery:ignore - Reserved: _events parameter kept for API compatibility
     ) async -> [AnalyzedLifeInsight] {
         var insights: [AnalyzedLifeInsight] = []
 
@@ -453,6 +454,7 @@ public final class LifeInsightsAnalyzer: ObservableObject {
 
     private func checkProactiveOpportunities(
         from _events: [LifeEvent],
+        // periphery:ignore - Reserved: _events parameter kept for API compatibility
         insights: [AnalyzedLifeInsight]
     ) async {
         for insight in insights where insight.isActionable {
@@ -472,6 +474,7 @@ public final class LifeInsightsAnalyzer: ObservableObject {
 
     // MARK: - Daily Summary
 
+    // periphery:ignore - Reserved: _events parameter kept for API compatibility
     private func updateDailySummary(with _events: [LifeEvent]) async {
         let aggregation = eventAggregator.getAggregation()
 

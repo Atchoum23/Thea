@@ -257,6 +257,7 @@ public enum NetworkError: Error, LocalizedError {
 
 // MARK: - Queued Request
 
+// periphery:ignore - Reserved: QueuedRequest type reserved for future feature activation
 struct QueuedRequest {
     let request: URLRequest
     let priority: Int

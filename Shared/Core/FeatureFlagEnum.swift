@@ -25,6 +25,8 @@ import Foundation
 /// 4. Add it to the FeatureFlag metadata (description, category, defaultValue)
 enum TheaFeatureFlag: String, CaseIterable, Sendable {
 
+// periphery:ignore - Reserved: TheaFeatureFlag type reserved for future feature activation
+
     // MARK: - AI & Models
     case localModels = "preferLocalModels"
     case ollama = "ollamaEnabled"
@@ -148,6 +150,7 @@ enum TheaFeatureFlag: String, CaseIterable, Sendable {
 
 // MARK: - Flag Category
 
+// periphery:ignore - Reserved: FlagCategory type reserved for future feature activation
 enum FlagCategory: String, CaseIterable, Sendable {
     case aiModels = "AI & Models"
     case privacySync = "Privacy & Sync"

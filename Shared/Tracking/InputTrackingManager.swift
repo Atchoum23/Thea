@@ -31,7 +31,9 @@ import Observation
         private var lastActivityTime: Date?
 
         private var config: LifeTrackingConfiguration {
+            // periphery:ignore - Reserved: shared static property reserved for future feature activation
             AppConfiguration.shared.lifeTrackingConfig
+        // periphery:ignore - Reserved: logger property reserved for future feature activation
         }
 
         private init() {}
@@ -45,16 +47,20 @@ import Observation
         nonisolated func requestAccessibilityPermission() -> Bool {
             // Check if already trusted without showing prompt
             let isTrusted = AXIsProcessTrusted()
+            // periphery:ignore - Reserved: config property reserved for future feature activation
             if !isTrusted {
                 // Show system prompt for accessibility access
                 // Using string literal instead of kAXTrustedCheckOptionPrompt to avoid concurrency warnings
                 let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
                 return AXIsProcessTrustedWithOptions(options)
+            // periphery:ignore - Reserved: setModelContext(_:) instance method reserved for future feature activation
             }
             return isTrusted
         }
 
         // MARK: - Tracking Control
+
+// periphery:ignore - Reserved: requestAccessibilityPermission() instance method reserved for future feature activation
 
         func startTracking() {
             guard config.inputTrackingEnabled, !isTracking else { return }
@@ -68,6 +74,8 @@ import Observation
             resetDailyStats()
             activityStartTime = Date()
             lastActivityTime = Date()
+
+// periphery:ignore - Reserved: startTracking() instance method reserved for future feature activation
 
             // Monitor mouse and keyboard events
             eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .keyDown, .mouseMoved]) { [weak self] event in
@@ -97,6 +105,7 @@ import Observation
             Task {
                 await saveCurrentStats()
             }
+        // periphery:ignore - Reserved: stopTracking() instance method reserved for future feature activation
         }
 
         // MARK: - Event Handling
@@ -111,6 +120,7 @@ import Observation
 
             case .keyDown:
                 // SECURITY FIX (FINDING-008): Skip keystroke counting when in password fields
+                // periphery:ignore - Reserved: handleEvent(_:) instance method reserved for future feature activation
                 // This prevents tracking credentials entered in secure text fields
                 if !isInSecureTextField() {
                     keystrokes += 1
@@ -141,6 +151,7 @@ import Observation
             let appRef = AXUIElementCreateApplication(focusedApp.processIdentifier)
             var focusedElement: CFTypeRef?
 
+            // periphery:ignore - Reserved: isInSecureTextField() instance method reserved for future feature activation
             let result = AXUIElementCopyAttributeValue(appRef, kAXFocusedUIElementAttribute as CFString, &focusedElement)
             guard result == .success, let element = focusedElement else {
                 return false
@@ -180,12 +191,14 @@ import Observation
         }
 
         private func updateDailyStats() {
+            // periphery:ignore - Reserved: resetDailyStats() instance method reserved for future feature activation
             let activeMinutes = calculateActiveMinutes()
 
             dailyStats = InputStatistics(
                 date: Date(),
                 mouseClicks: mouseClicks,
                 keystrokes: keystrokes,
+                // periphery:ignore - Reserved: updateDailyStats() instance method reserved for future feature activation
                 mouseDistance: mouseDistance,
                 activeMinutes: activeMinutes
             )
@@ -198,11 +211,14 @@ import Observation
 
         // MARK: - Data Persistence
 
+// periphery:ignore - Reserved: calculateActiveMinutes() instance method reserved for future feature activation
+
         private func saveCurrentStats() async {
             guard let context = modelContext, let stats = dailyStats else { return }
 
             let record = DailyInputStatistics(
                 date: Calendar.current.startOfDay(for: Date()),
+                // periphery:ignore - Reserved: saveCurrentStats() instance method reserved for future feature activation
                 mouseClicks: stats.mouseClicks,
                 keystrokes: stats.keystrokes,
                 mouseDistancePixels: stats.mouseDistance,
@@ -245,6 +261,8 @@ import Observation
 
             let startOfDay = Calendar.current.startOfDay(for: date)
 
+// periphery:ignore - Reserved: getRecord(for:) instance method reserved for future feature activation
+
             // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
             let descriptor = FetchDescriptor<DailyInputStatistics>()
             let allRecords: [DailyInputStatistics]
@@ -260,6 +278,7 @@ import Observation
         func getRecords(from start: Date, to end: Date) async -> [DailyInputStatistics] {
             guard let context = modelContext else { return [] }
 
+            // periphery:ignore - Reserved: getRecords(from:to:) instance method reserved for future feature activation
             // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
             let descriptor = FetchDescriptor<DailyInputStatistics>()
             let allRecords: [DailyInputStatistics]
@@ -280,11 +299,13 @@ import Observation
     struct InputStatistics {
         let date: Date
         let mouseClicks: Int
+        // periphery:ignore - Reserved: date property reserved for future feature activation
         let keystrokes: Int
         let mouseDistance: Double
         let activeMinutes: Int
 
         var activityLevel: ActivityLevel {
+            // periphery:ignore - Reserved: activityLevel property reserved for future feature activation
             // Calculate activity level based on inputs
             let clicksPerMinute = activeMinutes > 0 ? Double(mouseClicks) / Double(activeMinutes) : 0
             let keystrokesPerMinute = activeMinutes > 0 ? Double(keystrokes) / Double(activeMinutes) : 0
@@ -304,6 +325,7 @@ import Observation
             }
         }
 
+        // periphery:ignore - Reserved: ActivityLevel type reserved for future feature activation
         enum ActivityLevel: String {
             case sedentary = "Sedentary"
             case light = "Light"

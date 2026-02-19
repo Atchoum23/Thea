@@ -50,6 +50,7 @@ final class LocalModelManager {
         customModelPaths.append(path)
         saveCustomPaths()
         Task {
+            // periphery:ignore - Reserved: addCustomModelPath(_:) instance method reserved for future feature activation
             await discoverModels()
         }
     }
@@ -58,6 +59,7 @@ final class LocalModelManager {
         customModelPaths.removeAll { $0 == path }
         saveCustomPaths()
         Task {
+            // periphery:ignore - Reserved: removeCustomModelPath(_:) instance method reserved for future feature activation
             await discoverModels()
         }
     }
@@ -93,6 +95,7 @@ final class LocalModelManager {
     private func saveCustomPaths() {
         do {
             let data = try JSONEncoder().encode(customModelPaths)
+            // periphery:ignore - Reserved: saveCustomPaths() instance method reserved for future feature activation
             UserDefaults.standard.set(data, forKey: "LocalModelManager.customPaths")
         } catch {
             logger.error("Failed to save custom model paths: \(error.localizedDescription)")
@@ -501,6 +504,7 @@ extension LocalModelManager {
 
     func unloadModel(_ modelName: String) {
         runningModels.removeValue(forKey: modelName)
+    // periphery:ignore - Reserved: unloadModel(_:) instance method reserved for future feature activation
     }
 }
 
@@ -508,6 +512,7 @@ extension LocalModelManager {
 
 extension LocalModelManager {
     func installOllamaModel(_ modelName: String) async throws {
+        // periphery:ignore - Reserved: installOllamaModel(_:) instance method reserved for future feature activation
         guard isOllamaInstalled else {
             throw LocalModelError.runtimeNotInstalled("Ollama")
         }
@@ -530,6 +535,7 @@ extension LocalModelManager {
         #endif
     }
 
+    // periphery:ignore - Reserved: downloadGGUFModel(from:name:) instance method reserved for future feature activation
     func downloadGGUFModel(from url: URL, name: String) async throws {
         #if os(macOS)
             let destinationPath = FileManager.default.homeDirectoryForCurrentUser

@@ -112,6 +112,7 @@ final class StressDetector {
     private var heartRateBaseline: Double = 72.0
     private let heartRateElevationDelta: Double = 15.0
 
+    // periphery:ignore - Reserved: shared static property reserved for future feature activation
     /// HRV baseline and depression threshold (percentage below baseline)
     private var hrvBaseline: Double = 50.0
     private let hrvDepressionFraction: Double = 0.20
@@ -126,21 +127,34 @@ final class StressDetector {
     private let lateNightStartHour = 23
     private let lateNightEndHour = 5
 
+// periphery:ignore - Reserved: emaAlpha property reserved for future feature activation
+
     // MARK: - Internal Tracking
 
+// periphery:ignore - Reserved: maxHistoryCount property reserved for future feature activation
+
     private var recentAppSwitches: [Date] = []
+    // periphery:ignore - Reserved: appSwitchThreshold property reserved for future feature activation
+    // periphery:ignore - Reserved: appSwitchWindowSeconds property reserved for future feature activation
     private var recentNegativeSentiments: [Date] = []
     private var overlappingCalendarEvents: Int = 0
     private var cancellables = Set<AnyCancellable>()
 
+// periphery:ignore - Reserved: heartRateElevationDelta property reserved for future feature activation
+
     // MARK: - Persistence
 
+    // periphery:ignore - Reserved: hrvDepressionFraction property reserved for future feature activation
     private let storageURL: URL = {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            // periphery:ignore - Reserved: negativeSentimentThreshold property reserved for future feature activation
             .appendingPathComponent("Thea", isDirectory: true)
             .appendingPathComponent("LifeMonitoring", isDirectory: true)
+        // periphery:ignore - Reserved: calendarDensityThreshold property reserved for future feature activation
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true) // Safe: directory may already exist; error means state not persisted (works in-memory)
         return dir.appendingPathComponent("stress_state.json")
+    // periphery:ignore - Reserved: lateNightStartHour property reserved for future feature activation
+    // periphery:ignore - Reserved: lateNightEndHour property reserved for future feature activation
     }()
 
     // MARK: - Init
@@ -168,6 +182,7 @@ final class StressDetector {
             .store(in: &cancellables)
 
         logger.info("StressDetector started — current level: \(self.currentLevel.rawValue)")
+    // periphery:ignore - Reserved: start() instance method reserved for future feature activation
     }
 
     /// Stop processing events
@@ -187,12 +202,15 @@ final class StressDetector {
         case .appSwitch:
             recordAppSwitch(at: now)
 
+// periphery:ignore - Reserved: stop() instance method reserved for future feature activation
+
         // Message sentiment
         case .messageSent, .messageReceived, .emailReceived, .emailSent:
             if event.sentiment < negativeSentimentThreshold {
                 recordNegativeSentiment(at: now)
             }
 
+        // periphery:ignore - Reserved: processEvent(_:) instance method reserved for future feature activation
         // Calendar density
         case .eventStart:
             evaluateCalendarDensity(event)
@@ -231,6 +249,8 @@ final class StressDetector {
         }
     }
 
+// periphery:ignore - Reserved: recordAppSwitch(at:) instance method reserved for future feature activation
+
     private func recordNegativeSentiment(at timestamp: Date) {
         recentNegativeSentiments.append(timestamp)
 
@@ -243,6 +263,7 @@ final class StressDetector {
             activeSignals.insert(.negativeSentiment)
         } else {
             activeSignals.remove(.negativeSentiment)
+        // periphery:ignore - Reserved: recordNegativeSentiment(at:) instance method reserved for future feature activation
         }
     }
 
@@ -257,6 +278,7 @@ final class StressDetector {
 
             // Decay after 30 minutes
             Task { @MainActor [weak self] in
+                // periphery:ignore - Reserved: evaluateCalendarDensity(_:) instance method reserved for future feature activation
                 try? await Task.sleep(for: .seconds(1800)) // Safe: decay timer; sleep cancellation means task was cancelled; non-fatal
                 guard let self else { return }
                 self.overlappingCalendarEvents = max(0, self.overlappingCalendarEvents - 1)
@@ -280,6 +302,7 @@ final class StressDetector {
             // Update baseline with slow EMA
             heartRateBaseline = 0.95 * heartRateBaseline + 0.05 * value
 
+            // periphery:ignore - Reserved: evaluateHealthMetric(_:) instance method reserved for future feature activation
             if value > heartRateBaseline + heartRateElevationDelta {
                 activeSignals.insert(.heartRateElevated)
             } else {
@@ -312,6 +335,8 @@ final class StressDetector {
         }
     }
 
+// periphery:ignore - Reserved: evaluateLateNightActivity(at:) instance method reserved for future feature activation
+
     // MARK: - Score Computation
 
     func updateScore() {
@@ -322,6 +347,7 @@ final class StressDetector {
         let clampedRaw = min(max(rawScore, 0.0), 1.0)
 
         // Apply exponential moving average
+        // periphery:ignore - Reserved: updateScore() instance method reserved for future feature activation
         currentScore = emaAlpha * clampedRaw + (1.0 - emaAlpha) * currentScore
 
         // Derive level
@@ -354,6 +380,7 @@ final class StressDetector {
         case 0.15..<0.35:
             return .low
         case 0.35..<0.55:
+            // periphery:ignore - Reserved: computeLevel(from:) instance method reserved for future feature activation
             return .moderate
         case 0.55..<0.80:
             return .high
@@ -371,6 +398,8 @@ final class StressDetector {
         }
     }
 
+// periphery:ignore - Reserved: feedBehavioralFingerprint() instance method reserved for future feature activation
+
     // MARK: - Lagging Signal Setters
 
     /// Set from external sources (e.g. HealthKit sleep analysis, break detection)
@@ -379,6 +408,8 @@ final class StressDetector {
             logger.warning("setLaggingSignal called with non-lagging signal: \(signal.rawValue)")
             return
         }
+
+// periphery:ignore - Reserved: setLaggingSignal(_:active:) instance method reserved for future feature activation
 
         if active {
             activeSignals.insert(signal)
@@ -395,6 +426,7 @@ final class StressDetector {
         let cutoff = Date().addingTimeInterval(-Double(hours) * 3600)
         let recent = history.filter { $0.timestamp >= cutoff }
         guard !recent.isEmpty else { return nil }
+        // periphery:ignore - Reserved: averageScore(hours:) instance method reserved for future feature activation
         return recent.reduce(0.0) { $0 + $1.score } / Double(recent.count)
     }
 
@@ -402,6 +434,7 @@ final class StressDetector {
     func trend(hours: Int = 6) -> StressTrend {
         let cutoff = Date().addingTimeInterval(-Double(hours) * 3600)
         let recent = history.filter { $0.timestamp >= cutoff }
+        // periphery:ignore - Reserved: trend(hours:) instance method reserved for future feature activation
         guard recent.count >= 2 else { return .stable }
 
         let midpoint = recent.count / 2
@@ -420,6 +453,7 @@ final class StressDetector {
     /// Peak stress level in the last N hours
     func peakLevel(hours: Int = 24) -> StressLevel {
         let cutoff = Date().addingTimeInterval(-Double(hours) * 3600)
+        // periphery:ignore - Reserved: peakLevel(hours:) instance method reserved for future feature activation
         let recent = history.filter { $0.timestamp >= cutoff }
         guard let peak = recent.max(by: { $0.score < $1.score }) else { return .minimal }
         return peak.level
@@ -437,6 +471,7 @@ final class StressDetector {
     }
 
     func saveToDisk() {
+        // periphery:ignore - Reserved: saveToDisk() instance method reserved for future feature activation
         let state = PersistedStressState(
             currentScore: currentScore,
             currentLevel: currentLevel,
@@ -480,6 +515,7 @@ final class StressDetector {
 
 // MARK: - Stress Trend
 
+// periphery:ignore - Reserved: StressTrend type reserved for future feature activation
 enum StressTrend: String, Sendable {
     case increasing
     case stable

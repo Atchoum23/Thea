@@ -201,6 +201,7 @@ extension DeadlineIntelligence {
         sender: String,
         receivedDate: Date
     ) async -> [Deadline] {
+        // periphery:ignore - Reserved: receivedDate parameter kept for API compatibility
         let fullContent = "Subject: \(subject)\nFrom: \(sender)\n\n\(body)"
         return await processContent(fullContent, source: .email)
     }
@@ -233,6 +234,8 @@ extension DeadlineIntelligence {
     public func processCallTranscript(
         transcript: String,
         participants: [String],
+        // periphery:ignore - Reserved: participants parameter kept for API compatibility
+        // periphery:ignore - Reserved: callDate parameter kept for API compatibility
         callDate: Date
     ) async -> [Deadline] {
         await processContent(transcript, source: .voiceCall)

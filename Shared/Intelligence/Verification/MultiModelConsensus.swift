@@ -244,7 +244,9 @@ public final class MultiModelConsensus {
 
     private func calculateConsensus(
         originalResponse: String,
+        // periphery:ignore - Reserved: originalResponse parameter kept for API compatibility
         modelResponses: [ModelResponse],
+        // periphery:ignore - Reserved: taskType parameter kept for API compatibility
         taskType: TaskType
     ) -> ConsensusResult {
         guard !modelResponses.isEmpty else {

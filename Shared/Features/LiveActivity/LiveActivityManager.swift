@@ -16,6 +16,7 @@ import OSLog
 public final class LiveActivityManager: ObservableObject {
     public static let shared = LiveActivityManager()
 
+    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let logger = Logger(subsystem: "com.thea.app", category: "LiveActivity")
 
     // MARK: - Published State

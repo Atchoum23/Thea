@@ -328,6 +328,7 @@ import Foundation
         private var isMonitoring = false
         private var currentCallback: (@Sendable (Int) -> Void)?
         private var monitoringTask: Task<Void, Never>?
+        // periphery:ignore - Reserved: lmuService property reserved for future feature activation
         private var lmuService: io_connect_t = IO_OBJECT_NULL
 
         public init() {}

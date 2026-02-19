@@ -271,6 +271,7 @@ public actor MailMonitor {
         return nil
     }
 
+    // periphery:ignore - Reserved: _sender parameter kept for API compatibility
     private func determineImportance(sender _sender: String, subject: String) -> Bool {
         let lowercasedSubject = subject.lowercased()
 

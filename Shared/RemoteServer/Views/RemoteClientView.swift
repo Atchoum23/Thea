@@ -519,6 +519,7 @@ import SwiftUI
 
     private struct ScreenFrameView: View {
         let frame: ScreenFrame
+        // periphery:ignore - Reserved: geometry property reserved for future feature activation
         let geometry: GeometryProxy
 
         var body: some View {

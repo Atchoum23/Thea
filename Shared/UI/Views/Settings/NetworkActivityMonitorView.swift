@@ -19,6 +19,7 @@ struct NetworkActivityMonitorView: View {
     @State private var privacyConcernCount = 0
     @State private var dailyBytes = 0
     @State private var isMonitoring = false
+    // periphery:ignore - Reserved: selectedCategory property reserved for future feature activation
     @State private var selectedCategory: NetworkPrivacyMonitor.TrafficCategory?
     @State private var refreshTimer: Timer?
 

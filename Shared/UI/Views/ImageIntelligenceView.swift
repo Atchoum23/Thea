@@ -225,6 +225,7 @@ struct ImageIntelligenceView: View {
     // MARK: - iOS Sections
 
     private var operationSection: some View {
+        // periphery:ignore - Reserved: operationSection property reserved for future feature activation
         Section("Operations") {
             Button {
                 isImporting = true
@@ -261,6 +262,7 @@ struct ImageIntelligenceView: View {
         }
     }
 
+    // periphery:ignore - Reserved: historySection property reserved for future feature activation
     private var historySection: some View {
         Section("Recent Operations") {
             if processingHistory.isEmpty {

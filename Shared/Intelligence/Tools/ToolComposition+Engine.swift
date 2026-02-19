@@ -195,6 +195,7 @@ public final class ToolCompositionEngine: ObservableObject {
     private func executeStep(
         _ step: PipelineStep,
         context: inout ToolPipelineContext,
+        // periphery:ignore - Reserved: pipeline parameter kept for API compatibility
         pipeline: ToolPipeline
     ) async -> StepResult {
         let startTime = Date()

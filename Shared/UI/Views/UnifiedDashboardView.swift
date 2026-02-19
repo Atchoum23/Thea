@@ -131,6 +131,7 @@ private struct ModuleRow: View {
 }
 
 private struct ModuleSettingsView: View {
+    // periphery:ignore - Reserved: coordinator property reserved for future feature activation
     @Bindable var coordinator: IntegrationCoordinator
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var featureFlags = FeatureFlags.shared

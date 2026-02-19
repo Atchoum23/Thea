@@ -144,11 +144,17 @@ actor DependencyScanner {
         let type: DependencyType
     }
 
+// periphery:ignore - Reserved: version property reserved for future feature activation
+
+// periphery:ignore - Reserved: type property reserved for future feature activation
+
     enum DependencyType: Sendable {
         case npm
         case pip
         case swift
         case cocoapods
+        // periphery:ignore - Reserved: cocoapods case reserved for future feature activation
+        // periphery:ignore - Reserved: gradle case reserved for future feature activation
         case gradle
     }
 

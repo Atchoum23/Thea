@@ -54,6 +54,7 @@ public final class AutonomousAgentV3 {
     private let resourcePool: AgentResourcePool
     private let communicationBus: AgentCommunicationBus
 
+    // periphery:ignore - Reserved: resourcePool property reserved for future feature activation
     private var executionTask: Task<Void, Error>?
 
     private init() {
@@ -269,6 +270,7 @@ extension AutonomousAgentV3 {
         state: inout AutonomousExecutionState,
         plan _plan: AutonomousPlan
     ) {
+        // periphery:ignore - Reserved: _plan parameter kept for API compatibility
         let fixCount = state.fixAttempts[step.id] ?? 0
         state.failedSteps[step.id] = AutonomousExecutionState.ExecutionError(
             stepId: step.id,
@@ -316,6 +318,7 @@ extension AutonomousAgentV3 {
     private func executeStep(
         _ step: AutonomousPlan.PlanStep,
         state: inout AutonomousExecutionState
+    // periphery:ignore - Reserved: state parameter kept for API compatibility
     ) async throws {
         switch step.action {
         case let .generateCode(language, requirements):
@@ -512,6 +515,7 @@ extension AutonomousAgentV3 {
 extension AutonomousAgentV3 {
 
     private func verifyStep(
+        // periphery:ignore - Reserved: step parameter kept for API compatibility
         _ step: AutonomousPlan.PlanStep,
         verification: AutonomousPlan.VerificationStrategy
     ) async throws -> Bool {

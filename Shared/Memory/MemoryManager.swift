@@ -43,6 +43,7 @@ public final class MemoryManager: ObservableObject {
     private var accessTimes: [String: Date] = [:]
 
     // Stub for SwiftData context compatibility (not used)
+    // periphery:ignore - Reserved: modelContext property reserved for future feature activation
     private var modelContext: Any?
 
     // MARK: - Intelligence Configuration

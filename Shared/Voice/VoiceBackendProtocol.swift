@@ -5,6 +5,7 @@ import Foundation
 // Enables swapping voice engines while keeping the same interface
 
 protocol VoiceSynthesisBackend: Sendable {
+    // periphery:ignore - Reserved: VoiceSynthesisBackend protocol reserved for future feature activation
     var isAvailable: Bool { get async }
 
     /// Speak text and return when finished
@@ -14,6 +15,7 @@ protocol VoiceSynthesisBackend: Sendable {
     func stopSpeaking() async
 }
 
+// periphery:ignore - Reserved: VoiceRecognitionBackend protocol reserved for future feature activation
 protocol VoiceRecognitionBackend: Sendable {
     var isAvailable: Bool { get async }
 

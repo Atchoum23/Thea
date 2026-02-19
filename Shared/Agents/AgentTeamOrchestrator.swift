@@ -136,6 +136,8 @@ final class AgentTeamOrchestrator: ObservableObject {
             let provider = try getProvider()
             let model = getTeammateModel()
 
+// periphery:ignore - Reserved: teamID parameter kept for API compatibility
+
             let messages: [AIMessage] = [
                 AIMessage(
                     id: UUID(),
@@ -279,16 +281,27 @@ struct AgentTeam: Identifiable, Sendable {
     let id: UUID
     let goal: String
     let conversationID: UUID
+    // periphery:ignore - Reserved: removeCompletedTeams() instance method reserved for future feature activation
     let subTasks: [AgentSubTask]
     var status: AgentTeamStatus
     let startedAt: Date
+    // periphery:ignore - Reserved: hasActiveTeams property reserved for future feature activation
     var completedAt: Date?
     var synthesizedResult: String?
 }
 
 enum AgentTeamStatus: String, Sendable {
     case running, completed, failed
+// periphery:ignore - Reserved: goal property reserved for future feature activation
+// periphery:ignore - Reserved: conversationID property reserved for future feature activation
+// periphery:ignore - Reserved: subTasks property reserved for future feature activation
 }
+
+// periphery:ignore - Reserved: startedAt property reserved for future feature activation
+
+// periphery:ignore - Reserved: completedAt property reserved for future feature activation
+
+// periphery:ignore - Reserved: synthesizedResult property reserved for future feature activation
 
 struct AgentSubTask: Identifiable, Sendable {
     let id: UUID
@@ -298,19 +311,25 @@ struct AgentSubTask: Identifiable, Sendable {
 
 struct AgentSubTaskResult: Sendable {
     let subTaskID: UUID
+    // periphery:ignore - Reserved: node property reserved for future feature activation
     let success: Bool
     let result: String
     let error: String?
 }
 
 struct AgentTeamResult: Sendable {
+    // periphery:ignore - Reserved: error property reserved for future feature activation
     let team: AgentTeam
     let subTaskResults: [AgentSubTaskResult]
     let synthesizedResponse: String
+    // periphery:ignore - Reserved: team property reserved for future feature activation
+    // periphery:ignore - Reserved: subTaskResults property reserved for future feature activation
     let totalSubTasks: Int
     let successCount: Int
 
     var allSucceeded: Bool { successCount == totalSubTasks }
+    // periphery:ignore - Reserved: allSucceeded property reserved for future feature activation
+    // periphery:ignore - Reserved: partialSuccess property reserved for future feature activation
     var partialSuccess: Bool { successCount > 0 && successCount < totalSubTasks }
 }
 

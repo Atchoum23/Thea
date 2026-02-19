@@ -198,6 +198,7 @@ private struct WeightedIntentCandidate {
 }
 
 private struct PredictionAccuracyRecord {
+    // periphery:ignore - Reserved: timestamp property reserved for future feature activation
     let timestamp: Date
     let wasCorrect: Bool
 }

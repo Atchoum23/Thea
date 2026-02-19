@@ -26,6 +26,7 @@ extension SettingsManager {
         // AI & Models
         case .localModels: return preferLocalModels
         case .ollama: return ollamaEnabled
+        // periphery:ignore - Reserved: isFeatureEnabled(_:) instance method reserved for future feature activation
         case .semanticSearch: return enableSemanticSearch
         case .streamingResponses: return streamResponses
 
@@ -65,6 +66,7 @@ extension SettingsManager {
         switch flag {
         case .localModels: preferLocalModels = enabled
         case .ollama: ollamaEnabled = enabled
+        // periphery:ignore - Reserved: setFeatureEnabled(_:enabled:) instance method reserved for future feature activation
         case .semanticSearch: enableSemanticSearch = enabled
         case .streamingResponses: streamResponses = enabled
         case .cloudSync: iCloudSyncEnabled = enabled
@@ -90,6 +92,7 @@ extension SettingsManager {
     var featureFlagSnapshot: [TheaFeatureFlag: Bool] {
         var snapshot: [TheaFeatureFlag: Bool] = [:]
         for flag in TheaFeatureFlag.allCases {
+            // periphery:ignore - Reserved: featureFlagSnapshot property reserved for future feature activation
             snapshot[flag] = isFeatureEnabled(flag)
         }
         return snapshot
@@ -98,14 +101,17 @@ extension SettingsManager {
     /// Returns all enabled feature flags.
     var enabledTheaFeatureFlags: [TheaFeatureFlag] {
         TheaFeatureFlag.allCases.filter { isFeatureEnabled($0) }
+    // periphery:ignore - Reserved: enabledTheaFeatureFlags property reserved for future feature activation
     }
 
     /// Reset a feature flag to its default value.
     func resetTheaFeatureFlag(_ flag: TheaFeatureFlag) {
+        // periphery:ignore - Reserved: resetTheaFeatureFlag(_:) instance method reserved for future feature activation
         setFeatureEnabled(flag, enabled: flag.defaultValue)
     }
 
     /// Reset all feature flags to their default values.
+    // periphery:ignore - Reserved: resetAllTheaFeatureFlags() instance method reserved for future feature activation
     func resetAllTheaFeatureFlags() {
         for flag in TheaFeatureFlag.allCases {
             resetTheaFeatureFlag(flag)

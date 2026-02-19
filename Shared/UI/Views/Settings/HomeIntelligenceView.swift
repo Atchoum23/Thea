@@ -9,6 +9,7 @@ import SwiftUI
 struct HomeIntelligenceView: View {
     @ObservedObject private var homeService = HomeKitService.shared
     @State private var searchText = ""
+    // periphery:ignore - Reserved: showingCommandInput property reserved for future feature activation
     @State private var showingCommandInput = false
     @State private var commandText = ""
     @State private var commandResult: String?

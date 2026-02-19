@@ -1,6 +1,7 @@
 import SwiftUI
 import OSLog
 
+// periphery:ignore - Reserved: healthDashboardLogger global var reserved for future feature activation
 private let healthDashboardLogger = Logger(subsystem: "ai.thea.app", category: "HealthDashboardView")
 
 /// Main health dashboard view

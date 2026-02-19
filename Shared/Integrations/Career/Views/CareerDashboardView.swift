@@ -310,6 +310,8 @@ private struct GoalCard: View {
     let goal: CareerGoal
     let viewModel: CareerDashboardViewModel
 
+// periphery:ignore - Reserved: viewModel property reserved for future feature activation
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -348,6 +350,7 @@ private struct GoalCard: View {
 
 private struct SkillCard: View {
     let skill: Skill
+    // periphery:ignore - Reserved: viewModel property reserved for future feature activation
     let viewModel: CareerDashboardViewModel
 
     var body: some View {

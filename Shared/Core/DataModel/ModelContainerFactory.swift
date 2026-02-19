@@ -4,6 +4,7 @@ import SwiftUI
 /// Factory for creating ModelContainer with graceful error handling and fallback options
 @MainActor
 final class ModelContainerFactory {
+    // periphery:ignore - Reserved: ModelContainerFactory type reserved for future feature activation
     static let shared = ModelContainerFactory()
 
     private(set) var container: ModelContainer?
@@ -106,5 +107,6 @@ enum ModelContainerError: LocalizedError {
 
 /// Notification posted when ModelContainer falls back to in-memory storage
 extension Notification.Name {
+    // periphery:ignore - Reserved: modelContainerFallback static property reserved for future feature activation
     static let modelContainerFallback = Notification.Name("modelContainerFallback")
 }

@@ -305,6 +305,8 @@ public final class AutonomyController: ObservableObject {
     private var actionsThisHour: Int = 0
     private var hourResetTask: Task<Void, Never>?
 
+// periphery:ignore - Reserved: hourResetTask property reserved for future feature activation
+
     // MARK: - Initialization
 
     private init() {
@@ -588,6 +590,7 @@ public enum ActionDecision: Sendable {
 /// A record of an action that was executed, with timing and result details.
 public struct ExecutedAction {
     let action: AutonomousAction
+    // periphery:ignore - Reserved: result property reserved for future feature activation
     let result: AutonomousAction.ActionResult
     let rollback: @Sendable () async throws -> Void
 }

@@ -18,6 +18,7 @@ public actor CrossDeviceService {
     private let logger = Logger(subsystem: "ai.thea.app", category: "CrossDeviceService")
     public static let shared = CrossDeviceService()
 
+    // periphery:ignore - Reserved: logger property reserved for future feature activation
     // MARK: - State
 
     private var isInitialized = false
@@ -31,6 +32,8 @@ public actor CrossDeviceService {
     private let sharedDatabase: CKDatabase
     private let zoneID: CKRecordZone.ID
 
+// periphery:ignore - Reserved: sharedDatabase property reserved for future feature activation
+
     // MARK: - Configuration
 
     private var configuration: CrossDeviceSyncConfiguration
@@ -43,6 +46,8 @@ public actor CrossDeviceService {
 
     /// Active transport for direct device communication (non-CloudKit paths)
     private(set) var activeTransport: TheaTransport = .cloudKit
+
+// periphery:ignore - Reserved: activeTransport property reserved for future feature activation
 
     // MARK: - Initialization
 
@@ -253,6 +258,7 @@ public actor CrossDeviceService {
     // MARK: - Status
 
     /// Get the current transport summary for UI display
+    // periphery:ignore - Reserved: getTransportSummary() instance method reserved for future feature activation
     func getTransportSummary() async -> [(transport: TheaTransport, available: Bool, latency: Double?, active: Bool)] {
         await SmartTransportManager.shared.transportSummary()
     }

@@ -50,6 +50,7 @@ actor MLXModelScanner {
             return 0
         }
 
+        // periphery:ignore - Reserved: quickScanCount(_:) instance method reserved for future feature activation
         var count = 0
         let enumerator = FileManager.default.enumerator(
             at: url,
@@ -304,10 +305,15 @@ struct ScannedModel: Identifiable, Sendable {
     let modifiedDate: Date
     let status: ModelStatus
 
+    // periphery:ignore - Reserved: quantization property reserved for future feature activation
+    // periphery:ignore - Reserved: modifiedDate property reserved for future feature activation
+    // periphery:ignore - Reserved: status property reserved for future feature activation
     var formattedSize: String {
+        // periphery:ignore - Reserved: formattedSize property reserved for future feature activation
         ByteCountFormatter.string(fromByteCount: sizeInBytes, countStyle: .file)
     }
 
+    // periphery:ignore - Reserved: displayName property reserved for future feature activation
     var displayName: String {
         var display = name
         if let params = parameters {

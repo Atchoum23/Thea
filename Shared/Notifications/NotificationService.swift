@@ -23,6 +23,7 @@ import UserNotifications
 public class NotificationService: ObservableObject {
     public static let shared = NotificationService()
 
+    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let logger = Logger(subsystem: "ai.thea.app", category: "NotificationService")
 
     // MARK: - Published State

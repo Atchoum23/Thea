@@ -17,6 +17,8 @@ private final class AIModelBenchmarkService {
     struct BenchmarkEntry {
         let isLocal: Bool
         let provider: String
+        // periphery:ignore - Reserved: provider property reserved for future feature activation
+        // periphery:ignore - Reserved: contextWindow property reserved for future feature activation
         let contextWindow: Int
     }
 

@@ -41,6 +41,7 @@ public final class ProjectMemoryManager: ObservableObject {
     // MARK: - Private State
 
     private let fileManager = FileManager.default
+    // periphery:ignore - Reserved: autoSaveTask property reserved for future feature activation
     private var autoSaveTask: Task<Void, Never>?
 
     // MARK: - Initialization

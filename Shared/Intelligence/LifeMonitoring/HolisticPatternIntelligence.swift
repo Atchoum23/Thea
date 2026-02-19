@@ -261,6 +261,7 @@ public final class HolisticPatternIntelligence: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: _pattern parameter kept for API compatibility
     private func predictNextOccurrence(from observations: [Date], pattern _pattern: DetectedLifePattern) -> Date? {
         guard observations.count >= 3 else { return nil }
 

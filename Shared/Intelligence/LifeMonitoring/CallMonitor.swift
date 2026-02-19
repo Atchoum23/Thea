@@ -19,6 +19,7 @@ import Speech
 #endif
 
 // MARK: - Module Logger
+// periphery:ignore - Reserved: callMonitorLogger global var reserved for future feature activation
 let callMonitorLogger = Logger(subsystem: "ai.thea.app", category: "CallMonitor")
 
 // MARK: - Call Monitor

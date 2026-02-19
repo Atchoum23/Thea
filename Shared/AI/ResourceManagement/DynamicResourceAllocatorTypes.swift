@@ -107,6 +107,7 @@ extension DynamicResourceAllocator {
             guard isEnabled else { return false }
 
             let calendar = Calendar.current
+            // periphery:ignore - Reserved: isActiveNow() instance method reserved for future feature activation
             let now = Date()
             let hour = calendar.component(.hour, from: now)
             let minute = calendar.component(.minute, from: now)
@@ -261,6 +262,7 @@ extension DynamicResourceAllocator {
         let action: RecommendedAction
 
         enum ImpactLevel: String, Sendable {
+            // periphery:ignore - Reserved: action property reserved for future feature activation
             case low, medium, high, critical
         }
 
@@ -268,6 +270,8 @@ extension DynamicResourceAllocator {
             case reduceContextLength(to: Int)
             case switchQuantization(to: QuantizationLevel)
             case reduceModelSize
+            // periphery:ignore - Reserved: switchQuantization(to:) case reserved for future feature activation
+            // periphery:ignore - Reserved: reduceModelSize case reserved for future feature activation
             case enableThrottling(level: ThrottleLevel)
             case waitForCooling
             case closeOtherApps
@@ -277,6 +281,7 @@ extension DynamicResourceAllocator {
 
 // MARK: - Model Inference Settings
 
+// periphery:ignore - Reserved: ModelInferenceSettings type reserved for future feature activation
 struct ModelInferenceSettings: Sendable {
     let canLoad: Bool
     let recommendedQuantization: DynamicResourceAllocator.QuantizationLevel

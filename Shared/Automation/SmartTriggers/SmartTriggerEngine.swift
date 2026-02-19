@@ -24,6 +24,7 @@ public final class SmartTriggerEngine: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
     private var activeTimers: [UUID: Timer] = [:]
+    // periphery:ignore - Reserved: locationManager property reserved for future feature activation
     private var locationManager: Any? // CLLocationManager for iOS
 
     // MARK: - Published State

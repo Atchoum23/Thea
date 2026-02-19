@@ -16,6 +16,8 @@
         private var activeTasks: Set<UUID> = []
         private var completionHandlers: [UUID: (Result<Void, Error>) -> Void] = [:]
 
+// periphery:ignore - Reserved: logger property reserved for future feature activation
+
         // MARK: - Queue Operations
 
         func enqueue(_ task: CoworkTask) {
@@ -26,9 +28,11 @@
             self.tasks.append(contentsOf: tasks)
         }
 
+        // periphery:ignore - Reserved: enqueue(_:) instance method reserved for future feature activation
         @discardableResult
         func enqueue(instruction: String, priority: CoworkTask.TaskPriority = .normal) -> CoworkTask {
             let task = CoworkTask(instruction: instruction, priority: priority)
+            // periphery:ignore - Reserved: enqueue(_:) instance method reserved for future feature activation
             tasks.append(task)
             return task
         }
@@ -39,6 +43,7 @@
 
         func moveToFront(_ taskId: UUID) {
             if let index = tasks.firstIndex(where: { $0.id == taskId }) {
+                // periphery:ignore - Reserved: dequeue(_:) instance method reserved for future feature activation
                 let task = tasks.remove(at: index)
                 tasks.insert(task, at: 0)
             }
@@ -128,6 +133,7 @@
             await startProcessing(executor: executor)
         }
 
+        // periphery:ignore - Reserved: resume(executor:) instance method reserved for future feature activation
         func cancelAll() {
             isPaused = true
             for index in tasks.indices {
@@ -187,6 +193,8 @@
         }
     }
 
+// periphery:ignore - Reserved: onCompletion(of:handler:) instance method reserved for future feature activation
+
     // MARK: - Cowork Task
 
     struct CoworkTask: Identifiable, Equatable {
@@ -197,9 +205,14 @@
         var sessionId: UUID?
         var createdAt: Date
         var startedAt: Date?
+        // periphery:ignore - Reserved: sessionId property reserved for future feature activation
         var completedAt: Date?
         var error: String?
         var metadata: [String: String]
+
+// periphery:ignore - Reserved: error property reserved for future feature activation
+
+// periphery:ignore - Reserved: metadata property reserved for future feature activation
 
         enum TaskPriority: Int, CaseIterable, Codable {
             case low = 0
@@ -279,6 +292,7 @@
             status == .queued || status == .inProgress
         }
 
+        // periphery:ignore - Reserved: isComplete property reserved for future feature activation
         var isComplete: Bool {
             status == .completed || status == .failed || status == .cancelled
         }

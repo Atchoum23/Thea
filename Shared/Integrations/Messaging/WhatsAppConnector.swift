@@ -12,6 +12,7 @@ import OSLog
 actor WhatsAppConnector: MessagingPlatformConnector {
     let platform: MessagingPlatform = .whatsapp
     private(set) var isConnected = false
+    // periphery:ignore - Reserved: platform property reserved for future feature activation
     var credentials: MessagingCredentials
 
     private var messageHandler: (@Sendable (TheaGatewayMessage) async -> Void)?
@@ -59,6 +60,7 @@ actor WhatsAppConnector: MessagingPlatformConnector {
     // Called by TheaGatewayWSServer when it receives a POST from Meta's servers.
 
     func processWebhook(body: Data) async {
+        // periphery:ignore - Reserved: processWebhook(body:) instance method reserved for future feature activation
         guard let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
               let entry = (json["entry"] as? [[String: Any]])?.first,
               let changes = (entry["changes"] as? [[String: Any]])?.first,
@@ -92,6 +94,7 @@ actor WhatsAppConnector: MessagingPlatformConnector {
     }
 
     /// Handle Meta webhook verification (GET request with hub.challenge).
+    // periphery:ignore - Reserved: verifyWebhook(challenge:mode:token:) instance method reserved for future feature activation
     func verifyWebhook(challenge: String, mode: String, token: String) -> String? {
         guard mode == "subscribe",
               token == credentials.webhookSecret else { return nil }

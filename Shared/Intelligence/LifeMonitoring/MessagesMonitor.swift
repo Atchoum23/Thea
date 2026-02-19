@@ -282,6 +282,7 @@ public actor MessagesMonitor {
         return appleEpoch.addingTimeInterval(seconds)
     }
 
+    // periphery:ignore - Reserved: _handleId parameter kept for API compatibility
     private func lookupContactName(_ _handleId: String) -> String? {
         // In a full implementation, this would query the Contacts database
         // For now, return nil (use handleId as fallback)

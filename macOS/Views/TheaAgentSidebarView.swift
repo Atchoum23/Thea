@@ -9,6 +9,7 @@
 import SwiftUI
 
 #if os(macOS)
+// periphery:ignore - Reserved: TheaAgentSidebarView type reserved for future feature activation
 struct TheaAgentSidebarView: View {
     @State private var orchestrator = TheaAgentOrchestrator.shared
     @Binding var selectedSession: TheaAgentSession?

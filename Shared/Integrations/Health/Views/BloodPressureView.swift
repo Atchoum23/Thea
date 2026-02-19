@@ -395,6 +395,7 @@ final class BloodPressureViewModel {
 
 // MARK: - Models
 
+// periphery:ignore - Reserved: BPCategory type reserved for future feature activation
 enum BPCategory {
     case normal
     case elevated

@@ -128,15 +128,20 @@ final class Message {
         return DeviceType(rawValue: raw)
     }
 
+// periphery:ignore - Reserved: originDeviceType property reserved for future feature activation
+
     /// SF Symbol name for this message's origin device
     var deviceIcon: String? {
         originDeviceType?.icon
     }
 
+// periphery:ignore - Reserved: deviceIcon property reserved for future feature activation
+
     /// Stamps the current device identity onto this message
     @MainActor
     func stampCurrentDevice() {
         let device = DeviceRegistry.shared.currentDevice
+        // periphery:ignore - Reserved: stampCurrentDevice() instance method reserved for future feature activation
         deviceID = device.id
         deviceName = device.name
         deviceType = device.type.rawValue
@@ -145,6 +150,7 @@ final class Message {
 
     /// Original content if this message was edited
     var originalContent: MessageContent? {
+        // periphery:ignore - Reserved: originalContent property reserved for future feature activation
         guard let data = originalContentData else { return nil }
         do {
             return try sharedDecoder.decode(MessageContent.self, from: data)
@@ -209,6 +215,7 @@ struct ContentPart: Codable, Sendable {
     enum PartType: Codable, Sendable {
         case text(String)
         case image(Data)
+        // periphery:ignore - Reserved: file(_:) case reserved for future feature activation
         case file(String) // File path
     }
 

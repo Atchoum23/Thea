@@ -30,6 +30,7 @@ struct UnifiedMessage: Codable, Sendable, Identifiable {
     init(
         channelType: MessagingChannelType,
         channelID: String,
+        // periphery:ignore - Reserved: msgLogger global var reserved for future feature activation
         senderID: String,
         senderName: String? = nil,
         content: String,
@@ -48,6 +49,7 @@ struct UnifiedMessage: Codable, Sendable, Identifiable {
         self.content = content
         self.timestamp = timestamp
         self.isFromUser = isFromUser
+        // periphery:ignore - Reserved: init(channelType:channelID:senderID:senderName:content:timestamp:isFromUser:isFromBot:replyToMessageID:attachments:metadata:) initializer reserved for future feature activation
         self.isFromBot = isFromBot
         self.replyToMessageID = replyToMessageID
         self.attachments = attachments
@@ -96,6 +98,7 @@ struct UnifiedAttachment: Codable, Sendable, Identifiable {
 
 /// Types of messaging channels.
 enum MessagingChannelType: String, Codable, Sendable, CaseIterable {
+    // periphery:ignore - Reserved: init(type:url:mimeType:fileName:sizeBytes:localPath:) initializer reserved for future feature activation
     case iMessage
     case whatsApp
     case telegram
@@ -192,6 +195,8 @@ struct RegisteredChannel: Codable, Sendable, Identifiable {
 
 // MARK: - Message Comprehension Types
 
+// periphery:ignore - Reserved: init(type:name:status:isEnabled:autoReplyEnabled:) initializer reserved for future feature activation
+
 /// AI-extracted understanding of a message.
 struct MsgComprehension: Codable, Sendable {
     let intent: MsgIntent
@@ -211,6 +216,7 @@ struct MsgComprehension: Codable, Sendable {
         summary: String? = nil,
         suggestedResponse: String? = nil
     ) {
+        // periphery:ignore - Reserved: MsgComprehension type reserved for future feature activation
         self.intent = intent
         self.urgency = urgency
         self.requiredAction = requiredAction
@@ -331,6 +337,8 @@ enum MsgSentiment: String, Codable, Sendable, CaseIterable {
 
 // MARK: - Messaging Hub
 
+// periphery:ignore - Reserved: init(type:value:confidence:) initializer reserved for future feature activation
+
 /// Central message router for all messaging channels.
 @MainActor
 final class MessagingHub: ObservableObject {
@@ -357,13 +365,18 @@ final class MessagingHub: ObservableObject {
     // MARK: - Init
 
     private init() {
+        // periphery:ignore - Reserved: isProcessing property reserved for future feature activation
         let appSupport = FileManager.default.urls(
             for: .applicationSupportDirectory,
             in: .userDomainMask
+        // periphery:ignore - Reserved: maxRecentMessages property reserved for future feature activation
+        // periphery:ignore - Reserved: autoReplyGlobalEnabled property reserved for future feature activation
+        // periphery:ignore - Reserved: comprehensionEnabled property reserved for future feature activation
         ).first ?? FileManager.default.temporaryDirectory
         let dir = appSupport.appendingPathComponent("Thea/Messaging", isDirectory: true)
         do {
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        // periphery:ignore - Reserved: messageHandlers property reserved for future feature activation
         } catch {
             ErrorLogger.log(error, context: "MessagingHub.init.createDirectory")
         }
@@ -384,6 +397,7 @@ final class MessagingHub: ObservableObject {
     }
 
     func unregisterChannel(type: MessagingChannelType, name: String) {
+        // periphery:ignore - Reserved: registerChannel(_:) instance method reserved for future feature activation
         channels.removeAll { $0.type == type && $0.name == name }
         saveState()
     }
@@ -394,9 +408,12 @@ final class MessagingHub: ObservableObject {
         }
     }
 
+// periphery:ignore - Reserved: unregisterChannel(type:name:) instance method reserved for future feature activation
+
     func enableChannel(_ type: MessagingChannelType, name: String, enabled: Bool) {
         if let index = channels.firstIndex(where: { $0.type == type && $0.name == name }) {
             channels[index].isEnabled = enabled
+            // periphery:ignore - Reserved: updateChannelStatus(_:name:status:) instance method reserved for future feature activation
             saveState()
         }
     }
@@ -419,6 +436,7 @@ final class MessagingHub: ObservableObject {
         if let index = channels.firstIndex(where: { $0.type == message.channelType }) {
             channels[index].lastActivityAt = message.timestamp
             if !message.isFromUser && !message.isFromBot {
+                // periphery:ignore - Reserved: routeIncomingMessage(_:) instance method reserved for future feature activation
                 channels[index].unreadCount += 1
             }
         }
@@ -475,6 +493,7 @@ final class MessagingHub: ObservableObject {
     // MARK: - Query
 
     func messages(for channelType: MessagingChannelType, limit: Int = 50) -> [UnifiedMessage] {
+        // periphery:ignore - Reserved: onMessage(_:) instance method reserved for future feature activation
         let filtered = recentMessages.filter { $0.channelType == channelType }
         return Array(filtered.suffix(limit))
     }
@@ -485,10 +504,12 @@ final class MessagingHub: ObservableObject {
     }
 
     func searchMessages(query: String, limit: Int = 50) -> [UnifiedMessage] {
+        // periphery:ignore - Reserved: messages(from:limit:) instance method reserved for future feature activation
         let lowered = query.lowercased()
         let filtered = recentMessages.filter {
             $0.content.lowercased().contains(lowered) ||
             ($0.senderName?.lowercased().contains(lowered) ?? false)
+        // periphery:ignore - Reserved: searchMessages(query:limit:) instance method reserved for future feature activation
         }
         return Array(filtered.suffix(limit))
     }
@@ -501,12 +522,14 @@ final class MessagingHub: ObservableObject {
         Dictionary(grouping: channels, by: \.type)
     }
 
+    // periphery:ignore - Reserved: channelsByType property reserved for future feature activation
     // MARK: - OpenClaw Bridge Integration
 
     /// Convert an OpenClaw message to a UnifiedMessage.
     func fromOpenClaw(
         platform: String,
         channelID: String,
+        // periphery:ignore - Reserved: fromOpenClaw(platform:channelID:senderID:senderName:content:isFromBot:attachments:) instance method reserved for future feature activation
         senderID: String,
         senderName: String?,
         content: String,
@@ -535,6 +558,7 @@ final class MessagingHub: ObservableObject {
 
     private func mapOpenClawPlatform(_ platform: String) -> MessagingChannelType {
         switch platform.lowercased() {
+        // periphery:ignore - Reserved: mapOpenClawPlatform(_:) instance method reserved for future feature activation
         case "whatsapp": return .whatsApp
         case "telegram": return .telegram
         case "discord": return .discord
@@ -546,6 +570,7 @@ final class MessagingHub: ObservableObject {
     }
 
     private func mapAttachmentType(_ type: String) -> UnifiedAttachment.AttachmentType {
+        // periphery:ignore - Reserved: mapAttachmentType(_:) instance method reserved for future feature activation
         switch type.lowercased() {
         case "image": return .image
         case "audio": return .audio
@@ -558,6 +583,7 @@ final class MessagingHub: ObservableObject {
 
     // MARK: - Auto-Reply Logic
 
+    // periphery:ignore - Reserved: shouldAutoReply(for:comprehension:) instance method reserved for future feature activation
     private func shouldAutoReply(for message: UnifiedMessage, comprehension: MsgComprehension) -> Bool {
         guard autoReplyGlobalEnabled else { return false }
         guard !message.isFromBot else { return false }

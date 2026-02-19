@@ -323,6 +323,7 @@ public actor EnhancedSubagentSystem {
 
     // MARK: - Private Helpers
 
+    // periphery:ignore - Reserved: context parameter kept for API compatibility
     private func executeTask(_ task: SubagentTask, context: SubagentContext) async -> EnhancedSubagentResult {
         // Get a real AI provider for execution (must access @MainActor singletons)
         let provider = await MainActor.run {

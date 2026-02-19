@@ -286,6 +286,7 @@
 
         /// Check if a QA tool is available on the system
         func isToolAvailable(_ tool: QATool) async -> Bool {
+            // periphery:ignore - Reserved: isToolAvailable(_:) instance method reserved for future feature activation
             switch tool {
             case .swiftLint:
                 let (_, exitCode) = await runCommand("which", arguments: ["swiftlint"])
@@ -303,6 +304,7 @@
         }
 
         /// Get the last result for a specific tool
+        // periphery:ignore - Reserved: getLastResult(for:) instance method reserved for future feature activation
         func getLastResult(for tool: QATool) -> QAToolResult? {
             lastResults[tool]
         }

@@ -46,6 +46,7 @@
                 accessedAt = Date()
                 self.title = title
                 self.wasCached = wasCached
+            // periphery:ignore - Reserved: init(url:title:wasCached:) initializer reserved for future feature activation
             }
         }
 
@@ -102,6 +103,7 @@
             accessedFiles.append(access)
         }
 
+        // periphery:ignore - Reserved: trackFileDelete(_:) instance method reserved for future feature activation
         // MARK: - URL Tracking
 
         mutating func trackURLAccess(_ url: URL, title: String? = nil) {
@@ -109,16 +111,20 @@
             accessedURLs.append(access)
         }
 
+// periphery:ignore - Reserved: trackURLAccess(_:title:) instance method reserved for future feature activation
+
         // MARK: - Connectors
 
         mutating func activateConnector(_ name: String) {
             if !activeConnectors.contains(name) {
                 activeConnectors.append(name)
+            // periphery:ignore - Reserved: activateConnector(_:) instance method reserved for future feature activation
             }
         }
 
         mutating func deactivateConnector(_ name: String) {
             activeConnectors.removeAll { $0 == name }
+        // periphery:ignore - Reserved: deactivateConnector(_:) instance method reserved for future feature activation
         }
 
         // MARK: - Rules
@@ -151,6 +157,7 @@
 
         /// Build context string for LLM prompt
         func buildContextPrompt() -> String {
+            // periphery:ignore - Reserved: buildContextPrompt() instance method reserved for future feature activation
             var parts: [String] = []
 
             if !userInstructions.isEmpty {
@@ -186,6 +193,7 @@
     // MARK: - Default Rules
 
     extension CoworkContext.Rule {
+        // periphery:ignore - Reserved: defaultRules static property reserved for future feature activation
         static var defaultRules: [CoworkContext.Rule] {
             [
                 CoworkContext.Rule(

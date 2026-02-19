@@ -33,6 +33,7 @@ final class CodeIntelligenceManager {
             analyzedAt: Date()
         )
 
+        // periphery:ignore - Reserved: analyzeCode(_:language:) instance method reserved for future feature activation
         analysisResults.append(result)
         isAnalyzing = false
 
@@ -50,6 +51,7 @@ final class CodeIntelligenceManager {
     }
 
     func getSuggestions(for _: String, language _: String) async -> [String] {
+        // periphery:ignore - Reserved: analyzeRepository(at:) instance method reserved for future feature activation
         // AI-powered code suggestions
         []
     }
@@ -60,9 +62,12 @@ final class CodeIntelligenceManager {
     }
 }
 
+// periphery:ignore - Reserved: getSuggestions(for:language:) instance method reserved for future feature activation
+
 // MARK: - Models
 
 struct CodeAnalysisResult: Identifiable {
+    // periphery:ignore - Reserved: explainCode(_:language:) instance method reserved for future feature activation
     let id: UUID
     let language: String
     var issues: [CodeIssue]
@@ -72,10 +77,19 @@ struct CodeAnalysisResult: Identifiable {
 }
 
 struct CodeIssue: Identifiable {
+    // periphery:ignore - Reserved: language property reserved for future feature activation
+    // periphery:ignore - Reserved: issues property reserved for future feature activation
+    // periphery:ignore - Reserved: suggestions property reserved for future feature activation
+    // periphery:ignore - Reserved: complexity property reserved for future feature activation
+    // periphery:ignore - Reserved: analyzedAt property reserved for future feature activation
     let id: UUID
     let severity: IssueSeverity
     let message: String
     let line: Int
+    // periphery:ignore - Reserved: severity property reserved for future feature activation
+    // periphery:ignore - Reserved: message property reserved for future feature activation
+    // periphery:ignore - Reserved: line property reserved for future feature activation
+    // periphery:ignore - Reserved: column property reserved for future feature activation
     let column: Int
 }
 

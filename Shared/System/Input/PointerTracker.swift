@@ -17,6 +17,7 @@ final class PointerTracker {
 
     private(set) var currentPosition: CGPoint = .zero
     private(set) var isTracking = false
+    // periphery:ignore - Reserved: shared static property reserved for future feature activation
     private(set) var lastError: Error?
 
     private var eventTap: CFMachPort?
@@ -32,10 +33,12 @@ final class PointerTracker {
     }
 
     /// Request Accessibility permission (opens System Settings)
+    // periphery:ignore - Reserved: hasPermission property reserved for future feature activation
     func requestPermission() {
         // Prompt for accessibility permission
         // Use string literal to avoid concurrency warning on kAXTrustedCheckOptionPrompt global
         let options: NSDictionary = ["AXTrustedCheckOptionPrompt": true as CFBoolean]
+        // periphery:ignore - Reserved: requestPermission() instance method reserved for future feature activation
         let trusted = AXIsProcessTrustedWithOptions(options)
 
         if !trusted {
@@ -51,6 +54,7 @@ final class PointerTracker {
     func startTracking() {
         guard hasPermission else {
             lastError = PointerTrackingError.permissionDenied
+            // periphery:ignore - Reserved: startTracking() instance method reserved for future feature activation
             print("[PointerTracker] Cannot start tracking - Accessibility permission denied")
             return
         }
@@ -115,6 +119,8 @@ final class PointerTracker {
     func stopTracking() {
         guard isTracking else { return }
 
+// periphery:ignore - Reserved: stopTracking() instance method reserved for future feature activation
+
         if let tap = eventTap {
             CGEvent.tapEnable(tap: tap, enable: false)
             CFMachPortInvalidate(tap)
@@ -132,6 +138,7 @@ final class PointerTracker {
 
     /// Get current pointer position without continuous tracking
     func getCurrentPosition() -> CGPoint {
+        // periphery:ignore - Reserved: getCurrentPosition() instance method reserved for future feature activation
         if let currentEvent = CGEvent(source: nil) {
             return currentEvent.location
         }
@@ -144,6 +151,7 @@ final class PointerTracker {
 
 // MARK: - Errors
 
+// periphery:ignore - Reserved: PointerTrackingError type reserved for future feature activation
 enum PointerTrackingError: Error, LocalizedError {
     case permissionDenied
     case eventTapCreationFailed

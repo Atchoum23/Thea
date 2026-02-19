@@ -11,6 +11,7 @@ import OSLog
 
 private let tlLogger = Logger(subsystem: "ai.thea.app", category: "TranslationEngine")
 
+// periphery:ignore - Reserved: tlLogger global var reserved for future feature activation
 // MARK: - Translation Request
 
 struct TranslationRequest: Sendable {
@@ -290,6 +291,7 @@ final class TranslationEngine: ObservableObject {
 
     /// Quick translate — auto-detect source, translate to target
     func quickTranslate(_ text: String, to targetLanguage: String) async throws -> String {
+        // periphery:ignore - Reserved: quickTranslate(_:to:) instance method reserved for future feature activation
         let result = try await translate(
             TranslationRequest(text: text, to: targetLanguage)
         )
@@ -305,6 +307,7 @@ final class TranslationEngine: ObservableObject {
     }
 
     /// Get language confidence scores for text
+    // periphery:ignore - Reserved: detectLanguageConfidences(_:) instance method reserved for future feature activation
     func detectLanguageConfidences(_ text: String) -> [(code: String, confidence: Double)] {
         let recognizer = NLLanguageRecognizer()
         recognizer.processString(text)

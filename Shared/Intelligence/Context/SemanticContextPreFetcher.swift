@@ -217,6 +217,7 @@ public final class SemanticContextPreFetcher {
     // MARK: - Configuration
 
     private let maxCachedBundles = 10
+    // periphery:ignore - Reserved: defaultTokenBudget property reserved for future feature activation
     private let defaultTokenBudget = 8000
     private let prefetchCooldown: TimeInterval = 30
     private let itemExpirationSeconds: TimeInterval = 300

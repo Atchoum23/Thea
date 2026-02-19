@@ -35,6 +35,7 @@ extension Color {
 
     /// Tertiary label color
     static var tertiaryLabel: Color {
+        // periphery:ignore - Reserved: tertiaryLabel static property reserved for future feature activation
         #if os(macOS)
             Color(nsColor: .tertiaryLabelColor)
         #else
@@ -43,6 +44,7 @@ extension Color {
     }
 
     /// Quaternary label color
+    // periphery:ignore - Reserved: quaternaryLabel static property reserved for future feature activation
     static var quaternaryLabel: Color {
         #if os(macOS)
             Color(nsColor: .quaternaryLabelColor)

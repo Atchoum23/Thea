@@ -23,11 +23,13 @@ final class ShortcutsManager {
             if let error {
                 print("Failed to donate shortcut: \(error)")
             }
+        // periphery:ignore - Reserved: shared static property reserved for future feature activation
         }
     }
 
     func donateAskQuestionShortcut(question: String) {
         let intent = AskQuestionIntent()
+        // periphery:ignore - Reserved: donateNewConversationShortcut() instance method reserved for future feature activation
         intent.question = question
         intent.suggestedInvocationPhrase = "Ask THEA \(question)"
 
@@ -39,6 +41,7 @@ final class ShortcutsManager {
         }
     }
 
+    // periphery:ignore - Reserved: donateAskQuestionShortcut(question:) instance method reserved for future feature activation
     func donateVoiceCommandShortcut() {
         let intent = VoiceCommandIntent()
         intent.suggestedInvocationPhrase = "Talk to THEA"
@@ -51,6 +54,7 @@ final class ShortcutsManager {
         }
     }
 
+    // periphery:ignore - Reserved: donateVoiceCommandShortcut() instance method reserved for future feature activation
     func donateOpenProjectShortcut(project: Project) {
         let intent = OpenProjectIntent()
         intent.projectName = project.title
@@ -62,6 +66,7 @@ final class ShortcutsManager {
             if let error {
                 print("Failed to donate shortcut: \(error)")
             }
+        // periphery:ignore - Reserved: donateOpenProjectShortcut(project:) instance method reserved for future feature activation
         }
     }
 
@@ -77,6 +82,7 @@ final class ShortcutsManager {
         }
 
         if let voiceIntent = intent as? VoiceCommandIntent {
+            // periphery:ignore - Reserved: handleShortcut(_:) instance method reserved for future feature activation
             return try await handleVoiceCommand(voiceIntent)
         }
 
@@ -97,9 +103,12 @@ final class ShortcutsManager {
             throw ShortcutError.missingParameter
         }
 
+// periphery:ignore - Reserved: handleStartConversation(_:) instance method reserved for future feature activation
+
         let conversation = ChatManager.shared.createConversation(title: "Siri Question")
         guard ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) != nil else {
             throw ShortcutError.invalidParameter
+        // periphery:ignore - Reserved: handleAskQuestion(_:) instance method reserved for future feature activation
         }
 
         try await ChatManager.shared.sendMessage(question, in: conversation)
@@ -114,10 +123,13 @@ final class ShortcutsManager {
 
     private func handleOpenProject(_ intent: OpenProjectIntent) async throws -> ShortcutAction {
         guard let projectIDString = intent.projectID,
+              // periphery:ignore - Reserved: handleVoiceCommand(_:) instance method reserved for future feature activation
               let projectID = UUID(uuidString: projectIDString)
         else {
             throw ShortcutError.invalidParameter
         }
+
+// periphery:ignore - Reserved: handleOpenProject(_:) instance method reserved for future feature activation
 
         return .openProject(projectID)
     }
@@ -130,12 +142,14 @@ class StartConversationIntent: INIntent {
         get { "Start a THEA conversation" }
         set { super.suggestedInvocationPhrase = newValue }
     }
+// periphery:ignore - Reserved: StartConversationIntent type reserved for future feature activation
 }
 
 class AskQuestionIntent: INIntent {
     @NSManaged var question: String?
 
     override var suggestedInvocationPhrase: String? {
+        // periphery:ignore - Reserved: AskQuestionIntent type reserved for future feature activation
         get { "Ask THEA a question" }
         set { super.suggestedInvocationPhrase = newValue }
     }
@@ -144,12 +158,14 @@ class AskQuestionIntent: INIntent {
 class VoiceCommandIntent: INIntent {
     override var suggestedInvocationPhrase: String? {
         get { "Talk to THEA" }
+        // periphery:ignore - Reserved: VoiceCommandIntent type reserved for future feature activation
         set { super.suggestedInvocationPhrase = newValue }
     }
 }
 
 class OpenProjectIntent: INIntent {
     @NSManaged var projectName: String?
+    // periphery:ignore - Reserved: OpenProjectIntent type reserved for future feature activation
     @NSManaged var projectID: String?
 
     override var suggestedInvocationPhrase: String? {
@@ -161,11 +177,13 @@ class OpenProjectIntent: INIntent {
 // MARK: - Shortcut Actions
 
 enum ShortcutAction {
+    // periphery:ignore - Reserved: ShortcutAction type reserved for future feature activation
     case openConversation(UUID)
     case openProject(UUID)
     case startVoiceInput(UUID)
 }
 
+// periphery:ignore - Reserved: ShortcutError type reserved for future feature activation
 enum ShortcutError: LocalizedError {
     case unsupportedIntent
     case missingParameter

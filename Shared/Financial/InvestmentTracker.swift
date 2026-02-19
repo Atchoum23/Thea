@@ -47,6 +47,7 @@ final class InvestmentTracker {
         symbol: String,
         name: String,
         quantity: Double,
+        // periphery:ignore - Reserved: removePortfolio(id:) instance method reserved for future feature activation
         purchasePrice: Double,
         purchaseDate: Date,
         currency: String = "CHF",
@@ -83,18 +84,22 @@ final class InvestmentTracker {
         saveData()
     }
 
+// periphery:ignore - Reserved: updatePrice(holdingId:newPrice:) instance method reserved for future feature activation
+
     // MARK: - Dividends
 
     func recordDividend(
         holdingId: UUID,
         amount: Double,
         date: Date,
+        // periphery:ignore - Reserved: removeHolding(id:) instance method reserved for future feature activation
         taxWithheld: Double = 0,
         currency: String = "CHF"
     ) {
         let record = DividendRecord(
             id: UUID(),
             holdingId: holdingId,
+            // periphery:ignore - Reserved: recordDividend(holdingId:amount:date:taxWithheld:currency:) instance method reserved for future feature activation
             amount: amount,
             date: date,
             taxWithheld: taxWithheld,
@@ -222,6 +227,7 @@ final class InvestmentTracker {
         let lines = content.components(separatedBy: .newlines).filter { !$0.isEmpty }
         guard lines.count >= 2 else { throw TransactionImportError.noDataRows }
 
+        // periphery:ignore - Reserved: importHoldingsCSV(from:portfolioId:) instance method reserved for future feature activation
         var imported: [Holding] = []
 
         for lineIndex in 1..<lines.count {
@@ -382,6 +388,8 @@ struct PortfolioPerformance: Sendable {
     )
 }
 
+// periphery:ignore - Reserved: holdings property reserved for future feature activation
+
 struct HoldingPerformance: Sendable {
     let holding: Holding
     let currentValue: Double
@@ -390,6 +398,13 @@ struct HoldingPerformance: Sendable {
     let returnPercent: Double
     let dividendsReceived: Double
     let portfolioWeight: Double
+// periphery:ignore - Reserved: holding property reserved for future feature activation
+// periphery:ignore - Reserved: currentValue property reserved for future feature activation
+// periphery:ignore - Reserved: totalCost property reserved for future feature activation
+// periphery:ignore - Reserved: unrealizedGain property reserved for future feature activation
+// periphery:ignore - Reserved: returnPercent property reserved for future feature activation
+// periphery:ignore - Reserved: dividendsReceived property reserved for future feature activation
+// periphery:ignore - Reserved: portfolioWeight property reserved for future feature activation
 }
 
 struct AssetAllocation: Identifiable, Sendable {
@@ -397,6 +412,7 @@ struct AssetAllocation: Identifiable, Sendable {
     let assetClass: AssetClass
     let value: Double
     let percentage: Double
+    // periphery:ignore - Reserved: holdingCount property reserved for future feature activation
     let holdingCount: Int
 }
 

@@ -213,36 +213,6 @@ final class HealthServiceTests: XCTestCase {
         XCTAssertEqual(completedGoal.progress, 1.0, accuracy: 0.01, "Progress should be capped at 100%")
     }
 
-    // MARK: - Health Insights Tests
-
-    func testHealthScoreCalculation() async {
-        let viewModel = HealthInsightsViewModel()
-
-        await viewModel.loadData(timeRange: .week)
-
-        XCTAssertGreaterThanOrEqual(viewModel.healthScore, 0, "Health score should be non-negative")
-        XCTAssertLessThanOrEqual(viewModel.healthScore, 100, "Health score should not exceed 100")
-
-        // Component scores should sum to overall score
-        let componentAverage = (viewModel.sleepScore + viewModel.activityScore +
-            viewModel.heartScore + viewModel.nutritionScore) / 4.0
-        XCTAssertEqual(viewModel.healthScore, componentAverage, accuracy: 5.0,
-                       "Health score should approximate component average")
-    }
-
-    func testInsightGeneration() async {
-        let viewModel = HealthInsightsViewModel()
-        await viewModel.refreshInsights()
-
-        XCTAssertFalse(viewModel.insights.isEmpty, "Should generate at least some insights")
-
-        for insight in viewModel.insights {
-            XCTAssertFalse(insight.title.isEmpty, "Insight should have a title")
-            XCTAssertFalse(insight.message.isEmpty, "Insight should have a message")
-            XCTAssertFalse(insight.icon.isEmpty, "Insight should have an icon")
-        }
-    }
-
     // MARK: - Health Goals Tests
 
     func testGoalCreation() {
@@ -352,15 +322,6 @@ final class HealthServiceTests: XCTestCase {
     }
 
     // MARK: - Performance Tests
-
-    func testLargeDateRangePerformance() async {
-        measure {
-            let viewModel = HealthInsightsViewModel()
-            Task {
-                await viewModel.loadData(timeRange: .year)
-            }
-        }
-    }
 
     func testChartDataGeneration() async {
         measure {

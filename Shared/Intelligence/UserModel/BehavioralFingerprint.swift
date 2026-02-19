@@ -105,8 +105,10 @@ final class BehavioralFingerprint {
     func load() { loadFromDisk() }
 
     /// Total number of time slots with recorded data
+    // periphery:ignore - Reserved: save() instance method reserved for future feature activation
     var totalRecordedSlots: Int {
         timeSlots.flatMap { $0 }.filter { !$0.activityCounts.isEmpty }.count
+    // periphery:ignore - Reserved: load() instance method reserved for future feature activation
     }
 
     // MARK: - Querying
@@ -128,6 +130,8 @@ final class BehavioralFingerprint {
         let daySlots = timeSlots[day.index]
         var bestHour: Int?
         var bestScore: Double = 0
+
+// periphery:ignore - Reserved: bestTimeFor(_:on:) instance method reserved for future feature activation
 
         for hour in typicalWakeTime...min(typicalSleepTime, 23) {
             let slot = daySlots[hour]
@@ -269,6 +273,7 @@ struct TimeSlot: Codable, Sendable {
     func activityScore(for activity: BehavioralActivityType) -> Double {
         let total = activityCounts.values.reduce(0, +)
         guard total > 0 else { return 0 }
+        // periphery:ignore - Reserved: activityScore(for:) instance method reserved for future feature activation
         return Double(activityCounts[activity.rawValue, default: 0]) / Double(total)
     }
 }
@@ -306,7 +311,10 @@ enum DayOfWeek: String, Sendable, CaseIterable {
 struct BehavioralHourSummary: Sendable {
     let hour: Int
     let dominantActivity: BehavioralActivityType
+    // periphery:ignore - Reserved: hour property reserved for future feature activation
     let receptivity: Double
+    // periphery:ignore - Reserved: receptivity property reserved for future feature activation
+    // periphery:ignore - Reserved: cognitiveLoad property reserved for future feature activation
     let cognitiveLoad: Double
 }
 

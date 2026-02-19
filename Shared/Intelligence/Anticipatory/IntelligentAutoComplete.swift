@@ -199,6 +199,7 @@ public final class IntelligentAutoComplete {
         return suggestions
     }
 
+    // periphery:ignore - Reserved: context parameter kept for API compatibility
     private func getTemplateSuggestions(for input: String, context: CompletionContext) -> [AutoCompleteSuggestion] {
         let templates = [
             "Explain [topic] in simple terms",

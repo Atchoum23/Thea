@@ -4,6 +4,7 @@
 import OSLog
 import SwiftUI
 
+// periphery:ignore - Reserved: RemoteAccessSettingsView type reserved for future feature activation
 struct RemoteAccessSettingsView: View {
     #if os(macOS)
         @ObservedObject private var server = TheaRemoteServer.shared

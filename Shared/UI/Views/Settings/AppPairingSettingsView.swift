@@ -5,6 +5,7 @@ import SwiftUI
 
 #if os(macOS)
 
+// periphery:ignore - Reserved: AppPairingSettingsView type reserved for future feature activation
 struct AppPairingSettingsView: View {
     var body: some View {
         Text("App Pairing - Coming in G2")

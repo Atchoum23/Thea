@@ -68,6 +68,7 @@ final class TaskPlanDAG {
         // Execute in topological order, parallelizing when possible
         while true {
             let readyNodes = activePlans[index].nodes.filter { node in
+                // periphery:ignore - Reserved: execute(_:) instance method reserved for future feature activation
                 node.status == .pending &&
                     node.dependsOn.allSatisfy { depID in
                         results[depID]?.success == true
@@ -145,6 +146,7 @@ final class TaskPlanDAG {
 
             case .integration:
                 let result = try await executeIntegration(node)
+                // periphery:ignore - Reserved: executeNode(_:) instance method reserved for future feature activation
                 return TaskNodeResult(success: true, output: result)
 
             case .compound:
@@ -167,6 +169,8 @@ final class TaskPlanDAG {
         guard let modelID = models.first?.id else {
             return "No model available"
         }
+
+// periphery:ignore - Reserved: executeAIQuery(_:) instance method reserved for future feature activation
 
         let message = AIMessage(
             id: UUID(),
@@ -198,6 +202,7 @@ final class TaskPlanDAG {
         #else
         return "Integration actions not available on this platform"
         #endif
+    // periphery:ignore - Reserved: executeIntegration(_:) instance method reserved for future feature activation
     }
 
     // MARK: - Goal Decomposition
@@ -209,6 +214,8 @@ final class TaskPlanDAG {
         if lower.contains("plan my week") || lower.contains("weekly plan") {
             return weeklyPlanSteps()
         }
+
+// periphery:ignore - Reserved: context parameter kept for API compatibility
 
         if lower.contains("morning routine") || lower.contains("start my day") {
             return morningRoutineSteps()
@@ -344,9 +351,11 @@ final class TaskPlanDAG {
 
     func clearCompletedPlans() {
         activePlans.removeAll { $0.status == .completed }
+    // periphery:ignore - Reserved: removePlan(_:) instance method reserved for future feature activation
     }
 }
 
+// periphery:ignore - Reserved: clearCompletedPlans() instance method reserved for future feature activation
 // MARK: - Types
 
 struct TaskPlan: Identifiable, Sendable {
@@ -356,6 +365,9 @@ struct TaskPlan: Identifiable, Sendable {
     let createdAt: Date
     var status: PlanStatus
 
+// periphery:ignore - Reserved: goal property reserved for future feature activation
+
+    // periphery:ignore - Reserved: createdAt property reserved for future feature activation
     enum PlanStatus: String, Sendable {
         case ready
         case executing
@@ -369,10 +381,13 @@ struct TaskPlanNode: Identifiable, Sendable {
     let id: UUID
     let title: String
     let action: String
+    // periphery:ignore - Reserved: title property reserved for future feature activation
     let actionType: ActionType
     let dependsOn: [UUID]
     var status: NodeStatus = .pending
     var result: String?
+
+// periphery:ignore - Reserved: result property reserved for future feature activation
 
     init(title: String, action: String, actionType: ActionType, dependsOn: [UUID]) {
         self.id = UUID()
@@ -402,6 +417,7 @@ struct TaskNodeResult: Sendable {
     let output: String
 }
 
+// periphery:ignore - Reserved: TaskPlanResult type reserved for future feature activation
 struct TaskPlanResult: Sendable {
     let planID: UUID
     let success: Bool

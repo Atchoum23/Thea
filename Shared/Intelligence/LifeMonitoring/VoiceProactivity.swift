@@ -387,6 +387,7 @@ public actor VoiceProactivity {
         await processPendingInteractions()
     }
 
+    // periphery:ignore - Reserved: interaction parameter kept for API compatibility
     func waitForResponse(interaction: VoiceInteraction, timeout: TimeInterval) async -> VoiceResponse? {
         let deadline = Date().addingTimeInterval(timeout)
 

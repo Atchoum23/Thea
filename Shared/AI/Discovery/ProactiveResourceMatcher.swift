@@ -144,6 +144,7 @@ public final class ProactiveResourceMatcher: ObservableObject {
     private var userPreferences = UserResourcePreferences()
     private var usageHistory: [UUID: ResourceUsageStats] = [:]
     private var nlpTagger: NLTagger?
+    // periphery:ignore - Reserved: cancellables property reserved for future feature activation
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Keyword/Topic Mappings

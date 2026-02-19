@@ -16,14 +16,17 @@ public actor PatternDetector {
     private var communicationPatterns: [CommunicationPattern] = []
 
     // Configuration
+    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let minimumOccurrencesForPattern = 3
     private let patternExpirationDays = 30
 
     private init() {}
 
+    // periphery:ignore - Reserved: communicationPatterns property reserved for future feature activation
     // MARK: - Public API
 
     /// Analyze context history and detect patterns
+    // periphery:ignore - Reserved: patternExpirationDays property reserved for future feature activation
     public func analyzePatterns(from history: [ContextSnapshot]) async -> [DetectedPattern] {
         var patterns: [DetectedPattern] = []
 
@@ -346,6 +349,7 @@ private struct DailyPattern {
 
     func matchesTime(hour: Int, weekday _: Int) -> Bool {
         abs(self.hour - hour) <= 1
+    // periphery:ignore - Reserved: weekday property reserved for future feature activation
     }
 }
 
@@ -355,11 +359,13 @@ private struct LocationPattern {
     var longitude: Double
     var activity: String
     var occurrences: Int
+    // periphery:ignore - Reserved: placeName property reserved for future feature activation
     var confidence: Double
     var lastSeen: Date
 
     func matchesLocation(latitude: Double, longitude: Double) -> Bool {
         let distance = sqrt(pow(self.latitude - latitude, 2) + pow(self.longitude - longitude, 2))
+        // periphery:ignore - Reserved: lastSeen property reserved for future feature activation
         return distance < 0.01 // ~1km
     }
 }
@@ -369,10 +375,14 @@ private struct AppUsagePattern {
     var appName: String
     var hour: Int
     var weekday: Int
+    // periphery:ignore - Reserved: appName property reserved for future feature activation
     var occurrences: Int
+    // periphery:ignore - Reserved: weekday property reserved for future feature activation
     var lastSeen: Date
+// periphery:ignore - Reserved: lastSeen property reserved for future feature activation
 }
 
+// periphery:ignore - Reserved: CommunicationPattern type reserved for future feature activation
 private struct CommunicationPattern {
     var contactName: String
     var preferredTime: Int

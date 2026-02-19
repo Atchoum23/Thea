@@ -139,6 +139,7 @@ struct TripLeg: Codable, Sendable, Identifiable {
          endTime: Date? = nil, confirmationCode: String? = nil,
          cost: Double? = nil, currency: String = "CHF", notes: String = "") {
         self.id = UUID()
+        // periphery:ignore - Reserved: init(type:title:location:startTime:endTime:confirmationCode:cost:currency:notes:) initializer reserved for future feature activation
         self.type = type
         self.title = title
         self.location = location
@@ -177,6 +178,7 @@ struct PackingItem: Codable, Sendable, Identifiable {
     init(name: String, category: PackingCategory = .other, isPacked: Bool = false, quantity: Int = 1) {
         self.id = UUID()
         self.name = name
+        // periphery:ignore - Reserved: init(name:category:isPacked:quantity:) initializer reserved for future feature activation
         self.category = category
         self.isPacked = isPacked
         self.quantity = quantity
@@ -216,6 +218,7 @@ final class TravelManager: ObservableObject {
 
     func updateTrip(_ trip: TravelTrip) {
         if let idx = trips.firstIndex(where: { $0.id == trip.id }) {
+            // periphery:ignore - Reserved: updateTrip(_:) instance method reserved for future feature activation
             var updated = trip
             updated.updatedAt = Date()
             trips[idx] = updated
@@ -224,6 +227,7 @@ final class TravelManager: ObservableObject {
     }
 
     func deleteTrip(id: UUID) {
+        // periphery:ignore - Reserved: deleteTrip(id:) instance method reserved for future feature activation
         trips.removeAll { $0.id == id }
         save()
     }
@@ -243,6 +247,7 @@ final class TravelManager: ObservableObject {
             .sorted { $0.endDate > $1.endDate }
     }
 
+    // periphery:ignore - Reserved: totalTripCost property reserved for future feature activation
     var totalTripCost: Double {
         trips.flatMap(\.legs).compactMap(\.cost).reduce(0, +)
     }

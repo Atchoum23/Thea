@@ -60,6 +60,9 @@ struct ClipSmartAction: Identifiable, Sendable {
     let icon: String
     let actionType: ClipActionType
 
+    // periphery:ignore - Reserved: title property reserved for future feature activation
+    // periphery:ignore - Reserved: icon property reserved for future feature activation
+    // periphery:ignore - Reserved: actionType property reserved for future feature activation
     enum ClipActionType: String, Sendable {
         case openURL
         case composeEmail
@@ -80,7 +83,9 @@ struct ClipAnalysisResult: Sendable {
     let category: ClipCategory
     let summary: String
     let suggestedActions: [ClipSmartAction]
+    // periphery:ignore - Reserved: suggestedActions property reserved for future feature activation
     let tags: [String]
+    // periphery:ignore - Reserved: languageHint property reserved for future feature activation
     let languageHint: String?
 }
 

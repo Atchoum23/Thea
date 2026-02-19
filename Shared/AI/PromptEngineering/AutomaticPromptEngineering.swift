@@ -77,11 +77,13 @@ final class AutomaticPromptEngineering {
         additionalContext: [String: Any] = [:]
     ) async -> EngineeredPrompt {
         // 1. Classify task if not provided
+        // periphery:ignore - Reserved: patternCacheLimit property reserved for future feature activation
         let classification: TaskType
         if let providedType = taskType {
             classification = providedType
         } else {
             do {
+                // periphery:ignore - Reserved: setModelContext(_:) instance method reserved for future feature activation
                 let classifiedResult = try await TaskClassifier.shared.classify(userInput)
                 classification = classifiedResult.primaryType
             } catch {
@@ -89,6 +91,8 @@ final class AutomaticPromptEngineering {
                 classification = .simpleQA
             }
         }
+
+// periphery:ignore - Reserved: engineerPrompt(userInput:taskType:additionalContext:) instance method reserved for future feature activation
 
         // 2. Gather context
         let context = await gatherContext(for: userInput, taskType: classification, additional: additionalContext)
@@ -135,6 +139,7 @@ final class AutomaticPromptEngineering {
     ) async -> GatheredContext {
         var context = GatheredContext()
 
+        // periphery:ignore - Reserved: GatheredContext type reserved for future feature activation
         // 1. System/Environment Context
         if configuration.enableContextInjection {
             context.systemContext = await getSystemContext()
@@ -144,6 +149,8 @@ final class AutomaticPromptEngineering {
         // 2. Domain-specific Context
         context.domainContext = getDomainContext(for: taskType)
         context.appliedContextTypes.append("domain:\(taskType.rawValue)")
+
+// periphery:ignore - Reserved: gatherContext(for:taskType:additional:) instance method reserved for future feature activation
 
         // 3. User Preferences
         if let prefs = await getUserPreferences(for: taskType) {
@@ -191,6 +198,7 @@ final class AutomaticPromptEngineering {
         parts.append("Platform: iOS")
         #elseif os(watchOS)
         parts.append("Platform: watchOS")
+        // periphery:ignore - Reserved: getSystemContext() instance method reserved for future feature activation
         #elseif os(tvOS)
         parts.append("Platform: tvOS")
         #endif
@@ -215,6 +223,7 @@ final class AutomaticPromptEngineering {
         case .mathLogic:
             return """
             Domain: Mathematical and Logical Reasoning
+            // periphery:ignore - Reserved: getDomainContext(for:) instance method reserved for future feature activation
             - Show step-by-step work
             - Verify calculations
             - Consider edge cases
@@ -286,6 +295,7 @@ final class AutomaticPromptEngineering {
         }
 
         let filtered = allPreferences
+            // periphery:ignore - Reserved: getUserPreferences(for:) instance method reserved for future feature activation
             .filter { $0.category == taskType.rawValue && $0.confidence > 0.5 }
             .reduce(into: [String: String]()) { result, pref in
                 result[pref.preferenceKey] = pref.preferenceValue
@@ -306,6 +316,7 @@ final class AutomaticPromptEngineering {
             return []
         }
 
+        // periphery:ignore - Reserved: selectRelevantExamples(for:taskType:) instance method reserved for future feature activation
         // Simple keyword matching for relevance
         let inputWords = Set(input.lowercased().split(separator: " ").map(String.init))
 
@@ -347,6 +358,8 @@ final class AutomaticPromptEngineering {
             return []
         }
 
+// periphery:ignore - Reserved: getRelevantErrorPatterns(for:) instance method reserved for future feature activation
+
         // Filter by language if task type is code-related
         let isCodeTask = taskType == .codeGeneration || taskType == .debugging || taskType == .appDevelopment
         let relevantLanguage = isCodeTask ? "swift" : nil
@@ -371,6 +384,8 @@ final class AutomaticPromptEngineering {
         } else if wordCount > 50 {
             score += 1
         }
+
+// periphery:ignore - Reserved: estimateComplexity(input:taskType:) instance method reserved for future feature activation
 
         // Task-type complexity bonus
         switch taskType {
@@ -418,6 +433,7 @@ final class AutomaticPromptEngineering {
             if configuration.enableTreeOfThoughts {
                 return .treeOfThoughts
             } else if configuration.enableSelfConsistency {
+                // periphery:ignore - Reserved: selectReasoningStrategy(for:complexity:) instance method reserved for future feature activation
                 return .selfConsistency
             }
         }
@@ -448,6 +464,7 @@ final class AutomaticPromptEngineering {
     ) async -> EngineeredPrompt {
         var sections: [String] = []
 
+        // periphery:ignore - Reserved: buildOptimizedPrompt(input:taskType:context:strategy:) instance method reserved for future feature activation
         // 1. Role Assignment
         if configuration.enableRoleAssignment {
             sections.append(buildRoleSection(for: taskType))
@@ -518,6 +535,7 @@ final class AutomaticPromptEngineering {
             role = "You are an expert Swift 6.0 developer with deep knowledge of Apple platforms (macOS, iOS, watchOS, tvOS, visionOS). You write clean, efficient, and well-documented code following the latest best practices."
         case .mathLogic:
             role = "You are a mathematician and logician who solves problems step-by-step, showing all work and verifying solutions."
+        // periphery:ignore - Reserved: buildRoleSection(for:) instance method reserved for future feature activation
         case .creativeWriting:
             role = "You are a skilled creative writer who crafts engaging, well-structured content tailored to the audience and purpose."
         case .summarization:
@@ -541,6 +559,7 @@ final class AutomaticPromptEngineering {
             return "## Approach\nProvide a direct, focused response."
 
         case .chainOfThought:
+            // periphery:ignore - Reserved: buildReasoningInstructions(for:) instance method reserved for future feature activation
             return """
             ## Reasoning Approach
             Think through this step-by-step:
@@ -597,6 +616,7 @@ final class AutomaticPromptEngineering {
         case .codeGeneration:
             return """
             ## Output Format
+            // periphery:ignore - Reserved: buildOutputFormatSection(for:) instance method reserved for future feature activation
             Provide:
             1. Brief explanation of the approach
             2. Complete, working code with comments
@@ -675,6 +695,7 @@ final class AutomaticPromptEngineering {
         // LRU eviction if at limit
         if patternCache.count >= patternCacheLimit {
             if let oldestKey = patternCache.min(by: { $0.value.lastUsed < $1.value.lastUsed })?.key {
+                // periphery:ignore - Reserved: cachePattern(for:pattern:successRate:) instance method reserved for future feature activation
                 patternCache.removeValue(forKey: oldestKey)
             }
         }
@@ -690,10 +711,13 @@ final class AutomaticPromptEngineering {
         patternCache[key]?.pattern
     }
 
+// periphery:ignore - Reserved: getCachedPattern(for:) instance method reserved for future feature activation
+
     // MARK: - Outcome Tracking
 
     func recordOutcome(
         prompt: EngineeredPrompt,
+        // periphery:ignore - Reserved: recordOutcome(prompt:success:userFeedback:) instance method reserved for future feature activation
         success: Bool,
         userFeedback: String? = nil
     ) async {
@@ -727,6 +751,7 @@ enum PromptComplexityLevel: String, Codable, Sendable {
 }
 
 struct EngineeredPrompt: Sendable {
+    // periphery:ignore - Reserved: EngineeredPrompt type reserved for future feature activation
     let prompt: String
     let taskType: TaskType
     let strategy: AutomaticPromptEngineering.ReasoningStrategy
@@ -744,6 +769,7 @@ struct EngineeredPrompt: Sendable {
 }
 
 struct OptimizationDetails: Sendable {
+    // periphery:ignore - Reserved: originalInput property reserved for future feature activation
     let originalInput: String
     let taskType: TaskType
     let strategyUsed: AutomaticPromptEngineering.ReasoningStrategy

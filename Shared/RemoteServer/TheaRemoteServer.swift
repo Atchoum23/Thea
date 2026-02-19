@@ -498,14 +498,17 @@ import Network
 
         private func performHTTPRequest(url _: URL, method _: String, headers _: [String: String], body _: Data?) async throws -> NetworkProxyResponse {
             // SECURITY FIX (FINDING-001): HTTP proxy disabled
+            // periphery:ignore - Reserved: performHTTPRequest(url:method:headers:body:) instance method reserved for future feature activation
             throw RemoteServerError.featureDisabled("HTTP proxy disabled for security")
         }
 
         private func establishTCPProxy(host _: String, port _: Int) async throws -> NetworkProxyResponse {
+            // periphery:ignore - Reserved: establishTCPProxy(host:port:) instance method reserved for future feature activation
             // SECURITY FIX (FINDING-001): TCP proxy disabled
             throw RemoteServerError.featureDisabled("TCP proxy disabled for security")
         }
 
+        // periphery:ignore - Reserved: scanLocalNetwork() instance method reserved for future feature activation
         private func scanLocalNetwork() async throws -> NetworkProxyResponse {
             // SECURITY FIX (FINDING-001): Network scanning disabled
             throw RemoteServerError.featureDisabled("Network scanning disabled for security")

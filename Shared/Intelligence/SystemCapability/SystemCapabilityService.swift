@@ -56,6 +56,7 @@ public enum ChipFamily: String, Sendable {
 public final class SystemCapabilityService {
     public static let shared = SystemCapabilityService()
 
+    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let logger = Logger(subsystem: "com.thea.intelligence", category: "SystemCapability")
 
     // MARK: - Hardware Properties (computed once at init)

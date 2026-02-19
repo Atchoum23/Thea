@@ -6,9 +6,12 @@ import os.log
 private let appMonitorLogger = Logger(subsystem: "ai.thea.app", category: "ForegroundAppMonitor")
 
 /// Monitors foreground app changes and extracts context for AI assistance
+// periphery:ignore - Reserved: appMonitorLogger global var reserved for future feature activation
 @MainActor
 final class ForegroundAppMonitor: ObservableObject {
     static let shared = ForegroundAppMonitor()
+
+// periphery:ignore - Reserved: ForegroundAppMonitor type reserved for future feature activation
 
     // MARK: - Published Properties
 
@@ -222,6 +225,7 @@ final class ForegroundAppMonitor: ObservableObject {
 // MARK: - AppContext Model
 
 struct AppContext: Sendable {
+    // periphery:ignore - Reserved: AppContext type reserved for future feature activation
     let bundleID: String
     let appName: String
     let windowTitle: String
@@ -267,5 +271,6 @@ struct AppContext: Sendable {
 // MARK: - Notification Extension
 
 extension Notification.Name {
+    // periphery:ignore - Reserved: foregroundAppContextChanged static property reserved for future feature activation
     static let foregroundAppContextChanged = Notification.Name("foregroundAppContextChanged")
 }

@@ -15,6 +15,7 @@ final class GoogleProvider: AIProvider, Sendable {
     )
 
     let capabilities = ProviderCapabilities(
+        // periphery:ignore - Reserved: capabilities property reserved for future feature activation
         supportsStreaming: true,
         supportsVision: true,
         supportsFunctionCalling: true,
@@ -36,6 +37,7 @@ final class GoogleProvider: AIProvider, Sendable {
 
     // MARK: - Validation
 
+    // periphery:ignore - Reserved: validateAPIKey(_:) instance method reserved for future feature activation
     func validateAPIKey(_ key: String) async throws -> ValidationResult {
         guard let url = URL(string: "\(baseURL)/models?key=\(key)") else {
             return .failure("Invalid API URL configuration")

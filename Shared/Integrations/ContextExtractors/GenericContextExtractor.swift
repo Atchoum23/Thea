@@ -5,7 +5,10 @@ import os.log
 
 private let genericLogger = Logger(subsystem: "ai.thea.app", category: "GenericContextExtractor")
 
+// periphery:ignore - Reserved: genericLogger global var reserved for future feature activation
+
 /// Generic fallback context extractor for apps without specific handlers
+// periphery:ignore - Reserved: GenericContextExtractor type reserved for future feature activation
 enum GenericContextExtractor {
     /// Extract basic context from any app using Accessibility API
     static func extract(

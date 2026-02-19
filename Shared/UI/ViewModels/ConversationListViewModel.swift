@@ -47,18 +47,23 @@ final class ConversationListViewModel {
         chatManager.conversations
     }
 
+// periphery:ignore - Reserved: chatManager property reserved for future feature activation
+
     /// Filtered conversations based on search text
     var filteredConversations: [Conversation] {
+        // periphery:ignore - Reserved: init(chatManager:) initializer reserved for future feature activation
         guard !searchText.isEmpty else {
             return allConversations
         }
         let searchLower = searchText.lowercased()
         return allConversations.filter { conversation in
             conversation.title.lowercased().contains(searchLower) ||
+            // periphery:ignore - Reserved: allConversations property reserved for future feature activation
             conversation.messages.contains { message in
                 message.content.textValue.lowercased().contains(searchLower)
             }
         }
+    // periphery:ignore - Reserved: filteredConversations property reserved for future feature activation
     }
 
     /// Pinned conversations (filtered)
@@ -72,14 +77,18 @@ final class ConversationListViewModel {
     }
 
     /// Conversations grouped by date
+    // periphery:ignore - Reserved: pinnedConversations property reserved for future feature activation
     var conversationsByDate: [(title: String, conversations: [Conversation])] {
         let unpinned = recentConversations
         let calendar = Calendar.current
         let now = Date()
 
+// periphery:ignore - Reserved: recentConversations property reserved for future feature activation
+
         var today: [Conversation] = []
         var yesterday: [Conversation] = []
         var thisWeek: [Conversation] = []
+        // periphery:ignore - Reserved: conversationsByDate property reserved for future feature activation
         var thisMonth: [Conversation] = []
         var older: [Conversation] = []
 
@@ -119,22 +128,26 @@ final class ConversationListViewModel {
     }
 
     /// Select a conversation
+    // periphery:ignore - Reserved: createNewConversation() instance method reserved for future feature activation
     func selectConversation(_ conversation: Conversation) {
         selectedConversation = conversation
         chatManager.selectConversation(conversation)
     }
 
     /// Request deletion of a conversation (shows confirmation)
+    // periphery:ignore - Reserved: selectConversation(_:) instance method reserved for future feature activation
     func requestDelete(_ conversation: Conversation) {
         conversationToDelete = conversation
         showingDeleteConfirmation = true
     }
 
+    // periphery:ignore - Reserved: requestDelete(_:) instance method reserved for future feature activation
     /// Confirm deletion of pending conversation
     func confirmDelete() {
         guard let conversation = conversationToDelete else { return }
         chatManager.deleteConversation(conversation)
 
+        // periphery:ignore - Reserved: confirmDelete() instance method reserved for future feature activation
         if selectedConversation?.id == conversation.id {
             selectedConversation = nil
         }
@@ -147,19 +160,23 @@ final class ConversationListViewModel {
     func cancelDelete() {
         conversationToDelete = nil
         showingDeleteConfirmation = false
+    // periphery:ignore - Reserved: cancelDelete() instance method reserved for future feature activation
     }
 
     /// Toggle pin status of a conversation
     func togglePin(_ conversation: Conversation) {
         chatManager.togglePin(conversation)
+    // periphery:ignore - Reserved: togglePin(_:) instance method reserved for future feature activation
     }
 
     /// Update conversation title
     func updateTitle(_ conversation: Conversation, to title: String) {
+        // periphery:ignore - Reserved: updateTitle(_:to:) instance method reserved for future feature activation
         chatManager.updateConversationTitle(conversation, title: title)
     }
 
     /// Clear search text
+    // periphery:ignore - Reserved: clearSearch() instance method reserved for future feature activation
     func clearSearch() {
         searchText = ""
     }

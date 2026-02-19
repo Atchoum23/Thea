@@ -112,6 +112,7 @@ public struct InferenceBudget: Sendable {
 @MainActor
 @Observable
 public final class MobilePowerStateMonitor {
+    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let logger = Logger(subsystem: "ai.thea.app", category: "MobilePowerStateMonitor")
     public static let shared = MobilePowerStateMonitor()
 

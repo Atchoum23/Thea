@@ -68,7 +68,7 @@ struct TheaMessagingChatView: View {
     }
 
     private var sortedPlatforms: [MessagingPlatform] {
-        gateway.connectedPlatforms.sorted { $0.displayName < $1.displayName }
+        gateway.connectedPlatforms.sorted(by: { $0.displayName < $1.displayName })
     }
 
     @ViewBuilder

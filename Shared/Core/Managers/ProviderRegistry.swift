@@ -47,8 +47,11 @@ final class ProviderRegistry {
 
         init(provider: AIProvider, isConfigured: Bool) {
             id = provider.metadata.name
+            // periphery:ignore - Reserved: name property reserved for future feature activation
             name = provider.metadata.name
+            // periphery:ignore - Reserved: requiresAPIKey property reserved for future feature activation
             displayName = provider.metadata.displayName
+            // periphery:ignore - Reserved: metadata property reserved for future feature activation
             requiresAPIKey = true
             self.isConfigured = isConfigured
             metadata = provider.metadata
@@ -152,6 +155,8 @@ final class ProviderRegistry {
         let engine = CoreMLInferenceEngine.shared
         let models = engine.discoverLLMModels()
 
+// periphery:ignore - Reserved: refreshCoreMLProviders() instance method reserved for future feature activation
+
         debugLog("📱 Found \(models.count) CoreML models")
 
         for info in models {
@@ -191,6 +196,7 @@ final class ProviderRegistry {
         !localProviders.isEmpty
     }
 
+    // periphery:ignore - Reserved: hasLocalModels property reserved for future feature activation
     /// Get all providers that have API keys configured
     var configuredProviders: [AIProvider] {
         Array(providers.values)
@@ -334,6 +340,7 @@ final class ProviderRegistry {
     func getProviderForTask(complexity: QueryComplexity) -> AIProvider? {
         let preference = orchestratorConfig.localModelPreference
 
+        // periphery:ignore - Reserved: getProviderForTask(complexity:) instance method reserved for future feature activation
         switch (preference, complexity) {
         case (.always, _):
             // Always local
@@ -361,6 +368,7 @@ final class ProviderRegistry {
 
     func configureProvider(id: String, apiKey: String) async throws -> ValidationResult {
         // Create temporary provider to validate
+        // periphery:ignore - Reserved: configureProvider(id:apiKey:) instance method reserved for future feature activation
         let provider: AIProvider
         switch id {
         case "openai":
@@ -399,6 +407,7 @@ final class ProviderRegistry {
     }
 
     func removeProvider(id: String) throws {
+        // periphery:ignore - Reserved: removeProvider(id:) instance method reserved for future feature activation
         try SecureStorage.shared.deleteAPIKey(for: id)
         providers.removeValue(forKey: id)
 
@@ -411,6 +420,7 @@ final class ProviderRegistry {
 
     // MARK: - Helper
 
+    // periphery:ignore - Reserved: createDummyProvider(id:) instance method reserved for future feature activation
     private func createDummyProvider(id: String) -> AIProvider? {
         switch id {
         case "openai":

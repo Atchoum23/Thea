@@ -94,6 +94,7 @@ struct MediaPlayerView: View {
             VStack(spacing: 0) {
                 // Player area
                 if player.currentItem != nil {
+                    // periphery:ignore - Reserved: iOSLayout property reserved for future feature activation
                     compactPlayerArea
                     Divider()
                     compactControlBar
@@ -295,6 +296,7 @@ struct MediaPlayerView: View {
         Group {
             if let avPlayer = player.player, player.currentItem?.mediaType == .video {
                 VideoPlayer(player: avPlayer)
+                    // periphery:ignore - Reserved: compactPlayerArea property reserved for future feature activation
                     .frame(height: 220)
                     .accessibilityLabel("Video player")
             } else if let item = player.currentItem {
@@ -439,6 +441,7 @@ struct MediaPlayerView: View {
     private var compactControlBar: some View {
         VStack(spacing: 8) {
             // Progress
+            // periphery:ignore - Reserved: compactControlBar property reserved for future feature activation
             HStack(spacing: 4) {
                 Text(MediaPlayer.formatDuration(player.currentTime))
                     .font(.caption2.monospacedDigit())
@@ -550,6 +553,7 @@ struct MediaPlayerView: View {
 
     private var nowPlayingSection: some View {
         Group {
+            // periphery:ignore - Reserved: nowPlayingSection property reserved for future feature activation
             if let item = player.currentItem {
                 Section("Now Playing") {
                     VStack(alignment: .leading, spacing: 4) {
@@ -594,6 +598,7 @@ struct MediaPlayerView: View {
     }
 
     private var historySection: some View {
+        // periphery:ignore - Reserved: historySection property reserved for future feature activation
         Section("Recent (\(player.history.count))") {
             ForEach(filteredHistory) { item in
                 historyRow(item)
@@ -604,6 +609,7 @@ struct MediaPlayerView: View {
         }
     }
 
+    // periphery:ignore - Reserved: favoritesSection property reserved for future feature activation
     private var favoritesSection: some View {
         Section("Favorites") {
             ForEach(player.favorites()) { item in

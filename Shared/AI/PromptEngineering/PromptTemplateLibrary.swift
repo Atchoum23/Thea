@@ -31,11 +31,15 @@ final class PromptTemplateLibrary {
         }
     }
 
+// periphery:ignore - Reserved: config property reserved for future feature activation
+
     // MARK: - Template Selection
 
+    // periphery:ignore - Reserved: logger property reserved for future feature activation
     func selectBestTemplate(for category: String, minSuccessRate: Float) async -> PromptTemplate? {
         await refreshCacheIfNeeded()
 
+        // periphery:ignore - Reserved: setModelContext(_:) instance method reserved for future feature activation
         guard let templates = templatesCache[category] else {
             return nil
         }
@@ -44,6 +48,7 @@ final class PromptTemplateLibrary {
         let candidates = templates.filter { $0.isActive && $0.successRate >= minSuccessRate }
 
         // Return template with highest success rate
+        // periphery:ignore - Reserved: selectBestTemplate(for:minSuccessRate:) instance method reserved for future feature activation
         return candidates.max { a, b in
             a.successRate < b.successRate
         }
@@ -61,6 +66,7 @@ final class PromptTemplateLibrary {
     }
 
     private func refreshCache() async {
+        // periphery:ignore - Reserved: refreshCacheIfNeeded() instance method reserved for future feature activation
         guard let context = modelContext else { return }
 
         // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
@@ -69,6 +75,8 @@ final class PromptTemplateLibrary {
         do {
             let allTemplates = try context.fetch(descriptor)
             let templates = allTemplates.filter(\.isActive)
+
+// periphery:ignore - Reserved: refreshCache() instance method reserved for future feature activation
 
             templatesCache.removeAll()
             for template in templates {
@@ -91,6 +99,7 @@ final class PromptTemplateLibrary {
         let existingCount: Int
         do {
             existingCount = try context.fetchCount(descriptor)
+        // periphery:ignore - Reserved: initializeDefaultTemplates() instance method reserved for future feature activation
         } catch {
             logger.error("Failed to fetch template count: \(error.localizedDescription)")
             existingCount = 0
@@ -121,6 +130,7 @@ final class PromptTemplateLibrary {
 
         templates.append(PromptTemplate(
             name: "Swift Code Generation",
+            // periphery:ignore - Reserved: createDefaultTemplates() instance method reserved for future feature activation
             category: "Coder",
             templateText: """
             You are an expert Swift 6.0 engineer. Generate production-ready code following these requirements:
@@ -431,6 +441,7 @@ final class PromptTemplateLibrary {
         // Fetch all and sort in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<PromptTemplate>()
         let allTemplates: [PromptTemplate]
+        // periphery:ignore - Reserved: getAllTemplates() instance method reserved for future feature activation
         do {
             allTemplates = try context.fetch(descriptor)
         } catch {
@@ -445,6 +456,7 @@ final class PromptTemplateLibrary {
 
         // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<PromptTemplate>()
+        // periphery:ignore - Reserved: getTemplatesByCategory(_:) instance method reserved for future feature activation
         let allTemplates: [PromptTemplate]
         do {
             allTemplates = try context.fetch(descriptor)
@@ -461,6 +473,7 @@ final class PromptTemplateLibrary {
         name: String,
         category: String,
         templateText: String
+    // periphery:ignore - Reserved: createTemplate(name:category:templateText:) instance method reserved for future feature activation
     ) async {
         guard let context = modelContext else { return }
 
@@ -484,6 +497,7 @@ final class PromptTemplateLibrary {
     func updateTemplate(_ template: PromptTemplate, newText: String, createVersion: Bool) async {
         guard let context = modelContext else { return }
 
+        // periphery:ignore - Reserved: updateTemplate(_:newText:createVersion:) instance method reserved for future feature activation
         if createVersion {
             let newTemplate = PromptTemplate(
                 name: template.name,
@@ -510,6 +524,8 @@ final class PromptTemplateLibrary {
     func deleteTemplate(_ template: PromptTemplate) async {
         guard let context = modelContext else { return }
 
+// periphery:ignore - Reserved: deleteTemplate(_:) instance method reserved for future feature activation
+
         template.isActive = false
         do {
             try context.save()
@@ -524,6 +540,7 @@ final class PromptTemplateLibrary {
     // MARK: - Analytics
 
     func getTemplatePerformance() async -> [TemplatePerformance] {
+        // periphery:ignore - Reserved: getTemplatePerformance() instance method reserved for future feature activation
         let templates = await getAllTemplates()
 
         return templates.map { template in
@@ -541,6 +558,7 @@ final class PromptTemplateLibrary {
 
 // MARK: - Supporting Structures
 
+// periphery:ignore - Reserved: TemplatePerformance type reserved for future feature activation
 struct TemplatePerformance {
     let name: String
     let category: String

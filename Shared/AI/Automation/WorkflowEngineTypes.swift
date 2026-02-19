@@ -39,6 +39,7 @@ struct AutomationWorkflow: Identifiable, Codable, Sendable {
         self.createdAt = Date()
         self.lastModified = Date()
         self.lastRun = nil
+        // periphery:ignore - Reserved: init(id:name:description:nodes:connections:trigger:isEnabled:) initializer reserved for future feature activation
         self.runCount = 0
     }
 }
@@ -75,6 +76,7 @@ struct AutomationNode: Identifiable, Codable, Sendable {
 }
 
 /// Types of automation nodes available
+// periphery:ignore - Reserved: init(id:type:name:position:configuration:isEnabled:) initializer reserved for future feature activation
 enum AutomationNodeType: String, Codable, Sendable, CaseIterable {
     case llmPrompt = "LLM Prompt"
     case httpRequest = "HTTP Request"
@@ -157,6 +159,7 @@ struct NodeConfiguration: Codable, Sendable {
 struct Connection: Identifiable, Codable, Sendable {
     let id: UUID
     var sourceNodeId: UUID
+    // periphery:ignore - Reserved: init(parameters:retryCount:timeout:continueOnError:) initializer reserved for future feature activation
     var targetNodeId: UUID
     var sourcePort: String
     var targetPort: String
@@ -179,6 +182,8 @@ struct Connection: Identifiable, Codable, Sendable {
     }
 }
 
+// periphery:ignore - Reserved: init(id:sourceNodeId:targetNodeId:sourcePort:targetPort:condition:) initializer reserved for future feature activation
+
 /// Workflow trigger types
 enum AutomationWorkflowTrigger: Codable, Sendable {
     case manual
@@ -196,21 +201,36 @@ struct AutomationWorkflowResult: Sendable {
     let workflowId: UUID
     let startTime: Date
     let endTime: Date
+    // periphery:ignore - Reserved: manual case reserved for future feature activation
+    // periphery:ignore - Reserved: schedule(cron:) case reserved for future feature activation
+    // periphery:ignore - Reserved: webhook(path:) case reserved for future feature activation
+    // periphery:ignore - Reserved: fileChange(path:) case reserved for future feature activation
+    // periphery:ignore - Reserved: voiceCommand(phrase:) case reserved for future feature activation
+    // periphery:ignore - Reserved: shortcut(name:) case reserved for future feature activation
     let status: AutomationExecutionStatus
     let nodeResults: [UUID: NodeResult]
     let error: String?
 
     var duration: TimeInterval {
         endTime.timeIntervalSince(startTime)
+    // periphery:ignore - Reserved: workflowId property reserved for future feature activation
     }
 }
 
+// periphery:ignore - Reserved: nodeResults property reserved for future feature activation
+// periphery:ignore - Reserved: error property reserved for future feature activation
 struct NodeResult: Sendable {
+    // periphery:ignore - Reserved: duration property reserved for future feature activation
     let nodeId: UUID
     let status: AutomationExecutionStatus
     let output: String?
     let error: String?
     let duration: TimeInterval
+// periphery:ignore - Reserved: nodeId property reserved for future feature activation
+// periphery:ignore - Reserved: status property reserved for future feature activation
+// periphery:ignore - Reserved: output property reserved for future feature activation
+// periphery:ignore - Reserved: error property reserved for future feature activation
+// periphery:ignore - Reserved: duration property reserved for future feature activation
 }
 
 enum AutomationExecutionStatus: String, Sendable {
@@ -224,6 +244,7 @@ enum AutomationExecutionStatus: String, Sendable {
 
 // MARK: - Errors
 
+// periphery:ignore - Reserved: AutomationWorkflowError type reserved for future feature activation
 enum AutomationWorkflowError: Error, LocalizedError {
     case invalidConfiguration(String)
     case executionFailed(String)

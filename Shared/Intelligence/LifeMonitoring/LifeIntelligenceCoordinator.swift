@@ -27,6 +27,7 @@ public actor LifeIntelligenceCoordinator {
     // MARK: - Subsystems
 
     private let focusIntelligence = FocusModeIntelligence.shared
+    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let taskIntelligence = TaskIntelligence.shared
     private let relationshipIntelligence = RelationshipIntelligence.shared
 
@@ -39,6 +40,7 @@ public actor LifeIntelligenceCoordinator {
 
     // MARK: - Types
 
+    // periphery:ignore - Reserved: pendingDecisions property reserved for future feature activation
     public struct LifeContext: Sendable {
         public var currentFocusMode: String?
         public var isFocusModeActive: Bool = false
@@ -185,8 +187,10 @@ public actor LifeIntelligenceCoordinator {
         messageContent: String,
         platform: String,
         isCall: Bool
+    // periphery:ignore - Reserved: contactName parameter kept for API compatibility
     ) async -> CommunicationDecision {
         // Gather all context
+        // periphery:ignore - Reserved: isCall parameter kept for API compatibility
         var urgencyScore: Double = 0.3 // Base
 
         // 1. Check relationship context
@@ -294,6 +298,7 @@ public actor LifeIntelligenceCoordinator {
 
     private func generateAutoReply(for contactId: String?, platform: String) -> String {
         // Would be more sophisticated with templates
+        // periphery:ignore - Reserved: contactId parameter kept for API compatibility
         "I'm currently focused on something. I'll get back to you soon."
     }
 
@@ -382,6 +387,7 @@ public actor LifeIntelligenceCoordinator {
 
     private enum NotificationPriority {
         case high, medium, low
+    // periphery:ignore - Reserved: medium case reserved for future feature activation
     }
 
     // MARK: - Context Updates
@@ -536,6 +542,7 @@ public actor LifeIntelligenceCoordinator {
     }
 
     /// Log a communication event
+    // periphery:ignore - Reserved: logCommunication(contactId:contactName:direction:type:platform:) instance method reserved for future feature activation
     func logCommunication(
         contactId: String,
         contactName: String,

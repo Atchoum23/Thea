@@ -229,6 +229,7 @@ extension KnowledgeSourceManager {
         // Tutorials often contain step-by-step instructions
         [ExtractedFeature(
             name: "Tutorial Content",
+            // periphery:ignore - Reserved: _content parameter kept for API compatibility
             description: "Step-by-step learning material",
             implementationStatus: .notStarted,
             extractedAt: Date()
@@ -239,6 +240,7 @@ extension KnowledgeSourceManager {
     private func extractReferenceFeatures(_ _content: String) -> [ExtractedFeature] {
         [ExtractedFeature(
             name: "Reference Material",
+            // periphery:ignore - Reserved: _content parameter kept for API compatibility
             description: "Technical reference documentation",
             implementationStatus: .notStarted,
             extractedAt: Date()
@@ -248,6 +250,7 @@ extension KnowledgeSourceManager {
     /// Extract generic features
     private func extractGenericFeatures(_ _content: String) -> [ExtractedFeature] {
         [ExtractedFeature(
+            // periphery:ignore - Reserved: _content parameter kept for API compatibility
             name: "General Content",
             description: "General information and patterns",
             implementationStatus: .notStarted,
@@ -298,6 +301,8 @@ extension KnowledgeSourceManager {
     enum AuditError: Error {
         case fetchFailed(String)
         case parsingFailed(String)
+        // periphery:ignore - Reserved: parsingFailed(_:) case reserved for future feature activation
+        // periphery:ignore - Reserved: invalidContent case reserved for future feature activation
         case invalidContent
     }
 

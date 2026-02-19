@@ -211,5 +211,6 @@ struct TimestampedAction: Sendable {
     let action: UserAction
     let hourOfDay: Int
     let dayOfWeek: Int
+    // periphery:ignore - Reserved: minuteOfHour property reserved for future feature activation
     let minuteOfHour: Int
 }

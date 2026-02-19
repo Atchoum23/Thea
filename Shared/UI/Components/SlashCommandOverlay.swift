@@ -201,6 +201,7 @@ struct SlashCommandOverlay: View {
     func moveSelectionUp() {
         guard !filteredCommands.isEmpty else { return }
         withAnimation(TheaAnimation.micro) {
+            // periphery:ignore - Reserved: moveSelectionUp() instance method reserved for future feature activation
             selectedIndex = (selectedIndex - 1 + filteredCommands.count) % filteredCommands.count
         }
     }
@@ -208,6 +209,7 @@ struct SlashCommandOverlay: View {
     /// Move selection down in the command list
     func moveSelectionDown() {
         guard !filteredCommands.isEmpty else { return }
+        // periphery:ignore - Reserved: moveSelectionDown() instance method reserved for future feature activation
         withAnimation(TheaAnimation.micro) {
             selectedIndex = (selectedIndex + 1) % filteredCommands.count
         }
@@ -215,6 +217,7 @@ struct SlashCommandOverlay: View {
 
     /// Confirm the currently selected command
     func confirmSelection() {
+        // periphery:ignore - Reserved: confirmSelection() instance method reserved for future feature activation
         guard !filteredCommands.isEmpty,
               selectedIndex < filteredCommands.count else { return }
         onSelect(filteredCommands[selectedIndex])
@@ -280,6 +283,7 @@ private struct SlashCommandRow: View {
 
 extension View {
     /// Attach a slash command overlay above this view
+    // periphery:ignore - Reserved: withSlashCommands(inputText:onSelect:) instance method reserved for future feature activation
     func withSlashCommands(
         inputText: Binding<String>,
         onSelect: @escaping (SlashCommand) -> Void

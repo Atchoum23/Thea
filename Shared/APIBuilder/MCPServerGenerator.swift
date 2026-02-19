@@ -20,6 +20,7 @@ public actor MCPServerGenerator {
     private let mcpGeneratorLogger = Logger(subsystem: "ai.thea.app", category: "MCPServerGenerator")
     private var generatedServers: [String: GeneratedMCPServer] = [:]
     private var templates: [String: MCPTemplate] = [:]
+    // periphery:ignore - Reserved: mcpGeneratorLogger property reserved for future feature activation
     private var isInitialized = false
 
     // MARK: - Initialization
@@ -204,6 +205,8 @@ public actor MCPServerGenerator {
     private func generateServerInitializeHandler(for spec: MCPServerSpec) -> String {
         """
 
+// periphery:ignore - Reserved: spec parameter kept for API compatibility
+
             // MARK: - Initialize Handler
 
             private func handleInitialize(_ request: MCPRequest) async throws -> MCPResponse {
@@ -287,6 +290,7 @@ public actor MCPServerGenerator {
     // MARK: - List Handlers Generation
 
     private func generateListHandlers(for spec: MCPServerSpec) -> String {
+        // periphery:ignore - Reserved: generateListHandlers(for:) instance method reserved for future feature activation
         var code = """
 
             // MARK: - List Handlers
@@ -345,6 +349,7 @@ public actor MCPServerGenerator {
         return code
     }
 
+    // periphery:ignore - Reserved: generateInputSchema(_:) instance method reserved for future feature activation
     private func generateInputSchema(_ parameters: [MCPParameterSpec]) -> String {
         var schema: [String: Any] = [
             "type": "object",

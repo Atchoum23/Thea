@@ -6,6 +6,7 @@ import SwiftUI
 
 enum TheaAppConfiguration {
     static let appName = "Thea"
+    // periphery:ignore - Reserved: TheaAppConfiguration type reserved for future feature activation
     static let appVersion = "1.0.0"
 
     // Shared schema for all platforms
@@ -64,5 +65,7 @@ enum TheaAppConfiguration {
 extension Notification.Name {
     static let newConversation = Notification.Name("newConversation")
     static let newProject = Notification.Name("newProject")
+    // periphery:ignore - Reserved: newProject static property reserved for future feature activation
+    // periphery:ignore - Reserved: refreshData static property reserved for future feature activation
     static let refreshData = Notification.Name("refreshData")
 }

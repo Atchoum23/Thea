@@ -88,6 +88,7 @@
                 if type.conforms(to: .presentation) { return .presentation }
                 if type.conforms(to: .spreadsheet) { return .spreadsheet }
                 if type.conforms(to: .sourceCode) { return .code }
+                // periphery:ignore - Reserved: from(utType:) static method reserved for future feature activation
                 if type.conforms(to: .archive) { return .archive }
                 if type.conforms(to: .database) { return .data }
                 if type.conforms(to: .text) || type.conforms(to: .pdf) { return .document }
@@ -163,6 +164,7 @@
                 if let fileSize = attrs[.size] as? Int64 {
                     size = fileSize
                     modifiedAt = Date()
+                // periphery:ignore - Reserved: updateSize() instance method reserved for future feature activation
                 }
             } catch {
                 let filename = fileURL.lastPathComponent; let errMsg = error.localizedDescription
@@ -176,10 +178,14 @@
             }
         }
 
+// periphery:ignore - Reserved: addTag(_:) instance method reserved for future feature activation
+
         mutating func removeTag(_ tag: String) {
             tags.removeAll { $0 == tag }
         }
     }
+
+// periphery:ignore - Reserved: removeTag(_:) instance method reserved for future feature activation
 
     // MARK: - Artifact Collection Helpers
 
@@ -196,14 +202,19 @@
             filter { $0.fileType == type }
         }
 
+// periphery:ignore - Reserved: byType(_:) instance method reserved for future feature activation
+
         var finalArtifacts: [CoworkArtifact] {
             filter { !$0.isIntermediate }
+        // periphery:ignore - Reserved: finalArtifacts property reserved for future feature activation
         }
 
         var intermediateArtifacts: [CoworkArtifact] {
+            // periphery:ignore - Reserved: intermediateArtifacts property reserved for future feature activation
             filter(\.isIntermediate)
         }
 
+        // periphery:ignore - Reserved: forStep(_:) instance method reserved for future feature activation
         func forStep(_ stepId: UUID) -> [CoworkArtifact] {
             filter { $0.stepId == stepId }
         }

@@ -182,6 +182,8 @@ final class SyncConflictManager: ObservableObject {
 
     var hasConflicts: Bool { !pendingConflicts.isEmpty }
 
+// periphery:ignore - Reserved: hasConflicts property reserved for future feature activation
+
     func addConflict(_ conflict: SyncConflictItem) {
         pendingConflicts.append(conflict)
         if activeConflict == nil {
@@ -225,5 +227,6 @@ final class SyncConflictManager: ObservableObject {
 
 extension Notification.Name {
     static let syncConflictResolved = Notification.Name("theaSyncConflictResolved")
+    // periphery:ignore - Reserved: syncConflictDetected static property reserved for future feature activation
     static let syncConflictDetected = Notification.Name("theaSyncConflictDetected")
 }

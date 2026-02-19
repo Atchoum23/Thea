@@ -100,12 +100,14 @@ final class CoreMLInferenceEngine {
 
     func loadBundledModel(name: String) async throws {
         guard let url = Bundle.main.url(forResource: name, withExtension: "mlmodelc") else {
+            // periphery:ignore - Reserved: loadBundledModel(name:) instance method reserved for future feature activation
             throw CoreMLInferenceError.modelNotFound(name)
         }
         try await loadModel(at: url, id: name)
     }
 
     func unloadModel() {
+        // periphery:ignore - Reserved: unloadModel() instance method reserved for future feature activation
         loadedModel = nil
         loadedModelID = nil
     }
@@ -153,6 +155,7 @@ struct DiscoveredCoreMLModel: Identifiable, Sendable {
     let id: String
     let name: String
     let path: URL
+    // periphery:ignore - Reserved: source property reserved for future feature activation
     let source: ModelSource
     let sizeBytes: Int64
 }

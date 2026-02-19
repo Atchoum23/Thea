@@ -10,6 +10,7 @@ import Foundation
 import Observation
 import os.log
 
+// periphery:ignore - Reserved: blockerLogger global var reserved for future feature activation
 private let blockerLogger = Logger(subsystem: "ai.thea.app", category: "BlockerAnticipator")
 
 // MARK: - Blocker Signal

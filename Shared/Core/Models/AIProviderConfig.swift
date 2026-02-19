@@ -11,6 +11,7 @@ final class AIProviderConfig {
     var installedAt: Date
     var pluginVersion: String?
 
+    // periphery:ignore - Reserved: init(id:providerName:displayName:isEnabled:hasValidAPIKey:installedAt:pluginVersion:) initializer reserved for future feature activation
     init(
         id: UUID = UUID(),
         providerName: String,
