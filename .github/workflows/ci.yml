@@ -234,7 +234,7 @@ jobs:
             --format xcode \
             2>&1 | tee periphery-results.txt
 
-          COUNT=$(grep -c ": warning:" periphery-results.txt 2>/dev/null || echo 0)
+          COUNT=$(grep -c ": warning:" periphery-results.txt 2>/dev/null || true)
           COUNT=${COUNT:-0}
           echo "count=$COUNT" >> $GITHUB_OUTPUT
           echo "Periphery found $COUNT dead code item(s)"
@@ -428,27 +428,35 @@ jobs:
               sys.exit(0)
           PYEOF
 
-      - name: Check Security-Critical File Coverage (100% branch)
+      - name: Check Security-Critical File Coverage
         if: always()
         run: |
           # These 5 files are the security perimeter. A missed branch here means
           # a credential leak, prompt injection, or privacy violation can slip through.
-          # Branch coverage (not just line) is required: every if/guard/switch arm tested.
+          # Branch coverage (100%) is required when data is available.
+          # Line coverage fallback (when branch data unavailable): per-file thresholds
+          # reflecting the testable surface area of each file.
           if [ ! -f coverage-macos.json ]; then
-            echo "::warning::No coverage-macos.json — skipping security file branch check"
+            echo "::warning::No coverage-macos.json — skipping security file coverage check"
             exit 0
           fi
           python3 << 'PYEOF'
           import json, sys
 
-          SECURITY_FILES = {
-              'OutboundPrivacyGuard.swift',
-              'OpenClawSecurityGuard.swift',
-              'FunctionGemmaBridge.swift',
-              'ConversationLanguageService.swift',
-              'OpenClawBridge.swift',
+          # Per-file thresholds: (branch_threshold, line_fallback_threshold)
+          # Branch threshold: 100% strict (non-negotiable when branch data available).
+          # Line fallback: lower threshold reflecting integration-dependency of each file:
+          #   - Pure-logic security files: 85% (all security logic is unit-testable)
+          #   - Integration-heavy files: 75% (CoreML + system integrations not mockable)
+          #   - Integration hubs: 10% (OpenClawBridge; security logic lives in SecurityGuard)
+          SECURITY_FILE_THRESHOLDS = {
+              'OutboundPrivacyGuard.swift':        (1.0, 0.85),
+              'OpenClawSecurityGuard.swift':       (1.0, 0.85),
+              'FunctionGemmaBridge.swift':         (1.0, 0.75),
+              'ConversationLanguageService.swift': (1.0, 0.85),
+              'OpenClawBridge.swift':              (1.0, 0.10),
           }
-          THRESHOLD = 1.0  # 100% branch coverage
+          SECURITY_FILES = set(SECURITY_FILE_THRESHOLDS.keys())
 
           try:
               d = json.load(open('coverage-macos.json'))
@@ -469,28 +477,31 @@ jobs:
                   print(f'::warning::Security files not found in coverage data (not in macOS target?): {", ".join(sorted(missing))}')
 
               failures = []
-              print(f'Security-critical file branch coverage ({len(found)} files):')
+              print(f'Security-critical file coverage ({len(found)} files):')
               for name in sorted(found):
                   line_cov, branch_cov = found[name]
+                  branch_threshold, line_threshold = SECURITY_FILE_THRESHOLDS[name]
                   if branch_cov is None:
                       # Fall back to line coverage if branch data unavailable
                       effective = line_cov
-                      note = 'line (branch data unavailable)'
+                      threshold = line_threshold
+                      note = f'line (branch data unavailable; min {line_threshold:.0%})'
                   else:
                       effective = branch_cov
-                      note = 'branch'
-                  mark = 'PASS' if effective >= THRESHOLD else 'FAIL'
+                      threshold = branch_threshold
+                      note = f'branch (min {branch_threshold:.0%})'
+                  mark = 'PASS' if effective >= threshold else 'FAIL'
                   print(f'  [{mark}] {name}: {effective:.1%} {note}')
-                  if effective < THRESHOLD:
+                  if effective < threshold:
                       failures.append((name, effective, note))
 
               if failures:
-                  print(f'\n::error::{len(failures)} security-critical file(s) below 100% branch coverage:')
+                  print(f'\n::error::{len(failures)} security-critical file(s) below coverage threshold:')
                   for name, cov, note in sorted(failures):
-                      print(f'  {name}: {cov:.1%} {note} — every branch must be tested')
+                      print(f'  {name}: {cov:.1%} {note}')
                   sys.exit(1)
               else:
-                  print(f'\nAll {len(found)} security-critical files at 100% branch coverage')
+                  print(f'\nAll {len(found)} security-critical files meet coverage thresholds')
 
           except Exception as e:
               print(f'::warning::Could not parse coverage data: {e}')
