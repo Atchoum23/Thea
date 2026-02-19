@@ -1,9 +1,10 @@
 import Foundation
 import OSLog
 
-// MARK: - OpenClaw Client
-// WebSocket client for OpenClaw Gateway communication
-// Connects to local Gateway at ws://127.0.0.1:18789
+// MARK: - OpenClaw Client (unchanged — connects to Thea's own WS server)
+// WebSocket client that connects to Thea's built-in TheaGatewayWSServer at ws://127.0.0.1:18789.
+// No longer connects to an external OpenClaw daemon — Thea IS the gateway (Phase O upgrade).
+// Connection URL, reconnect logic, and message parsing remain identical.
 
 actor OpenClawClient {
     private let logger = Logger(subsystem: "com.thea.app", category: "OpenClawClient")

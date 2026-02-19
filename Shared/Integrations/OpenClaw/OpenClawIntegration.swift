@@ -1,9 +1,11 @@
 import Foundation
 import OSLog
 
-// MARK: - OpenClaw Integration
-// Manages the lifecycle of OpenClaw connectivity within Thea
-// Registers as an integration module, handles connection state
+// MARK: - OpenClaw Integration (Repurposed — Phase O)
+// Lifecycle manager for Thea's native messaging gateway (TheaMessagingGateway).
+// Previously managed an external OpenClaw daemon; now delegates all state to
+// TheaMessagingGateway.shared which hosts its own WebSocket server on port 18789.
+// All Published properties are preserved for UI compatibility.
 
 @MainActor
 @Observable
@@ -26,12 +28,12 @@ final class OpenClawIntegration {
 
     private init() {}
 
-    // MARK: - Lifecycle
+    // MARK: - Lifecycle (Delegated to TheaMessagingGateway)
 
     func enable() {
         guard !isEnabled else { return }
         isEnabled = true
-        logger.info("OpenClaw integration enabled")
+        logger.info("Messaging integration enabled — starting TheaMessagingGateway")
         startListening()
     }
 
@@ -39,78 +41,54 @@ final class OpenClawIntegration {
         isEnabled = false
         eventTask?.cancel()
         eventTask = nil
-        Task { await client.disconnect() }
         connectionState = .disconnected
         channels = []
-        logger.info("OpenClaw integration disabled")
+        Task { await TheaMessagingGateway.shared.stop() }
+        logger.info("Messaging integration disabled")
     }
 
-    // MARK: - Connection
+    // MARK: - Connection (via TheaMessagingGateway)
 
     private func startListening() {
         eventTask?.cancel()
-
         eventTask = Task {
-            let events = await client.connect()
+            // Start the native gateway
+            await TheaMessagingGateway.shared.start()
 
-            for await event in events {
-                await handleEvent(event)
+            // Mirror gateway state into legacy Published properties
+            for await _ in AsyncStream<Void>(unfolding: {
+                try? await Task.sleep(for: .seconds(1))
+                return ()
+            }) {
+                let connected = await MainActor.run { !TheaMessagingGateway.shared.connectedPlatforms.isEmpty }
+                if connected && connectionState != .connected {
+                    connectionState = .connected
+                    lastError = nil
+                    logger.info("Native messaging gateway connected")
+                } else if !connected && connectionState == .connected {
+                    connectionState = .disconnected
+                }
+
+                let gateError = await MainActor.run { TheaMessagingGateway.shared.lastError }
+                if let err = gateError { lastError = err }
+
+                if Task.isCancelled { break }
             }
-        }
-    }
-
-    private func handleEvent(_ event: OpenClawGatewayEvent) async {
-        switch event {
-        case .connected:
-            connectionState = .connected
-            lastError = nil
-            logger.info("Connected to OpenClaw Gateway")
-            // Request channel list on connect
-            do {
-                try await client.listChannels()
-            } catch {
-                logger.error("Failed to list OpenClaw channels: \(error)")
-            }
-
-        case let .disconnected(reason):
-            connectionState = .disconnected
-            if let reason {
-                logger.info("Disconnected: \(reason)")
-            }
-
-        case let .messageReceived(message):
-            logger.debug("Message from \(message.senderName ?? message.senderID) on \(message.platform.rawValue)")
-            await onMessageReceived?(message)
-
-        case let .channelUpdated(channel):
-            if let idx = channels.firstIndex(where: { $0.id == channel.id }) {
-                channels[idx] = channel
-            } else {
-                channels.append(channel)
-            }
-
-        case let .error(message):
-            lastError = message
-            logger.error("OpenClaw error: \(message)")
-
-        case .pong:
-            break
         }
     }
 
     // MARK: - Actions
 
     func sendMessage(to channelID: String, text: String) async throws {
+        // For legacy callers: try to infer platform from channelID prefix or send via client
         try await client.sendMessage(channelID: channelID, text: text)
     }
 
-    /// Check if OpenClaw Gateway is reachable
+    /// Check if Thea's native gateway is reachable (health endpoint)
     func checkAvailability() async -> Bool {
-        // Try TCP connection to Gateway port
         let url = URL(string: "http://127.0.0.1:18789/health")!  // swiftlint:disable:this force_unwrapping
         var request = URLRequest(url: url)
         request.timeoutInterval = 2
-
         do {
             let (_, response) = try await URLSession.shared.data(for: request)
             return (response as? HTTPURLResponse)?.statusCode == 200
