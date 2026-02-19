@@ -8,8 +8,18 @@ name: Thea Security Scanning
 on:
   push:
     branches: [main, develop]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.github/*.md'
+      - '.claude/**'
   pull_request:
     branches: [main, develop]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.github/*.md'
+      - '.claude/**'
   workflow_dispatch:
   schedule:
     # Run weekly on Mondays at 4 AM UTC

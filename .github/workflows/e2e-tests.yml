@@ -10,9 +10,19 @@ name: Thea E2E Tests
 on:
   push:
     branches: [main, develop]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.github/*.md'
+      - '.claude/**'
   pull_request:
     branches: [main, develop]
     types: [labeled]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.github/*.md'
+      - '.claude/**'
   workflow_dispatch:
   schedule:
     # Run nightly at 3 AM UTC for regression testing
