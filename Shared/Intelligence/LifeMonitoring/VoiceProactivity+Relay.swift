@@ -20,7 +20,7 @@ extension VoiceProactivity {
     /// (conservative — prefers relay or voice confirmation).
     /// - Parameter platform: The target messaging platform.
     /// - Returns: `true` if direct send is available.
-    func canSendDirectly(platform: MessagingPlatform) async -> Bool {
+    func canSendDirectly(platform: VoiceRelayPlatform) async -> Bool {
         #if os(iOS)
         // On iOS, might need to check if unlocked
         return false // Conservative - always relay or confirm
@@ -139,7 +139,7 @@ extension VoiceProactivity {
     /// defaulting to `.iMessage` if no match is found.
     /// - Parameter response: The user's voice response.
     /// - Returns: The matched messaging platform.
-    func determinePlatform(from response: VoiceResponse?) -> MessagingPlatform {
+    func determinePlatform(from response: VoiceResponse?) -> VoiceRelayPlatform {
         guard let action = response?.matchedExpectation?.action else {
             return .iMessage // Default
         }

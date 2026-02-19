@@ -27,7 +27,11 @@ final class SlackConnectorTests: XCTestCase {
     func testConnectWithNoTokensFails() async {
         let connector = SlackConnector()
         // Missing both botToken and apiKey (Socket Mode app token)
-        await connector.connect(credentials: MessagingCredentials(isEnabled: true))
+        do {
+            try await connector.connect()
+        } catch {
+            // Expected: no tokens in test environment
+        }
         let isConn = await connector.isConnected
         XCTAssertFalse(isConn)
     }

@@ -84,7 +84,7 @@ extension VoiceProactivity {
         to recipient: String,
         recipientName: String?,
         message: String,
-        platform: MessagingPlatform
+        platform: VoiceRelayPlatform
     ) async -> Bool {
         let relay = MessageRelay(
             platform: platform,

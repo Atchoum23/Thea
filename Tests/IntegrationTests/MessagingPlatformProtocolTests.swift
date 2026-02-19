@@ -106,19 +106,19 @@ final class MessagingPlatformProtocolTests: XCTestCase {
     }
 
     func testOutboundMessageWithReplyTo() {
-        let msg = OutboundMessagingMessage(chatId: "room-2", content: "Follow-up", replyToMessageId: "msg-abc")
-        XCTAssertEqual(msg.replyToMessageId, "msg-abc")
+        let msg = OutboundMessagingMessage(chatId: "room-2", content: "Follow-up", replyToId: "msg-abc")
+        XCTAssertEqual(msg.replyToId, "msg-abc")
     }
 
     // MARK: - MessagingError
 
     func testMessagingErrorIsError() {
-        let err: Error = MessagingError.notConnected
+        let err: Error = MessagingError.notConnected(platform: .telegram)
         XCTAssertNotNil(err.localizedDescription)
     }
 
     func testMessagingErrorPlatformUnavailable() {
-        let err = MessagingError.platformUnavailable
+        let err = MessagingError.platformUnavailable(platform: .discord, reason: "not supported on this OS")
         XCTAssertFalse(err.localizedDescription.isEmpty)
     }
 }

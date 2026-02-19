@@ -18,8 +18,12 @@ final class TelegramConnectorTests: XCTestCase {
 
     func testConnectWithoutTokenSetsDisconnected() async {
         let connector = TelegramConnector()
-        // No token → should fail gracefully
-        await connector.connect(credentials: MessagingCredentials(isEnabled: true))
+        // No token → should fail gracefully (connect() reads credentials set on the connector)
+        do {
+            try await connector.connect()
+        } catch {
+            // Expected: no bot token configured in unit test environment
+        }
         let isConn = await connector.isConnected
         XCTAssertFalse(isConn)
     }

@@ -306,14 +306,6 @@ struct MessagingCredentialsStore {
     }
 }
 
-// MARK: - MessagingCredentials Codable
-
-extension MessagingCredentials: Codable {
-    enum CodingKeys: String, CodingKey {
-        case botToken, apiKey, serverUrl, webhookSecret, isEnabled
-    }
-}
-
 // MARK: - PersonalKnowledgeGraph Extension
 
 extension PersonalKnowledgeGraph {

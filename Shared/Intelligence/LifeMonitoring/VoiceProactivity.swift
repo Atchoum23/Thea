@@ -48,7 +48,7 @@ public actor VoiceProactivity {
         public var quietHoursEnd: Int = 7    // 7 AM
         public var macRelayEnabled: Bool = true
         public var macRelayHostname: String = ""
-        public var preferredPlatformByContact: [String: MessagingPlatform] = [:]
+        public var preferredPlatformByContact: [String: VoiceRelayPlatform] = [:]
 
         public init() {}
     }

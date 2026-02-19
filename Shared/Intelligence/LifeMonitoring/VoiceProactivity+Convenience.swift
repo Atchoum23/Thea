@@ -82,7 +82,7 @@ extension VoiceProactivity {
     ///   - preview: A short preview of the message content.
     public func notifyMessage(
         from sender: String,
-        platform: MessagingPlatform,
+        platform: VoiceRelayPlatform,
         preview: String
     ) async {
         let message = "New \(platform.displayName) message from \(sender). They said: \(preview)"

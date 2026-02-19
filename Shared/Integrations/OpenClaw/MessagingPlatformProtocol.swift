@@ -126,7 +126,7 @@ struct MessagingAttachment: Sendable, Codable {
 // MARK: - Credentials
 
 /// Per-platform credentials. All tokens stored in Keychain via MessagingCredentialsStore.
-struct MessagingCredentials: Sendable {
+struct MessagingCredentials: Sendable, Codable {
     var botToken: String?      // Telegram / Discord / Slack bot token
     var apiKey: String?        // WhatsApp phone number ID, Matrix access token, Slack app token
     var serverUrl: String?     // BlueBubbles URL, Matrix homeserver URL, Signal phone number
