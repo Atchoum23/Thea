@@ -1,9 +1,11 @@
 import Foundation
 import OSLog
 
-// MARK: - OpenClaw Bridge
-// Maps between OpenClaw messages and Thea's AI system
-// Routes incoming messages to AI and sends responses back
+// MARK: - OpenClaw Bridge (Multi-Platform Router)
+// Routes messages from ALL platforms (Telegram, Discord, Slack, iMessage, WhatsApp,
+// Signal, Matrix) to Thea's AI system and sends responses back.
+// Upgraded in Phase O to handle TheaGatewayMessage from TheaMessagingGateway.
+// All existing security code (rate limiting, injection mitigation, privacy guard) is preserved.
 
 @MainActor
 final class OpenClawBridge {
@@ -22,7 +24,13 @@ final class OpenClawBridge {
 
     /// Rate limiting: max responses per minute per channel
     private let maxResponsesPerMinute = 5
-    private var recentResponses: [String: [Date]] = [:]
+    /// Rate limit tracking keyed by channelID — renamed rateLimitChannels for clarity (Phase O)
+    private var rateLimitChannels: [String: [Date]] = [:]
+    /// Legacy alias (used by existing handleIncomingMessage code)
+    private var recentResponses: [String: [Date]] {
+        get { rateLimitChannels }
+        set { rateLimitChannels = newValue }
+    }
 
     private init() {}
 
@@ -176,6 +184,79 @@ final class OpenClawBridge {
         return result
     }
 }
+
+    // MARK: - Multi-Platform Router (Phase O — TheaMessagingGateway integration)
+
+    /// Process an inbound message from any of the 7 native platform connectors.
+    /// Called by TheaMessagingGateway after OpenClawSecurityGuard approval.
+    func processInboundMessage(_ message: TheaGatewayMessage) async {
+        // Route Moltbook platform messages to MoltbookAgent
+        if message.platform.rawValue == "moltbook" {
+            let ocMsg = bridgeToOpenClawMessage(message)
+            await MoltbookAgent.shared.processInboundMessage(ocMsg)
+        }
+
+        // Check sender allowlist
+        if !allowedSenders.isEmpty, !allowedSenders.contains(message.senderId) {
+            logger.debug("Ignoring message from non-allowed sender: \(message.senderId)")
+            return
+        }
+
+        // Check if auto-respond is enabled for this chat
+        guard autoRespondEnabled, autoRespondChannels.contains(message.chatId) else {
+            logger.debug("Auto-respond disabled for chat \(message.chatId) on \(message.platform.displayName)")
+            return
+        }
+
+        // Rate limiting (shared rateLimitChannels with legacy path)
+        let now = Date()
+        let channelKey = "\(message.platform.rawValue):\(message.chatId)"
+        rateLimitChannels[channelKey] = (rateLimitChannels[channelKey] ?? []).filter {
+            now.timeIntervalSince($0) < 60
+        }
+        if (rateLimitChannels[channelKey]?.count ?? 0) >= maxResponsesPerMinute {
+            logger.warning("Rate limit reached for \(message.platform.displayName)/\(message.chatId)")
+            return
+        }
+
+        // Generate AI response
+        do {
+            let ocMsg = bridgeToOpenClawMessage(message)
+            let response = try await generateAIResponse(for: ocMsg)
+
+            // Privacy guard on outbound
+            let outcome = await OutboundPrivacyGuard.shared.sanitize(response, channel: "messaging")
+            guard let sanitized = outcome.content else {
+                logger.warning("Outbound response blocked by privacy guard for \(message.chatId)")
+                return
+            }
+
+            // Send back via TheaMessagingGateway (routes to correct platform connector)
+            let outbound = OutboundMessagingMessage(chatId: message.chatId, content: sanitized, replyToId: message.id)
+            try await TheaMessagingGateway.shared.send(outbound, via: message.platform)
+
+            rateLimitChannels[channelKey, default: []].append(Date())
+            logger.info("Sent AI response to \(message.platform.displayName)/\(message.chatId)")
+        } catch {
+            logger.error("Failed to respond to \(message.platform.displayName): \(error.localizedDescription)")
+        }
+    }
+
+    /// Convert TheaGatewayMessage to OpenClawMessage for legacy code compatibility.
+    private func bridgeToOpenClawMessage(_ msg: TheaGatewayMessage) -> OpenClawMessage {
+        OpenClawMessage(
+            id: msg.id,
+            channelID: msg.chatId,
+            platform: msg.platform.openClawPlatform,
+            senderID: msg.senderId,
+            senderName: msg.senderName,
+            content: msg.content,
+            timestamp: msg.timestamp,
+            attachments: [],
+            replyToMessageID: nil,
+            isFromBot: false
+        )
+    }
 
 // MARK: - Errors
 
