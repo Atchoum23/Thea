@@ -46,16 +46,17 @@ phase and run all steps fully and autonomously, committing after each step."
 | Category                  | Status          | Notes |
 |---------------------------|-----------------|-------|
 | v1 phases (A–L)           | ✅ ALL DONE     | See Progress Tracking section |
-| Phase N: Workflows        | ⏳ PENDING      | 6 workflow files need overhaul |
-| Phase O: OpenClaw         | ⏳ PENDING      | Protocol rewrite + all new features |
-| Phase P: Components       | ⏳ PENDING      | 16 subsystem analyses |
+| Phase N: Workflows        | ✅ DONE         | All 6 YAML files written + committed (2026-02-19) |
+| Phase O: OpenClaw         | ⏳ PENDING      | Protocol rewrite + all new features (O_PRE first) |
+| Phase P: Components       | ⏳ PENDING      | 16 subsystem analyses + AI 2026 upgrades |
 | Phase Q: Tests ≥80%       | ⏳ PENDING      | Baseline measurement first |
 | Phase R: Periphery        | ⏳ PARTIAL      | ~2,667 items remain from v1 D3 |
-| Phase S: CI Green         | ⏳ PENDING      | Blocked by N |
+| Phase S: CI Green         | ⏳ PENDING      | Blocked by O + P |
 | Phase T: Notarization     | ⏳ PENDING      | Blocked by S |
+| Phase W: V1 Re-verify     | ⏳ PENDING      | Run after O + P complete |
 | Phase U: Final Report     | ⏳ PENDING      | Blocked by all above |
-| Phase V: Manual Gate      | ⏳ MANUAL       | Alexis only |
-| **Overall ship-ready %**  | **~40%**        | v1 phases done; v2 phases all pending |
+| Phase V: Manual Gate      | ⏳ MANUAL       | Alexis only — last step |
+| **Overall ship-ready %**  | **~45%**        | N done; O/P/Q/R/W/S/T/U all pending |
 
 *Last updated: 2026-02-19*
 
