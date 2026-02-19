@@ -5,6 +5,7 @@ import SwiftData
 // Platform selector + conversation thread view for all messaging platforms.
 // Accessible from macOS main navigation and iOS tab bar as "Messages".
 
+// periphery:ignore - Reserved: TheaMessagingChatView type reserved for future feature activation
 struct TheaMessagingChatView: View {
     @ObservedObject private var gateway = TheaMessagingGateway.shared
     @ObservedObject private var sessions = MessagingSessionManager.shared

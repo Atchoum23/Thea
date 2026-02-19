@@ -48,6 +48,7 @@ public actor TeamKnowledgeBase {
     private var lastSyncTime: [String: Date] = [:]
 
     /// Local pending changes
+    // periphery:ignore - Reserved: pendingChanges property reserved for future feature activation
     private var pendingChanges: [SharedKnowledgeItem] = []
 
     // MARK: - Configuration

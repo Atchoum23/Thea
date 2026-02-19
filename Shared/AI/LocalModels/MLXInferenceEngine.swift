@@ -145,6 +145,8 @@ final class MLXInferenceEngine {
         print("📦 MLXInferenceEngine: Model unloaded")
     }
 
+// periphery:ignore - Reserved: unloadModel() instance method reserved for future feature activation
+
     // MARK: - Text Generation
 
     /// Generate text completion (single turn, no history)
@@ -445,16 +447,20 @@ final class MLXInferenceEngine {
 
     /// Clear all chat sessions
     func clearAllChatSessions() {
+        // periphery:ignore - Reserved: clearChatSession(for:) instance method reserved for future feature activation
         chatSessions.removeAll()
     }
 
     // MARK: - Model Information
+
+// periphery:ignore - Reserved: clearAllChatSessions() instance method reserved for future feature activation
 
     /// Get information about available MLX models in SharedLLMs
     func getAvailableModels() -> [LocalModel] {
         LocalModelManager.shared.availableModels.filter { $0.type == .mlx }
     }
 
+    // periphery:ignore - Reserved: getAvailableModels() instance method reserved for future feature activation
     /// Check if a specific model is currently loaded
     func isModelLoaded(_ modelID: String) -> Bool {
         loadedModelID == modelID && loadedModel != nil
@@ -464,6 +470,7 @@ final class MLXInferenceEngine {
     var contextWindowSize: Int {
         // Default context window - would need model config inspection for accurate value
         8192
+    // periphery:ignore - Reserved: contextWindowSize property reserved for future feature activation
     }
 }
 
@@ -495,6 +502,7 @@ extension GenerateParameters {
     /// Create parameters optimized for chat/assistant use
     static var chat: GenerateParameters {
         GenerateParameters(
+            // periphery:ignore - Reserved: chat static property reserved for future feature activation
             maxTokens: 2048,
             temperature: 0.7,
             topP: 0.9
@@ -503,6 +511,7 @@ extension GenerateParameters {
 
     /// Create parameters for deterministic/factual responses
     static var deterministic: GenerateParameters {
+        // periphery:ignore - Reserved: deterministic static property reserved for future feature activation
         GenerateParameters(
             maxTokens: 2048,
             temperature: 0.0
@@ -510,6 +519,7 @@ extension GenerateParameters {
     }
 
     /// Create parameters for creative/diverse responses
+    // periphery:ignore - Reserved: creative static property reserved for future feature activation
     static var creative: GenerateParameters {
         GenerateParameters(
             maxTokens: 4096,

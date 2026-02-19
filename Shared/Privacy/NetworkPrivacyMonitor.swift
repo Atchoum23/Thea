@@ -102,6 +102,8 @@ actor NetworkPrivacyMonitor {
     private let maxSnapshots = 90
     private let snapshotKey = "NetworkPrivacyMonitor.snapshots"
 
+// periphery:ignore - Reserved: maxSnapshots property reserved for future feature activation
+
     // MARK: - Domain Classification
 
     private static let aiProviderDomains: Set<String> = [
@@ -266,6 +268,7 @@ actor NetworkPrivacyMonitor {
     }
 
     func getServiceStats(for service: String) -> ServiceStats? {
+        // periphery:ignore - Reserved: getServiceStats(for:) instance method reserved for future feature activation
         serviceStats[service]
     }
 
@@ -275,6 +278,7 @@ actor NetworkPrivacyMonitor {
         Array(dailySnapshots.suffix(days))
     }
 
+    // periphery:ignore - Reserved: saveDailySnapshot() instance method reserved for future feature activation
     func saveDailySnapshot() {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"

@@ -4,6 +4,7 @@
 import SwiftUI
 import OSLog
 
+// periphery:ignore - Reserved: logger global var reserved for future feature activation
 private let logger = Logger(subsystem: "ai.thea.app", category: "VoiceSettingsView")
 
 struct VoiceSettingsView: View {

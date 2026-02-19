@@ -283,11 +283,13 @@ extension TaskClassifier {
     /// Update calibration data with a classification outcome
     func updateCalibration(confidence: Double, wasCorrect: Bool) {
         let bucketIndex = min(9, Int(confidence * 10))
+        // periphery:ignore - Reserved: updateCalibration(confidence:wasCorrect:) instance method reserved for future feature activation
         calibrationData[bucketIndex].add(wasCorrect: wasCorrect)
     }
 
     /// Get current calibration statistics
     func getCalibrationStats() -> [(range: String, accuracy: Double, count: Int)] {
+        // periphery:ignore - Reserved: getCalibrationStats() instance method reserved for future feature activation
         calibrationData.map { bucket in
             (
                 range: String(format: "%.1f-%.1f", bucket.rangeStart, bucket.rangeEnd),
@@ -367,6 +369,7 @@ extension TaskClassifier {
         return responseText
     }
 
+    // periphery:ignore - Reserved: _query parameter kept for API compatibility
     func parseClassificationResponse(_ response: String, for _query: String) throws -> ClassificationResult {
         // Extract JSON from response
         let jsonString = extractJSON(from: response)

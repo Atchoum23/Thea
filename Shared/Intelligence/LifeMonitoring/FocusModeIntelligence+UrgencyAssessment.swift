@@ -91,6 +91,7 @@ extension FocusModeIntelligence {
         var totalScore: Double = 0.0
         let contactKey = contactId ?? phoneNumber ?? "unknown"
 
+        // periphery:ignore - Reserved: assessUrgencyAutonomously(contactId:phoneNumber:messageContent:platform:language:) instance method reserved for future feature activation
         // ========== 1. KEYWORD ANALYSIS ==========
         let keywordScore = analyzeKeywordsForUrgency(messageContent, language: language)
         if keywordScore > 0 {
@@ -228,6 +229,7 @@ extension FocusModeIntelligence {
                                   "emergenza", "urgente", "aiuto", "subito"]
         for keyword in emergencyKeywords {
             if lowercased.contains(keyword) {
+                // periphery:ignore - Reserved: analyzeKeywordsForUrgency(_:language:) instance method reserved for future feature activation
                 score += 0.4
             }
         }
@@ -262,6 +264,7 @@ extension FocusModeIntelligence {
                               "oggi", "adesso", "stasera", "subito"]
 
         for keyword in timeSensitive {
+            // periphery:ignore - Reserved: analyzeTimeSensitiveLanguage(_:language:) instance method reserved for future feature activation
             if lowercased.contains(keyword) {
                 score += 0.3
             }
@@ -291,6 +294,7 @@ extension FocusModeIntelligence {
                                  "worried", "scared", "anxious", "panicking"]
         for indicator in stressIndicators {
             if lowercased.contains(indicator) {
+                // periphery:ignore - Reserved: analyzeSentimentForUrgency(_:) instance method reserved for future feature activation
                 score += 0.3
             }
         }
@@ -317,6 +321,7 @@ extension FocusModeIntelligence {
         }
 
         let platforms = Set(recentComms.map { $0.platform })
+        // periphery:ignore - Reserved: countRecentPlatformAttempts(contactKey:) instance method reserved for future feature activation
         return platforms.count
     }
 
@@ -331,6 +336,7 @@ extension FocusModeIntelligence {
         case 0.4..<0.6: return .possiblyUrgent
         case 0.2..<0.4: return .unknown
         default: return .notUrgent
+        // periphery:ignore - Reserved: scoreToUrgencyLevel(_:) instance method reserved for future feature activation
         }
     }
 
@@ -346,6 +352,7 @@ extension FocusModeIntelligence {
             return .notifyUserNow
         }
 
+        // periphery:ignore - Reserved: determineRecommendation(score:signals:) instance method reserved for future feature activation
         switch score {
         case 0.8...: return .emergencyAlert
         case 0.6..<0.8: return .notifyUserNow
@@ -364,6 +371,7 @@ extension FocusModeIntelligence {
         let signalCount = Double(signals.count)
         let baseConfidence = min(0.9, signalCount * 0.15)
 
+        // periphery:ignore - Reserved: calculateConfidence(signals:) instance method reserved for future feature activation
         // Strong signals increase confidence
         let strongSignals = signals.filter { $0.weight > 0.2 }.count
         let strongBonus = Double(strongSignals) * 0.1
@@ -382,6 +390,8 @@ extension FocusModeIntelligence {
         if signals.isEmpty {
             return "No urgency signals detected. Will auto-reply and handle normally."
         }
+
+// periphery:ignore - Reserved: generateReasoning(signals:score:recommendation:) instance method reserved for future feature activation
 
         let topSignals = signals.sorted { $0.weight > $1.weight }.prefix(3)
         let signalDescriptions = topSignals.map { $0.description }.joined(separator: "; ")
@@ -421,6 +431,7 @@ extension FocusModeIntelligence {
     func enrichUrgencyWithContext(
         _ assessment: UrgencyAssessment,
         contactId: String?,
+        // periphery:ignore - Reserved: enrichUrgencyWithContext(_:contactId:messageContent:) instance method reserved for future feature activation
         messageContent: String
     ) async -> UrgencyAssessment {
         var signals = assessment.signals
@@ -476,6 +487,7 @@ extension FocusModeIntelligence {
     /// - Returns: `true` if a meeting is scheduled soon, `false` otherwise.
     func hasMeetingWithContactSoon(_ contactId: String) async -> Bool {
         // Would check calendar for events with this contact
+        // periphery:ignore - Reserved: hasMeetingWithContactSoon(_:) instance method reserved for future feature activation
         false
     }
 
@@ -486,6 +498,7 @@ extension FocusModeIntelligence {
     /// - Parameter message: The message text to analyze.
     /// - Returns: `true` if a project reference pattern is found.
     func messageContainsProjectReference(_ message: String) -> Bool {
+        // periphery:ignore - Reserved: messageContainsProjectReference(_:) instance method reserved for future feature activation
         // Would check against known project names, ticket numbers, etc.
         let lowercased = message.lowercased()
 
@@ -511,6 +524,7 @@ extension FocusModeIntelligence {
     ///
     /// - Parameter contactId: The contact identifier to check outgoing messages for.
     /// - Returns: `true` if the user recently sent a message to this contact.
+    // periphery:ignore - Reserved: isReplyToYourMessage(contactId:) instance method reserved for future feature activation
     func isReplyToYourMessage(contactId: String?) async -> Bool {
         // Would check recent outgoing messages to this contact
         false

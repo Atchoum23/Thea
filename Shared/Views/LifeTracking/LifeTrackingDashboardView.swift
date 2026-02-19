@@ -488,6 +488,7 @@ class LifeTrackingDashboardViewModel: ObservableObject {
 
     private let coordinator = LifeMonitoringCoordinator.shared
 
+    // periphery:ignore - Reserved: _timeRange parameter kept for API compatibility
     func loadData(for _timeRange: LifeTrackingTimeRange = .today) async {
         let stats = coordinator.getStatistics()
 

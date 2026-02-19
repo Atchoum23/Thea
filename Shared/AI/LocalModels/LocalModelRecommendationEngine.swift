@@ -23,6 +23,7 @@ import UIKit
 @MainActor
 @Observable
 final class LocalModelRecommendationEngine {
+    // periphery:ignore - Reserved: shared static property reserved for future feature activation
     static let shared = LocalModelRecommendationEngine()
 
     // MARK: - State

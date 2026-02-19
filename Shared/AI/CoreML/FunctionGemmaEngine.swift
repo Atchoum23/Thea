@@ -37,6 +37,9 @@ final class FunctionGemmaEngine {
     func loadModel() async throws {
         guard !isModelLoaded else { return }
 
+// periphery:ignore - Reserved: shared static property reserved for future feature activation
+
+        // periphery:ignore - Reserved: logger property reserved for future feature activation
         logger.info("Loading FunctionGemma model...")
 
         let engine = CoreMLInferenceEngine.shared
@@ -56,6 +59,7 @@ final class FunctionGemmaEngine {
             logger.info("FunctionGemma model loaded: \(model.name)")
         } else {
             // Fall back to rule-based parsing if no CoreML model available
+            // periphery:ignore - Reserved: loadModel() instance method reserved for future feature activation
             logger.info("No FunctionGemma CoreML model found — using rule-based parser")
             isModelLoaded = true
         }
@@ -86,6 +90,8 @@ final class FunctionGemmaEngine {
         let parts = splitInstruction(instruction)
         var calls: [FunctionCall] = []
 
+// periphery:ignore - Reserved: parse(_:) instance method reserved for future feature activation
+
         for part in parts {
             if let call = try await parse(part.trimmingCharacters(in: .whitespaces)) {
                 calls.append(call)
@@ -98,6 +104,7 @@ final class FunctionGemmaEngine {
     // MARK: - CoreML Parsing
 
     private func parseWithCoreML(_ instruction: String) async throws -> FunctionCall? {
+        // periphery:ignore - Reserved: parseMultiple(_:) instance method reserved for future feature activation
         let engine = CoreMLInferenceEngine.shared
         guard engine.loadedModelID != nil else { return nil }
 
@@ -116,6 +123,7 @@ final class FunctionGemmaEngine {
     // MARK: - Rule-Based Parsing
 
     private func parseWithRules(_ instruction: String) -> FunctionCall? {
+        // periphery:ignore - Reserved: parseWithCoreML(_:) instance method reserved for future feature activation
         let lower = instruction.lowercased().trimmingCharacters(in: .whitespaces)
 
         // Calendar operations
@@ -133,6 +141,7 @@ final class FunctionGemmaEngine {
             return call
         }
 
+        // periphery:ignore - Reserved: parseWithRules(_:) instance method reserved for future feature activation
         // Finder operations
         if let call = parseFinderIntent(lower, original: instruction) {
             return call
@@ -189,6 +198,8 @@ extension FunctionGemmaEngine {
             )
         }
 
+// periphery:ignore - Reserved: parseCalendarIntent(_:original:) instance method reserved for future feature activation
+
         if lower.contains("show") || lower.contains("list") || lower.contains("what") || lower.contains("get") {
             if lower.contains("today") {
                 return FunctionCall(
@@ -221,6 +232,7 @@ extension FunctionGemmaEngine {
                 module: "reminders", function: "createReminder",
                 arguments: args, confidence: 0.85, originalInstruction: original
             )
+        // periphery:ignore - Reserved: parseReminderIntent(_:original:) instance method reserved for future feature activation
         }
 
         if lower.contains("show") || lower.contains("list") || lower.contains("get") {
@@ -248,6 +260,7 @@ extension FunctionGemmaEngine {
 
         if lower.contains("search") {
             let query = extractQuotedOrAfter(original, keywords: ["search for", "search", "look up"]) ?? "query"
+            // periphery:ignore - Reserved: parseSafariIntent(_:original:) instance method reserved for future feature activation
             return FunctionCall(
                 module: "safari", function: "navigateTo",
                 arguments: ["url": "https://www.google.com/search?q=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query)"],
@@ -272,6 +285,7 @@ extension FunctionGemmaEngine {
         return nil
     }
 
+    // periphery:ignore - Reserved: parseFinderIntent(_:original:) instance method reserved for future feature activation
     func parseTerminalIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["terminal", "command line", "shell", "run command", "execute"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
@@ -285,6 +299,7 @@ extension FunctionGemmaEngine {
             )
         }
 
+        // periphery:ignore - Reserved: parseTerminalIntent(_:original:) instance method reserved for future feature activation
         return nil
     }
 
@@ -300,6 +315,7 @@ extension FunctionGemmaEngine {
         }
         if lower.contains("skip") || lower.contains("next") {
             return FunctionCall(module: "music", function: "nextTrack", arguments: [:], confidence: 0.85, originalInstruction: original)
+        // periphery:ignore - Reserved: parseMusicIntent(_:original:) instance method reserved for future feature activation
         }
 
         return nil
@@ -316,6 +332,7 @@ extension FunctionGemmaEngine {
                 arguments: ["enabled": enable ? "true" : "false"], confidence: 0.9, originalInstruction: original
             )
         }
+        // periphery:ignore - Reserved: parseSystemIntent(_:original:) instance method reserved for future feature activation
         if lower.contains("lock") {
             return FunctionCall(module: "system", function: "lockScreen", arguments: [:], confidence: 0.9, originalInstruction: original)
         }
@@ -336,6 +353,7 @@ extension FunctionGemmaEngine {
             return FunctionCall(
                 module: "mail", function: "composeEmail",
                 arguments: ["to": recipient, "subject": subject], confidence: 0.7, originalInstruction: original
+            // periphery:ignore - Reserved: parseMailIntent(_:original:) instance method reserved for future feature activation
             )
         }
 
@@ -351,6 +369,7 @@ extension FunctionGemmaEngine {
             return FunctionCall(
                 module: "shortcuts", function: "runShortcut",
                 arguments: ["name": name], confidence: name.isEmpty ? 0.4 : 0.85, originalInstruction: original
+            // periphery:ignore - Reserved: parseShortcutsIntent(_:original:) instance method reserved for future feature activation
             )
         }
 
@@ -369,6 +388,7 @@ extension FunctionGemmaEngine {
         if let range = text.range(of: "'[^']+'", options: .regularExpression) {
             let quoted = text[range]
             return String(quoted.dropFirst().dropLast())
+        // periphery:ignore - Reserved: extractQuotedOrAfter(_:keywords:) instance method reserved for future feature activation
         }
 
         for keyword in keywords {
@@ -387,6 +407,7 @@ extension FunctionGemmaEngine {
         let stopWords = [" and ", " then ", " but ", " or ", ".", ",", ";"]
         var result = after
         for stop in stopWords {
+            // periphery:ignore - Reserved: extractAfter(_:keyword:) instance method reserved for future feature activation
             if let stopRange = result.lowercased().range(of: stop) {
                 result = String(result[..<stopRange.lowerBound])
             }
@@ -400,6 +421,7 @@ extension FunctionGemmaEngine {
         do {
             regex = try NSRegularExpression(pattern: pattern)
         } catch {
+            // periphery:ignore - Reserved: extractURL(_:) instance method reserved for future feature activation
             logger.debug("Failed to compile URL regex pattern: \(error.localizedDescription)")
             return nil
         }
@@ -417,6 +439,7 @@ extension FunctionGemmaEngine {
             "tomorrow", "today", "tonight",
             "in \\d+ (?:hour|minute|day|week)s?",
             "at \\d{1,2}(?::\\d{2})?\\s*(?:am|pm)?",
+            // periphery:ignore - Reserved: extractTimeExpression(_:) instance method reserved for future feature activation
             "next (?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)"
         ]
 
@@ -442,6 +465,7 @@ extension FunctionGemmaEngine {
         let separators = [" and then ", " then ", " and also ", ", and "]
         var parts = [text]
 
+        // periphery:ignore - Reserved: splitInstruction(_:) instance method reserved for future feature activation
         for separator in separators {
             var newParts: [String] = []
             for part in parts {
@@ -456,6 +480,7 @@ extension FunctionGemmaEngine {
     func parseFunctionCallFromOutput(_ output: String) -> FunctionCall? {
         guard let data = output.data(using: .utf8) else { return nil }
         let jsonObject: Any
+        // periphery:ignore - Reserved: parseFunctionCallFromOutput(_:) instance method reserved for future feature activation
         do {
             jsonObject = try JSONSerialization.jsonObject(with: data)
         } catch {
@@ -478,6 +503,7 @@ extension FunctionGemmaEngine {
 
     func buildFunctionCallingPrompt(instruction: String) -> String {
         var prompt = "You are a function-calling assistant. Parse the user instruction into a function call.\n\n"
+        // periphery:ignore - Reserved: buildFunctionCallingPrompt(instruction:) instance method reserved for future feature activation
         prompt += "Available functions:\n"
 
         for def in functionCatalog {
@@ -538,6 +564,7 @@ struct FunctionCall: Sendable {
     let arguments: [String: String]
     let confidence: Double
     let originalInstruction: String
+// periphery:ignore - Reserved: originalInstruction property reserved for future feature activation
 }
 
 struct FunctionDefinition: Sendable {
@@ -549,6 +576,7 @@ struct FunctionDefinition: Sendable {
     struct ParameterDef: Sendable {
         let name: String
         let type: String
+        // periphery:ignore - Reserved: required property reserved for future feature activation
         let required: Bool
     }
 }

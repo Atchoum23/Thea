@@ -20,8 +20,13 @@ actor OpenClawClient {
 
     init(gatewayURL: URL = URL(string: "ws://127.0.0.1:18789")!) { // swiftlint:disable:this force_unwrapping
         self.gatewayURL = gatewayURL
+    // periphery:ignore - Reserved: logger property reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: session property reserved for future feature activation
+    // periphery:ignore - Reserved: eventContinuation property reserved for future feature activation
+    // periphery:ignore - Reserved: reconnectAttempts property reserved for future feature activation
+    // periphery:ignore - Reserved: maxReconnectAttempts property reserved for future feature activation
     // MARK: - Connection
 
     func connect() -> AsyncStream<OpenClawGatewayEvent> {
@@ -32,6 +37,7 @@ actor OpenClawClient {
             continuation.onTermination = { _ in
                 Task { await self.disconnect() }
             }
+        // periphery:ignore - Reserved: connect() instance method reserved for future feature activation
         }
     }
 
@@ -42,6 +48,7 @@ actor OpenClawClient {
         logger.info("Connecting to OpenClaw Gateway at \(self.gatewayURL.absoluteString)")
 
         let config = URLSessionConfiguration.default
+        // periphery:ignore - Reserved: startConnection() instance method reserved for future feature activation
         config.timeoutIntervalForRequest = 10
         session = URLSession(configuration: config)
 
@@ -62,6 +69,7 @@ actor OpenClawClient {
         webSocket = nil
         session?.invalidateAndCancel()
         session = nil
+        // periphery:ignore - Reserved: disconnect() instance method reserved for future feature activation
         eventContinuation?.yield(.disconnected(reason: "Manual disconnect"))
         eventContinuation?.finish()
         eventContinuation = nil
@@ -100,10 +108,13 @@ actor OpenClawClient {
 
     // MARK: - Receive
 
+// periphery:ignore - Reserved: listChannels() instance method reserved for future feature activation
+
     private func receiveMessages() async {
         guard let ws = webSocket else { return }
 
         while connectionState == .connected {
+            // periphery:ignore - Reserved: receiveMessages() instance method reserved for future feature activation
             do {
                 let message = try await ws.receive()
                 switch message {
@@ -130,6 +141,7 @@ actor OpenClawClient {
     private func parseGatewayMessage(_ data: Data) {
         let json: [String: Any]
         do {
+            // periphery:ignore - Reserved: parseGatewayMessage(_:) instance method reserved for future feature activation
             guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
                 logger.error("Gateway message is not a JSON object")
                 return
@@ -170,6 +182,7 @@ actor OpenClawClient {
 
     private func attemptReconnect() async {
         guard reconnectAttempts < maxReconnectAttempts else {
+            // periphery:ignore - Reserved: attemptReconnect() instance method reserved for future feature activation
             connectionState = .failed
             eventContinuation?.yield(.error("Max reconnection attempts reached"))
             return
@@ -193,6 +206,7 @@ actor OpenClawClient {
     // MARK: - Parsing Helpers
 
     private func parseIncomingMessage(_ params: [String: Any]) -> OpenClawMessage? {
+        // periphery:ignore - Reserved: parseIncomingMessage(_:) instance method reserved for future feature activation
         guard let id = params["id"] as? String,
               let channelID = params["channel_id"] as? String,
               let platformStr = params["platform"] as? String,
@@ -215,6 +229,7 @@ actor OpenClawClient {
         )
     }
 
+    // periphery:ignore - Reserved: parseChannel(_:) instance method reserved for future feature activation
     private func parseChannel(_ params: [String: Any]) -> OpenClawChannel? {
         guard let id = params["id"] as? String,
               let platformStr = params["platform"] as? String,

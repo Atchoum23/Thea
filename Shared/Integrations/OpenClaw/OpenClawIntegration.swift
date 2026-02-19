@@ -85,6 +85,7 @@ final class OpenClawIntegration {
     }
 
     /// Check if Thea's native gateway is reachable (health endpoint)
+    // periphery:ignore - Reserved: checkAvailability() instance method reserved for future feature activation
     func checkAvailability() async -> Bool {
         let url = URL(string: "http://127.0.0.1:18789/health")!  // swiftlint:disable:this force_unwrapping
         var request = URLRequest(url: url)

@@ -12,6 +12,8 @@ import SwiftUI
 
 private let logger = Logger(subsystem: "ai.thea.app", category: "ArtifactPanel")
 
+// periphery:ignore - Reserved: logger global var reserved for future feature activation
+
 // MARK: - Artifact Panel View
 
 /// Main artifact panel that shows in the 4th column
@@ -433,6 +435,7 @@ struct ArtifactDetailView: View {
 // MARK: - Artifact Extraction Utility
 
 /// Utility for extracting artifacts from message content
+// periphery:ignore - Reserved: ArtifactExtractor type reserved for future feature activation
 enum ArtifactExtractor {
     /// Extract code blocks from markdown content
     static func extractCodeBlocks(from content: String) -> [Artifact] {

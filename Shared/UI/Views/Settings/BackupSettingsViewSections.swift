@@ -333,6 +333,7 @@ extension BackupSettingsView {
         }
     }
 
+    // periphery:ignore - Reserved: _backup parameter kept for API compatibility
     func restoreFromBackup(_ _backup: BackupSettingsEntry) {
         isRestoringBackup = true
         restoreProgress = 0

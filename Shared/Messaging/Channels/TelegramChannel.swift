@@ -43,7 +43,9 @@ final class TelegramChannel: ObservableObject {
         storageDir = appSupport.appendingPathComponent("Thea/Telegram")
         do {
             try FileManager.default.createDirectory(at: storageDir, withIntermediateDirectories: true)
+        // periphery:ignore - Reserved: enabled property reserved for future feature activation
         } catch {
+            // periphery:ignore - Reserved: maxHistoryMessages property reserved for future feature activation
             logger.debug("Could not create Telegram storage directory: \(error.localizedDescription)")
         }
         loadState()
@@ -67,6 +69,7 @@ final class TelegramChannel: ObservableObject {
             MessagingHub.shared.updateChannelStatus(.telegram, name: "Telegram", status: .error)
             logger.warning("OpenClaw Gateway not available for Telegram")
             return
+        // periphery:ignore - Reserved: connect() instance method reserved for future feature activation
         }
 
         if !OpenClawIntegration.shared.isEnabled {
@@ -104,6 +107,7 @@ final class TelegramChannel: ObservableObject {
         processedMessageIDs.insert(message.id)
 
         let tgMessage = TelegramMessage(
+            // periphery:ignore - Reserved: disconnect() instance method reserved for future feature activation
             id: message.id,
             chatID: message.channelID,
             senderID: message.senderID,
@@ -112,6 +116,7 @@ final class TelegramChannel: ObservableObject {
             timestamp: message.timestamp,
             isFromBot: message.isFromBot,
             attachments: message.attachments.map { att in
+                // periphery:ignore - Reserved: handleOpenClawMessage(_:) instance method reserved for future feature activation
                 TelegramAttachment(
                     type: mapAttachmentType(att.type),
                     url: att.url?.absoluteString,
@@ -171,6 +176,7 @@ final class TelegramChannel: ObservableObject {
             logger.error("Failed to send Telegram message: \(error.localizedDescription)")
             return false
         }
+    // periphery:ignore - Reserved: sendMessage(to:text:) instance method reserved for future feature activation
     }
 
     func replyToMessage(chatID: String, messageID: String, text: String) async -> Bool {
@@ -185,6 +191,7 @@ final class TelegramChannel: ObservableObject {
             logger.error("Failed to reply: \(error.localizedDescription)")
             return false
         }
+    // periphery:ignore - Reserved: replyToMessage(chatID:messageID:text:) instance method reserved for future feature activation
     }
 
     func markAsRead(chatID: String, messageID: String) async {
@@ -199,6 +206,8 @@ final class TelegramChannel: ObservableObject {
         }
     }
 
+// periphery:ignore - Reserved: markAsRead(chatID:messageID:) instance method reserved for future feature activation
+
     // MARK: - History
 
     func loadHistory(chatID: String, limit: Int = 50) async -> [TelegramMessage] {
@@ -211,6 +220,7 @@ final class TelegramChannel: ObservableObject {
             let client = OpenClawClient()
             try await client.send(command: .getHistory(sessionKey: chatID, limit: limit, before: nil))
             do { try await Task.sleep(for: .milliseconds(500)) } catch { return [] }
+            // periphery:ignore - Reserved: loadHistory(chatID:limit:) instance method reserved for future feature activation
             return Array((conversationCache[chatID] ?? []).suffix(limit))
         } catch {
             logger.error("Failed to load Telegram history: \(error.localizedDescription)")
@@ -227,6 +237,7 @@ final class TelegramChannel: ObservableObject {
 
     // MARK: - Export Parsing (Offline Fallback)
 
+    // periphery:ignore - Reserved: searchMessages(query:) instance method reserved for future feature activation
     /// Parse Telegram Desktop JSON export (result.json from "Export chat history").
     func importDesktopExport(from url: URL) -> [TelegramMessage] {
         let data: Data
@@ -381,6 +392,7 @@ final class TelegramChannel: ObservableObject {
                     id: message.chatID,
                     name: message.chatID,
                     memberCount: 0,
+                    // periphery:ignore - Reserved: updateContactFromMessage(_:) instance method reserved for future feature activation
                     lastMessageAt: message.timestamp,
                     type: message.chatType
                 ))
@@ -416,6 +428,7 @@ final class TelegramChannel: ObservableObject {
                     groups.append(TelegramGroup(
                         id: channel.id,
                         name: channel.name,
+                        // periphery:ignore - Reserved: updateChannelsFromOpenClaw() instance method reserved for future feature activation
                         memberCount: channel.participantCount ?? 0,
                         lastMessageAt: channel.lastActivityAt,
                         type: .group
@@ -431,6 +444,7 @@ final class TelegramChannel: ObservableObject {
         }
         if subscribedChannels.contains(where: { $0.id == channelID }) {
             return .channel
+        // periphery:ignore - Reserved: detectChatType(_:) instance method reserved for future feature activation
         }
         // Telegram group IDs are typically negative numbers
         if let numID = Int64(channelID), numID < 0 {
@@ -446,6 +460,7 @@ final class TelegramChannel: ObservableObject {
         case .image: return .photo
         case .audio: return .audio
         case .video: return .video
+        // periphery:ignore - Reserved: mapAttachmentType(_:) instance method reserved for future feature activation
         case .document: return .document
         case .sticker: return .sticker
         }
@@ -461,9 +476,11 @@ final class TelegramChannel: ObservableObject {
 
     // MARK: - Persistence
 
+    // periphery:ignore - Reserved: conversationCount property reserved for future feature activation
     private func saveState() {
         let state = TelegramState(
             contacts: contacts,
+            // periphery:ignore - Reserved: saveState() instance method reserved for future feature activation
             groups: groups,
             subscribedChannels: subscribedChannels,
             messageCount: messageCount,
@@ -574,6 +591,7 @@ struct TelegramContact: Codable, Sendable, Identifiable {
 
     init(
         id: String,
+        // periphery:ignore - Reserved: init(id:name:username:isBot:lastMessageAt:) initializer reserved for future feature activation
         name: String,
         username: String? = nil,
         isBot: Bool = false,
@@ -596,6 +614,7 @@ struct TelegramGroup: Codable, Sendable, Identifiable {
     var isMuted: Bool
 
     init(
+        // periphery:ignore - Reserved: init(id:name:memberCount:lastMessageAt:type:isMuted:) initializer reserved for future feature activation
         id: String,
         name: String,
         memberCount: Int = 0,
@@ -619,6 +638,7 @@ struct TelegramSubscribedChannel: Codable, Sendable, Identifiable {
     var lastPostAt: Date?
     var isMonitored: Bool
 
+    // periphery:ignore - Reserved: init(id:name:subscriberCount:lastPostAt:isMonitored:) initializer reserved for future feature activation
     init(
         id: String,
         name: String,

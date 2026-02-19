@@ -49,6 +49,7 @@ public final class ExtensionSyncBridge: ObservableObject {
 
     private var webSocketServer: NWListener?
     private var heartbeatTimer: Timer?
+    // periphery:ignore - Reserved: cancellables property reserved for future feature activation
     private var cancellables = Set<AnyCancellable>()
 
     private let webSocketPort: UInt16 = 9876

@@ -180,6 +180,7 @@ final class TheaTaskManager: ObservableObject {
     private init() {}
 
     func setModelContext(_ context: ModelContext) {
+        // periphery:ignore - Reserved: setModelContext(_:) instance method reserved for future feature activation
         self.modelContext = context
         fetchTasks()
     }
@@ -260,6 +261,7 @@ final class TheaTaskManager: ObservableObject {
         fetchTasks()
     }
 
+    // periphery:ignore - Reserved: updateTask(_:) instance method reserved for future feature activation
     func updateTask(_ task: TheaTask) {
         task.updatedDate = Date()
         do {

@@ -15,6 +15,8 @@ import OSLog
 final class FunctionGemmaBridge {
     static let shared = FunctionGemmaBridge()
 
+// periphery:ignore - Reserved: FunctionGemmaBridge type reserved for future feature activation
+
     private let logger = Logger(subsystem: "com.thea.app", category: "FunctionGemmaBridge")
     private let engine = FunctionGemmaEngine.shared
 
@@ -327,6 +329,7 @@ final class FunctionGemmaBridge {
 // MARK: - Types
 
 struct FunctionExecutionResult: Sendable {
+    // periphery:ignore - Reserved: FunctionExecutionResult type reserved for future feature activation
     let success: Bool
     let message: String
     let functionCalls: [FunctionCall]
@@ -335,6 +338,7 @@ struct FunctionExecutionResult: Sendable {
 
 // MARK: - Errors
 
+// periphery:ignore - Reserved: FunctionGemmaBridgeError type reserved for future feature activation
 enum FunctionGemmaBridgeError: Error, LocalizedError {
     case unknownModule(String)
     case unknownFunction(String, module: String)

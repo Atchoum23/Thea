@@ -396,6 +396,7 @@ import SwiftUI
 public struct Context7SearchView: View {
     @State private var searchQuery = ""
     @State private var libraries: [Context7Library] = []
+    // periphery:ignore - Reserved: selectedLibrary property reserved for future feature activation
     @State private var selectedLibrary: Context7Library?
     @State private var documentation: Context7Result?
     @State private var isSearching = false

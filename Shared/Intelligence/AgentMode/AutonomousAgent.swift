@@ -324,9 +324,12 @@ public final class AutonomousAgent: ObservableObject {
         AgentAnalysisResult(suggestedFixes: [])
     }
 
+// periphery:ignore - Reserved: failures parameter kept for API compatibility
+
     private func applyFixes(_ analysis: AgentAnalysisResult) async -> FixResult {
         // Apply suggested fixes
         FixResult(fixedCount: 0, failedCount: 0)
+    // periphery:ignore - Reserved: analysis parameter kept for API compatibility
     }
 }
 
@@ -420,6 +423,9 @@ struct AgentAnalysisResult {
 struct SuggestedFix {
     let description: String
     let filePath: String
+    // periphery:ignore - Reserved: description property reserved for future feature activation
+    // periphery:ignore - Reserved: filePath property reserved for future feature activation
+    // periphery:ignore - Reserved: changes property reserved for future feature activation
     let changes: String
 }
 

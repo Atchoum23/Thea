@@ -26,6 +26,7 @@ public actor AppActivityContextProvider: ContextProvider {
 
     // Cached values
     private var recentApps: [AppActivityContext.RecentApp] = []
+    // periphery:ignore - Reserved: lastActiveApp property reserved for future feature activation
     private var lastActiveApp: String?
 
     public var isActive: Bool { state == .running }

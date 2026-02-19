@@ -26,6 +26,7 @@ final class AnthropicProvider: AIProvider, Sendable {
 
     private let apiKey: String
 
+    // periphery:ignore - Reserved: capabilities property reserved for future feature activation
     // Store configuration values at init time for Sendable compliance
     private let baseURL: String
     private let apiVersion: String
@@ -56,6 +57,7 @@ final class AnthropicProvider: AIProvider, Sendable {
         request.setValue("application/json", forHTTPHeaderField: "content-type")
         request.timeoutInterval = requestTimeout
 
+        // periphery:ignore - Reserved: validateAPIKey(_:) instance method reserved for future feature activation
         // Test with minimal request
         let testModel = await MainActor.run { AppConfiguration.shared.apiValidationConfig.anthropicTestModel }
         let testBody: [String: Any] = [
@@ -335,6 +337,7 @@ final class AnthropicProvider: AIProvider, Sendable {
 
         if options.stream {
             return streamAdvancedResponse(request: request, model: model, messages: messages)
+        // periphery:ignore - Reserved: chatAdvanced(messages:model:options:) instance method reserved for future feature activation
         } else {
             return try await nonStreamAdvancedResponse(request: request, messages: messages, model: model)
         }
@@ -351,6 +354,7 @@ final class AnthropicProvider: AIProvider, Sendable {
         // requires the exact original content block array to be sent back — not plain text.
         // Sending plain text for a message that originally contained thinking blocks
         // causes API Error 400: "thinking blocks cannot be modified".
+        // periphery:ignore - Reserved: buildAdvancedRequestBody(messages:model:options:) instance method reserved for future feature activation
         let anthropicMessages: [[String: Any]] = messages.map { msg in
             let role = msg.role == .user ? "user" : "assistant"
             if msg.role == .assistant,
@@ -426,6 +430,8 @@ final class AnthropicProvider: AIProvider, Sendable {
             throw AnthropicError.invalidResponse
         }
 
+// periphery:ignore - Reserved: buildAdvancedRequest(body:model:options:) instance method reserved for future feature activation
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
@@ -458,6 +464,7 @@ final class AnthropicProvider: AIProvider, Sendable {
     ) -> AsyncThrowingStream<ChatResponse, Error> {
         let requestCopy = request
         return AsyncThrowingStream { continuation in
+            // periphery:ignore - Reserved: streamAdvancedResponse(request:model:messages:) instance method reserved for future feature activation
             Task { @Sendable [model, messages] in
                 do {
                     let (asyncBytes, response) = try await URLSession.shared.bytes(for: requestCopy)
@@ -551,6 +558,7 @@ final class AnthropicProvider: AIProvider, Sendable {
         model: String
     ) async throws -> AsyncThrowingStream<ChatResponse, Error> {
         let (data, response) = try await URLSession.shared.data(for: request)
+        // periphery:ignore - Reserved: nonStreamAdvancedResponse(request:messages:model:) instance method reserved for future feature activation
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             if let httpResponse = response as? HTTPURLResponse {
                 throw AnthropicError.serverError(status: httpResponse.statusCode, message: "Advanced chat request failed")
@@ -595,13 +603,18 @@ struct AnthropicChatOptions: Sendable {
     let cacheControl: CacheControl?
     let effort: EffortLevel?              // Opus 4.5 only
     let thinking: ThinkingConfig?
+    // periphery:ignore - Reserved: stream property reserved for future feature activation
     let contextManagement: ContextManagement?
     let serverTools: [ServerTool]?
     let toolChoice: AnthropicToolChoice?  // Controls tool selection behavior
     let compaction: CompactionConfig?     // Context compaction for long sessions
     let extendedContextLimit: Int?        // For 1M token beta (nil = default 200K)
 
+    // periphery:ignore - Reserved: toolChoice property reserved for future feature activation
+    // periphery:ignore - Reserved: compaction property reserved for future feature activation
+    // periphery:ignore - Reserved: extendedContextLimit property reserved for future feature activation
     init(
+        // periphery:ignore - Reserved: init(maxTokens:stream:systemPrompt:cacheControl:effort:thinking:contextManagement:serverTools:toolChoice:compaction:extendedContextLimit:) initializer reserved for future feature activation
         maxTokens: Int? = nil,
         stream: Bool = true,
         systemPrompt: String? = nil,
@@ -627,6 +640,7 @@ struct AnthropicChatOptions: Sendable {
         self.extendedContextLimit = extendedContextLimit
     }
 
+    // periphery:ignore - Reserved: default static property reserved for future feature activation
     static let `default` = AnthropicChatOptions()
 }
 

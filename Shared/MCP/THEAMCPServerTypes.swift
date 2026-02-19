@@ -293,6 +293,7 @@ public struct THEAMCPSchemaProperty: Codable, Sendable {
     public var items: THEAMCPSchemaItems?
     public var `enum`: [String]?
 
+    // periphery:ignore - Reserved: `enum` parameter kept for API compatibility
     public init(type: String, description: String? = nil, items: THEAMCPSchemaItems? = nil, `enum`: [String]? = nil) {
         self.type = type
         self.description = description

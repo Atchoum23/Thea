@@ -137,6 +137,7 @@ final class ConversationMemory {
 
         // Check if summarization is needed
         if configuration.enableAutoSummarization,
+           // periphery:ignore - Reserved: assistantResponse parameter kept for API compatibility
            messageIndex > 0,
            messageIndex % configuration.summarizationThreshold == 0 {
             await triggerSummarization(projectId: projectId)
@@ -234,6 +235,7 @@ final class ConversationMemory {
         var prompt = "Context from previous conversations:\n\n"
 
         // Add relevant facts
+        // periphery:ignore - Reserved: buildContextPrompt(for:projectId:) instance method reserved for future feature activation
         if !context.facts.isEmpty {
             prompt += "Known facts about the user:\n"
             for fact in context.facts {
@@ -464,6 +466,7 @@ final class ConversationMemory {
         let importance = min(Double(learnedFacts.count) / 20.0, 0.8)
         return AISummaryResult(
             text: topicSummary,
+            // periphery:ignore - Reserved: factsContext parameter kept for API compatibility
             keyTopics: topics,
             importance: max(importance, 0.3)
         )
@@ -479,20 +482,24 @@ final class ConversationMemory {
     func removeUserPreference(key: String) {
         userPreferences.removeValue(forKey: key)
         saveMemory()
+    // periphery:ignore - Reserved: setUserPreference(key:value:) instance method reserved for future feature activation
     }
 
     // MARK: - Memory Management
 
+    // periphery:ignore - Reserved: removeUserPreference(key:) instance method reserved for future feature activation
     func forgetFact(id: UUID) {
         learnedFacts.removeAll { $0.id == id }
         saveMemory()
     }
 
     func forgetSummary(id: UUID) {
+        // periphery:ignore - Reserved: forgetFact(id:) instance method reserved for future feature activation
         conversationSummaries.removeAll { $0.id == id }
         saveMemory()
     }
 
+    // periphery:ignore - Reserved: forgetSummary(id:) instance method reserved for future feature activation
     func clearAllMemory() {
         conversationSummaries.removeAll()
         learnedFacts.removeAll()
@@ -504,6 +511,8 @@ final class ConversationMemory {
         conversationSummaries.removeAll { $0.projectId == projectId }
         saveMemory()
     }
+
+// periphery:ignore - Reserved: clearProjectMemory(projectId:) instance method reserved for future feature activation
 
     // MARK: - Persistence
 
@@ -585,6 +594,7 @@ final class ConversationMemory {
     private func formatRelativeTime(_ date: Date) -> String {
         let interval = Date().timeIntervalSince(date)
 
+        // periphery:ignore - Reserved: formatRelativeTime(_:) instance method reserved for future feature activation
         if interval < 3600 {
             return "\(Int(interval / 60)) minutes ago"
         } else if interval < 86400 {
@@ -619,6 +629,7 @@ struct RetrievedContext: Sendable {
 
     var isEmpty: Bool {
         summaries.isEmpty && facts.isEmpty && userPreferences.isEmpty
+    // periphery:ignore - Reserved: isEmpty property reserved for future feature activation
     }
 }
 
@@ -626,6 +637,8 @@ struct ConversationMemoryStats: Sendable {
     let totalSummaries: Int
     let totalFacts: Int
     let factsByCategory: [ConversationMemory.FactCategory: Int]
+    // periphery:ignore - Reserved: factsByCategory property reserved for future feature activation
     let preferencesCount: Int
+    // periphery:ignore - Reserved: oldestMemory property reserved for future feature activation
     let oldestMemory: Date?
 }

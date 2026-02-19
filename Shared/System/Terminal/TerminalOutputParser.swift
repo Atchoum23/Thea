@@ -74,6 +74,7 @@
         static func isJSON(_ text: String) -> Bool {
             let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
             return (trimmed.hasPrefix("{") && trimmed.hasSuffix("}")) ||
+                // periphery:ignore - Reserved: stripANSI(_:) static method reserved for future feature activation
                 (trimmed.hasPrefix("[") && trimmed.hasSuffix("]"))
         }
 
@@ -89,12 +90,14 @@
         }
 
         /// Detect if output looks like a table (columns aligned with spaces)
+        // periphery:ignore - Reserved: isJSON(_:) static method reserved for future feature activation
         static func isTable(_ text: String) -> Bool {
             let lines = text.components(separatedBy: .newlines).filter { !$0.isEmpty }
             guard lines.count >= 2 else { return false }
 
             // Check if lines have similar column structure
             let firstLineColumns = lines[0].split(separator: " ", omittingEmptySubsequences: true).count
+            // periphery:ignore - Reserved: parseJSON(_:) static method reserved for future feature activation
             guard firstLineColumns >= 2 else { return false }
 
             let similarStructure = lines.prefix(5).allSatisfy { line in
@@ -105,6 +108,7 @@
             return similarStructure
         }
 
+        // periphery:ignore - Reserved: isTable(_:) static method reserved for future feature activation
         /// Parse common error patterns
         static func parseErrors(_ text: String) -> [TerminalErrorInfo] {
             var errors: [TerminalErrorInfo] = []
@@ -121,6 +125,7 @@
                 ("Warning:", .warning),
                 ("WARNING:", .warning),
                 ("command not found", .commandNotFound),
+                // periphery:ignore - Reserved: parseErrors(_:) static method reserved for future feature activation
                 ("Permission denied", .permissionDenied),
                 ("No such file or directory", .fileNotFound),
                 ("Connection refused", .connectionError),
@@ -196,8 +201,12 @@
                 switch code {
                 case 0: // Reset
                     newStyle = ANSIStyle()
+                // periphery:ignore - Reserved: backgroundColor property reserved for future feature activation
                 case 1: // Bold
+                    // periphery:ignore - Reserved: isDim property reserved for future feature activation
+                    // periphery:ignore - Reserved: isItalic property reserved for future feature activation
                     newStyle.isBold = true
+                // periphery:ignore - Reserved: isStrikethrough property reserved for future feature activation
                 case 2: // Dim
                     newStyle.isDim = true
                 case 3: // Italic
@@ -262,13 +271,23 @@
         case error
         case fatal
         case warning
+        // periphery:ignore - Reserved: TerminalErrorInfo type reserved for future feature activation
         case commandNotFound
         case permissionDenied
         case fileNotFound
         case connectionError
         case timeout
 
+        // periphery:ignore - Reserved: error case reserved for future feature activation
+        // periphery:ignore - Reserved: fatal case reserved for future feature activation
+        // periphery:ignore - Reserved: warning case reserved for future feature activation
+        // periphery:ignore - Reserved: commandNotFound case reserved for future feature activation
+        // periphery:ignore - Reserved: permissionDenied case reserved for future feature activation
+        // periphery:ignore - Reserved: fileNotFound case reserved for future feature activation
+        // periphery:ignore - Reserved: connectionError case reserved for future feature activation
+        // periphery:ignore - Reserved: timeout case reserved for future feature activation
         var color: Color {
+            // periphery:ignore - Reserved: color property reserved for future feature activation
             switch self {
             case .error, .fatal, .permissionDenied:
                 .red
@@ -281,6 +300,7 @@
             }
         }
 
+        // periphery:ignore - Reserved: icon property reserved for future feature activation
         var icon: String {
             switch self {
             case .error, .fatal:

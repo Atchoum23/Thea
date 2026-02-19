@@ -12,7 +12,10 @@ struct DiscoveredDeviceInfo: Identifiable {
     let port: Int
     let platform: String
     let lastSeen: Date
+// periphery:ignore - Reserved: port property reserved for future feature activation
 }
+
+// periphery:ignore - Reserved: lastSeen property reserved for future feature activation
 
 // MARK: - Device Row
 
@@ -47,6 +50,7 @@ struct DeviceRow: View {
 // MARK: - Remote Authentication Settings
 
 struct RemoteAuthenticationSettingsView: View {
+    // periphery:ignore - Reserved: RemoteAuthenticationSettingsView type reserved for future feature activation
     @State private var authMethod = AuthMethod.token
     @State private var accessToken = ""
     @State private var showToken = false
@@ -114,6 +118,7 @@ struct RemoteAuthenticationSettingsView: View {
 
 // MARK: - Connection History
 
+// periphery:ignore - Reserved: ConnectionHistoryView type reserved for future feature activation
 struct ConnectionHistoryView: View {
     @State private var connections: [ConnectionRecord] = []
 

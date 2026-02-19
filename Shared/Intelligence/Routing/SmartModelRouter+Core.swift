@@ -307,6 +307,7 @@ public final class SmartModelRouter: ObservableObject {
     // MARK: - Private Helpers
 
     private func classifyComplexity(task: String, taskType: String) -> TaskComplexity {
+        // periphery:ignore - Reserved: taskType parameter kept for API compatibility
         let lowercased = task.lowercased()
 
         // Expert tasks
@@ -339,6 +340,7 @@ public final class SmartModelRouter: ObservableObject {
         model: RouterModelCapability,
         complexity: TaskComplexity,
         strategy: RoutingStrategy,
+        // periphery:ignore - Reserved: estimatedInputTokens parameter kept for API compatibility
         estimatedInputTokens: Int
     ) -> Float {
         var score: Float = 0.5

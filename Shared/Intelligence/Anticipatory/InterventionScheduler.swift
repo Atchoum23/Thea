@@ -166,5 +166,10 @@ struct InterventionRecord: Sendable {
     let type: String
     let triggeredAt: Date
     let wasAccepted: Bool
+    // periphery:ignore - Reserved: interventionId property reserved for future feature activation
+    // periphery:ignore - Reserved: type property reserved for future feature activation
+    // periphery:ignore - Reserved: triggeredAt property reserved for future feature activation
+    // periphery:ignore - Reserved: wasAccepted property reserved for future feature activation
+    // periphery:ignore - Reserved: responseTime property reserved for future feature activation
     let responseTime: TimeInterval?
 }

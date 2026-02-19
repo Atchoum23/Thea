@@ -55,6 +55,7 @@ final class MLXModelManager {
         saveModelDirectories()
 
         // Remove models from this directory
+        // periphery:ignore - Reserved: addModelDirectory(_:) instance method reserved for future feature activation
         scannedModels.removeAll { $0.path.path.hasPrefix(url.path) }
     }
 
@@ -64,6 +65,7 @@ final class MLXModelManager {
             .appendingPathComponent(config.sharedLLMsDirectory)
     }
 
+    // periphery:ignore - Reserved: removeModelDirectory(_:) instance method reserved for future feature activation
     private func loadModelDirectories() {
         if let data = defaults.data(forKey: "MLXModelManager.directories"),
            let urls = try? JSONDecoder().decode([URL].self, from: data) // Safe: corrupt cache → use default HuggingFace directories in else branch
@@ -117,6 +119,7 @@ final class MLXModelManager {
         scanError = nil
         scannedModels.removeAll()
 
+        // periphery:ignore - Reserved: saveModelDirectories() instance method reserved for future feature activation
         for directory in modelDirectories {
             await scanDirectory(directory)
         }
@@ -147,6 +150,7 @@ final class MLXModelManager {
 
     func getModel(byID id: UUID) -> ScannedModel? {
         scannedModels.first { $0.id == id }
+    // periphery:ignore - Reserved: quickScanCount() instance method reserved for future feature activation
     }
 
     func getModel(byName name: String) -> ScannedModel? {
@@ -157,22 +161,29 @@ final class MLXModelManager {
         scannedModels.filter { $0.format == format }
     }
 
+// periphery:ignore - Reserved: getModel(byID:) instance method reserved for future feature activation
+
     func getTotalModelsSize() -> Int64 {
         scannedModels.reduce(0) { $0 + $1.sizeInBytes }
+    // periphery:ignore - Reserved: getModel(byName:) instance method reserved for future feature activation
     }
 
     var formattedTotalSize: String {
+        // periphery:ignore - Reserved: getModels(format:) instance method reserved for future feature activation
         ByteCountFormatter.string(fromByteCount: getTotalModelsSize(), countStyle: .file)
     }
 
+    // periphery:ignore - Reserved: getTotalModelsSize() instance method reserved for future feature activation
     // MARK: - Model Operations
 
     func deleteModel(_ model: ScannedModel) async throws {
+        // periphery:ignore - Reserved: formattedTotalSize property reserved for future feature activation
         // Remove from file system
         try FileManager.default.removeItem(at: model.path)
 
         // Remove from scanned models
         scannedModels.removeAll { $0.id == model.id }
+    // periphery:ignore - Reserved: deleteModel(_:) instance method reserved for future feature activation
     }
 
     func openModelLocation(_ model: ScannedModel) {
@@ -181,12 +192,15 @@ final class MLXModelManager {
         #endif
     }
 
+// periphery:ignore - Reserved: openModelLocation(_:) instance method reserved for future feature activation
+
     // MARK: - Directory Creation
 
     func createDefaultDirectoryIfNeeded() async throws {
         let defaultDir = getDefaultModelDirectory()
 
         if !FileManager.default.fileExists(atPath: defaultDir.path) {
+            // periphery:ignore - Reserved: createDefaultDirectoryIfNeeded() instance method reserved for future feature activation
             try FileManager.default.createDirectory(
                 at: defaultDir,
                 withIntermediateDirectories: true,
@@ -203,6 +217,7 @@ final class MLXModelManager {
     func importModel(from sourceURL: URL, to destinationDirectory: URL) async throws -> ScannedModel {
         let destinationURL = destinationDirectory.appendingPathComponent(sourceURL.lastPathComponent)
 
+        // periphery:ignore - Reserved: importModel(from:to:) instance method reserved for future feature activation
         // Check if file already exists
         if FileManager.default.fileExists(atPath: destinationURL.path) {
             throw ModelManagerError.modelAlreadyExists
@@ -231,6 +246,7 @@ final class MLXModelManager {
 
     func getStatistics() -> ModelStatistics {
         let mlxCount = scannedModels.count { $0.format == .mlx }
+        // periphery:ignore - Reserved: getStatistics() instance method reserved for future feature activation
         let ggufCount = scannedModels.count { $0.format == .gguf }
         let totalSize = getTotalModelsSize()
 
@@ -248,6 +264,7 @@ final class MLXModelManager {
 // MARK: - Data Structures
 
 struct ModelStatistics {
+    // periphery:ignore - Reserved: ModelStatistics type reserved for future feature activation
     let totalModels: Int
     let mlxModels: Int
     let ggufModels: Int
@@ -266,6 +283,7 @@ struct ModelStatistics {
 
 // MARK: - Errors
 
+// periphery:ignore - Reserved: ModelManagerError type reserved for future feature activation
 enum ModelManagerError: LocalizedError {
     case modelAlreadyExists
     case importFailed

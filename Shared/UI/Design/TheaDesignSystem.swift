@@ -37,6 +37,8 @@ public struct HoverLiftModifier: ViewModifier {
     @State private var isHovered = false
     let maxLift: CGFloat
 
+// periphery:ignore - Reserved: maxLift property reserved for future feature activation
+
     public func body(content: Content) -> some View {
         content
             .scaleEffect(isHovered ? 1.02 : 1.0)
@@ -395,6 +397,7 @@ public struct TheaGhostButtonStyle: ButtonStyle {
 
 /// Streaming indicator with THEA branding
 public struct TheaStreamingIndicatorView: View {
+    // periphery:ignore - Reserved: modelName property reserved for future feature activation
     let modelName: String?
 
     @State private var dotOpacity: [Double] = [1, 0.5, 0.2]

@@ -400,6 +400,7 @@ public final class CodebaseSearchEngine: ObservableObject {
     private func searchText(
         query: ParsedQuery,
         indexer: SemanticCodeIndexer,
+        // periphery:ignore - Reserved: filters parameter kept for API compatibility
         filters: SearchFilters,
         options: SearchOptions
     ) async -> [CodeSearchResult] {

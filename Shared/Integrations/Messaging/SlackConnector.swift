@@ -7,6 +7,7 @@ import OSLog
 // Socket Mode delivers events via WSS; responses sent via chat.postMessage REST.
 
 actor SlackConnector: MessagingPlatformConnector {
+    // periphery:ignore - Reserved: platform property reserved for future feature activation
     let platform: MessagingPlatform = .slack
     private(set) var isConnected = false
     var credentials: MessagingCredentials

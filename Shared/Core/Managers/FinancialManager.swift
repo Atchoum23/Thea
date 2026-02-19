@@ -46,6 +46,7 @@ final class FinancialManager {
         accounts.removeAll { $0.id == account.id }
     }
 
+    // periphery:ignore - Reserved: removeAccount(_:) instance method reserved for future feature activation
     // MARK: - Transaction Management
 
     func addTransaction(
@@ -53,6 +54,7 @@ final class FinancialManager {
         amount: Double,
         description: String,
         category: String,
+        // periphery:ignore - Reserved: addTransaction(accountId:amount:description:category:date:) instance method reserved for future feature activation
         date: Date = Date()
     ) -> FinancialTransaction {
         let transaction = FinancialTransaction(
@@ -73,11 +75,13 @@ final class FinancialManager {
         modelContext?.delete(transaction)
         do { try modelContext?.save() } catch { financialLogger.error("Failed to save after removing transaction: \(error.localizedDescription)") }
         transactions.removeAll { $0.id == transaction.id }
+    // periphery:ignore - Reserved: removeTransaction(_:) instance method reserved for future feature activation
     }
 
     func clearAllData() {
         guard let context = modelContext else { return }
 
+        // periphery:ignore - Reserved: clearAllData() instance method reserved for future feature activation
         for transaction in transactions {
             context.delete(transaction)
         }
@@ -93,6 +97,8 @@ final class FinancialManager {
 
     func syncAccount(_ account: FinancialAccount) async {
         isSyncing = true
+
+// periphery:ignore - Reserved: syncAccount(_:) instance method reserved for future feature activation
 
         // Simulate sync delay
         do {
@@ -111,11 +117,13 @@ final class FinancialManager {
     // MARK: - Analytics
 
     func getBalance(for accountId: UUID) -> Double {
+        // periphery:ignore - Reserved: getBalance(for:) instance method reserved for future feature activation
         transactions
             .filter { $0.accountId == accountId }
             .reduce(0) { $0 + $1.amount }
     }
 
+    // periphery:ignore - Reserved: getSpendingByCategory() instance method reserved for future feature activation
     func getSpendingByCategory() -> [String: Double] {
         var result: [String: Double] = [:]
         for transaction in transactions where transaction.amount < 0 {

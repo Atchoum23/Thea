@@ -10,6 +10,7 @@ struct PasswordVaultView: View {
     @ObservedObject private var manager = PasswordManager.shared
     @State private var showingAddEntry = false
     @State private var searchText = ""
+    // periphery:ignore - Reserved: selectedCategory property reserved for future feature activation
     @State private var selectedCategory: CredentialCategory?
 
     var body: some View {

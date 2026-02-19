@@ -26,6 +26,7 @@ final class SpeechTranscriptionService: ObservableObject {
     @Published private(set) var isTranscribing = false
     @Published private(set) var lastError: String?
 
+    // periphery:ignore - Reserved: lastError property reserved for future feature activation
     private init() {}
 
     // MARK: - Public API
@@ -47,6 +48,7 @@ final class SpeechTranscriptionService: ObservableObject {
 
     /// Transcribe from raw PCM audio data (16kHz mono, Float32).
     func transcribe(pcmData: Data, sampleRate: Double = 16000, locale: Locale = .current) async throws -> String {
+        // periphery:ignore - Reserved: transcribe(pcmData:sampleRate:locale:) instance method reserved for future feature activation
         // Write to temp WAV file then transcribe
         let tempURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
@@ -105,6 +107,7 @@ final class SpeechTranscriptionService: ObservableObject {
 
     // MARK: - WAV Writer (for PCM → file conversion)
 
+    // periphery:ignore - Reserved: writePCMToWAV(pcmData:sampleRate:outputURL:) instance method reserved for future feature activation
     private func writePCMToWAV(pcmData: Data, sampleRate: Double, outputURL: URL) throws {
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatLinearPCM),

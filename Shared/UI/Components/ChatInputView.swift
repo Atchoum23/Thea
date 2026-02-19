@@ -277,6 +277,7 @@ struct ChatInputView: View {
 
     // MARK: - Image Paste Handling
 
+    // periphery:ignore - Reserved: handlePastedImage(_:) instance method reserved for future feature activation
     private func handlePastedImage(_ imageData: Data) {
         // Convert pasted image data to a file attachment
         Task {

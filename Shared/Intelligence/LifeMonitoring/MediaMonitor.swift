@@ -34,6 +34,7 @@ public class MediaMonitor: ObservableObject {
     @Published public private(set) var activeService: MediaService?
 
     private var cancellables = Set<AnyCancellable>()
+    // periphery:ignore - Reserved: cancellables property reserved for future feature activation
     private var pollingTask: Task<Void, Never>?
     private var sessionHistory: [MediaSession] = []
     private var currentSession: MediaSession?
@@ -180,6 +181,7 @@ public class MediaMonitor: ObservableObject {
             }
         }
 
+        // periphery:ignore - Reserved: _app parameter kept for API compatibility
         private func checkNativeAppPlayback(app _app: NSRunningApplication, service: MediaService) async {
             // Use AppleScript to check playback state
             let appName: String

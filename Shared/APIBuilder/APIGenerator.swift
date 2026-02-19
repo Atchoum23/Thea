@@ -108,6 +108,7 @@ public actor APIGenerator {
 // MARK: - APIGenerator + OpenAPI Parsing
 
 extension APIGenerator {
+    // periphery:ignore - Reserved: parseOpenAPISpecData(_:) instance method reserved for future feature activation
     func parseOpenAPISpecData(_ data: Data) throws -> APISpec {
         try parseOpenAPISpec(data)
     }

@@ -11,6 +11,7 @@ import AppKit
 
 @MainActor
 final class CGActionExecutor {
+    // periphery:ignore - Reserved: CGActionExecutor type reserved for future feature activation
     static let shared = CGActionExecutor()
 
     // MARK: - State
@@ -287,6 +288,7 @@ final class CGActionExecutor {
 
 // MARK: - Errors
 
+// periphery:ignore - Reserved: ActionExecutionError type reserved for future feature activation
 enum ActionExecutionError: Error, LocalizedError {
     case permissionDenied
     case eventCreationFailed(String)

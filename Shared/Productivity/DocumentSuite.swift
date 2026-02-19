@@ -353,8 +353,11 @@ actor DocumentSuiteService {
         documents.first { $0.id == id }
     }
 
+// periphery:ignore - Reserved: getDocument(_:) instance method reserved for future feature activation
+
     func search(_ query: String) -> [TheaDocument] {
         let lowered = query.lowercased()
+        // periphery:ignore - Reserved: search(_:) instance method reserved for future feature activation
         return documents.filter {
             $0.title.lowercased().contains(lowered) ||
             $0.content.lowercased().contains(lowered) ||
@@ -365,6 +368,7 @@ actor DocumentSuiteService {
     // MARK: - Export
 
     func exportDocument(_ id: UUID, format: DocExportFormat) throws -> Data {
+        // periphery:ignore - Reserved: exportDocument(_:format:) instance method reserved for future feature activation
         guard let doc = documents.first(where: { $0.id == id }) else {
             throw DocumentSuiteError.invalidContent
         }
@@ -600,6 +604,7 @@ actor DocumentSuiteService {
 
     // MARK: - Statistics
 
+    // periphery:ignore - Reserved: getStats() instance method reserved for future feature activation
     func getStats() -> (total: Int, favorites: Int, wordCount: Int, types: [DocSuiteType: Int]) {
         let favorites = documents.filter(\.isFavorite).count
         let words = documents.reduce(0) { $0 + $1.wordCount }

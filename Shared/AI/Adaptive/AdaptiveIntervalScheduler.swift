@@ -391,6 +391,7 @@ public actor AdaptiveIntervalScheduler {
     /// Record outcome of a governance cycle for learning
     public func recordGovernanceOutcome(
         actualInterval: TimeInterval,
+        // periphery:ignore - Reserved: actualInterval parameter kept for API compatibility
         changesApplied: Int,
         issuesDetected: Int,
         resourceUsage: Double
@@ -568,6 +569,7 @@ public actor AdaptiveIntervalScheduler {
         activity: AdaptiveActivityLevel,
         stability: StabilityState,
         resources: ResourceAvailability,
+        // periphery:ignore - Reserved: _predictedActivity parameter kept for API compatibility
         predictedActivity _predictedActivity: AdaptiveActivityLevel
     ) -> String {
         var parts: [String] = []

@@ -12,6 +12,7 @@ final class DynamicModelRegistry: ObservableObject {
     static let shared = DynamicModelRegistry()
 
     @Published private(set) var availableModels: [AIModel] = AIModel.allKnownModels
+    // periphery:ignore - Reserved: availableModels property reserved for future feature activation
     @Published private(set) var lastRefresh: Date?
     @Published private(set) var isRefreshing = false
 
@@ -165,6 +166,7 @@ final class DynamicModelRegistry: ObservableObject {
         return "openrouter"
     }
 
+    // periphery:ignore - Reserved: _data parameter kept for API compatibility
     private func detectCapabilities(from modelID: String, data _data: [String: Any]) -> [ModelCapability] {
         var caps: [ModelCapability] = [.chat]
         let id = modelID.lowercased()

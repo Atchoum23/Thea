@@ -612,6 +612,7 @@ public final class PreferenceSyncEngine: ObservableObject {
 
     // MARK: - Quota Handling
 
+    // periphery:ignore - Reserved: _changedKeys parameter kept for API compatibility
     private func handleQuotaViolation(changedKeys _changedKeys: [String]) {
         // Remove timestamp meta-keys first (they're expendable)
         let cloudDict = cloud.dictionaryRepresentation

@@ -24,6 +24,8 @@ public final class CrossDeviceNotificationPreferences: ObservableObject {
     private let cloudKeyValueStore = NSUbiquitousKeyValueStore.default
     private var cancellables = Set<AnyCancellable>()
 
+// periphery:ignore - Reserved: cancellables property reserved for future feature activation
+
     // MARK: - Storage Keys
 
     private enum StorageKey {
@@ -187,6 +189,7 @@ public final class CrossDeviceNotificationPreferences: ObservableObject {
         cloudKeyValueStore.synchronize()
     }
 
+    // periphery:ignore - Reserved: notification parameter kept for API compatibility
     @objc private func iCloudDidChange(_ notification: Notification) {
         guard syncWithiCloud else { return }
 

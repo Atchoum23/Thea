@@ -178,6 +178,7 @@ public final class AnticipatoryIntelligenceCore {
     }
 
     private func updateMentalModel(from action: AnticipatedUserAction) {
+        // periphery:ignore - Reserved: action parameter kept for API compatibility
         // Update focus level based on action frequency
         let actionRate = temporalEngine.currentActionRate
         let focusLevel = min(1.0, Double(actionRate) / 10.0)
@@ -209,6 +210,7 @@ public final class AnticipatoryIntelligenceCore {
         }
     }
 
+    // periphery:ignore - Reserved: _context parameter kept for API compatibility
     private func handleContextChange(_ _context: AmbientContext) {
         // Update predictions based on new context
         Task {

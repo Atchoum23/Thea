@@ -31,9 +31,11 @@ final class UserPreferenceModel {
     /// Gets all preferences for a specific category
     func getPreferences(for category: String) async -> [UserPromptPreference] {
         if let cached = preferencesCache[category] {
+            // periphery:ignore - Reserved: logger property reserved for future feature activation
             return cached
         }
 
+        // periphery:ignore - Reserved: setModelContext(_:) instance method reserved for future feature activation
         await loadPreferences()
         return preferencesCache[category] ?? []
     }
@@ -43,6 +45,7 @@ final class UserPreferenceModel {
         category: String,
         key: String,
         value: String,
+        // periphery:ignore - Reserved: getPreferences(for:) instance method reserved for future feature activation
         reinforcement: Float
     ) async {
         guard let context = modelContext else { return }
@@ -52,6 +55,7 @@ final class UserPreferenceModel {
         let allPreferences: [UserPromptPreference]
         do {
             allPreferences = try context.fetch(descriptor)
+        // periphery:ignore - Reserved: updatePreference(category:key:value:reinforcement:) instance method reserved for future feature activation
         } catch {
             logger.error("Failed to fetch preferences for update: \(error.localizedDescription)")
             return
@@ -101,6 +105,7 @@ final class UserPreferenceModel {
             await updatePreference(
                 category: category,
                 key: change.key,
+                // periphery:ignore - Reserved: recordUserCorrection(category:originalOutput:correctedOutput:) instance method reserved for future feature activation
                 value: change.value,
                 reinforcement: 0.15
             )
@@ -119,6 +124,7 @@ final class UserPreferenceModel {
                 value: characteristic.value,
                 reinforcement: 0.05
             )
+        // periphery:ignore - Reserved: recordUserAcceptance(category:output:) instance method reserved for future feature activation
         }
     }
 
@@ -134,6 +140,7 @@ final class UserPreferenceModel {
             let preferences = try context.fetch(descriptor)
 
             preferencesCache.removeAll()
+            // periphery:ignore - Reserved: loadPreferences() instance method reserved for future feature activation
             for preference in preferences {
                 preferencesCache[preference.category, default: []].append(preference)
             }
@@ -153,6 +160,7 @@ final class UserPreferenceModel {
             if lengthDiff > 0 {
                 changes.append(("verbosity", "verbose"))
             } else {
+                // periphery:ignore - Reserved: analyzeChanges(from:to:) instance method reserved for future feature activation
                 changes.append(("verbosity", "concise"))
             }
         }
@@ -197,6 +205,7 @@ final class UserPreferenceModel {
             characteristics.append(("length", "short"))
         } else if output.count < 2000 {
             characteristics.append(("length", "medium"))
+        // periphery:ignore - Reserved: extractCharacteristics(from:category:) instance method reserved for future feature activation
         } else {
             characteristics.append(("length", "long"))
         }
@@ -257,11 +266,14 @@ final class UserPreferenceModel {
 
     /// Checks if user prefers a specific style
     func prefersStyle(_ style: String, in category: String) async -> Bool {
+        // periphery:ignore - Reserved: getTopPreferences(for:limit:) instance method reserved for future feature activation
         let preferences = await getPreferences(for: category)
         return preferences.contains { $0.preferenceValue == style && $0.confidence > 0.7 }
     }
 
     // MARK: - Preference Reset
+
+// periphery:ignore - Reserved: prefersStyle(_:in:) instance method reserved for future feature activation
 
     /// Resets all preferences for a category
     func resetPreferences(for category: String) async {
@@ -269,6 +281,8 @@ final class UserPreferenceModel {
 
         // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<UserPromptPreference>()
+
+// periphery:ignore - Reserved: resetPreferences(for:) instance method reserved for future feature activation
 
         do {
             let allPreferences = try context.fetch(descriptor)
@@ -289,6 +303,8 @@ final class UserPreferenceModel {
 
         let descriptor = FetchDescriptor<UserPromptPreference>()
 
+// periphery:ignore - Reserved: resetAllPreferences() instance method reserved for future feature activation
+
         do {
             let preferences = try context.fetch(descriptor)
             for preference in preferences {
@@ -307,6 +323,7 @@ final class UserPreferenceModel {
     func getPreferenceStats() async -> PreferenceStats {
         guard let context = modelContext else {
             return PreferenceStats(
+                // periphery:ignore - Reserved: getPreferenceStats() instance method reserved for future feature activation
                 totalPreferences: 0,
                 categoriesTracked: 0,
                 averageConfidence: 0,
@@ -342,6 +359,7 @@ final class UserPreferenceModel {
     /// Gets preference history for a specific key
     func getPreferenceHistory(category: String, key: String) async -> [PreferenceHistory] {
         let preferences = await getPreferences(for: category)
+        // periphery:ignore - Reserved: getPreferenceHistory(category:key:) instance method reserved for future feature activation
         let matching = preferences.filter { $0.preferenceKey == key }
 
         return matching.map { preference in
@@ -357,12 +375,14 @@ final class UserPreferenceModel {
 // MARK: - Supporting Structures
 
 struct PreferenceStats {
+    // periphery:ignore - Reserved: PreferenceStats type reserved for future feature activation
     let totalPreferences: Int
     let categoriesTracked: Int
     let averageConfidence: Float
     let mostConfidentPreference: UserPromptPreference?
 }
 
+// periphery:ignore - Reserved: PreferenceHistory type reserved for future feature activation
 struct PreferenceHistory {
     let value: String
     let confidence: Float

@@ -5,7 +5,10 @@ import os.log
 
 private let textEditorLogger = Logger(subsystem: "ai.thea.app", category: "TextEditorContextExtractor")
 
+// periphery:ignore - Reserved: textEditorLogger global var reserved for future feature activation
+
 /// Extracts context from Notes/TextEdit using Accessibility API
+// periphery:ignore - Reserved: TextEditorContextExtractor type reserved for future feature activation
 enum TextEditorContextExtractor {
     /// Extract context from frontmost text editor (Notes or TextEdit)
     static func extract(

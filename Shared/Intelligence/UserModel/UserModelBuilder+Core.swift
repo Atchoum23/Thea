@@ -75,7 +75,9 @@ public final class UserModelBuilder {
     public func observeResponseReaction(
         wasHelpful: Bool,
         wasAccepted: Bool,
+        // periphery:ignore - Reserved: wasAccepted parameter kept for API compatibility
         followUpQuery: String?,
+        // periphery:ignore - Reserved: responseLength parameter kept for API compatibility
         responseLength: Int
     ) async {
         // Adjust verbosity preference based on follow-up

@@ -112,10 +112,12 @@ extension LocalModelRecommendationEngine {
 
     /// Get AI-powered recommendation for optimal model based on current system state
     func getOptimalModelRecommendation() -> ModelRecommendation? {
+        // periphery:ignore - Reserved: getOptimalModelRecommendation() instance method reserved for future feature activation
         recommendations.first
     }
 
     /// Get system capability summary for UI display
+    // periphery:ignore - Reserved: getSystemCapabilitySummary() instance method reserved for future feature activation
     func getSystemCapabilitySummary() -> SystemCapabilitySummary {
         let caps = analyzeSystemCapabilities()
         guard let profile = systemProfile else {

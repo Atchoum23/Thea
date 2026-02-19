@@ -231,6 +231,7 @@ public final class CodeExecutionVerifier {
 // background DispatchQueue; no shared mutable state between concurrent invocations
 /// JavaScript execution using built-in JavaScriptCore
 final class JavaScriptEngine: @unchecked Sendable {
+    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let logger = Logger(subsystem: "com.thea.ai", category: "JavaScriptEngine")
 
     func execute(_ code: String) async -> CodeExecResult {

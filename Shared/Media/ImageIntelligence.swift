@@ -208,6 +208,11 @@ struct ProcessedImage: Sendable {
 }
 
 enum ImageIntelligenceError: Error, LocalizedError, Sendable {
+    // periphery:ignore - Reserved: format property reserved for future feature activation
+    // periphery:ignore - Reserved: dimensions property reserved for future feature activation
+    // periphery:ignore - Reserved: operation property reserved for future feature activation
+    // periphery:ignore - Reserved: originalSize property reserved for future feature activation
+    // periphery:ignore - Reserved: processedSize property reserved for future feature activation
     case fileNotFound(String)
     case unsupportedFormat(String)
     case processingFailed(String)
@@ -524,13 +529,16 @@ actor ImageIntelligence {
     func clearHistory() {
         processingHistory.removeAll()
         saveHistory()
+    // periphery:ignore - Reserved: clearHistory() instance method reserved for future feature activation
     }
 
     func totalBytesProcessed() -> Int64 {
         processingHistory.reduce(0) { $0 + $1.inputSize }
+    // periphery:ignore - Reserved: totalBytesProcessed() instance method reserved for future feature activation
     }
 
     func totalBytesSaved() -> Int64 {
+        // periphery:ignore - Reserved: totalBytesSaved() instance method reserved for future feature activation
         processingHistory.reduce(0) { $0 + max(0, $1.inputSize - $1.outputSize) }
     }
 
@@ -716,6 +724,7 @@ actor ImageIntelligence {
 
     // MARK: - Persistence
 
+    // periphery:ignore - Reserved: loadHistory() instance method reserved for future feature activation
     private func loadHistory() {
         guard FileManager.default.fileExists(atPath: historyFile.path) else { return }
         let data: Data

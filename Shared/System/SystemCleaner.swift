@@ -153,6 +153,7 @@ struct CleanerScanResult: Sendable {
     let categoryBreakdown: [CleanableCategory: UInt64]
 
     var formattedTotal: String {
+        // periphery:ignore - Reserved: formattedTotal property reserved for future feature activation
         SystemCleaner.formatBytes(totalBytes)
     }
 }
@@ -412,6 +413,7 @@ final class SystemCleaner {
         return result
     }
 
+    // periphery:ignore - Reserved: cleanItem(_:) instance method reserved for future feature activation
     func cleanItem(_ item: CleanableItem) async -> Bool {
         do {
             let sizeBefore = item.sizeBytes

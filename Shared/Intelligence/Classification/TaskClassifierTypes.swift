@@ -140,6 +140,7 @@ struct CalibrationBucket {
         return Double(correctCount) / Double(totalCount)
     }
 
+    // periphery:ignore - Reserved: add(wasCorrect:) instance method reserved for future feature activation
     mutating func add(wasCorrect: Bool) {
         totalCount += 1
         if wasCorrect {

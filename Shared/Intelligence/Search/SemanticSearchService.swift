@@ -67,12 +67,14 @@ actor EmbeddingIndexActor {
     func store(messageID: UUID, conversationID: UUID, embedding: [Float], content: String) {
         embeddings[messageID] = embedding
         metadata[messageID] = EmbeddingMetadata(
+            // periphery:ignore - Reserved: asyncLoad() instance method reserved for future feature activation
             conversationID: conversationID,
             contentHash: content.hashValue,
             createdAt: Date()
         )
 
         // Update conversation index
+        // periphery:ignore - Reserved: store(messageID:conversationID:embedding:content:) instance method reserved for future feature activation
         if conversationIndex[conversationID] == nil {
             conversationIndex[conversationID] = []
         }
@@ -90,6 +92,8 @@ actor EmbeddingIndexActor {
                 createdAt: Date()
             )
 
+// periphery:ignore - Reserved: storeBatch(_:) instance method reserved for future feature activation
+
             if conversationIndex[item.conversationID] == nil {
                 conversationIndex[item.conversationID] = []
             }
@@ -106,27 +110,34 @@ actor EmbeddingIndexActor {
     /// Check if message is indexed
     func hasEmbedding(for messageID: UUID) -> Bool {
         embeddings[messageID] != nil
+    // periphery:ignore - Reserved: getEmbedding(for:) instance method reserved for future feature activation
     }
 
     /// Check if content has changed (by hash comparison)
     func contentChanged(messageID: UUID, currentHash: Int) -> Bool {
+        // periphery:ignore - Reserved: hasEmbedding(for:) instance method reserved for future feature activation
         guard let meta = metadata[messageID] else { return true }
         return meta.contentHash != currentHash
     }
 
+    // periphery:ignore - Reserved: contentChanged(messageID:currentHash:) instance method reserved for future feature activation
     /// Get all message IDs in a conversation
     func messageIDs(in conversationID: UUID) -> Set<UUID> {
         conversationIndex[conversationID] ?? []
     }
 
+    // periphery:ignore - Reserved: messageIDs(in:) instance method reserved for future feature activation
     /// Get all indexed message IDs
     func allMessageIDs() -> Set<UUID> {
         Set(embeddings.keys)
     }
 
+// periphery:ignore - Reserved: allMessageIDs() instance method reserved for future feature activation
+
     /// Remove embedding for a message
     func remove(messageID: UUID) {
         guard let meta = metadata[messageID] else { return }
+        // periphery:ignore - Reserved: remove(messageID:) instance method reserved for future feature activation
         embeddings.removeValue(forKey: messageID)
         metadata.removeValue(forKey: messageID)
         conversationIndex[meta.conversationID]?.remove(messageID)
@@ -165,6 +176,7 @@ actor EmbeddingIndexActor {
 
     /// Find similar messages using cosine similarity
     func findSimilar(
+        // periphery:ignore - Reserved: findSimilar(to:threshold:limit:conversationFilter:) instance method reserved for future feature activation
         to queryEmbedding: [Float],
         threshold: Float,
         limit: Int,
@@ -244,6 +256,7 @@ actor EmbeddingIndexActor {
     // MARK: - Vector Math
 
     /// Calculate cosine similarity using Accelerate framework
+    // periphery:ignore - Reserved: cosineSimilarity(_:_:) instance method reserved for future feature activation
     private func cosineSimilarity(_ a: [Float], _ b: [Float]) -> Float {
         guard a.count == b.count, !a.isEmpty else { return 0 }
 

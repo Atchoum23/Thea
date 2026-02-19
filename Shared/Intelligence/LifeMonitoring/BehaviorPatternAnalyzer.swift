@@ -534,7 +534,9 @@ struct AppSwitchRecord: Sendable {
     let timestamp: Date
     let fromApp: String
     let toApp: String
+    // periphery:ignore - Reserved: fromApp property reserved for future feature activation
     let toAppName: String
+// periphery:ignore - Reserved: toAppName property reserved for future feature activation
 }
 
 /// A user action for sequence analysis
@@ -542,6 +544,7 @@ struct BehaviorUserAction: Sendable {
     let timestamp: Date
     let type: UserActionType
     let appBundleId: String
+    // periphery:ignore - Reserved: details property reserved for future feature activation
     let details: String
 }
 

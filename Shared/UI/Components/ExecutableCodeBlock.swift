@@ -13,6 +13,8 @@ import OSLog
 
 private let logger = Logger(subsystem: "ai.thea.app", category: "ExecutableCodeBlock")
 
+// periphery:ignore - Reserved: logger global var reserved for future feature activation
+
 // MARK: - Executable Code Block
 
 /// Code block with optional execution capability and user confirmation
@@ -20,6 +22,7 @@ public struct ExecutableCodeBlock: View {
     let code: String
     let language: String?
     var isExpanded: Bool
+    // periphery:ignore - Reserved: onToggle property reserved for future feature activation
     let onToggle: () -> Void
 
     @State private var showCopied = false

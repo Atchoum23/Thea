@@ -45,6 +45,7 @@ public final class ProactiveEngine: ObservableObject {
         currentFile: String? = nil,
         recentQuery: String? = nil,
         recentErrors: [String] = []
+    // periphery:ignore - Reserved: recentQuery parameter kept for API compatibility
     ) async -> [AnticipatoryEngineSuggestion] {
         guard isEnabled else { return [] }
 
@@ -94,6 +95,7 @@ public final class ProactiveEngine: ObservableObject {
 
     /// Record an action for pattern learning
     public func recordAction(_ action: String, context: [String: String] = [:]) {
+        // periphery:ignore - Reserved: context parameter kept for API compatibility
         let now = Date()
         actionHistory.append((action, now))
 
@@ -124,6 +126,7 @@ public final class ProactiveEngine: ObservableObject {
     /// Predict user's likely intent based on context
     public func predictIntent(
         currentFile: String? = nil,
+        // periphery:ignore - Reserved: recentQuery parameter kept for API compatibility
         recentQuery: String? = nil,
         timeOfDay: Int = Calendar.current.component(.hour, from: Date())
     ) -> [PredictedIntent] {

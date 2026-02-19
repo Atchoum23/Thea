@@ -33,11 +33,13 @@ public actor CrossDeviceNotificationService {
     var currentDeviceRegistration: CrossDeviceRegistration?
     var registeredDevices: [CrossDeviceRegistration] = []
     var pendingNotifications: [CrossDeviceNotificationPayload] = []
+    // periphery:ignore - Reserved: pendingNotifications property reserved for future feature activation
     var deliveryTracking: [UUID: [CrossDeviceNotificationDelivery]] = [:]
     var subscriptionSetup = false
 
     // MARK: - Change Token
 
+    // periphery:ignore - Reserved: changeToken property reserved for future feature activation
     private var changeToken: CKServerChangeToken? {
         get {
             guard let data = UserDefaults.standard.data(forKey: "thea.notifications.changeToken") else { return nil }

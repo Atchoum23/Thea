@@ -72,6 +72,8 @@ private struct GoalPattern {
     let extractTitle: (String) -> String?
 }
 
+// periphery:ignore - Reserved: extractTitle property reserved for future feature activation
+
 // MARK: - Goal Inference Engine
 
 @MainActor
@@ -90,6 +92,7 @@ public final class GoalInferenceEngine {
     private let minConfidenceThreshold = 0.4
     private let signalDecayDays = 14
     private let maxSignalsPerGoal = 50
+    // periphery:ignore - Reserved: maxSignalsPerGoal property reserved for future feature activation
     private let consolidationInterval: TimeInterval = 300 // 5 minutes
 
     // MARK: - Patterns
@@ -389,6 +392,7 @@ extension GoalInferenceEngine {
         return signals
     }
 
+    // periphery:ignore - Reserved: content parameter kept for API compatibility
     private func determineSignalType(from pattern: GoalPattern, content: String) -> GoalSignal.SignalType {
         switch pattern.category {
         case .learning:

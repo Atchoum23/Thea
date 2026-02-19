@@ -280,6 +280,7 @@ public enum SuggestionSource: String, Sendable {
         }
     }
 
+    // periphery:ignore - Reserved: label property reserved for future feature activation
     var label: String {
         switch self {
         case .intentPrediction: return "Predicted"

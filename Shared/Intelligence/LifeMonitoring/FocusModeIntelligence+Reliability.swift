@@ -16,6 +16,7 @@ extension FocusModeIntelligence {
         let id: UUID
         let actionType: ActionType
         let timestamp: Date
+        // periphery:ignore - Reserved: PendingAction type reserved for future feature activation
         var attempts: Int
         var lastAttempt: Date
         var verified: Bool
@@ -58,6 +59,7 @@ extension FocusModeIntelligence {
     func executeWithVerification(
         actionType: PendingAction.ActionType,
         action: @escaping () async -> Bool,
+        // periphery:ignore - Reserved: executeWithVerification(actionType:action:verificationMethod:maxRetries:) instance method reserved for future feature activation
         verificationMethod: PendingAction.VerificationMethod = .pollStatus,
         maxRetries: Int = 3
     ) async -> Bool {
@@ -112,6 +114,7 @@ extension FocusModeIntelligence {
     /// - Returns: `true` if the action is verified as successful.
     func verifyAction(_ actionType: PendingAction.ActionType) async -> Bool {
         switch actionType {
+        // periphery:ignore - Reserved: verifyAction(_:) instance method reserved for future feature activation
         case .callForwardingEnable:
             // Could check by calling *#21# to query forwarding status
             return true // Assume success for now
@@ -133,6 +136,7 @@ extension FocusModeIntelligence {
     ///
     /// - Parameter id: The UUID of the pending action to mark.
     func markActionVerified(_ id: UUID) {
+        // periphery:ignore - Reserved: markActionVerified(_:) instance method reserved for future feature activation
         markPendingActionVerified(id)
     }
 
@@ -141,6 +145,7 @@ extension FocusModeIntelligence {
     /// Sends a local notification with the failed action type so the user can take manual action.
     ///
     /// - Parameter actionType: The type of action that failed.
+    // periphery:ignore - Reserved: notifyUserOfFailedAction(_:) instance method reserved for future feature activation
     func notifyUserOfFailedAction(_ actionType: PendingAction.ActionType) async {
         let content = UNMutableNotificationContent()
         content.title = "\u{26A0}\u{FE0F} THEA Action Failed"

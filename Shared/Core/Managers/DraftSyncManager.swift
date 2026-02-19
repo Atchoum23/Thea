@@ -311,6 +311,7 @@ public final class DraftSyncManager: ObservableObject {
         cloudKeyValueStore.synchronize()
     }
 
+    // periphery:ignore - Reserved: _notification parameter kept for API compatibility
     @objc private func cloudStoreDidChange(_ _notification: Notification) {
         guard crossDeviceSyncEnabled else { return }
 

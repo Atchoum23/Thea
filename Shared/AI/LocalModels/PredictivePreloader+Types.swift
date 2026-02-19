@@ -44,6 +44,7 @@ enum PredictionSource: String, Sendable {
     case timeOfDay = "Time of Day"
     /// Prediction from a blend of Markov chain and time-of-day signals.
     case combined = "Combined"
+// periphery:ignore - Reserved: source property reserved for future feature activation
 }
 
 /// A detected recurring sequence of task types.
@@ -60,6 +61,7 @@ struct TaskSequence: Sendable {
 
     /// Human-readable description of the sequence (e.g. "code → debug → test").
     var description: String {
+        // periphery:ignore - Reserved: TaskSequence type reserved for future feature activation
         tasks.map { $0.rawValue }.joined(separator: " → ")
     }
 }
@@ -74,6 +76,7 @@ struct PredictionStats: Sendable {
     let uniqueTransitions: Int
     /// Number of distinct hours that have recorded data.
     let hoursWithData: Int
+    // periphery:ignore - Reserved: PredictionStats type reserved for future feature activation
     /// Shannon entropy of the task distribution (bits). Lower = more predictable.
     let entropy: Double
     /// The task type with the highest frequency, if any.
@@ -106,6 +109,7 @@ struct TimeBasedUIConfiguration: Sendable {
     /// The day of week (1=Sunday, 7=Saturday).
     let dayOfWeek: Int
     /// The recommended primary UI mode.
+    // periphery:ignore - Reserved: TimeBasedUIConfiguration type reserved for future feature activation
     let primaryMode: UIMode
     /// Distribution of task types expected at this hour.
     let taskDistribution: [TaskType: Double]
@@ -152,6 +156,7 @@ enum UIMode: String, Sendable {
         case .coding: "Development environment"
         case .creative: "Creative writing mode"
         case .research: "Research and analysis"
+        // periphery:ignore - Reserved: description property reserved for future feature activation
         case .conversation: "Casual conversation"
         case .casual: "Relaxed interaction"
         case .evening: "Winding down"
@@ -166,6 +171,7 @@ enum UIMode: String, Sendable {
         case .productivity: "chart.bar"
         case .coding: "chevron.left.forwardslash.chevron.right"
         case .creative: "paintbrush"
+        // periphery:ignore - Reserved: icon property reserved for future feature activation
         case .research: "magnifyingglass"
         case .conversation: "bubble.left.and.bubble.right"
         case .casual: "face.smiling"
@@ -214,6 +220,7 @@ enum UIRecommendation: String, Sendable {
         case .showCodeTools: "Show Code Tools"
         case .enableSyntaxHighlighting: "Enable Syntax Highlighting"
         case .hideCodeTools: "Hide Code Tools"
+        // periphery:ignore - Reserved: displayName property reserved for future feature activation
         case .showCreativeTools: "Show Creative Tools"
         case .enableMarkdownPreview: "Enable Markdown Preview"
         case .showSourcePanel: "Show Source Panel"
@@ -243,8 +250,12 @@ struct PredictedQuickAction: Sendable, Identifiable {
     /// SF Symbol name for the button icon.
     let icon: String
     /// Action identifier dispatched when the button is tapped.
+    // periphery:ignore - Reserved: title property reserved for future feature activation
     let action: String
+// periphery:ignore - Reserved: icon property reserved for future feature activation
 }
+
+// periphery:ignore - Reserved: action property reserved for future feature activation
 
 /// Color theme preferences adapted to time of day.
 enum ThemePreference: String, Sendable {
@@ -256,6 +267,7 @@ enum ThemePreference: String, Sendable {
 
     /// Color temperature adjustment factor (0.0 = neutral, higher = warmer).
     var colorTemperature: Double {
+        // periphery:ignore - Reserved: colorTemperature property reserved for future feature activation
         switch self {
         case .system: 0.0
         case .light: 0.0
@@ -267,6 +279,7 @@ enum ThemePreference: String, Sendable {
 }
 
 /// Analysis of user productivity within a named time block (e.g. "Morning", "Evening").
+// periphery:ignore - Reserved: TimeBlockAnalysis type reserved for future feature activation
 struct TimeBlockAnalysis: Sendable {
     /// Human-readable name of the time block.
     let name: String

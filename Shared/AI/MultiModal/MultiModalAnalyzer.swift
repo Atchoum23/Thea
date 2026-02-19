@@ -417,6 +417,7 @@ public actor MultiModalAnalyzer {
     }
 
     #if os(macOS)
+    // periphery:ignore - Reserved: imageSize parameter kept for API compatibility
     private func analyzeScreenStructure(ocrResults: [VisionOCR.OCRResult], imageSize: CGSize) -> ScreenStructure {
         // Group text blocks by vertical position (detect rows)
         let sortedBlocks = ocrResults.sorted { $0.boundingBox.origin.y > $1.boundingBox.origin.y }

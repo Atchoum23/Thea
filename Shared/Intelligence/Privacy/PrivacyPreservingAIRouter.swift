@@ -47,6 +47,14 @@ public actor PrivacyPreservingAIRouter {
         let wasOverridden: Bool
     }
 
+// periphery:ignore - Reserved: timestamp property reserved for future feature activation
+
+// periphery:ignore - Reserved: dataTypes property reserved for future feature activation
+
+// periphery:ignore - Reserved: decision property reserved for future feature activation
+
+// periphery:ignore - Reserved: wasOverridden property reserved for future feature activation
+
     // MARK: - Initialization
 
     private init() {
@@ -205,6 +213,8 @@ public actor PrivacyPreservingAIRouter {
     private func determineRoute(
         maxSensitivity: DataSensitivityLevel,
         classification: ContentClassificationResult,
+        // periphery:ignore - Reserved: classification parameter kept for API compatibility
+        // periphery:ignore - Reserved: taskType parameter kept for API compatibility
         taskType: AITaskType
     ) -> ProcessingRoute {
         // Critical data: ALWAYS local

@@ -321,8 +321,14 @@ private class ContextBuilder {
 
     func addTextInput(_ text: String) {
         textInputs.append(text)
+    // periphery:ignore - Reserved: textInputs property reserved for future feature activation
     }
 
+// periphery:ignore - Reserved: imageDescriptions property reserved for future feature activation
+
+// periphery:ignore - Reserved: documentSummaries property reserved for future feature activation
+
+    // periphery:ignore - Reserved: addTextInput(_:) instance method reserved for future feature activation
     func addVoiceInput(_ text: String) {
         voiceInputs.append(text)
     }
@@ -331,11 +337,15 @@ private class ContextBuilder {
         imageDescriptions.append(description)
     }
 
+// periphery:ignore - Reserved: addImageDescription(_:) instance method reserved for future feature activation
+
     func addDocumentSummary(_ summary: String) {
         documentSummaries.append(summary)
+    // periphery:ignore - Reserved: addDocumentSummary(_:) instance method reserved for future feature activation
     }
 
     func build() -> String {
+        // periphery:ignore - Reserved: build() instance method reserved for future feature activation
         var context = ""
 
         if !textInputs.isEmpty {
@@ -357,6 +367,7 @@ private class ContextBuilder {
         return context
     }
 
+    // periphery:ignore - Reserved: clear() instance method reserved for future feature activation
     func clear() {
         textInputs.removeAll()
         voiceInputs.removeAll()

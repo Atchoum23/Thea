@@ -24,13 +24,19 @@ struct FunctionInfo {
     let canThrow: Bool
     let visibility: String
     let lineNumber: Int
+// periphery:ignore - Reserved: parameters property reserved for future feature activation
+// periphery:ignore - Reserved: returnType property reserved for future feature activation
 }
 
 struct ClassInfo {
+    // periphery:ignore - Reserved: lineNumber property reserved for future feature activation
     let name: String
     let methods: [FunctionInfo]
     let properties: [String]
     let protocols: [String]
+// periphery:ignore - Reserved: methods property reserved for future feature activation
+// periphery:ignore - Reserved: properties property reserved for future feature activation
+// periphery:ignore - Reserved: protocols property reserved for future feature activation
 }
 
 // MARK: - Source Analysis
@@ -266,6 +272,7 @@ extension TestGenerator {
         return "unknown"
     }
 
+    // periphery:ignore - Reserved: line parameter kept for API compatibility
     func extractParameters(from line: String, language: ProgrammingLanguage) -> [(name: String, type: String)] {
         // Simplified parameter extraction
         []

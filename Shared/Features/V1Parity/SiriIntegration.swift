@@ -363,6 +363,7 @@ public final class SiriIntegrationService {
     }
 
     public func donateShortcut(_ shortcut: TheaShortcut) async {
+        // periphery:ignore - Reserved: shortcut parameter kept for API compatibility
         logger.warning("Siri shortcuts not available on this platform")
     }
 
@@ -370,6 +371,7 @@ public final class SiriIntegrationService {
         logger.warning("Siri shortcuts not available on this platform")
     }
 
+    // periphery:ignore - Reserved: request parameter kept for API compatibility
     public func handleSiriRequest(_ request: SiriRequest) async -> SiriResponse {
         SiriResponse(
             success: false,

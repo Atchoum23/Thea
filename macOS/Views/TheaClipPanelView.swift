@@ -9,6 +9,7 @@ struct TheaClipPanelView: View {
     @State private var searchText: String = ""
     @State private var selectedFilter: ClipFilter = .all
     @State private var selectedEntry: TheaClipEntry?
+    // periphery:ignore - Reserved: selectedPinboard property reserved for future feature activation
     @State private var selectedPinboard: TheaClipPinboard?
     @State private var showingNewPinboard = false
     @State private var newPinboardName = ""

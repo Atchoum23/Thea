@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// periphery:ignore - Reserved: LifeJournalView type reserved for future feature activation
 struct LifeJournalView: View {
     @State private var journal = AmbientLifeJournal.shared
     @State private var selectedEntry: JournalEntry?

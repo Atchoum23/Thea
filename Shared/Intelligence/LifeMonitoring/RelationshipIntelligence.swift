@@ -150,6 +150,7 @@ public actor RelationshipIntelligence {
     // Callbacks
     private var onRelationshipDecay: ((ContactRelationship) -> Void)?
     private var onFollowUpSuggested: ((ContactRelationship, String) -> Void)?
+    // periphery:ignore - Reserved: onFollowUpSuggested property reserved for future feature activation
     private var onNewContactDetected: ((ContactRelationship) -> Void)?
 
     // MARK: - Types
@@ -343,6 +344,7 @@ public actor RelationshipIntelligence {
         return Double(confirmedUrgent) / Double(total)
     }
 
+    // periphery:ignore - Reserved: contactId parameter kept for API compatibility
     private func calculateAverageResponseTime(for contactId: String) -> TimeInterval? {
         // Would analyze message pairs to find response times
         nil

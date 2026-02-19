@@ -8,6 +8,7 @@ import OSLog
 // Only available on macOS (Process is not available on iOS/watchOS/tvOS).
 
 actor SignalConnector: MessagingPlatformConnector {
+    // periphery:ignore - Reserved: platform property reserved for future feature activation
     let platform: MessagingPlatform = .signal
     private(set) var isConnected = false
     var credentials: MessagingCredentials

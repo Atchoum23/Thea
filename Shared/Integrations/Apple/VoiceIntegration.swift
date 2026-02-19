@@ -620,6 +620,7 @@ public enum VoiceIntegrationError: LocalizedError {
 // dispatches callbacks on main thread; stored closures are only called from those callbacks
 private class SynthesizerDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
     var completionHandler: (() -> Void)?
+    // periphery:ignore - Reserved: errorHandler property reserved for future feature activation
     var errorHandler: ((Error) -> Void)?
 
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {

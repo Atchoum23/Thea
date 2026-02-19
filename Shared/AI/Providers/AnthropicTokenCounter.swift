@@ -109,6 +109,7 @@ struct AnthropicTokenCounter: Sendable {
 
     /// Check if a message will fit within a model's context window
     func checkFits(
+        // periphery:ignore - Reserved: checkFits(messages:model:maxTokens:contextLimit:) instance method reserved for future feature activation
         messages: [AIMessage],
         model: String,
         maxTokens: Int,
@@ -137,6 +138,7 @@ struct TokenCountResult: Sendable {
 
 // MARK: - Context Fit Result
 
+// periphery:ignore - Reserved: ContextFitResult type reserved for future feature activation
 struct ContextFitResult: Sendable {
     let fits: Bool
     let inputTokens: Int

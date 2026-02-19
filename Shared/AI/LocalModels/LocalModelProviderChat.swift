@@ -21,6 +21,7 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
     }
 
     var capabilities: ProviderCapabilities {
+        // periphery:ignore - Reserved: capabilities property reserved for future feature activation
         ProviderCapabilities(
             supportsStreaming: true,
             supportsVision: false,
@@ -37,6 +38,7 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
         self.instance = instance
     }
 
+    // periphery:ignore - Reserved: validateAPIKey(_:) instance method reserved for future feature activation
     func validateAPIKey(_: String) async throws -> ValidationResult {
         // Local models don't need API keys
         .success()

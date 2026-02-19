@@ -329,6 +329,7 @@
     // MARK: - QuickLook Preview Extension
 
     extension Binding where Value: Equatable & Sendable {
+        // periphery:ignore - Reserved: map(_:) instance method reserved for future feature activation
         func map<T>(_ transform: @escaping @Sendable (Value) -> T?) -> Binding<T?> {
             Binding<T?>(
                 get: { transform(self.wrappedValue) },

@@ -14,9 +14,12 @@ import os.log
 
 private let pipelineLogger = Logger(subsystem: "ai.thea.app", category: "PostResponsePipeline")
 
+// periphery:ignore - Reserved: pipelineLogger global var reserved for future feature activation
+
 /// Coordinates all post-response processing actions after an AI response completes.
 /// Each action is independent and failure-isolated — one action failing does not block others.
 @MainActor
+// periphery:ignore - Reserved: PostResponsePipeline type reserved for future feature activation
 enum PostResponsePipeline {
 
     /// Context needed by the post-response pipeline.

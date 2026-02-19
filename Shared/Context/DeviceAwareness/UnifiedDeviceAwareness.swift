@@ -21,6 +21,7 @@ final class UnifiedDeviceAwareness {
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "UnifiedDeviceAwareness")
 
+    // periphery:ignore - Reserved: shared static property reserved for future feature activation
     // MARK: - Device Information
 
     var deviceInfo = DeviceHardwareInfo()
@@ -107,15 +108,18 @@ final class UnifiedDeviceAwareness {
     func stopMonitoring() {
         updateTask?.cancel()
         updateTask = nil
+    // periphery:ignore - Reserved: stopMonitoring() instance method reserved for future feature activation
     }
 
     func refreshNow() async {
         await gatherInitialInfo()
+    // periphery:ignore - Reserved: refreshNow() instance method reserved for future feature activation
     }
 
     // MARK: - Configuration
 
     func updateConfiguration(_ config: Configuration) {
+        // periphery:ignore - Reserved: updateConfiguration(_:) instance method reserved for future feature activation
         configuration = config
         saveConfiguration()
 
@@ -137,6 +141,7 @@ final class UnifiedDeviceAwareness {
         }
     }
 
+    // periphery:ignore - Reserved: saveConfiguration() instance method reserved for future feature activation
     private func saveConfiguration() {
         do {
             let data = try JSONEncoder().encode(configuration)

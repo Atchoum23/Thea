@@ -25,6 +25,8 @@ public final class HandoffManager: ObservableObject {
     private let artifactActivityType = "com.thea.app.artifact"
     private let browsingActivityType = "com.thea.app.browsing"
 
+// periphery:ignore - Reserved: browsingActivityType property reserved for future feature activation
+
     // MARK: - Published State
 
     @Published public private(set) var isHandoffEnabled = true
@@ -283,6 +285,7 @@ public final class HandoffManager: ObservableObject {
         return true
     }
 
+    // periphery:ignore - Reserved: handleContinuationStream(input:output:) instance method reserved for future feature activation
     private func handleContinuationStream(input _: InputStream?, output _: OutputStream?) {
         // Handle large data transfer via continuation streams
         // This is useful for transferring full conversation history

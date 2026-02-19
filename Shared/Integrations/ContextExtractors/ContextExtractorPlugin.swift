@@ -47,6 +47,7 @@ protocol ContextExtractorPlugin: Sendable {
     /// Bundle identifiers this extractor handles (one extractor can support multiple)
     static var supportedBundleIDs: [String] { get }
 
+    // periphery:ignore - Reserved: ContextExtractorPlugin protocol reserved for future feature activation
     /// Human-readable name shown in settings UI
     static var displayName: String { get }
 
@@ -75,6 +76,7 @@ protocol GenericContextExtractorPlugin: Sendable {
 
     /// Extract context from an arbitrary running application.
     static func extract(
+        // periphery:ignore - Reserved: GenericContextExtractorPlugin protocol reserved for future feature activation
         app: NSRunningApplication,
         includeSelectedText: Bool,
         includeWindowContent: Bool
@@ -96,6 +98,7 @@ final class ContextExtractorRegistry {
     /// Registered extractors, keyed by bundle ID for O(1) lookup
     private var extractors: [String: any ContextExtractorPlugin.Type] = [:]
 
+    // periphery:ignore - Reserved: ContextExtractorRegistry type reserved for future feature activation
     /// Fallback extractor for apps without a specific plugin
     private var fallbackExtractor: (any GenericContextExtractorPlugin.Type)?
 
@@ -177,6 +180,7 @@ private enum XcodeExtractorAdapter: ContextExtractorPlugin {
     static let supportedBundleIDs = ["com.apple.dt.Xcode"]
     static let displayName = "Xcode"
 
+    // periphery:ignore - Reserved: XcodeExtractorAdapter type reserved for future feature activation
     static func extract(includeSelectedText: Bool, includeWindowContent: Bool) async -> AppContext? {
         await XcodeContextExtractor.extract(
             includeSelectedText: includeSelectedText,
@@ -190,6 +194,8 @@ private enum VSCodeExtractorAdapter: ContextExtractorPlugin {
     static let supportedBundleIDs = ["com.microsoft.VSCode"]
     static let displayName = "VS Code"
 
+// periphery:ignore - Reserved: VSCodeExtractorAdapter type reserved for future feature activation
+
     static func extract(includeSelectedText: Bool, includeWindowContent: Bool) async -> AppContext? {
         await VSCodeContextExtractor.extract(
             includeSelectedText: includeSelectedText,
@@ -201,6 +207,7 @@ private enum VSCodeExtractorAdapter: ContextExtractorPlugin {
 private enum TerminalExtractorAdapter: ContextExtractorPlugin {
     static let pluginID = "terminal-apps"
     static let supportedBundleIDs = [
+        // periphery:ignore - Reserved: TerminalExtractorAdapter type reserved for future feature activation
         "com.googlecode.iterm2",
         "com.apple.Terminal",
         "dev.warp.Warp-Stable"
@@ -217,6 +224,7 @@ private enum TerminalExtractorAdapter: ContextExtractorPlugin {
 
 private enum TextEditorExtractorAdapter: ContextExtractorPlugin {
     static let pluginID = "text-editors"
+    // periphery:ignore - Reserved: TextEditorExtractorAdapter type reserved for future feature activation
     static let supportedBundleIDs = ["com.apple.Notes", "com.apple.TextEdit"]
     static let displayName = "Text Editor"
 
@@ -229,6 +237,7 @@ private enum TextEditorExtractorAdapter: ContextExtractorPlugin {
 }
 
 private enum SafariExtractorAdapter: ContextExtractorPlugin {
+    // periphery:ignore - Reserved: SafariExtractorAdapter type reserved for future feature activation
     static let pluginID = "com.apple.Safari"
     static let supportedBundleIDs = ["com.apple.Safari"]
     static let displayName = "Safari"
@@ -241,6 +250,7 @@ private enum SafariExtractorAdapter: ContextExtractorPlugin {
     }
 }
 
+// periphery:ignore - Reserved: GenericExtractorAdapter type reserved for future feature activation
 private enum GenericExtractorAdapter: GenericContextExtractorPlugin {
     static let pluginID = "generic-fallback"
     static let displayName = "Generic App"

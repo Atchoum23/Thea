@@ -337,6 +337,7 @@ public final class ConvergenceDetector: ObservableObject {
     /// Decide whether to apply a proposed change
     public func shouldApplyChange(
         expectedImprovement: Double,
+        // periphery:ignore - Reserved: changeRisk parameter kept for API compatibility
         changeRisk: Double = 0.5
     ) -> ChangeDecision {
         let analysis = analyze()

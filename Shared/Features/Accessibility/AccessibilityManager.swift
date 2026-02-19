@@ -19,6 +19,7 @@ public final class AccessibilityManager: ObservableObject {
     public static let shared = AccessibilityManager()
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "AccessibilityManager")
+    // periphery:ignore - Reserved: cancellables property reserved for future feature activation
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Published State

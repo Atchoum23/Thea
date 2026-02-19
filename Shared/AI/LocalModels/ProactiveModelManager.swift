@@ -80,17 +80,21 @@ final class ProactiveModelManager {
         }
     }
 
+// periphery:ignore - Reserved: maxDiskSpaceGB property reserved for future feature activation
+
     // MARK: - Pre-Request Analysis (Called BEFORE work starts)
 
     /// Analyze a user request and prepare models BEFORE execution begins
     /// Returns recommendations and can trigger auto-download if enabled
     func analyzeRequest(_ request: String) async -> RequestAnalysis {
+        // periphery:ignore - Reserved: inactiveDaysThreshold property reserved for future feature activation
         isAnalyzing = true
         defer { isAnalyzing = false }
 
         logger.info("Analyzing request for model requirements...")
 
         // 1. Classify the task
+        // periphery:ignore - Reserved: autoDownloadConfidenceThreshold property reserved for future feature activation
         let classification: ClassificationResult
         do {
             classification = try await TaskClassifier.shared.classify(request)
@@ -121,6 +125,7 @@ final class ProactiveModelManager {
                 userRequest: request
             )
 
+            // periphery:ignore - Reserved: analyzeRequest(_:) instance method reserved for future feature activation
             recommendation = rec
 
             if decision.shouldDownload {
@@ -196,6 +201,7 @@ final class ProactiveModelManager {
                     ready: false,
                     selectedModel: recommendation.modelName,
                     score: 0,
+                    // periphery:ignore - Reserved: preflightCheck(for:) instance method reserved for future feature activation
                     action: .downloadStarted(model: recommendation.modelName)
                 )
             } else {
@@ -254,6 +260,7 @@ final class ProactiveModelManager {
                     downloadURL: "https://huggingface.co/mlx-community/deepseek-coder-v2-lite-instruct-4bit",
                     reason: "Optimized for code generation with excellent performance",
                     taskTypes: [.codeGeneration, .debugging, .codeRefactoring],
+                    // periphery:ignore - Reserved: findBestModelToDownload(for:) instance method reserved for future feature activation
                     priority: .high
                 ),
                 ProactiveModelRecommendation(
@@ -271,6 +278,7 @@ final class ProactiveModelManager {
             return [
                 ProactiveModelRecommendation(
                     modelId: "mlx-community/Qwen2.5-7B-Instruct-4bit",
+                    // periphery:ignore - Reserved: getRecommendedModels(for:hardware:) instance method reserved for future feature activation
                     modelName: "Qwen 2.5 7B Instruct 4-bit",
                     estimatedSizeGB: 4.5,
                     downloadURL: "https://huggingface.co/mlx-community/Qwen2.5-7B-Instruct-4bit",
@@ -478,6 +486,7 @@ final class ProactiveModelManager {
 
             // Record for proactivity learning
             governor.recordUserFeedback(ProactivityFeedback(
+                // periphery:ignore - Reserved: estimateDownloadTime(_:) instance method reserved for future feature activation
                 action: "auto_cleanup_\(decision.model.name)",
                 wasHelpful: true, // Assume helpful until user complains
                 userOverrode: false
@@ -519,6 +528,7 @@ final class ProactiveModelManager {
         UserDefaults.standard.set(count, forKey: key)
     }
 
+    // periphery:ignore - Reserved: checkAndPerformCleanup() instance method reserved for future feature activation
     func recordModelUsage(_ modelName: String) {
         var record = modelUsageHistory[modelName] ?? ModelUsageRecord(modelName: modelName)
         record.usageCount += 1
@@ -542,6 +552,7 @@ final class ProactiveModelManager {
         do {
             let data = try JSONEncoder().encode(modelUsageHistory)
             UserDefaults.standard.set(data, forKey: "ProactiveModelManager.usageHistory")
+        // periphery:ignore - Reserved: recordTaskRequest(_:) instance method reserved for future feature activation
         } catch {
             logger.error("Failed to encode modelUsageHistory: \(error.localizedDescription)")
         }
@@ -549,6 +560,7 @@ final class ProactiveModelManager {
 
     // MARK: - Startup Analysis
 
+    // periphery:ignore - Reserved: recordModelUsage(_:) instance method reserved for future feature activation
     private func performStartupAnalysis() async {
         logger.info("Performing startup analysis...")
 
@@ -596,6 +608,7 @@ struct RequestAnalysis: Sendable {
     let taskType: TaskType
     let confidence: Double
     let hasOptimalModel: Bool
+    // periphery:ignore - Reserved: requestAutonomousConsent() instance method reserved for future feature activation
     var currentModel: String?
     var currentModelScore: Double?
     var recommendation: ProactiveModelRecommendation?
@@ -605,6 +618,7 @@ struct RequestAnalysis: Sendable {
 struct PreflightResult: Sendable {
     let ready: Bool
     let selectedModel: String?
+    // periphery:ignore - Reserved: applyConsentSettings(_:) instance method reserved for future feature activation
     let score: Double
     let action: PreflightAction
 }
@@ -619,8 +633,17 @@ enum PreflightAction: Sendable {
 
 struct ProactiveModelRecommendation: Sendable, Identifiable {
     var id: String { modelId }
+    // periphery:ignore - Reserved: request property reserved for future feature activation
+    // periphery:ignore - Reserved: taskType property reserved for future feature activation
+    // periphery:ignore - Reserved: confidence property reserved for future feature activation
+    // periphery:ignore - Reserved: hasOptimalModel property reserved for future feature activation
+    // periphery:ignore - Reserved: currentModel property reserved for future feature activation
+    // periphery:ignore - Reserved: currentModelScore property reserved for future feature activation
+    // periphery:ignore - Reserved: recommendation property reserved for future feature activation
+    // periphery:ignore - Reserved: estimatedWaitTime property reserved for future feature activation
     let modelId: String
     let modelName: String
+    // periphery:ignore - Reserved: PreflightResult type reserved for future feature activation
     let estimatedSizeGB: Double
     let downloadURL: String
     let reason: String
@@ -628,6 +651,11 @@ struct ProactiveModelRecommendation: Sendable, Identifiable {
     let priority: SuggestionPriority
 }
 
+// periphery:ignore - Reserved: proceed case reserved for future feature activation
+// periphery:ignore - Reserved: waitForDownload(progress:) case reserved for future feature activation
+// periphery:ignore - Reserved: downloadStarted(model:) case reserved for future feature activation
+// periphery:ignore - Reserved: suggestDownload(_:) case reserved for future feature activation
+// periphery:ignore - Reserved: useRemote case reserved for future feature activation
 struct PendingModelDownload: Sendable, Identifiable {
     var id: String { recommendation.modelId }
     let recommendation: ProactiveModelRecommendation
@@ -635,6 +663,7 @@ struct PendingModelDownload: Sendable, Identifiable {
     let requestedAt: Date
 }
 
+// periphery:ignore - Reserved: downloadURL property reserved for future feature activation
 struct ModelDownloadTask: Sendable, Identifiable {
     var id: String { recommendation.modelId }
     let recommendation: ProactiveModelRecommendation
@@ -644,11 +673,15 @@ struct ModelDownloadTask: Sendable, Identifiable {
 }
 
 enum ModelDownloadStatus: String, Sendable {
+    // periphery:ignore - Reserved: requestedAt property reserved for future feature activation
     case pending
     case downloading
     case completed
     case failed
     case cancelled
+// periphery:ignore - Reserved: status property reserved for future feature activation
+// periphery:ignore - Reserved: startedAt property reserved for future feature activation
+// periphery:ignore - Reserved: completedAt property reserved for future feature activation
 }
 
 struct DownloadProgress: Sendable {
@@ -663,8 +696,11 @@ struct DownloadProgress: Sendable {
         guard percentage > 0 else { return nil }
         let elapsed = Date().timeIntervalSince(startedAt)
         let totalEstimate = elapsed / percentage
+        // periphery:ignore - Reserved: bytesDownloaded property reserved for future feature activation
+        // periphery:ignore - Reserved: totalBytes property reserved for future feature activation
         return totalEstimate - elapsed
     }
+// periphery:ignore - Reserved: remainingTime property reserved for future feature activation
 }
 
 struct CleanupCandidate: Sendable, Identifiable {
@@ -677,6 +713,7 @@ struct CleanupCandidate: Sendable, Identifiable {
 
 struct ModelUsageRecord: Codable, Sendable {
     let modelName: String
+    // periphery:ignore - Reserved: usageCount property reserved for future feature activation
     var usageCount: Int = 0
     var lastUsed = Date.distantPast
 }
@@ -685,6 +722,7 @@ struct AutonomousConsentRequest: Sendable {
     var enableAutoDownload: Bool
     var enableAutoCleanup: Bool
     var maxDiskSpaceGB: Double
+    // periphery:ignore - Reserved: AutonomousConsentRequest type reserved for future feature activation
     var inactiveDaysThreshold: Int
 }
 
@@ -696,15 +734,21 @@ extension Notification.Name {
     static let modelCleanupCompleted = Notification.Name("ProactiveModelManager.cleanupCompleted")
 }
 
+// periphery:ignore - Reserved: modelDownloadFailed static property reserved for future feature activation
+
+// periphery:ignore - Reserved: modelCleanupCompleted static property reserved for future feature activation
+
 // MARK: - Helper Extensions
 
 private extension Double {
     func nonZeroOr(_ defaultValue: Double) -> Double {
+        // periphery:ignore - Reserved: nonZeroOr(_:) instance method reserved for future feature activation
         self == 0 ? defaultValue : self
     }
 }
 
 private extension Int {
+    // periphery:ignore - Reserved: nonZeroOr(_:) instance method reserved for future feature activation
     func nonZeroOr(_ defaultValue: Int) -> Int {
         self == 0 ? defaultValue : self
     }

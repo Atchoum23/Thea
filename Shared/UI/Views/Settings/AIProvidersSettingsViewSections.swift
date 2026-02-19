@@ -35,6 +35,7 @@ enum ProviderStatus: String, CaseIterable {
 struct ProviderDisplayInfo: Identifiable {
     let id: String
     let name: String
+    // periphery:ignore - Reserved: name property reserved for future feature activation
     let displayName: String
     let icon: String
     let websiteURL: URL?
@@ -94,6 +95,7 @@ struct ProviderDisplayInfo: Identifiable {
 
 // MARK: - Usage Statistics
 
+// periphery:ignore - Reserved: ProviderUsageStats type reserved for future feature activation
 struct ProviderUsageStats {
     let provider: String
     let tokensToday: Int

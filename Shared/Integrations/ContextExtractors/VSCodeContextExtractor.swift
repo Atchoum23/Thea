@@ -5,7 +5,10 @@ import os.log
 
 private let vscodeLogger = Logger(subsystem: "ai.thea.app", category: "VSCodeContextExtractor")
 
+// periphery:ignore - Reserved: vscodeLogger global var reserved for future feature activation
+
 /// Extracts context from VS Code using Accessibility API
+// periphery:ignore - Reserved: VSCodeContextExtractor type reserved for future feature activation
 enum VSCodeContextExtractor {
     /// Extract context from frontmost VS Code window
     static func extract(

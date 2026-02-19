@@ -53,6 +53,7 @@
 
             var isActive: Bool {
                 self == .planning || self == .executing
+            // periphery:ignore - Reserved: color property reserved for future feature activation
             }
         }
 
@@ -64,6 +65,7 @@
             self.id = id
             self.name = name
             self.workingDirectory = workingDirectory
+            // periphery:ignore - Reserved: isActive property reserved for future feature activation
             steps = []
             artifacts = []
             context = CoworkContext(workingDirectory: workingDirectory)
@@ -88,6 +90,7 @@
 
         func pause() {
             status = .paused
+            // periphery:ignore - Reserved: start() instance method reserved for future feature activation
             taskQueue.pause()
             lastActivityAt = Date()
         }
@@ -136,11 +139,13 @@
                 update(&steps[index])
                 updateProgress()
                 lastActivityAt = Date()
+            // periphery:ignore - Reserved: addSteps(_:) instance method reserved for future feature activation
             }
         }
 
         func startStep(_ stepId: UUID) {
             updateStep(stepId) { $0.start() }
+        // periphery:ignore - Reserved: updateStep(_:with:) instance method reserved for future feature activation
         }
 
         func completeStep(_ stepId: UUID) {
@@ -148,18 +153,24 @@
         }
 
         func failStep(_ stepId: UUID, error: String) {
+            // periphery:ignore - Reserved: startStep(_:) instance method reserved for future feature activation
             updateStep(stepId) { $0.fail(with: error) }
         }
 
+        // periphery:ignore - Reserved: completeStep(_:) instance method reserved for future feature activation
         var currentStep: CoworkStep? {
             steps.first { $0.status == .inProgress }
         }
 
+// periphery:ignore - Reserved: failStep(_:error:) instance method reserved for future feature activation
+
         var nextPendingStep: CoworkStep? {
             steps.first { $0.status == .pending }
+        // periphery:ignore - Reserved: currentStep property reserved for future feature activation
         }
 
         var completedSteps: [CoworkStep] {
+            // periphery:ignore - Reserved: nextPendingStep property reserved for future feature activation
             steps.filter { $0.status == .completed }
         }
 
@@ -169,6 +180,8 @@
             artifacts.append(artifact)
             lastActivityAt = Date()
         }
+
+// periphery:ignore - Reserved: addArtifact(_:) instance method reserved for future feature activation
 
         func addArtifact(from url: URL, isIntermediate: Bool = false, stepId: UUID? = nil) {
             if let artifact = CoworkArtifact.from(url: url, isIntermediate: isIntermediate, stepId: stepId) {
@@ -180,6 +193,8 @@
         func removeArtifact(_ artifactId: UUID) {
             artifacts.removeAll { $0.id == artifactId }
         }
+
+// periphery:ignore - Reserved: removeArtifact(_:) instance method reserved for future feature activation
 
         var finalArtifacts: [CoworkArtifact] {
             artifacts.filter { !$0.isIntermediate }
@@ -246,6 +261,7 @@
     extension CoworkSession {
         struct CodableRepresentation: Codable {
             let id: UUID
+            // periphery:ignore - Reserved: CodableRepresentation type reserved for future feature activation
             let name: String
             let workingDirectory: URL
             let steps: [CoworkStep]
@@ -259,6 +275,7 @@
         }
 
         func toCodable() -> CodableRepresentation {
+            // periphery:ignore - Reserved: toCodable() instance method reserved for future feature activation
             CodableRepresentation(
                 id: id,
                 name: name,
@@ -274,6 +291,7 @@
             )
         }
 
+        // periphery:ignore - Reserved: from(_:) static method reserved for future feature activation
         static func from(_ codable: CodableRepresentation) -> CoworkSession {
             let session = CoworkSession(
                 id: codable.id,

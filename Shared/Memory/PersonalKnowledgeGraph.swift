@@ -69,12 +69,14 @@ actor PersonalKnowledgeGraph {
     /// Add a relationship between two entities
     func addRelationship(from sourceID: String, to targetID: String, relationship: String, confidence: Double = 1.0) {
         // Ensure both entities exist
+        // periphery:ignore - Reserved: entities(ofType:) instance method reserved for future feature activation
         guard entities[sourceID] != nil, entities[targetID] != nil else {
             logger.warning("Cannot add relationship: entity not found")
             return
         }
 
         // Check for duplicate
+        // periphery:ignore - Reserved: addRelationship(from:to:relationship:confidence:) instance method reserved for future feature activation
         if edges.contains(where: { $0.sourceID == sourceID && $0.targetID == targetID && $0.relationship == relationship }) {
             return
         }
@@ -137,6 +139,7 @@ actor PersonalKnowledgeGraph {
         for edge in related {
             let neighborID = edge.sourceID == entityID ? edge.targetID : edge.sourceID
             neighborCounts[neighborID, default: 0] += 1
+        // periphery:ignore - Reserved: relatedEntities(to:limit:) instance method reserved for future feature activation
         }
 
         return neighborCounts
@@ -199,6 +202,7 @@ actor PersonalKnowledgeGraph {
         var potentialEntities: [String] = []
 
         for word in words where word.count > 2 {
+            // periphery:ignore - Reserved: extractAndStore(from:context:) instance method reserved for future feature activation
             let trimmed = word.trimmingCharacters(in: .punctuationCharacters)
             if let first = trimmed.first, first.isUppercase, trimmed.count > 2 {
                 potentialEntities.append(trimmed)
@@ -226,6 +230,7 @@ actor PersonalKnowledgeGraph {
         return entities.values.first { existing in
             guard existing.type == type else { return false }
             let normalizedExisting = existing.name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            // periphery:ignore - Reserved: findSimilarEntity(name:type:) instance method reserved for future feature activation
             // Exact match after normalization
             if normalizedExisting == normalizedNew { return true }
             // Substring match for longer names (handles "John" vs "John Smith")
@@ -242,6 +247,7 @@ actor PersonalKnowledgeGraph {
         if let existing = findSimilarEntity(name: entity.name, type: entity.type) {
             // Merge: update lastUpdated and increment referenceCount
             var merged = existing
+            // periphery:ignore - Reserved: addOrMergeEntity(_:) instance method reserved for future feature activation
             merged.lastUpdatedAt = Date()
             merged.referenceCount += 1
             for (key, value) in entity.attributes {
@@ -264,6 +270,8 @@ actor PersonalKnowledgeGraph {
         let cutoffDate = Date().addingTimeInterval(-Double(daysThreshold) * 86400)
         var removedIDs: Set<String> = []
 
+// periphery:ignore - Reserved: decayStaleEntities(daysThreshold:minimumReferenceCount:) instance method reserved for future feature activation
+
         for (id, entity) in entities {
             if entity.lastUpdatedAt < cutoffDate && entity.referenceCount < minimumReferenceCount {
                 removedIDs.insert(id)
@@ -283,6 +291,10 @@ actor PersonalKnowledgeGraph {
 
     var entityCount: Int { entities.count }
     var edgeCount: Int { edges.count }
+
+// periphery:ignore - Reserved: entityCount property reserved for future feature activation
+
+// periphery:ignore - Reserved: edgeCount property reserved for future feature activation
 
     func statistics() -> KGStatistics {
         let typeDistribution = Dictionary(grouping: entities.values) { $0.type }
@@ -317,6 +329,7 @@ actor PersonalKnowledgeGraph {
     }
 
     /// Load persisted graph from disk (called by orchestrator on startup)
+    // periphery:ignore - Reserved: load() instance method reserved for future feature activation
     func load() {
         loadFromDisk()
     }

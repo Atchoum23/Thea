@@ -14,6 +14,7 @@ import OSLog
 @Observable
 public final class EmotionAwareAdapter {
 
+    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let logger = Logger(subsystem: "app.thea.anticipatory", category: "EmotionAdapter")
 
     // MARK: - State

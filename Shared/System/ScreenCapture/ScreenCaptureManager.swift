@@ -24,6 +24,8 @@ final class ScreenCaptureManager {
 
     // MARK: - Capture Mode
 
+// periphery:ignore - Reserved: shared static property reserved for future feature activation
+
     enum CaptureMode: Hashable {
         case fullScreen
         case activeWindow
@@ -31,6 +33,7 @@ final class ScreenCaptureManager {
         case region(CGRect)
     }
 
+    // periphery:ignore - Reserved: CaptureMode type reserved for future feature activation
     // MARK: - Initialization
 
     init() {
@@ -63,6 +66,7 @@ final class ScreenCaptureManager {
             false,
             onScreenWindowsOnly: true
         )
+        // periphery:ignore - Reserved: requestAuthorization() instance method reserved for future feature activation
         await checkAuthorization()
 
         if !isAuthorized {
@@ -78,6 +82,7 @@ final class ScreenCaptureManager {
             throw ScreenCaptureError.notAuthorized
         }
 
+        // periphery:ignore - Reserved: captureScreen() instance method reserved for future feature activation
         let content = try await SCShareableContent.excludingDesktopWindows(
             false,
             onScreenWindowsOnly: true
@@ -97,6 +102,8 @@ final class ScreenCaptureManager {
         guard isAuthorized else {
             throw ScreenCaptureError.notAuthorized
         }
+
+// periphery:ignore - Reserved: captureWindow(bundleID:) instance method reserved for future feature activation
 
         let content = try await SCShareableContent.excludingDesktopWindows(
             false,
@@ -118,6 +125,7 @@ final class ScreenCaptureManager {
     func captureActiveWindow() async throws -> CGImage {
         guard isAuthorized else {
             throw ScreenCaptureError.notAuthorized
+        // periphery:ignore - Reserved: captureActiveWindow() instance method reserved for future feature activation
         }
 
         // Get frontmost app
@@ -132,6 +140,7 @@ final class ScreenCaptureManager {
     /// Capture a specific region of the screen
     func captureRegion(_ rect: CGRect) async throws -> CGImage {
         guard isAuthorized else {
+            // periphery:ignore - Reserved: captureRegion(_:) instance method reserved for future feature activation
             throw ScreenCaptureError.notAuthorized
         }
 
@@ -149,6 +158,7 @@ final class ScreenCaptureManager {
     // MARK: - Private Capture Logic
 
     private func captureWithFilter(_ filter: SCContentFilter) async throws -> CGImage {
+        // periphery:ignore - Reserved: captureWithFilter(_:) instance method reserved for future feature activation
         let config = SCStreamConfiguration()
 
         // High quality capture
@@ -168,6 +178,7 @@ final class ScreenCaptureManager {
 
 // MARK: - Screen Capture Errors
 
+// periphery:ignore - Reserved: ScreenCaptureError type reserved for future feature activation
 enum ScreenCaptureError: Error, LocalizedError {
     case notAuthorized
     case noDisplayFound

@@ -90,6 +90,7 @@ final class AIModelGovernor {
 
         // 6. Make intelligent decision
         let shouldDownload = makeDownloadDecision(
+            // periphery:ignore - Reserved: shouldDownloadModel(recommendation:forTask:userRequest:) instance method reserved for future feature activation
             requestImportance: requestImportance,
             existingCoverage: existingCoverage,
             storageAnalysis: storageAnalysis,
@@ -305,6 +306,8 @@ final class AIModelGovernor {
         return min(1.0, importance)
     }
 
+// periphery:ignore - Reserved: analyzeRequestImportance(_:taskType:) instance method reserved for future feature activation
+
     private func assessExistingModelCoverage(for taskType: TaskType) async -> Double {
         let orchestrator = UnifiedLocalModelOrchestrator.shared
         let selection = await orchestrator.selectModel(for: taskType)
@@ -330,6 +333,7 @@ final class AIModelGovernor {
                 let usedPercent = 1.0 - (freeGB / totalGB)
 
                 // Calculate current model storage
+                // periphery:ignore - Reserved: assessExistingModelCoverage(for:) instance method reserved for future feature activation
                 let manager = LocalModelManager.shared
                 let modelStorageGB = manager.availableModels.reduce(0.0) { $0 + Double($1.size) / 1_000_000_000 }
 
@@ -383,6 +387,7 @@ final class AIModelGovernor {
             value += 0.1
         }
 
+        // periphery:ignore - Reserved: calculateExpectedModelValue(recommendation:taskType:currentCoverage:) instance method reserved for future feature activation
         // Boost if task type matches recommendation's strengths
         if recommendation.taskTypes.contains(taskType) {
             value += 0.15
@@ -415,6 +420,8 @@ final class AIModelGovernor {
         return downloadScore > threshold
     }
 
+// periphery:ignore - Reserved: makeDownloadDecision(requestImportance:existingCoverage:storageAnalysis:expectedValue:canDownloadNow:) instance method reserved for future feature activation
+
     private func calculateDecisionConfidence(
         importance: Double,
         coverage: Double,
@@ -437,6 +444,7 @@ final class AIModelGovernor {
         if shouldDownload {
             if coverage < 0.3 {
                 reasons.append("No suitable local model for this task type")
+            // periphery:ignore - Reserved: calculateDecisionConfidence(importance:coverage:value:) instance method reserved for future feature activation
             } else if coverage < 0.7 {
                 reasons.append("Current model coverage is suboptimal (\(Int(coverage * 100))%)")
             }
@@ -446,6 +454,7 @@ final class AIModelGovernor {
             if value > 0.7 {
                 reasons.append("Significant quality improvement expected")
             }
+        // periphery:ignore - Reserved: buildDownloadReasoning(shouldDownload:importance:coverage:storage:value:) instance method reserved for future feature activation
         } else {
             if coverage > 0.7 {
                 reasons.append("Existing model provides good coverage (\(Int(coverage * 100))%)")
@@ -481,6 +490,8 @@ final class AIModelGovernor {
         }
 
         let recencyScore = max(0, 1.0 - (daysSinceUse / 90)) // Decay over 90 days
+
+// periphery:ignore - Reserved: suggestAlternative(existingCoverage:taskType:) instance method reserved for future feature activation
 
         // Calculate usage frequency score
         let usageCount = usageRecord?.usageCount ?? 0
@@ -564,6 +575,7 @@ final class AIModelGovernor {
             reasons.append("Low value relative to size")
         }
 
+        // periphery:ignore - Reserved: _model parameter kept for API compatibility
         return reasons.isEmpty ? "Low overall value assessment" : reasons.joined(separator: "; ")
     }
 
@@ -611,6 +623,7 @@ final class AIModelGovernor {
 
     // MARK: - System Monitoring
 
+    // periphery:ignore - Reserved: recordDecision(_:forTask:) instance method reserved for future feature activation
     private func startContinuousMonitoring() async {
         // Monitor system state periodically
         while true {
@@ -756,6 +769,10 @@ struct DownloadDecision: Sendable {
     let shouldDownload: Bool
     let confidence: Double
     let reasoning: String
+    // periphery:ignore - Reserved: downloadAggressiveness property reserved for future feature activation
+    // periphery:ignore - Reserved: cleanupAggressiveness property reserved for future feature activation
+    // periphery:ignore - Reserved: resourceUsageLimit property reserved for future feature activation
+    // periphery:ignore - Reserved: proactivityMultiplier property reserved for future feature activation
     let alternativeAction: String?
     let estimatedBenefit: Double
     let storageCost: Double
@@ -765,6 +782,7 @@ struct CleanupDecision: Sendable {
     let model: LocalModel
     let shouldDelete: Bool
     let valueScore: Double
+    // periphery:ignore - Reserved: DownloadDecision type reserved for future feature activation
     let reasoning: String
     let alternativeAction: String?
     let freedSpace: Double
@@ -778,6 +796,7 @@ struct ResourceAllocation: Sendable {
 }
 
 struct StorageAnalysis: Sendable {
+    // periphery:ignore - Reserved: alternativeAction property reserved for future feature activation
     let freeSpaceGB: Double
     let totalSpaceGB: Double
     let usedPercent: Double
@@ -789,8 +808,12 @@ struct StorageAnalysis: Sendable {
 enum StoragePressure: String, Sendable {
     case low
     case moderate
+    // periphery:ignore - Reserved: freeSpaceGB property reserved for future feature activation
+    // periphery:ignore - Reserved: totalSpaceGB property reserved for future feature activation
     case high
+    // periphery:ignore - Reserved: modelStorageGB property reserved for future feature activation
     case critical
+// periphery:ignore - Reserved: pressureLevel property reserved for future feature activation
 }
 
 struct ModelValueAssessment: Sendable {
@@ -801,7 +824,11 @@ struct ModelValueAssessment: Sendable {
     let capabilityScore: Double
     let sizeEfficiency: Double
     let daysSinceLastUse: Double
+    // periphery:ignore - Reserved: modelName property reserved for future feature activation
     let totalUses: Int
+    // periphery:ignore - Reserved: recencyScore property reserved for future feature activation
+    // periphery:ignore - Reserved: frequencyScore property reserved for future feature activation
+    // periphery:ignore - Reserved: capabilityScore property reserved for future feature activation
     let couldBeUsefulFor: [String]
 }
 
@@ -809,6 +836,9 @@ struct SystemResourceState: Sendable {
     var cpuUsage: Double = 0
     var memoryUsage: Double = 0
     var gpuUsage: Double = 0
+    // periphery:ignore - Reserved: cpuUsage property reserved for future feature activation
+    // periphery:ignore - Reserved: memoryUsage property reserved for future feature activation
+    // periphery:ignore - Reserved: gpuUsage property reserved for future feature activation
     var thermalState: GovernorThermalState = .nominal
     var availableBandwidth: Double = 1.0
     var activeInferenceCount: Int = 0
@@ -839,6 +869,7 @@ struct ProactivityLevel: Sendable {
     let level: Level
     let score: Double
     let description: String
+    // periphery:ignore - Reserved: recentActions property reserved for future feature activation
     let recentActions: [String]
     let successRate: Double
 

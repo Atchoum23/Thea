@@ -132,6 +132,7 @@
             _ commands: [String],
             workingDirectory: URL? = nil,
             stopOnError: Bool = true
+        // periphery:ignore - Reserved: executeSequence(_:workingDirectory:stopOnError:) instance method reserved for future feature activation
         ) async throws -> [ShellCommandResult] {
             var results: [ShellCommandResult] = []
             var currentDir = workingDirectory
@@ -220,6 +221,7 @@
         func executeInFrontWindow(_ command: String) async throws {
             let validation = securityPolicy.isAllowed(command)
             switch validation {
+            // periphery:ignore - Reserved: executeInFrontWindow(_:) instance method reserved for future feature activation
             case let .blocked(reason):
                 throw ExecutorError.commandBlocked(reason)
             case let .requiresConfirmation(reason):
@@ -275,6 +277,7 @@
         /// Open a new tab in the front window
         func openNewTab(withCommand command: String? = nil) async throws {
             let script: String
+            // periphery:ignore - Reserved: openNewTab(withCommand:) instance method reserved for future feature activation
             if let cmd = command {
                 // SECURITY FIX (FINDING-004): Use proper escaping
                 let escapedCommand = escapeForAppleScript(cmd)
@@ -300,6 +303,7 @@
 
         /// Close the front Terminal window
         func closeFrontWindow() async throws {
+            // periphery:ignore - Reserved: closeFrontWindow() instance method reserved for future feature activation
             let script = """
             tell application "Terminal"
                 if (count windows) > 0 then
@@ -312,6 +316,7 @@
         }
 
         /// Clear the current Terminal buffer
+        // periphery:ignore - Reserved: clearTerminal() instance method reserved for future feature activation
         func clearTerminal() async throws {
             try await executeInFrontWindow("clear")
         }

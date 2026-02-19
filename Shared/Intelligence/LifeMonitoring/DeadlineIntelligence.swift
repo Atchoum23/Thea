@@ -18,6 +18,8 @@ import EventKit
 // MARK: - Module Logger
 let deadlineLogger = Logger(subsystem: "ai.thea.app", category: "DeadlineIntelligence")
 
+// periphery:ignore - Reserved: deadlineLogger global var reserved for future feature activation
+
 // MARK: - Deadline Intelligence Engine
 
 /// AI engine for detecting, tracking, and reminding about deadlines
@@ -47,6 +49,7 @@ public actor DeadlineIntelligence {
     var onReminderTriggered: ((Deadline, DeadlineUrgency) -> Void)?
     var onDeadlineMissed: ((Deadline) -> Void)?
 
+    // periphery:ignore - Reserved: logger property reserved for future feature activation
     let logger = Logger(subsystem: "ai.thea.app", category: "DeadlineIntelligence")
 
     // MARK: - Initialization

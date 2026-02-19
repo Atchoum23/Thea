@@ -82,6 +82,7 @@ struct CorrelationResult: Codable, Sendable, Identifiable {
     let strength: CDCorrelationStrength
     let sampleSize: Int
     let insight: String
+    // periphery:ignore - Reserved: from(coefficient:) static method reserved for future feature activation
     let discoveredAt: Date
 
     init(
@@ -105,6 +106,7 @@ struct CorrelationResult: Codable, Sendable, Identifiable {
 
 // MARK: - Metric Pair Definition
 
+// periphery:ignore - Reserved: init(metric1:metric2:coefficient:sampleSize:insight:discoveredAt:) initializer reserved for future feature activation
 /// Defines a pair of metrics to correlate, with extractors and an insight generator.
 private struct MetricPair {
     let name1: String
@@ -126,6 +128,7 @@ final class CrossDomainCorrelationEngine {
     // MARK: - State
 
     private(set) var snapshots: [DailyLifeSnapshot] = []
+    // periphery:ignore - Reserved: MetricPair type reserved for future feature activation
     private(set) var discoveredCorrelations: [CorrelationResult] = []
     private(set) var lastAnalysisDate: Date?
     private(set) var isCaptureInProgress = false
@@ -138,6 +141,7 @@ final class CrossDomainCorrelationEngine {
     // MARK: - Persistence
 
     private static let storageDirectory: URL = {
+        // periphery:ignore - Reserved: shared static property reserved for future feature activation
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Thea", isDirectory: true)
             .appendingPathComponent("Correlations", isDirectory: true)
@@ -150,6 +154,8 @@ final class CrossDomainCorrelationEngine {
     }()
 
     // MARK: - Init
+
+// periphery:ignore - Reserved: healthStore property reserved for future feature activation
 
     private init() {
         load()
@@ -176,6 +182,7 @@ final class CrossDomainCorrelationEngine {
         // Remove any existing snapshot for today (replace)
         snapshots.removeAll { calendar.isDate($0.date, inSameDayAs: now) }
 
+        // periphery:ignore - Reserved: captureToday() instance method reserved for future feature activation
         // Gather HealthKit data
         let (sleepHours, sleepQuality, remMin, deepMin) = await fetchSleepData(start: startOfDay, end: endOfDay)
         let (exerciseMin, steps, activeCal) = await fetchActivityData(start: startOfDay, end: endOfDay)
@@ -244,6 +251,7 @@ final class CrossDomainCorrelationEngine {
         var results: [CorrelationResult] = []
 
         for pair in pairs {
+            // periphery:ignore - Reserved: analyzeCorrelations() instance method reserved for future feature activation
             // Extract paired values, filtering out nil (missing data)
             var xValues: [Double] = []
             var yValues: [Double] = []
@@ -304,6 +312,7 @@ final class CrossDomainCorrelationEngine {
             let dx = x[i] - meanX
             let dy = y[i] - meanY
             sumXY += dx * dy
+            // periphery:ignore - Reserved: pearsonCorrelation(_:_:) instance method reserved for future feature activation
             sumX2 += dx * dx
             sumY2 += dy * dy
         }
@@ -330,6 +339,7 @@ final class CrossDomainCorrelationEngine {
             discoveredCorrelations
                 .sorted { abs($0.coefficient) > abs($1.coefficient) }
                 .prefix(limit)
+        // periphery:ignore - Reserved: generateInsights() instance method reserved for future feature activation
         )
     }
 
@@ -338,6 +348,7 @@ final class CrossDomainCorrelationEngine {
     // swiftlint:disable:next function_body_length
     private func buildMetricPairs() -> [MetricPair] {
         [
+            // periphery:ignore - Reserved: topCorrelations(limit:) instance method reserved for future feature activation
             // Sleep hours vs productivity
             MetricPair(
                 name1: "Sleep Hours",
@@ -348,6 +359,7 @@ final class CrossDomainCorrelationEngine {
                     Self.generateSleepProductivityInsight(r: r, snapshots: snapshots)
                 }
             ),
+            // periphery:ignore - Reserved: buildMetricPairs() instance method reserved for future feature activation
             // Sleep hours vs mood
             MetricPair(
                 name1: "Sleep Hours",
@@ -493,6 +505,7 @@ final class CrossDomainCorrelationEngine {
 
         for i in 0..<(sorted.count - 1) {
             let today = sorted[i]
+            // periphery:ignore - Reserved: analyzeOffsetPairs() instance method reserved for future feature activation
             let tomorrow = sorted[i + 1]
 
             // Verify they are consecutive days
@@ -541,6 +554,7 @@ final class CrossDomainCorrelationEngine {
             lowSleepDays.map(\.productivityScore).reduce(0, +) / Double(lowSleepDays.count)
 
         if avgProductivityLow > 0 {
+            // periphery:ignore - Reserved: generateSleepProductivityInsight(r:snapshots:) static method reserved for future feature activation
             let percentDifference = ((avgProductivityHigh - avgProductivityLow) / avgProductivityLow) * 100
             if percentDifference > 0 {
                 return "Your productivity is \(String(format: "%.0f", percentDifference))% higher on days after 7+ hours of sleep (r=\(String(format: "%.2f", r)))."
@@ -560,6 +574,7 @@ final class CrossDomainCorrelationEngine {
         let avgMoodSedentary = sedentaryDays.isEmpty ? 0 :
             sedentaryDays.map(\.moodScore).reduce(0, +) / Double(sedentaryDays.count)
 
+        // periphery:ignore - Reserved: generateExerciseMoodInsight(r:snapshots:) static method reserved for future feature activation
         let delta = avgMoodExercise - avgMoodSedentary
         if abs(delta) > 0.01 {
             let direction = delta > 0 ? "improves" : "declines"
@@ -580,6 +595,7 @@ final class CrossDomainCorrelationEngine {
         let descriptor = HKSampleQueryDescriptor(
             predicates: [.categorySample(type: sleepType, predicate: predicate)],
             sortDescriptors: [SortDescriptor(\.startDate, order: .forward)],
+            // periphery:ignore - Reserved: fetchSleepData(start:end:) instance method reserved for future feature activation
             limit: nil
         )
 
@@ -632,12 +648,15 @@ final class CrossDomainCorrelationEngine {
         return await (exerciseMin ?? 0, steps ?? 0, activeCal ?? 0)
     }
 
+// periphery:ignore - Reserved: fetchActivityData(start:end:) instance method reserved for future feature activation
+
     private func fetchRestingHeartRate(start: Date, end: Date) async -> Double {
         let hrType = HKQuantityType(.restingHeartRate)
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
         let descriptor = HKStatisticsQueryDescriptor(
             predicate: .quantitySample(type: hrType, predicate: predicate),
             options: .discreteAverage
+        // periphery:ignore - Reserved: fetchRestingHeartRate(start:end:) instance method reserved for future feature activation
         )
         do {
             let result = try await descriptor.result(for: healthStore)
@@ -653,6 +672,7 @@ final class CrossDomainCorrelationEngine {
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
         let descriptor = HKStatisticsQueryDescriptor(
             predicate: .quantitySample(type: hrvType, predicate: predicate),
+            // periphery:ignore - Reserved: fetchHRV(start:end:) instance method reserved for future feature activation
             options: .discreteAverage
         )
         do {
@@ -668,6 +688,7 @@ final class CrossDomainCorrelationEngine {
         let quantityType = HKQuantityType(identifier)
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
         let descriptor = HKStatisticsQueryDescriptor(
+            // periphery:ignore - Reserved: fetchQuantitySum(_:unit:start:end:) instance method reserved for future feature activation
             predicate: .quantitySample(type: quantityType, predicate: predicate),
             options: .cumulativeSum
         )
@@ -702,6 +723,7 @@ final class CrossDomainCorrelationEngine {
     private func estimateStressLevel() -> Double {
         let mood = MoodTracker.shared.currentMood
         let trend = MoodTracker.shared.moodTrend(hours: 6)
+        // periphery:ignore - Reserved: estimateStressLevel() instance method reserved for future feature activation
         var stress = 1.0 - mood // Base: inverse of mood
 
         // Declining mood = higher stress
@@ -718,6 +740,8 @@ final class CrossDomainCorrelationEngine {
 
     private func estimateProductivity() -> (score: Double, deepWorkMinutes: Double) {
         let context = BehavioralFingerprint.shared.currentContext()
+
+// periphery:ignore - Reserved: estimateProductivity() instance method reserved for future feature activation
 
         // Productivity score based on cognitive load and activity type
         var score: Double = 0.5
@@ -756,6 +780,7 @@ final class CrossDomainCorrelationEngine {
     // MARK: - Weather Data
 
     private func fetchWeatherData() -> (temp: Double, humidity: Double, pressure: Double, uv: Double) {
+        // periphery:ignore - Reserved: fetchWeatherData() instance method reserved for future feature activation
         guard let weather = WeatherMonitor.shared.currentWeather else {
             return (0, 0, 0, 0)
         }
@@ -775,6 +800,7 @@ final class CrossDomainCorrelationEngine {
         let lastAnalysisDate: Date?
     }
 
+    // periphery:ignore - Reserved: save() instance method reserved for future feature activation
     private func save() {
         let state = PersistedState(
             snapshots: snapshots,

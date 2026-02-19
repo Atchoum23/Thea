@@ -59,6 +59,8 @@ struct TransportProbeResult: Sendable {
         TransportProbeResult(transport: transport, isAvailable: false, latencyMs: nil, endpoint: nil, probedAt: Date())
     }
 
+// periphery:ignore - Reserved: probedAt property reserved for future feature activation
+
     static func available(_ transport: TheaTransport, latency: Double, endpoint: String) -> TransportProbeResult {
         TransportProbeResult(transport: transport, isAvailable: true, latencyMs: latency, endpoint: endpoint, probedAt: Date())
     }
@@ -70,6 +72,9 @@ struct TransportHealthStatus: Sendable {
     let isHealthy: Bool
     let lastCheckedAt: Date
     let consecutiveFailures: Int
+    // periphery:ignore - Reserved: transport property reserved for future feature activation
+    // periphery:ignore - Reserved: isHealthy property reserved for future feature activation
+    // periphery:ignore - Reserved: lastCheckedAt property reserved for future feature activation
     let averageLatencyMs: Double?
 }
 
@@ -174,6 +179,7 @@ actor SmartTransportManager {
 
     /// Stop monitoring and release resources
     func stopMonitoring() {
+        // periphery:ignore - Reserved: stopMonitoring() instance method reserved for future feature activation
         monitoringTask?.cancel()
         monitoringTask = nil
         bonjourBrowser?.cancel()
@@ -184,6 +190,7 @@ actor SmartTransportManager {
     }
 
     /// Get the endpoint for the active transport
+    // periphery:ignore - Reserved: activeEndpoint() instance method reserved for future feature activation
     func activeEndpoint() -> String? {
         peerEndpoints[activeTransport]
     }

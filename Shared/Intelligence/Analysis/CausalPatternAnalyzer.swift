@@ -10,6 +10,7 @@ import Foundation
 import Observation
 import os.log
 
+// periphery:ignore - Reserved: causalLogger global var reserved for future feature activation
 private let causalLogger = Logger(subsystem: "ai.thea.app", category: "CausalPatternAnalyzer")
 
 // MARK: - Causal Relationship

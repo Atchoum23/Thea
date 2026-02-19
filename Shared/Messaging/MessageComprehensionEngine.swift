@@ -11,7 +11,10 @@ import OSLog
 // swiftlint:disable:next line_length
 private let msgComprehensionLogger = Logger(subsystem: "ai.thea.app", category: "MessageComprehension")
 
+// periphery:ignore - Reserved: msgComprehensionLogger global var reserved for future feature activation
+
 /// Analyzes messages to extract structured understanding.
+// periphery:ignore - Reserved: MsgComprehensionEngine type reserved for future feature activation
 enum MsgComprehensionEngine {
 
     // MARK: - Main Analysis

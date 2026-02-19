@@ -10,6 +10,8 @@ import OSLog
 private let logger = Logger(subsystem: "ai.thea.app", category: "EnhancedMessageBubbleTypes")
 #endif
 
+// periphery:ignore - Reserved: logger global var reserved for future feature activation
+
 // MARK: - Supporting Views
 
 /// Small icon action button
@@ -45,6 +47,7 @@ struct IconActionButton: View {
 
 /// Confidence indicator dot
 struct ConfidenceDot: View {
+    // periphery:ignore - Reserved: ConfidenceDot type reserved for future feature activation
     let confidence: Double
 
     var body: some View {
@@ -68,6 +71,7 @@ struct EnhancedCodeBlock: View {
     let code: String
     let language: String?
     var isExpanded: Bool
+    // periphery:ignore - Reserved: onToggle property reserved for future feature activation
     let onToggle: () -> Void
 
     @State private var showCopied = false
