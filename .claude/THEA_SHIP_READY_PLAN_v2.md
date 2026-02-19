@@ -2558,8 +2558,23 @@ echo "Notarization verified"
 > git pull && git log --oneline -5 && git status --short && git stash list
 > # Run Build Verification Gate — must be 4x BUILD SUCCEEDED before touching code
 > ```
+>
+> ⚡ **LOCAL-FIRST PROTOCOL (do NOT push and wait for GH Actions)**:
+> Phase U verifies locally. Only push ONCE at the end to confirm the GH Actions baseline.
+> ```bash
+> # Local swift test for verification (55 min, same quality as GH Actions):
+> swift test 2>&1 | tee /tmp/phase-u-tests.log | grep -E "(PASSED|FAILED|error:)" | tail -10
+>
+> # 4-platform builds (local, parallel):
+> for SCHEME in Thea-macOS Thea-iOS Thea-watchOS Thea-tvOS; do
+>   xcodebuild -project Thea.xcodeproj -scheme "$SCHEME" -configuration Debug \
+>     -destination 'platform=macOS' build -derivedDataPath /tmp/TheaBuild \
+>     CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "BUILD|error:" | tail -2 &
+> done; wait
+> ```
 
-**Goal**: Confirm ALL ship-ready criteria met. Generate comprehensive report.
+**Goal**: Confirm ALL ship-ready criteria met via LOCAL verification. Generate comprehensive report.
+**Then push ONCE** to confirm GH Actions is green before transitioning to v3.
 
 ```bash
 cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"

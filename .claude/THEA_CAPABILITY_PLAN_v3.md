@@ -444,6 +444,40 @@ done
 
 Threshold: >85°C = warning (log only). >90°C = pause 2 min. >95°C = stop executor, alert.
 
+### Rule 9 — LOCAL-FIRST TESTING PROTOCOL (MANDATORY — zero quality loss)
+
+**Principle**: GH Actions macOS runners are 3-4× slower than MSM3U. Every unnecessary CI push
+adds 80-120 min of dead wait time. The fix: iterate locally until clean, then push ONCE per wave.
+
+**Quality guarantee**: `swift test` locally catches 100% of the same bugs as GH Actions Unit Tests.
+GH Actions additionally verifies clean-environment behavior — preserved by running it at wave gates.
+
+**Per-phase loop (development iteration):**
+```bash
+# 1. Write code, fix types, fix build errors
+swift build 2>&1 | grep "error:" | head -20
+
+# 2. Run local tests (fast — 55 min on MSM3U, vs 90-120 min on GH Actions):
+swift test 2>&1 | grep -E "(PASSED|FAILED|error:)" | tail -20
+
+# 3. If tests fail: fix locally, re-run swift test. Repeat until clean.
+# 4. Only when locally clean: git add + git commit + (skip pushsync until wave end)
+```
+
+**Per-WAVE gate (GH Actions verification — once per wave, not per phase):**
+```bash
+# After all phases in the wave are locally clean and committed:
+git pushsync  # One push → one GH Actions run → verify clean environment
+# Monitor until GH Actions green. Fix if needed, then re-pushsync.
+# This ensures GH Actions green is confirmed, without 28 separate CI waits.
+```
+
+**Apply to remaining v2**: Phase U must use local builds + local swift test (not a new GH Actions push).
+Phase T file creation needs no tests. Only push at end of Phase U to confirm final GH Actions state.
+
+**NEVER**: Run phase after phase pushing to GH Actions and waiting 90-120 min between each.
+**ALWAYS**: Local swift test → local fix loop → commit → push once at wave gate.
+
 ### Pre-flight Build Gate (BEFORE EVERY PHASE)
 ```bash
 xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
