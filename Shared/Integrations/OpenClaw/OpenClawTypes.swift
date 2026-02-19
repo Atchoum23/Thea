@@ -8,7 +8,9 @@ import Foundation
 // MARK: - Wire Protocol Types (O0/O1)
 
 /// Request sent to Gateway: {"type":"req","id":"uuid","method":"...","params":{...}}
-struct OpenClawWireRequest: Sendable {
+/// @unchecked Sendable: params contains only JSON-serializable primitives (String/Int/Double/Bool/Array)
+/// built at call site; never escapes across concurrency boundaries after construction.
+struct OpenClawWireRequest: @unchecked Sendable {
     let type = "req"
     let id: String
     let method: String
@@ -338,7 +340,9 @@ struct OpenClawSecurityFinding: Identifiable, Codable, Sendable {
 // MARK: - Gateway Commands (O0 / O1)
 
 /// Commands sent to OpenClaw Gateway (proper req/res protocol)
-enum OpenClawGatewayCommand: Sendable {
+/// @unchecked Sendable: invokeNode/setConfig params contain JSON-serializable primitives only;
+/// values are never mutated or shared across concurrency domains after the command is created.
+enum OpenClawGatewayCommand: @unchecked Sendable {
     // Messaging
     case listChannels
     case sendMessage(channelID: String, text: String)
