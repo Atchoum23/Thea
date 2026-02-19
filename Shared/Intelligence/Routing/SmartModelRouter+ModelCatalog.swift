@@ -20,6 +20,7 @@ extension SmartModelRouter {
 
     // MARK: - Anthropic
 
+    // swiftlint:disable function_body_length
     private func registerAnthropicModels() {
         // Claude 4.6 (Latest — Feb 2026)
         registerModel(RouterModelCapability(
@@ -120,6 +121,7 @@ extension SmartModelRouter {
             qualityScore: 0.70
         ))
     }
+    // swiftlint:enable function_body_length
 
     // MARK: - OpenAI
 
