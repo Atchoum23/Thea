@@ -323,7 +323,7 @@ final class OpenClawBridge {
         // Auto-load default VLM if none loaded
         if engine.loadedModel == nil {
             do {
-                try await engine.loadModel(id: MLXVisionEngine.qwen3VL8B)
+                _ = try await engine.loadModel(id: MLXVisionEngine.qwen3VL8B)
             } catch {
                 logger.warning("P15: VLM load failed — skipping image description: \(error.localizedDescription)")
                 return nil
