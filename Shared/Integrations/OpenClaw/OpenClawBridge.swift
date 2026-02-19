@@ -222,9 +222,39 @@ final class OpenClawBridge {
             return
         }
 
+        // P11: Transcribe audio attachments → prepend transcript to effective content
+        var effectiveMessage = message
+        let audioAttachments = message.attachments.filter { $0.kind == .audio }
+        if !audioAttachments.isEmpty {
+            var transcripts: [String] = []
+            for attachment in audioAttachments {
+                if let transcript = await transcribeAudioAttachment(attachment) {
+                    transcripts.append(transcript)
+                }
+            }
+            if !transcripts.isEmpty {
+                let combined = transcripts.joined(separator: "\n")
+                let voicePrefix = message.content.isEmpty
+                    ? "[Voice note]: \(combined)"
+                    : "[Voice note]: \(combined)\n\(message.content)"
+                effectiveMessage = TheaGatewayMessage(
+                    id: message.id,
+                    platform: message.platform,
+                    chatId: message.chatId,
+                    senderId: message.senderId,
+                    senderName: message.senderName,
+                    content: voicePrefix,
+                    timestamp: message.timestamp,
+                    isGroup: message.isGroup,
+                    attachments: message.attachments.filter { $0.kind != .audio }
+                )
+                logger.info("P11: Transcribed \(audioAttachments.count) audio attachment(s) for \(message.platform.displayName)/\(message.chatId)")
+            }
+        }
+
         // Generate AI response
         do {
-            let ocMsg = bridgeToOpenClawMessage(message)
+            let ocMsg = bridgeToOpenClawMessage(effectiveMessage)
             let response = try await generateAIResponse(for: ocMsg)
 
             // Light confidence verification (P2: messaging context = no multi-model, maxLatency 2s)
@@ -252,6 +282,35 @@ final class OpenClawBridge {
             logger.info("Sent AI response to \(message.platform.displayName)/\(message.chatId)")
         } catch {
             logger.error("Failed to respond to \(message.platform.displayName): \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - P11: Audio Attachment Transcription
+
+    /// Transcribe an audio attachment from a gateway message using SpeechTranscriptionService.
+    /// Writes attachment data to a temp file, then delegates to SpeechTranscriptionService.
+    private func transcribeAudioAttachment(_ attachment: MessagingAttachment) async -> String? {
+        let ext: String
+        switch attachment.mimeType.lowercased() {
+        case "audio/ogg", "audio/ogg; codecs=opus": ext = "ogg"
+        case "audio/mpeg", "audio/mp3": ext = "mp3"
+        case "audio/mp4", "audio/aac": ext = "m4a"
+        case "audio/wav", "audio/wave": ext = "wav"
+        case "audio/webm": ext = "webm"
+        default: ext = attachment.fileName.flatMap { URL(fileURLWithPath: $0).pathExtension } ?? "audio"
+        }
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension(ext)
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+        do {
+            try attachment.data.write(to: tempURL)
+            let transcript = try await SpeechTranscriptionService.shared.transcribe(audioURL: tempURL)
+            logger.debug("P11: Audio transcript (\(transcript.count) chars) from \(attachment.mimeType)")
+            return transcript
+        } catch {
+            logger.warning("P11: Audio transcription failed for \(attachment.mimeType): \(error.localizedDescription)")
+            return nil
         }
     }
 
