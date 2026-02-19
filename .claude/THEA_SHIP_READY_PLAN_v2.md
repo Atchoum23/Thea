@@ -57,12 +57,12 @@ phase and run all steps fully and autonomously, committing after each step."
 | Phase R: Periphery        | ✅ DONE         | 2,674 items marked periphery:ignore/Reserved across 489 files. Committed 6d725251 + 4d14df81 + 9a0b408e |
 | Phase W: V1 Re-verify     | ✅ DONE         | W1-W8 all complete. 4046/4046 tests ✅, 0 SwiftLint violations ✅, security ✅. Commit: a2f3f5e5 |
 | Phase S: CI Green         | ✅ DONE         | Run 22199198129 SUCCESS at 23:26:54 CET. SwiftLint ✅ Builds (4x) ✅ SPM ✅ macOS ✅ iOS ✅ Periphery ✅. ntfy sent. |
-| Phase T: Notarization     | 🔄 ACTIVE       | T-auto (T3+T5) running in parallel tmux window. T1/T2/T4 require Alexis (ntfy sent, non-blocking). |
-| Phase U: Final Report     | 🔄 ACTIVE       | Executor running Phase U. LOCAL swift test only (no GH push). Auto-starts v3 6-stream launcher on completion. |
+| Phase T: Notarization     | ✅ DONE         | T-auto DONE: ExportOptions-DevID.plist (T3) + Scripts/notarize.sh (T5) → commit c07f9211. T1/T2/T4 non-blocking (ntfy sent). |
+| Phase U: Final Report     | 🔄 ACTIVE       | Executor generating Final Verification Report (Phase U). 4046/4046 swift tests ✅. Auto-starts v3 on completion. |
 | Phase V: Manual Gate      | ⚠️ DEFERRED    | MERGED into v3 Phase AD3 (combined final gate). Do NOT stop here — proceed to v3. |
-| **Overall ship-ready %**  | **~93%**        | N+O+P+Q+R+W+S done; T/U active; V deferred to v3 AD3 |
+| **Overall ship-ready %**  | **~96%**        | N+O+P+Q+R+W+S+T done; U active; V deferred to v3 AD3. E2E fix deployed (sha 4890e26e). |
 
-*Last updated: 2026-02-19 23:27 CET — Phase S ✅ COMPLETE. Run 22199198129 all green. Phase T-auto + Phase U now active on executor. v3 6-stream launch follows Phase U completion.*
+*Last updated: 2026-02-20 00:00 CET — Phase T-auto ✅ DONE (c07f9211). Phase U 🔄 ACTIVE (executor generating Final Verification Report, 4046 tests ✅). E2E fix deployed (sha 4890e26e — iOS 26 Tab API + Maestro robustness). New CI runs triggered: Thea CI #379 + E2E #312 in_progress. Phase S will be truly complete when all 6 workflows green on sha 4890e26e (~1h45m from 22:48 UTC).*
 
 ---
 
