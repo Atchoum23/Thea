@@ -56,7 +56,6 @@
 		053D10E9206A3F9FB0D138DB /* ModelRouter+Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A26F2208AE068DC9ECBE45 /* ModelRouter+Types.swift */; };
 		053EB39C11A2FE1CD7AE5BCE /* FocusOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F2B7D088340F1C762251C23 /* FocusOrchestrator.swift */; };
 		054257EA3542520FF464C37B /* ProactiveNotificationIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69AE251446D24B99DC6D9EBC /* ProactiveNotificationIntelligence.swift */; };
-		057C9C4F182068F7796878A9 /* SmartModelRouter+ModelCatalog 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A741AAD7439A2F284065F95 /* SmartModelRouter+ModelCatalog 2.swift */; };
 		0586056E20DFE4B592BA913F /* AgentEnhancements+MessageQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A63326A9AC104F79EF7E8322 /* AgentEnhancements+MessageQueue.swift */; };
 		05A303917EC7D0E97F428399 /* DNSBlocklistManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B95704AA33981566A24BCD5 /* DNSBlocklistManagerView.swift */; };
 		05A5D393230C2E9C084B6D5B /* PhysicalMailChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E9C14554173683DA0F6EF3 /* PhysicalMailChannel.swift */; };
@@ -525,7 +524,6 @@
 		37367D4177971E6AE54D2837 /* CallMonitor+Queries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E976462B703515CBE566D5 /* CallMonitor+Queries.swift */; };
 		37437E80E10B5848EDF3BBF4 /* VoiceBackendProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51EF80C59BC3C938B26B24C1 /* VoiceBackendProtocol.swift */; };
 		37495A06A9D14929FCA7691F /* iOSAutomationSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5754C968953F564F15B7EBFF /* iOSAutomationSection.swift */; };
-		3764F5E333B0AB24D507F5B5 /* OpenClawSecurityGuardMessagingTests 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C2D26CEB067FF45B215ED1 /* OpenClawSecurityGuardMessagingTests 2.swift */; };
 		376FF3865AAF7968B9E4174A /* FocusModeIntelligence+Learning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F22503DCE5ACECB40BD3B10 /* FocusModeIntelligence+Learning.swift */; };
 		37884AE4F083D4B958E01294 /* icon-96.png in Resources */ = {isa = PBXBuildFile; fileRef = 99546E1BAE198E4685265A5A /* icon-96.png */; };
 		37940D789DE5BE4877ABF1C8 /* THEAMCPServerTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F35C4C7D8D822F3CB46F44 /* THEAMCPServerTypes.swift */; };
@@ -632,7 +630,6 @@
 		4235360EF4A5033E38CBBC3C /* PredictiveLifeEngine+PatternPredictions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29437F6E450406273BBFE12A /* PredictiveLifeEngine+PatternPredictions.swift */; };
 		4276A5153158128CD0A1899F /* ConversationMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45AE888FBB3CAD38DB600EC5 /* ConversationMemory.swift */; };
 		429B4B3713213434A6B4712B /* ConversationIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA47D1889A0DF7617094D88 /* ConversationIntelligence.swift */; };
-		429FE6BB932104ABE35A166C /* MessagingPlatformProtocolTests 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDA123DB0B87C161E90A80C /* MessagingPlatformProtocolTests 2.swift */; };
 		42B2B3D4726D41B7CC14D218 /* ai-sidebar.css in Resources */ = {isa = PBXBuildFile; fileRef = 2CDA7757850F5850A7CAFC5E /* ai-sidebar.css */; };
 		4343FEF9347232401D051F95 /* ResponseNotificationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72FA6DB594497FD8B397F1CE /* ResponseNotificationHandler.swift */; };
 		434BBADFAB15FFDD03D5E834 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 74925CC1319728AD55A5F849 /* PrivacyInfo.xcprivacy */; };
@@ -1884,7 +1881,6 @@
 		D3BB515F8041EEEC21D53A4F /* PrivacySettingsViewSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 653DFB5BA5A429E7EDB8765A /* PrivacySettingsViewSections.swift */; };
 		D4074D4CAB3F35536133FB64 /* NotesIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CC6D75910A21D1B143F3AB4 /* NotesIntegration.swift */; };
 		D42D57AF7D9984F31F840D02 /* PermissionsTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFA2EF92AFF6A8A09A41FC68 /* PermissionsTypes.swift */; };
-		D452F0B5BDDDB2D36BEC2123 /* SmartModelRouter+ModelCatalog 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A741AAD7439A2F284065F95 /* SmartModelRouter+ModelCatalog 2.swift */; };
 		D468C5CE2CB0E89EE6280B6A /* AssessmentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73D9A711AEC2BF35FC6A06EC /* AssessmentViewModel.swift */; };
 		D4CE616DB8BC78742E66980A /* DiscordConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA861EB8EDA3268C7AB5541B /* DiscordConnector.swift */; };
 		D4D1DA32876895635A5B4591 /* MediaAutomationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4D9E41333AFD836F317258 /* MediaAutomationModels.swift */; };
@@ -2693,7 +2689,6 @@
 		3A31D5A95202A25306AF85DA /* ModelSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSelectorView.swift; sourceTree = "<group>"; };
 		3A39E657454A8273F0B46AEE /* WidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WidgetExtension.entitlements; sourceTree = "<group>"; };
 		3A4AD63B8991F00AB890CC10 /* KnowledgeManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeManagementView.swift; sourceTree = "<group>"; };
-		3A741AAD7439A2F284065F95 /* SmartModelRouter+ModelCatalog 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SmartModelRouter+ModelCatalog 2.swift"; sourceTree = "<group>"; };
 		3AABB4A30E8D88394B584502 /* NotificationPayloadTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPayloadTypes.swift; sourceTree = "<group>"; };
 		3AD151422B1C56401D1576CE /* SyncConflictResolutionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncConflictResolutionView.swift; sourceTree = "<group>"; };
 		3AD81309BBB16200ABB14BF9 /* CoworkSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoworkSession.swift; sourceTree = "<group>"; };
@@ -3103,7 +3098,6 @@
 		857BB5506B4FBC2D1296B1CF /* APIGenerator+Templates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIGenerator+Templates.swift"; sourceTree = "<group>"; };
 		85A4C64EF1EA8CF3569A0C64 /* MentalWorldModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentalWorldModel.swift; sourceTree = "<group>"; };
 		85B1685CF8CDD2175144F48D /* OnboardingManagerTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingManagerTypes.swift; sourceTree = "<group>"; };
-		85C2D26CEB067FF45B215ED1 /* OpenClawSecurityGuardMessagingTests 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OpenClawSecurityGuardMessagingTests 2.swift"; sourceTree = "<group>"; };
 		85DB4FC0AB8685C4ECE6205A /* VideoEncoderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoEncoderService.swift; sourceTree = "<group>"; };
 		85DCFC6B41A251AAA329B764 /* TaskClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskClassifier.swift; sourceTree = "<group>"; };
 		85E2E9B5D065766CC489B5C0 /* ExternalSubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalSubscriptionManager.swift; sourceTree = "<group>"; };
@@ -3294,7 +3288,6 @@
 		AD8580643130E3F95DCE9E18 /* dark-mode-inject.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = "dark-mode-inject.css"; sourceTree = "<group>"; };
 		AD870CD2078AC2578C4E4CA4 /* ProactiveSuggestionEngine+Views.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProactiveSuggestionEngine+Views.swift"; sourceTree = "<group>"; };
 		ADBFA4C4EE5C2B32A6710AA1 /* TheaWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaWidgets.swift; sourceTree = "<group>"; };
-		ADDA123DB0B87C161E90A80C /* MessagingPlatformProtocolTests 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MessagingPlatformProtocolTests 2.swift"; sourceTree = "<group>"; };
 		AE45E617D2796AF751FFE80A /* CoreMLService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMLService.swift; sourceTree = "<group>"; };
 		AE45FE9B289218509A56ACB3 /* ContextProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextProvider.swift; sourceTree = "<group>"; };
 		AE8D699C51A337162D4453E6 /* TodoistIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoistIntegration.swift; sourceTree = "<group>"; };
@@ -5176,7 +5169,6 @@
 				19A26F2208AE068DC9ECBE45 /* ModelRouter+Types.swift */,
 				FF5D06447B535E0963CBDE40 /* SmartModelRouter.swift */,
 				A425612A7178A18F605D1BA9 /* SmartModelRouter+Core.swift */,
-				3A741AAD7439A2F284065F95 /* SmartModelRouter+ModelCatalog 2.swift */,
 				91EBDA07553AFFF41C46B3C3 /* SmartModelRouter+ModelCatalog.swift */,
 			);
 			path = Routing;
@@ -6061,13 +6053,11 @@
 				0936318FA09A7042DDAA2F2D /* HealthServiceTests.swift */,
 				65A701A0A188D2D2FF28903F /* IncomeServiceTests.swift */,
 				C2ABEACF5247936B5C241F15 /* IntegrationModuleTests.swift */,
-				ADDA123DB0B87C161E90A80C /* MessagingPlatformProtocolTests 2.swift */,
 				8A3D54FDBA757A76349EFF03 /* MessagingPlatformProtocolTests.swift */,
 				1A05B41D2C58CFCFEF62C990 /* MessagingSessionManagerTests.swift */,
 				DBE699DFF79812ADB9A9EF99 /* NetworkResilienceTests.swift */,
 				7130C85DA968036A0DA5FF11 /* NutritionServiceTests.swift */,
 				636D0E3118E8EA0A13C01A4A /* OpenClawBridgeMessagingTests.swift */,
-				85C2D26CEB067FF45B215ED1 /* OpenClawSecurityGuardMessagingTests 2.swift */,
 				79E83BFF17B27017340CC4E3 /* OpenClawSecurityGuardMessagingTests.swift */,
 				F7107578EAAA228CD1A18692 /* OpenClawSecurityGuardTests.swift */,
 				C43A0FD152AF520E25D1CB9E /* OutboundPrivacyGuardTests.swift */,
@@ -8739,7 +8729,6 @@
 				C3376DE64ACD3BF0CEDD52D5 /* SleepQualityView.swift in Sources */,
 				8641BB4BB3FC0A0E3107FD30 /* SmartDeviceIntegration.swift in Sources */,
 				CEA393BC69E9AC80B09A74A6 /* SmartModelRouter+Core.swift in Sources */,
-				D452F0B5BDDDB2D36BEC2123 /* SmartModelRouter+ModelCatalog 2.swift in Sources */,
 				00023931B261CCABF845E2F0 /* SmartModelRouter+ModelCatalog.swift in Sources */,
 				1878B5418C19F464B77B1E80 /* SmartModelRouter.swift in Sources */,
 				21FE11DB889EB2D529BA0E26 /* SmartNotificationScheduler.swift in Sources */,
@@ -9046,13 +9035,11 @@
 				87191B9E6BA1378DBE8EA0C4 /* IncomeServiceTests.swift in Sources */,
 				4A2EFD210AC80EC99CCDB3F5 /* IntegrationModuleTests.swift in Sources */,
 				CDAF66E3ACA211DE6CDE56B9 /* MLXInferenceTests.swift in Sources */,
-				429FE6BB932104ABE35A166C /* MessagingPlatformProtocolTests 2.swift in Sources */,
 				CCAA12A02E2F5C7CDBC7869D /* MessagingPlatformProtocolTests.swift in Sources */,
 				A13C41AA85B8449D5259E416 /* MessagingSessionManagerTests.swift in Sources */,
 				AA3CCFCABB2E2B2123BB1038 /* NetworkResilienceTests.swift in Sources */,
 				2F7F8A9A838A28F11CE0FA2B /* NutritionServiceTests.swift in Sources */,
 				A822239B1D14395D8C66FABF /* OpenClawBridgeMessagingTests.swift in Sources */,
-				3764F5E333B0AB24D507F5B5 /* OpenClawSecurityGuardMessagingTests 2.swift in Sources */,
 				339242038A9680CFC8F3D258 /* OpenClawSecurityGuardMessagingTests.swift in Sources */,
 				0AA2D6F993376BD7B8484BDE /* OpenClawSecurityGuardTests.swift in Sources */,
 				93CB9BE6C8CD3DDDCEE99E4C /* OutboundPrivacyGuardTests.swift in Sources */,
@@ -9940,7 +9927,6 @@
 				8C9A2FC9A431F49E3ED527A2 /* SleepQualityView.swift in Sources */,
 				18C15DC2A595CDDB9C1E3508 /* SmartDeviceIntegration.swift in Sources */,
 				EA082ECCEA3E7FAD40D9CCA3 /* SmartModelRouter+Core.swift in Sources */,
-				057C9C4F182068F7796878A9 /* SmartModelRouter+ModelCatalog 2.swift in Sources */,
 				4F6625E40763222423478FD4 /* SmartModelRouter+ModelCatalog.swift in Sources */,
 				B3B04BB1ED566FDD916FE3B6 /* SmartModelRouter.swift in Sources */,
 				41E11F965FBEC74684B0AC1E /* SmartNotificationScheduler.swift in Sources */,
