@@ -47,7 +47,7 @@ phase and run all steps fully and autonomously, committing after each step."
 |---------------------------|-----------------|-------|
 | v1 phases (A–L)           | ✅ ALL DONE     | See Progress Tracking section |
 | Phase N: Workflows        | ✅ DONE         | All 6 YAML files written + committed (2026-02-19) |
-| Phase O: Messaging Gateway| 🔶 IN PROGRESS  | O_CLEAN✅ OpenClaw fully uninstalled. Types✅. O0 foundation files: pending |
+| Phase O: Messaging Gateway| ✅ DONE         | All O0–O10, O_Tests, O_Wire complete. iOS+macOS wired. (2026-02-19) |
 | Phase P: Components       | ⏳ PENDING      | 16 subsystem analyses + AI 2026 upgrades |
 | Phase Q: Tests ≥80%       | ⏳ PENDING      | Baseline measurement first |
 | Phase R: Periphery        | ⏳ PARTIAL      | ~2,667 items remain from v1 D3 |
@@ -56,9 +56,9 @@ phase and run all steps fully and autonomously, committing after each step."
 | Phase W: V1 Re-verify     | ⏳ PENDING      | Run after O + P complete |
 | Phase U: Final Report     | ⏳ PENDING      | Blocked by all above |
 | Phase V: Manual Gate      | ⏳ MANUAL       | Alexis only — last step |
-| **Overall ship-ready %**  | **~47%**        | N done; O in progress (O_PRE+O0/O1 done); P–U pending |
+| **Overall ship-ready %**  | **~55%**        | N+O done; P in progress; Q/R/W/S/T/U pending |
 
-*Last updated: 2026-02-19*
+*Last updated: 2026-02-19 — Phase O complete, Session Safety Protocol added*
 
 ---
 
@@ -159,7 +159,7 @@ Wave 0 — PREREQUISITE (ALL DONE ✅):
 
 Wave 1 — PARALLEL (no dependencies between O, P):
   ✅ N — GitHub Workflows Overhaul   [DONE 2026-02-19 — all 6 YAML files written + committed]
-  O — Thea Native Messaging Gateway    [MSM3U, ~6h, start with O_CLEAN then O0–O10]
+  ✅ O — Thea Native Messaging Gateway [DONE 2026-02-19 — O0–O10, O_Tests, O_Wire, iOS+macOS wired]
   P — Component Analysis + Fixes       [MSM3U, ~4h, P1–P16 including AI 2026 upgrades]
 
 Wave 2 — AFTER WAVE 1 (parallel with each other):
@@ -181,6 +181,104 @@ Agent parallelism within waves:
     Session 2: "Execute Phase P — Component Analysis + Fixes (P1–P16)"
   Each session sends ntfy progress notifications on phase start/complete/failure.
   Monitor both and merge results via git pushsync when each session commits.
+```
+
+---
+
+## SESSION SAFETY PROTOCOL — MANDATORY FOR ALL AUTONOMOUS SESSIONS
+
+These rules exist because of real failures encountered during v2 execution. Every autonomous
+Claude Code session MUST follow this protocol or it will produce lost work, conflicts, and
+partial commits. No exceptions.
+
+### 1. SUSPEND thea-sync AT SESSION START — RESTORE AT END
+
+The thea-sync launchd daemon runs `git stash` every ~5 minutes as a safety net. This will
+stash your in-progress file writes before you can commit them, silently reverting your work.
+
+```bash
+# FIRST command of every session:
+launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+echo "thea-sync suspended"
+
+# LAST command of every session (even on failure/interrupt):
+launchctl load ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+echo "thea-sync restored"
+```
+
+If the session is interrupted before restoring, the next session must check:
+```bash
+launchctl list | grep thea-sync || launchctl load ~/Library/LaunchAgents/com.alexis.thea-sync.plist
+git stash list  # drop any auto-stashes from this session after verifying contents
+```
+
+### 2. PULL LATEST PLAN BEFORE EXECUTING ANYTHING
+
+The plan is the source of truth. A prior session may have rewritten a phase between when
+you were spawned and when you begin executing. Always read the plan fresh before acting.
+
+```bash
+git pull
+# Then: Read "/Users/alexis/Documents/IT & Tech/MyApps/Thea/.claude/THEA_SHIP_READY_PLAN_v2.md"
+# Check what is already done. Do not re-do completed work.
+```
+
+### 3. COMMIT EVERY FILE INDIVIDUALLY — NEVER BATCH
+
+Do not write 5 files then commit once. Write one file, commit, write next file, commit.
+This prevents losing multiple files if thea-sync stashes mid-write or the session is
+interrupted. The git log is your progress record.
+
+```bash
+# Pattern for EVERY file created or modified:
+git add <specific-file> && git commit -m "Auto-save: [what it is]"
+# NOT: write 7 test files, then git add -A
+```
+
+### 4. VERIFY PLAN STATE BEFORE STARTING A PHASE — NEVER ASSUME
+
+Before executing any phase step, check git log to confirm what's already committed.
+A parallel session or prior interrupted session may have done part of the work.
+
+```bash
+git log --oneline -20  # see what's already committed
+git status --short      # see any uncommitted changes to handle first
+git stash list          # check for any stashed work to recover before starting
+```
+
+If you find uncommitted changes or stashes:
+- Apply stash: `git stash pop` then `git add -A && git commit -m "Auto-save: recover stashed work"`
+- Commit any staged changes before proceeding
+
+### 5. CLEAN EXIT PROTOCOL — ALWAYS RUN BEFORE STOPPING
+
+Whether completing normally or stopping early, always run this before the session ends:
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+git add -A && git status
+# If anything staged:
+git commit -m "Auto-save: session end checkpoint — [what was in progress]"
+# Then restore thea-sync:
+launchctl load ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+# Then pushsync if phase is complete:
+# git pushsync
+```
+
+### 6. NEVER RUN CONCURRENTLY WITH ANOTHER SESSION ON THE SAME REPO
+
+Two Claude Code sessions writing to the same git repo simultaneously will corrupt the
+index and cause conflicts. Before starting a session:
+
+```bash
+pgrep -la claude | grep -v "^$$"  # check for other running claude processes
+# If another session is active, coordinate — do not both commit at the same time
+# Use different terminal tabs and alternate commits, or split into non-overlapping files
+```
+
+If index corruption occurs (false deletions in git diff):
+```bash
+rm -f .git/index && git read-tree HEAD  # rebuild index from HEAD
 ```
 
 ---
@@ -2540,8 +2638,8 @@ Update this section after each phase completes:
 
 | Phase | Description                                  | Status      | Agent    | Completed |
 |-------|----------------------------------------------|-------------|----------|-----------|
-| N     | GitHub Workflows Overhaul (6 files)          | ⏳ PENDING  | —        | —         |
-| O     | Thea Native Messaging Gateway                | 🔶 PARTIAL  | 2026-02-19| O_PRE+O0/O1 done; O2–O10 pending |
+| N     | GitHub Workflows Overhaul (6 files)          | ✅ DONE     | mbam2    | 2026-02-19|
+| O     | Thea Native Messaging Gateway                | ✅ DONE     | msm3u    | 2026-02-19|
 | P     | Component Analysis + Individual Fixes        | ⏳ PENDING  | —        | —         |
 | Q     | Test Coverage to 80%+                        | ⏳ PENDING  | —        | —         |
 | R     | Periphery Full Resolution                    | ✅ PARTIAL  | afc0c7b  | 2026-02-18|
