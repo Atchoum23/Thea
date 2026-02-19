@@ -222,6 +222,19 @@ final class OpenClawBridge {
             return
         }
 
+        // P15: Describe image attachments → prepend description to effective content (macOS only)
+        var imageDescriptions: [String] = []
+        #if os(macOS)
+        let imageAttachments = message.attachments.filter { $0.kind == .image }
+        if !imageAttachments.isEmpty {
+            for attachment in imageAttachments {
+                if let desc = await describeImageAttachment(attachment) {
+                    imageDescriptions.append(desc)
+                }
+            }
+        }
+        #endif
+
         // P11: Transcribe audio attachments → prepend transcript to effective content
         var effectiveMessage = message
         let audioAttachments = message.attachments.filter { $0.kind == .audio }
@@ -234,9 +247,10 @@ final class OpenClawBridge {
             }
             if !transcripts.isEmpty {
                 let combined = transcripts.joined(separator: "\n")
+                let imagePrefix = imageDescriptions.isEmpty ? "" : imageDescriptions.map { "[Image]: \($0)" }.joined(separator: "\n") + "\n"
                 let voicePrefix = message.content.isEmpty
-                    ? "[Voice note]: \(combined)"
-                    : "[Voice note]: \(combined)\n\(message.content)"
+                    ? "\(imagePrefix)[Voice note]: \(combined)"
+                    : "\(imagePrefix)[Voice note]: \(combined)\n\(message.content)"
                 effectiveMessage = TheaGatewayMessage(
                     id: message.id,
                     platform: message.platform,
@@ -248,8 +262,22 @@ final class OpenClawBridge {
                     isGroup: message.isGroup,
                     attachments: message.attachments.filter { $0.kind != .audio }
                 )
-                logger.info("P11: Transcribed \(audioAttachments.count) audio attachment(s) for \(message.platform.displayName)/\(message.chatId)")
+                logger.info("P11: Transcribed \(audioAttachments.count) audio + \(imageDescriptions.count) image attachment(s) for \(message.platform.displayName)/\(message.chatId)")
             }
+        }
+
+        // P15: If images were described but no audio, still update effectiveMessage content
+        if !imageDescriptions.isEmpty && audioAttachments.isEmpty {
+            let imagePrefix = imageDescriptions.map { "[Image]: \($0)" }.joined(separator: "\n")
+            let newContent = message.content.isEmpty ? imagePrefix : "\(imagePrefix)\n\(message.content)"
+            effectiveMessage = TheaGatewayMessage(
+                id: message.id, platform: message.platform, chatId: message.chatId,
+                senderId: message.senderId, senderName: message.senderName,
+                content: newContent, timestamp: message.timestamp,
+                isGroup: message.isGroup,
+                attachments: message.attachments.filter { $0.kind != .image }
+            )
+            logger.info("P15: Described \(imageDescriptions.count) image attachment(s) for \(message.platform.displayName)/\(message.chatId)")
         }
 
         // Generate AI response
@@ -284,6 +312,36 @@ final class OpenClawBridge {
             logger.error("Failed to respond to \(message.platform.displayName): \(error.localizedDescription)")
         }
     }
+
+    // MARK: - P15: Image Attachment Description (macOS — MLXVisionEngine)
+
+    #if os(macOS)
+    /// Describe an image attachment using the local VLM (MLXVisionEngine).
+    /// Falls back gracefully if no model is loaded — returns nil so the AI call proceeds without context.
+    private func describeImageAttachment(_ attachment: MessagingAttachment) async -> String? {
+        let engine = MLXVisionEngine.shared
+        // Auto-load default VLM if none loaded
+        if engine.loadedModel == nil {
+            do {
+                try await engine.loadModel(id: MLXVisionEngine.qwen3VL8B)
+            } catch {
+                logger.warning("P15: VLM load failed — skipping image description: \(error.localizedDescription)")
+                return nil
+            }
+        }
+        do {
+            let desc = try await engine.describeImage(
+                imageData: attachment.data,
+                prompt: "Describe this image concisely in 1-2 sentences. Focus on what is shown, any text visible, and the context."
+            )
+            logger.debug("P15: Image description (\(desc.count) chars) from \(attachment.mimeType)")
+            return desc
+        } catch {
+            logger.warning("P15: Image description failed for \(attachment.mimeType): \(error.localizedDescription)")
+            return nil
+        }
+    }
+    #endif
 
     // MARK: - P11: Audio Attachment Transcription
 
