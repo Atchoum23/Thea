@@ -1,9 +1,11 @@
-# THEA CAPABILITY MAXIMIZATION PLAN v3.1
+# THEA CAPABILITY MAXIMIZATION PLAN v3.5
 # ══════════════════════════════════════════════════════════════════════════════
 # ⚠️  ABSOLUTE NON-NEGOTIABLE RULE — NEVER REMOVE ANYTHING. ONLY ADD AND FIX.
 # ══════════════════════════════════════════════════════════════════════════════
 #
-# Created: 2026-02-19 | Updated: 2026-02-19 13:47 CET → v3.1
+# Created: 2026-02-19 | Updated: 2026-02-19 15:37 CET → v3.5
+# v3.1 (13:47): initial | v3.2: MetaAI audit | v3.3: snippets | v3.4: behavioral protocols
+# v3.5 (15:37): full 1113-file codebase audit integrated; AE3 (platform observers) + AF3 (settings nav) added
 # v2→v3 auto-transition: executor starts A3 after v2 Phase U; v2 Phase V merged into AD3
 # Owner: Autonomous agent system (MSM3U primary + MBAM2 secondary)
 # Scope: All platforms — macOS, iOS, watchOS, tvOS, Tizen, TheaWeb
