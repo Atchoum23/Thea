@@ -29,13 +29,10 @@ extension Color {
 
     static let theaPrimaryDefault = Color(hex: "0066FF")
     static let theaAccentDefault = Color(hex: "00D4AA")
-    // periphery:ignore - Reserved: theaPurple static property reserved for future feature activation
     static let theaPurpleDefault = Color(hex: "8B5CF6")
     static let theaGoldDefault = Color(hex: "FFB84D")
 
     // MARK: - Semantic Colors
-
-// periphery:ignore - Reserved: theaGold static property reserved for future feature activation
 
     static let theaSuccess = Color.green
     static let theaWarning = Color.orange
@@ -43,10 +40,6 @@ extension Color {
     static let theaInfo = Color.blue
 
     // MARK: - Gradients
-
-// periphery:ignore - Reserved: theaPurpleDefault static property reserved for future feature activation
-
-// periphery:ignore - Reserved: theaGoldDefault static property reserved for future feature activation
 
     @MainActor
     static var theaPrimaryGradient: LinearGradient {
@@ -58,7 +51,6 @@ extension Color {
     }
 
     @MainActor
-    // periphery:ignore - Reserved: theaPrimaryGradient static property reserved for future feature activation
     static var theaHeroGradient: LinearGradient {
         LinearGradient(
             colors: [theaPurple, theaPrimary, theaAccent],
@@ -67,7 +59,6 @@ extension Color {
         )
     }
 
-    // periphery:ignore - Reserved: theaHeroGradient static property reserved for future feature activation
     // MARK: - Static Gradients (for non-MainActor contexts)
 
     static let theaPrimaryGradientDefault = LinearGradient(
@@ -84,8 +75,6 @@ extension Color {
 
     // MARK: - Glass-Harmonized Colors
 
-// periphery:ignore - Reserved: theaHeroGradientDefault static property reserved for future feature activation
-
     /// Subtle brand tint for Liquid Glass surfaces
     static let theaGlassTint = Color(hex: "0066FF").opacity(0.3)
 
@@ -93,10 +82,8 @@ extension Color {
     static let theaGlassAccentTint = Color(hex: "00D4AA").opacity(0.25)
 
     /// Platform-adaptive surface color for cards and containers
-    // periphery:ignore - Reserved: theaGlassTint static property reserved for future feature activation
     static var theaSurface: Color {
         #if os(macOS)
-        // periphery:ignore - Reserved: theaGlassAccentTint static property reserved for future feature activation
         Color(nsColor: .controlBackgroundColor)
         #elseif os(watchOS) || os(tvOS)
         Color.gray.opacity(0.15)
@@ -110,7 +97,6 @@ extension Color {
         #if os(macOS)
         Color(nsColor: .windowBackgroundColor)
         #elseif os(watchOS) || os(tvOS)
-        // periphery:ignore - Reserved: theaSurfaceElevated static property reserved for future feature activation
         Color.gray.opacity(0.2)
         #else
         Color(.tertiarySystemGroupedBackground)
@@ -135,7 +121,6 @@ extension Color {
     static let theaGlassGradient = LinearGradient(
         colors: [
             Color(hex: "0066FF").opacity(0.08),
-            // periphery:ignore - Reserved: theaGlassGradient static property reserved for future feature activation
             Color(hex: "00D4AA").opacity(0.06)
         ],
         startPoint: .topLeading,
@@ -181,17 +166,14 @@ extension ShapeStyle where Self == Color {
     /// Accent brand color for Thea - nonisolated version using default
     static var theaAccent: Color {
         Color.theaAccentDefault
-    // periphery:ignore - Reserved: theaAccent static property reserved for future feature activation
     }
 
     /// Purple brand color for Thea - nonisolated version using default
     static var theaPurple: Color {
-        // periphery:ignore - Reserved: theaPurple static property reserved for future feature activation
         Color.theaPurpleDefault
     }
 
     /// Gold brand color for Thea - nonisolated version using default
-    // periphery:ignore - Reserved: theaGold static property reserved for future feature activation
     static var theaGold: Color {
         Color.theaGoldDefault
     }

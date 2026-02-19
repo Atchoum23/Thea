@@ -11,7 +11,6 @@ import SwiftUI
 #if os(macOS)
 struct TheaAgentDetailView: View {
     let session: TheaAgentSession
-    // periphery:ignore - Reserved: dismiss property reserved for future feature activation
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {

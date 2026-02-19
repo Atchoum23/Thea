@@ -12,11 +12,8 @@ import OSLog
 
 private let notifChannelLogger = Logger(subsystem: "ai.thea.app", category: "NotificationChannel")
 
-// periphery:ignore - Reserved: notifChannelLogger global var reserved for future feature activation
-
 /// Bridges system notifications to MessagingHub.
 @MainActor
-// periphery:ignore - Reserved: NotificationChannel type reserved for future feature activation
 final class NotificationChannel: NSObject, ObservableObject {
     static let shared = NotificationChannel()
 

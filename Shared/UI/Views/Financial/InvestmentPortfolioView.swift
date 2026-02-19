@@ -10,7 +10,6 @@ struct InvestmentPortfolioView: View {
     @State private var selectedPortfolio: InvestmentPortfolio?
     @State private var showingAddPortfolio = false
     @State private var showingAddHolding = false
-    // periphery:ignore - Reserved: showingImportCSV property reserved for future feature activation
     @State private var showingImportCSV = false
     @State private var newPortfolioName = ""
 

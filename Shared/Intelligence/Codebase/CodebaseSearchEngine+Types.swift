@@ -16,16 +16,9 @@ struct ParsedQuery {
     let symbolPatterns: [String]
 }
 
-// periphery:ignore - Reserved: excludeTerms property reserved for future feature activation
-
-// periphery:ignore - Reserved: filePatterns property reserved for future feature activation
-
 struct SearchHistoryEntry {
     let query: String
     let timestamp: Date
-    // periphery:ignore - Reserved: query property reserved for future feature activation
-    // periphery:ignore - Reserved: timestamp property reserved for future feature activation
-    // periphery:ignore - Reserved: resultCount property reserved for future feature activation
     let resultCount: Int
 }
 

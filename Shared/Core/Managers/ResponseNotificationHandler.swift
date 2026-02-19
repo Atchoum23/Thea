@@ -35,7 +35,6 @@ final class ResponseNotificationHandler: ObservableObject {
 
     // MARK: - Notification Categories
 
-    // periphery:ignore - Reserved: pendingNotifications property reserved for future feature activation
     static let categoryResponseComplete = "RESPONSE_COMPLETE"
     static let categoryAttentionRequired = "ATTENTION_REQUIRED"
     static let categoryBackgroundTask = "BACKGROUND_TASK"
@@ -45,7 +44,6 @@ final class ResponseNotificationHandler: ObservableObject {
 
     static let actionView = "VIEW_ACTION"
     static let actionDismiss = "DISMISS_ACTION"
-    // periphery:ignore - Reserved: categoryScheduledPrompt static property reserved for future feature activation
     static let actionRegenerate = "REGENERATE_ACTION"
 
     private init() {
@@ -62,7 +60,6 @@ final class ResponseNotificationHandler: ObservableObject {
             let options: UNAuthorizationOptions = [.alert, .sound, .badge]
             let granted = try await center.requestAuthorization(options: options)
             isAuthorized = granted
-            // periphery:ignore - Reserved: requestAuthorization() instance method reserved for future feature activation
             return granted
         } catch {
             print("❌ Notification authorization failed: \(error)")
@@ -169,7 +166,6 @@ final class ResponseNotificationHandler: ObservableObject {
         conversationId: UUID,
         conversationTitle: String,
         reason: String
-    // periphery:ignore - Reserved: notifyAttentionRequired(conversationId:conversationTitle:reason:) instance method reserved for future feature activation
     ) async {
         guard settings.notificationsEnabled && settings.notifyOnAttentionRequired else { return }
         guard isAuthorized else { return }
@@ -208,7 +204,6 @@ final class ResponseNotificationHandler: ObservableObject {
     func notifyBackgroundTaskComplete(
         taskName: String,
         result: String
-    // periphery:ignore - Reserved: notifyBackgroundTaskComplete(taskName:result:) instance method reserved for future feature activation
     ) async {
         guard settings.notificationsEnabled else { return }
         guard isAuthorized else { return }
@@ -281,7 +276,6 @@ final class ResponseNotificationHandler: ObservableObject {
     /// Remove pending notifications for a conversation
     func clearNotifications(for conversationId: UUID) {
         center.getDeliveredNotifications { notifications in
-            // periphery:ignore - Reserved: clearNotifications(for:) instance method reserved for future feature activation
             let idsToRemove = notifications
                 .filter { notification in
                     notification.request.content.userInfo["conversationId"] as? String == conversationId.uuidString
@@ -296,7 +290,6 @@ final class ResponseNotificationHandler: ObservableObject {
 
     /// Clear all THEA notifications
     func clearAllNotifications() {
-        // periphery:ignore - Reserved: clearAllNotifications() instance method reserved for future feature activation
         center.removeAllDeliveredNotifications()
         center.removeAllPendingNotificationRequests()
         clearBadge()
@@ -308,7 +301,6 @@ final class ResponseNotificationHandler: ObservableObject {
 // @unchecked Sendable: @MainActor provides isolation for all state; NSObject subclass required for
 // UNUserNotificationCenterDelegate; delegate methods are nonisolated with explicit MainActor dispatch
 @MainActor
-// periphery:ignore - Reserved: ResponseNotificationDelegate type reserved for future feature activation
 final class ResponseNotificationDelegate: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
     static let shared = ResponseNotificationDelegate()
 

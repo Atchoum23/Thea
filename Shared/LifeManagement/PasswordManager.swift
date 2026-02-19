@@ -195,7 +195,6 @@ private enum KeychainHelper {
     static func load(key: String) -> Data? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            // periphery:ignore - Reserved: load(key:) static method reserved for future feature activation
             kSecAttrService as String: service,
             kSecAttrAccount as String: key,
             kSecReturnData as String: true,
@@ -254,7 +253,6 @@ final class PasswordManager: ObservableObject {
 
     func updateEntry(_ entry: PasswordEntry, newPassword: String? = nil) {
         if let idx = entries.firstIndex(where: { $0.id == entry.id }) {
-            // periphery:ignore - Reserved: updateEntry(_:newPassword:) instance method reserved for future feature activation
             var updated = entry
             updated.updatedAt = Date()
             if let pw = newPassword {
@@ -273,7 +271,6 @@ final class PasswordManager: ObservableObject {
     }
 
     func getPassword(for id: UUID) -> String? {
-        // periphery:ignore - Reserved: getPassword(for:) instance method reserved for future feature activation
         guard let data = KeychainHelper.load(key: keychainPrefix + id.uuidString) else { return nil }
         return String(data: data, encoding: .utf8)
     }
@@ -288,7 +285,6 @@ final class PasswordManager: ObservableObject {
         entries.filter { ($0.passwordStrength ?? .veryWeak) < .fair }
     }
 
-    // periphery:ignore - Reserved: entriesByCategory property reserved for future feature activation
     var entriesByCategory: [CredentialCategory: [PasswordEntry]] {
         Dictionary(grouping: entries, by: \.category)
     }

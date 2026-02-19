@@ -27,7 +27,6 @@ final class AutonomousTaskExecutor {
     private(set) var executionHistory: [AutonomousTaskExecution] = []
     private(set) var activeConditionMonitors: [UUID: Task<Void, Never>] = [:]
 
-    // periphery:ignore - Reserved: shared static property reserved for future feature activation
     // State
     private(set) var isEnabled = true
     private(set) var isMonitoring = false
@@ -65,8 +64,6 @@ final class AutonomousTaskExecutor {
         }
     }
 
-// periphery:ignore - Reserved: registerTask(_:) instance method reserved for future feature activation
-
     /// Unregister a task
     func unregisterTask(id: UUID) {
         stopMonitoringTask(id: id)
@@ -76,14 +73,12 @@ final class AutonomousTaskExecutor {
 
     /// Enable/disable a task
     func setTaskEnabled(_ id: UUID, enabled: Bool) {
-        // periphery:ignore - Reserved: unregisterTask(id:) instance method reserved for future feature activation
         guard let index = registeredTasks.firstIndex(where: { $0.id == id }) else { return }
         registeredTasks[index].isEnabled = enabled
         saveRegisteredTasks()
 
         if enabled {
             startMonitoringTask(registeredTasks[index])
-        // periphery:ignore - Reserved: setTaskEnabled(_:enabled:) instance method reserved for future feature activation
         } else {
             stopMonitoringTask(id: id)
         }
@@ -98,7 +93,6 @@ final class AutonomousTaskExecutor {
         replyMessage: String,
         whenFocusModeActive: Bool = true,
         whenUserAway: Bool = true
-    // periphery:ignore - Reserved: createAutoReplyTask(appBundleId:appName:replyMessage:whenFocusModeActive:whenUserAway:) static method reserved for future feature activation
     ) -> AutonomousTask {
         let conditions: [TaskCondition] = [
             whenFocusModeActive ? .focusModeActive : nil,
@@ -125,7 +119,6 @@ final class AutonomousTaskExecutor {
         description: String,
         schedule: AutoTaskSchedule,
         actions: [AutoTaskAction]
-    // periphery:ignore - Reserved: createScheduledTask(name:description:schedule:actions:) static method reserved for future feature activation
     ) -> AutonomousTask {
         AutonomousTask(
             name: name,
@@ -177,7 +170,6 @@ final class AutonomousTaskExecutor {
         for (id, _) in activeConditionMonitors {
             stopMonitoringTask(id: id)
         }
-        // periphery:ignore - Reserved: stopAllMonitoring() instance method reserved for future feature activation
         isMonitoring = false
     }
 
@@ -588,7 +580,6 @@ final class AutonomousTaskExecutor {
     private func saveRegisteredTasks() {
         let encoder = JSONEncoder()
         do {
-            // periphery:ignore - Reserved: saveRegisteredTasks() instance method reserved for future feature activation
             let data = try encoder.encode(registeredTasks.map(AutonomousTaskDTO.init))
             UserDefaults.standard.set(data, forKey: "AutonomousTaskExecutor.tasks")
         } catch {
@@ -621,7 +612,6 @@ final class AutonomousTaskExecutor {
 
     func updateConfiguration(_ config: Configuration) {
         configuration = config
-        // periphery:ignore - Reserved: updateConfiguration(_:) instance method reserved for future feature activation
         do {
             let data = try JSONEncoder().encode(config)
             UserDefaults.standard.set(data, forKey: "AutonomousTaskExecutor.config")
@@ -661,7 +651,6 @@ struct AutonomousTask: Identifiable, Sendable {
     var createdAt: Date
 
     init(
-        // periphery:ignore - Reserved: init(id:name:description:triggerConditions:conditionLogic:actions:priority:isEnabled:isDestructive:) initializer reserved for future feature activation
         id: UUID = UUID(),
         name: String,
         description: String,
@@ -710,7 +699,6 @@ struct AutonomousTaskDTO: Codable {
     let isDestructive: Bool
     let createdAt: Date
 
-    // periphery:ignore - Reserved: init(_:) initializer reserved for future feature activation
     init(_ task: AutonomousTask) {
         id = task.id
         name = task.name

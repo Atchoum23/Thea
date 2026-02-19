@@ -472,7 +472,6 @@ struct HealthAnalysisReport: Sendable {
     let date: Date
     let dataPoints: [HealthDataPoint]
     let insights: [CoachingInsight]
-    // periphery:ignore - Reserved: insights property reserved for future feature activation
     let overallScore: Double // 0.0-1.0
 }
 
@@ -490,7 +489,6 @@ struct CoachingInsight: Identifiable, Sendable {
     let title: String
     let message: String
     let suggestion: String
-    // periphery:ignore - Reserved: dataValue property reserved for future feature activation
     let dataValue: Double
 }
 

@@ -23,7 +23,6 @@ extension PredictivePreloader {
     /// - Returns: A ``PredictionStats`` snapshot of the current state.
     func getPredictionStats() -> PredictionStats {
         var taskCounts: [TaskType: Int] = [:]
-        // periphery:ignore - Reserved: getPredictionStats() instance method reserved for future feature activation
         for record in recentTasks {
             taskCounts[record.taskType, default: 0] += 1
         }
@@ -107,7 +106,6 @@ extension PredictivePreloader {
     /// using JSON encoding with string keys (since `TaskType` is not directly JSON-key-codable).
     /// Called periodically (every 10 task recordings) and on reset.
     func persistState() {
-        // periphery:ignore - Reserved: persistState() instance method reserved for future feature activation
         // Convert transition matrix to string keys for JSON encoding
         var encodableMatrix: [String: [String: Double]] = [:]
         for (fromTask, toDict) in transitionMatrix {
@@ -142,7 +140,6 @@ extension PredictivePreloader {
     ///
     /// Removes the transition matrix, time-of-day patterns, and task history.
     /// The engine will begin learning from scratch after this call.
-    // periphery:ignore - Reserved: reset() instance method reserved for future feature activation
     func reset() {
         transitionMatrix.removeAll()
         timeOfDayPatterns.removeAll()

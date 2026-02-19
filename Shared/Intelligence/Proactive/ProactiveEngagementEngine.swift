@@ -32,10 +32,7 @@ final class ProactiveEngagementEngine {
     var maxDailyEngagements = 5
 
     /// Minimum hours between engagements
-    // periphery:ignore - Reserved: shared static property reserved for future feature activation
     var minEngagementIntervalHours = 2.0
-
-// periphery:ignore - Reserved: logger property reserved for future feature activation
 
     /// Which engagement types are enabled
     var enabledTypes: Set<EngagementType> = Set(EngagementType.allCases)
@@ -65,7 +62,6 @@ final class ProactiveEngagementEngine {
 
         // Check minimum interval
         if let lastDate = lastEngagementDate {
-            // periphery:ignore - Reserved: evaluate() instance method reserved for future feature activation
             let hoursSince = Date().timeIntervalSince(lastDate) / 3600
             guard hoursSince >= minEngagementIntervalHours else {
                 return
@@ -120,7 +116,6 @@ final class ProactiveEngagementEngine {
             if !hasDeliveredToday(type: .morningBriefing) {
                 engagements.append(ProactiveEngagement(
                     type: .morningBriefing,
-                    // periphery:ignore - Reserved: evaluateTimeTriggers() instance method reserved for future feature activation
                     title: "Good morning!",
                     message: "Ready for your daily briefing? I can summarize your schedule, health trends, and priorities.",
                     priority: 8,
@@ -156,7 +151,6 @@ final class ProactiveEngagementEngine {
         }
 
         return pipeline.activeInsights.prefix(2).map { insight in
-            // periphery:ignore - Reserved: evaluateHealthTriggers() instance method reserved for future feature activation
             ProactiveEngagement(
                 type: .healthInsight,
                 title: insight.title,
@@ -177,7 +171,6 @@ final class ProactiveEngagementEngine {
             events = try await integration.getTodayEvents()
         } catch {
             logger.error("Failed to fetch today's calendar events: \(error.localizedDescription)")
-            // periphery:ignore - Reserved: evaluateCalendarTriggers() instance method reserved for future feature activation
             return []
         }
 
@@ -211,7 +204,6 @@ final class ProactiveEngagementEngine {
         // If user is typically active now but receptivity is unusually low
         if context.isAwake, context.receptivity < 0.2 {
             return [ProactiveEngagement(
-                // periphery:ignore - Reserved: evaluatePatternTriggers() instance method reserved for future feature activation
                 type: .patternDeviation,
                 title: "Unusual quiet period",
                 message: "You're usually more active at this time. Everything okay?",
@@ -231,7 +223,6 @@ final class ProactiveEngagementEngine {
         let calendar = Calendar.current
         let weekday = (calendar.component(.weekday, from: Date()) + 5) % 7
 
-        // periphery:ignore - Reserved: evaluateGoalTriggers() instance method reserved for future feature activation
         guard let day = dayOfWeek(from: weekday) else { return [] }
 
         let exerciseTime = fingerprint.bestTimeFor(.exercise, on: day)
@@ -258,7 +249,6 @@ final class ProactiveEngagementEngine {
 
         await SmartNotificationScheduler.shared.scheduleOptimally(
             title: engagement.title,
-            // periphery:ignore - Reserved: deliverEngagement(_:) instance method reserved for future feature activation
             body: engagement.message,
             priority: engagement.priority >= 8 ? .high : .normal
         )
@@ -274,14 +264,12 @@ final class ProactiveEngagementEngine {
         let calendar = Calendar.current
         return deliveredEngagements.contains { engagement in
             engagement.type == type && calendar.isDateInToday(engagement.timestamp)
-        // periphery:ignore - Reserved: hasDeliveredToday(type:) instance method reserved for future feature activation
         }
     }
 
     private func resetDailyCounterIfNeeded() {
         let calendar = Calendar.current
         if let lastReset = lastResetDate, calendar.isDateInToday(lastReset) {
-            // periphery:ignore - Reserved: resetDailyCounterIfNeeded() instance method reserved for future feature activation
             return
         }
         todayEngagementCount = 0
@@ -291,7 +279,6 @@ final class ProactiveEngagementEngine {
 
     private func dayOfWeek(from index: Int) -> DayOfWeek? {
         switch index {
-        // periphery:ignore - Reserved: dayOfWeek(from:) instance method reserved for future feature activation
         case 0: .monday
         case 1: .tuesday
         case 2: .wednesday
@@ -322,7 +309,5 @@ struct ProactiveEngagement: Identifiable, Sendable {
     let message: String
     let priority: Int  // 1-10
     let actionSuggestion: String?
-    // periphery:ignore - Reserved: actionSuggestion property reserved for future feature activation
-    // periphery:ignore - Reserved: timestamp property reserved for future feature activation
     let timestamp = Date()
 }

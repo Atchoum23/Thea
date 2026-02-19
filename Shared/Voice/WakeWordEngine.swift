@@ -81,9 +81,7 @@ final class WakeWordEngine {
         let timestamp: Date
         let audioLevel: Float
         let speakerVerified: Bool
-        // periphery:ignore - Reserved: audioLevel property reserved for future feature activation
         let processingLatency: TimeInterval
-    // periphery:ignore - Reserved: processingLatency property reserved for future feature activation
     }
 
     enum PowerLevel: String, CaseIterable, Codable, Sendable {
@@ -398,7 +396,6 @@ private final class AudioProcessor: @unchecked Sendable {
     private let processingQueue = DispatchQueue(label: "app.thea.wakeword.processing", qos: .userInteractive)
 
     private let wakeWords: [WakeWordEngine.WakeWord]
-    // periphery:ignore - Reserved: sensitivity property reserved for future feature activation
     private let sensitivity: Float
     private let enableSpeakerVerification: Bool
 

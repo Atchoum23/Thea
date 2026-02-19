@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-// periphery:ignore - Reserved: TheaAgentSettingsView type reserved for future feature activation
 struct TheaAgentSettingsView: View {
     @StateObject private var settings = SettingsManager.shared
 

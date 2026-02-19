@@ -9,7 +9,6 @@ import Combine
 import Foundation
 import OSLog
 
-// periphery:ignore - Reserved: logger global var reserved for future feature activation
 private let logger = Logger(subsystem: "ai.thea.app", category: "ConnectionQualityMonitor")
 
 // MARK: - Connection Quality

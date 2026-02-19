@@ -25,7 +25,6 @@ extension PredictivePreloader {
     ///   - maxLength: Maximum number of tasks in a sequence. Defaults to 4.
     /// - Returns: An array of ``TaskSequence`` sorted by occurrence count (descending).
     func detectCommonSequences(minLength: Int = 2, maxLength: Int = 4) -> [TaskSequence] {
-        // periphery:ignore - Reserved: detectCommonSequences(minLength:maxLength:) instance method reserved for future feature activation
         guard recentTasks.count >= minLength else { return [] }
 
         var sequences: [String: Int] = [:] // sequence_key -> count
@@ -64,7 +63,6 @@ extension PredictivePreloader {
     /// returned — enabling the caller to predict what comes next.
     ///
     /// - Returns: The matching ``TaskSequence`` if found, or `nil` if no match.
-    // periphery:ignore - Reserved: matchesSequenceStart() instance method reserved for future feature activation
     func matchesSequenceStart() -> TaskSequence? {
         let sequences = detectCommonSequences()
         let recentTaskTypes = recentTasks.suffix(3).map { $0.taskType }

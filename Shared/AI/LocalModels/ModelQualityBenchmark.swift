@@ -51,7 +51,6 @@ final class ModelQualityBenchmark: @unchecked Sendable {
     /// Record quality observation for a model
     func recordQuality(
         modelName: String,
-        // periphery:ignore - Reserved: emaAlpha property reserved for future feature activation
         taskType: TaskType,
         success: Bool,
         latency: TimeInterval,
@@ -68,7 +67,6 @@ final class ModelQualityBenchmark: @unchecked Sendable {
         // Update overall metrics with EMA
         let successValue: Double = success ? 1.0 : 0.0
 
-        // periphery:ignore - Reserved: recordQuality(modelName:taskType:success:latency:userSatisfaction:tokensGenerated:) instance method reserved for future feature activation
         if metrics.sampleCount == 0 {
             // First sample - initialize directly
             metrics.overallSuccessRate = successValue
@@ -149,7 +147,6 @@ final class ModelQualityBenchmark: @unchecked Sendable {
 
     /// Get quality score for a specific task type
     func getTaskQualityScore(for modelName: String, taskType: TaskType) -> Double {
-        // periphery:ignore - Reserved: emaUpdate(current:newValue:) instance method reserved for future feature activation
         guard let metrics = modelMetrics[modelName],
               let taskMetrics = metrics.taskMetrics[taskType],
               taskMetrics.sampleCount >= 3 else {
@@ -165,7 +162,6 @@ final class ModelQualityBenchmark: @unchecked Sendable {
             return 0.0
         }
         return metrics.qualityTrend
-    // periphery:ignore - Reserved: getTaskQualityScore(for:taskType:) instance method reserved for future feature activation
     }
 
     /// Get detailed metrics for a model
@@ -184,18 +180,15 @@ final class ModelQualityBenchmark: @unchecked Sendable {
         var bestModel: String?
         var bestScore: Double = 0
 
-        // periphery:ignore - Reserved: getDetailedMetrics(for:) instance method reserved for future feature activation
         for (modelName, metrics) in modelMetrics {
             if let taskMetrics = metrics.taskMetrics[taskType],
                taskMetrics.sampleCount >= 3,
                taskMetrics.qualityScore > bestScore {
-                // periphery:ignore - Reserved: getModelsByQuality() instance method reserved for future feature activation
                 bestScore = taskMetrics.qualityScore
                 bestModel = modelName
             }
         }
 
-        // periphery:ignore - Reserved: getBestModelForTask(_:) instance method reserved for future feature activation
         return bestModel
     }
 
@@ -214,7 +207,6 @@ final class ModelQualityBenchmark: @unchecked Sendable {
 
         if abs(difference) < 0.05 {
             winner = nil // Too close to call
-        // periphery:ignore - Reserved: compareModels(_:_:) instance method reserved for future feature activation
         } else {
             winner = difference > 0 ? model1 : model2
         }
@@ -246,13 +238,10 @@ final class ModelQualityBenchmark: @unchecked Sendable {
         // Confidence increases with sample count, capped at 100 samples
         let sampleConfidence = min(1.0, Double(metrics.sampleCount) / 100.0)
 
-// periphery:ignore - Reserved: isQualityReliable(for:) instance method reserved for future feature activation
-
         // Confidence also depends on recency of data
         let daysSinceUpdate = Date().timeIntervalSince(metrics.lastUpdated) / (24 * 3600)
         let recencyConfidence = max(0.0, 1.0 - (daysSinceUpdate / 30.0)) // Decays over 30 days
 
-        // periphery:ignore - Reserved: getConfidenceLevel(for:) instance method reserved for future feature activation
         return (sampleConfidence * 0.7) + (recencyConfidence * 0.3)
     }
 
@@ -268,7 +257,6 @@ final class ModelQualityBenchmark: @unchecked Sendable {
             let latency = metrics.taskMetrics[taskType]?.averageLatency ?? metrics.averageLatency
 
             entries.append(BenchmarkEntry(
-                // periphery:ignore - Reserved: benchmarkReport(for:) instance method reserved for future feature activation
                 modelName: modelName,
                 taskScore: taskScore,
                 overallScore: overallScore,
@@ -310,8 +298,6 @@ final class ModelQualityBenchmark: @unchecked Sendable {
         }
     }
 
-// periphery:ignore - Reserved: persistState() instance method reserved for future feature activation
-
     /// Clear all quality data
     func reset() {
         modelMetrics.removeAll()
@@ -320,7 +306,6 @@ final class ModelQualityBenchmark: @unchecked Sendable {
     }
 }
 
-// periphery:ignore - Reserved: reset() instance method reserved for future feature activation
 // MARK: - Model Quality Metrics
 
 /// Quality metrics for a single model
@@ -384,7 +369,6 @@ struct ModelQualityMetrics: Codable, Sendable {
 
         // Keep last 20 scores
         if qualityHistory.count > 20 {
-            // periphery:ignore - Reserved: updateQualityTrend() instance method reserved for future feature activation
             qualityHistory.removeFirst(qualityHistory.count - 20)
         }
 
@@ -432,7 +416,6 @@ struct TaskQualityMetrics: Codable, Sendable {
         latency: TimeInterval,
         satisfaction: Double?,
         emaAlpha: Double
-    // periphery:ignore - Reserved: record(success:latency:satisfaction:emaAlpha:) instance method reserved for future feature activation
     ) {
         let successValue: Double = success ? 1.0 : 0.0
 
@@ -459,7 +442,6 @@ struct ModelComparison: Sendable {
     let model1: String
     let model2: String
     let score1: Double
-    // periphery:ignore - Reserved: ModelComparison type reserved for future feature activation
     let score2: Double
     let difference: Double
     let winner: String?
@@ -478,7 +460,6 @@ struct ModelComparison: Sendable {
 struct BenchmarkReport: Sendable {
     let taskType: TaskType
     let entries: [BenchmarkEntry]
-    // periphery:ignore - Reserved: BenchmarkReport type reserved for future feature activation
     let generatedAt: Date
 
     var bestModel: String? {
@@ -492,12 +473,9 @@ struct BenchmarkEntry: Sendable {
     let taskScore: Double
     let overallScore: Double
     let averageLatency: TimeInterval
-    // periphery:ignore - Reserved: overallScore property reserved for future feature activation
     let sampleCount: Int
-    // periphery:ignore - Reserved: sampleCount property reserved for future feature activation
     let isReliable: Bool
 
-    // periphery:ignore - Reserved: formattedLatency property reserved for future feature activation
     var formattedLatency: String {
         String(format: "%.2fs", averageLatency)
     }

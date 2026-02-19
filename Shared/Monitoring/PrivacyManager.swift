@@ -46,7 +46,6 @@ public actor PrivacyManager {
         isInitialized = true
     }
 
-    // periphery:ignore - Reserved: loadConsentStatus() instance method reserved for future feature activation
     private func loadConsentStatus() {
         if let data = defaults.data(forKey: consentKey) {
             do {

@@ -20,8 +20,6 @@ public final class MemoryAugmentedChat {
     // Configuration
     public var config = AugmentationConfig()
 
-// periphery:ignore - Reserved: logger property reserved for future feature activation
-
     // Statistics
     private var stats = AugmentationStatistics()
 
@@ -34,7 +32,6 @@ public final class MemoryAugmentedChat {
         _ userMessage: String,
         conversationId: UUID,
         projectId: UUID? = nil,
-        // periphery:ignore - Reserved: processMessage(_:conversationId:projectId:existingMessages:) instance method reserved for future feature activation
         existingMessages: [AIMessage] = []
     ) async -> AugmentedMessage {
         logger.debug("Processing message with memory augmentation")
@@ -114,7 +111,6 @@ public final class MemoryAugmentedChat {
     func getSuggestions(
         conversationId: UUID,
         recentMessages: [AIMessage],
-        // periphery:ignore - Reserved: getSuggestions(conversationId:recentMessages:projectId:) instance method reserved for future feature activation
         projectId: UUID? = nil
     ) async -> [ContextualSuggestion] {
         var suggestions: [ContextualSuggestion] = []
@@ -166,7 +162,6 @@ public final class MemoryAugmentedChat {
 
     private func classifyTask(_ message: String) async -> TaskType {
         #if os(macOS)
-        // periphery:ignore - Reserved: classifyTask(_:) instance method reserved for future feature activation
         // Use the AI-powered task classifier (macOS only)
         do {
             let classification = try await TaskClassifier.shared.classify(message)
@@ -181,7 +176,6 @@ public final class MemoryAugmentedChat {
     }
 
     private func buildSystemContext(
-        // periphery:ignore - Reserved: buildSystemContext(taskType:retrievedSources:projectId:) instance method reserved for future feature activation
         taskType: TaskType,
         retrievedSources: [RetrievalSource],
         projectId: UUID?
@@ -222,7 +216,6 @@ public final class MemoryAugmentedChat {
         return context.isEmpty ? nil : context
     }
 
-    // periphery:ignore - Reserved: shouldInjectContext(confidence:taskType:messageCount:) instance method reserved for future feature activation
     private func shouldInjectContext(
         confidence: Double,
         taskType: TaskType,

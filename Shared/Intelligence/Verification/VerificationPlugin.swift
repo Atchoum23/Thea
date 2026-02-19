@@ -42,8 +42,6 @@ protocol VerificationPlugin: AnyObject, Sendable {
     /// Unique identifier for this verifier
     var pluginID: String { get }
 
-// periphery:ignore - Reserved: VerificationPlugin protocol reserved for future feature activation
-
     /// Human-readable name shown in settings/diagnostics
     var displayName: String { get }
 
@@ -73,8 +71,6 @@ struct VerificationInput: Sendable {
     /// The AI response being verified
     let response: String
 
-// periphery:ignore - Reserved: VerificationInput type reserved for future feature activation
-
     /// The user's original query
     let query: String
 
@@ -103,7 +99,6 @@ struct VerificationInput: Sendable {
 /// Maps directly to what ConfidenceSystem aggregates.
 struct VerificationOutput: Sendable {
     /// The confidence source with score and details
-    // periphery:ignore - Reserved: VerificationOutput type reserved for future feature activation
     let source: ConfidenceSource
 
     /// Factors contributing to the confidence score
@@ -149,7 +144,6 @@ struct VerificationOutput: Sendable {
 /// registered verifiers in parallel.
 @MainActor
 final class VerificationPluginRegistry {
-    // periphery:ignore - Reserved: VerificationPluginRegistry type reserved for future feature activation
     static let shared = VerificationPluginRegistry()
 
     /// Registered verification plugins, keyed by plugin ID
@@ -209,7 +203,6 @@ final class VerificationPluginRegistry {
 
 // MARK: - Default shouldRun Implementation
 
-// periphery:ignore - Reserved: VerificationPlugin protocol extension reserved for future feature activation
 extension VerificationPlugin {
     /// Default: always run if enabled. Override for task-type filtering.
     func shouldRun(taskType: TaskType, context: ValidationContext) -> Bool {

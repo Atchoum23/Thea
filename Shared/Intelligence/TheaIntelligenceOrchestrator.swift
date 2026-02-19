@@ -39,9 +39,6 @@ final class TheaIntelligenceOrchestrator {
     /// Periodic evaluation timer
     private var evaluationTimer: Timer?
 
-// periphery:ignore - Reserved: shared static property reserved for future feature activation
-
-    // periphery:ignore - Reserved: logger property reserved for future feature activation
     // MARK: - Configuration
 
     /// Master switch for the intelligence orchestrator
@@ -69,7 +66,6 @@ final class TheaIntelligenceOrchestrator {
         initializeSubsystems()
 
         // Start periodic evaluation
-        // periphery:ignore - Reserved: start() instance method reserved for future feature activation
         startPeriodicEvaluation()
 
         // Run initial evaluation
@@ -91,7 +87,6 @@ final class TheaIntelligenceOrchestrator {
 
     // MARK: - Initialization
 
-    // periphery:ignore - Reserved: stop() instance method reserved for future feature activation
     private func initializeSubsystems() {
         // Load persisted state from disk
         Task {
@@ -101,8 +96,6 @@ final class TheaIntelligenceOrchestrator {
             // and pruneAlertHistory() on first access.
             _ = PersonalBaselineMonitor.shared.baselines.count
         }
-
-// periphery:ignore - Reserved: initializeSubsystems() instance method reserved for future feature activation
 
         logger.info("Subsystems initialized")
     }
@@ -117,7 +110,6 @@ final class TheaIntelligenceOrchestrator {
         ) { [weak self] _ in
             Task { @MainActor in
                 await self?.evaluate()
-            // periphery:ignore - Reserved: startPeriodicEvaluation() instance method reserved for future feature activation
             }
         }
     }
@@ -130,7 +122,6 @@ final class TheaIntelligenceOrchestrator {
         evaluationCount += 1
         let startTime = Date()
 
-        // periphery:ignore - Reserved: evaluate() instance method reserved for future feature activation
         logger.info("Evaluation cycle #\(self.evaluationCount) starting...")
 
         // 1. Update behavioral fingerprint with current activity
@@ -168,8 +159,6 @@ final class TheaIntelligenceOrchestrator {
     ) async -> String {
         guard isEnabled else { return response }
 
-// periphery:ignore - Reserved: processAIResponse(task:response:conversationContext:) instance method reserved for future feature activation
-
         // Run through reflexion if needed
         let reflexionResult = await ChatReflexionIntegration.shared.processResponse(
             task: task,
@@ -186,14 +175,11 @@ final class TheaIntelligenceOrchestrator {
         await ConversationMemoryExtractor.shared.extractFromConversation(conversation)
     }
 
-    // periphery:ignore - Reserved: extractConversationMemory(_:) instance method reserved for future feature activation
     /// Extract memory from a single user message (real-time)
     func extractMessageMemory(_ text: String) async {
         guard isEnabled else { return }
         await ConversationMemoryExtractor.shared.extractFromMessage(text)
     }
-
-// periphery:ignore - Reserved: extractMessageMemory(_:) instance method reserved for future feature activation
 
     // MARK: - AI Query with Fallback
 
@@ -202,19 +188,15 @@ final class TheaIntelligenceOrchestrator {
         try await ResilientAIFallbackChain.shared.quickQuery(prompt)
     }
 
-// periphery:ignore - Reserved: query(_:) instance method reserved for future feature activation
-
     /// Send a full chat through the resilient fallback chain
     func chat(messages: [AIMessage]) async throws -> FallbackChatResult {
         try await ResilientAIFallbackChain.shared.chat(messages: messages)
-    // periphery:ignore - Reserved: chat(messages:) instance method reserved for future feature activation
     }
 
     // MARK: - System Status
 
     /// Get a comprehensive status report of all intelligence systems
     func statusReport() async -> IntelligenceStatusReport {
-        // periphery:ignore - Reserved: statusReport() instance method reserved for future feature activation
         let graph = PersonalKnowledgeGraph.shared
         let fingerprint = BehavioralFingerprint.shared
         let scheduler = SmartNotificationScheduler.shared
@@ -257,7 +239,6 @@ enum IntelligenceSystemStatus: String, Sendable {
     case error
 }
 
-// periphery:ignore - Reserved: IntelligenceStatusReport type reserved for future feature activation
 struct IntelligenceStatusReport: Sendable {
     let isRunning: Bool
     let evaluationCount: Int

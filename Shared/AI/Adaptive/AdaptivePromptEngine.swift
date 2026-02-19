@@ -54,7 +54,6 @@ final class AdaptivePromptEngine {
 
         let analysis = PromptAnalysis(
             originalPrompt: prompt,
-            // periphery:ignore - Reserved: shared static property reserved for future feature activation
             detectedIntent: detectIntent(prompt),
             anticipatedNeeds: anticipateNeeds(prompt),
             suggestedEnhancements: suggestEnhancements(prompt),
@@ -90,7 +89,6 @@ final class AdaptivePromptEngine {
         }
 
         // Add general intent detection
-        // periphery:ignore - Reserved: analyzePrompt(_:) instance method reserved for future feature activation
         let generalIntents = detectGeneralIntents(partialPrompt)
         predictions.append(contentsOf: generalIntents)
 
@@ -111,8 +109,6 @@ final class AdaptivePromptEngine {
                 confidence: prediction.confidence
             )
         }
-
-// periphery:ignore - Reserved: predictIntentFromPartial(_:) instance method reserved for future feature activation
 
         return suggestedCompletions
     }
@@ -140,7 +136,6 @@ final class AdaptivePromptEngine {
         let hour = Calendar.current.component(.hour, from: Date())
         if let timePattern = userPromptProfile.timePatterns.first(where: { $0.hour == hour }) {
             suggestions.append(AdaptiveSuggestion(
-                // periphery:ignore - Reserved: getSuggestedCompletions(for:) instance method reserved for future feature activation
                 type: .timeBased,
                 title: timePattern.activityName,
                 description: "You often \(timePattern.activityName.lowercased()) at this time",
@@ -157,8 +152,6 @@ final class AdaptivePromptEngine {
 
         return suggestions.sorted { $0.confidence > $1.confidence }
     }
-
-// periphery:ignore - Reserved: getProactiveSuggestions() instance method reserved for future feature activation
 
     // MARK: - Intent Detection
 
@@ -199,7 +192,6 @@ final class AdaptivePromptEngine {
 
         // Question intents
         if lower.hasPrefix("what") || lower.hasPrefix("how") || lower.hasPrefix("why") ||
-           // periphery:ignore - Reserved: detectIntent(_:) instance method reserved for future feature activation
            lower.hasPrefix("when") || lower.hasPrefix("where") || lower.contains("?") {
             return .question
         }
@@ -248,13 +240,11 @@ final class AdaptivePromptEngine {
         }
 
         return predictions
-    // periphery:ignore - Reserved: containsCodeKeywords(_:) instance method reserved for future feature activation
     }
 
     // MARK: - Anticipation & Suggestions
 
     private func anticipateNeeds(_ prompt: String) -> [AnticipatedNeed] {
-        // periphery:ignore - Reserved: detectGeneralIntents(_:) instance method reserved for future feature activation
         var needs: [AnticipatedNeed] = []
         let intent = detectIntent(prompt)
 
@@ -288,7 +278,6 @@ final class AdaptivePromptEngine {
                 type: .visualization,
                 description: "A visual representation of the analysis",
                 likelihood: 0.6
-            // periphery:ignore - Reserved: anticipateNeeds(_:) instance method reserved for future feature activation
             ))
             needs.append(AnticipatedNeed(
                 type: .summary,
@@ -340,7 +329,6 @@ final class AdaptivePromptEngine {
         }
 
         return enhancements
-    // periphery:ignore - Reserved: suggestEnhancements(_:) instance method reserved for future feature activation
     }
 
     // MARK: - Mood Detection
@@ -377,7 +365,6 @@ final class AdaptivePromptEngine {
             frustration: min(1.0, frustrationLevel),
             exploration: min(1.0, explorationLevel),
             formality: min(1.0, formalityLevel)
-        // periphery:ignore - Reserved: detectMood(_:) instance method reserved for future feature activation
         )
     }
 
@@ -414,7 +401,6 @@ final class AdaptivePromptEngine {
     // MARK: - Learning
 
     private func learnFromPrompt(_ prompt: String, analysis: PromptAnalysis) async {
-        // periphery:ignore - Reserved: getWorkflowContext() instance method reserved for future feature activation
         guard configuration.enableAdaptiveLearning else { return }
 
         // Update prompt patterns
@@ -426,7 +412,6 @@ final class AdaptivePromptEngine {
             expectedResponseType: nil
         )
 
-        // periphery:ignore - Reserved: identifyCurrentWorkflow() instance method reserved for future feature activation
         if let existingIndex = userPromptProfile.commonPatterns.firstIndex(where: {
             $0.prefix.lowercased() == pattern.prefix.lowercased()
         }) {
@@ -444,8 +429,6 @@ final class AdaptivePromptEngine {
             intent: analysis.detectedIntent,
             mood: analysis.moodIndicators
         ))
-
-// periphery:ignore - Reserved: learnFromPrompt(_:analysis:) instance method reserved for future feature activation
 
         // Trim old interactions
         if userPromptProfile.recentInteractions.count > 100 {
@@ -497,7 +480,6 @@ final class AdaptivePromptEngine {
     }
 
     private func suggestFollowUps(for interaction: PromptInteraction) -> [AdaptiveSuggestion] {
-        // periphery:ignore - Reserved: recordFeedback(wasHelpful:forInteraction:) instance method reserved for future feature activation
         var suggestions: [AdaptiveSuggestion] = []
 
         switch interaction.intent {
@@ -512,20 +494,16 @@ final class AdaptivePromptEngine {
 
         case .debugging:
             suggestions.append(AdaptiveSuggestion(
-                // periphery:ignore - Reserved: adjustConfidenceFromHistory(_:for:) instance method reserved for future feature activation
                 type: .followUp,
                 title: "Prevent recurrence?",
                 description: "Learn how to prevent similar bugs",
                 suggestedPrompt: "How can I prevent this type of bug in the future?",
                 confidence: 0.6
-            // periphery:ignore - Reserved: getHistoricalNeeds(for:) instance method reserved for future feature activation
             ))
 
         default:
             break
         }
-
-// periphery:ignore - Reserved: suggestFollowUps(for:) instance method reserved for future feature activation
 
         return suggestions
     }
@@ -554,7 +532,6 @@ final class AdaptivePromptEngine {
 
     // MARK: - Persistence
 
-    // periphery:ignore - Reserved: calculateConfidence(_:) instance method reserved for future feature activation
     private func loadProfile() {
         if let data = UserDefaults.standard.data(forKey: "AdaptivePrompt.profile") {
             do {
@@ -588,7 +565,6 @@ final class AdaptivePromptEngine {
         configuration = config
         do {
             let data = try JSONEncoder().encode(config)
-            // periphery:ignore - Reserved: saveProfile() instance method reserved for future feature activation
             UserDefaults.standard.set(data, forKey: "AdaptivePrompt.config")
         } catch {
             logger.error("Failed to encode AdaptivePrompt.config: \(error.localizedDescription)")
@@ -607,7 +583,6 @@ final class AdaptivePromptEngine {
 struct PromptAnalysis: Sendable {
     let originalPrompt: String
     let detectedIntent: PromptIntent
-    // periphery:ignore - Reserved: updateConfiguration(_:) instance method reserved for future feature activation
     let anticipatedNeeds: [AnticipatedNeed]
     let suggestedEnhancements: [PromptEnhancement]
     let moodIndicators: MoodIndicators
@@ -617,7 +592,6 @@ struct PromptAnalysis: Sendable {
 
 enum PromptIntent: String, Codable, Sendable, CaseIterable {
     case codeGeneration
-    // periphery:ignore - Reserved: clearLearningData() instance method reserved for future feature activation
     case codeImprovement
     case codeExplanation
     case debugging
@@ -626,7 +600,6 @@ enum PromptIntent: String, Codable, Sendable, CaseIterable {
     case creative
     case research
     case question
-    // periphery:ignore - Reserved: PromptAnalysis type reserved for future feature activation
     case taskAssistance
     case general
 
@@ -670,18 +643,12 @@ struct AdaptiveSuggestion: Sendable, Identifiable {
     let suggestedPrompt: String
     let confidence: Double
 
-    // periphery:ignore - Reserved: expectedResponse property reserved for future feature activation
     enum SuggestionType: String, Codable, Sendable {
         case workflowNext
         case timeBased
         case followUp
-        // periphery:ignore - Reserved: completion property reserved for future feature activation
-        // periphery:ignore - Reserved: fullPrompt property reserved for future feature activation
-        // periphery:ignore - Reserved: intent property reserved for future feature activation
-        // periphery:ignore - Reserved: confidence property reserved for future feature activation
         case contextual
     }
-// periphery:ignore - Reserved: AdaptiveSuggestion type reserved for future feature activation
 }
 
 struct AnticipatedNeed: Sendable {
@@ -699,12 +666,6 @@ struct AnticipatedNeed: Sendable {
     }
 }
 
-// periphery:ignore - Reserved: type property reserved for future feature activation
-
-// periphery:ignore - Reserved: description property reserved for future feature activation
-
-// periphery:ignore - Reserved: likelihood property reserved for future feature activation
-
 struct PromptEnhancement: Sendable {
     let type: EnhancementType
     let suggestion: String
@@ -716,9 +677,6 @@ struct PromptEnhancement: Sendable {
         case formatPreference
         case clarifyScope
     }
-// periphery:ignore - Reserved: type property reserved for future feature activation
-// periphery:ignore - Reserved: suggestion property reserved for future feature activation
-// periphery:ignore - Reserved: example property reserved for future feature activation
 }
 
 struct MoodIndicators: Codable, Sendable {
@@ -736,11 +694,6 @@ struct WorkflowContext: Sendable {
     let estimatedRemaining: Int
 }
 
-// periphery:ignore - Reserved: workflowType property reserved for future feature activation
-// periphery:ignore - Reserved: currentStep property reserved for future feature activation
-// periphery:ignore - Reserved: totalSteps property reserved for future feature activation
-// periphery:ignore - Reserved: completedSteps property reserved for future feature activation
-// periphery:ignore - Reserved: estimatedRemaining property reserved for future feature activation
 enum ResponseType: String, Codable, Sendable {
     case code
     case explanation
@@ -792,7 +745,6 @@ struct WorkflowPattern: Sendable {
 
     func matchScore(for intents: [PromptIntent]) -> Double {
         // Calculate how well the given intents match this workflow
-        // periphery:ignore - Reserved: matchScore(for:) instance method reserved for future feature activation
         guard !steps.isEmpty, !intents.isEmpty else { return 0 }
 
         var matches = 0
@@ -806,12 +758,10 @@ struct WorkflowPattern: Sendable {
     }
 
     func predictNextStep() -> WorkflowStep? {
-        // periphery:ignore - Reserved: predictNextStep() instance method reserved for future feature activation
         guard currentStepIndex < steps.count else { return nil }
         return steps[currentStepIndex]
     }
 
-    // periphery:ignore - Reserved: estimateRemainingSteps() instance method reserved for future feature activation
     func estimateRemainingSteps() -> Int {
         max(0, steps.count - currentStepIndex)
     }

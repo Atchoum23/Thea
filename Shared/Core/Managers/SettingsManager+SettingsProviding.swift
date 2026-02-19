@@ -13,5 +13,4 @@ import Foundation
 
 // MARK: - Protocol Conformance
 
-// periphery:ignore - Reserved: SettingsProviding protocol reserved for future feature activation
 extension SettingsManager: SettingsProviding {}

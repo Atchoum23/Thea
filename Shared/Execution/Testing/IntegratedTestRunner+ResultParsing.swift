@@ -306,9 +306,6 @@ extension IntegratedTestRunner {
     func parseCoverageReport(
         output: String,
         framework: TestFramework,
-        // periphery:ignore - Reserved: output parameter kept for API compatibility
-        // periphery:ignore - Reserved: framework parameter kept for API compatibility
-        // periphery:ignore - Reserved: projectPath parameter kept for API compatibility
         projectPath: String
     ) -> CoverageReport? {
         // Simplified coverage parsing - would need framework-specific handling

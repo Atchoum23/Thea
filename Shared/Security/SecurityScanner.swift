@@ -132,7 +132,6 @@ private struct MalwareSignature: Sendable {
     let pattern: String // hex or string pattern
     let category: ScanCategory
     let threat: ThreatLevel
-// periphery:ignore - Reserved: MalwareSignature type reserved for future feature activation
 }
 
 // MARK: - SecurityScanner Service
@@ -149,7 +148,6 @@ actor SystemSecurityScanner {
         "/Library/LaunchDaemons",
         "/Library/LaunchAgents",
         "~/Library/LaunchAgents"
-    // periphery:ignore - Reserved: suspiciousPaths property reserved for future feature activation
     ]
 
     // Known adware bundle IDs
@@ -717,19 +715,14 @@ actor SystemSecurityScanner {
     func lastScan() -> ScanReport? { scanHistory.last }
 
     func clearHistory() {
-        // periphery:ignore - Reserved: lastScan() instance method reserved for future feature activation
         scanHistory.removeAll()
-        // periphery:ignore - Reserved: clearHistory() instance method reserved for future feature activation
         saveHistory()
     }
 
     func getScanningStatus() -> Bool { isScanning }
 
-// periphery:ignore - Reserved: getScanningStatus() instance method reserved for future feature activation
-
     // MARK: - Persistence
 
-    // periphery:ignore - Reserved: loadHistory() instance method reserved for future feature activation
     private func loadHistory() {
         do {
             let data = try Data(contentsOf: historyFile)

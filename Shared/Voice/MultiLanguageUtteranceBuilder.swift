@@ -29,8 +29,6 @@ struct LanguageSegment: Identifiable, Sendable {
     }
 }
 
-// periphery:ignore - Reserved: LanguageSegment type reserved for future feature activation
-
 // MARK: - Multi-Language Utterance Builder
 
 /// Builds multiple utterances from text containing different languages
@@ -53,8 +51,6 @@ final class MultiLanguageUtteranceBuilder {
         loadPreferredVoices()
     }
 
-// periphery:ignore - Reserved: shared static property reserved for future feature activation
-
     // MARK: - Public API
 
     /// Build utterances from text, automatically detecting language segments
@@ -71,7 +67,6 @@ final class MultiLanguageUtteranceBuilder {
         return segments.map { segment in
             createUtterance(for: segment)
         }
-    // periphery:ignore - Reserved: buildUtterances(from:) instance method reserved for future feature activation
     }
 
     /// Detect language segments in text
@@ -79,7 +74,6 @@ final class MultiLanguageUtteranceBuilder {
         let recognizer = NLLanguageRecognizer()
         var segments: [LanguageSegment] = []
 
-        // periphery:ignore - Reserved: buildUtterances(from:preferredLanguage:) instance method reserved for future feature activation
         // First, try sentence-level detection
         let sentenceTokenizer = NLTokenizer(unit: .sentence)
         sentenceTokenizer.string = text
@@ -87,8 +81,6 @@ final class MultiLanguageUtteranceBuilder {
         var currentLanguage: String?
         var currentStart: String.Index?
         var segmentText = ""
-
-// periphery:ignore - Reserved: detectLanguageSegments(_:defaultLanguage:) instance method reserved for future feature activation
 
         sentenceTokenizer.enumerateTokens(in: text.startIndex..<text.endIndex) { range, _ in
             let sentence = String(text[range])
@@ -171,7 +163,6 @@ final class MultiLanguageUtteranceBuilder {
 
         // Apply default speech parameters
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate
-        // periphery:ignore - Reserved: createUtterance(for:) instance method reserved for future feature activation
         utterance.pitchMultiplier = 1.0
         utterance.volume = 1.0
 
@@ -195,7 +186,6 @@ final class MultiLanguageUtteranceBuilder {
         // Get all voices for this language
         let voices = AVSpeechSynthesisVoice.speechVoices().filter {
             $0.language.hasPrefix(language) || language.hasPrefix($0.language.prefix(2))
-        // periphery:ignore - Reserved: getBestVoice(for:) instance method reserved for future feature activation
         }
 
         // Sort by quality
@@ -223,8 +213,6 @@ final class MultiLanguageUtteranceBuilder {
         }
     }
 
-// periphery:ignore - Reserved: qualityScore(_:) instance method reserved for future feature activation
-
     // MARK: - Voice Management
 
     /// Set preferred voice for a language
@@ -235,21 +223,17 @@ final class MultiLanguageUtteranceBuilder {
 
     /// Get available voices for a language
     func availableVoices(for language: String) -> [AVSpeechSynthesisVoice] {
-        // periphery:ignore - Reserved: setPreferredVoice(_:for:) instance method reserved for future feature activation
         AVSpeechSynthesisVoice.speechVoices().filter {
             $0.language.hasPrefix(language) || language.hasPrefix($0.language.prefix(2))
         }.sorted { qualityScore($0) > qualityScore($1) }
     }
 
-    // periphery:ignore - Reserved: availableVoices(for:) instance method reserved for future feature activation
     /// Get all available languages
     var availableLanguages: [String] {
         let voices = AVSpeechSynthesisVoice.speechVoices()
         let languages = Set(voices.map { String($0.language.prefix(2)) })
         return languages.sorted()
     }
-
-// periphery:ignore - Reserved: availableLanguages property reserved for future feature activation
 
     // MARK: - Configuration
 
@@ -258,13 +242,10 @@ final class MultiLanguageUtteranceBuilder {
         useEnhancedVoices = enabled
     }
 
-    // periphery:ignore - Reserved: setUseEnhancedVoices(_:) instance method reserved for future feature activation
     /// Enable/disable premium voices
     func setUsePremiumVoices(_ enabled: Bool) {
         usePremiumVoices = enabled
     }
-
-// periphery:ignore - Reserved: setUsePremiumVoices(_:) instance method reserved for future feature activation
 
     // MARK: - Persistence
 
@@ -286,7 +267,6 @@ final class MultiLanguageUtteranceBuilder {
 
     private func savePreferredVoices() {
         let identifiers = preferredVoices.mapValues { $0.identifier }
-        // periphery:ignore - Reserved: savePreferredVoices() instance method reserved for future feature activation
         do {
             let data = try JSONEncoder().encode(identifiers)
             UserDefaults.standard.set(data, forKey: "preferredVoices")
@@ -302,7 +282,6 @@ final class MultiLanguageUtteranceBuilder {
 extension MultiLanguageUtteranceBuilder {
     /// Speak text with automatic language detection
     func speak(_ text: String, using synthesizer: AVSpeechSynthesizer) {
-        // periphery:ignore - Reserved: speak(_:using:) instance method reserved for future feature activation
         let utterances = buildUtterances(from: text)
         for utterance in utterances {
             synthesizer.speak(utterance)
@@ -310,7 +289,6 @@ extension MultiLanguageUtteranceBuilder {
     }
 
     /// Get language display name
-    // periphery:ignore - Reserved: languageDisplayName(for:) instance method reserved for future feature activation
     func languageDisplayName(for code: String) -> String {
         Locale.current.localizedString(forLanguageCode: code) ?? code
     }

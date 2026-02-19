@@ -120,8 +120,6 @@ final class HardwareShortcutManager {
     // Callbacks
     var onShortcutTriggered: ((HardwareShortcutAction) -> Void)?
 
-// periphery:ignore - Reserved: shared static property reserved for future feature activation
-
     // Internal
     #if os(macOS)
     private var globalMonitor: Any?
@@ -145,7 +143,6 @@ final class HardwareShortcutManager {
         isMonitoring = true
     }
 
-    // periphery:ignore - Reserved: startMonitoring() instance method reserved for future feature activation
     /// Stop monitoring
     func stopMonitoring() {
         guard isMonitoring else { return }
@@ -156,7 +153,6 @@ final class HardwareShortcutManager {
             globalMonitor = nil
         }
         if let monitor = localMonitor {
-            // periphery:ignore - Reserved: stopMonitoring() instance method reserved for future feature activation
             NSEvent.removeMonitor(monitor)
             localMonitor = nil
         }
@@ -174,7 +170,6 @@ final class HardwareShortcutManager {
     }
 
     /// Unregister a shortcut
-    // periphery:ignore - Reserved: registerShortcut(_:) instance method reserved for future feature activation
     func unregisterShortcut(id: UUID) {
         registeredShortcuts.removeAll { $0.id == id }
         saveShortcuts()
@@ -182,14 +177,11 @@ final class HardwareShortcutManager {
 
     /// Enable/disable a shortcut
     func setShortcutEnabled(_ id: UUID, enabled: Bool) {
-        // periphery:ignore - Reserved: unregisterShortcut(id:) instance method reserved for future feature activation
         if let index = registeredShortcuts.firstIndex(where: { $0.id == id }) {
             registeredShortcuts[index].isEnabled = enabled
             saveShortcuts()
         }
     }
-
-// periphery:ignore - Reserved: setShortcutEnabled(_:enabled:) instance method reserved for future feature activation
 
     /// Get default shortcuts for platform
     func getDefaultShortcuts() -> [ShortcutConfig] {
@@ -227,7 +219,6 @@ final class HardwareShortcutManager {
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
             Task { @MainActor in
                 self?.handleKeyEvent(event)
-            // periphery:ignore - Reserved: setupMacOSMonitors() instance method reserved for future feature activation
             }
         }
 
@@ -244,7 +235,6 @@ final class HardwareShortcutManager {
         // Check F5 key (keyCode 96) for function key trigger
         if event.keyCode == 96 {
             if let shortcut = registeredShortcuts.first(where: {
-                // periphery:ignore - Reserved: handleKeyEvent(_:) instance method reserved for future feature activation
                 $0.trigger == .functionKey && $0.isEnabled
             }) {
                 triggerShortcut(shortcut)
@@ -279,13 +269,11 @@ final class HardwareShortcutManager {
     private func triggerShortcut(_ config: ShortcutConfig) {
         lastTriggeredShortcut = config
         onShortcutTriggered?(config.action)
-    // periphery:ignore - Reserved: triggerShortcut(_:) instance method reserved for future feature activation
     }
 
     /// Manually trigger an action (for external callers like ActionButton)
     func triggerAction(_ action: HardwareShortcutAction) {
         onShortcutTriggered?(action)
-    // periphery:ignore - Reserved: triggerAction(_:) instance method reserved for future feature activation
     }
 
     // MARK: - Persistence
@@ -304,7 +292,6 @@ final class HardwareShortcutManager {
     }
 
     private func saveShortcuts() {
-        // periphery:ignore - Reserved: saveShortcuts() instance method reserved for future feature activation
         do {
             let data = try JSONEncoder().encode(registeredShortcuts)
             UserDefaults.standard.set(data, forKey: "hardwareShortcuts")
@@ -318,7 +305,6 @@ final class HardwareShortcutManager {
 
 #if os(macOS)
 /// Common key codes for macOS
-// periphery:ignore - Reserved: MacKeyCode type reserved for future feature activation
 enum MacKeyCode: Int {
     case space = 49
     case returnKey = 36

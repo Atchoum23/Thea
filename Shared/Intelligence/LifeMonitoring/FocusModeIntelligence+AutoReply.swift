@@ -269,7 +269,6 @@ extension FocusModeIntelligence {
     }
     #endif
 
-    // periphery:ignore - Reserved: sendViaShortcuts(to:message:platform:) instance method reserved for future feature activation
     func sendViaShortcuts(to phoneNumber: String, message: String, platform: CommunicationPlatform) async -> Bool {
         #if os(iOS)
         let shortcutName: String

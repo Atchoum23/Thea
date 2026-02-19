@@ -144,9 +144,6 @@ import Foundation
         let providerName = "Apple Wallet"
         let providerType: FinancialProviderType = .bank
 
-// periphery:ignore - Reserved: providerType property reserved for future feature activation
-
-        // periphery:ignore - Reserved: authenticate(credentials:) instance method reserved for future feature activation
         func authenticate(credentials _: FinancialCredentials) async throws {
             throw FinancialError.connectionFailed("FinanceKit not available on this platform")
         }

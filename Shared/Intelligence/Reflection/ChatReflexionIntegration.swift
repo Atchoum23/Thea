@@ -25,10 +25,7 @@ final class ChatReflexionIntegration {
     var isEnabled = true
 
     /// Minimum response length to trigger reflexion (skip trivial responses)
-    // periphery:ignore - Reserved: shared static property reserved for future feature activation
     var minimumResponseLength = 100
-
-// periphery:ignore - Reserved: logger property reserved for future feature activation
 
     /// Confidence threshold below which reflexion triggers
     var confidenceThreshold: Float = 0.6
@@ -57,8 +54,6 @@ final class ChatReflexionIntegration {
         guard isEnabled else {
             return ReflexionResult(response: response, wasImproved: false)
         }
-
-// periphery:ignore - Reserved: processResponse(task:response:conversationContext:) instance method reserved for future feature activation
 
         // Skip short responses
         guard response.count >= minimumResponseLength else {
@@ -123,7 +118,6 @@ final class ChatReflexionIntegration {
         let engine = ReflexionEngine.shared
 
         switch feedback {
-        // periphery:ignore - Reserved: recordFeedback(messageID:feedback:) instance method reserved for future feature activation
         case .positive:
             logger.info("Positive feedback recorded for \(messageID)")
 
@@ -161,7 +155,6 @@ final class ChatReflexionIntegration {
         switch feedback {
         case .positive:
             await graph.addEntity(KGEntity(
-                // periphery:ignore - Reserved: updateKnowledgeGraph(feedback:messageID:) instance method reserved for future feature activation
                 name: "positive_interaction_\(messageID.uuidString.prefix(8))",
                 type: .event,
                 attributes: ["type": "positive_feedback", "date": ISO8601DateFormatter().string(from: Date())]
@@ -188,14 +181,11 @@ final class ChatReflexionIntegration {
         return recent.reduce(Float(0)) { $0 + $1.score } / Float(recent.count)
     }
 
-// periphery:ignore - Reserved: averageQuality(last:) instance method reserved for future feature activation
-
     /// Improvement rate (percentage of responses that were improved)
     var improvementRate: Double {
         guard reflexionCount > 0 else { return 0 }
         return Double(improvedCount) / Double(reflexionCount) * 100
     }
-// periphery:ignore - Reserved: improvementRate property reserved for future feature activation
 }
 
 // MARK: - Types
@@ -203,7 +193,6 @@ final class ChatReflexionIntegration {
 struct ReflexionResult: Sendable {
     let response: String
     let wasImproved: Bool
-    // periphery:ignore - Reserved: ReflexionResult type reserved for future feature activation
     var originalScore: Float?
     var improvedScore: Float?
     var iterations: Int = 0
@@ -211,7 +200,6 @@ struct ReflexionResult: Sendable {
 
 enum UserResponseFeedback: Sendable {
     case positive
-    // periphery:ignore - Reserved: UserResponseFeedback type reserved for future feature activation
     case negative
     case correction(String)
     case rating(Float)  // 0.0-1.0
@@ -219,8 +207,6 @@ enum UserResponseFeedback: Sendable {
 
 struct QualityDataPoint: Sendable {
     let timestamp: Date
-    // periphery:ignore - Reserved: timestamp property reserved for future feature activation
     let score: Float
-    // periphery:ignore - Reserved: wasImproved property reserved for future feature activation
     let wasImproved: Bool
 }

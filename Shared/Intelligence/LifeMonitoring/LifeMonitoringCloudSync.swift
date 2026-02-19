@@ -521,7 +521,6 @@ public struct CloudReadingSession: Identifiable, Sendable {
         sourceDeviceName = record["sourceDeviceName"] as? String ?? ""
     }
 
-    // periphery:ignore - Reserved: toRecord(zoneName:) instance method reserved for future feature activation
     func toRecord(zoneName: String) -> CKRecord {
         let zoneID = CKRecordZone.ID(zoneName: zoneName, ownerName: CKCurrentUserDefaultName)
         let recordID = CKRecord.ID(recordName: "reading-\(id.uuidString)", zoneID: zoneID)

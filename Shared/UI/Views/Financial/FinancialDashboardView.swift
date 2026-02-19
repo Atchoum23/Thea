@@ -384,7 +384,6 @@ struct AccountCard: View {
 
 struct TransactionRow: View {
     let transaction: Transaction
-    // periphery:ignore - Reserved: currency property reserved for future feature activation
     var currency: String = "USD"
 
     var body: some View {

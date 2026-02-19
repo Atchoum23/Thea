@@ -36,7 +36,6 @@ public class AudioStreamService: ObservableObject {
 
     #if os(macOS)
         private var stream: SCStream?
-        // periphery:ignore - Reserved: audioOutput property reserved for future feature activation
         private var audioOutput: AudioCaptureOutput?
     #endif
 

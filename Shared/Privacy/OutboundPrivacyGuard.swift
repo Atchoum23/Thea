@@ -42,16 +42,11 @@ struct ChannelRegistration: Sendable {
 }
 
 /// Finding from a security scan (used by pre-commit hook integration)
-// periphery:ignore - Reserved: channelId property reserved for future feature activation
-// periphery:ignore - Reserved: description property reserved for future feature activation
 struct SecurityFinding: Sendable {
     enum Severity: String, Sendable { case critical, warning, info }
-    // periphery:ignore - Reserved: registeredAt property reserved for future feature activation
-    // periphery:ignore - Reserved: registeredBy property reserved for future feature activation
     let severity: Severity
     let file: String
     let description: String
-    // periphery:ignore - Reserved: SecurityFinding type reserved for future feature activation
     let recommendation: String
 }
 
@@ -124,7 +119,6 @@ actor OutboundPrivacyGuard {
         id: String,
         description: String,
         policy: any PrivacyPolicy,
-        // periphery:ignore - Reserved: registerChannel(id:description:policy:allowedDataTypes:registeredBy:) instance method reserved for future feature activation
         allowedDataTypes: Set<OutboundDataType>,
         registeredBy: String
     ) {
@@ -250,11 +244,8 @@ actor OutboundPrivacyGuard {
         channelPolicies[channel] = policy
     }
 
-// periphery:ignore - Reserved: setPolicy(_:for:) instance method reserved for future feature activation
-
     func getPolicy(for channel: String) -> (any PrivacyPolicy)? {
         channelPolicies[channel]
-    // periphery:ignore - Reserved: getPolicy(for:) instance method reserved for future feature activation
     }
 
     // MARK: - Audit
@@ -573,7 +564,6 @@ actor OutboundPrivacyGuard {
 
     /// Scan content for credentials/secrets (used by git pre-commit hook integration)
     func preCommitScan(_ content: String, filename: String) -> [SecurityFinding] {
-        // periphery:ignore - Reserved: preCommitScan(_:filename:) instance method reserved for future feature activation
         var findings: [SecurityFinding] = []
         let types = classifyContent(content)
 
@@ -611,7 +601,6 @@ struct PrivacyAuditStatistics: Sendable {
     let passed: Int
     let redacted: Int
     let blocked: Int
-    // periphery:ignore - Reserved: totalRedactions property reserved for future feature activation
     let totalRedactions: Int
 }
 

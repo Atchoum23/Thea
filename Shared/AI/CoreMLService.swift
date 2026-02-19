@@ -51,7 +51,6 @@ public class CoreMLService: ObservableObject {
 
     // MARK: - NLP Components
 
-    // periphery:ignore - Reserved: sentimentAnalyzer property reserved for future feature activation
     private let sentimentAnalyzer = NLModel()
     private let languageRecognizer = NLLanguageRecognizer()
     private let tokenizer = NLTokenizer(unit: .word)

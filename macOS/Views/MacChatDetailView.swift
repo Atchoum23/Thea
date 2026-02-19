@@ -25,7 +25,6 @@ struct MacChatDetailView: View {
     @State private var showingSystemPrompt = false
     @State private var systemPromptText = ""
     @State private var isUserScrolledUp = false
-    // periphery:ignore - Reserved: isInputFocused property reserved for future feature activation
     @FocusState private var isInputFocused: Bool
     @FocusState private var isSearchFocused: Bool
 

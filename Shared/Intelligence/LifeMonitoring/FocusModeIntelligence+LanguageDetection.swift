@@ -279,7 +279,6 @@ extension FocusModeIntelligence {
     /// - Parameters:
     ///   - phoneNumber: The phone number to call back.
     ///   - reason: A description of why the callback was initiated.
-    // periphery:ignore - Reserved: reason parameter kept for API compatibility
     func initiateCallback(to phoneNumber: String, reason: String) async {
         #if os(iOS)
         if let url = URL(string: "tel://\(phoneNumber.replacingOccurrences(of: " ", with: ""))") {

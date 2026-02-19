@@ -158,7 +158,6 @@ public struct PrivacyControlsView: View {
 private struct PermissionRow: View {
     let permission: PrivacyPermission
     let status: PrivacyPermissionStatus
-    // periphery:ignore - Reserved: hasConsent property reserved for future feature activation
     let hasConsent: Bool
 
     var body: some View {

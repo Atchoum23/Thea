@@ -84,11 +84,9 @@ final class MessagingSessionManager: ObservableObject {
     func resetSession(key: String) {
         guard let session = activeSessions.first(where: { $0.key == key }) else { return }
         session.clearHistory()
-        // periphery:ignore - Reserved: session(for:) instance method reserved for future feature activation
         try? modelContext?.save()
     }
 
-    // periphery:ignore - Reserved: resetSession(key:) instance method reserved for future feature activation
     func resetAll() {
         for session in activeSessions { session.clearHistory() }
         try? modelContext?.save()
@@ -100,7 +98,6 @@ final class MessagingSessionManager: ObservableObject {
               let ctx = modelContext else { return }
         ctx.delete(session)
         activeSessions.removeAll(where: { $0.key == key })
-        // periphery:ignore - Reserved: deleteSession(key:) instance method reserved for future feature activation
         try? ctx.save()
     }
 
@@ -113,8 +110,6 @@ final class MessagingSessionManager: ObservableObject {
         guard let session = activeSessions.first(where: { $0.key == sessionKey }) else { return [] }
         let history = session.decodedHistory()
         guard !history.isEmpty else { return [] }
-
-// periphery:ignore - Reserved: relevantContext(for:sessionKey:maxItems:) instance method reserved for future feature activation
 
         let lambda: Double = 0.6  // balance: 1.0 = pure relevance, 0.0 = pure diversity
         let queryTokens = Set(query.lowercased().split(separator: " ").map(String.init))
@@ -167,7 +162,6 @@ final class MessagingSessionManager: ObservableObject {
     func scheduleDailyReset() {
         // Reset all sessions at 04:00 daily via background task
         Task {
-            // periphery:ignore - Reserved: scheduleDailyReset() instance method reserved for future feature activation
             while true {
                 let calendar = Calendar.current
                 let now = Date()
@@ -274,7 +268,6 @@ struct MessagingCredentialsStore {
 
     static func delete(for platform: MessagingPlatform) {
         let key = "\(service).\(platform.rawValue)"
-        // periphery:ignore - Reserved: delete(for:) static method reserved for future feature activation
         keychainDelete(key: key)
     }
 
@@ -305,7 +298,6 @@ struct MessagingCredentialsStore {
     }
 
     private static func keychainDelete(key: String) {
-        // periphery:ignore - Reserved: keychainDelete(key:) static method reserved for future feature activation
         let query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
             kSecAttrAccount: key
@@ -318,7 +310,6 @@ struct MessagingCredentialsStore {
 
 extension PersonalKnowledgeGraph {
     /// Returns frequently-referenced entities for messaging context injection.
-    // periphery:ignore - Reserved: contextForMessaging() instance method reserved for future feature activation
     func contextForMessaging() -> [String] {
         recentEntities(limit: 20)
             .filter { $0.referenceCount > 2 }

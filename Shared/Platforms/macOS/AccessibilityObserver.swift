@@ -25,7 +25,6 @@
         private let queue = DispatchQueue(label: "app.thea.accessibility", qos: .userInitiated)
 
         // Observation state
-        // periphery:ignore - Reserved: focusedWindowObserver property reserved for future feature activation
         private var focusedWindowObserver: AnyObject?
         private var focusedAppObserver: AnyObject?
         private var frontmostApp: NSRunningApplication?

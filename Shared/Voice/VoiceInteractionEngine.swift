@@ -313,14 +313,12 @@ final class VoiceInteractionEngine {
         }
     }
 
-    // periphery:ignore - Reserved: pauseSpeaking() instance method reserved for future feature activation
     /// Resume speaking
     func resumeSpeaking() {
         speechSynthesizer.continueSpeaking()
     }
 
     /// Get available voices
-    // periphery:ignore - Reserved: resumeSpeaking() instance method reserved for future feature activation
     func getAvailableVoices() -> [VoiceInfo] {
         AVSpeechSynthesisVoice.speechVoices().map { voice in
             VoiceInfo(
@@ -338,13 +336,10 @@ final class VoiceInteractionEngine {
         getAvailableVoices().filter { $0.language.hasPrefix(language.prefix(2)) }
     }
 
-    // periphery:ignore - Reserved: getVoices(for:) instance method reserved for future feature activation
     /// Get supported recognition languages
     func getSupportedLanguages() -> [Locale] {
         Set(SFSpeechRecognizer.supportedLocales()).sorted { $0.identifier < $1.identifier }
     }
-
-// periphery:ignore - Reserved: getSupportedLanguages() instance method reserved for future feature activation
 
     private func mapQuality(_ quality: AVSpeechSynthesisVoiceQuality) -> VoiceInfo.Quality {
         switch quality {
@@ -392,7 +387,6 @@ final class VoiceInteractionEngine {
     /// Have a voice conversation turn
     func conversationTurn(prompt: String) async throws -> String {
         // Speak the prompt
-        // periphery:ignore - Reserved: conversationTurn(prompt:) instance method reserved for future feature activation
         speak(prompt)
 
         // Wait for speech to finish
@@ -403,7 +397,6 @@ final class VoiceInteractionEngine {
     }
 
     private func waitForSpeechCompletion() async {
-        // periphery:ignore - Reserved: waitForSpeechCompletion() instance method reserved for future feature activation
         while isSpeaking {
             do {
                 try await Task.sleep(for: .milliseconds(100))
@@ -533,6 +526,5 @@ enum VoiceInteractionError: Error, LocalizedError {
 
 extension Notification.Name {
     static let voiceTranscriptionComplete = Notification.Name("voiceTranscriptionComplete")
-    // periphery:ignore - Reserved: voiceActivityChanged static property reserved for future feature activation
     static let voiceActivityChanged = Notification.Name("voiceActivityChanged")
 }

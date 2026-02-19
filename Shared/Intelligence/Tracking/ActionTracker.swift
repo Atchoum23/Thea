@@ -158,8 +158,6 @@ public actor ActionTracker {
     private var actionCounts: [TrackedActionType: Int] = [:]
     private var trackingStartTime: Date?
 
-// periphery:ignore - Reserved: trackingStartTime property reserved for future feature activation
-
     private init() {}
 
     // MARK: - Lifecycle
@@ -404,7 +402,6 @@ public actor ActionTracker {
     }
 
     /// Check if recent actions match any patterns
-    // periphery:ignore - Reserved: newAction parameter kept for API compatibility
     private func detectPatterns(with newAction: TrackedAction) async {
         let recentWindow = Array(recentActions.suffix(10))
 

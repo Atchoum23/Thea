@@ -19,7 +19,6 @@ public final class NetworkManager: ObservableObject {
 
     private var defaultSession: URLSession
     private var backgroundSession: URLSession
-    // periphery:ignore - Reserved: backgroundSession property reserved for future feature activation
     private let sessionDelegate = NetworkSessionDelegate()
 
     // MARK: - Published State
@@ -53,7 +52,6 @@ public final class NetworkManager: ObservableObject {
     // MARK: - Rate Limiting
 
     private var rateLimiters: [String: NetworkRateLimiter] = [:]
-    // periphery:ignore - Reserved: requestQueue property reserved for future feature activation
     private var requestQueue: [QueuedRequest] = []
 
     // MARK: - Initialization

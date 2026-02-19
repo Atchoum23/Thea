@@ -10,7 +10,6 @@ import Foundation
 import Observation
 import os.log
 
-// periphery:ignore - Reserved: hubLogger global var reserved for future feature activation
 private let hubLogger = Logger(subsystem: "ai.thea.app", category: "UnifiedIntelligenceHub")
 
 // MARK: - Intelligence Event Types

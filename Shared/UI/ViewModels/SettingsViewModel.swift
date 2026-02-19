@@ -51,39 +51,29 @@ final class SettingsViewModel {
         set { settingsManager.theme = newValue }
     }
 
-// periphery:ignore - Reserved: defaultProviderId property reserved for future feature activation
-
     /// Whether debug mode is enabled
     var debugMode: Bool {
         get { settingsManager.debugMode }
         set { settingsManager.debugMode = newValue }
-    // periphery:ignore - Reserved: streamResponses property reserved for future feature activation
     }
 
     // MARK: - Dependencies
 
     @ObservationIgnored private let settingsManager: SettingsManager
-    // periphery:ignore - Reserved: theme property reserved for future feature activation
     @ObservationIgnored private let providerRegistry: ProviderRegistry
     @ObservationIgnored private let logger = Logger(subsystem: "app.thea", category: "SettingsViewModel")
 
     // MARK: - Initialization
 
-    // periphery:ignore - Reserved: debugMode property reserved for future feature activation
     init(
         settingsManager: SettingsManager = .shared,
         providerRegistry: ProviderRegistry = .shared
     ) {
         self.settingsManager = settingsManager
         self.providerRegistry = providerRegistry
-    // periphery:ignore - Reserved: settingsManager property reserved for future feature activation
-    // periphery:ignore - Reserved: providerRegistry property reserved for future feature activation
-    // periphery:ignore - Reserved: logger property reserved for future feature activation
     }
 
     // MARK: - Tab Navigation
-
-// periphery:ignore - Reserved: init(settingsManager:providerRegistry:) initializer reserved for future feature activation
 
     /// Available settings tabs
     enum SettingsTab: String, CaseIterable, Identifiable {
@@ -105,7 +95,6 @@ final class SettingsViewModel {
             case .voice: return "mic"
             case .privacy: return "lock.shield"
             case .advanced: return "wrench.and.screwdriver"
-            // periphery:ignore - Reserved: icon property reserved for future feature activation
             case .about: return "info.circle"
             }
         }
@@ -119,32 +108,25 @@ final class SettingsViewModel {
     // MARK: - Provider Management
 
     /// Get all available providers
-    // periphery:ignore - Reserved: navigateTo(_:) instance method reserved for future feature activation
     var availableProviderInfo: [ProviderRegistry.ProviderInfo] {
         providerRegistry.availableProviders
     }
 
     /// Check if a provider has an API key configured
     func hasAPIKey(for providerId: String) -> Bool {
-        // periphery:ignore - Reserved: availableProviderInfo property reserved for future feature activation
         settingsManager.hasAPIKey(for: providerId)
     }
 
     /// Request API key entry for a provider
-    // periphery:ignore - Reserved: hasAPIKey(for:) instance method reserved for future feature activation
     func requestAPIKey(for providerId: String) {
         apiKeyProvider = providerId
         showingAPIKeyEntry = true
     }
 
-// periphery:ignore - Reserved: requestAPIKey(for:) instance method reserved for future feature activation
-
     /// Save API key for a provider
     func saveAPIKey(_ key: String, for providerId: String) {
         isSaving = true
         errorMessage = nil
-
-// periphery:ignore - Reserved: saveAPIKey(_:for:) instance method reserved for future feature activation
 
         settingsManager.setAPIKey(key, for: providerId)
         logger.info("API key saved for provider: \(providerId)")
@@ -157,7 +139,6 @@ final class SettingsViewModel {
     /// Remove API key for a provider
     func removeAPIKey(for providerId: String) {
         settingsManager.deleteAPIKey(for: providerId)
-        // periphery:ignore - Reserved: removeAPIKey(for:) instance method reserved for future feature activation
         logger.info("API key removed for provider: \(providerId)")
     }
 
@@ -165,7 +146,6 @@ final class SettingsViewModel {
 
     /// Reset all settings to defaults
     func resetToDefaults() {
-        // periphery:ignore - Reserved: resetToDefaults() instance method reserved for future feature activation
         isSaving = true
 
         settingsManager.resetToDefaults()
@@ -177,7 +157,6 @@ final class SettingsViewModel {
     // MARK: - Validation
 
     /// Validate current settings
-    // periphery:ignore - Reserved: validateSettings() instance method reserved for future feature activation
     func validateSettings() -> [String] {
         var issues: [String] = []
 

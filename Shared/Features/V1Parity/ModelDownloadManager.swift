@@ -229,7 +229,6 @@ public final class ModelDownloadManager {
     /// Active download tasks keyed by model ID for cancellation support
     private var downloadTasks: [String: Task<Void, Error>] = [:]
 
-    // periphery:ignore - Reserved: _download parameter kept for API compatibility
     private func performDownload(model: DownloadableModel, download _download: ModelDownload) async throws {
         // Create local directory structure matching HuggingFace hub layout
         let modelDirName = "models--\(model.id.replacingOccurrences(of: "/", with: "--"))"

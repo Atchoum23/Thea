@@ -89,7 +89,6 @@ public final class UsageAnalyticsService {
         provider: String,
         tokensIn: Int,
         tokensOut: Int,
-        // periphery:ignore - Reserved: provider parameter kept for API compatibility
         latencyMs: Int,
         success: Bool
     ) {
@@ -121,7 +120,6 @@ public final class UsageAnalyticsService {
         type: String,
         durationMs: Int,
         success: Bool
-    // periphery:ignore - Reserved: durationMs parameter kept for API compatibility
     ) {
         guard isEnabled else { return }
 
@@ -133,7 +131,6 @@ public final class UsageAnalyticsService {
 
     /// Track a search
     public func trackSearch(query: String, resultsCount: Int) {
-        // periphery:ignore - Reserved: query parameter kept for API compatibility
         guard isEnabled else { return }
 
         updateDailyMetrics { metrics in
@@ -142,7 +139,6 @@ public final class UsageAnalyticsService {
     }
 
     /// Track autonomous action
-    // periphery:ignore - Reserved: type parameter kept for API compatibility
     public func trackAutonomousAction(type: String, approved: Bool) {
         guard isEnabled else { return }
 

@@ -63,7 +63,6 @@ extension FocusModeIntelligence {
     ///   - contactId: The VIP contact identifier.
     ///   - language: The BCP-47 language code for the default message.
     /// - Returns: The VIP message string, or `nil` if the contact is not a VIP.
-    // periphery:ignore - Reserved: getVIPMessage(for:language:) instance method reserved for future feature activation
     func getVIPMessage(for contactId: String, language: String) -> String? {
         guard isVIPContact(contactId) else { return nil }
 

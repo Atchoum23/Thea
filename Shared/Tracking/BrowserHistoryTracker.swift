@@ -26,36 +26,28 @@ final class BrowserHistoryTracker {
 
     func setModelContext(_ context: ModelContext) {
         modelContext = context
-    // periphery:ignore - Reserved: shared static property reserved for future feature activation
     }
-
-// periphery:ignore - Reserved: logger property reserved for future feature activation
 
     // MARK: - Tracking Control
 
     func startTracking() {
         guard config.browserTrackingEnabled, !isTracking else { return }
 
-// periphery:ignore - Reserved: config property reserved for future feature activation
-
         isTracking = true
         currentSession = BrowsingSession(startTime: Date(), visits: [])
     }
 
-    // periphery:ignore - Reserved: setModelContext(_:) instance method reserved for future feature activation
     func stopTracking() {
         isTracking = false
 
         if let session = currentSession {
             Task {
-                // periphery:ignore - Reserved: startTracking() instance method reserved for future feature activation
                 await saveSession(session)
             }
         }
         currentSession = nil
     }
 
-    // periphery:ignore - Reserved: stopTracking() instance method reserved for future feature activation
     // MARK: - Page Visit Tracking
 
     func trackPageVisit(url: URL, title: String?, content _: String?) {
@@ -68,7 +60,6 @@ final class BrowserHistoryTracker {
             duration: 0,
             contentSummary: nil,
             category: categorizeURL(url)
-        // periphery:ignore - Reserved: trackPageVisit(url:title:content:) instance method reserved for future feature activation
         )
 
         currentSession?.visits.append(visit)
@@ -89,7 +80,6 @@ final class BrowserHistoryTracker {
         }
 
         // Learning
-        // periphery:ignore - Reserved: categorizeURL(_:) instance method reserved for future feature activation
         if host.contains("coursera") || host.contains("udemy") || host.contains("youtube") && url.path.contains("watch") {
             return .learning
         }
@@ -133,8 +123,6 @@ final class BrowserHistoryTracker {
         // Remove query parameters that may contain sensitive data (tokens, auth, etc.)
         let sanitizedURL = sanitizeURL(visit.url)
 
-// periphery:ignore - Reserved: saveVisit(_:) instance method reserved for future feature activation
-
         let record = BrowsingRecord(
             sessionID: sessionID,
             url: sanitizedURL,
@@ -161,7 +149,6 @@ final class BrowserHistoryTracker {
             "api_key", "apikey", "key", "secret", "password", "pwd",
             "session", "sessionid", "sid", "code", "state", "nonce",
             "oauth", "bearer", "jwt", "credential", "credentials",
-            // periphery:ignore - Reserved: sanitizeURL(_:) instance method reserved for future feature activation
             "client_secret", "private_key"
         ]
 
@@ -198,15 +185,11 @@ final class BrowserHistoryTracker {
 
     // MARK: - Reports
 
-// periphery:ignore - Reserved: saveSession(_:) instance method reserved for future feature activation
-
     func getDailyBrowsingReport() -> BrowsingReport {
         let today = Calendar.current.startOfDay(for: Date())
         let visits = currentSession?.visits ?? []
 
         var categoryDurations: [URLCategory: TimeInterval] = [:]
-
-// periphery:ignore - Reserved: getDailyBrowsingReport() instance method reserved for future feature activation
 
         for visit in visits {
             categoryDurations[visit.category, default: 0] += visit.duration
@@ -226,7 +209,6 @@ final class BrowserHistoryTracker {
         guard let context = modelContext else { return [] }
 
         let calendar = Calendar.current
-        // periphery:ignore - Reserved: getVisits(for:) instance method reserved for future feature activation
         let startOfDay = calendar.startOfDay(for: date)
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay.addingTimeInterval(86400)
 
@@ -247,7 +229,6 @@ final class BrowserHistoryTracker {
     func getVisits(from start: Date, to end: Date) async -> [BrowsingRecord] {
         guard let context = modelContext else { return [] }
 
-        // periphery:ignore - Reserved: getVisits(from:to:) instance method reserved for future feature activation
         // Fetch all and filter in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<BrowsingRecord>()
         let allRecords: [BrowsingRecord]
@@ -270,10 +251,7 @@ struct BrowsingSession: Identifiable {
     let startTime: Date
     var visits: [PageVisit]
 
-// periphery:ignore - Reserved: startTime property reserved for future feature activation
-
     var totalDuration: TimeInterval {
-        // periphery:ignore - Reserved: totalDuration property reserved for future feature activation
         visits.reduce(0) { $0 + $1.duration }
     }
 }
@@ -298,7 +276,6 @@ enum URLCategory: String {
     case other = "Other"
 }
 
-// periphery:ignore - Reserved: BrowsingReport type reserved for future feature activation
 struct BrowsingReport {
     let date: Date
     let totalVisits: Int

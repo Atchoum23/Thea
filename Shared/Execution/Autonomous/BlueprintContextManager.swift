@@ -11,7 +11,6 @@ import Foundation
 /// Manages execution context and handles compaction for long operations
 @MainActor
 final class BlueprintContextManager {
-    // periphery:ignore - Reserved: BlueprintContextManager type reserved for future feature activation
     private var context: [String: Any] = [:]
     private var history: [BlueprintContextSnapshot] = []
     private let maxHistorySize = 100
@@ -45,7 +44,6 @@ final class BlueprintContextManager {
     }
 }
 
-// periphery:ignore - Reserved: BlueprintContextSnapshot type reserved for future feature activation
 private struct BlueprintContextSnapshot {
     let timestamp: Date
     let context: [String: Any]

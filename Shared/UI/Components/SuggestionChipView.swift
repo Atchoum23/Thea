@@ -6,7 +6,6 @@ struct SuggestionItem: Identifiable {
     let id = UUID()
     let icon: String
     let text: String
-    // periphery:ignore - Reserved: prompt property reserved for future feature activation
     let prompt: String
 
     init(icon: String, text: String, prompt: String? = nil) {

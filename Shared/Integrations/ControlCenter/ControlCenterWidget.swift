@@ -257,7 +257,6 @@ public final class ControlCenterWidgetManager: ObservableObject {
         }
     }
 
-    // periphery:ignore - Reserved: loadActionStates() instance method reserved for future feature activation
     private func loadActionStates() {
         guard let data = UserDefaults.standard.data(forKey: "controlCenter.actionStates") else {
             return

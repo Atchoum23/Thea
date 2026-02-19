@@ -515,72 +515,19 @@
         var pti_cow_faults: Int32 = 0
         var pti_messages_sent: Int32 = 0
         var pti_messages_received: Int32 = 0
-        // periphery:ignore - Reserved: pbi_flags property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_status property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_xstatus property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_pid property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_ppid property reserved for future feature activation
         var pti_syscalls_mach: Int32 = 0
-        // periphery:ignore - Reserved: pbi_gid property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_ruid property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_rgid property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_svuid property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_svgid property reserved for future feature activation
-        // periphery:ignore - Reserved: rfu_1 property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_comm property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_name property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_nfiles property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_pgid property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_pjobc property reserved for future feature activation
-        // periphery:ignore - Reserved: e_tdev property reserved for future feature activation
-        // periphery:ignore - Reserved: e_tpgid property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_nice property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_start_tvsec property reserved for future feature activation
-        // periphery:ignore - Reserved: pbi_start_tvusec property reserved for future feature activation
         var pti_syscalls_unix: Int32 = 0
         var pti_csw: Int32 = 0
         var pti_threadnum: Int32 = 0
-        // periphery:ignore - Reserved: pti_virtual_size property reserved for future feature activation
         var pti_numrunning: Int32 = 0
         var pti_priority: Int32 = 0
     }
-
-// periphery:ignore - Reserved: pti_threads_user property reserved for future feature activation
-
-// periphery:ignore - Reserved: pti_threads_system property reserved for future feature activation
-
-// periphery:ignore - Reserved: pti_policy property reserved for future feature activation
-
-// periphery:ignore - Reserved: pti_faults property reserved for future feature activation
-
-// periphery:ignore - Reserved: pti_pageins property reserved for future feature activation
-
-// periphery:ignore - Reserved: pti_cow_faults property reserved for future feature activation
-
-// periphery:ignore - Reserved: pti_messages_sent property reserved for future feature activation
-
-// periphery:ignore - Reserved: pti_messages_received property reserved for future feature activation
-
-// periphery:ignore - Reserved: pti_syscalls_mach property reserved for future feature activation
-
-// periphery:ignore - Reserved: pti_syscalls_unix property reserved for future feature activation
-
-// periphery:ignore - Reserved: pti_csw property reserved for future feature activation
-
-// periphery:ignore - Reserved: pti_threadnum property reserved for future feature activation
-
-// periphery:ignore - Reserved: pti_numrunning property reserved for future feature activation
-
-// periphery:ignore - Reserved: pti_priority property reserved for future feature activation
 
     // swiftlint:enable large_tuple
 
     @_silgen_name("proc_listpids")
     private func proc_listpids(_ type: UInt32, _ typeinfo: UInt32, _ buffer: UnsafeMutableRawPointer?, _ buffersize: Int32) -> Int32
 
-// periphery:ignore - Reserved: type parameter kept for API compatibility
-
     @_silgen_name("proc_pidinfo")
-    // periphery:ignore - Reserved: pid parameter kept for API compatibility
     private func proc_pidinfo(_ pid: Int32, _ flavor: Int32, _ arg: UInt64, _ buffer: UnsafeMutableRawPointer?, _ buffersize: Int32) -> Int32
 #endif

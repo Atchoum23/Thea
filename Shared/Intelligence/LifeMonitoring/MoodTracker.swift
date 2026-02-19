@@ -29,7 +29,6 @@ enum MoodTrendDirection: String, Sendable {
     case improving, stable, declining
 }
 
-// periphery:ignore - Reserved: MoodTrendDirection type reserved for future feature activation
 // MARK: - Mood Tracker
 
 @MainActor
@@ -149,17 +148,13 @@ final class MoodTracker {
         recordSample(score: score, source: .userReported)
     }
 
-// periphery:ignore - Reserved: reportMood(score:) instance method reserved for future feature activation
-
     // MARK: - Querying
 
     /// Current mood as a clamped 0...1 value
     var currentMood: Double { currentMoodScore }
 
-    // periphery:ignore - Reserved: currentMood property reserved for future feature activation
     /// Trend over the last N hours (default 6)
     func moodTrend(hours: Int = 6) -> MoodTrendDirection {
-        // periphery:ignore - Reserved: moodTrend(hours:) instance method reserved for future feature activation
         let cutoff = Date().addingTimeInterval(-Double(hours) * 3600)
         let recent = samples.filter { $0.timestamp >= cutoff }
         guard recent.count >= 2 else { return .stable }
@@ -185,7 +180,6 @@ final class MoodTracker {
     }
 
     /// Hourly breakdown for the last N hours
-    // periphery:ignore - Reserved: hourlySamples(hours:) instance method reserved for future feature activation
     func hourlySamples(hours: Int = 24) -> [(hour: Int, average: Double)] {
         let cutoff = Date().addingTimeInterval(-Double(hours) * 3600)
         let recent = samples.filter { $0.timestamp >= cutoff }

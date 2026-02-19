@@ -139,7 +139,6 @@ final class TheaMessagingGateway: ObservableObject {
 
     /// Convenience: send a text reply to the same chat a message came from.
     func reply(to inbound: TheaGatewayMessage, text: String) async throws {
-        // periphery:ignore - Reserved: reply(to:text:) instance method reserved for future feature activation
         let outbound = OutboundMessagingMessage(
             chatId: inbound.chatId,
             content: text,
@@ -150,7 +149,6 @@ final class TheaMessagingGateway: ObservableObject {
 
     // MARK: - Health
 
-    // periphery:ignore - Reserved: healthStatus() instance method reserved for future feature activation
     func healthStatus() -> [String: Any] {
         let connectorList = connectedPlatforms.map(\.rawValue).sorted()
         return [

@@ -16,7 +16,6 @@ enum ProFeature: String, CaseIterable, Sendable {
     // AI Features
     case unlimitedProviders = "Unlimited AI Providers"
     case modelComparison = "Model Comparison Mode"
-    // periphery:ignore - Reserved: logger global var reserved for future feature activation
     case advancedAgents = "Advanced Agent Delegation"
     case customSystemPrompts = "Custom System Prompts"
 
@@ -44,7 +43,6 @@ enum ProFeature: String, CaseIterable, Sendable {
         case .modelComparison: "Compare responses from multiple models side-by-side"
         case .advancedAgents: "Delegate complex tasks to specialized AI agents"
         case .customSystemPrompts: "Customize AI personality and behavior per conversation"
-        // periphery:ignore - Reserved: description property reserved for future feature activation
         case .verificationPipeline: "Verify AI responses with multi-source fact-checking"
         case .smartRouting: "Automatically route queries to the best AI model"
         case .conversationForking: "Branch conversations to explore different directions"
@@ -63,7 +61,6 @@ enum ProFeature: String, CaseIterable, Sendable {
         case .unlimitedProviders: "server.rack"
         case .modelComparison: "rectangle.split.2x1"
         case .advancedAgents: "person.2.circle"
-        // periphery:ignore - Reserved: icon property reserved for future feature activation
         case .customSystemPrompts: "text.bubble"
         case .verificationPipeline: "checkmark.shield"
         case .smartRouting: "arrow.triangle.branch"
@@ -130,7 +127,6 @@ enum SubscriptionTier: String, CaseIterable, Sendable {
         switch self {
         case .free: ""
         case .pro: "PRO"
-        // periphery:ignore - Reserved: badge property reserved for future feature activation
         case .team: "TEAM"
         }
     }
@@ -145,7 +141,6 @@ enum FeatureGate {
     static func isAvailable(_ feature: ProFeature) -> Bool {
         let store = StoreKitService.shared
 
-        // periphery:ignore - Reserved: isAvailable(_:) static method reserved for future feature activation
         // Free features are always available
         if ProFeature.freeFeatures.contains(feature) {
             return true
@@ -185,7 +180,6 @@ enum FeatureGate {
     /// Number of AI providers allowed in the current tier.
     static var maxProviders: Int {
         switch currentTier {
-        // periphery:ignore - Reserved: maxProviders static property reserved for future feature activation
         case .free: 1
         case .pro, .team: .max
         }
@@ -193,7 +187,6 @@ enum FeatureGate {
 
     /// Number of daily messages in the current tier.
     static var dailyMessageLimit: Int {
-        // periphery:ignore - Reserved: dailyMessageLimit static property reserved for future feature activation
         switch currentTier {
         case .free: 50
         case .pro, .team: .max
@@ -201,7 +194,6 @@ enum FeatureGate {
     }
 
     /// Maximum conversation history depth in free tier.
-    // periphery:ignore - Reserved: maxConversationHistory static property reserved for future feature activation
     static var maxConversationHistory: Int {
         switch currentTier {
         case .free: 100

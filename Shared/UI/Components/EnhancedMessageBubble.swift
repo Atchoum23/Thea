@@ -16,7 +16,6 @@ import SwiftUI
 import Highlightr
 import OSLog
 
-// periphery:ignore - Reserved: logger global var reserved for future feature activation
 private let logger = Logger(subsystem: "ai.thea.app", category: "EnhancedMessageBubble")
 #endif
 

@@ -104,12 +104,10 @@ struct PromptLibrary: Codable {
     }
 
     func activePrompts(for scope: PromptScope) -> [CustomPrompt] {
-        // periphery:ignore - Reserved: activePrompts(for:) instance method reserved for future feature activation
         prompts.filter { $0.isActive && ($0.scope == scope || $0.scope == .all) }
             .sorted { $0.priority > $1.priority }
     }
 
-    // periphery:ignore - Reserved: combinedPrompt(for:) instance method reserved for future feature activation
     func combinedPrompt(for scope: PromptScope) -> String {
         activePrompts(for: scope).map(\.content).joined(separator: "\n\n")
     }

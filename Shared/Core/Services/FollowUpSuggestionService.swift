@@ -21,7 +21,6 @@ final class FollowUpSuggestionService: ObservableObject {
     private var totalSelections: Int = 0
     private var totalDismissals: Int = 0
 
-    // periphery:ignore - Reserved: latestSuggestions property reserved for future feature activation
     /// Auto-prompt threshold: after N consecutive acceptances of same pattern, auto-execute
     private var consecutiveAutoAccepts: [String: Int] = [:]
     private let autoPromptThreshold = 5
@@ -30,8 +29,6 @@ final class FollowUpSuggestionService: ObservableObject {
         set { UserDefaults.standard.set(newValue, forKey: "followUp.autoPrompt") }
     }
 
-    // periphery:ignore - Reserved: autoPromptThreshold property reserved for future feature activation
-    // periphery:ignore - Reserved: isAutoPromptEnabled property reserved for future feature activation
     private init() {
         loadState()
     }
@@ -46,10 +43,7 @@ final class FollowUpSuggestionService: ObservableObject {
         taskType: String?,
         modelName: String? = nil
     ) -> [FollowUpSuggestion] {
-        // periphery:ignore - Reserved: query parameter kept for API compatibility
         var suggestions: [FollowUpSuggestion] = []
-
-// periphery:ignore - Reserved: modelName parameter kept for API compatibility
 
         let responseLength = response.count
         let hasCode = response.contains("```")
@@ -185,7 +179,6 @@ final class FollowUpSuggestionService: ObservableObject {
     /// Record that the user dismissed/ignored suggestions.
     func recordDismissal() {
         totalDismissals += 1
-        // periphery:ignore - Reserved: recordDismissal() instance method reserved for future feature activation
         for key in consecutiveAutoAccepts.keys {
             consecutiveAutoAccepts[key] = 0
         }
@@ -194,14 +187,12 @@ final class FollowUpSuggestionService: ObservableObject {
 
     /// Check if a suggestion pattern should auto-execute (user always picks it).
     func shouldAutoPrompt(_ suggestion: FollowUpSuggestion) -> Bool {
-        // periphery:ignore - Reserved: shouldAutoPrompt(_:) instance method reserved for future feature activation
         guard isAutoPromptEnabled else { return false }
         let pattern = patternKey(for: suggestion)
         return (consecutiveAutoAccepts[pattern] ?? 0) >= autoPromptThreshold
     }
 
     /// Acceptance rate (0.0-1.0).
-    // periphery:ignore - Reserved: acceptanceRate property reserved for future feature activation
     var acceptanceRate: Double {
         let total = totalSelections + totalDismissals
         guard total > 0 else { return 0 }

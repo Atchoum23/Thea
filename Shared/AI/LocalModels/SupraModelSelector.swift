@@ -455,17 +455,11 @@ struct SupraModelCandidate: Sendable {
 
 /// Detailed score breakdown for Supra-Model selection
 struct SupraScoreBreakdown: Sendable {
-    // periphery:ignore - Reserved: breakdown property reserved for future feature activation
     let total: Double
     let qualityScore: Double
     let resourceFitScore: Double
     let versatilityScore: Double
     let recencyScore: Double
-    // periphery:ignore - Reserved: qualityScore property reserved for future feature activation
-    // periphery:ignore - Reserved: resourceFitScore property reserved for future feature activation
-    // periphery:ignore - Reserved: versatilityScore property reserved for future feature activation
-    // periphery:ignore - Reserved: recencyScore property reserved for future feature activation
-    // periphery:ignore - Reserved: communityScore property reserved for future feature activation
     let communityScore: Double
     let reason: String
 }

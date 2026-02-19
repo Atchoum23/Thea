@@ -149,7 +149,6 @@ public final class ActiveMemoryRetrieval {
         userMessage: String,
         assistantResponse: String,
         conversationId: UUID,
-        // periphery:ignore - Reserved: wasHelpful parameter kept for API compatibility
         wasHelpful: Bool? = nil
     ) async {
         logger.debug("Learning from exchange")

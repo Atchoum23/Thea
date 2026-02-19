@@ -64,7 +64,6 @@ public class SessionRecordingService: ObservableObject {
     // MARK: - Start Recording
 
     /// Start recording a session
-    // periphery:ignore - Reserved: _sessionId parameter kept for API compatibility
     public func startRecording(sessionId _sessionId: String, width: Int, height: Int) throws -> String {
         guard !isRecording else {
             throw RecordingError.alreadyRecording

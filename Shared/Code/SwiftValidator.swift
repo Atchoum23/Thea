@@ -26,9 +26,7 @@
             isValidating = true
             defer { isValidating = false }
 
-            // periphery:ignore - Reserved: shared static property reserved for future feature activation
             // Create temporary file
-            // periphery:ignore - Reserved: logger property reserved for future feature activation
             let tempDir = FileManager.default.temporaryDirectory
             let tempFile = tempDir.appendingPathComponent("TempSwiftValidation_\(UUID().uuidString).swift")
 
@@ -38,8 +36,6 @@
 
                 // Run swiftc -typecheck
                 let result = try await runSwiftCompiler(on: tempFile)
-
-// periphery:ignore - Reserved: validateSwiftSyntax(_:) instance method reserved for future feature activation
 
                 // Clean up
                 do {
@@ -76,8 +72,6 @@
 
             fullCode += "\n\(code)"
 
-// periphery:ignore - Reserved: validateWithContext(_:imports:framework:) instance method reserved for future feature activation
-
             return try await validateSwiftSyntax(fullCode)
         }
 
@@ -95,7 +89,6 @@
 
             let outputPipe = Pipe()
             let errorPipe = Pipe()
-            // periphery:ignore - Reserved: runSwiftCompiler(on:) instance method reserved for future feature activation
             process.standardOutput = outputPipe
             process.standardError = errorPipe
 
@@ -129,7 +122,6 @@
             }
 
             return errors
-        // periphery:ignore - Reserved: parseSwiftCompilerErrors(_:) instance method reserved for future feature activation
         }
 
         private func parseErrorLine(_ line: String) -> SwiftError? {
@@ -142,7 +134,6 @@
                 return nil
             }
 
-            // periphery:ignore - Reserved: parseErrorLine(_:) instance method reserved for future feature activation
             let lineNumber = Int(match.2) ?? 0
             let column = Int(match.3) ?? 0
             let severityString = String(match.4)
@@ -182,8 +173,6 @@
             {
                 return .syntax
             }
-
-// periphery:ignore - Reserved: categorizeError(_:) instance method reserved for future feature activation
 
             // Type errors
             if lowercased.contains("type") || lowercased.contains("cannot convert") ||
@@ -227,7 +216,6 @@
                 if lowercased.contains("expected '}'") {
                     return "Add missing closing brace '}'"
                 }
-                // periphery:ignore - Reserved: generateSuggestion(for:category:) instance method reserved for future feature activation
                 if lowercased.contains("expected ')'") {
                     return "Add missing closing parenthesis ')'"
                 }
@@ -278,7 +266,6 @@
             let openBraces = code.count { $0 == "{" }
             let closeBraces = code.count { $0 == "}" }
             if openBraces != closeBraces {
-                // periphery:ignore - Reserved: quickValidate(_:) instance method reserved for future feature activation
                 issues.append("Mismatched braces: \(openBraces) '{' vs \(closeBraces) '}'")
             }
 
@@ -318,7 +305,6 @@
 
             if let match = text.firstMatch(of: pattern) {
                 return String(match.1)
-            // periphery:ignore - Reserved: extractSwiftCode(from:) instance method reserved for future feature activation
             }
 
             return nil
@@ -330,7 +316,6 @@
             var blocks: [String] = []
 
             for match in text.matches(of: pattern) {
-                // periphery:ignore - Reserved: extractAllSwiftCode(from:) instance method reserved for future feature activation
                 blocks.append(String(match.1))
             }
 
@@ -345,17 +330,13 @@
         case failure(errors: [SwiftError])
 
         var isSuccess: Bool {
-            // periphery:ignore - Reserved: success case reserved for future feature activation
-            // periphery:ignore - Reserved: failure(errors:) case reserved for future feature activation
             if case .success = self {
-                // periphery:ignore - Reserved: isSuccess property reserved for future feature activation
                 return true
             }
             return false
         }
 
         var errors: [SwiftError] {
-            // periphery:ignore - Reserved: errors property reserved for future feature activation
             if case let .failure(errors) = self {
                 return errors
             }
@@ -406,7 +387,6 @@
         }
     }
 
-    // periphery:ignore - Reserved: QuickValidationResult type reserved for future feature activation
     struct QuickValidationResult {
         let isLikelyValid: Bool
         let issues: [String]

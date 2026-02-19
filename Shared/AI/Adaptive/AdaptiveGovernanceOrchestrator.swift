@@ -139,8 +139,6 @@ public actor AdaptiveGovernanceOrchestrator {
     private var consecutiveFailures: Int = 0
     private var lastCycleTimestamp: Date?
 
-// periphery:ignore - Reserved: lastCycleTimestamp property reserved for future feature activation
-
     /// History for analysis
     private var cycleHistory: [GovernanceCycleMetrics] = []
     private let maxHistorySize = 100
@@ -303,7 +301,6 @@ public actor AdaptiveGovernanceOrchestrator {
 
     /// Record feedback event
     @MainActor
-    // periphery:ignore - Reserved: context parameter kept for API compatibility
     public func recordFeedback(source: FeedbackSource, value: Double, context: GovernanceFeedbackContext) {
         // Record to hyperparameter tuner based on source type
         let id: HyperparameterID

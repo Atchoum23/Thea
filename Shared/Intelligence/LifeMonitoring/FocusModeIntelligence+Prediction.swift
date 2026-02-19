@@ -18,12 +18,10 @@ extension FocusModeIntelligence {
         let confidence: Double
         let signals: [PredictionSignal]
         let suggestedTime: Date?
-    // periphery:ignore - Reserved: suggestedTime property reserved for future feature activation
     }
 
     /// A single signal contributing to a Focus Mode prediction.
     public struct PredictionSignal: Sendable {
-        // periphery:ignore - Reserved: source property reserved for future feature activation
         let source: String
         let confidence: Double
         let suggestedMode: String?

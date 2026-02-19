@@ -9,7 +9,6 @@ struct WebClipperView: View {
     @State private var urlInput = ""
     @State private var searchQuery = ""
     @State private var selectedArticle: ClippedArticle?
-    // periphery:ignore - Reserved: showExportSheet property reserved for future feature activation
     @State private var showExportSheet = false
 
     var body: some View {

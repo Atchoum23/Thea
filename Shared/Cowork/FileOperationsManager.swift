@@ -47,7 +47,6 @@
             }
         }
 
-        // periphery:ignore - Reserved: readFile(at:) instance method reserved for future feature activation
         func readTextFile(at url: URL, encoding: String.Encoding = .utf8) throws -> String {
             let data = try readFile(at: url)
             guard let text = String(data: data, encoding: encoding) else {
@@ -62,7 +61,6 @@
                 throw OperationError.accessDenied(reason)
             }
 
-            // periphery:ignore - Reserved: readTextFile(at:encoding:) instance method reserved for future feature activation
             var isDirectory: ObjCBool = false
             guard fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory),
                   isDirectory.boolValue
@@ -93,7 +91,6 @@
                     createdAt: attrs[.creationDate] as? Date,
                     modifiedAt: attrs[.modificationDate] as? Date,
                     isDirectory: (attrs[.type] as? FileAttributeType) == .typeDirectory,
-                    // periphery:ignore - Reserved: getFileAttributes(at:) instance method reserved for future feature activation
                     isReadOnly: !fileManager.isWritableFile(atPath: url.path)
                 )
             }
@@ -113,7 +110,6 @@
 
             try folderAccess.withAccess(to: url.deletingLastPathComponent()) {
                 try data.write(to: url, options: .atomic)
-            // periphery:ignore - Reserved: writeFile(data:to:overwrite:) instance method reserved for future feature activation
             }
         }
 
@@ -128,15 +124,12 @@
             let validation = folderAccess.validateOperation(.createDirectory, at: url.deletingLastPathComponent())
             if case let .denied(reason) = validation {
                 throw OperationError.accessDenied(reason)
-            // periphery:ignore - Reserved: writeTextFile(_:to:encoding:overwrite:) instance method reserved for future feature activation
             }
 
             try folderAccess.withAccess(to: url.deletingLastPathComponent()) {
                 try fileManager.createDirectory(at: url, withIntermediateDirectories: withIntermediates)
             }
         }
-
-// periphery:ignore - Reserved: createDirectory(at:withIntermediates:) instance method reserved for future feature activation
 
         // MARK: - Modify Operations
 
@@ -149,7 +142,6 @@
 
             // Check destination write access
             validation = folderAccess.validateOperation(.write, at: destination)
-            // periphery:ignore - Reserved: moveFile(from:to:overwrite:) instance method reserved for future feature activation
             if case let .denied(reason) = validation {
                 throw OperationError.accessDenied(reason)
             }
@@ -186,7 +178,6 @@
             }
 
             // Check destination write access
-            // periphery:ignore - Reserved: copyFile(from:to:overwrite:) instance method reserved for future feature activation
             validation = folderAccess.validateOperation(.write, at: destination)
             if case let .denied(reason) = validation {
                 throw OperationError.accessDenied(reason)
@@ -217,14 +208,12 @@
 
         // MARK: - Delete Operations
 
-        // periphery:ignore - Reserved: renameFile(at:to:) instance method reserved for future feature activation
         func deleteFile(at url: URL, moveToTrash: Bool = true) throws {
             let validation = folderAccess.validateOperation(.delete, at: url)
             if case let .denied(reason) = validation {
                 throw OperationError.accessDenied(reason)
             }
 
-            // periphery:ignore - Reserved: deleteFile(at:moveToTrash:) instance method reserved for future feature activation
             guard fileManager.fileExists(atPath: url.path) else {
                 throw OperationError.fileNotFound(url)
             }
@@ -245,7 +234,6 @@
 
             for file in files {
                 let destination = directory.appendingPathComponent(file.lastPathComponent)
-                // periphery:ignore - Reserved: batchCopy(files:to:overwrite:) instance method reserved for future feature activation
                 try copyFile(from: file, to: destination, overwrite: overwrite)
                 copiedFiles.append(destination)
             }
@@ -257,7 +245,6 @@
             var movedFiles: [URL] = []
 
             for file in files {
-                // periphery:ignore - Reserved: batchMove(files:to:overwrite:) instance method reserved for future feature activation
                 let destination = directory.appendingPathComponent(file.lastPathComponent)
                 try moveFile(from: file, to: destination, overwrite: overwrite)
                 movedFiles.append(destination)
@@ -269,7 +256,6 @@
         func batchDelete(files: [URL], moveToTrash: Bool = true) throws {
             for file in files {
                 try deleteFile(at: file, moveToTrash: moveToTrash)
-            // periphery:ignore - Reserved: batchDelete(files:moveToTrash:) instance method reserved for future feature activation
             }
         }
 
@@ -277,7 +263,6 @@
 
         func searchFiles(
             in directory: URL,
-            // periphery:ignore - Reserved: searchFiles(in:matching:recursive:caseSensitive:) instance method reserved for future feature activation
             matching pattern: String,
             recursive: Bool = true,
             caseSensitive: Bool = false
@@ -312,7 +297,6 @@
         }
 
         func findFiles(
-            // periphery:ignore - Reserved: findFiles(in:withExtensions:recursive:) instance method reserved for future feature activation
             in directory: URL,
             withExtensions extensions: [String],
             recursive: Bool = true
@@ -345,7 +329,6 @@
 
     // MARK: - Supporting Types
 
-    // periphery:ignore - Reserved: FileAttributes type reserved for future feature activation
     struct FileAttributes {
         let size: Int64
         let createdAt: Date?

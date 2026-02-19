@@ -473,8 +473,6 @@ actor DataAnonymizer {
         var result = content
         var mapping: [String: String] = [:]
 
-// periphery:ignore - Reserved: type parameter kept for API compatibility
-
         // Simple name pseudonymization
         let namePatterns = [
             #"(?<=from |to |by |with |for |sent by |cc: |bcc: )[A-Z][a-z]+ [A-Z][a-z]+"#,
@@ -538,8 +536,6 @@ actor DataAnonymizer {
     private func generalize(_ content: String, type: PrivateDataType, level: PrivacyPreservingAIRouter.Configuration.AnonymizationLevel) -> String {
         var result = content
 
-// periphery:ignore - Reserved: level parameter kept for API compatibility
-
         switch type {
         case .address:
             // Replace full address with just city
@@ -563,13 +559,11 @@ actor DataAnonymizer {
     }
 
     private func aggregate(_ content: String, type: PrivateDataType) -> String {
-        // periphery:ignore - Reserved: type parameter kept for API compatibility
         // Convert individual values to aggregates
         // This is simplified - real implementation would collect and aggregate
         content
     }
 
-    // periphery:ignore - Reserved: level parameter kept for API compatibility
     private func blurLocation(_ content: String, level: PrivacyPreservingAIRouter.Configuration.AnonymizationLevel) -> String {
         var result = content
 

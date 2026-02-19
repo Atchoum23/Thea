@@ -56,7 +56,6 @@ public actor UnifiedContextSync {
 
     private var isSyncing = false
     private var lastSyncTime: Date?
-    // periphery:ignore - Reserved: lastSyncTime property reserved for future feature activation
     private var syncTimer: Task<Void, Never>?
 
     // MARK: - Initialization
@@ -294,7 +293,6 @@ public actor UnifiedContextSync {
 
     // MARK: - Token Management
 
-    // periphery:ignore - Reserved: loadServerChangeToken() instance method reserved for future feature activation
     nonisolated private func loadServerChangeToken() -> CKServerChangeToken? {
         guard let data = UserDefaults.standard.data(forKey: tokenKey) else {
             return nil

@@ -15,11 +15,9 @@ import AppKit
 
 private let imsgLogger = Logger(subsystem: "ai.thea.app", category: "iMessageChannel")
 
-// periphery:ignore - Reserved: imsgLogger global var reserved for future feature activation
 /// Native iMessage/SMS channel — no third-party dependency.
 @MainActor
 final class iMessageChannel: ObservableObject { // swiftlint:disable:this type_name
-    // periphery:ignore - Reserved: iMessageChannel type reserved for future feature activation
     static let shared = iMessageChannel()
 
     // MARK: - Published State
@@ -200,7 +198,6 @@ final class iMessageChannel: ObservableObject { // swiftlint:disable:this type_n
 
 // MARK: - Contact Model
 
-// periphery:ignore - Reserved: iMessageContact type reserved for future feature activation
 struct iMessageContact: Codable, Sendable, Identifiable { // swiftlint:disable:this type_name
     let id: UUID
     let identifier: String

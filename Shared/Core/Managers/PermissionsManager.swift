@@ -62,7 +62,6 @@ final class PermissionsManager {
     private(set) var isRefreshing = false
 
     /// Last refresh date
-    // periphery:ignore - Reserved: hasCompletedOnboarding property reserved for future feature activation
     private(set) var lastRefreshDate: Date?
 
     // Legacy permission states (for backward compatibility)
@@ -258,7 +257,6 @@ final class PermissionsManager {
 
         #if os(macOS)
             await requestFullDiskAccess()
-        // periphery:ignore - Reserved: requestAllPermissions() instance method reserved for future feature activation
         #endif
 
         hasCompletedOnboarding = true
@@ -277,7 +275,6 @@ final class PermissionsManager {
         speechRecognitionStatus = convertSpeechStatus(status)
     }
 
-    // periphery:ignore - Reserved: requestSpeechRecognition() instance method reserved for future feature activation
     func requestMicrophone() async {
         #if !os(macOS)
             let granted = await AVAudioApplication.requestRecordPermission()
@@ -287,7 +284,6 @@ final class PermissionsManager {
         #endif
     }
 
-    // periphery:ignore - Reserved: requestMicrophone() instance method reserved for future feature activation
     func requestNotifications() async {
         do {
             let granted = try await UNUserNotificationCenter.current().requestAuthorization(
@@ -296,7 +292,6 @@ final class PermissionsManager {
             notificationsStatus = granted ? .authorized : .denied
         } catch {
             notificationsStatus = .denied
-        // periphery:ignore - Reserved: requestNotifications() instance method reserved for future feature activation
         }
     }
 
@@ -307,7 +302,6 @@ final class PermissionsManager {
                 let granted = try await store.requestAccess(for: .contacts)
                 contactsStatus = granted ? .authorized : .denied
             } catch {
-                // periphery:ignore - Reserved: requestContacts() instance method reserved for future feature activation
                 contactsStatus = .denied
             }
         #endif
@@ -319,7 +313,6 @@ final class PermissionsManager {
             let granted = try await store.requestFullAccessToEvents()
             calendarStatus = granted ? .authorized : .denied
         } catch {
-            // periphery:ignore - Reserved: requestCalendar() instance method reserved for future feature activation
             calendarStatus = .denied
         }
     }
@@ -329,21 +322,18 @@ final class PermissionsManager {
             let status = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
             photosStatus = convertPhotoStatus(status)
         #endif
-    // periphery:ignore - Reserved: requestPhotos() instance method reserved for future feature activation
     }
 
     func requestLocation() async {
         #if os(iOS)
             let manager = CLLocationManager()
             manager.requestWhenInUseAuthorization()
-        // periphery:ignore - Reserved: requestLocation() instance method reserved for future feature activation
         #endif
     }
 
     func requestFullDiskAccess() async {
         #if os(macOS)
             fullDiskAccessStatus = checkFullDiskAccess()
-        // periphery:ignore - Reserved: requestFullDiskAccess() instance method reserved for future feature activation
         #endif
     }
 
@@ -415,7 +405,6 @@ final class PermissionsManager {
 
     private func convertLocationStatus(_ status: CLAuthorizationStatus) -> PermissionStatus {
         switch status {
-        // periphery:ignore - Reserved: convertLocationStatus(_:) instance method reserved for future feature activation
         case .authorizedAlways, .authorizedWhenInUse: return .authorized
         case .denied: return .denied
         case .notDetermined: return .notDetermined
@@ -457,13 +446,11 @@ final class PermissionsManager {
     // MARK: - Computed Properties
 
     var allPermissionsGranted: Bool {
-        // periphery:ignore - Reserved: allPermissionsGranted property reserved for future feature activation
         speechRecognitionStatus == .authorized &&
             microphoneStatus == .authorized &&
             notificationsStatus == .authorized
     }
 
-    // periphery:ignore - Reserved: criticalPermissionsDenied property reserved for future feature activation
     var criticalPermissionsDenied: [String] {
         var denied: [String] = []
 

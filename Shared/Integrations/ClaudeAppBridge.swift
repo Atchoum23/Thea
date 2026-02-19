@@ -29,7 +29,6 @@ import Foundation
         // MARK: - Constants
 
         private let claudeBundleId = "com.anthropic.claudefordesktop"
-        // periphery:ignore - Reserved: claudeAppName property reserved for future feature activation
         private let claudeAppName = "Claude"
 
         // MARK: - Initialization

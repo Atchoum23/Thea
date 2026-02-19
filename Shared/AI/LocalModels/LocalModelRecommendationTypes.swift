@@ -33,14 +33,8 @@ struct DiscoveredModel: Identifiable, Sendable {
     let source: LocalModelSource
     let author: String
     let description: String?
-    // periphery:ignore - Reserved: source property reserved for future feature activation
-    // periphery:ignore - Reserved: path property reserved for future feature activation
     let downloads: Int
-    // periphery:ignore - Reserved: quantization property reserved for future feature activation
-    // periphery:ignore - Reserved: capabilities property reserved for future feature activation
-    // periphery:ignore - Reserved: installedDate property reserved for future feature activation
     let likes: Int
-    // periphery:ignore - Reserved: formattedSize property reserved for future feature activation
     let estimatedSizeGB: Double
     let quantization: String?
     let capabilities: [LocalModelCapability]
@@ -51,19 +45,9 @@ struct DiscoveredModel: Identifiable, Sendable {
 
 // MARK: - Model Recommendation
 
-// periphery:ignore - Reserved: source property reserved for future feature activation
-
-// periphery:ignore - Reserved: author property reserved for future feature activation
-
-// periphery:ignore - Reserved: description property reserved for future feature activation
-
-// periphery:ignore - Reserved: likes property reserved for future feature activation
 struct ModelRecommendation: Identifiable, Sendable {
-    // periphery:ignore - Reserved: quantization property reserved for future feature activation
     var id: String { model.id }
     let model: DiscoveredModel
-    // periphery:ignore - Reserved: lastUpdated property reserved for future feature activation
-    // periphery:ignore - Reserved: downloadURL property reserved for future feature activation
     let score: Double
     let reasons: [String]
     let priority: RecommendationPriority
@@ -91,7 +75,6 @@ struct UserUsageProfile: Codable, Sendable {
 
         // Normalize to percentages
         for (key, value) in taskDistribution {
-            // periphery:ignore - Reserved: recordTask(_:) instance method reserved for future feature activation
             taskDistribution[key] = value / Double(totalTasks)
         }
 
@@ -111,22 +94,11 @@ struct SystemCapabilities: Sendable {
     let recommendedMaxModelGB: Double
 }
 
-// periphery:ignore - Reserved: hasGPU property reserved for future feature activation
-
-// periphery:ignore - Reserved: isAppleSilicon property reserved for future feature activation
-
-// periphery:ignore - Reserved: gpuCores property reserved for future feature activation
-
-// periphery:ignore - Reserved: neuralEngineTOPS property reserved for future feature activation
-
-// periphery:ignore - Reserved: recommendedMaxModelGB property reserved for future feature activation
-
 // MARK: - System Hardware Profile
 
 struct SystemHardwareProfile: Sendable {
     let totalMemoryGB: Double
     let cpuCores: Int
-    // periphery:ignore - Reserved: cpuCores property reserved for future feature activation
     let chipType: AppleSiliconChip
     let gpuCores: Int
     let neuralEngineCapability: NeuralEngineCapability
@@ -240,7 +212,6 @@ enum LocalThermalState: String, Codable, Sendable {
 
 // MARK: - System Capability Summary
 
-// periphery:ignore - Reserved: SystemCapabilitySummary type reserved for future feature activation
 struct SystemCapabilitySummary: Sendable {
     let tierName: String
     let maxModelSize: String

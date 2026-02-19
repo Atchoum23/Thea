@@ -27,7 +27,6 @@ final class KnowledgeManager {
         isIndexing = true
         indexProgress = 0.0
 
-        // periphery:ignore - Reserved: startIndexing(paths:) instance method reserved for future feature activation
         let total = paths.count
         for (index, path) in paths.enumerated() {
             try await indexFile(at: path)
@@ -40,8 +39,6 @@ final class KnowledgeManager {
     func indexFile(at url: URL) async throws {
         let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
         let size = (attributes[.size] as? Int64) ?? 0
-
-// periphery:ignore - Reserved: indexFile(at:) instance method reserved for future feature activation
 
         let file = IndexedFile(
             id: UUID(),
@@ -58,13 +55,11 @@ final class KnowledgeManager {
 
     func removeFile(_ file: IndexedFile) {
         modelContext?.delete(file)
-        // periphery:ignore - Reserved: removeFile(_:) instance method reserved for future feature activation
         do { try modelContext?.save() } catch { knowledgeLogger.error("Failed to save after removing file: \(error.localizedDescription)") }
         indexedFiles.removeAll { $0.id == file.id }
     }
 
     func clearAllData() {
-        // periphery:ignore - Reserved: clearAllData() instance method reserved for future feature activation
         guard let context = modelContext else { return }
 
         for file in indexedFiles {
@@ -77,7 +72,6 @@ final class KnowledgeManager {
         indexProgress = 0.0
     }
 
-    // periphery:ignore - Reserved: search(query:) instance method reserved for future feature activation
     func search(query: String) -> [IndexedFile] {
         indexedFiles.filter { $0.name.localizedCaseInsensitiveContains(query) }
     }

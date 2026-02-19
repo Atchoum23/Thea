@@ -21,7 +21,6 @@ struct LiquidGlassModifier: ViewModifier {
             content
                 .background(.ultraThinMaterial)
                 .clipShape(Capsule())
-        // periphery:ignore - Reserved: LiquidGlassModifier type reserved for future feature activation
         }
     }
 }
@@ -55,7 +54,6 @@ struct CircularGlassModifier: ViewModifier {
                 .background(.ultraThinMaterial)
                 .clipShape(Circle())
         }
-    // periphery:ignore - Reserved: CircularGlassModifier type reserved for future feature activation
     }
 }
 
@@ -70,7 +68,6 @@ struct SimpleGlassCardModifier: ViewModifier {
         if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
             content
                 .padding(padding)
-                // periphery:ignore - Reserved: SimpleGlassCardModifier type reserved for future feature activation
                 .glassEffect(.regular, in: .rect(cornerRadius: innerRadius))
         } else {
             content
@@ -91,7 +88,6 @@ struct SoftEdgeModifier: ViewModifier {
         } else {
             content
         }
-    // periphery:ignore - Reserved: SoftEdgeModifier type reserved for future feature activation
     }
 }
 
@@ -106,7 +102,6 @@ extension View {
     /// Applies Liquid Glass effect with rounded rectangle shape
     func liquidGlassRounded(cornerRadius: CGFloat = TheaCornerRadius.lg) -> some View {
         modifier(RoundedGlassModifier(cornerRadius: cornerRadius))
-    // periphery:ignore - Reserved: liquidGlass(interactive:) instance method reserved for future feature activation
     }
 
     /// Applies Liquid Glass effect with circular shape
@@ -116,12 +111,10 @@ extension View {
 
     /// Applies Liquid Glass to a card with concentric radius
     func liquidGlassCard(
-        // periphery:ignore - Reserved: liquidGlassCircle() instance method reserved for future feature activation
         cornerRadius: CGFloat = TheaCornerRadius.card,
         padding: CGFloat = TheaSpacing.lg
     ) -> some View {
         modifier(SimpleGlassCardModifier(cornerRadius: cornerRadius, padding: padding))
-    // periphery:ignore - Reserved: liquidGlassCard(cornerRadius:padding:) instance method reserved for future feature activation
     }
 
     /// Applies soft scroll-edge effects replacing hard dividers
@@ -129,21 +122,17 @@ extension View {
         modifier(SoftEdgeModifier())
     }
 
-    // periphery:ignore - Reserved: softEdges() instance method reserved for future feature activation
     /// Conditionally applies tint to Liquid Glass
     @ViewBuilder
     func liquidGlassTint(_ color: Color) -> some View {
         self.tint(color)
     }
-// periphery:ignore - Reserved: liquidGlassTint(_:) instance method reserved for future feature activation
 }
 
 // MARK: - Glass Effect Container
 
 struct GlassContainer<Content: View>: View {
     let content: () -> Content
-
-// periphery:ignore - Reserved: GlassContainer type reserved for future feature activation
 
     init(@ViewBuilder content: @escaping () -> Content) {
         self.content = content
@@ -163,7 +152,6 @@ struct GlassContainer<Content: View>: View {
 // MARK: - Adaptive Toolbar Style
 
 struct AdaptiveToolbarStyle: ViewModifier {
-    // periphery:ignore - Reserved: AdaptiveToolbarStyle type reserved for future feature activation
     func body(content: Content) -> some View {
         #if os(iOS)
         if #available(iOS 18.0, *) {
@@ -179,7 +167,6 @@ struct AdaptiveToolbarStyle: ViewModifier {
 }
 
 extension View {
-    // periphery:ignore - Reserved: adaptiveToolbar() instance method reserved for future feature activation
     func adaptiveToolbar() -> some View {
         modifier(AdaptiveToolbarStyle())
     }

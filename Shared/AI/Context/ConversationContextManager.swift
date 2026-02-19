@@ -21,7 +21,6 @@ struct ContextBlock: Identifiable, Codable, Sendable {
         id: UUID = UUID(),
         content: String,
         source: ContextSource,
-        // periphery:ignore - Reserved: init(id:content:source:timestamp:relevanceScore:tokenCount:isActive:) initializer reserved for future feature activation
         timestamp: Date = Date(),
         relevanceScore: Double = 1.0,
         tokenCount: Int? = nil,
@@ -39,7 +38,6 @@ struct ContextBlock: Identifiable, Codable, Sendable {
     private static func estimateTokenCount(_ text: String) -> Int {
         // Rough estimate: ~4 characters per token for English
         // Adjust for different languages/scripts
-        // periphery:ignore - Reserved: estimateTokenCount(_:) static method reserved for future feature activation
         max(1, text.count / 4)
     }
 }
@@ -59,7 +57,6 @@ enum ContextSource: String, Codable, Sendable {
 /// Managed conversation context container for the context manager
 struct ManagedConversationContext: Codable, Sendable {
     var conversationId: UUID
-    // periphery:ignore - Reserved: ManagedConversationContext type reserved for future feature activation
     var blocks: [ContextBlock]
     var totalTokens: Int
     var createdAt: Date
@@ -109,7 +106,6 @@ struct ManagedConversationContext: Codable, Sendable {
 /// Actor-based conversation context manager for thread-safe operations
 /// Manages conversation-specific context with relevance scoring and pruning
 actor ConversationContextManager {
-    // periphery:ignore - Reserved: ConversationContextManager type reserved for future feature activation
     static let shared = ConversationContextManager()
 
     // Storage
@@ -559,7 +555,6 @@ actor ConversationContextManager {
 // MARK: - Context Message Type
 
 /// Lightweight message DTO for context formatting
-// periphery:ignore - Reserved: ContextMessage type reserved for future feature activation
 struct ContextMessage: Codable, Sendable {
     enum Role: String, Codable, Sendable {
         case system

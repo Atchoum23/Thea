@@ -4,7 +4,6 @@
 enum MessageAction {
     case copy
     case copyAsMarkdown
-    // periphery:ignore - Reserved: copyAsMarkdown case reserved for future feature activation
     case edit
     case regenerate
     case rewrite(RewriteStyle)
@@ -26,7 +25,6 @@ enum MessageAction {
         case moreFormal
         case moreCasual
 
-        // periphery:ignore - Reserved: label property reserved for future feature activation
         var label: String {
             switch self {
             case .shorter: "Shorter"

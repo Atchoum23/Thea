@@ -34,13 +34,9 @@ protocol PrivacyPolicy: Sendable {
     /// Keywords that trigger blocking (case-insensitive)
     var blockedKeywords: Set<String> { get }
 
-// periphery:ignore - Reserved: allowCodeSnippets property reserved for future feature activation
-
     /// Topic allowlist — if non-nil, only these topics may be discussed
-    // periphery:ignore - Reserved: allowHealthData property reserved for future feature activation
     var allowedTopics: Set<String>? { get }
 
-    // periphery:ignore - Reserved: allowFinancialData property reserved for future feature activation
     /// Maximum outbound message length (0 = unlimited)
     var maxContentLength: Int { get }
 }
@@ -95,8 +91,6 @@ enum SanitizationOutcome: Sendable {
     }
 }
 
-// periphery:ignore - Reserved: isAllowed property reserved for future feature activation
-
 // MARK: - Redaction Record
 
 struct Redaction: Sendable {
@@ -106,10 +100,6 @@ struct Redaction: Sendable {
     let reason: String
 }
 
-// periphery:ignore - Reserved: type property reserved for future feature activation
-// periphery:ignore - Reserved: originalLength property reserved for future feature activation
-// periphery:ignore - Reserved: replacement property reserved for future feature activation
-// periphery:ignore - Reserved: reason property reserved for future feature activation
 enum RedactionType: String, Codable, Sendable {
     case pii           // Personal identifiable information
     case apiKey         // API keys, tokens, secrets
@@ -131,11 +121,8 @@ struct PrivacyAuditEntry: Sendable, Identifiable {
     let channel: String
     let policyName: String
     let outcome: AuditOutcome
-    // periphery:ignore - Reserved: policyName property reserved for future feature activation
     let redactionCount: Int
     let originalLength: Int
-    // periphery:ignore - Reserved: originalLength property reserved for future feature activation
-    // periphery:ignore - Reserved: sanitizedLength property reserved for future feature activation
     let sanitizedLength: Int
 
     enum AuditOutcome: String, Codable, Sendable {

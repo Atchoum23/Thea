@@ -345,7 +345,6 @@ actor TheaDownloadManager {
         var lastCheck = Date()
         var lastBytes: Int64 = 0
 
-        // periphery:ignore - Reserved: session parameter kept for API compatibility
         while !Task.isCancelled {
             do {
                 try await Task.sleep(nanoseconds: 500_000_000) // 0.5s
@@ -448,15 +447,11 @@ actor TheaDownloadManager {
         downloads.filter { $0.status == .downloading }
     }
 
-// periphery:ignore - Reserved: getActiveDownloads() instance method reserved for future feature activation
-
     func getDownloadsByCategory(_ category: DownloadCategory) -> [DownloadItem] {
         downloads.filter { $0.category == category }
-    // periphery:ignore - Reserved: getDownloadsByCategory(_:) instance method reserved for future feature activation
     }
 
     func getDownloadsByStatus(_ status: DLStatus) -> [DownloadItem] {
-        // periphery:ignore - Reserved: getDownloadsByStatus(_:) instance method reserved for future feature activation
         downloads.filter { $0.status == status }
     }
 
@@ -470,7 +465,6 @@ actor TheaDownloadManager {
         )
     }
 
-    // periphery:ignore - Reserved: search(_:) instance method reserved for future feature activation
     func search(_ query: String) -> [DownloadItem] {
         let lowered = query.lowercased()
         return downloads.filter {

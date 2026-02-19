@@ -191,7 +191,6 @@ public actor AutomatableSuggestionEngine {
     private var executedSuggestions: [AutomatableSuggestion] = []
     private var suggestionPatterns: [SuggestionPattern] = []
     private var actionRegistry: [UUID: SuggestionAction] = [:] // Store actions by ID for reverse lookups
-    // periphery:ignore - Reserved: suggestionPatterns property reserved for future feature activation
     private var isRunning = false
 
     private let consentManager = UserConsentManager.shared
@@ -468,12 +467,10 @@ public actor AutomatableSuggestionEngine {
     }
 
     private func learnFromDismissal(_ suggestion: AutomatableSuggestion) async {
-        // periphery:ignore - Reserved: suggestion parameter kept for API compatibility
         // Learn what types of suggestions users don't want
         // Could reduce frequency of similar suggestions
     }
 
-    // periphery:ignore - Reserved: suggestion parameter kept for API compatibility
     private func learnFromFeedback(_ suggestion: AutomatableSuggestion, feedback: AutomatableSuggestion.UserFeedback) async {
         // Adjust future suggestion generation based on feedback
         if !feedback.wasHelpful && !feedback.shouldRepeat {

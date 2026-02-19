@@ -12,7 +12,6 @@ public actor IncomeService: IncomeServiceProtocol {
 
     // MARK: - Initialization
 
-    // periphery:ignore - Reserved: gigIntegration property reserved for future feature activation
     public init(gigIntegration: GigPlatformIntegration = GigPlatformIntegration()) {
         self.gigIntegration = gigIntegration
     }
@@ -194,25 +193,21 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
     private func syncUpwork(apiKey _: String) async throws -> [IncomeEntry] {
         // Would call Upwork API
         // GET /api/profiles/v2/search/jobs.json
-        // periphery:ignore - Reserved: syncUpwork(apiKey:) instance method reserved for future feature activation
         []
     }
 
     private func syncFiverr(apiKey _: String) async throws -> [IncomeEntry] {
         // Would call Fiverr API
-        // periphery:ignore - Reserved: syncFiverr(apiKey:) instance method reserved for future feature activation
         // GET /sellers/{username}/gigs
         []
     }
 
     private func syncUber(apiKey _: String) async throws -> [IncomeEntry] {
-        // periphery:ignore - Reserved: syncUber(apiKey:) instance method reserved for future feature activation
         // Would call Uber Driver API
         // GET /v1/partners/trips
         []
     }
 
-    // periphery:ignore - Reserved: syncDoorDash(apiKey:) instance method reserved for future feature activation
     private func syncDoorDash(apiKey _: String) async throws -> [IncomeEntry] {
         // Would call DoorDash API
         // GET /drive/v2/deliveries

@@ -11,7 +11,6 @@ import Foundation
 import Observation
 import os.log
 
-// periphery:ignore - Reserved: userModelLogger global var reserved for future feature activation
 private let userModelLogger = Logger(subsystem: "ai.thea.app", category: "UserModelBuilder")
 
 // MARK: - User Profile

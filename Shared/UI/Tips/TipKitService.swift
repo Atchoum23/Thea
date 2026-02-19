@@ -90,7 +90,6 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
 
         var message: Text? {
             Text("Hold the microphone button to speak to Thea hands-free.")
-        // periphery:ignore - Reserved: hasUsedVoice static property reserved for future feature activation
         }
 
         var image: Image? {
@@ -156,7 +155,6 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
 
         var message: Text? {
             Text("Start a SharePlay session to brainstorm with friends using Thea together.")
-        // periphery:ignore - Reserved: SharePlayTip type reserved for future feature activation
         }
 
         var image: Image? {
@@ -175,7 +173,6 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
         }
 
         var message: Text? {
-            // periphery:ignore - Reserved: WidgetTip type reserved for future feature activation
             Text("Quick access to Thea from your Home Screen or Lock Screen.")
         }
 
@@ -194,7 +191,6 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
             Text("Automate with Shortcuts")
         }
 
-        // periphery:ignore - Reserved: ShortcutsTip type reserved for future feature activation
         var message: Text? {
             Text("Use Thea actions in Shortcuts to automate your workflow.")
         }
@@ -211,7 +207,6 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
 
         var title: Text {
             Text("Focus Mode Integration")
-        // periphery:ignore - Reserved: hasFocusModeEnabled static property reserved for future feature activation
         }
 
         var message: Text? {
@@ -235,7 +230,6 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
         static var isAdvancedUser: Bool = false
 
         var title: Text {
-            // periphery:ignore - Reserved: isAdvancedUser static property reserved for future feature activation
             Text("Extend with MCP Servers")
         }
 
@@ -255,7 +249,6 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
     @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
     struct LocalModelTip: Tip {
         var title: Text {
-            // periphery:ignore - Reserved: LocalModelTip type reserved for future feature activation
             Text("On-Device AI Models")
         }
 
@@ -299,7 +292,6 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
     #if os(macOS)
         @available(macOS 14.0, *)
         struct MenuBarTip: Tip {
-            // periphery:ignore - Reserved: MenuBarTip type reserved for future feature activation
             var title: Text {
                 Text("Quick Access Menu")
             }
@@ -314,7 +306,6 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "TipKitService")
         }
 
         @available(macOS 14.0, *)
-        // periphery:ignore - Reserved: TerminalIntegrationTip type reserved for future feature activation
         struct TerminalIntegrationTip: Tip {
             var title: Text {
                 Text("Terminal Integration")

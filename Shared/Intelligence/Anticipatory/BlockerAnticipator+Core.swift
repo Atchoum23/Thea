@@ -320,7 +320,6 @@ public final class BlockerAnticipator {
         }
     }
 
-    // periphery:ignore - Reserved: signals parameter kept for API compatibility
     private func generateInterventions(for blocker: DetectedBlocker, signals: [BlockerSignal]) -> [BlockerAnalysis.Intervention] {
         var interventions: [BlockerAnalysis.Intervention] = []
 

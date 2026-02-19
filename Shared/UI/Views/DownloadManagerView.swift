@@ -16,8 +16,6 @@ struct DownloadManagerView: View {
     @State private var showError = false
     @State private var searchText = ""
 
-// periphery:ignore - Reserved: showAddSheet property reserved for future feature activation
-
     var body: some View {
         #if os(macOS)
         HSplitView {
@@ -182,7 +180,6 @@ struct DownloadManagerView: View {
     private var statsSection: some View {
         Section("Overview") {
             HStack {
-                // periphery:ignore - Reserved: statsSection property reserved for future feature activation
                 Label("\(stats.completedDownloads)/\(stats.totalDownloads)", systemImage: "checkmark.circle")
                 Spacer()
                 Text(stats.formattedTotalSize)
@@ -199,7 +196,6 @@ struct DownloadManagerView: View {
 
     private var addSection: some View {
         Section("Add Download") {
-            // periphery:ignore - Reserved: addSection property reserved for future feature activation
             TextField("URL", text: $urlInput)
                 #if os(iOS)
                 .textInputAutocapitalization(.never)
@@ -217,7 +213,6 @@ struct DownloadManagerView: View {
 
     @ViewBuilder
     private var activeSection: some View {
-        // periphery:ignore - Reserved: activeSection property reserved for future feature activation
         let active = downloads.filter { !$0.status.isTerminal }
         if !active.isEmpty {
             Section("Active") {
@@ -239,7 +234,6 @@ struct DownloadManagerView: View {
     }
 
     @ViewBuilder
-    // periphery:ignore - Reserved: completedSection property reserved for future feature activation
     private var completedSection: some View {
         let completed = downloads.filter { $0.status.isTerminal }
         if !completed.isEmpty {

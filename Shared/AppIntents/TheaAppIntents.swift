@@ -63,8 +63,6 @@ public struct QuickChatIntent: AppIntent {
 
     public init() {}
 
-// periphery:ignore - Reserved: conversationId property reserved for future feature activation
-
     public func perform() async throws -> some IntentResult & ProvidesDialog {
         let response = "Thea: I'll help you with '\(message)'. Opening full conversation..."
         return .result(dialog: IntentDialog(stringLiteral: response))
@@ -106,7 +104,6 @@ public struct CreateProjectIntent: AppIntent {
     @Parameter(title: "Description")
     var projectDescription: String?
 
-    // periphery:ignore - Reserved: projectDescription property reserved for future feature activation
     public init() {}
 
     public func perform() async throws -> some IntentResult & ProvidesDialog {
@@ -150,8 +147,6 @@ public struct LogHealthDataIntent: AppIntent {
 
     @Parameter(title: "Notes")
     var notes: String?
-
-// periphery:ignore - Reserved: notes property reserved for future feature activation
 
     public init() {}
 
@@ -300,7 +295,6 @@ public enum HealthDataTypeEntity: String, AppEnum {
 // MARK: - Options Providers
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
-// periphery:ignore - Reserved: ConversationOptionsProvider type reserved for future feature activation
 struct ConversationOptionsProvider: DynamicOptionsProvider {
     func results() async throws -> [String] {
         // Return list of conversation IDs

@@ -218,7 +218,6 @@ public actor LifeMonitorWebSocketServer {
         }
     }
 
-    // periphery:ignore - Reserved: _json parameter kept for API compatibility
     private func handleSyncRequest(_ _json: [String: Any], clientId: String) {
         // Send back acknowledgment with current state
         let response: [String: Any] = [

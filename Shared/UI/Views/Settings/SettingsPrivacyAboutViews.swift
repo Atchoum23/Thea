@@ -354,7 +354,6 @@ struct AboutView: View {
 // MARK: - Terminal Settings Section View
 
 struct TerminalSettingsSectionView: View {
-    // periphery:ignore - Reserved: TerminalSettingsSectionView type reserved for future feature activation
     @State private var shellPath = "/bin/zsh"
     @State private var enableSyntaxHighlighting = true
     @State private var fontSize: Double = 12
@@ -421,7 +420,6 @@ struct TerminalSettingsSectionView: View {
 
 // MARK: - Cowork Settings Section View
 
-// periphery:ignore - Reserved: CoworkSettingsSectionView type reserved for future feature activation
 struct CoworkSettingsSectionView: View {
     @State private var enableCowork = false
     @State private var serverURL = ""

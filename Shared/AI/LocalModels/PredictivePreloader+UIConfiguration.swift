@@ -29,8 +29,6 @@ extension PredictivePreloader {
         let hourPatterns = timeOfDayPatterns[currentHour] ?? [:]
         let totalCount = hourPatterns.values.reduce(0, +)
 
-// periphery:ignore - Reserved: getTimeBasedUIConfiguration() instance method reserved for future feature activation
-
         // Calculate task distributions
         var taskDistribution: [TaskType: Double] = [:]
         for (task, count) in hourPatterns {
@@ -83,7 +81,6 @@ extension PredictivePreloader {
            dominant.value > 0.4 {
             switch dominant.key {
             case .codeGeneration, .codeAnalysis, .debugging:
-                // periphery:ignore - Reserved: determinePrimaryMode(from:hour:) instance method reserved for future feature activation
                 return .coding
             case .creative, .creativeWriting, .contentCreation:
                 return .creative
@@ -130,7 +127,6 @@ extension PredictivePreloader {
         taskDistribution: [TaskType: Double],
         hour: Int,
         dayOfWeek: Int
-    // periphery:ignore - Reserved: generateUIRecommendations(primaryMode:taskDistribution:hour:dayOfWeek:) instance method reserved for future feature activation
     ) -> [UIRecommendation] {
         var recommendations: [UIRecommendation] = []
 
@@ -190,7 +186,6 @@ extension PredictivePreloader {
         var actions: [PredictedQuickAction] = []
 
         // Sort task types by probability
-        // periphery:ignore - Reserved: getSuggestedPredictedQuickActions(taskDistribution:) instance method reserved for future feature activation
         let sortedTasks = taskDistribution.sorted { $0.value > $1.value }
 
         for (task, probability) in sortedTasks.prefix(4) {
@@ -260,7 +255,6 @@ extension PredictivePreloader {
     func getThemePreference(hour: Int) -> ThemePreference {
         switch hour {
         case 6..<8:
-            // periphery:ignore - Reserved: getThemePreference(hour:) instance method reserved for future feature activation
             return .warmLight
         case 8..<18:
             return .system
@@ -282,8 +276,6 @@ extension PredictivePreloader {
     /// - Returns: A confidence score in the range `0.0...1.0`.
     func calculateConfidence(hourPatterns: [TaskType: Double]) -> Double {
         let totalCount = hourPatterns.values.reduce(0, +)
-
-// periphery:ignore - Reserved: calculateConfidence(hourPatterns:) instance method reserved for future feature activation
 
         // More data = higher confidence
         let dataConfidence = min(1.0, totalCount / 50.0)
@@ -312,7 +304,6 @@ extension PredictivePreloader {
     ///
     /// - Returns: An array of ``TimeBlockAnalysis`` for each time block.
     func analyzeTimeBlocks() -> [TimeBlockAnalysis] {
-        // periphery:ignore - Reserved: analyzeTimeBlocks() instance method reserved for future feature activation
         var blocks: [TimeBlockAnalysis] = []
 
         let timeBlockRanges: [(String, ClosedRange<Int>)] = [
@@ -361,7 +352,6 @@ extension PredictivePreloader {
     ///
     /// - Parameter taskCounts: Task type to count mapping.
     /// - Returns: A productivity score in the range `0.0...1.0`.
-    // periphery:ignore - Reserved: calculateProductivityScore(taskCounts:) instance method reserved for future feature activation
     func calculateProductivityScore(taskCounts: [TaskType: Double]) -> Double {
         // Weight different task types by "productivity"
         let weights: [TaskType: Double] = [

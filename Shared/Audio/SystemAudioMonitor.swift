@@ -25,7 +25,6 @@ struct AudioCaptureConfig: Sendable {
     var vadThreshold: Float = 0.01  // Minimum amplitude for voice
 
     static let `default` = AudioCaptureConfig()
-    // periphery:ignore - Reserved: audioMonitorLogger global var reserved for future feature activation
     static let highQuality = AudioCaptureConfig(sampleRate: 44100, channelCount: 2)
 }
 
@@ -43,7 +42,6 @@ struct AudioBuffer: Sendable {
     let timestamp: Date
     let sampleRate: Double
     let channelCount: Int
-    // periphery:ignore - Reserved: highQuality static property reserved for future feature activation
     let duration: TimeInterval
     let hasVoiceActivity: Bool
 
@@ -57,13 +55,8 @@ struct AudioBuffer: Sendable {
 /// Audio monitoring session info
 struct AudioMonitoringSession: Identifiable, Sendable {
     let id: UUID
-    // periphery:ignore - Reserved: timestamp property reserved for future feature activation
-    // periphery:ignore - Reserved: sampleRate property reserved for future feature activation
-    // periphery:ignore - Reserved: channelCount property reserved for future feature activation
     let startTime: Date
-    // periphery:ignore - Reserved: hasVoiceActivity property reserved for future feature activation
     var endTime: Date?
-    // periphery:ignore - Reserved: rmsLevel property reserved for future feature activation
     var source: AudioSourceType
     var totalDuration: TimeInterval
     var bufferCount: Int
@@ -73,9 +66,6 @@ struct AudioMonitoringSession: Identifiable, Sendable {
 // MARK: - System Audio Monitor
 
 /// Standalone audio monitor for system audio capture
-// periphery:ignore - Reserved: startTime property reserved for future feature activation
-// periphery:ignore - Reserved: endTime property reserved for future feature activation
-// periphery:ignore - Reserved: source property reserved for future feature activation
 @MainActor
 @Observable
 final class SystemAudioMonitor {
@@ -87,8 +77,6 @@ final class SystemAudioMonitor {
     private(set) var currentLevel: Float = 0
     private(set) var hasVoiceActivity = false
     private(set) var currentSession: AudioMonitoringSession?
-
-// periphery:ignore - Reserved: shared static property reserved for future feature activation
 
     // Configuration
     private(set) var config = AudioCaptureConfig.default
@@ -118,7 +106,6 @@ final class SystemAudioMonitor {
         self.currentSource = source
 
         #if os(macOS)
-        // periphery:ignore - Reserved: startMonitoring(source:config:) instance method reserved for future feature activation
         if source == .systemOutput {
             try await startSystemAudioCapture()
         } else {
@@ -147,7 +134,6 @@ final class SystemAudioMonitor {
         #if os(macOS)
         if let stream = stream {
             do {
-                // periphery:ignore - Reserved: stopMonitoring() instance method reserved for future feature activation
                 try await stream.stopCapture()
             } catch {
                 audioMonitorLogger.error("Failed to stop audio capture: \(error.localizedDescription)")
@@ -171,15 +157,12 @@ final class SystemAudioMonitor {
 
     // MARK: - macOS System Audio Capture
 
-// periphery:ignore - Reserved: updateConfig(_:) instance method reserved for future feature activation
-
     #if os(macOS)
     @available(macOS 13.0, *)
     private func startSystemAudioCapture() async throws {
         // Get shareable content
         let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
 
-        // periphery:ignore - Reserved: startSystemAudioCapture() instance method reserved for future feature activation
         // Get the display to capture audio from
         guard let display = content.displays.first else {
             throw AudioMonitorError.noDisplayAvailable
@@ -217,7 +200,6 @@ final class SystemAudioMonitor {
     private func startMicrophoneCapture() async throws {
         audioEngine = AVAudioEngine()
 
-        // periphery:ignore - Reserved: startMicrophoneCapture() instance method reserved for future feature activation
         guard let engine = audioEngine else {
             throw AudioMonitorError.engineCreationFailed
         }
@@ -240,8 +222,6 @@ final class SystemAudioMonitor {
 
     private func processAudioBuffer(_ buffer: AVAudioPCMBuffer, time: AVAudioTime) {
         guard let channelData = buffer.floatChannelData else { return }
-
-// periphery:ignore - Reserved: processAudioBuffer(_:time:) instance method reserved for future feature activation
 
         let frameCount = Int(buffer.frameLength)
         var samples: [Float] = []
@@ -337,7 +317,6 @@ final class SystemAudioMonitor {
 // @unchecked Sendable: NSObject subclass required for SCStreamOutput protocol; SCStream delivers
 // callbacks on its own internal queue; weak monitor reference avoids retain cycles
 private class AudioStreamOutput: NSObject, SCStreamOutput, @unchecked Sendable {
-    // periphery:ignore - Reserved: AudioStreamOutput type reserved for future feature activation
     private weak var monitor: SystemAudioMonitor?
 
     init(monitor: SystemAudioMonitor) {
@@ -395,7 +374,6 @@ private class AudioStreamOutput: NSObject, SCStreamOutput, @unchecked Sendable {
 
 // MARK: - Errors
 
-// periphery:ignore - Reserved: AudioMonitorError type reserved for future feature activation
 enum AudioMonitorError: Error, LocalizedError {
     case noDisplayAvailable
     case engineCreationFailed

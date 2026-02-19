@@ -63,7 +63,6 @@ struct BonjourDiscoveredDevice: Identifiable, Codable, Sendable, Hashable {
 
 /// Service for discovering Thea devices on the network using Bonjour/mDNS
 @MainActor
-// periphery:ignore - Reserved: default static property reserved for future feature activation
 @Observable
 final class DeviceDiscoveryService {
     static let shared = DeviceDiscoveryService()
@@ -89,13 +88,8 @@ final class DeviceDiscoveryService {
     private var listener: NWListener?
     private var deviceTimeouts: [UUID: Task<Void, Never>] = [:]
 
-// periphery:ignore - Reserved: shared static property reserved for future feature activation
-
-    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private init() {}
 
-    // periphery:ignore - Reserved: serviceType static property reserved for future feature activation
-    // periphery:ignore - Reserved: serviceDomain static property reserved for future feature activation
     // MARK: - Discovery
 
     /// Start discovering Thea devices on the network
@@ -117,7 +111,6 @@ final class DeviceDiscoveryService {
             Task { @MainActor in
                 self?.handleBrowseResults(results, changes: changes)
             }
-        // periphery:ignore - Reserved: startDiscovery() instance method reserved for future feature activation
         }
 
         browser?.start(queue: .main)
@@ -142,7 +135,6 @@ final class DeviceDiscoveryService {
         startDiscovery()
     }
 
-    // periphery:ignore - Reserved: stopDiscovery() instance method reserved for future feature activation
     // MARK: - Advertising
 
     /// Start advertising this device on the network
@@ -153,7 +145,6 @@ final class DeviceDiscoveryService {
         guard let nwPort = NWEndpoint.Port(rawValue: port) else {
             throw RemoteServerError.networkError("Invalid port: \(port)")
         }
-        // periphery:ignore - Reserved: refresh() instance method reserved for future feature activation
         listener = try NWListener(using: parameters, on: nwPort)
 
         // Create TXT record with device info
@@ -162,7 +153,6 @@ final class DeviceDiscoveryService {
         listener?.service = NWListener.Service(
             name: name,
             type: Self.serviceType,
-            // periphery:ignore - Reserved: startAdvertising(port:name:capabilities:) instance method reserved for future feature activation
             domain: Self.serviceDomain,
             txtRecord: txtRecord
         )
@@ -191,15 +181,12 @@ final class DeviceDiscoveryService {
         case .failed(let error):
             lastError = error
             onError?(error)
-        // periphery:ignore - Reserved: stopAdvertising() instance method reserved for future feature activation
         case .cancelled:
             isDiscovering = false
         default:
             break
         }
     }
-
-// periphery:ignore - Reserved: handleBrowserStateChange(_:) instance method reserved for future feature activation
 
     private func handleBrowseResults(_ results: Set<NWBrowser.Result>, changes: Set<NWBrowser.Result.Change>) {
         for change in changes {
@@ -213,7 +200,6 @@ final class DeviceDiscoveryService {
             case .identical:
                 break
             @unknown default:
-                // periphery:ignore - Reserved: handleBrowseResults(_:changes:) instance method reserved for future feature activation
                 break
             }
         }
@@ -230,12 +216,10 @@ final class DeviceDiscoveryService {
                 discoveredDevices.removeAll { $0.name == name }
                 onDeviceLost?(device)
             }
-        // periphery:ignore - Reserved: handleDeviceAdded(_:) instance method reserved for future feature activation
         }
     }
 
     private func handleDeviceChanged(_ result: NWBrowser.Result) {
-        // periphery:ignore - Reserved: handleDeviceRemoved(_:) instance method reserved for future feature activation
         resolveDevice(result)
     }
 
@@ -244,13 +228,11 @@ final class DeviceDiscoveryService {
     private func resolveDevice(_ result: NWBrowser.Result) {
         guard case .service(let name, _, _, _) = result.endpoint else { return }
 
-        // periphery:ignore - Reserved: handleDeviceChanged(_:) instance method reserved for future feature activation
         // Parse TXT record if available
         let capabilities: BonjourDiscoveredDevice.DeviceCapabilities
         let platform: BonjourDiscoveredDevice.DevicePlatform
 
         if case .bonjour(let txtRecord) = result.metadata {
-            // periphery:ignore - Reserved: resolveDevice(_:) instance method reserved for future feature activation
             capabilities = parseCapabilities(from: txtRecord)
             platform = parsePlatform(from: txtRecord)
         } else {
@@ -319,7 +301,6 @@ final class DeviceDiscoveryService {
                 id: discoveredDevices[index].id,  // Preserve ID
                 name: device.name,
                 hostName: device.hostName,
-                // periphery:ignore - Reserved: addOrUpdateDevice(_:) instance method reserved for future feature activation
                 port: device.port,
                 platform: device.platform,
                 capabilities: device.capabilities,
@@ -342,7 +323,6 @@ final class DeviceDiscoveryService {
 
         // Set new timeout - mark offline after 60 seconds without update
         deviceTimeouts[device.id] = Task {
-            // periphery:ignore - Reserved: setupDeviceTimeout(_:) instance method reserved for future feature activation
             do {
                 try await Task.sleep(for: .seconds(60))
             } catch {
@@ -372,7 +352,6 @@ final class DeviceDiscoveryService {
         dict["name"] = name
         dict["platform"] = currentPlatform().rawValue
         dict["localModels"] = capabilities.supportsLocalModels ? "1" : "0"
-        // periphery:ignore - Reserved: createTXTRecord(name:capabilities:) instance method reserved for future feature activation
         dict["screenShare"] = capabilities.supportsScreenSharing ? "1" : "0"
         dict["audio"] = capabilities.supportsAudioMonitoring ? "1" : "0"
         dict["remote"] = capabilities.supportsRemoteExecution ? "1" : "0"
@@ -386,7 +365,6 @@ final class DeviceDiscoveryService {
         let dict = record.dictionary
 
         return BonjourDiscoveredDevice.DeviceCapabilities(
-            // periphery:ignore - Reserved: parseCapabilities(from:) instance method reserved for future feature activation
             supportsLocalModels: dict["localModels"] == "1",
             supportsScreenSharing: dict["screenShare"] == "1",
             supportsAudioMonitoring: dict["audio"] == "1",
@@ -399,12 +377,10 @@ final class DeviceDiscoveryService {
     private func parsePlatform(from record: NWTXTRecord) -> BonjourDiscoveredDevice.DevicePlatform {
         let dict = record.dictionary
         return BonjourDiscoveredDevice.DevicePlatform(rawValue: dict["platform"] ?? "Unknown") ?? .unknown
-    // periphery:ignore - Reserved: parsePlatform(from:) instance method reserved for future feature activation
     }
 
     private func currentPlatform() -> BonjourDiscoveredDevice.DevicePlatform {
         #if os(macOS)
-        // periphery:ignore - Reserved: currentPlatform() instance method reserved for future feature activation
         return .macOS
         #elseif os(iOS)
         if UIDevice.current.userInterfaceIdiom == .pad {
@@ -423,7 +399,6 @@ final class DeviceDiscoveryService {
     // MARK: - Listener Handlers
 
     private func handleListenerStateChange(_ state: NWListener.State) {
-        // periphery:ignore - Reserved: handleListenerStateChange(_:) instance method reserved for future feature activation
         switch state {
         case .ready:
             break
@@ -463,7 +438,6 @@ extension NWTXTRecord {
     }
 
     /// Factory method to create TXT record from dictionary
-    // periphery:ignore - Reserved: fromDictionary(_:) static method reserved for future feature activation
     static func fromDictionary(_ dict: [String: String]) -> NWTXTRecord {
         var record = NWTXTRecord()
         for (key, value) in dict {

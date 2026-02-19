@@ -67,8 +67,6 @@ final class FinancialIntegration {
         saveAccounts()
     }
 
-// periphery:ignore - Reserved: connectAccount(provider:credentials:) instance method reserved for future feature activation
-
     // MARK: - Data Fetching
 
     func refreshAllAccounts() async throws {
@@ -91,7 +89,6 @@ final class FinancialIntegration {
         if let updated = updatedAccounts.first(where: { $0.id == account.id }),
            let index = connectedAccounts.firstIndex(where: { $0.id == account.id })
         {
-            // periphery:ignore - Reserved: disconnectAccount(_:) instance method reserved for future feature activation
             var refreshed = connectedAccounts[index]
             refreshed.balance = updated.balance
             refreshed.currency = updated.currency
@@ -283,7 +280,6 @@ final class FinancialIntegration {
             let calendar = Calendar.current
 
             switch budget.period {
-            // periphery:ignore - Reserved: createBudget(category:limit:period:) instance method reserved for future feature activation
             case .daily:
                 periodStart = calendar.startOfDay(for: now)
                 periodEnd = calendar.date(byAdding: .day, value: 1, to: periodStart) ?? now
@@ -298,7 +294,6 @@ final class FinancialIntegration {
                 periodEnd = calendar.date(byAdding: .year, value: 1, to: periodStart) ?? now
             }
 
-            // periphery:ignore - Reserved: updateBudgetSpending() instance method reserved for future feature activation
             let spent = transactions
                 .filter { $0.category == budget.category && $0.date >= periodStart && $0.date < periodEnd }
                 .reduce(0.0) { $0 + abs($1.amount) }
@@ -348,7 +343,6 @@ final class FinancialIntegration {
         let monthlyExpenses = calculateMonthlySpending()
         let savingsRate = (monthlyIncome - monthlyExpenses) / monthlyIncome
 
-        // periphery:ignore - Reserved: calculateEndDate(_:) instance method reserved for future feature activation
         return InvestmentStrategy(
             recommendedSavingsRate: 0.20, // 20%
             currentSavingsRate: savingsRate,
@@ -366,7 +360,6 @@ final class FinancialIntegration {
         // Estimate based on incoming transactions
         let income = transactions
             .filter { $0.amount > 0 && $0.category == .income }
-            // periphery:ignore - Reserved: getInvestmentStrategy() instance method reserved for future feature activation
             .reduce(0) { $0 + $1.amount }
 
         return income / max(1, Double(transactions.count) / 30)
@@ -386,7 +379,6 @@ final class FinancialIntegration {
     private func saveAccounts() {
         do {
             let data = try JSONEncoder().encode(connectedAccounts)
-            // periphery:ignore - Reserved: estimateMonthlyIncome() instance method reserved for future feature activation
             UserDefaults.standard.set(data, forKey: "FinancialIntegration.accounts")
         } catch {
             logger.debug("Could not save connected accounts: \(error.localizedDescription)")
@@ -406,7 +398,6 @@ final class FinancialIntegration {
         do {
             let data = try JSONEncoder().encode(budgets)
             UserDefaults.standard.set(data, forKey: "FinancialIntegration.budgets")
-        // periphery:ignore - Reserved: saveAccounts() instance method reserved for future feature activation
         } catch {
             logger.debug("Could not save budgets: \(error.localizedDescription)")
         }
@@ -424,7 +415,6 @@ final class FinancialIntegration {
 
 protocol FinancialProvider: Sendable {
     var providerName: String { get }
-    // periphery:ignore - Reserved: saveBudgets() instance method reserved for future feature activation
     var providerType: FinancialProviderType { get }
 
     func authenticate(credentials: FinancialCredentials) async throws
@@ -446,9 +436,6 @@ struct ProviderAccount: Identifiable, Codable, Sendable {
     var lastUpdated: Date
 }
 
-// periphery:ignore - Reserved: providerType property reserved for future feature activation
-
-// periphery:ignore - Reserved: authenticate(credentials:) instance method reserved for future feature activation
 /// A financial transaction
 /// Note: Uses @unchecked Sendable because mutations only occur within @MainActor-isolated FinancialAIService
 struct Transaction: Identifiable, Codable, Sendable {
@@ -477,7 +464,6 @@ enum TransactionCategory: String, Codable, Sendable {
     case groceries, dining, transportation, entertainment, housing, utilities, healthcare, shopping, travel, income, other
 }
 
-// periphery:ignore - Reserved: init(id:accountId:amount:description:date:category:) initializer reserved for future feature activation
 struct Budget: Identifiable, Codable, Sendable {
     let id: UUID
     let category: TransactionCategory
@@ -509,11 +495,6 @@ struct FinancialAlert: Identifiable, Sendable {
 
 struct FinancialCredentials: Codable, Sendable {
     let apiKey: String?
-    // periphery:ignore - Reserved: type property reserved for future feature activation
-    // periphery:ignore - Reserved: title property reserved for future feature activation
-    // periphery:ignore - Reserved: message property reserved for future feature activation
-    // periphery:ignore - Reserved: severity property reserved for future feature activation
-    // periphery:ignore - Reserved: timestamp property reserved for future feature activation
     let apiSecret: String?
     let accessToken: String?
 }
@@ -524,14 +505,11 @@ enum FinancialProviderType: String, Sendable {
 
 struct FinancialInsight: Identifiable {
     let id: UUID
-    // periphery:ignore - Reserved: FinancialCredentials type reserved for future feature activation
     let type: InsightType
     let title: String
     let description: String
     let actionable: Bool
     let action: String?
-
-// periphery:ignore - Reserved: FinancialProviderType type reserved for future feature activation
 
     enum InsightType {
         case spendingTrend, categoryAnalysis, unusualSpending, budgetRecommendation
@@ -540,15 +518,12 @@ struct FinancialInsight: Identifiable {
 
 struct InvestmentStrategy {
     let recommendedSavingsRate: Double
-    // periphery:ignore - Reserved: actionable property reserved for future feature activation
-    // periphery:ignore - Reserved: action property reserved for future feature activation
     let currentSavingsRate: Double
     let emergencyFundTarget: Double
     let currentEmergencyFund: Double
     let investmentRecommendations: [String]
 }
 
-// periphery:ignore - Reserved: InvestmentStrategy type reserved for future feature activation
 // MARK: - Provider Implementations
 
 struct RevolutProvider: FinancialProvider {
@@ -560,9 +535,7 @@ struct RevolutProvider: FinancialProvider {
     }
 
     func fetchAccounts() async throws -> [ProviderAccount] {
-        // periphery:ignore - Reserved: providerType property reserved for future feature activation
         // Fetch from Revolut API
-        // periphery:ignore - Reserved: authenticate(credentials:) instance method reserved for future feature activation
         []
     }
 
@@ -579,9 +552,6 @@ struct BinanceProvider: FinancialProvider {
         // Binance API authentication
     }
 
-// periphery:ignore - Reserved: providerType property reserved for future feature activation
-
-    // periphery:ignore - Reserved: authenticate(credentials:) instance method reserved for future feature activation
     func fetchAccounts() async throws -> [ProviderAccount] {
         []
     }
@@ -596,9 +566,7 @@ struct CoinbaseProvider: FinancialProvider {
     let providerType = FinancialProviderType.crypto
 
     func authenticate(credentials _: FinancialCredentials) async throws {
-        // periphery:ignore - Reserved: providerType property reserved for future feature activation
         // Coinbase API authentication
-    // periphery:ignore - Reserved: authenticate(credentials:) instance method reserved for future feature activation
     }
 
     func fetchAccounts() async throws -> [ProviderAccount] {
@@ -614,9 +582,6 @@ struct PlaidProvider: FinancialProvider {
     let providerName = "Plaid"
     let providerType = FinancialProviderType.bank
 
-// periphery:ignore - Reserved: providerType property reserved for future feature activation
-
-    // periphery:ignore - Reserved: authenticate(credentials:) instance method reserved for future feature activation
     func authenticate(credentials _: FinancialCredentials) async throws {
         // Plaid Link authentication
     }

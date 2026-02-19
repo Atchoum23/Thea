@@ -145,7 +145,6 @@ struct ServiceRecord: Codable, Sendable, Identifiable {
         self.type = type
         self.date = date
         self.mileage = mileage
-        // periphery:ignore - Reserved: init(type:date:mileage:cost:currency:provider:notes:) initializer reserved for future feature activation
         self.cost = cost
         self.currency = currency
         self.provider = provider
@@ -169,7 +168,6 @@ struct FuelLog: Codable, Sendable, Identifiable {
         self.id = UUID()
         self.date = date
         self.liters = liters
-        // periphery:ignore - Reserved: init(date:liters:cost:currency:mileage:distance:isFullTank:) initializer reserved for future feature activation
         self.cost = cost
         self.currency = currency
         self.mileage = mileage
@@ -245,19 +243,16 @@ final class VehicleManager: ObservableObject {
         if let idx = vehicles.firstIndex(where: { $0.id == vehicle.id }) {
             vehicles[idx] = vehicle
             save()
-        // periphery:ignore - Reserved: updateVehicle(_:) instance method reserved for future feature activation
         }
     }
 
     func deleteVehicle(id: UUID) {
         vehicles.removeAll { $0.id == id }
         save()
-    // periphery:ignore - Reserved: deleteVehicle(id:) instance method reserved for future feature activation
     }
 
     func addServiceRecord(vehicleID: UUID, record: ServiceRecord) {
         if let idx = vehicles.firstIndex(where: { $0.id == vehicleID }) {
-            // periphery:ignore - Reserved: addServiceRecord(vehicleID:record:) instance method reserved for future feature activation
             vehicles[idx].serviceRecords.append(record)
             if record.mileage > vehicles[idx].currentMileage {
                 vehicles[idx].currentMileage = record.mileage
@@ -267,7 +262,6 @@ final class VehicleManager: ObservableObject {
     }
 
     func addFuelLog(vehicleID: UUID, log: FuelLog) {
-        // periphery:ignore - Reserved: addFuelLog(vehicleID:log:) instance method reserved for future feature activation
         if let idx = vehicles.firstIndex(where: { $0.id == vehicleID }) {
             vehicles[idx].fuelLogs.append(log)
             if log.mileage > vehicles[idx].currentMileage {
@@ -279,7 +273,6 @@ final class VehicleManager: ObservableObject {
 
     // MARK: - Queries
 
-    // periphery:ignore - Reserved: totalMaintenanceCost property reserved for future feature activation
     var totalMaintenanceCost: Double {
         vehicles.reduce(0) { $0 + $1.totalServiceCost }
     }

@@ -8,7 +8,6 @@ import Foundation
 import OSLog
 
 #if os(macOS)
-// periphery:ignore - Reserved: RegressionDetector type reserved for future feature activation
 actor RegressionDetector {
     static let shared = RegressionDetector()
 

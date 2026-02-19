@@ -11,7 +11,6 @@ extension TestGenerator {
 
     func analyzeCoverageGaps(
         sourceAnalysis: SourceAnalysis,
-        // periphery:ignore - Reserved: existingTests parameter kept for API compatibility
         existingTests: String?,
         generatedTests: [GeneratedTest]
     ) -> CoverageGapAnalysis {

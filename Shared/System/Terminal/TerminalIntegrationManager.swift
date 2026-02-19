@@ -67,7 +67,6 @@ import OSLog
             executor = TerminalCommandExecutor(securityPolicy: .default)
 
             // Setup history storage
-            // periphery:ignore - Reserved: monitorTask property reserved for future feature activation
             let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
                 ?? FileManager.default.temporaryDirectory
             let theaFolder = appSupport.appendingPathComponent("Thea", isDirectory: true)
@@ -122,8 +121,6 @@ import OSLog
             return content
         }
 
-// periphery:ignore - Reserved: readTerminalContent() instance method reserved for future feature activation
-
         /// Read full scrollback history
         func readTerminalHistory() async throws -> String {
             try await windowReader.readHistory()
@@ -136,22 +133,18 @@ import OSLog
 
         /// Check if Terminal is busy (command running)
         func isTerminalBusy() async throws -> Bool {
-            // periphery:ignore - Reserved: readTerminalHistory() instance method reserved for future feature activation
             try await windowReader.isBusy()
         }
 
         /// Get current processes in Terminal
-        // periphery:ignore - Reserved: readTerminalHistory(windowIndex:tabIndex:) instance method reserved for future feature activation
         func getCurrentProcesses() async throws -> [String] {
             try await windowReader.getCurrentProcesses()
         }
 
-        // periphery:ignore - Reserved: isTerminalBusy() instance method reserved for future feature activation
         // MARK: - WRITE/RUN Commands
 
         /// Execute a command based on current execution mode
         @discardableResult
-        // periphery:ignore - Reserved: getCurrentProcesses() instance method reserved for future feature activation
         func execute(_ command: String, workingDirectory: URL? = nil) async throws -> ShellCommandResult {
             // Validate against security policy
             let validation = securityPolicy.isAllowed(command)
@@ -252,14 +245,12 @@ import OSLog
         // MARK: - MONITOR Output
 
         /// Start monitoring Terminal output for changes
-        // periphery:ignore - Reserved: executeSequence(_:stopOnError:) instance method reserved for future feature activation
         func startMonitoring(interval: TimeInterval = 0.5, onChange: @escaping (String) -> Void) {
             stopMonitoring()
 
             isMonitoring = true
             monitorTask = Task {
                 var lastContent = ""
-                // periphery:ignore - Reserved: startMonitoring(interval:onChange:) instance method reserved for future feature activation
                 while !Task.isCancelled {
                     do {
                         let content = try await readTerminalContent()
@@ -299,14 +290,11 @@ import OSLog
             isMonitoring = false
         }
 
-// periphery:ignore - Reserved: stopMonitoring() instance method reserved for future feature activation
-
         /// Wait for Terminal to become idle (no command running)
         func waitForIdle(timeout: TimeInterval = 30, pollInterval: TimeInterval = 0.5) async throws {
             let startTime = Date()
             while Date().timeIntervalSince(startTime) < timeout {
                 if try await !isTerminalBusy() {
-                    // periphery:ignore - Reserved: waitForIdle(timeout:pollInterval:) instance method reserved for future feature activation
                     return
                 }
                 try await Task.sleep(nanoseconds: UInt64(pollInterval * 1_000_000_000))
@@ -326,13 +314,11 @@ import OSLog
         func openNewTab(withCommand command: String? = nil) async throws {
             try await executor.openNewTab(withCommand: command)
             await refreshWindowList()
-        // periphery:ignore - Reserved: openNewTab(withCommand:) instance method reserved for future feature activation
         }
 
         /// Clear the Terminal screen
         func clearTerminal() async throws {
             try await executor.clearTerminal()
-        // periphery:ignore - Reserved: clearTerminal() instance method reserved for future feature activation
         }
 
         // MARK: - Session Management
@@ -347,7 +333,6 @@ import OSLog
         }
 
         func deleteSession(_ session: TerminalSession) {
-            // periphery:ignore - Reserved: deleteSession(_:) instance method reserved for future feature activation
             sessions.removeAll { $0.id == session.id }
             if currentSession?.id == session.id {
                 currentSession = sessions.first
@@ -458,7 +443,6 @@ import OSLog
             }
         }
 
-        // periphery:ignore - Reserved: loadCommandHistory() instance method reserved for future feature activation
         func loadCommandHistory() -> [TerminalCommand] {
             do {
                 let data = try Data(contentsOf: commandHistoryURL)

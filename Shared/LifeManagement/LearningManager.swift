@@ -179,7 +179,6 @@ struct TrackedLearningResource: Codable, Sendable, Identifiable {
         self.title = title
         self.type = type
         self.url = url
-        // periphery:ignore - Reserved: init(title:type:url:isCompleted:) initializer reserved for future feature activation
         self.isCompleted = isCompleted
     }
 }
@@ -196,7 +195,6 @@ struct StudySession: Codable, Sendable, Identifiable {
         self.id = UUID()
         self.date = date
         self.durationMinutes = durationMinutes
-        // periphery:ignore - Reserved: init(date:durationMinutes:notes:rating:) initializer reserved for future feature activation
         self.notes = notes
         self.rating = min(max(rating, 1), 5)
     }
@@ -236,7 +234,6 @@ final class LearningTracker: ObservableObject {
     func updateGoal(_ goal: TrackedLearningGoal) {
         if let idx = goals.firstIndex(where: { $0.id == goal.id }) {
             var updated = goal
-            // periphery:ignore - Reserved: updateGoal(_:) instance method reserved for future feature activation
             updated.updatedAt = Date()
             goals[idx] = updated
             save()
@@ -250,7 +247,6 @@ final class LearningTracker: ObservableObject {
 
     func addStudySession(goalID: UUID, session: StudySession) {
         if let idx = goals.firstIndex(where: { $0.id == goalID }) {
-            // periphery:ignore - Reserved: addStudySession(goalID:session:) instance method reserved for future feature activation
             goals[idx].studySessions.append(session)
             goals[idx].updatedAt = Date()
             if goals[idx].status == .notStarted {
@@ -261,7 +257,6 @@ final class LearningTracker: ObservableObject {
     }
 
     func addResource(goalID: UUID, resource: TrackedLearningResource) {
-        // periphery:ignore - Reserved: addResource(goalID:resource:) instance method reserved for future feature activation
         if let idx = goals.firstIndex(where: { $0.id == goalID }) {
             goals[idx].resources.append(resource)
             goals[idx].updatedAt = Date()
@@ -288,7 +283,6 @@ final class LearningTracker: ObservableObject {
         goals.map(\.currentStreak).max() ?? 0
     }
 
-    // periphery:ignore - Reserved: goalsByCategory property reserved for future feature activation
     var goalsByCategory: [LearningCategory: [TrackedLearningGoal]] {
         Dictionary(grouping: goals, by: \.category)
     }

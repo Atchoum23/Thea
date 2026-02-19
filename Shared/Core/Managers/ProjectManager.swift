@@ -44,8 +44,6 @@ final class ProjectManager: ObservableObject {
             project.title = title
         }
 
-// periphery:ignore - Reserved: updateProject(_:title:customInstructions:) instance method reserved for future feature activation
-
         if let customInstructions {
             project.customInstructions = customInstructions
         }
@@ -68,7 +66,6 @@ final class ProjectManager: ObservableObject {
     func clearAllData() {
         guard let context = modelContext else { return }
 
-        // periphery:ignore - Reserved: clearAllData() instance method reserved for future feature activation
         for project in projects {
             context.delete(project)
         }
@@ -80,7 +77,6 @@ final class ProjectManager: ObservableObject {
 
     func setActiveProject(_ project: Project?) {
         activeProject = project
-    // periphery:ignore - Reserved: setActiveProject(_:) instance method reserved for future feature activation
     }
 
     // MARK: - Conversation Management
@@ -100,7 +96,6 @@ final class ProjectManager: ObservableObject {
     // MARK: - File Management
 
     func addFile(to project: Project, name: String, path: String, size: Int64) {
-        // periphery:ignore - Reserved: addFile(to:name:path:size:) instance method reserved for future feature activation
         let file = ProjectFile(
             id: UUID(),
             name: name,
@@ -113,7 +108,6 @@ final class ProjectManager: ObservableObject {
         do { try modelContext?.save() } catch { projectLogger.error("Failed to save after adding file to project: \(error.localizedDescription)") }
     }
 
-    // periphery:ignore - Reserved: removeFile(from:fileID:) instance method reserved for future feature activation
     func removeFile(from project: Project, fileID: UUID) {
         project.files.removeAll { $0.id == fileID }
         do { try modelContext?.save() } catch { projectLogger.error("Failed to save after removing file from project: \(error.localizedDescription)") }

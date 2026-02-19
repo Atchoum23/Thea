@@ -112,7 +112,6 @@ public final class AgentSecKillSwitch: ObservableObject {
     }
 
     /// Force reset (for testing only)
-    // periphery:ignore - Reserved: forceReset() instance method reserved for future feature activation
     func forceReset() {
         isTriggered = false
         triggerReason = nil

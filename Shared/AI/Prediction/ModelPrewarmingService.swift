@@ -45,7 +45,6 @@ public actor ModelPrewarmingService {
     private var warmModelIDs: Set<String> = []
 
     /// Last prediction check time
-    // periphery:ignore - Reserved: lastCheckTime property reserved for future feature activation
     private var lastCheckTime: Date?
 
     /// Active monitoring task

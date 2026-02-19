@@ -33,10 +33,6 @@ public final class DocumentationGroundingService: ObservableObject {
     private let context7BaseURL = "https://context7.com"
     private let context7MCPURL = "https://mcp.context7.com/mcp"
     private let searchEndpoint = "/api/v2/libs/search"  // params: query, libraryName
-    // periphery:ignore - Reserved: context7BaseURL property reserved for future feature activation
-    // periphery:ignore - Reserved: context7MCPURL property reserved for future feature activation
-    // periphery:ignore - Reserved: searchEndpoint property reserved for future feature activation
-    // periphery:ignore - Reserved: contextEndpoint property reserved for future feature activation
     private let contextEndpoint = "/api/v2/context"      // params: query, libraryId, type (json/txt)
 
     // MARK: - Initialization

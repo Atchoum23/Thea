@@ -34,8 +34,6 @@ actor MoltbookAgent {
     /// Auto-visit interval (seconds) — default 4 hours
     var heartbeatInterval: TimeInterval = 4 * 60 * 60
 
-// periphery:ignore - Reserved: privacyGuard property reserved for future feature activation
-
     /// Maximum posts per day to avoid flooding
     var maxDailyPosts = 10
 
@@ -59,7 +57,6 @@ actor MoltbookAgent {
     // MARK: - Lifecycle
 
     /// Enable the Moltbook agent
-    // periphery:ignore - Reserved: lastHeartbeat property reserved for future feature activation
     func enable() {
         guard !isEnabled else { return }
         isEnabled = true
@@ -188,8 +185,6 @@ actor MoltbookAgent {
         case let .clean(text):
             return await handleOutboundPost(discussionID: discussionID, text: text)
 
-// periphery:ignore - Reserved: composeResponse(to:content:) instance method reserved for future feature activation
-
         case let .redacted(text, redactions):
             logger.info("Moltbook post redacted (\(redactions.count) redactions)")
             return await handleOutboundPost(discussionID: discussionID, text: text)
@@ -216,7 +211,6 @@ actor MoltbookAgent {
 
         // Send directly if not in preview mode
         do {
-            // periphery:ignore - Reserved: handleOutboundPost(discussionID:text:) instance method reserved for future feature activation
             try await sendPost(post)
             dailyPostCount += 1
             return .sent(post)
@@ -243,7 +237,6 @@ actor MoltbookAgent {
         } catch {
             logger.error("Failed to send approved post: \(error.localizedDescription)")
             return false
-        // periphery:ignore - Reserved: approvePendingPost(id:) instance method reserved for future feature activation
         }
     }
 
@@ -262,12 +255,10 @@ actor MoltbookAgent {
     /// Get unread development insights
     func getUnreadInsights() -> [DevelopmentInsight] {
         insights.filter { !$0.isRead }
-    // periphery:ignore - Reserved: rejectPendingPost(id:) instance method reserved for future feature activation
     }
 
     /// Mark insight as read
     func markInsightRead(id: UUID) {
-        // periphery:ignore - Reserved: clearPendingPosts() instance method reserved for future feature activation
         if let index = insights.firstIndex(where: { $0.id == id }) {
             insights[index].isRead = true
         }
@@ -275,12 +266,9 @@ actor MoltbookAgent {
 
     // MARK: - Private Helpers
 
-// periphery:ignore - Reserved: getUnreadInsights() instance method reserved for future feature activation
-
     private func isRelevantTopic(_ content: String) -> Bool {
         let lower = content.lowercased()
         return topicsOfInterest.contains { lower.contains($0) }
-    // periphery:ignore - Reserved: markInsightRead(id:) instance method reserved for future feature activation
     }
 
     private func extractInsight(from message: OpenClawMessage) -> DevelopmentInsight? {
@@ -322,7 +310,6 @@ actor MoltbookAgent {
 
     private func resetDailyCountIfNeeded() {
         let calendar = Calendar.current
-        // periphery:ignore - Reserved: sendPost(_:) instance method reserved for future feature activation
         if let lastReset = lastPostCountReset,
            calendar.isDateInToday(lastReset)
         {
@@ -355,8 +342,6 @@ struct MoltbookPost: Sendable, Identifiable {
         case rejected
         case sent
     }
-// periphery:ignore - Reserved: createdAt property reserved for future feature activation
-// periphery:ignore - Reserved: status property reserved for future feature activation
 }
 
 struct MoltbookDiscussion: Sendable {
@@ -371,18 +356,11 @@ struct MoltbookDiscussion: Sendable {
 struct DevelopmentInsight: Sendable, Identifiable {
     let id: UUID
     let timestamp: Date
-    // periphery:ignore - Reserved: participantCount property reserved for future feature activation
-    // periphery:ignore - Reserved: lastActivityAt property reserved for future feature activation
     let source: String
     let title: String
     let summary: String
     let topics: [String]
-    // periphery:ignore - Reserved: timestamp property reserved for future feature activation
-    // periphery:ignore - Reserved: source property reserved for future feature activation
     let actionability: Actionability
-    // periphery:ignore - Reserved: summary property reserved for future feature activation
-    // periphery:ignore - Reserved: topics property reserved for future feature activation
-    // periphery:ignore - Reserved: actionability property reserved for future feature activation
     var isRead: Bool
 
     enum Actionability: String, Sendable {
@@ -392,7 +370,6 @@ struct DevelopmentInsight: Sendable, Identifiable {
     }
 }
 
-// periphery:ignore - Reserved: MoltbookPostResult type reserved for future feature activation
 enum MoltbookPostResult: Sendable {
     case sent(MoltbookPost)
     case pendingReview(MoltbookPost)

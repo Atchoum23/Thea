@@ -38,7 +38,6 @@ final class ModelGovernanceEngine {
     private(set) var modelFleet = ModelFleet()
 
     /// Current governance policy
-    // periphery:ignore - Reserved: shared static property reserved for future feature activation
     private(set) var policy: GovernanceEnginePolicy = .default
 
     /// System resource snapshot
@@ -241,8 +240,6 @@ final class ModelGovernanceEngine {
 
     // MARK: - Dynamic Fleet Management
 
-// periphery:ignore - Reserved: getSupraModelForInference() instance method reserved for future feature activation
-
     /// Initialize the dynamic model fleet
     private func initializeFleet() async {
         let manager = LocalModelManager.shared
@@ -308,7 +305,6 @@ final class ModelGovernanceEngine {
 
         // 3. Check Tier 2 (on-demand)
         if let tier2Match = await findBestModelInTier(.tier2OnDemand, for: taskType) {
-            // periphery:ignore - Reserved: selectModelForTask(_:context:) instance method reserved for future feature activation
             // Ensure model is loaded
             await ensureModelLoaded(tier2Match.model)
             return tier2Match
@@ -494,7 +490,6 @@ final class ModelGovernanceEngine {
 
         // Check memory for loading
         guard resourceSnapshot.availableMemoryGB > sizeGB * 1.2 else {
-            // periphery:ignore - Reserved: canAccommodateModel(sizeGB:) instance method reserved for future feature activation
             return false
         }
 
@@ -639,7 +634,6 @@ final class ModelGovernanceEngine {
     ) {
         qualityTracker.recordQuality(
             modelName: modelName,
-            // periphery:ignore - Reserved: recordModelQuality(modelName:taskType:success:latency:userSatisfaction:) instance method reserved for future feature activation
             taskType: taskType,
             success: success,
             latency: latency,
@@ -736,8 +730,6 @@ final class ModelGovernanceEngine {
 
 // MARK: - Supporting Types
 
-// periphery:ignore - Reserved: shutdown() instance method reserved for future feature activation
-
 /// State of the Supra-Model (always-present anchor)
 struct SupraModelState: Codable, Sendable {
     let modelId: String
@@ -818,13 +810,9 @@ struct GovernanceModelSelection: Sendable {
 
 /// Task context for model selection in governance engine
 struct GovernanceTaskContext: Sendable {
-    // periphery:ignore - Reserved: tier property reserved for future feature activation
-    // periphery:ignore - Reserved: score property reserved for future feature activation
-    // periphery:ignore - Reserved: reason property reserved for future feature activation
     var urgency: GovernanceTaskUrgency = .normal
     var allowSituational: Bool = true
     var preferLocal: Bool = true
-    // periphery:ignore - Reserved: GovernanceTaskContext type reserved for future feature activation
     var maxLatencyMs: Int?
 
     enum GovernanceTaskUrgency: String, Sendable {
@@ -858,16 +846,11 @@ struct ResourceSnapshot: Sendable {
     var thermalState: ResourceThermalState = .nominal
     var timestamp = Date()
 
-// periphery:ignore - Reserved: modelStorageGB property reserved for future feature activation
-
-// periphery:ignore - Reserved: thermalState property reserved for future feature activation
-
     var memoryPressure: Double {
         1.0 - (availableMemoryGB / totalMemoryGB)
     }
 
     var diskPressure: Double {
-        // periphery:ignore - Reserved: diskPressure property reserved for future feature activation
         1.0 - (availableDiskGB / totalDiskGB)
     }
 }
@@ -884,6 +867,5 @@ enum ResourceThermalState: String, Codable, Sendable {
 extension Notification.Name {
     static let supraModelEvolved = Notification.Name("ModelGovernance.supraModelEvolved")
     static let supraModelBootstrapRequired = Notification.Name("ModelGovernance.bootstrapRequired")
-    // periphery:ignore - Reserved: fleetReorganized static property reserved for future feature activation
     static let fleetReorganized = Notification.Name("ModelGovernance.fleetReorganized")
 }

@@ -24,7 +24,6 @@ public final class BrowserAutomationEngine: ObservableObject {
 
     // MARK: - Configuration
 
-    // periphery:ignore - Reserved: allowedDomains property reserved for future feature activation
     private var allowedDomains: Set<String> = []
     private var userAgent = "TheaBrowser/1.0"
     private var timeout: TimeInterval = 30

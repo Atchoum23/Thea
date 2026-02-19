@@ -42,7 +42,6 @@ final class WorkflowEngine {
         loadWorkflows()
     }
 
-    // periphery:ignore - Reserved: shared static property reserved for future feature activation
     // MARK: - Workflow Management
 
     /// Create a new workflow
@@ -69,16 +68,12 @@ final class WorkflowEngine {
         saveWorkflows()
     }
 
-// periphery:ignore - Reserved: createWorkflow(name:description:) instance method reserved for future feature activation
-
     /// Get a workflow by ID
     func getWorkflow(id: UUID) -> AutomationWorkflow? {
         workflows.first { $0.id == id }
     }
 
     // MARK: - Workflow Execution
-
-// periphery:ignore - Reserved: updateWorkflow(_:) instance method reserved for future feature activation
 
     /// Execute a workflow
     func execute(_ workflow: AutomationWorkflow, input: [String: Any] = [:]) async -> AutomationWorkflowResult {
@@ -88,20 +83,17 @@ final class WorkflowEngine {
         executionProgress = 0
 
         var nodeResults: [UUID: NodeResult] = [:]
-        // periphery:ignore - Reserved: deleteWorkflow(id:) instance method reserved for future feature activation
         var context: [String: Any] = input
         var hasError = false
         var errorMessage: String?
 
         // Build execution order (topological sort)
-        // periphery:ignore - Reserved: getWorkflow(id:) instance method reserved for future feature activation
         let orderedNodes = topologicalSort(workflow)
 
         for (index, node) in orderedNodes.enumerated() where node.isEnabled {
             onNodeProgress?(node.id, .running)
 
             let nodeStart = Date()
-            // periphery:ignore - Reserved: execute(_:input:) instance method reserved for future feature activation
             do {
                 let output = try await executeNode(node, context: context)
                 context[node.id.uuidString] = output
@@ -181,7 +173,6 @@ final class WorkflowEngine {
             return try await executeHTTPRequest(node, context: context)
         case .fileRead:
             return try await executeFileRead(node, context: context)
-        // periphery:ignore - Reserved: cancelExecution() instance method reserved for future feature activation
         case .fileWrite:
             return try await executeFileWrite(node, context: context)
         case .conditional:
@@ -190,7 +181,6 @@ final class WorkflowEngine {
             return try await executeLoop(node, context: context)
         case .aggregate:
             return try await executeAggregate(node, context: context)
-        // periphery:ignore - Reserved: executeNode(_:context:) instance method reserved for future feature activation
         case .transform:
             return try await executeTransform(node, context: context)
         case .delay:
@@ -219,7 +209,6 @@ final class WorkflowEngine {
             throw AutomationWorkflowError.executionFailed("No AI provider available")
         }
 
-        // periphery:ignore - Reserved: executeLLMPrompt(_:context:) instance method reserved for future feature activation
         // Resolve model - use specified model or default
         let model: String
         if modelName == "default" || modelName.isEmpty {
@@ -268,7 +257,6 @@ final class WorkflowEngine {
         if let headers = node.configuration.parameters["headers"] {
             for header in headers.components(separatedBy: "\n") {
                 let parts = header.components(separatedBy: ":")
-                // periphery:ignore - Reserved: executeHTTPRequest(_:context:) instance method reserved for future feature activation
                 if parts.count == 2 {
                     request.addValue(parts[1].trimmingCharacters(in: .whitespaces),
                                    forHTTPHeaderField: parts[0].trimmingCharacters(in: .whitespaces))
@@ -297,7 +285,6 @@ final class WorkflowEngine {
         guard let path = node.configuration.parameters["path"],
               let content = node.configuration.parameters["content"] else {
             throw AutomationWorkflowError.invalidConfiguration("Missing path or content")
-        // periphery:ignore - Reserved: executeFileRead(_:context:) instance method reserved for future feature activation
         }
 
         let interpolatedPath = interpolate(path, with: context)
@@ -306,8 +293,6 @@ final class WorkflowEngine {
         try interpolatedContent.write(toFile: interpolatedPath, atomically: true, encoding: .utf8)
         return "File written successfully"
     }
-
-// periphery:ignore - Reserved: executeFileWrite(_:context:) instance method reserved for future feature activation
 
     private func executeConditional(_ node: AutomationNode, context: [String: Any]) async throws -> String {
         guard let condition = node.configuration.parameters["condition"] else {
@@ -320,7 +305,6 @@ final class WorkflowEngine {
         return result ? "true" : "false"
     }
 
-    // periphery:ignore - Reserved: executeConditional(_:context:) instance method reserved for future feature activation
     private func executeLoop(_ node: AutomationNode, context: [String: Any]) async throws -> String {
         guard let items = node.configuration.parameters["items"] else {
             throw AutomationWorkflowError.invalidConfiguration("No items to loop over")
@@ -331,7 +315,6 @@ final class WorkflowEngine {
         return "Processed \(itemList.count) items"
     }
 
-    // periphery:ignore - Reserved: executeLoop(_:context:) instance method reserved for future feature activation
     private func executeAggregate(_ node: AutomationNode, context: [String: Any]) async throws -> String {
         let strategy = node.configuration.parameters["strategy"] ?? "join"
         let inputs = context.values.compactMap { $0 as? String }
@@ -341,7 +324,6 @@ final class WorkflowEngine {
             let separator = node.configuration.parameters["separator"] ?? "\n"
             return inputs.joined(separator: separator)
         case "count":
-            // periphery:ignore - Reserved: executeAggregate(_:context:) instance method reserved for future feature activation
             return String(inputs.count)
         case "first":
             return inputs.first ?? ""
@@ -360,7 +342,6 @@ final class WorkflowEngine {
 
         let interpolated = interpolate(input, with: context)
 
-        // periphery:ignore - Reserved: executeTransform(_:context:) instance method reserved for future feature activation
         switch transform {
         case "uppercase":
             return interpolated.uppercased()
@@ -392,13 +373,11 @@ final class WorkflowEngine {
     }
 
     private func executeNotification(_ node: AutomationNode, context: [String: Any]) async throws -> String {
-        // periphery:ignore - Reserved: executeDelay(_:context:) instance method reserved for future feature activation
         let title = interpolate(node.configuration.parameters["title"] ?? "Thea Workflow", with: context)
         let body = interpolate(node.configuration.parameters["body"] ?? "", with: context)
         let sound = node.configuration.parameters["sound"] ?? "default"
 
         #if canImport(UserNotifications)
-        // periphery:ignore - Reserved: executeNotification(_:context:) instance method reserved for future feature activation
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
@@ -422,7 +401,6 @@ final class WorkflowEngine {
               let uuid = UUID(uuidString: workflowId),
               let subWorkflow = getWorkflow(id: uuid) else {
             throw AutomationWorkflowError.invalidConfiguration("Sub-workflow not found")
-        // periphery:ignore - Reserved: executeSubWorkflow(_:context:) instance method reserved for future feature activation
         }
 
         let result = await execute(subWorkflow, input: context.mapValues { "\($0)" })
@@ -433,7 +411,6 @@ final class WorkflowEngine {
         // Code execution is disabled for security
         // In production, could use JavaScriptCore or similar
         throw AutomationWorkflowError.unsupportedOperation("Code execution is not supported")
-    // periphery:ignore - Reserved: executeCode(_:context:) instance method reserved for future feature activation
     }
 
     // MARK: - Helpers
@@ -441,8 +418,6 @@ final class WorkflowEngine {
     private func topologicalSort(_ workflow: AutomationWorkflow) -> [AutomationNode] {
         var result: [AutomationNode] = []
         var visited: Set<UUID> = []
-
-// periphery:ignore - Reserved: topologicalSort(_:) instance method reserved for future feature activation
 
         func visit(_ node: AutomationNode) {
             guard !visited.contains(node.id) else { return }
@@ -468,7 +443,6 @@ final class WorkflowEngine {
 
     private func interpolate(_ text: String, with context: [String: Any]) -> String {
         var result = text
-        // periphery:ignore - Reserved: interpolate(_:with:) instance method reserved for future feature activation
         for (key, value) in context {
             result = result.replacingOccurrences(of: "{{\(key)}}", with: "\(value)")
         }
@@ -476,7 +450,6 @@ final class WorkflowEngine {
     }
 
     private func evaluateCondition(_ condition: String) -> Bool {
-        // periphery:ignore - Reserved: evaluateCondition(_:) instance method reserved for future feature activation
         // Simple evaluation - just check for "true" or non-empty
         condition.lowercased() == "true" || (!condition.isEmpty && condition != "false" && condition != "0")
     }
@@ -492,7 +465,6 @@ final class WorkflowEngine {
         }
     }
 
-    // periphery:ignore - Reserved: saveWorkflows() instance method reserved for future feature activation
     private func saveWorkflows() {
         do {
             let data = try JSONEncoder().encode(workflows)

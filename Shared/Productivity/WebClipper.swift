@@ -273,8 +273,6 @@ struct HTMLExtractor: Sendable {
     private static func extractTags(from html: String, title: String, content: String) -> [String] {
         var tags: [String] = []
 
-// periphery:ignore - Reserved: title parameter kept for API compatibility
-
         if let keywords = extractMeta(from: html, name: "keywords") {
             let kw = keywords.components(separatedBy: ",")
                 .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -344,7 +342,6 @@ final class WebClipper {
     }
 
     func clipFromHTML(_ html: String, url: String) -> ClippedArticle {
-        // periphery:ignore - Reserved: clipFromHTML(_:url:) instance method reserved for future feature activation
         let article = HTMLExtractor.extractReadableContent(from: html, url: url)
         articles.insert(article, at: 0)
         saveArticles()
@@ -420,7 +417,6 @@ final class WebClipper {
         saveArticles()
     }
 
-    // periphery:ignore - Reserved: updateTags(_:tags:) instance method reserved for future feature activation
     func updateTags(_ articleID: UUID, tags: [String]) {
         guard let index = articles.firstIndex(where: { $0.id == articleID }) else { return }
         articles[index].tags = tags

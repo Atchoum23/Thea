@@ -13,7 +13,6 @@ import OSLog
 public final class ConversationIntelligenceService: ObservableObject {
     public static let shared = ConversationIntelligenceService()
 
-    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let logger = Logger(subsystem: "com.thea.app", category: "ConversationIntelligence")
 
     // NLP components

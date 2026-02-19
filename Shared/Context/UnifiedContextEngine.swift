@@ -403,7 +403,6 @@ public actor ContextInsightEngine {
     public static let shared = ContextInsightEngine()
 
     private var patterns: [String: PatternData] = [:]
-    // periphery:ignore - Reserved: patterns property reserved for future feature activation
     private var lastInsightTime: [String: Date] = [:]
     private let minimumInsightInterval: TimeInterval = 300 // 5 minutes
 
@@ -517,7 +516,6 @@ public actor ContextInsightEngine {
 
 // MARK: - Pattern Data
 
-// periphery:ignore - Reserved: PatternData type reserved for future feature activation
 private struct PatternData {
     var occurrences: Int = 0
     var lastOccurrence: Date?

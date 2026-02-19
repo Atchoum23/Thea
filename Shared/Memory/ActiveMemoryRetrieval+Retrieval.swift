@@ -234,8 +234,6 @@ extension ActiveMemoryRetrieval {
 
     func retrieveFromEventHistory(
         query: String,
-        // periphery:ignore - Reserved: query parameter kept for API compatibility
-        // periphery:ignore - Reserved: conversationId parameter kept for API compatibility
         conversationId: UUID?
     ) async -> PartialRetrievalResult {
         var sources: [RetrievalSource] = []

@@ -108,7 +108,6 @@ final class FileAttachmentManager {
         processingProgress = 1.0
     }
 
-    // periphery:ignore - Reserved: addAttachments(from:) instance method reserved for future feature activation
     /// Add file from data
     func addAttachment(data: Data, name: String, mimeType: String) async throws {
         isProcessing = true
@@ -117,7 +116,6 @@ final class FileAttachmentManager {
         let fileSizeMB = Double(data.count) / 1_048_576
 
         if fileSizeMB > configuration.maxFileSizeMB {
-            // periphery:ignore - Reserved: addAttachment(data:name:mimeType:) instance method reserved for future feature activation
             throw FileAttachmentError.fileTooLarge(fileSizeMB, configuration.maxFileSizeMB)
         }
 
@@ -395,7 +393,6 @@ final class FileAttachmentManager {
         if mimeType.hasPrefix("text/") { return .text }
         if mimeType.hasPrefix("audio/") { return .audio }
         if mimeType.hasPrefix("video/") { return .video }
-        // periphery:ignore - Reserved: detectFileType(from:name:) instance method reserved for future feature activation
         if mimeType == "application/pdf" { return .pdf }
         if mimeType == "application/json" { return .data }
 
@@ -461,7 +458,6 @@ final class FileAttachmentManager {
 
         var context = "## Attached Files (\(attachments.count))\n\n"
 
-        // periphery:ignore - Reserved: formatForAI() instance method reserved for future feature activation
         for attachment in attachments {
             context += "### \(attachment.name)\n"
             context += "- Type: \(attachment.fileType.displayName)\n"
@@ -492,7 +488,6 @@ final class FileAttachmentManager {
         attachments
             .filter { $0.fileType == .image }
             .compactMap { attachment -> (String, String, String)? in
-                // periphery:ignore - Reserved: getBase64Images() instance method reserved for future feature activation
                 let data = attachment.processedData ?? attachment.rawData
                 guard let data else { return nil }
                 return (attachment.name, data.base64EncodedString(), attachment.mimeType)
@@ -504,7 +499,6 @@ final class FileAttachmentManager {
     func updateConfiguration(_ config: Configuration) {
         configuration = config
         saveConfiguration()
-    // periphery:ignore - Reserved: updateConfiguration(_:) instance method reserved for future feature activation
     }
 
     private func loadConfiguration() {
@@ -518,7 +512,6 @@ final class FileAttachmentManager {
 
     private func saveConfiguration() {
         do {
-            // periphery:ignore - Reserved: saveConfiguration() instance method reserved for future feature activation
             let data = try JSONEncoder().encode(configuration)
             UserDefaults.standard.set(data, forKey: "FileAttachment.config")
         } catch {
@@ -538,15 +531,12 @@ struct FileAttachment: Identifiable, Sendable {
     let mimeType: String
     let addedAt: Date
 
-// periphery:ignore - Reserved: addedAt property reserved for future feature activation
-
     var rawData: Data?
     var processedData: Data?
     var extractedText: String?
     var extractedMetadata: [String: String]?
 
     #if os(macOS)
-    // periphery:ignore - Reserved: previewImage property reserved for future feature activation
     @MainActor var previewImage: NSImage?
     #elseif os(iOS) || os(tvOS)
     @MainActor var previewUIImage: UIImage?

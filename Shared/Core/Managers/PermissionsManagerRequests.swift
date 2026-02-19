@@ -264,7 +264,6 @@ extension PermissionsManager {
 
     // MARK: - Open Settings
 
-    // periphery:ignore - Reserved: openSystemSettings() instance method reserved for future feature activation
     func openSystemSettings() {
         #if os(iOS)
             if let url = URL(string: UIApplication.openSettingsURLString) {

@@ -14,7 +14,6 @@ import SwiftUI
 /// Centralized container for managing app-wide services
 /// Use @Environment(\.serviceContainer) in views to access services
 @MainActor
-// periphery:ignore - Reserved: ServiceContainer type reserved for future feature activation
 final class ServiceContainer: ObservableObject {
     static let shared = ServiceContainer()
 

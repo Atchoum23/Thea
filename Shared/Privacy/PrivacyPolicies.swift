@@ -29,9 +29,6 @@ struct CloudAPIPolicy: PrivacyPolicy {
 struct MessagingPolicy: PrivacyPolicy {
     let name = "Messaging"
     let strictnessLevel: StrictnessLevel = .strict
-    // periphery:ignore - Reserved: allowCodeSnippets property reserved for future feature activation
-    // periphery:ignore - Reserved: allowHealthData property reserved for future feature activation
-    // periphery:ignore - Reserved: allowFinancialData property reserved for future feature activation
     let allowPII = false
     let allowFilePaths = false
     let allowCodeSnippets = false
@@ -46,12 +43,6 @@ struct MessagingPolicy: PrivacyPolicy {
 }
 
 // MARK: - MCP Policy
-
-// periphery:ignore - Reserved: allowCodeSnippets property reserved for future feature activation
-
-// periphery:ignore - Reserved: allowHealthData property reserved for future feature activation
-
-// periphery:ignore - Reserved: allowFinancialData property reserved for future feature activation
 
 /// Policy for MCP tool responses (Claude Desktop calling Thea tools).
 /// Strict — filter sensitive local data from tool responses.
@@ -70,12 +61,6 @@ struct MCPPolicy: PrivacyPolicy {
     let maxContentLength = 0
 }
 
-// periphery:ignore - Reserved: allowCodeSnippets property reserved for future feature activation
-
-// periphery:ignore - Reserved: allowHealthData property reserved for future feature activation
-
-// periphery:ignore - Reserved: allowFinancialData property reserved for future feature activation
-
 // MARK: - Web API Policy
 
 /// Policy for HTTP responses from TheaWeb / Vapor endpoints.
@@ -90,9 +75,6 @@ struct WebAPIPolicy: PrivacyPolicy {
     let blockedKeywords: Set<String> = []
     let allowedTopics: Set<String>? = nil
     let maxContentLength = 0
-// periphery:ignore - Reserved: allowCodeSnippets property reserved for future feature activation
-// periphery:ignore - Reserved: allowHealthData property reserved for future feature activation
-// periphery:ignore - Reserved: allowFinancialData property reserved for future feature activation
 }
 
 // MARK: - Moltbook Policy
@@ -107,9 +89,6 @@ struct MoltbookPolicy: PrivacyPolicy {
     let allowCodeSnippets = false
     let allowHealthData = false
     let allowFinancialData = false
-    // periphery:ignore - Reserved: allowCodeSnippets property reserved for future feature activation
-    // periphery:ignore - Reserved: allowHealthData property reserved for future feature activation
-    // periphery:ignore - Reserved: allowFinancialData property reserved for future feature activation
     let blockedKeywords: Set<String> = [
         "password", "secret", "api key", "token", "credential",
         "credit card", "bank", "social security", "ssn",
@@ -133,7 +112,6 @@ struct MoltbookPolicy: PrivacyPolicy {
 // MARK: - Permissive Policy
 
 /// Minimal filtering for fully trusted local channels.
-// periphery:ignore - Reserved: PermissivePolicy type reserved for future feature activation
 struct PermissivePolicy: PrivacyPolicy {
     let name = "Permissive"
     let strictnessLevel: StrictnessLevel = .permissive

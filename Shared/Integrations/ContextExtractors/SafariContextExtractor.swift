@@ -5,10 +5,7 @@ import os.log
 
 private let safariLogger = Logger(subsystem: "ai.thea.app", category: "SafariContextExtractor")
 
-// periphery:ignore - Reserved: safariLogger global var reserved for future feature activation
-
 /// Extracts context from Safari using AppleScript and Accessibility API
-// periphery:ignore - Reserved: SafariContextExtractor type reserved for future feature activation
 enum SafariContextExtractor {
     /// Extract context from frontmost Safari window
     static func extract(

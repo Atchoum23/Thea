@@ -199,7 +199,6 @@ actor TheaAgentRunner {
     }
 
     /// Distill a completed session's findings into a compact summary for the supervisor.
-    // periphery:ignore - Reserved: distillAndRelease(session:) instance method reserved for future feature activation
     func distillAndRelease(session: TheaAgentSession) async -> String {
         let messages = await MainActor.run { session.messages }
         let agentOutput = messages

@@ -156,7 +156,6 @@ public class OnDeviceAIService: ObservableObject {
     /// Execute a tool-augmented prompt (Foundation Models tool calling)
     public func generateWithTools(
         prompt: String,
-        // periphery:ignore - Reserved: tools parameter kept for API compatibility
         tools: [OnDeviceTool]
     ) async throws -> OnDeviceToolResponse {
         guard isAvailable else {

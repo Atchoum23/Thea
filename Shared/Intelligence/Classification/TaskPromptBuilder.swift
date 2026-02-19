@@ -11,7 +11,6 @@ import Foundation
 
 /// Builds task-specific system prompt instructions based on classified task type.
 /// Stateless utility — all methods are static.
-// periphery:ignore - Reserved: TaskPromptBuilder type reserved for future feature activation
 enum TaskPromptBuilder {
 
     // MARK: - Public API

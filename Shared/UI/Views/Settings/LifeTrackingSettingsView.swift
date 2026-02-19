@@ -1,6 +1,5 @@
 import SwiftUI
 
-// periphery:ignore - Reserved: LifeTrackingSettingsView type reserved for future feature activation
 struct LifeTrackingSettingsView: View {
     @State private var config = AppConfiguration.shared.lifeTrackingConfig
     @State private var showingDeleteConfirmation = false

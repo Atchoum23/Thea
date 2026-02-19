@@ -234,7 +234,6 @@ public struct KnowledgeSourcesView: View {
     }
 
     @ViewBuilder
-    // periphery:ignore - Reserved: toolbarMenuItems property reserved for future feature activation
     private var toolbarMenuItems: some View {
         Button {
             Task {

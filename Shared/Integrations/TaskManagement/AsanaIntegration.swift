@@ -15,7 +15,6 @@ import CryptoKit
 /// Comprehensive Asana API client with MCP server integration
 public actor AsanaClient {
     private let baseURL = "https://app.asana.com/api/1.0"
-    // periphery:ignore - Reserved: mcpURL property reserved for future feature activation
     private let mcpURL = "https://mcp.asana.com/v2/mcp"
 
     private var accessToken: String?

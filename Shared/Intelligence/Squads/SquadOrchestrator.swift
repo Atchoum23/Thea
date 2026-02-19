@@ -341,7 +341,6 @@ public final class SquadOrchestrator {
         phase: SquadExecutionPlan.ExecutionPhase,
         squad: SquadDefinition,
         task: SquadTask,
-        // periphery:ignore - Reserved: executionState parameter kept for API compatibility
         executionState: SquadExecutionState
     ) async throws -> [SquadTaskResult] {
         logger.info("Executing parallel phase: \(phase.name) with \(phase.memberIds.count) members")

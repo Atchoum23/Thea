@@ -424,9 +424,7 @@ public actor AgentCommunicationBus {
 /// Represents an agent's subscription to the bus
 struct AgentSubscription: Sendable {
     let agentId: UUID
-    // periphery:ignore - Reserved: agentId property reserved for future feature activation
     let filter: BusAgentMessageFilter
-    // periphery:ignore - Reserved: registeredAt property reserved for future feature activation
     let registeredAt: Date
 }
 

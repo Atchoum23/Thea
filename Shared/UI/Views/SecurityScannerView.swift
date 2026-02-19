@@ -16,8 +16,6 @@ struct SecurityScannerView: View {
 
     var body: some View {
         #if os(macOS)
-        // periphery:ignore - Reserved: selectedFinding property reserved for future feature activation
-        // periphery:ignore - Reserved: showCategoryPicker property reserved for future feature activation
         HSplitView {
             scanPanel
                 .frame(minWidth: 280, idealWidth: 320)
@@ -157,7 +155,6 @@ struct SecurityScannerView: View {
     private var scanSection: some View {
         Section {
             Button {
-                // periphery:ignore - Reserved: scanSection property reserved for future feature activation
                 Task { await runScan() }
             } label: {
                 if isScanning {
@@ -176,7 +173,6 @@ struct SecurityScannerView: View {
     @ViewBuilder
     private var lastScanSummary: some View {
         if let report = lastReport {
-            // periphery:ignore - Reserved: lastScanSummary property reserved for future feature activation
             Section("Last Scan") {
                 HStack {
                     Image(systemName: report.overallThreatLevel.icon)
@@ -214,7 +210,6 @@ struct SecurityScannerView: View {
 
     @ViewBuilder
     private var findingsSection: some View {
-        // periphery:ignore - Reserved: findingsSection property reserved for future feature activation
         if let report = lastReport, !report.findings.isEmpty {
             ForEach(ScanCategory.allCases, id: \.self) { category in
                 let catFindings = report.findings.filter { $0.category == category }
@@ -288,7 +283,6 @@ struct SecurityScannerView: View {
         .padding(.vertical, 2)
     }
 
-    // periphery:ignore - Reserved: severityRow(_:count:color:) instance method reserved for future feature activation
     private func severityRow(_ label: String, count: Int, color: Color) -> some View {
         HStack {
             Circle()

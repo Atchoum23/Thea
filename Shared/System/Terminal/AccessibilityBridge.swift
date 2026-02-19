@@ -14,12 +14,10 @@
             case terminalNotFound
             case noFocusedWindow
             case elementNotFound
-            // periphery:ignore - Reserved: accessibilityBridgeLogger global var reserved for future feature activation
             case attributeReadFailed
 
             var errorDescription: String? {
                 switch self {
-                // periphery:ignore - Reserved: AccessibilityError type reserved for future feature activation
                 case .accessDenied:
                     "Accessibility access is denied. Please grant access in System Preferences > Security & Privacy > Privacy > Accessibility"
                 case .terminalNotFound:
@@ -61,7 +59,6 @@
             guard let terminalApp = NSWorkspace.shared.runningApplications.first(where: {
                 $0.bundleIdentifier == "com.apple.Terminal"
             }) else {
-                // periphery:ignore - Reserved: readTerminalText() static method reserved for future feature activation
                 throw AccessibilityError.terminalNotFound
             }
 
@@ -96,7 +93,6 @@
 
             guard let terminalApp = NSWorkspace.shared.runningApplications.first(where: {
                 $0.bundleIdentifier == "com.apple.Terminal"
-            // periphery:ignore - Reserved: readSelectedText() static method reserved for future feature activation
             }) else {
                 throw AccessibilityError.terminalNotFound
             }
@@ -129,7 +125,6 @@
             }
 
             guard let terminalApp = NSWorkspace.shared.runningApplications.first(where: {
-                // periphery:ignore - Reserved: getTerminalWindowBounds() static method reserved for future feature activation
                 $0.bundleIdentifier == "com.apple.Terminal"
             }) else {
                 throw AccessibilityError.terminalNotFound
@@ -178,7 +173,6 @@
             var value: CFTypeRef?
             if AXUIElementCopyAttributeValue(element, kAXValueAttribute as CFString, &value) == .success,
                let text = value as? String
-            // periphery:ignore - Reserved: findTextContent(in:) static method reserved for future feature activation
             {
                 return text
             }
@@ -225,7 +219,6 @@
             var children: CFTypeRef?
             if AXUIElementCopyAttributeValue(element, kAXChildrenAttribute as CFString, &children) == .success {
                 return children as? [AXUIElement] ?? []
-            // periphery:ignore - Reserved: getChildren(of:) static method reserved for future feature activation
             }
             return []
         }
@@ -234,7 +227,6 @@
         static func getRole(of element: AXUIElement) -> String? {
             var role: CFTypeRef?
             if AXUIElementCopyAttributeValue(element, kAXRoleAttribute as CFString, &role) == .success {
-                // periphery:ignore - Reserved: getRole(of:) static method reserved for future feature activation
                 return role as? String
             }
             return nil
@@ -243,7 +235,6 @@
         /// Get the title of an element
         static func getTitle(of element: AXUIElement) -> String? {
             var title: CFTypeRef?
-            // periphery:ignore - Reserved: getTitle(of:) static method reserved for future feature activation
             if AXUIElementCopyAttributeValue(element, kAXTitleAttribute as CFString, &title) == .success {
                 return title as? String
             }
@@ -257,7 +248,6 @@
     // monitoring state is only mutated from startMonitoring/stopMonitoring, called sequentially
     /// Monitor for Terminal content changes using Accessibility observers
     final class TerminalAccessibilityMonitor: @unchecked Sendable {
-        // periphery:ignore - Reserved: TerminalAccessibilityMonitor type reserved for future feature activation
         private var observer: AXObserver?
         private var terminalPID: pid_t?
         fileprivate var onChange: (@MainActor (String) -> Void)?
@@ -306,7 +296,6 @@
         }
     }
 
-    // periphery:ignore - Reserved: observerCallback(_:_:_:_:) free function reserved for future feature activation
     private func observerCallback(
         _: AXObserver,
         _: AXUIElement,

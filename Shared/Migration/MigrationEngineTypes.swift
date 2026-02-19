@@ -37,9 +37,7 @@ struct MigrationProgress: Sendable {
     let stage: MigrationStage
     let currentItem: String
     let itemsProcessed: Int
-    // periphery:ignore - Reserved: attachmentCount property reserved for future feature activation
     let totalItems: Int
-    // periphery:ignore - Reserved: estimatedDurationSeconds property reserved for future feature activation
     let percentage: Double
 
     var conversations: [MigratedConversation]?
@@ -53,7 +51,6 @@ struct MigrationStats: Sendable {
     let attachmentCount: Int
 }
 
-// periphery:ignore - Reserved: MigrationStats type reserved for future feature activation
 enum MigrationStage: String, Sendable {
     case scanning = "Scanning"
     case conversations = "Migrating Conversations"
@@ -76,7 +73,6 @@ struct MigratedConversation: Sendable {
 struct MigratedMessage: Sendable {
     let role: MessageRole
     let content: MessageContent
-    // periphery:ignore - Reserved: provider property reserved for future feature activation
     let timestamp: Date
 }
 
@@ -87,8 +83,6 @@ struct MigratedProject: Sendable {
     let createdAt: Date
     let updatedAt: Date
 }
-
-// periphery:ignore - Reserved: description property reserved for future feature activation
 
 struct MigrationSourceInfo {
     let source: any MigrationSource
@@ -105,12 +99,6 @@ class MigrationJob: Identifiable, @unchecked Sendable {
     var endTime: Date?
     var status: MigrationStatus
     var progress: MigrationProgress
-
-// periphery:ignore - Reserved: startTime property reserved for future feature activation
-
-// periphery:ignore - Reserved: endTime property reserved for future feature activation
-
-// periphery:ignore - Reserved: status property reserved for future feature activation
 
     init(id: UUID, source: String, startTime: Date, status: MigrationStatus, progress: MigrationProgress) {
         self.id = id
@@ -305,7 +293,6 @@ struct ChatGPTMigration: MigrationSource {
     }
 
     func importFromExport(fileURL: URL) async throws -> AsyncThrowingStream<MigrationProgress, Error> {
-        // periphery:ignore - Reserved: importFromExport(fileURL:) instance method reserved for future feature activation
         AsyncThrowingStream { continuation in
             Task {
                 do {
@@ -329,7 +316,6 @@ struct ChatGPTMigration: MigrationSource {
         }
     }
 
-    // periphery:ignore - Reserved: parseChatGPTConversation(_:) instance method reserved for future feature activation
     private func parseChatGPTConversation(_ json: [String: Any]) throws -> MigratedConversation {
         let title = json["title"] as? String ?? "Untitled"
         let mapping = json["mapping"] as? [String: [String: Any]] ?? [:]

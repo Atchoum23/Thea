@@ -307,7 +307,6 @@ public actor HealthIntelligence {
 
     #if canImport(HealthKit)
     private let healthStore = HKHealthStore()
-    // periphery:ignore - Reserved: authorizedTypes property reserved for future feature activation
     private var authorizedTypes: Set<HKObjectType> = []
     #endif
 

@@ -231,8 +231,6 @@ actor DNSBlocklistService {
         entries.values.filter { $0.source == .user }.sorted { $0.domain < $1.domain }
     }
 
-// periphery:ignore - Reserved: getUserEntries() instance method reserved for future feature activation
-
     func getStats() -> BlocklistStats {
         resetDailyCountsIfNeeded()
         var byCategory: [BlockCategory: Int] = [:]
@@ -250,14 +248,12 @@ actor DNSBlocklistService {
 
     func resetStats() {
         blockedCountToday = 0
-        // periphery:ignore - Reserved: resetStats() instance method reserved for future feature activation
         blockedCountTotal = 0
     }
 
     // MARK: - Built-in Lists
 
     private func loadBuiltinBlocklists() {
-        // periphery:ignore - Reserved: loadBuiltinBlocklists() instance method reserved for future feature activation
         // Advertising domains
         let adDomains = [
             "doubleclick.net", "googlesyndication.com", "googleadservices.com",
@@ -324,7 +320,6 @@ actor DNSBlocklistService {
         }
     }
 
-    // periphery:ignore - Reserved: loadPersistedEntries() instance method reserved for future feature activation
     private func loadPersistedEntries() {
         guard let data = UserDefaults.standard.data(forKey: storageKey) else { return }
         let persisted: [BlocklistEntry]

@@ -775,7 +775,6 @@ final class DocumentScanner {
         return counts.sorted { $0.value > $1.value }
     }
 
-    // periphery:ignore - Reserved: imageURL(for:) instance method reserved for future feature activation
     func imageURL(for path: String) -> URL {
         imagesDir.appendingPathComponent(path)
     }

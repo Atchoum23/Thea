@@ -342,7 +342,6 @@ private struct RoutePerformanceData {
         return Float(successfulAttempts) / Float(totalAttempts)
     }
 
-    // periphery:ignore - Reserved: averageUserRating property reserved for future feature activation
     var averageUserRating: Float? {
         guard userRatingCount > 0 else { return nil }
         return userRatingSum / Float(userRatingCount)

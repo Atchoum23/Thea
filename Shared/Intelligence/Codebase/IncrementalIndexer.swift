@@ -53,7 +53,6 @@ public actor IncrementalIndexer {
 
     private var isWatching = false
     private var watchedPaths: Set<String> = []
-    // periphery:ignore - Reserved: fileSystemSources property reserved for future feature activation
     private var fileSystemSources: [String: DispatchSourceFileSystemObject] = [:]
     private var directoryMonitors: [String: DirectoryMonitor] = [:]
 

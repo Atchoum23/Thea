@@ -52,7 +52,6 @@ struct ConversationLanguagePickerView: View {
 // MARK: - Conversation Language Badge
 
 /// Inline badge showing the active language in the chat header.
-// periphery:ignore - Reserved: ConversationLanguageBadge type reserved for future feature activation
 struct ConversationLanguageBadge: View {
     let conversation: Conversation
 

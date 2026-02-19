@@ -419,7 +419,6 @@ public actor IdleTimeMonitor: ActivityMonitor {
     private let logger: ActivityLogger
     private var checkTask: Task<Void, Never>?
     private var lastActiveTime: Date?
-    // periphery:ignore - Reserved: lastActiveTime property reserved for future feature activation
     private var isCurrentlyIdle = false
 
     init(logger: ActivityLogger) {
@@ -486,7 +485,6 @@ public actor FocusModeMonitor: ActivityMonitor {
     public let type: MonitorType = .focusMode
     public private(set) var isActive = false
 
-    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let logger: ActivityLogger
 
     init(logger: ActivityLogger) {

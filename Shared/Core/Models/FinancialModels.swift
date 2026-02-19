@@ -52,7 +52,6 @@ final class FinancialTransaction {
         id: UUID = UUID(),
         accountId: UUID,
         amount: Double,
-        // periphery:ignore - Reserved: init(id:accountId:amount:transactionDescription:category:merchant:date:isRecurring:tags:) initializer reserved for future feature activation
         transactionDescription: String,
         category: String? = nil,
         merchant: String? = nil,
@@ -80,21 +79,18 @@ extension FinancialTransaction: Identifiable {}
 enum TimePeriod: String, Codable {
     case week
     case month
-    // periphery:ignore - Reserved: TimePeriod type reserved for future feature activation
     case quarter
     case year
 }
 
 struct MonthlyData: Identifiable {
     let id = UUID()
-    // periphery:ignore - Reserved: MonthlyData type reserved for future feature activation
     let month: String
     let income: Decimal
     let expenses: Decimal
 }
 
 struct BudgetRecommendation: Identifiable {
-    // periphery:ignore - Reserved: BudgetRecommendation type reserved for future feature activation
     let id = UUID()
     let category: String
     let reason: String
@@ -102,7 +98,6 @@ struct BudgetRecommendation: Identifiable {
     let recommendedBudget: Decimal
 }
 
-// periphery:ignore - Reserved: TransactionAnomaly type reserved for future feature activation
 struct TransactionAnomaly: Identifiable {
     let id = UUID()
     let transaction: FinancialTransaction

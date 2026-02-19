@@ -44,8 +44,6 @@ final class SelfTuningEngine {
         var enableABTesting = true
         var abTestDuration: Int = 20 // Interactions per A/B test
 
-// periphery:ignore - Reserved: shared static property reserved for future feature activation
-
         enum OptimizationStrategy: String, Codable, Sendable, CaseIterable {
             case bayesian = "Bayesian Optimization"
             case genetic = "Genetic Algorithm"
@@ -117,7 +115,6 @@ final class SelfTuningEngine {
             contextType: String,
             responseTime: TimeInterval,
             tokenCount: Int
-        // periphery:ignore - Reserved: bounds static property reserved for future feature activation
         ) {
             self.id = UUID()
             self.parameters = parameters
@@ -135,8 +132,6 @@ final class SelfTuningEngine {
         let value: Double // 0-1 scale
         let timestamp: Date
         let contextType: String?
-
-// periphery:ignore - Reserved: init(parameters:userFeedback:performanceScore:contextType:responseTime:tokenCount:) initializer reserved for future feature activation
 
         enum FeedbackType: String, Codable, Sendable, CaseIterable {
             case explicit = "Explicit Rating"
@@ -211,8 +206,6 @@ final class SelfTuningEngine {
     ) async {
         let params = parameters ?? currentParameters
 
-// periphery:ignore - Reserved: getParameters(for:) instance method reserved for future feature activation
-
         let trial = OptimizationTrial(
             parameters: params,
             userFeedback: feedback,
@@ -226,7 +219,6 @@ final class SelfTuningEngine {
 
         // Trim history if needed
         if optimizationHistory.count > configuration.maxTrialsToKeep {
-            // periphery:ignore - Reserved: recordTrial(parameters:feedback:contextType:responseTime:tokenCount:) instance method reserved for future feature activation
             optimizationHistory.removeFirst(optimizationHistory.count - configuration.maxTrialsToKeep)
         }
 
@@ -263,7 +255,6 @@ final class SelfTuningEngine {
             contextType: contextType,
             responseTime: 0,
             tokenCount: 0
-        // periphery:ignore - Reserved: recordImplicitFeedback(_:contextType:) instance method reserved for future feature activation
         )
     }
 
@@ -288,13 +279,10 @@ final class SelfTuningEngine {
         guard !isOptimizing else { return }
 
         isOptimizing = true
-        // periphery:ignore - Reserved: optimize() instance method reserved for future feature activation
         defer { isOptimizing = false }
 
         let strategy = selectStrategy()
         let result: ModelParameters
-
-// periphery:ignore - Reserved: resetToDefaults() instance method reserved for future feature activation
 
         switch strategy {
         case .bayesian:
@@ -305,7 +293,6 @@ final class SelfTuningEngine {
             result = await runReinforcementOptimization()
         case .hybrid:
             result = await runHybridOptimization()
-        // periphery:ignore - Reserved: runOptimization() instance method reserved for future feature activation
         }
 
         // Calculate improvement
@@ -349,7 +336,6 @@ final class SelfTuningEngine {
         }
     }
 
-    // periphery:ignore - Reserved: selectStrategy() instance method reserved for future feature activation
     // MARK: - Bayesian Optimization
 
     private func runBayesianOptimization() async -> ModelParameters {
@@ -368,7 +354,6 @@ final class SelfTuningEngine {
 
             if sample > bestScore {
                 bestScore = sample
-                // periphery:ignore - Reserved: runBayesianOptimization() instance method reserved for future feature activation
                 bestParams = candidate
             }
         }
@@ -391,7 +376,6 @@ final class SelfTuningEngine {
         for temp in temperatures {
             for topP in topPs {
                 var params = currentParameters
-                // periphery:ignore - Reserved: generateParameterSpace() instance method reserved for future feature activation
                 params.temperature = temp
                 params.topP = topP
                 space.append(params)
@@ -415,7 +399,6 @@ final class SelfTuningEngine {
         return similar.map { $0.performanceScore }.reduce(0, +) / Double(similar.count)
     }
 
-    // periphery:ignore - Reserved: predictScore(for:) instance method reserved for future feature activation
     private func calculateUncertainty(for params: ModelParameters) -> Double {
         // Higher uncertainty for unexplored regions
         let similar = optimizationHistory.filter { trial in
@@ -429,7 +412,6 @@ final class SelfTuningEngine {
 
         let variance = similar.map { trial in
             pow(trial.performanceScore - performanceMetrics.averageScore, 2)
-        // periphery:ignore - Reserved: calculateUncertainty(for:) instance method reserved for future feature activation
         }.reduce(0, +) / Double(similar.count)
 
         return sqrt(variance)
@@ -449,7 +431,6 @@ final class SelfTuningEngine {
         // Add historical best performers
         let bestTrials = optimizationHistory
             .sorted { $0.performanceScore > $1.performanceScore }
-            // periphery:ignore - Reserved: runGeneticOptimization() instance method reserved for future feature activation
             .prefix(5)
 
         population.append(contentsOf: bestTrials.map { $0.parameters })
@@ -492,7 +473,6 @@ final class SelfTuningEngine {
 
         if Double.random(in: 0...1) < 0.3 {
             mutated.topP += Double.random(in: -0.1...0.1) * mutationStrength
-            // periphery:ignore - Reserved: mutate(_:) instance method reserved for future feature activation
             mutated.topP = max(0.1, min(1.0, mutated.topP))
         }
 
@@ -514,7 +494,6 @@ final class SelfTuningEngine {
         child.frequencyPenalty = Double.random(in: 0...1) < 0.5 ? p1.frequencyPenalty : p2.frequencyPenalty
         child.presencePenalty = Double.random(in: 0...1) < 0.5 ? p1.presencePenalty : p2.presencePenalty
 
-        // periphery:ignore - Reserved: crossover(_:_:) instance method reserved for future feature activation
         return child
     }
 
@@ -529,8 +508,6 @@ final class SelfTuningEngine {
 
         // Calculate gradients based on rewards
         let avgScore = recentTrials.map { $0.performanceScore }.reduce(0, +) / Double(recentTrials.count)
-
-// periphery:ignore - Reserved: runReinforcementOptimization() instance method reserved for future feature activation
 
         for trial in recentTrials {
             let advantage = trial.performanceScore - avgScore
@@ -561,8 +538,6 @@ final class SelfTuningEngine {
         let results = await [bayesian, genetic, reinforcement]
         let scores = results.map { predictScore(for: $0) }
 
-// periphery:ignore - Reserved: runHybridOptimization() instance method reserved for future feature activation
-
         // Weighted combination based on scores
         let totalScore = scores.reduce(0, +)
         guard totalScore > 0 else { return currentParameters }
@@ -588,7 +563,6 @@ final class SelfTuningEngine {
         switch feedback.type {
         case .explicit: score *= 1.0
         case .correction: score *= 0.8
-        // periphery:ignore - Reserved: calculateScore(from:) instance method reserved for future feature activation
         case .regeneration: score *= 0.7
         case .continuation: score *= 0.9
         case .abandonment: score *= 0.5
@@ -604,7 +578,6 @@ final class SelfTuningEngine {
         // Need minimum trials
         guard optimizationHistory.count >= configuration.minTrialsBeforeOptimization else {
             return false
-        // periphery:ignore - Reserved: shouldOptimize() instance method reserved for future feature activation
         }
 
         // Optimize periodically or when performance drops
@@ -619,7 +592,6 @@ final class SelfTuningEngine {
 
         guard !trials.isEmpty else { return }
 
-        // periphery:ignore - Reserved: updateMetrics() instance method reserved for future feature activation
         let scores = trials.map { $0.performanceScore }
         performanceMetrics.averageScore = scores.reduce(0, +) / Double(scores.count)
 
@@ -650,7 +622,6 @@ final class SelfTuningEngine {
         if abs(improvement) < configuration.convergenceThreshold {
             if convergenceStatus == .converging {
                 convergenceStatus = .converged
-            // periphery:ignore - Reserved: updateConvergenceStatus(improvement:) instance method reserved for future feature activation
             } else {
                 convergenceStatus = .converging
             }
@@ -664,7 +635,6 @@ final class SelfTuningEngine {
     private func calculateConfidence() -> Double {
         // Higher confidence with more trials and lower variance
         let trialFactor = min(1.0, Double(optimizationHistory.count) / 100.0)
-        // periphery:ignore - Reserved: calculateConfidence() instance method reserved for future feature activation
         let varianceFactor = 1.0 / (1.0 + performanceMetrics.scoreVariance)
         let trendFactor = max(0, min(1, 0.5 + performanceMetrics.improvementTrend))
 
@@ -673,7 +643,6 @@ final class SelfTuningEngine {
 
     private func getContextSpecificParameters(_ context: String) -> ModelParameters? {
         // Find trials for this context
-        // periphery:ignore - Reserved: getContextSpecificParameters(_:) instance method reserved for future feature activation
         let contextTrials = optimizationHistory.filter { $0.contextType == context }
 
         guard contextTrials.count >= 5 else { return nil }
@@ -713,7 +682,6 @@ final class SelfTuningEngine {
     }
 
     private func saveState() {
-        // periphery:ignore - Reserved: saveState() instance method reserved for future feature activation
         do {
             let data = try JSONEncoder().encode(currentParameters)
             UserDefaults.standard.set(data, forKey: "SelfTuning.parameters")
@@ -746,7 +714,6 @@ final class SelfTuningEngine {
         }
     }
 
-    // periphery:ignore - Reserved: updateConfiguration(_:) instance method reserved for future feature activation
     func updateConfiguration(_ config: Configuration) {
         configuration = config
         do {

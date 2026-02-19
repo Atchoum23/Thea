@@ -104,7 +104,6 @@ struct OutboundMessagingMessage: Sendable {
     var attachments: [MessagingAttachment]
 
     init(chatId: String, content: String, replyToId: String? = nil, attachments: [MessagingAttachment] = []) {
-        // periphery:ignore - Reserved: attachments property reserved for future feature activation
         self.chatId = chatId
         self.content = content
         self.replyToId = replyToId
@@ -178,9 +177,6 @@ enum MessagingError: Error, LocalizedError, Sendable {
 protocol MessagingPlatformConnector: Actor {
     var platform: MessagingPlatform { get }
     var isConnected: Bool { get }
-    // periphery:ignore - Reserved: platform property reserved for future feature activation
-    // periphery:ignore - Reserved: isConnected property reserved for future feature activation
-    // periphery:ignore - Reserved: credentials property reserved for future feature activation
     var credentials: MessagingCredentials { get set }
 
     func connect() async throws

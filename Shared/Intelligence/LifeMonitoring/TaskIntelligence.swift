@@ -133,7 +133,6 @@ public actor TaskIntelligence {
     private var tasks: [UUID: IntelligenceTask] = [:]
     private var projects: [String: ProjectInfo] = [:]
     private var completionPatterns: [String: CompletionPattern] = [:]
-    // periphery:ignore - Reserved: projects property reserved for future feature activation
     private let eventStore = EKEventStore()
     private var hasCalendarAccess = false
     private var hasRemindersAccess = false
@@ -399,7 +398,6 @@ public actor TaskIntelligence {
     }
 
     private func cleanTitle(_ input: String, task: IntelligenceTask) -> String {
-        // periphery:ignore - Reserved: task parameter kept for API compatibility
         var title = input
 
         // Remove time expressions
@@ -430,7 +428,6 @@ public actor TaskIntelligence {
         return title.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    // periphery:ignore - Reserved: input parameter kept for API compatibility
     private func extractContacts(from input: String) async -> [String] {
         // Would use Contacts framework to match names
         []

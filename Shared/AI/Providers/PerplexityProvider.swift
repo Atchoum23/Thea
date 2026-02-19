@@ -15,7 +15,6 @@ final class PerplexityProvider: AIProvider, Sendable {
     )
 
     let capabilities = ProviderCapabilities(
-        // periphery:ignore - Reserved: capabilities property reserved for future feature activation
         supportsStreaming: true,
         supportsVision: false,
         supportsFunctionCalling: false,
@@ -34,7 +33,6 @@ final class PerplexityProvider: AIProvider, Sendable {
 
     // MARK: - Validation
 
-    // periphery:ignore - Reserved: validateAPIKey(_:) instance method reserved for future feature activation
     func validateAPIKey(_ key: String) async throws -> ValidationResult {
         guard let url = URL(string: "\(baseURL)/chat/completions") else {
             return .failure("Invalid API URL configuration")

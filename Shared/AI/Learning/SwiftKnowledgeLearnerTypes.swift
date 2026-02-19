@@ -45,7 +45,6 @@ final class SwiftLearnedPattern: Identifiable {
     var lastSeen = Date()
 
     init(category: String, patternSignature: String, exampleCode: String, context: String, confidence: Double) {
-        // periphery:ignore - Reserved: ConversationData type reserved for future feature activation
         self.category = category
         self.patternSignature = patternSignature
         self.exampleCode = exampleCode
@@ -57,7 +56,6 @@ final class SwiftLearnedPattern: Identifiable {
         category = dto.category
         patternSignature = dto.patternSignature
         exampleCode = dto.exampleCode
-        // periphery:ignore - Reserved: LearningReport type reserved for future feature activation
         context = dto.context
         confidence = dto.confidence
         occurrenceCount = dto.occurrenceCount
@@ -68,15 +66,10 @@ final class SwiftLearnedPattern: Identifiable {
 struct SwiftLearnedPatternDTO: Codable {
     let category: String
     let patternSignature: String
-    // periphery:ignore - Reserved: category property reserved for future feature activation
-    // periphery:ignore - Reserved: patternSignature property reserved for future feature activation
-    // periphery:ignore - Reserved: exampleCode property reserved for future feature activation
-    // periphery:ignore - Reserved: context property reserved for future feature activation
     let exampleCode: String
     let context: String
     let confidence: Double
     let occurrenceCount: Int
-    // periphery:ignore - Reserved: init(category:patternSignature:exampleCode:context:confidence:) initializer reserved for future feature activation
     let lastSeen: Date
 
     init(_ pattern: SwiftLearnedPattern) {
@@ -84,7 +77,6 @@ struct SwiftLearnedPatternDTO: Codable {
         patternSignature = pattern.patternSignature
         exampleCode = pattern.exampleCode
         context = pattern.context
-        // periphery:ignore - Reserved: init(from:) initializer reserved for future feature activation
         confidence = pattern.confidence
         occurrenceCount = pattern.occurrenceCount
         lastSeen = pattern.lastSeen
@@ -95,7 +87,6 @@ struct SwiftLearnedPatternDTO: Codable {
 
 @Observable
 final class CodeSnippet: Identifiable {
-    // periphery:ignore - Reserved: SwiftLearnedPatternDTO type reserved for future feature activation
     let id = UUID()
     let code: String
     let language: String
@@ -121,19 +112,6 @@ final class CodeSnippet: Identifiable {
     }
 }
 
-// periphery:ignore - Reserved: code property reserved for future feature activation
-
-// periphery:ignore - Reserved: language property reserved for future feature activation
-
-// periphery:ignore - Reserved: purpose property reserved for future feature activation
-
-// periphery:ignore - Reserved: tags property reserved for future feature activation
-
-// periphery:ignore - Reserved: qualityScore property reserved for future feature activation
-
-// periphery:ignore - Reserved: createdAt property reserved for future feature activation
-
-// periphery:ignore - Reserved: init(code:language:purpose:tags:qualityScore:) initializer reserved for future feature activation
 struct CodeSnippetDTO: Codable {
     let code: String
     let language: String
@@ -141,7 +119,6 @@ struct CodeSnippetDTO: Codable {
     let tags: [String]
     let qualityScore: Double
 
-    // periphery:ignore - Reserved: init(from:) initializer reserved for future feature activation
     init(_ snippet: CodeSnippet) {
         code = snippet.code
         language = snippet.language
@@ -150,8 +127,6 @@ struct CodeSnippetDTO: Codable {
         qualityScore = snippet.qualityScore
     }
 }
-
-// periphery:ignore - Reserved: CodeSnippetDTO type reserved for future feature activation
 
 // MARK: - Error Resolution
 
@@ -172,20 +147,14 @@ final class ErrorResolution: Identifiable {
     }
 
     init(from dto: ErrorResolutionDTO) {
-        // periphery:ignore - Reserved: errorPattern property reserved for future feature activation
-        // periphery:ignore - Reserved: errorType property reserved for future feature activation
-        // periphery:ignore - Reserved: resolution property reserved for future feature activation
-        // periphery:ignore - Reserved: preventionRule property reserved for future feature activation
         errorPattern = dto.errorPattern
         errorType = dto.errorType
-        // periphery:ignore - Reserved: init(errorPattern:errorType:resolution:preventionRule:) initializer reserved for future feature activation
         resolution = dto.resolution
         preventionRule = dto.preventionRule
         occurrenceCount = dto.occurrenceCount
     }
 }
 
-// periphery:ignore - Reserved: init(from:) initializer reserved for future feature activation
 struct ErrorResolutionDTO: Codable {
     let errorPattern: String
     let errorType: String
@@ -194,7 +163,6 @@ struct ErrorResolutionDTO: Codable {
     let occurrenceCount: Int
 
     init(_ resolution: ErrorResolution) {
-        // periphery:ignore - Reserved: ErrorResolutionDTO type reserved for future feature activation
         errorPattern = resolution.errorPattern
         errorType = resolution.errorType
         self.resolution = resolution.resolution
@@ -215,14 +183,7 @@ final class BestPractice: Identifiable {
     let exampleCode: String
     let context: String
 
-    // periphery:ignore - Reserved: practiceId property reserved for future feature activation
-    // periphery:ignore - Reserved: category property reserved for future feature activation
-    // periphery:ignore - Reserved: title property reserved for future feature activation
-    // periphery:ignore - Reserved: practiceDescription property reserved for future feature activation
-    // periphery:ignore - Reserved: exampleCode property reserved for future feature activation
-    // periphery:ignore - Reserved: context property reserved for future feature activation
     init(practiceId: String, category: String, title: String, description: String, exampleCode: String, context: String) {
-        // periphery:ignore - Reserved: init(practiceId:category:title:description:exampleCode:context:) initializer reserved for future feature activation
         self.practiceId = practiceId
         self.category = category
         self.title = title
@@ -235,7 +196,6 @@ final class BestPractice: Identifiable {
 // MARK: - String Extension
 
 extension String {
-    // periphery:ignore - Reserved: count(of:) instance method reserved for future feature activation
     func count(of character: Character) -> Int {
         filter { $0 == character }.count
     }

@@ -55,7 +55,6 @@ enum CommandCategory: String, CaseIterable {
         case .navigation: return "arrow.triangle.turn.up.right.diamond"
         case .settings: return "gear"
         case .model: return "cpu"
-        // periphery:ignore - Reserved: icon property reserved for future feature activation
         case .file: return "doc"
         }
     }
@@ -333,24 +332,19 @@ class CommandPaletteManager: ObservableObject {
 
     func show() {
         isPresented = true
-    // periphery:ignore - Reserved: toggle() instance method reserved for future feature activation
     }
 
     func hide() {
-        // periphery:ignore - Reserved: show() instance method reserved for future feature activation
         isPresented = false
     }
 
-    // periphery:ignore - Reserved: hide() instance method reserved for future feature activation
     func registerCommand(_ command: PaletteCommand) {
         commands.removeAll { $0.id == command.id }
         commands.append(command)
-    // periphery:ignore - Reserved: registerCommand(_:) instance method reserved for future feature activation
     }
 
     func registerCommands(_ newCommands: [PaletteCommand]) {
         for command in newCommands {
-            // periphery:ignore - Reserved: registerCommands(_:) instance method reserved for future feature activation
             registerCommand(command)
         }
     }
@@ -459,7 +453,6 @@ private extension Array {
 
 /// View modifier to add command palette overlay (shortcut is registered in app commands)
 struct CommandPaletteModifier: ViewModifier {
-    // periphery:ignore - Reserved: CommandPaletteModifier type reserved for future feature activation
     @StateObject private var manager = CommandPaletteManager.shared
 
     func body(content: Content) -> some View {
@@ -477,7 +470,6 @@ struct CommandPaletteModifier: ViewModifier {
 
 extension View {
     /// Add command palette overlay support
-    // periphery:ignore - Reserved: commandPalette() instance method reserved for future feature activation
     func commandPalette() -> some View {
         modifier(CommandPaletteModifier())
     }

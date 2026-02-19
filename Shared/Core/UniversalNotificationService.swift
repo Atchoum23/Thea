@@ -31,7 +31,6 @@ public actor UniversalNotificationService {
     // MARK: - State
 
     private var isInitialized = false
-    // periphery:ignore - Reserved: deviceToken property reserved for future feature activation
     private var deviceToken: String?
     private var activeSubscriptions: Set<String> = []
 

@@ -7,7 +7,6 @@ import OSLog
 // Intents: GUILD_MESSAGES (512) + MESSAGE_CONTENT (32768) + DIRECT_MESSAGES (4096) = 37376
 
 actor DiscordConnector: MessagingPlatformConnector {
-    // periphery:ignore - Reserved: platform property reserved for future feature activation
     let platform: MessagingPlatform = .discord
     private(set) var isConnected = false
     var credentials: MessagingCredentials

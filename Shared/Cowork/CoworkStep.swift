@@ -119,7 +119,6 @@
             status = .skipped
             completedAt = Date()
             addLog(.info, "Step skipped\(reason.map { ": \($0)" } ?? "")")
-        // periphery:ignore - Reserved: skip(reason:) instance method reserved for future feature activation
         }
 
         mutating func addLog(_ level: LogEntry.LogLevel, _ message: String, details: String? = nil) {
@@ -141,7 +140,6 @@
         mutating func addTool(_ tool: String) {
             if !toolsUsed.contains(tool) {
                 toolsUsed.append(tool)
-            // periphery:ignore - Reserved: addTool(_:) instance method reserved for future feature activation
             }
         }
     }
@@ -174,17 +172,14 @@
 
             func tools(_ tools: [String]) -> Builder {
                 self.tools.append(contentsOf: tools)
-                // periphery:ignore - Reserved: tools(_:) instance method reserved for future feature activation
                 return self
             }
 
             func input(_ url: URL) -> Builder {
-                // periphery:ignore - Reserved: input(_:) instance method reserved for future feature activation
                 inputs.append(url)
                 return self
             }
 
-            // periphery:ignore - Reserved: output(_:) instance method reserved for future feature activation
             func output(_ url: URL) -> Builder {
                 outputs.append(url)
                 return self

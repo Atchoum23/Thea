@@ -8,7 +8,6 @@ import Foundation
 // MARK: - Queued Message
 
 struct QueuedMessage: Identifiable, Sendable {
-    // periphery:ignore - Reserved: QueuedMessage type reserved for future feature activation
     let id: UUID
     var text: String
     var attachments: [QueuedAttachment]
@@ -41,7 +40,6 @@ struct QueuedMessage: Identifiable, Sendable {
 
 // MARK: - Queued Attachment
 
-// periphery:ignore - Reserved: QueuedAttachment type reserved for future feature activation
 struct QueuedAttachment: Identifiable, Sendable {
     let id: UUID
     let name: String

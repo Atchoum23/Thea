@@ -512,7 +512,6 @@ public enum DeepLinkSource: String, Sendable {
 // MARK: - Route
 
 private struct DeepLinkRoute {
-    // periphery:ignore - Reserved: pattern property reserved for future feature activation
     let pattern: String
     let handler: (DeepLink) async -> Bool
 

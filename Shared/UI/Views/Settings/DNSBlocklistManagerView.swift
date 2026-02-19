@@ -17,7 +17,6 @@ struct DNSBlocklistManagerView: View {
     @State private var selectedCategory: DNSBlocklistService.BlockCategory?
     @State private var newDomain = ""
     @State private var newCategory: DNSBlocklistService.BlockCategory = .custom
-    // periphery:ignore - Reserved: showingAddSheet property reserved for future feature activation
     @State private var showingAddSheet = false
 
     var body: some View {

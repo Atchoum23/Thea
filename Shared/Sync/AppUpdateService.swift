@@ -371,7 +371,6 @@ public final class AppUpdateService: ObservableObject {
     // MARK: - Handle Notification Action
 
     public func handleNotificationAction(_ actionID: String, userInfo: [AnyHashable: Any]) {
-        // periphery:ignore - Reserved: userInfo parameter kept for API compatibility
         switch actionID {
         case Self.updateNowActionID:
             Task {
@@ -487,7 +486,6 @@ public struct AppUpdateInfo: Codable, Identifiable, Sendable {
     public let platform: String
     public var installedAt: Date?
 
-    // periphery:ignore - Reserved: init(version:build:commitHash:sourceDevice:publishedAt:platform:installedAt:) initializer reserved for future feature activation
     init(
         version: String,
         build: String,

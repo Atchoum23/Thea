@@ -22,7 +22,6 @@ public final class WebSearchVerifier {
     // MARK: - Verification
 
     /// Verify a response by fact-checking against web sources
-    // periphery:ignore - Reserved: query parameter kept for API compatibility
     public func verify(response: String, query: String) async -> WebVerificationResult {
         logger.info("Starting web verification")
 

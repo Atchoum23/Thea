@@ -21,7 +21,6 @@ import OSLog
 final class AnthropicFilesAPI: Sendable {
     private let apiKey: String
     private let baseURL = "https://api.anthropic.com/v1/files"
-    // periphery:ignore - Reserved: AnthropicFilesAPI type reserved for future feature activation
     private let apiVersion = "2023-06-01"
     private let betaHeader = "files-api-2025-04-14"
     private let logger = Logger(subsystem: "com.thea.v2", category: "AnthropicFilesAPI")
@@ -245,7 +244,6 @@ struct FileUploadResponse: Codable, Sendable {
 
     init(
         id: String,
-        // periphery:ignore - Reserved: init(id:filename:mimeType:sizeBytes:createdAt:expiresAt:) initializer reserved for future feature activation
         filename: String,
         mimeType: String,
         sizeBytes: Int,
@@ -262,13 +260,11 @@ struct FileUploadResponse: Codable, Sendable {
 }
 
 struct FileListResponse: Codable, Sendable {
-    // periphery:ignore - Reserved: FileListResponse type reserved for future feature activation
     let data: [FileUploadResponse]
 }
 
 // MARK: - Helper for building file content blocks
 
-// periphery:ignore - Reserved: AnthropicFileContent type reserved for future feature activation
 struct AnthropicFileContent {
     /// Build a file content block for use in messages
     static func fileBlock(fileId: String) -> [String: Any] {

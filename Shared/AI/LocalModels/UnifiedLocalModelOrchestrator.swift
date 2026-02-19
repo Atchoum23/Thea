@@ -211,8 +211,6 @@ final class UnifiedLocalModelOrchestrator {
             scoredModels.append((model, score, reason))
         }
 
-// periphery:ignore - Reserved: selectModel(for:context:) instance method reserved for future feature activation
-
         // Sort by score
         scoredModels.sort { $0.score > $1.score }
 
@@ -258,7 +256,6 @@ final class UnifiedLocalModelOrchestrator {
     }
 
     /// Map from existing ModelRuntime to our LocalRuntime
-    // periphery:ignore - Reserved: selectRuntime(for:) instance method reserved for future feature activation
     private func mapModelRuntimeToLocal(_ runtime: ModelRuntime) -> LocalRuntime {
         switch runtime {
         case .mlx: return .mlx
@@ -284,7 +281,6 @@ final class UnifiedLocalModelOrchestrator {
     private func calculateModelScore(
         _ model: LocalModel,
         for taskType: TaskType,
-        // periphery:ignore - Reserved: mapModelRuntimeToLocal(_:) instance method reserved for future feature activation
         context: LocalRoutingContext
     ) -> Double {
         var score = 0.5  // Base score
@@ -293,7 +289,6 @@ final class UnifiedLocalModelOrchestrator {
         let capabilityScore = calculateCapabilityScore(model, for: taskType)
         score += capabilityScore * 0.4
 
-        // periphery:ignore - Reserved: canRuntimeHandle(_:model:) instance method reserved for future feature activation
         // 2. Historical performance (30% weight)
         let performanceScore = getHistoricalPerformance(model, for: taskType)
         score += performanceScore * 0.3
@@ -306,8 +301,6 @@ final class UnifiedLocalModelOrchestrator {
         let modelLocalRuntime = mapModelRuntimeToLocal(model.runtime)
         let runtimeScore = modelLocalRuntime == preferredRuntime ? 1.0 : 0.7
         score += runtimeScore * 0.1
-
-// periphery:ignore - Reserved: calculateModelScore(_:for:context:) instance method reserved for future feature activation
 
         // 5. Recency/freshness (5% weight)
         let quantizationScore = calculateQuantizationScore(model)
@@ -338,7 +331,6 @@ final class UnifiedLocalModelOrchestrator {
             if modelName.contains("llama") {
                 return 0.85
             }
-            // periphery:ignore - Reserved: calculateCapabilityScore(_:for:) instance method reserved for future feature activation
             return 0.7
 
         case .creative, .creativeWriting, .contentCreation, .creation:
@@ -391,7 +383,6 @@ final class UnifiedLocalModelOrchestrator {
         if sizeGB >= 4 && sizeGB <= 8 {
             return 1.0
         } else if sizeGB < 4 {
-            // periphery:ignore - Reserved: getHistoricalPerformance(_:for:) instance method reserved for future feature activation
             return 0.8  // Smaller models may sacrifice quality
         } else if sizeGB <= 16 {
             return 0.7
@@ -400,7 +391,6 @@ final class UnifiedLocalModelOrchestrator {
         }
     }
 
-    // periphery:ignore - Reserved: calculateSizeScore(_:context:) instance method reserved for future feature activation
     private func calculateQuantizationScore(_ model: LocalModel) -> Double {
         switch model.quantization.lowercased() {
         case "4bit", "q4": return 0.9  // Good balance
@@ -420,7 +410,6 @@ final class UnifiedLocalModelOrchestrator {
         }
 
         if model.quantization.lowercased().contains("4bit") {
-            // periphery:ignore - Reserved: calculateQuantizationScore(_:) instance method reserved for future feature activation
             reasons.append("Memory-efficient 4-bit quantization")
         }
 
@@ -429,7 +418,6 @@ final class UnifiedLocalModelOrchestrator {
             reasons.append("\(modelLocalRuntime.displayName) runtime ready")
         }
 
-        // periphery:ignore - Reserved: buildScoreReason(_:for:score:) instance method reserved for future feature activation
         return reasons.joined(separator: "; ")
     }
 
@@ -452,7 +440,6 @@ final class UnifiedLocalModelOrchestrator {
             taskType: taskType,
             success: success,
             latency: latency,
-            // periphery:ignore - Reserved: recordModelUsage(model:taskType:success:latency:tokensGenerated:) instance method reserved for future feature activation
             tokens: tokensGenerated
         )
 
@@ -481,7 +468,6 @@ final class UnifiedLocalModelOrchestrator {
         }
     }
 
-    // periphery:ignore - Reserved: getModelRecommendations() instance method reserved for future feature activation
     private func mapPriority(_ priority: RecommendationPriority) -> SuggestionPriority {
         switch priority {
         case .high: return .high
@@ -498,8 +484,6 @@ final class UnifiedLocalModelOrchestrator {
 
     // MARK: - Integration with ModelRouter
 
-// periphery:ignore - Reserved: mapPriority(_:) instance method reserved for future feature activation
-
     /// Register local models with the ProviderRegistry
     func registerWithProviderRegistry() async {
         // Delegate to ProviderRegistry's built-in local model refresh
@@ -507,7 +491,6 @@ final class UnifiedLocalModelOrchestrator {
         logger.info("Refreshed local model registrations via ProviderRegistry")
     }
 
-    // periphery:ignore - Reserved: shouldRecommendModel(_:) instance method reserved for future feature activation
     // MARK: - Persistence
 
     private func loadPerformanceHistory() {
@@ -515,7 +498,6 @@ final class UnifiedLocalModelOrchestrator {
         let history: [String: LocalModelPerformanceMetrics]
         do {
             history = try JSONDecoder().decode([String: LocalModelPerformanceMetrics].self, from: data)
-        // periphery:ignore - Reserved: registerWithProviderRegistry() instance method reserved for future feature activation
         } catch {
             logger.error("Failed to decode LocalOrchestrator performance history: \(error.localizedDescription)")
             return
@@ -536,7 +518,6 @@ final class UnifiedLocalModelOrchestrator {
     // MARK: - Cleanup
 
     func resetPerformanceHistory() {
-        // periphery:ignore - Reserved: savePerformanceHistory() instance method reserved for future feature activation
         modelPerformance.removeAll()
         UserDefaults.standard.removeObject(forKey: "LocalOrchestrator.performanceHistory")
         logger.info("Reset local model performance history")
@@ -547,7 +528,6 @@ final class UnifiedLocalModelOrchestrator {
 
 enum LocalRuntime: String, Codable, Sendable, CaseIterable {
     case mlx = "MLX"
-    // periphery:ignore - Reserved: resetPerformanceHistory() instance method reserved for future feature activation
     case ollama = "Ollama"
     case gguf = "GGUF"
     case coreML = "Core ML"
@@ -576,13 +556,8 @@ struct LocalModelSelection: Sendable {
     let model: LocalModel
     let runtime: LocalRuntime
     let score: Double
-    // periphery:ignore - Reserved: isAvailable property reserved for future feature activation
-    // periphery:ignore - Reserved: version property reserved for future feature activation
-    // periphery:ignore - Reserved: lastChecked property reserved for future feature activation
-    // periphery:ignore - Reserved: errorMessage property reserved for future feature activation
     let reason: String
     let alternatives: [LocalModel]
-// periphery:ignore - Reserved: LocalModelSelection type reserved for future feature activation
 }
 
 struct LocalRoutingContext: Sendable {
@@ -590,8 +565,6 @@ struct LocalRoutingContext: Sendable {
     var maxModelSizeGB: Double?
     var preferOffline: Bool = false
     var preferredQuantization: String?
-
-// periphery:ignore - Reserved: LocalRoutingContext type reserved for future feature activation
 
     init(
         urgency: RoutingContext.Urgency = .normal,
@@ -616,11 +589,9 @@ struct LocalModelPerformanceMetrics: Codable, Sendable {
         self.modelName = modelName
     }
 
-    // periphery:ignore - Reserved: init(modelName:) initializer reserved for future feature activation
     mutating func record(taskType: TaskType, success: Bool, latency: TimeInterval, tokens: Int) {
         if taskMetrics[taskType] == nil {
             taskMetrics[taskType] = TaskPerformanceMetrics()
-        // periphery:ignore - Reserved: record(taskType:success:latency:tokens:) instance method reserved for future feature activation
         }
 
         taskMetrics[taskType]?.record(success: success, latency: latency, tokens: tokens)
@@ -654,7 +625,6 @@ struct TaskPerformanceMetrics: Codable, Sendable {
 
     mutating func record(success: Bool, latency: TimeInterval, tokens: Int) {
         if success {
-            // periphery:ignore - Reserved: record(success:latency:tokens:) instance method reserved for future feature activation
             successCount += 1
         } else {
             failureCount += 1
@@ -665,7 +635,6 @@ struct TaskPerformanceMetrics: Codable, Sendable {
 }
 
 struct LocalModelSuggestion: Identifiable, Sendable {
-    // periphery:ignore - Reserved: LocalModelSuggestion type reserved for future feature activation
     var id: String { modelId }
     let modelId: String
     let modelName: String
@@ -685,7 +654,6 @@ enum SuggestionPriority: String, Codable, Sendable {
 
 extension ModelRouter {
     /// Route with local model preference
-    // periphery:ignore - Reserved: routeWithLocalPreference(classification:preferLocal:) instance method reserved for future feature activation
     func routeWithLocalPreference(
         classification: ClassificationResult,
         preferLocal: Bool = false

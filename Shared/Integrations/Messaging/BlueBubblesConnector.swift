@@ -8,7 +8,6 @@ import OSLog
 
 actor BlueBubblesConnector: MessagingPlatformConnector {
     let platform: MessagingPlatform = .imessage
-    // periphery:ignore - Reserved: platform property reserved for future feature activation
     private(set) var isConnected = false
     var credentials: MessagingCredentials
 
@@ -67,7 +66,6 @@ actor BlueBubblesConnector: MessagingPlatformConnector {
 
     // MARK: - Receive Loop
 
-    // periphery:ignore - Reserved: serverUrl parameter kept for API compatibility
     private func receiveLoop(serverUrl: String, apiKey: String) async {
         while !Task.isCancelled, let ws = webSocket {
             do {

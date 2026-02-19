@@ -18,8 +18,6 @@ struct MessagingHubView: View {
     @State private var showingChannelDetail = false
 
     var body: some View {
-        // periphery:ignore - Reserved: searchText property reserved for future feature activation
-        // periphery:ignore - Reserved: showingChannelDetail property reserved for future feature activation
         #if os(macOS)
         HSplitView {
             channelListView
@@ -164,7 +162,6 @@ struct MessagingHubView: View {
 
     private var recentMessagesSection: some View {
         Section {
-            // periphery:ignore - Reserved: recentMessagesSection property reserved for future feature activation
             let messages = filteredMessages
             if messages.isEmpty {
                 ContentUnavailableView(
@@ -219,7 +216,6 @@ struct MessagingHubView: View {
     // MARK: - Settings Section
 
     private var settingsSection: some View {
-        // periphery:ignore - Reserved: settingsSection property reserved for future feature activation
         Section {
             Toggle("Global Auto-Reply", isOn: Binding(
                 get: { hub.autoReplyGlobalEnabled },
@@ -417,7 +413,6 @@ struct MessagingHubView: View {
 
     // MARK: - Helpers
 
-    // periphery:ignore - Reserved: filteredMessages property reserved for future feature activation
     private var filteredMessages: [UnifiedMessage] {
         if searchText.isEmpty {
             return hub.recentMessages

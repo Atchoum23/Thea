@@ -183,7 +183,6 @@
 
         // MARK: - Event Handling
 
-        // periphery:ignore - Reserved: event parameter kept for API compatibility
         private func handleUserEvent(_ action: InterventionAction, event: NSEvent?) {
             isUserActive = true
             lastInterventionAction = action

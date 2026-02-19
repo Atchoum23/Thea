@@ -203,7 +203,6 @@ public final class MobileIntelligenceOrchestrator {
         network: NetworkCondition,
         budget: InferenceBudget,
         taskType: TaskType,
-        // periphery:ignore - Reserved: budget parameter kept for API compatibility
         urgency: QueryUrgency,
         queryLength: Int
     ) -> (Float, String) {
@@ -331,8 +330,6 @@ public final class MobileIntelligenceOrchestrator {
         urgency: QueryUrgency,
         success: Bool,
         latency: TimeInterval,
-        // periphery:ignore - Reserved: latency parameter kept for API compatibility
-        // periphery:ignore - Reserved: userSatisfaction parameter kept for API compatibility
         userSatisfaction: Float? = nil
     ) {
         let contextHash = "\(taskType.rawValue)_\(urgency.rawValue)"

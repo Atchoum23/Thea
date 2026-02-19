@@ -24,7 +24,6 @@ struct AskWithContextIntent: AppIntent {
     nonisolated(unsafe) static var title: LocalizedStringResource = "Ask Thea with Context"
     nonisolated(unsafe) static var description: IntentDescription = "Ask Thea a question with additional context from files or clipboard"
 
-    // periphery:ignore - Reserved: AskWithContextIntent type reserved for future feature activation
     @Parameter(title: "Question")
     var question: String
 
@@ -130,8 +129,6 @@ struct GenerateCodeIntent: AppIntent {
     nonisolated(unsafe) static var title: LocalizedStringResource = "Generate Code"
     nonisolated(unsafe) static var description: IntentDescription = "Generate code using Thea AI"
 
-// periphery:ignore - Reserved: GenerateCodeIntent type reserved for future feature activation
-
     @Parameter(title: "Description")
     var description: String
 
@@ -171,7 +168,6 @@ struct GenerateCodeIntent: AppIntent {
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 struct SummarizeContentIntent: AppIntent {
     nonisolated(unsafe) static var title: LocalizedStringResource = "Summarize Content"
-    // periphery:ignore - Reserved: SummarizeContentIntent type reserved for future feature activation
     nonisolated(unsafe) static var description: IntentDescription = "Summarize text, files, or web pages"
 
     @Parameter(title: "Content Type")
@@ -246,7 +242,6 @@ struct SummarizeContentIntent: AppIntent {
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 struct AutomationTranslateIntent: AppIntent {
-    // periphery:ignore - Reserved: AutomationTranslateIntent type reserved for future feature activation
     nonisolated(unsafe) static var title: LocalizedStringResource = "Translate with Thea"
     nonisolated(unsafe) static var description: IntentDescription = "Translate text to another language"
 
@@ -287,7 +282,6 @@ struct AutomationTranslateIntent: AppIntent {
 // MARK: Create Automation Intent
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
-// periphery:ignore - Reserved: CreateAutomationIntent type reserved for future feature activation
 struct CreateAutomationIntent: AppIntent {
     nonisolated(unsafe) static var title: LocalizedStringResource = "Create Thea Automation"
     nonisolated(unsafe) static var description: IntentDescription = "Create a new automation workflow"

@@ -287,7 +287,6 @@ public final class MemoryConsolidator: ObservableObject {
 public final class UnifiedMemorySystem: ObservableObject {
     public static let shared = UnifiedMemorySystem()
 
-    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let logger = Logger(subsystem: "com.thea.memory", category: "UnifiedMemorySystem")
 
     public let episodic = EpisodicMemoryManager.shared

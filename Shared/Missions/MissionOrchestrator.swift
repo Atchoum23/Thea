@@ -13,7 +13,6 @@ public final class MissionOrchestrator: ObservableObject {
     public static let shared = MissionOrchestrator()
 
     let logger = Logger(subsystem: "com.thea.app", category: "Mission")
-    // periphery:ignore - Reserved: cancellables property reserved for future feature activation
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Published State

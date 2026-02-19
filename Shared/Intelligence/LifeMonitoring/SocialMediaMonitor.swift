@@ -318,7 +318,6 @@ public final class SocialMediaMonitor: ObservableObject {
         return contact
     }
 
-    // periphery:ignore - Reserved: extractMetadata(_:) instance method reserved for future feature activation
     private func extractMetadata(_ userInfo: [AnyHashable: Any]) -> [String: String] {
         var metadata: [String: String] = [:]
 

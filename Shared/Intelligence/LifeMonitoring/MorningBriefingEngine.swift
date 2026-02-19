@@ -31,7 +31,6 @@ final class MorningBriefingEngine: ObservableObject {
         set { UserDefaults.standard.set(newValue, forKey: "briefing.enabled") }
     }
 
-    // periphery:ignore - Reserved: preferredHour property reserved for future feature activation
     var preferredHour: Int {
         get {
             let stored = UserDefaults.standard.integer(forKey: "briefing.hour")

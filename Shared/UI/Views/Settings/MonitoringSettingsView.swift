@@ -3,7 +3,6 @@
 
 import SwiftUI
 
-// periphery:ignore - Reserved: MonitoringSettingsView type reserved for future feature activation
 struct MonitoringSettingsView: View {
     @State private var screenCaptureEnabled = false
     @State private var audioCaptureEnabled = false

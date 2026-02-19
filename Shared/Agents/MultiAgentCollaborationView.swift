@@ -36,7 +36,6 @@ public final class CollaborationOrchestrator: ObservableObject {
     // MARK: - Session Management
 
     /// Create a new collaboration session
-    // periphery:ignore - Reserved: problem parameter kept for API compatibility
     public func createSession(name: String, problem: String) -> CollaborationSession {
         var session = CollaborationSession(name: name)
 

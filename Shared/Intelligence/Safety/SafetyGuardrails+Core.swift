@@ -17,8 +17,6 @@ public final class SafetyGuardrailsManager: ObservableObject {
     private let auditStorageURL: URL
     private let rollbackStorageURL: URL
 
-// periphery:ignore - Reserved: auditStorageURL property reserved for future feature activation
-
     @Published public private(set) var policies: [SafetyPolicy] = []
     @Published public private(set) var pendingInterventions: [HumanInterventionRequest] = []
     @Published public private(set) var recentAuditEntries: [SafetyAuditEntry] = []
@@ -408,7 +406,6 @@ extension SafetyGuardrailsManager {
     }
 
     private func checkReversibility(_ action: String, category: SafetyActionCategory) -> Bool {
-        // periphery:ignore - Reserved: action parameter kept for API compatibility
         switch category {
         case .fileRead:
             return true  // Read-only
@@ -425,7 +422,6 @@ extension SafetyGuardrailsManager {
         }
     }
 
-    // periphery:ignore - Reserved: action parameter kept for API compatibility
     private func identifyAffectedResources(_ action: String, context: [String: String]) -> [AffectedResource] {
         var resources: [AffectedResource] = []
 

@@ -8,7 +8,6 @@ import Foundation
 import OSLog
 
 #if os(macOS)
-// periphery:ignore - Reserved: CodeQualityGate type reserved for future feature activation
 actor CodeQualityGate {
     static let shared = CodeQualityGate()
 

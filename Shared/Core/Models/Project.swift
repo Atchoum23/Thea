@@ -57,7 +57,6 @@ struct ProjectFile: Codable, Identifiable, Sendable {
     let size: Int64
     let addedAt: Date
 
-    // periphery:ignore - Reserved: init(id:name:path:size:addedAt:) initializer reserved for future feature activation
     init(
         id: UUID = UUID(),
         name: String,

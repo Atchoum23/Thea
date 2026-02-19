@@ -38,10 +38,7 @@ final class VoiceActivationEngine {
 
     // MARK: - Configuration Updates
 
-// periphery:ignore - Reserved: audioEngine property reserved for future feature activation
-
     func updateConfiguration() {
-        // periphery:ignore - Reserved: speechSynthesizer property reserved for future feature activation
         // Re-initialize speech recognizer if language changed
         speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: config.recognitionLanguage))
         isWakeWordEnabled = config.wakeWordEnabled
@@ -66,7 +63,6 @@ final class VoiceActivationEngine {
         stopAudioEngine()
         isListening = false
         conversationMode = false
-    // periphery:ignore - Reserved: startWakeWordDetection() instance method reserved for future feature activation
     }
 
     private func requestSpeechAuthorization() async -> SFSpeechRecognizerAuthorizationStatus {
@@ -79,13 +75,11 @@ final class VoiceActivationEngine {
 
     private func startAudioEngine() throws {
         // Cancel any ongoing recognition
-        // periphery:ignore - Reserved: stopWakeWordDetection() instance method reserved for future feature activation
         recognitionTask?.cancel()
         recognitionTask = nil
 
         #if os(iOS)
             // Configure audio session (iOS only)
-            // periphery:ignore - Reserved: requestSpeechAuthorization() instance method reserved for future feature activation
             let audioSession = AVAudioSession.sharedInstance()
             try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
@@ -93,7 +87,6 @@ final class VoiceActivationEngine {
 
         // Create recognition request
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-        // periphery:ignore - Reserved: startAudioEngine() instance method reserved for future feature activation
         guard let recognitionRequest else {
             throw VoiceEngineError.recognitionFailed
         }
@@ -159,7 +152,6 @@ final class VoiceActivationEngine {
 
     // MARK: - Wake Word Detection
 
-    // periphery:ignore - Reserved: stopAudioEngine() instance method reserved for future feature activation
     private func detectWakeWord(in transcript: String) -> Bool {
         guard isWakeWordEnabled, !conversationMode else { return false }
 
@@ -172,7 +164,6 @@ final class VoiceActivationEngine {
         // Play activation sound
         if config.activationSoundEnabled {
             playActivationSound()
-        // periphery:ignore - Reserved: detectWakeWord(in:) instance method reserved for future feature activation
         }
 
         // Extract command after wake word
@@ -180,7 +171,6 @@ final class VoiceActivationEngine {
         for wakeWord in config.wakeWords {
             command = command.replacingOccurrences(of: wakeWord, with: "")
         }
-        // periphery:ignore - Reserved: handleWakeWordDetected(fullTranscript:) instance method reserved for future feature activation
         command = command.trimmingCharacters(in: .whitespacesAndNewlines)
 
         if command.isEmpty {
@@ -209,7 +199,6 @@ final class VoiceActivationEngine {
             let response = try await routeToAI(command)
 
             // Speak response
-            // periphery:ignore - Reserved: processVoiceCommand(_:) instance method reserved for future feature activation
             await speak(response)
 
             // If in conversation mode, wait for next input
@@ -234,7 +223,6 @@ final class VoiceActivationEngine {
         let voiceModel = config.voiceAssistantModel
 
         let message = AIMessage(
-            // periphery:ignore - Reserved: routeToAI(_:) instance method reserved for future feature activation
             id: UUID(),
             conversationID: UUID(),
             role: .user,
@@ -271,8 +259,6 @@ final class VoiceActivationEngine {
         utterance.pitchMultiplier = config.pitchMultiplier
         utterance.volume = config.volume
 
-// periphery:ignore - Reserved: speak(_:rate:) instance method reserved for future feature activation
-
         currentUtterance = utterance
 
         await withCheckedContinuation { continuation in
@@ -292,14 +278,12 @@ final class VoiceActivationEngine {
 
     // MARK: - Conversation Mode
 
-    // periphery:ignore - Reserved: stopSpeaking() instance method reserved for future feature activation
     private func startSilenceDetector() {
         let silenceThreshold = config.silenceThresholdSeconds
 
         Task {
             while conversationMode {
                 do {
-                    // periphery:ignore - Reserved: startSilenceDetector() instance method reserved for future feature activation
                     try await Task.sleep(nanoseconds: UInt64(silenceThreshold * 1_000_000_000))
                 } catch {
                     break // Task cancelled — silence detector stopping
@@ -322,21 +306,17 @@ final class VoiceActivationEngine {
         await speak("Goodbye!")
     }
 
-// periphery:ignore - Reserved: exitConversationMode() instance method reserved for future feature activation
-
     // MARK: - Audio Feedback
 
     private func playActivationSound() {
         AudioServicesPlaySystemSound(config.activationSoundID)
     }
 
-    // periphery:ignore - Reserved: playActivationSound() instance method reserved for future feature activation
     // MARK: - Voice Commands
 
     func handleVoiceCommand(_ command: VoiceCommand) async {
         switch command {
         case .newConversation:
-            // periphery:ignore - Reserved: handleVoiceCommand(_:) instance method reserved for future feature activation
             await speak("Creating a new conversation")
             // Trigger new conversation in app
 
@@ -368,8 +348,6 @@ final class VoiceActivationEngine {
 private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
     let onComplete: () -> Void
 
-// periphery:ignore - Reserved: SpeechDelegate type reserved for future feature activation
-
     init(onComplete: @escaping () -> Void) {
         self.onComplete = onComplete
     }
@@ -382,7 +360,6 @@ private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unch
 // MARK: - Voice Commands
 
 enum VoiceCommand {
-    // periphery:ignore - Reserved: VoiceCommand type reserved for future feature activation
     case newConversation
     case listConversations
     case openSettings
@@ -393,7 +370,6 @@ enum VoiceCommand {
 
 // MARK: - Errors
 
-// periphery:ignore - Reserved: VoiceEngineError type reserved for future feature activation
 enum VoiceEngineError: LocalizedError {
     case authorizationDenied
     case recognitionFailed

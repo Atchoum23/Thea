@@ -230,9 +230,7 @@ import Observation
     @Observable
     final class LocationTrackingManager {
         static let shared = LocationTrackingManager()
-        // periphery:ignore - Reserved: shared static property reserved for future feature activation
         private init() {}
-        // periphery:ignore - Reserved: setModelContext(_:) instance method reserved for future feature activation
         func setModelContext(_: ModelContext) {}
     }
 #endif

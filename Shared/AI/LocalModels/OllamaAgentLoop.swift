@@ -33,9 +33,7 @@ final class OllamaAgentLoop {
     private(set) var configuration = Configuration()
     private(set) var isRunning = false
     private(set) var currentModel: String?
-    // periphery:ignore - Reserved: shared static property reserved for future feature activation
     private(set) var toolHistory: [ToolExecution] = []
-    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private(set) var pendingApproval: ToolApprovalRequest?
 
     // MARK: - Tool Types
@@ -75,26 +73,16 @@ final class OllamaAgentLoop {
     func run(
         model: String,
         prompt: String,
-        // periphery:ignore - Reserved: timestamp property reserved for future feature activation
-        // periphery:ignore - Reserved: tool property reserved for future feature activation
-        // periphery:ignore - Reserved: input property reserved for future feature activation
-        // periphery:ignore - Reserved: output property reserved for future feature activation
-        // periphery:ignore - Reserved: approved property reserved for future feature activation
-        // periphery:ignore - Reserved: autoApproved property reserved for future feature activation
         stream: Bool = true
     ) async throws -> AsyncThrowingStream<AgentLoopEvent, Error> {
         isRunning = true
         currentModel = model
-        // periphery:ignore - Reserved: tool property reserved for future feature activation
-        // periphery:ignore - Reserved: input property reserved for future feature activation
-        // periphery:ignore - Reserved: reason property reserved for future feature activation
         toolHistory.removeAll()
 
         return AsyncThrowingStream { continuation in
             Task { @MainActor in
                 defer {
                     self.isRunning = false
-                    // periphery:ignore - Reserved: run(model:prompt:stream:) instance method reserved for future feature activation
                     self.currentModel = nil
                 }
 
@@ -166,12 +154,10 @@ final class OllamaAgentLoop {
         continuation: AsyncThrowingStream<AgentLoopEvent, Error>.Continuation
     ) async throws -> OllamaResponse {
         guard let url = URL(string: "\(configuration.ollamaBaseURL)/api/chat") else {
-            // periphery:ignore - Reserved: OllamaResponse type reserved for future feature activation
             throw OllamaAgentError.invalidURL
         }
 
         var request = URLRequest(url: url)
-        // periphery:ignore - Reserved: callOllamaWithTools(model:messages:stream:continuation:) instance method reserved for future feature activation
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = configuration.timeoutSeconds
@@ -285,7 +271,6 @@ final class OllamaAgentLoop {
             input = toolCall.command ?? ""
         case .webSearch:
             input = toolCall.query ?? ""
-        // periphery:ignore - Reserved: executeTool(_:continuation:) instance method reserved for future feature activation
         }
 
         continuation.yield(.toolCall(toolCall.type, input))
@@ -346,7 +331,6 @@ final class OllamaAgentLoop {
             if command.hasPrefix(safeCommand) {
                 return true
             }
-        // periphery:ignore - Reserved: isAutoApproved(_:) instance method reserved for future feature activation
         }
 
         // Check for destructive commands
@@ -373,7 +357,6 @@ final class OllamaAgentLoop {
                 input: input,
                 reason: "This command requires your approval",
                 continuation: cont
-            // periphery:ignore - Reserved: requestApproval(for:) instance method reserved for future feature activation
             )
         }
     }
@@ -387,15 +370,12 @@ final class OllamaAgentLoop {
 
     // MARK: - Tool Implementations
 
-// periphery:ignore - Reserved: respondToApproval(_:) instance method reserved for future feature activation
-
     private func executeBash(_ command: String) async throws -> String {
         #if os(macOS)
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/bin/zsh")
         process.arguments = ["-c", command]
 
-        // periphery:ignore - Reserved: executeBash(_:) instance method reserved for future feature activation
         let outputPipe = Pipe()
         let errorPipe = Pipe()
         process.standardOutput = outputPipe
@@ -425,8 +405,6 @@ final class OllamaAgentLoop {
         guard let url = URL(string: "\(configuration.ollamaBaseURL)/api/search") else {
             throw OllamaAgentError.invalidURL
         }
-
-// periphery:ignore - Reserved: executeWebSearch(_:) instance method reserved for future feature activation
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -466,23 +444,18 @@ final class OllamaAgentLoop {
         configuration = config
     }
 
-    // periphery:ignore - Reserved: updateConfiguration(_:) instance method reserved for future feature activation
     func addAutoApproveCommand(_ command: String) {
         configuration.autoApproveCommands.insert(command)
     }
 
-// periphery:ignore - Reserved: addAutoApproveCommand(_:) instance method reserved for future feature activation
-
     func removeAutoApproveCommand(_ command: String) {
         configuration.autoApproveCommands.remove(command)
-    // periphery:ignore - Reserved: removeAutoApproveCommand(_:) instance method reserved for future feature activation
     }
 }
 
 // MARK: - Agent Loop Events
 
 enum AgentLoopEvent: Sendable {
-    // periphery:ignore - Reserved: AgentLoopEvent type reserved for future feature activation
     case text(String)
     case toolCall(OllamaAgentLoop.ToolType, String)
     case toolResult(OllamaAgentLoop.ToolType, String)
@@ -493,7 +466,6 @@ enum AgentLoopEvent: Sendable {
 
 // MARK: - Errors
 
-// periphery:ignore - Reserved: OllamaAgentError type reserved for future feature activation
 enum OllamaAgentError: LocalizedError {
     case invalidURL
     case ollamaNotRunning

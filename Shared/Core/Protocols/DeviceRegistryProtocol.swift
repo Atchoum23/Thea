@@ -21,7 +21,6 @@ import Foundation
 /// - Cross-device features can be tested without needing physical devices
 /// - Alternative device discovery backends (e.g., CloudKit-based) can conform
 @MainActor
-// periphery:ignore - Reserved: DeviceRegistryProtocol protocol reserved for future feature activation
 protocol DeviceRegistryProtocol: AnyObject {
 
     // MARK: - Current Device

@@ -309,7 +309,6 @@ public struct ContentPreferences: Sendable {
 
 /// Main engine for learning from YouTube content
 public actor YouTubeIntelligence {
-    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let logger = Logger(subsystem: "ai.thea.app", category: "YouTubeIntelligence")
     // MARK: - Singleton
 

@@ -174,7 +174,6 @@ public final class CausalPatternAnalyzer {
 
     // MARK: - Private Analysis Methods
 
-    // periphery:ignore - Reserved: effect parameter kept for API compatibility
     private func findPotentialCauses(for effect: ObservedEffect) -> [CausalFactor] {
         var causes: [CausalFactor] = []
         let now = Date()

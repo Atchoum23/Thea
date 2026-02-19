@@ -210,7 +210,6 @@ struct OmniEpisodicMetadata: Codable {
     }
 
     static func decode(_ data: Data?) -> OmniEpisodicMetadata? {
-        // periphery:ignore - Reserved: decode(_:) static method reserved for future feature activation
         guard let data else { return nil }
         do { return try JSONDecoder().decode(OmniEpisodicMetadata.self, from: data) } catch {
             memTypeLogger.debug("Failed to decode OmniEpisodicMetadata: \(error.localizedDescription)")
@@ -277,7 +276,6 @@ struct MemoryImportanceWeights {
     var source: Double = 0.15
 
     /// Weight for user feedback (explicit corrections)
-    // periphery:ignore - Reserved: feedback property reserved for future feature activation
     var feedback: Double = 0.10
 }
 

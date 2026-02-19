@@ -464,7 +464,6 @@ final class HealthInsightsOverviewViewModel {
         avgSleepMinutes: Int,
         avgSteps: Int,
         avgRestingHR: Int,
-        // periphery:ignore - Reserved: avgCalories parameter kept for API compatibility
         avgCalories: Int
     ) {
         var result: [HealthHighlight] = []

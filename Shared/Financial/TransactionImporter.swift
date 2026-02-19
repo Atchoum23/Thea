@@ -121,8 +121,6 @@ final class TransactionImporter {
     func categorizeTransaction(description: String, amount: Double, type: String = "OTHER") -> String {
         let desc = description.lowercased()
 
-// periphery:ignore - Reserved: type parameter kept for API compatibility
-
         // Groceries
         if matchesAny(desc, ["migros", "coop", "aldi", "lidl", "denner", "spar", "manor food", "volg", "supermarket", "grocery", "lebensmittel"]) {
             return "Groceries"
@@ -187,7 +185,6 @@ final class TransactionImporter {
     /// Detect recurring transactions from a list.
     /// Groups by similar description + amount, checks interval consistency.
     func detectRecurring(in transactions: [ImportedTransaction]) -> [RecurringPattern] {
-        // periphery:ignore - Reserved: detectRecurring(in:) instance method reserved for future feature activation
         var patterns: [RecurringPattern] = []
 
         // Group by category + approximate amount
@@ -415,7 +412,6 @@ struct ImportedTransaction: Identifiable, Codable, Sendable {
     var tags: [String]
 }
 
-// periphery:ignore - Reserved: RecurringPattern type reserved for future feature activation
 struct RecurringPattern: Identifiable, Sendable {
     let id: UUID
     let description: String

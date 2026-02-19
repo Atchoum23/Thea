@@ -66,7 +66,6 @@
                 else
                     error "No Terminal windows open"
                 end if
-            // periphery:ignore - Reserved: readFrontWindowContent() instance method reserved for future feature activation
             end tell
             """
 
@@ -107,7 +106,6 @@
                     return history of selected tab of front window
                 else
                     error "No Terminal windows open"
-                // periphery:ignore - Reserved: readHistory() instance method reserved for future feature activation
                 end if
             end tell
             """
@@ -125,7 +123,6 @@
                 if (count windows) >= \(windowIndex) then
                     set targetWindow to window \(windowIndex)
                     if (count tabs of targetWindow) >= \(tabIndex) then
-                        // periphery:ignore - Reserved: readHistory(windowIndex:tabIndex:) instance method reserved for future feature activation
                         return history of tab \(tabIndex) of targetWindow
                     else
                         error "Tab index out of range"
@@ -155,7 +152,6 @@
             tell application "Terminal"
                 if (count windows) > 0 then
                     return busy of selected tab of front window
-                // periphery:ignore - Reserved: isBusy() instance method reserved for future feature activation
                 else
                     return false
                 end if
@@ -170,7 +166,6 @@
             let script = """
             tell application "Terminal"
                 if (count windows) >= \(windowIndex) then
-                    // periphery:ignore - Reserved: isBusy(windowIndex:tabIndex:) instance method reserved for future feature activation
                     set targetWindow to window \(windowIndex)
                     if (count tabs of targetWindow) >= \(tabIndex) then
                         return busy of tab \(tabIndex) of targetWindow
@@ -187,7 +182,6 @@
         func getCurrentProcesses() async throws -> [String] {
             let script = """
             tell application "Terminal"
-                // periphery:ignore - Reserved: getCurrentProcesses() instance method reserved for future feature activation
                 if (count windows) > 0 then
                     return processes of selected tab of front window
                 else
@@ -206,7 +200,6 @@
         /// Get the TTY device name for the current tab
         func getTTY() async throws -> String {
             let script = """
-            // periphery:ignore - Reserved: getTTY() instance method reserved for future feature activation
             tell application "Terminal"
                 if (count windows) > 0 then
                     return tty of selected tab of front window
@@ -221,7 +214,6 @@
 
         /// Get the current working directory (by reading PWD or using lsof)
         func getCurrentDirectory() async throws -> URL? {
-            // periphery:ignore - Reserved: getCurrentDirectory() instance method reserved for future feature activation
             // Try to get PWD from the last prompt or use lsof
             let tty = try await getTTY()
             guard !tty.isEmpty else { return nil }
@@ -354,7 +346,6 @@
     struct WindowInfo: Identifiable {
         var id: Int { index }
         let index: Int
-        // periphery:ignore - Reserved: name property reserved for future feature activation
         let name: String
         let tabCount: Int
         let selectedTab: Int

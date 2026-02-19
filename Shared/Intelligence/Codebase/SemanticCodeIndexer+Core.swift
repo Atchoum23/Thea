@@ -615,7 +615,6 @@ extension SemanticCodeIndexer {
 
     private func shouldExclude(path: String) -> Bool {
         for pattern in configuration.excludePatterns {
-            // periphery:ignore - Reserved: shouldExclude(path:) instance method reserved for future feature activation
             if matchesGlob(path: path, pattern: pattern) {
                 return true
             }
@@ -624,7 +623,6 @@ extension SemanticCodeIndexer {
     }
 
     private func shouldInclude(path: String) -> Bool {
-        // periphery:ignore - Reserved: shouldInclude(path:) instance method reserved for future feature activation
         for pattern in configuration.includePatterns {
             if matchesGlob(path: path, pattern: pattern) {
                 return true
@@ -633,7 +631,6 @@ extension SemanticCodeIndexer {
         return false
     }
 
-    // periphery:ignore - Reserved: matchesGlob(path:pattern:) instance method reserved for future feature activation
     private func matchesGlob(path: String, pattern: String) -> Bool {
         // Simple glob matching
         let regexPattern = pattern

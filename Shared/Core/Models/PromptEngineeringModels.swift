@@ -15,7 +15,6 @@ final class UserPromptPreference {
     init(
         id: UUID = UUID(),
         category: String,
-        // periphery:ignore - Reserved: init(id:category:preferenceKey:preferenceValue:confidence:lastUpdated:) initializer reserved for future feature activation
         preferenceKey: String,
         preferenceValue: String,
         confidence: Float = 0.5,
@@ -87,7 +86,6 @@ final class CodeCorrection {
 
     init(
         id: UUID = UUID(),
-        // periphery:ignore - Reserved: init(id:originalCode:correctedCode:errorID:timestamp:wasSuccessful:modelUsed:) initializer reserved for future feature activation
         originalCode: String,
         correctedCode: String,
         errorID: UUID,
@@ -122,7 +120,6 @@ final class PromptTemplate {
     var isActive: Bool
 
     init(
-        // periphery:ignore - Reserved: init(id:name:category:templateText:version:successCount:failureCount:averageConfidence:createdAt:lastUsed:isActive:) initializer reserved for future feature activation
         id: UUID = UUID(),
         name: String,
         category: String,
@@ -166,7 +163,6 @@ final class CodeFewShotExample {
     var usageCount: Int
     var createdAt: Date
 
-    // periphery:ignore - Reserved: init(id:taskType:inputExample:outputExample:quality:usageCount:createdAt:) initializer reserved for future feature activation
     init(
         id: UUID = UUID(),
         taskType: String,

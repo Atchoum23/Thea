@@ -11,7 +11,6 @@ private let reflexionLogger = Logger(subsystem: "ai.thea.app", category: "Reflex
 // MARK: - Reflexion Engine
 
 /// Main engine for self-reflection and improvement
-// periphery:ignore - Reserved: reflexionLogger global var reserved for future feature activation
 @MainActor
 public final class ReflexionEngine: ObservableObject {
     public static let shared = ReflexionEngine()
@@ -122,7 +121,6 @@ extension ReflexionEngine {
         // Analyze the output against the task requirements
         var strengths: [String] = []
         var weaknesses: [String] = []
-        // periphery:ignore - Reserved: context parameter kept for API compatibility
         var suggestions: [String] = []
 
         // Basic heuristic analysis (in production, this would use an LLM)
@@ -285,7 +283,6 @@ extension ReflexionEngine {
         context: String = ""
     ) -> FailureAnalysis {
         // Determine error type
-        // periphery:ignore - Reserved: context parameter kept for API compatibility
         let errorType = classifyError(error)
 
         // Find root cause (heuristic)
@@ -365,7 +362,6 @@ extension ReflexionEngine {
 
     private func inferRootCause(task: String, error: String, errorType: FailureType) -> String {
         switch errorType {
-        // periphery:ignore - Reserved: task parameter kept for API compatibility
         case .misunderstanding:
             return "Task requirements were ambiguous or misinterpreted"
         case .incompleteContext:
@@ -390,7 +386,6 @@ extension ReflexionEngine {
     }
 
     private func suggestFixes(errorType: FailureType, error: String) -> [String] {
-        // periphery:ignore - Reserved: error parameter kept for API compatibility
         switch errorType {
         case .misunderstanding:
             return [
@@ -444,7 +439,6 @@ extension ReflexionEngine {
         }
     }
 
-    // periphery:ignore - Reserved: error parameter kept for API compatibility
     private func extractContributingFactors(task: String, error: String) -> [String] {
         var factors: [String] = []
 

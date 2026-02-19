@@ -40,7 +40,6 @@ public final class HandoffService {
 
     private var configuration: HandoffConfiguration
 
-    // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let logger = Logger(subsystem: "ai.thea.app", category: "HandoffService")
 
     // MARK: - Initialization

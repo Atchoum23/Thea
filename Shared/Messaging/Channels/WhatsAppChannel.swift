@@ -38,7 +38,6 @@ final class WhatsAppChannel: ObservableObject {
     private var conversationCache: [String: [WhatsAppMessage]] = [:]
     private var processedMessageIDs: Set<String> = []
 
-    // periphery:ignore - Reserved: isPaired property reserved for future feature activation
     // MARK: - Init
 
     private init() {
@@ -47,10 +46,7 @@ final class WhatsAppChannel: ObservableObject {
         storageDir = appSupport.appendingPathComponent("Thea/WhatsApp")
         do {
             try FileManager.default.createDirectory(at: storageDir, withIntermediateDirectories: true)
-        // periphery:ignore - Reserved: enabled property reserved for future feature activation
         } catch {
-            // periphery:ignore - Reserved: syncMediaFiles property reserved for future feature activation
-            // periphery:ignore - Reserved: maxHistoryMessages property reserved for future feature activation
             logger.debug("Could not create WhatsApp storage directory: \(error.localizedDescription)")
         }
         loadState()
@@ -74,7 +70,6 @@ final class WhatsAppChannel: ObservableObject {
             MessagingHub.shared.updateChannelStatus(.whatsApp, name: "WhatsApp", status: .error)
             logger.warning("OpenClaw Gateway not available")
             return
-        // periphery:ignore - Reserved: connect() instance method reserved for future feature activation
         }
 
         // Enable OpenClaw if not already
@@ -113,7 +108,6 @@ final class WhatsAppChannel: ObservableObject {
         processedMessageIDs.insert(message.id)
 
         // Convert to WhatsAppMessage
-        // periphery:ignore - Reserved: disconnect() instance method reserved for future feature activation
         let waMessage = WhatsAppMessage(
             id: message.id,
             chatID: message.channelID,
@@ -122,7 +116,6 @@ final class WhatsAppChannel: ObservableObject {
             content: message.content,
             timestamp: message.timestamp,
             isFromMe: message.isFromBot,
-            // periphery:ignore - Reserved: handleOpenClawMessage(_:) instance method reserved for future feature activation
             attachments: message.attachments.map { att in
                 WhatsAppAttachment(
                     type: mapAttachmentType(att.type),
@@ -190,7 +183,6 @@ final class WhatsAppChannel: ObservableObject {
             logger.error("Failed to send WhatsApp message: \(error.localizedDescription)")
             return false
         }
-    // periphery:ignore - Reserved: sendMessage(to:text:) instance method reserved for future feature activation
     }
 
     func replyToMessage(chatID: String, messageID: String, text: String) async -> Bool {
@@ -205,7 +197,6 @@ final class WhatsAppChannel: ObservableObject {
             logger.error("Failed to reply: \(error.localizedDescription)")
             return false
         }
-    // periphery:ignore - Reserved: replyToMessage(chatID:messageID:text:) instance method reserved for future feature activation
     }
 
     func markAsRead(chatID: String, messageID: String) async {
@@ -220,8 +211,6 @@ final class WhatsAppChannel: ObservableObject {
         }
     }
 
-// periphery:ignore - Reserved: markAsRead(chatID:messageID:) instance method reserved for future feature activation
-
     // MARK: - History
 
     func loadHistory(chatID: String, limit: Int = 50) async -> [WhatsAppMessage] {
@@ -234,7 +223,6 @@ final class WhatsAppChannel: ObservableObject {
         guard isConnected else { return [] }
         do {
             let client = OpenClawClient()
-            // periphery:ignore - Reserved: loadHistory(chatID:limit:) instance method reserved for future feature activation
             try await client.send(command: .getHistory(sessionKey: chatID, limit: limit, before: nil))
             // History comes back as events — they'll be processed by handleOpenClawMessage
             do { try await Task.sleep(for: .milliseconds(500)) } catch { return [] }
@@ -254,7 +242,6 @@ final class WhatsAppChannel: ObservableObject {
 
     // MARK: - Backup Parsing (Offline Fallback)
 
-    // periphery:ignore - Reserved: searchMessages(query:) instance method reserved for future feature activation
     /// Parse WhatsApp chat export file (txt format from "Export Chat" feature).
     func importChatExport(from url: URL) -> [WhatsAppMessage] {
         let content: String
@@ -425,7 +412,6 @@ final class WhatsAppChannel: ObservableObject {
 
         do {
             let transcription = try await transcribeAudio(at: audioURL)
-            // periphery:ignore - Reserved: transcribeVoiceNote(_:) instance method reserved for future feature activation
             logger.info("Transcribed voice note: \(transcription.prefix(100))")
 
             let transcriptionMsg = MessagingHub.shared.fromOpenClaw(
@@ -451,7 +437,6 @@ final class WhatsAppChannel: ObservableObject {
             request.shouldReportPartialResults = false
 
             recognizer?.recognitionTask(with: request) { result, error in
-                // periphery:ignore - Reserved: transcribeAudio(at:) instance method reserved for future feature activation
                 if let error {
                     continuation.resume(throwing: error)
                 } else if let result, result.isFinal {
@@ -470,7 +455,6 @@ final class WhatsAppChannel: ObservableObject {
                 groups.append(WhatsAppGroup(
                     id: message.chatID,
                     name: message.chatID,
-                    // periphery:ignore - Reserved: updateContactFromMessage(_:) instance method reserved for future feature activation
                     participantCount: 0,
                     lastMessageAt: message.timestamp
                 ))
@@ -494,7 +478,6 @@ final class WhatsAppChannel: ObservableObject {
             if channel.isGroup {
                 if !groups.contains(where: { $0.id == channel.id }) {
                     groups.append(WhatsAppGroup(
-                        // periphery:ignore - Reserved: updateChannelsFromOpenClaw() instance method reserved for future feature activation
                         id: channel.id,
                         name: channel.name,
                         participantCount: channel.participantCount ?? 0,
@@ -510,14 +493,11 @@ final class WhatsAppChannel: ObservableObject {
         channelID.hasSuffix("@g.us") || groups.contains { $0.id == channelID }
     }
 
-// periphery:ignore - Reserved: isGroupChat(_:) instance method reserved for future feature activation
-
     // MARK: - Helpers
 
     private func mapAttachmentType(_ type: OpenClawAttachment.AttachmentType) -> WhatsAppAttachmentType {
         switch type {
         case .image: return .image
-        // periphery:ignore - Reserved: mapAttachmentType(_:) instance method reserved for future feature activation
         case .audio: return .voiceNote
         case .video: return .video
         case .document: return .document
@@ -536,7 +516,6 @@ final class WhatsAppChannel: ObservableObject {
 
     private func saveState() {
         let state = WhatsAppState(
-            // periphery:ignore - Reserved: saveState() instance method reserved for future feature activation
             contacts: contacts,
             groups: groups,
             messageCount: messageCount,
@@ -616,7 +595,6 @@ struct WhatsAppContact: Codable, Sendable, Identifiable {
     var isBlocked: Bool
 
     init(
-        // periphery:ignore - Reserved: init(id:name:phoneNumber:profilePictureURL:lastMessageAt:isBlocked:) initializer reserved for future feature activation
         id: String,
         name: String,
         phoneNumber: String? = nil,
@@ -640,7 +618,6 @@ struct WhatsAppGroup: Codable, Sendable, Identifiable {
     var lastMessageAt: Date?
     var isMuted: Bool
 
-    // periphery:ignore - Reserved: init(id:name:participantCount:lastMessageAt:isMuted:) initializer reserved for future feature activation
     init(
         id: String,
         name: String,

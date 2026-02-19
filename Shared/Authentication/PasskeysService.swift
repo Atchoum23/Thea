@@ -36,7 +36,6 @@ public class PasskeysService: NSObject, ObservableObject {
     // MARK: - Configuration
 
     private let relyingPartyIdentifier = "thea.app"
-    // periphery:ignore - Reserved: authorizationController property reserved for future feature activation
     private var authorizationController: ASAuthorizationController?
 
     // MARK: - Continuation

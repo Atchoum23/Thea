@@ -33,7 +33,6 @@ public actor ClipboardContextProvider: ContextProvider {
         let timestamp: Date
         let contentType: ClipboardContext.ClipboardContentType
         let preview: String?
-        // periphery:ignore - Reserved: size property reserved for future feature activation
         let size: Int
     }
 

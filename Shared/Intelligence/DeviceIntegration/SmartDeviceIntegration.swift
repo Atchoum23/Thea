@@ -134,12 +134,10 @@ public final class SmartDeviceManager: ObservableObject {
         DeviceVoiceCommandResult(success: true, message: "Navigation executed")
     }
 
-    // periphery:ignore - Reserved: command parameter kept for API compatibility
     private func handlePlaybackCommand(_ command: DeviceVoiceCommand) async -> DeviceVoiceCommandResult {
         // Handle: "Play", "Pause", "Stop", "Fast forward", etc.
         guard let device = activeDevice, device.capabilities.contains(.mediaPlayback) else {
             return DeviceVoiceCommandResult(success: false, message: "No media device connected")
-        // periphery:ignore - Reserved: command parameter kept for API compatibility
         }
         return DeviceVoiceCommandResult(success: true, message: "Playback command executed")
     }
@@ -147,7 +145,6 @@ public final class SmartDeviceManager: ObservableObject {
     private func handleSelectionCommand(_ command: DeviceVoiceCommand) async -> DeviceVoiceCommandResult {
         // Handle: "Select first", "Select this", "Select {title}", etc.
         DeviceVoiceCommandResult(success: true, message: "Selection executed")
-    // periphery:ignore - Reserved: command parameter kept for API compatibility
     }
 
     private func handleSearchCommand(_ command: DeviceVoiceCommand) async -> DeviceVoiceCommandResult {
@@ -157,12 +154,10 @@ public final class SmartDeviceManager: ObservableObject {
 
     private func handleControlCommand(_ command: DeviceVoiceCommand) async -> DeviceVoiceCommandResult {
         // Handle: "Turn on subtitles", "Increase volume", etc.
-        // periphery:ignore - Reserved: command parameter kept for API compatibility
         DeviceVoiceCommandResult(success: true, message: "Control command executed")
     }
 
     private func handleCustomCommand(_ command: DeviceVoiceCommand) async -> DeviceVoiceCommandResult {
-        // periphery:ignore - Reserved: command parameter kept for API compatibility
         // Handle app-specific custom commands
         DeviceVoiceCommandResult(success: true, message: "Custom command processed")
     }
@@ -635,7 +630,6 @@ public struct DeviceAutomationSchedule: Codable, Sendable {
         self.interval = interval
     }
 
-    // periphery:ignore - Reserved: date parameter kept for API compatibility
     public func shouldExecute(at date: Date) -> Bool {
         // Check if schedule matches current time
         // Implementation would compare date components

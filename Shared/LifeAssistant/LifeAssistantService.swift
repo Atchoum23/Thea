@@ -505,7 +505,6 @@ final class CalendarAssistant {
             return nil
         }
         let calendar = Calendar.current
-        // periphery:ignore - Reserved: logger property reserved for future feature activation
         let startOfDay = calendar.startOfDay(for: Date())
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
         let predicate = eventStore.predicateForEvents(withStart: startOfDay, end: endOfDay, calendars: nil)
@@ -547,7 +546,6 @@ final class CalendarAssistant {
         }
         let formatter = DateFormatter()
         formatter.timeStyle = .short
-        // periphery:ignore - Reserved: query parameter kept for API compatibility
         let eventList = events.prefix(5).map { "- \($0.title) at \(formatter.string(from: $0.startDate))" }.joined(separator: "\n")
         return AssistantResponse(
             message: "Here are your upcoming events:\n\(eventList)",
@@ -567,7 +565,6 @@ final class HealthAssistant {
         #if os(macOS) || os(iOS) || os(watchOS)
         guard HKHealthStore.isHealthDataAvailable() else { return nil }
 
-        // periphery:ignore - Reserved: logger property reserved for future feature activation
         let steps = await queryTodaySum(for: .stepCount)
         let activeCalories = await queryTodaySum(for: .activeEnergyBurned)
         let sleepHours = await querySleepHours()
@@ -597,7 +594,6 @@ final class HealthAssistant {
             return AssistantResponse(
                 message: "Health data is not available. Please ensure HealthKit access is granted in Settings.",
                 suggestions: []
-            // periphery:ignore - Reserved: query parameter kept for API compatibility
             )
         }
         let msg = """
@@ -663,7 +659,6 @@ final class FinancialAssistant {
 
     func getWeeklySummary() async -> AssistantFinancialSummary? {
         // Read from UserDefaults-persisted financial data (set by FinancialDataManager)
-        // periphery:ignore - Reserved: logger property reserved for future feature activation
         let weeklySpending = UserDefaults.standard.double(forKey: "finance.weeklySpending")
         let weeklyBudget = UserDefaults.standard.double(forKey: "finance.weeklyBudget")
         if weeklyBudget > 0 {
@@ -679,7 +674,6 @@ final class FinancialAssistant {
     func processQuery(_ query: String) async -> AssistantResponse {
         if let summary = await getWeeklySummary() {
             let pct = summary.budget > 0 ? Int((summary.spending / summary.budget) * 100) : 0
-            // periphery:ignore - Reserved: query parameter kept for API compatibility
             return AssistantResponse(
                 message: "This week: spent \(String(format: "%.0f", summary.spending)) of \(String(format: "%.0f", summary.budget)) budget (\(pct)%). Savings: \(String(format: "%.0f", summary.savings)).",
                 suggestions: []
@@ -713,7 +707,6 @@ final class SocialAssistant {
 final class ProductivityAssistant {
     private let logger = Logger(subsystem: "com.thea.life", category: "ProductivityAssistant")
 
-    // periphery:ignore - Reserved: logger property reserved for future feature activation
     func getPriorityTasks() async -> [String] {
         // Read from UserDefaults-persisted task data
         UserDefaults.standard.stringArray(forKey: "productivity.priorityTasks") ?? []
@@ -736,7 +729,6 @@ final class ProductivityAssistant {
     }
 
     func processQuery(_ query: String) async -> AssistantResponse {
-        // periphery:ignore - Reserved: query parameter kept for API compatibility
         let tasks = await getPriorityTasks()
         let score = await getProductivityScore()
         let focusMinutes = Int(await getCurrentFocusTime())
@@ -761,7 +753,6 @@ final class LearningAssistant {
         )
     }
 
-    // periphery:ignore - Reserved: query parameter kept for API compatibility
     func processQuery(_ query: String) async -> AssistantResponse {
         let progress = await getWeeklyProgress()
         let pct = progress.goal > 0 ? Int((progress.hoursLearned / progress.goal) * 100) : 0

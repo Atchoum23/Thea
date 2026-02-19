@@ -50,7 +50,6 @@ final class SmartNotificationScheduler {
         priority: NotificationPriority,
         category: NotificationService.Category? = nil
     ) -> DeliveryDecision {
-        // periphery:ignore - Reserved: category parameter kept for API compatibility
         scheduledCount += 1
 
         // Bypass smart scheduling if disabled or critical
@@ -157,7 +156,6 @@ final class SmartNotificationScheduler {
 
     /// Record that the user engaged with a notification (opens, responds, etc.)
     func recordEngagement() {
-        // periphery:ignore - Reserved: recordEngagement() instance method reserved for future feature activation
         BehavioralFingerprint.shared.recordNotificationEngagement(engaged: true)
     }
 
@@ -200,7 +198,6 @@ enum DeliveryDecision: Sendable {
     case now(reason: String)
     case deferred(until: Date, reason: String)
 
-    // periphery:ignore - Reserved: isImmediate property reserved for future feature activation
     var isImmediate: Bool {
         if case .now = self { return true }
         return false

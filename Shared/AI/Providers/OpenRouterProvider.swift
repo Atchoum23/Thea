@@ -16,7 +16,6 @@ final class OpenRouterProvider: AIProvider, Sendable {
 
     let capabilities = ProviderCapabilities(
         supportsStreaming: true,
-        // periphery:ignore - Reserved: capabilities property reserved for future feature activation
         supportsVision: true,
         supportsFunctionCalling: true,
         supportsWebSearch: false,
@@ -35,7 +34,6 @@ final class OpenRouterProvider: AIProvider, Sendable {
     // MARK: - Validation
 
     func validateAPIKey(_ key: String) async throws -> ValidationResult {
-        // periphery:ignore - Reserved: validateAPIKey(_:) instance method reserved for future feature activation
         guard let url = URL(string: "\(baseURL)/models") else {
             return .failure("Invalid API URL configuration")
         }
@@ -71,7 +69,6 @@ final class OpenRouterProvider: AIProvider, Sendable {
 
     /// Advanced chat with Anthropic-specific features forwarded through OpenRouter.
     /// When routing to a Claude model, forwards: system prompts, cache control, thinking, effort.
-    // periphery:ignore - Reserved: chatAdvanced(messages:model:options:) instance method reserved for future feature activation
     func chatAdvanced(
         messages: [AIMessage],
         model: String,

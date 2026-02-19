@@ -33,7 +33,6 @@ final class SwissTaxEstimator {
     ) -> SwissTaxResult {
         // Social contributions (AHV/IV/EO/ALV)
         let ahvRate = 0.053 // Employee share 5.3%
-        // periphery:ignore - Reserved: municipality parameter kept for API compatibility
         let alvRate = 0.011 // ALV 1.1%
         let socialContributions = grossIncome * (ahvRate + alvRate)
 
@@ -153,7 +152,6 @@ final class SwissTaxEstimator {
         saveDeductions()
     }
 
-    // periphery:ignore - Reserved: removeDeduction(id:) instance method reserved for future feature activation
     /// Toggle deduction active state.
     func toggleDeduction(id: UUID) {
         if let index = deductions.firstIndex(where: { $0.id == id }) {
@@ -206,7 +204,6 @@ final class SwissTaxEstimator {
         // Simplified cantonal base tax using a representative progressive schedule
         // Each canton has a multiplier applied to this base
         let brackets: [(threshold: Double, rate: Double)] = [
-            // periphery:ignore - Reserved: canton parameter kept for API compatibility
             (20_000, 0.0),
             (40_000, 0.04),
             (60_000, 0.06),
@@ -292,8 +289,6 @@ struct SwissTaxResult: Sendable {
     let grossIncome: Double
     let taxableIncome: Double
     let federalTax: Double
-    // periphery:ignore - Reserved: grossIncome property reserved for future feature activation
-    // periphery:ignore - Reserved: taxableIncome property reserved for future feature activation
     let cantonalTax: Double
     let municipalTax: Double
     let churchTax: Double
@@ -304,8 +299,6 @@ struct SwissTaxResult: Sendable {
     let deductions: Double
     let canton: SwissCanton
     let filingStatus: FilingStatus
-    // periphery:ignore - Reserved: filingStatus property reserved for future feature activation
-    // periphery:ignore - Reserved: children property reserved for future feature activation
     let children: Int
     let quarterlyAmount: Double
 }

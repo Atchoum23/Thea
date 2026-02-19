@@ -13,7 +13,6 @@ final class IndexedFile {
     var fileType: String
     var isIndexed: Bool
 
-    // periphery:ignore - Reserved: init(id:path:name:size:indexedAt:lastModified:contentHash:fileType:isIndexed:) initializer reserved for future feature activation
     init(
         id: UUID = UUID(),
         path: String,

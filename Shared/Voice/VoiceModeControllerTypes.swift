@@ -288,7 +288,6 @@ private struct PermissionRow: View {
 /// Full-screen overlay when voice mode is active
 public struct VoiceModeOverlay: View {
     @ObservedObject var controller = VoiceModeController.shared
-    // periphery:ignore - Reserved: colorScheme property reserved for future feature activation
     @Environment(\.colorScheme) private var colorScheme
 
     public init() {}

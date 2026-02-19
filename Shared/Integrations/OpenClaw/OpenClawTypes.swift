@@ -23,7 +23,6 @@ struct OpenClawWireRequest: @unchecked Sendable {
     }
 
     func encoded() throws -> String {
-        // periphery:ignore - Reserved: OpenClawWireRequest type reserved for future feature activation
         let dict: [String: Any] = ["type": type, "id": id, "method": method, "params": params]
         let data = try JSONSerialization.data(withJSONObject: dict)
         guard let json = String(data: data, encoding: .utf8) else {
@@ -46,7 +45,6 @@ struct OpenClawWireResponse: Codable, Sendable {
 struct OpenClawWireEvent: Codable, Sendable {
     let type: String    // "event"
     let event: String
-    // periphery:ignore - Reserved: OpenClawWireResponse type reserved for future feature activation
     let payload: OpenClawJSONValue?
     let seq: Int?
     let stateVersion: Int?
@@ -55,7 +53,6 @@ struct OpenClawWireEvent: Codable, Sendable {
 /// Error object in a Gateway response
 struct OpenClawResponseError: Codable, Sendable {
     let code: Int
-    // periphery:ignore - Reserved: OpenClawWireEvent type reserved for future feature activation
     let message: String
     let data: OpenClawJSONValue?
 }
@@ -118,8 +115,6 @@ enum OpenClawJSONValue: Codable, Sendable {
     }
 }
 
-// periphery:ignore - Reserved: decode(as:) instance method reserved for future feature activation
-
 // MARK: - Payload Container
 
 /// Type-safe wrapper around a raw JSON Data response from the Gateway
@@ -132,8 +127,6 @@ struct OpenClawPayload: Sendable {
     func decode<T: Decodable>(as type: T.Type) throws -> T {
         try JSONDecoder().decode(type, from: data)
     }
-
-// periphery:ignore - Reserved: OpenClawPayload type reserved for future feature activation
 
     var rawJSON: Data { data }
     var binaryData: Data? { nil } // reserved for binary payloads
@@ -227,8 +220,6 @@ struct OpenClawSession: Identifiable, Codable, Sendable {
     let lastActivity: Date?
     var transcript: [OpenClawMessage]
 
-// periphery:ignore - Reserved: OpenClawSession type reserved for future feature activation
-
     init(id: String, agentId: String, channelType: String, scope: String,
          identifier: String, lastActivity: Date? = nil, transcript: [OpenClawMessage] = []) {
         self.id = id
@@ -252,8 +243,6 @@ struct OpenClawAgent: Identifiable, Codable, Sendable {
     var sessionCount: Int
 }
 
-// periphery:ignore - Reserved: OpenClawAgent type reserved for future feature activation
-
 // MARK: - Canvas (O1)
 
 /// Agent-driven visual workspace state
@@ -263,7 +252,6 @@ struct OpenClawCanvasState: Codable, Sendable {
     let updatedAt: Date
 }
 
-// periphery:ignore - Reserved: OpenClawCanvasState type reserved for future feature activation
 // MARK: - Node Capabilities (O1)
 
 /// Capabilities available on paired nodes (iOS, Android, macOS companion)
@@ -283,7 +271,6 @@ struct OpenClawNode: Identifiable, Codable, Sendable {
     let name: String
     let platform: String  // "ios", "android", "macos"
     let capabilities: [OpenClawNodeCapability]
-    // periphery:ignore - Reserved: OpenClawNode type reserved for future feature activation
     let lastSeen: Date?
 }
 
@@ -294,7 +281,6 @@ struct OpenClawCronJob: Identifiable, Codable, Sendable {
     let id: String
     let expression: String   // cron expression e.g. "0 9 * * 1-5"
     let agentId: String
-    // periphery:ignore - Reserved: OpenClawCronJob type reserved for future feature activation
     let message: String      // injected task message
     var enabled: Bool
     let nextRun: Date?
@@ -305,7 +291,6 @@ struct OpenClawCronJob: Identifiable, Codable, Sendable {
 struct OpenClawGatewayStatus: Codable, Sendable {
     let version: String
     let protocolVersion: Int
-    // periphery:ignore - Reserved: OpenClawGatewayStatus type reserved for future feature activation
     let uptime: TimeInterval
     let connectedNodes: Int
     let activeChannels: Int
@@ -325,7 +310,6 @@ struct OpenClawGatewayStatus: Codable, Sendable {
 
 struct OpenClawMemoryResult: Identifiable, Codable, Sendable {
     let id: String
-    // periphery:ignore - Reserved: OpenClawMemoryResult type reserved for future feature activation
     let content: String
     let score: Double
     let tags: [String]
@@ -335,7 +319,6 @@ struct OpenClawMemoryResult: Identifiable, Codable, Sendable {
 // MARK: - Security Audit (O1)
 
 struct OpenClawSecurityAuditResult: Codable, Sendable {
-    // periphery:ignore - Reserved: OpenClawSecurityAuditResult type reserved for future feature activation
     let riskScore: Double      // 0.0 (safe) – 10.0 (critical)
     let findings: [OpenClawSecurityFinding]
     let auditedAt: Date
@@ -490,7 +473,6 @@ enum OpenClawGatewayCommand: @unchecked Sendable {
 // MARK: - Gateway Events (O1)
 
 /// Events received from OpenClaw Gateway
-// periphery:ignore - Reserved: OpenClawGatewayEvent type reserved for future feature activation
 enum OpenClawGatewayEvent: Sendable {
     // Connection
     case connected

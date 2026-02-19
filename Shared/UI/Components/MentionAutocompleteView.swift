@@ -157,7 +157,6 @@ final class MentionDataProvider: ObservableObject {
     }
 
     func clear() {
-        // periphery:ignore - Reserved: clear() instance method reserved for future feature activation
         searchTask?.cancel()
         items = []
     }
@@ -299,7 +298,6 @@ struct MentionAutocompleteView: View {
 
     /// Call this from the parent's key handler.
     /// Returns `true` if the key was consumed.
-    // periphery:ignore - Reserved: handleKeyPress(_:) instance method reserved for future feature activation
     func handleKeyPress(_ key: KeyEquivalent) -> Bool {
         switch key {
         case .upArrow:

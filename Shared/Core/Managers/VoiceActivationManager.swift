@@ -202,7 +202,6 @@ final class VoiceActivationManager {
 
     // MARK: - Persistence
 
-    // periphery:ignore - Reserved: savePreferences() instance method reserved for future feature activation
     func savePreferences() {
         UserDefaults.standard.set(wakeWord, forKey: "wakeWord")
         UserDefaults.standard.set(conversationMode, forKey: "conversationMode")

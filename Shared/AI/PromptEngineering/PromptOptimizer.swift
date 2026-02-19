@@ -33,7 +33,6 @@ final class PromptOptimizer {
 
     // MARK: - Main Optimization Method
 
-    // periphery:ignore - Reserved: config property reserved for future feature activation
     /// Optimizes a prompt for a given task type and agent type
     func optimizePrompt(
         for taskInstruction: String,
@@ -41,7 +40,6 @@ final class PromptOptimizer {
         context: TaskContext,
         originalPrompt: String? = nil
     ) async -> String {
-        // periphery:ignore - Reserved: setModelContext(_:) instance method reserved for future feature activation
         guard config.enableAutoOptimization else {
             return originalPrompt ?? taskInstruction
         }
@@ -50,7 +48,6 @@ final class PromptOptimizer {
 
         // 1. Select best template for task type
         if let template = await selectBestTemplate(for: agentType, taskInstruction: taskInstruction) {
-            // periphery:ignore - Reserved: optimizePrompt(for:agentType:context:originalPrompt:) instance method reserved for future feature activation
             optimizedPrompt = interpolateTemplate(template.templateText, with: taskInstruction, context: context)
         } else {
             optimizedPrompt = taskInstruction
@@ -93,7 +90,6 @@ final class PromptOptimizer {
     private func interpolateTemplate(_ template: String, with instruction: String, context: TaskContext) -> String {
         var result = template
         result = result.replacingOccurrences(of: "{{INSTRUCTION}}", with: instruction)
-        // periphery:ignore - Reserved: selectBestTemplate(for:taskInstruction:) instance method reserved for future feature activation
         result = result.replacingOccurrences(of: "{{CONTEXT}}", with: formatContext(context))
 
         if let previousError = context.previousError {
@@ -103,7 +99,6 @@ final class PromptOptimizer {
         return result
     }
 
-    // periphery:ignore - Reserved: interpolateTemplate(_:with:context:) instance method reserved for future feature activation
     private func formatContext(_ context: TaskContext) -> String {
         var contextParts: [String] = []
 
@@ -115,7 +110,6 @@ final class PromptOptimizer {
             contextParts.append("Previous attempts: \(context.previousAttempts.count)")
         }
 
-        // periphery:ignore - Reserved: formatContext(_:) instance method reserved for future feature activation
         if !context.verificationIssues.isEmpty {
             contextParts.append("Known issues to avoid: \(context.verificationIssues.joined(separator: ", "))")
         }
@@ -135,7 +129,6 @@ final class PromptOptimizer {
             let allExamples = try context.fetch(descriptor)
             let examples = allExamples
                 .filter { $0.taskType == agentType }
-                // periphery:ignore - Reserved: getCodeFewShotExamples(for:limit:) instance method reserved for future feature activation
                 .sorted { ($0.quality, $0.usageCount) > ($1.quality, $1.usageCount) }
             return Array(examples.prefix(limit))
         } catch {
@@ -153,7 +146,6 @@ final class PromptOptimizer {
             enhancedPrompt += """
             Example \(index + 1):
             Input: \(example.inputExample)
-            // periphery:ignore - Reserved: injectCodeFewShotExamples(_:examples:) instance method reserved for future feature activation
             Output: \(example.outputExample)
 
             """
@@ -174,7 +166,6 @@ final class PromptOptimizer {
 
             for preference in preferences where preference.confidence > config.confidenceThreshold {
                 enhancedPrompt += "- \(preference.preferenceKey): \(preference.preferenceValue)\n"
-            // periphery:ignore - Reserved: applyUserPreferences(_:preferences:) instance method reserved for future feature activation
             }
         }
 
@@ -190,7 +181,6 @@ final class PromptOptimizer {
             enhancedPrompt += "\n\n⚠️ CRITICAL: Avoid these issues from previous attempts:\n"
 
             for (index, issue) in issues.enumerated() {
-                // periphery:ignore - Reserved: addErrorPrevention(_:issues:) instance method reserved for future feature activation
                 enhancedPrompt += "\(index + 1). \(issue)\n"
             }
 
@@ -209,7 +199,6 @@ final class PromptOptimizer {
         success: Bool,
         confidence: Double,
         output: String? = nil
-    // periphery:ignore - Reserved: recordOutcome(promptTemplate:taskType:success:confidence:output:) instance method reserved for future feature activation
     ) async {
         guard config.autoRecordOutcomes, let context = modelContext else { return }
 
@@ -257,7 +246,6 @@ final class PromptOptimizer {
         preferenceKey: String,
         preferenceValue: String,
         positive: Bool
-    // periphery:ignore - Reserved: recordUserFeedback(category:preferenceKey:preferenceValue:positive:) instance method reserved for future feature activation
     ) async {
         await userPreferenceModel.updatePreference(
             category: category,
@@ -274,7 +262,6 @@ final class PromptOptimizer {
         variants: [PromptTemplate]
     ) -> PromptTemplate? {
         guard config.enableABTesting, !variants.isEmpty else {
-            // periphery:ignore - Reserved: selectTemplateForABTest(variants:) instance method reserved for future feature activation
             return variants.first
         }
 
@@ -298,7 +285,6 @@ final class PromptOptimizer {
     func createTemplate(
         name: String,
         category: String,
-        // periphery:ignore - Reserved: createTemplate(name:category:templateText:) instance method reserved for future feature activation
         templateText: String
     ) async {
         guard let context = modelContext else { return }
@@ -320,7 +306,6 @@ final class PromptOptimizer {
     /// Updates an existing template
     func updateTemplate(
         _ template: PromptTemplate,
-        // periphery:ignore - Reserved: updateTemplate(_:newText:) instance method reserved for future feature activation
         newText: String
     ) async {
         guard let context = modelContext else { return }
@@ -351,7 +336,6 @@ final class PromptOptimizer {
 
     /// Gets all templates for a category
     func getTemplates(for category: String) async -> [PromptTemplate] {
-        // periphery:ignore - Reserved: getTemplates(for:) instance method reserved for future feature activation
         guard let context = modelContext else { return [] }
 
         // Fetch all and filter/sort in memory to avoid Swift 6 #Predicate Sendable issues
@@ -423,7 +407,6 @@ struct OptimizationStats {
 // MARK: - Context Extension
 
 extension TaskContext {
-    // periphery:ignore - Reserved: categoryHint property reserved for future feature activation
     var categoryHint: String {
         if let error = previousError {
             if error.contains("syntax") || error.contains("compile") {

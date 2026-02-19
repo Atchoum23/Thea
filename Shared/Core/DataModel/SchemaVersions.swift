@@ -12,7 +12,6 @@ import os.log
 
 private let logger = Logger(subsystem: "ai.thea.app", category: "schema-versions")
 
-// periphery:ignore - Reserved: logger global var reserved for future feature activation
 // MARK: - Schema V1 (Current Production Schema)
 
 /// Version 1.0.0 - Initial production schema
@@ -117,13 +116,11 @@ enum TheaSchemaMigrationPlan: SchemaMigrationPlan {
 extension TheaSchemaMigrationPlan {
     /// Creates a backup of the database before migration
     static func backupDatabase(context: ModelContext) throws {
-        // periphery:ignore - Reserved: backupDatabase(context:) static method reserved for future feature activation
         // Implementation: Export to JSON, copy .sqlite file, etc.
         logger.info("📦 Creating database backup...")
     }
 
     /// Validates migration completed successfully
-    // periphery:ignore - Reserved: validateMigration(context:) static method reserved for future feature activation
     static func validateMigration(context: ModelContext) throws {
         // Implementation: Run integrity checks, count records, etc.
         logger.info("✓ Validating migration integrity...")

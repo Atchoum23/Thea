@@ -89,14 +89,12 @@ struct OCRResult: Sendable {
 }
 
 /// Errors from OCR processing
-// periphery:ignore - Reserved: DocumentComplexity type reserved for future feature activation
 enum OCRError: Error, LocalizedError {
     case imageConversionFailed
     case noTextDetected
     case providerUnavailable(String)
     case apiKeyMissing(String)
     case networkError(Error)
-    // periphery:ignore - Reserved: OCRResult type reserved for future feature activation
     case processingFailed(String)
 
     var errorDescription: String? {
@@ -113,7 +111,6 @@ enum OCRError: Error, LocalizedError {
             return "Network error: \(error.localizedDescription)"
         case .processingFailed(let reason):
             return "OCR processing failed: \(reason)"
-        // periphery:ignore - Reserved: OCRError type reserved for future feature activation
         }
     }
 }
@@ -143,14 +140,7 @@ final class VisionOCRProvider: OCRProvider, @unchecked Sendable {
 
     var supportedScripts: Set<OCRScript> {
         [.latin, .greek, .cyrillic, .chinese, .japanese, .korean, .arabic, .hebrew, .devanagari, .thai]
-    // periphery:ignore - Reserved: providerName property reserved for future feature activation
-    // periphery:ignore - Reserved: supportedScripts property reserved for future feature activation
-    // periphery:ignore - Reserved: accuracyTier property reserved for future feature activation
-    // periphery:ignore - Reserved: isAvailable property reserved for future feature activation
-    // periphery:ignore - Reserved: requiresNetwork property reserved for future feature activation
     }
-
-// periphery:ignore - Reserved: extractText(from:languages:) instance method reserved for future feature activation
 
     var isAvailable: Bool { true }
 
@@ -158,7 +148,6 @@ final class VisionOCRProvider: OCRProvider, @unchecked Sendable {
         let startTime = Date()
 
         return try await withCheckedThrowingContinuation { continuation in
-            // periphery:ignore - Reserved: VisionOCRProvider type reserved for future feature activation
             let request = VNRecognizeTextRequest { request, error in
                 if let error = error {
                     continuation.resume(throwing: OCRError.processingFailed(error.localizedDescription))
@@ -291,10 +280,7 @@ final class AdaptiveOCREngine {
     private(set) var averageConfidence: Double = 0
     private(set) var averageProcessingTime: TimeInterval = 0
 
-// periphery:ignore - Reserved: shared static property reserved for future feature activation
-
     private init() {
-        // periphery:ignore - Reserved: visionProvider property reserved for future feature activation
         // Cloud providers would be initialized with API keys from secure storage
         // For now, only Vision is available by default
     }
@@ -315,8 +301,6 @@ final class AdaptiveOCREngine {
         return result
     }
 
-// periphery:ignore - Reserved: extractText(from:) instance method reserved for future feature activation
-
     /// Extract text with specific language hints
     func extractText(from image: CGImage, languages: [String]) async throws -> OCRResult {
         let complexity = assessComplexity(image)
@@ -329,7 +313,6 @@ final class AdaptiveOCREngine {
     }
 
     #if canImport(AppKit)
-    // periphery:ignore - Reserved: extractText(from:languages:) instance method reserved for future feature activation
     /// Convenience method for NSImage (macOS)
     func extractText(from nsImage: NSImage) async throws -> OCRResult {
         guard let cgImage = nsImage.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
@@ -341,7 +324,6 @@ final class AdaptiveOCREngine {
 
     #if canImport(UIKit)
     /// Convenience method for UIImage (iOS)
-    // periphery:ignore - Reserved: extractText(from:) instance method reserved for future feature activation
     func extractText(from uiImage: UIImage) async throws -> OCRResult {
         guard let cgImage = uiImage.cgImage else {
             throw OCRError.imageConversionFailed
@@ -362,7 +344,6 @@ final class AdaptiveOCREngine {
         // For complex documents, prefer higher accuracy tiers
         if complexity == .complex {
             if let cloudProvider = cloudProviders.first(where: {
-                // periphery:ignore - Reserved: selectOptimalProvider(script:complexity:) instance method reserved for future feature activation
                 $0.isAvailable && $0.accuracyTier >= .enhanced && $0.supportedScripts.contains(script)
             }) {
                 return cloudProvider
@@ -382,14 +363,12 @@ final class AdaptiveOCREngine {
 
     /// Assess document complexity from image characteristics
     func assessComplexity(_ image: CGImage) -> DocumentComplexity {
-        // periphery:ignore - Reserved: detectPrimaryScript(_:) instance method reserved for future feature activation
         // Simple heuristics based on image dimensions and variance
         let width = image.width
         let height = image.height
         let aspectRatio = Double(width) / Double(height)
 
         // Very wide or very tall images often indicate tables or multi-column layouts
-        // periphery:ignore - Reserved: assessComplexity(_:) instance method reserved for future feature activation
         if aspectRatio > 2.5 || aspectRatio < 0.4 {
             return .complex
         }
@@ -412,23 +391,19 @@ final class AdaptiveOCREngine {
 
     /// Set minimum accuracy tier required
     func setMinimumAccuracyTier(_ tier: OCRAccuracyTier) {
-        // periphery:ignore - Reserved: setPreferOffline(_:) instance method reserved for future feature activation
         minimumAccuracyTier = tier
     }
 
     /// Register a cloud OCR provider
-    // periphery:ignore - Reserved: setMinimumAccuracyTier(_:) instance method reserved for future feature activation
     func registerCloudProvider(_ provider: OCRProvider) {
         cloudProviders.append(provider)
     }
 
-    // periphery:ignore - Reserved: registerCloudProvider(_:) instance method reserved for future feature activation
     // MARK: - Statistics
 
     private func updateStatistics(_ result: OCRResult) {
         totalExtractions += 1
 
-        // periphery:ignore - Reserved: updateStatistics(_:) instance method reserved for future feature activation
         // Running average for confidence
         let n = Double(totalExtractions)
         averageConfidence = averageConfidence * (n - 1) / n + result.confidence / n
@@ -440,14 +415,12 @@ final class AdaptiveOCREngine {
     /// Get available providers
     var availableProviders: [OCRProvider] {
         var providers: [OCRProvider] = [visionProvider]
-        // periphery:ignore - Reserved: availableProviders property reserved for future feature activation
         providers.append(contentsOf: cloudProviders.filter { $0.isAvailable })
         return providers
     }
 
     /// Get supported scripts across all providers
     var supportedScripts: Set<OCRScript> {
-        // periphery:ignore - Reserved: supportedScripts property reserved for future feature activation
         var scripts = visionProvider.supportedScripts
         for provider in cloudProviders {
             scripts.formUnion(provider.supportedScripts)
@@ -460,7 +433,6 @@ final class AdaptiveOCREngine {
 
 extension CGImage {
     /// Create CGImage from Data
-    // periphery:ignore - Reserved: fromData(_:) static method reserved for future feature activation
     static func fromData(_ data: Data) -> CGImage? {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
               let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {

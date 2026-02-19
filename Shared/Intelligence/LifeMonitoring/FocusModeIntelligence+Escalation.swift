@@ -52,7 +52,6 @@ extension FocusModeIntelligence {
         timestamps = timestamps.filter { $0 > cutoff }
 
         // Add current timestamp
-        // periphery:ignore - Reserved: trackMessageForEscalation(contactKey:messageContent:) instance method reserved for future feature activation
         timestamps.append(Date())
         setMessageCountTracking(for: contactKey, timestamps: timestamps)
 
@@ -83,7 +82,6 @@ extension FocusModeIntelligence {
 
         let escalationInquiry: [String: String] = [
             "en": "I noticed you've sent several messages. Is this urgent and needs my immediate attention? Reply YES if so, otherwise I'll get back to you when I'm available.",
-            // periphery:ignore - Reserved: handleEscalation(contactKey:messageCount:) instance method reserved for future feature activation
             "de": "Ich habe bemerkt, dass du mehrere Nachrichten gesendet hast. Ist das dringend und braucht meine sofortige Aufmerksamkeit? Antworte JA falls ja, sonst melde ich mich, wenn ich verf\u{00FC}gbar bin.",
             "fr": "J'ai remarqu\u{00E9} que tu as envoy\u{00E9} plusieurs messages. Est-ce urgent et n\u{00E9}cessite mon attention imm\u{00E9}diate? R\u{00E9}ponds OUI si c'est le cas, sinon je te recontacte d\u{00E8}s que possible.",
             "it": "Ho notato che hai inviato diversi messaggi. \u{00C8} urgente e richiede la mia attenzione immediata? Rispondi S\u{00CC} se s\u{00EC}, altrimenti ti rispondo quando sar\u{00F2} disponibile."
@@ -108,7 +106,6 @@ extension FocusModeIntelligence {
 
             if var state = getConversationState(for: contactKey) {
                 state.markedAsUrgent = true
-                // periphery:ignore - Reserved: checkEscalationConfirmation(contactKey:messageContent:) instance method reserved for future feature activation
                 state.currentStage = .confirmedUrgent
                 setConversationState(for: contactKey, state: state)
             }
@@ -149,8 +146,6 @@ extension FocusModeIntelligence {
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
         try? await UNUserNotificationCenter.current().add(request) // Safe: notification delivery failure is non-fatal; focus mode continues
 
-// periphery:ignore - Reserved: notifyUserOfUrgentContact(contactKey:) instance method reserved for future feature activation
-
         print("[Escalation] User notified about urgent contact: \(contactKey)")
     }
 
@@ -171,7 +166,6 @@ extension FocusModeIntelligence {
         #if os(macOS)
         let script = """
         tell application "Calendar"
-            // periphery:ignore - Reserved: getCalendarAwareMessage(language:) instance method reserved for future feature activation
             set currentDate to current date
             set theCalendars to calendars
             repeat with cal in theCalendars
@@ -211,7 +205,6 @@ extension FocusModeIntelligence {
 
         #if os(macOS)
         return nil
-        // periphery:ignore - Reserved: getNextAvailableSlot(language:) instance method reserved for future feature activation
         #else
         return nil
         #endif
@@ -230,16 +223,12 @@ extension FocusModeIntelligence {
         return nil
     }
 
-// periphery:ignore - Reserved: getCurrentLocationBehavior() instance method reserved for future feature activation
-
     /// Get a location-aware message for the contact.
     ///
     /// PRIVACY: Always returns `nil` -- location is NEVER shared with contacts.
     func getLocationAwareMessage(language: String) async -> String? {
         nil
     }
-
-// periphery:ignore - Reserved: getLocationAwareMessage(language:) instance method reserved for future feature activation
 
     /// Calculate the response delay adjusted for the user's current location.
     ///
@@ -248,7 +237,6 @@ extension FocusModeIntelligence {
     /// - Returns: The appropriate response delay in seconds.
     func getLocationBasedResponseDelay() async -> TimeInterval {
         guard let _ = await getCurrentLocationBehavior() else {
-            // periphery:ignore - Reserved: getLocationBasedResponseDelay() instance method reserved for future feature activation
             return getGlobalSettings().autoReplyDelay
         }
         return getGlobalSettings().autoReplyDelay
@@ -350,7 +338,6 @@ extension FocusModeIntelligence {
     public func handleIncomingGroupMessage(
         groupId: String,
         groupName: String?,
-        // periphery:ignore - Reserved: groupName parameter kept for API compatibility
         from contactId: String?,
         platform: CommunicationPlatform,
         messageContent: String,
@@ -392,7 +379,6 @@ extension FocusModeIntelligence {
     ///   - groupId: The unique identifier of the group chat.
     ///   - message: The message text to send.
     ///   - platform: The communication platform.
-    // periphery:ignore - Reserved: platform parameter kept for API compatibility
     func sendGroupMessage(groupId: String, message: String, platform: CommunicationPlatform) async {
         print("[GroupChat] Would send to group \(groupId): \(message)")
     }

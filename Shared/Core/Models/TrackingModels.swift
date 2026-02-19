@@ -22,7 +22,6 @@ final class HealthSnapshot {
         steps: Int = 0,
         activeCalories: Double = 0,
         heartRateAverage: Double? = nil,
-        // periphery:ignore - Reserved: init(id:date:steps:activeCalories:heartRateAverage:heartRateMin:heartRateMax:sleepDuration:workoutMinutes:snapshotData:) initializer reserved for future feature activation
         heartRateMin: Double? = nil,
         heartRateMax: Double? = nil,
         sleepDuration: TimeInterval = 0,
@@ -58,7 +57,6 @@ final class DailyScreenTimeRecord {
         date: Date,
         totalScreenTime: TimeInterval = 0,
         appUsageData: Data = Data(),
-        // periphery:ignore - Reserved: init(id:date:totalScreenTime:appUsageData:productivityScore:focusTimeMinutes:) initializer reserved for future feature activation
         productivityScore: Double = 0,
         focusTimeMinutes: Int = 0
     ) {
@@ -87,7 +85,6 @@ final class DailyInputStatistics {
         id: UUID = UUID(),
         date: Date,
         mouseClicks: Int = 0,
-        // periphery:ignore - Reserved: init(id:date:mouseClicks:keystrokes:mouseDistancePixels:activeMinutes:activityLevel:) initializer reserved for future feature activation
         keystrokes: Int = 0,
         mouseDistancePixels: Double = 0,
         activeMinutes: Int = 0,
@@ -119,7 +116,6 @@ final class BrowsingRecord {
     init(
         id: UUID = UUID(),
         sessionID: UUID,
-        // periphery:ignore - Reserved: init(id:sessionID:url:title:timestamp:duration:category:contentSummary:) initializer reserved for future feature activation
         url: String,
         title: String,
         timestamp: Date = Date(),
@@ -152,7 +148,6 @@ final class LocationVisitRecord {
 
     init(
         id: UUID = UUID(),
-        // periphery:ignore - Reserved: init(id:latitude:longitude:arrivalTime:departureTime:placeName:category:) initializer reserved for future feature activation
         latitude: Double,
         longitude: Double,
         arrivalTime: Date = Date(),
@@ -184,7 +179,6 @@ final class LifeInsight {
     var isRead: Bool
 
     init(
-        // periphery:ignore - Reserved: init(id:date:insightType:title:insightDescription:actionableRecommendations:priority:isRead:) initializer reserved for future feature activation
         id: UUID = UUID(),
         date: Date = Date(),
         insightType: String,
@@ -217,7 +211,6 @@ final class WindowState {
     var projectID: UUID?
     var lastOpened: Date
 
-    // periphery:ignore - Reserved: init(id:windowType:position:size:conversationID:projectID:lastOpened:) initializer reserved for future feature activation
     init(
         id: UUID = UUID(),
         windowType: String,

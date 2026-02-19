@@ -33,7 +33,6 @@ public final class SkillsRegistryService: ObservableObject {
     private let installedSkillsURL: URL
     private var dependencyScanner: DependencyScanner?
 
-    // periphery:ignore - Reserved: dependencyScanner property reserved for future feature activation
     // MARK: - Initialization
 
     private init() {
@@ -167,7 +166,6 @@ public final class SkillsRegistryService: ObservableObject {
 
     /// Get reviews for a skill
     public func getReviews(skillId: String) async throws -> [SkillReview] {
-        // periphery:ignore - Reserved: skillId parameter kept for API compatibility
         // In production, this would fetch from API
         []
     }
@@ -179,7 +177,6 @@ public final class SkillsRegistryService: ObservableObject {
     }
 
     /// Submit a review for a skill
-    // periphery:ignore - Reserved: comment parameter kept for API compatibility
     public func submitReview(skillId: String, rating: Int, comment: String) async throws {
         // In production, this would submit to API
         logger.info("Submitted review for skill: \(skillId) with rating: \(rating)")

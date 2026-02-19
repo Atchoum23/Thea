@@ -30,9 +30,7 @@ actor TranscriptionEngine {
     #endif
     /// The speaker label for the current segment being transcribed.
     private var currentSpeaker: String = "Unknown"
-    // periphery:ignore - Reserved: currentSpeaker property reserved for future feature activation
     /// The start time of the current transcript segment.
-    // periphery:ignore - Reserved: segmentStartTime property reserved for future feature activation
     private var segmentStartTime: Date?
 
     /// Initializes the speech recognizer for the given language.

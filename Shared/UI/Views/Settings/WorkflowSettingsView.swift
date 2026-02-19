@@ -4,7 +4,6 @@
 import SwiftUI
 
 struct WorkflowSettingsView: View {
-    // periphery:ignore - Reserved: WorkflowSettingsView type reserved for future feature activation
     @State private var workflows: [WorkflowSummary] = []
     @State private var showingNewWorkflow = false
     @State private var executionMode = ExecutionMode.sequential
@@ -307,7 +306,6 @@ struct WorkflowHistoryView: View {
         let id = UUID()
         let workflowName: String
         let startTime: Date
-        // periphery:ignore - Reserved: duration property reserved for future feature activation
         let duration: TimeInterval
         let status: Status
 

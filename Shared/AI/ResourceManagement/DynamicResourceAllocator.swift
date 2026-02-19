@@ -614,17 +614,14 @@ extension DynamicResourceAllocator {
     /// Get optimal model size that can be loaded given current system state
     func getMaxRecommendedModelSizeGB() -> Double {
         currentAllocation.maxModelMemoryGB * 0.8
-    // periphery:ignore - Reserved: getMaxRecommendedModelSizeGB() instance method reserved for future feature activation
     }
 
     /// Check if a model of given size can be loaded
     func canLoadModel(sizeGB: Double) -> Bool {
-        // periphery:ignore - Reserved: canLoadModel(sizeGB:) instance method reserved for future feature activation
         sizeGB <= currentAllocation.maxModelMemoryGB
     }
 
     /// Get recommended settings for a specific model size
-    // periphery:ignore - Reserved: getSettingsForModel(sizeGB:) instance method reserved for future feature activation
     func getSettingsForModel(sizeGB: Double) -> ModelInferenceSettings {
         let canFit = sizeGB <= currentAllocation.maxModelMemoryGB
 

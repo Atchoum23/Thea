@@ -167,28 +167,9 @@ extension FocusModeIntelligence {
         let suggestedAction: String
     }
 
-// periphery:ignore - Reserved: duration property reserved for future feature activation
-
-// periphery:ignore - Reserved: messagesReceived property reserved for future feature activation
-
-// periphery:ignore - Reserved: callsMissed property reserved for future feature activation
-
-// periphery:ignore - Reserved: autoRepliesSent property reserved for future feature activation
-
-// periphery:ignore - Reserved: urgentContacts property reserved for future feature activation
-
-// periphery:ignore - Reserved: pendingResponses property reserved for future feature activation
-
-// periphery:ignore - Reserved: topPriorityContacts property reserved for future feature activation
-
-// periphery:ignore - Reserved: suggestedFollowUps property reserved for future feature activation
-
     func getTopPriorityContacts(from communications: [IncomingCommunication]) -> [String] {
         var contactCounts: [String: Int] = [:]
-        // periphery:ignore - Reserved: contactId property reserved for future feature activation
-        // periphery:ignore - Reserved: reason property reserved for future feature activation
         for comm in communications {
-            // periphery:ignore - Reserved: suggestedAction property reserved for future feature activation
             if let cId = comm.contactId ?? comm.phoneNumber {
                 contactCounts[cId, default: 0] += 1
             }
@@ -246,12 +227,6 @@ extension FocusModeIntelligence {
         let timestamp: Date
         let duration: TimeInterval
         let transcription: String? // If available
-        // periphery:ignore - Reserved: callerNumber property reserved for future feature activation
-        // periphery:ignore - Reserved: callerName property reserved for future feature activation
-        // periphery:ignore - Reserved: timestamp property reserved for future feature activation
-        // periphery:ignore - Reserved: duration property reserved for future feature activation
-        // periphery:ignore - Reserved: transcription property reserved for future feature activation
-        // periphery:ignore - Reserved: urgencyAssessment property reserved for future feature activation
         let urgencyAssessment: UrgencyAssessment?
     }
 

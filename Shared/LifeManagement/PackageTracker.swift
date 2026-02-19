@@ -339,14 +339,12 @@ final class PackageTracker: ObservableObject {
     func updateLabel(_ package: TrackedPackage, newLabel: String) {
         if let idx = packages.firstIndex(where: { $0.id == package.id }) {
             packages[idx].label = newLabel
-            // periphery:ignore - Reserved: updateLabel(_:newLabel:) instance method reserved for future feature activation
             savePackages()
         }
     }
 
     func updateNotes(_ package: TrackedPackage, newNotes: String?) {
         if let idx = packages.firstIndex(where: { $0.id == package.id }) {
-            // periphery:ignore - Reserved: updateNotes(_:newNotes:) instance method reserved for future feature activation
             packages[idx].notes = newNotes
             savePackages()
         }
@@ -355,7 +353,6 @@ final class PackageTracker: ObservableObject {
     // MARK: - Detection
 
     func detectAndAdd(from text: String) -> [TrackingNumberDetection] {
-        // periphery:ignore - Reserved: detectAndAdd(from:) instance method reserved for future feature activation
         let detections = TrackingNumberDetection.detect(in: text)
         for detection in detections where detection.confidence >= 0.7 {
             addPackage(
@@ -483,7 +480,6 @@ final class PackageTracker: ObservableObject {
         return events
     }
 
-    // periphery:ignore - Reserved: carrier parameter kept for API compatibility
     private func inferStatus(from description: String, carrier: PackageCarrier) -> PackageStatus {
         let lower = description.lowercased()
         if lower.contains("delivered") || lower.contains("livré") || lower.contains("zugestellt") {

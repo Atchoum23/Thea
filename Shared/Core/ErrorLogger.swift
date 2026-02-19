@@ -27,7 +27,6 @@ enum ErrorLogger {
 
     /// Log a warning (non-error condition that may indicate a problem)
     static func warn(
-        // periphery:ignore - Reserved: warn(_:file:function:line:) static method reserved for future feature activation
         _ message: String,
         file: String = #fileID,
         function: String = #function,
@@ -38,7 +37,6 @@ enum ErrorLogger {
 
     /// Execute a throwing closure, logging any error and returning nil on failure.
     /// Use as a drop-in replacement for `try?` when you want error visibility.
-    // periphery:ignore - Reserved: tryOrNil(context:file:function:line:_:) static method reserved for future feature activation
     static func tryOrNil<T>(
         context: String,
         file: String = #fileID,

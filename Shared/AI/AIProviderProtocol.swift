@@ -24,9 +24,7 @@ struct ProviderMetadata: Codable, Sendable {
 
     init(
         id: UUID = UUID(),
-        // periphery:ignore - Reserved: capabilities property reserved for future feature activation
         name: String,
-        // periphery:ignore - Reserved: validateAPIKey(_:) instance method reserved for future feature activation
         displayName: String,
         logoURL: URL? = nil,
         websiteURL: URL,
@@ -60,7 +58,6 @@ struct ProviderCapabilities: Codable, Sendable {
     }
 
     init(
-        // periphery:ignore - Reserved: ProviderCapabilities type reserved for future feature activation
         supportsStreaming: Bool = true,
         supportsVision: Bool = false,
         supportsFunctionCalling: Bool = false,
@@ -97,7 +94,6 @@ struct ValidationResult: Sendable {
 // MARK: - Chat Response
 
 struct ChatResponse: Sendable {
-    // periphery:ignore - Reserved: ValidationResult type reserved for future feature activation
     enum ResponseType: Sendable {
         case delta(String) // Streaming chunk
         case complete(AIMessage) // Final message
@@ -197,13 +193,10 @@ struct ThinkingConfig: Sendable {
 enum EffortLevel: String, Sendable {
     case high      // Maximum quality, higher token usage
     case medium    // Balanced (default)
-    // periphery:ignore - Reserved: init(enabled:budgetTokens:) initializer reserved for future feature activation
     case low       // Faster, lower token usage
 }
 
 // MARK: - Context Management (P1)
-
-// periphery:ignore - Reserved: default static property reserved for future feature activation
 
 /// Auto-clear old tool results when approaching context limits
 /// Beta header: context-management-2025-06-27
@@ -224,7 +217,6 @@ struct ContextManagement: Sendable {
                 excludeTools: excludeTools
             )
         ])
-    // periphery:ignore - Reserved: clearToolUses(atTokens:keepLast:excludeTools:) static method reserved for future feature activation
     }
 
     /// Convenience: clear thinking blocks when reaching token threshold
@@ -240,7 +232,6 @@ struct ContextManagement: Sendable {
 
 struct ContextEdit: Sendable {
     enum EditType: String, Sendable {
-        // periphery:ignore - Reserved: clearThinking(atTokens:) static method reserved for future feature activation
         case clearToolUses = "clear_tool_uses_20250919"
         case clearThinking = "clear_thinking_20251015"
     }
@@ -259,10 +250,8 @@ struct ContextEdit: Sendable {
         excludeTools: [String]? = nil
     ) {
         self.type = type
-        // periphery:ignore - Reserved: clearAtLeast property reserved for future feature activation
         self.trigger = trigger
         self.keep = keep
-        // periphery:ignore - Reserved: init(type:trigger:keep:clearAtLeast:excludeTools:) initializer reserved for future feature activation
         self.clearAtLeast = clearAtLeast
         self.excludeTools = excludeTools
     }
@@ -361,14 +350,12 @@ struct ToolSearchConfig: Sendable {
 /// Tool choice — controls how Claude selects tools
 struct AnthropicToolChoice: Sendable {
     enum ChoiceType: String, Sendable {
-        // periphery:ignore - Reserved: init(tools:maxResults:) initializer reserved for future feature activation
         case auto        // Claude decides
         case any         // Must use a tool
         case tool        // Must use specific tool
         case none        // No tool use
     }
 
-    // periphery:ignore - Reserved: AnthropicToolChoice type reserved for future feature activation
     let type: ChoiceType
     let toolName: String?
     let disableParallelToolUse: Bool?
@@ -399,7 +386,6 @@ struct CompactionConfig: Sendable {
 
     init(enabled: Bool = true, triggerThreshold: Int = 150_000, targetSize: Int = 80_000) {
         self.enabled = enabled
-        // periphery:ignore - Reserved: CompactionConfig type reserved for future feature activation
         self.triggerThreshold = triggerThreshold
         self.targetSize = targetSize
     }
@@ -419,7 +405,6 @@ struct WebSearchConfig: Sendable {
         blockedDomains: [String]? = nil,
         userLocation: UserLocation? = nil
     ) {
-        // periphery:ignore - Reserved: init(maxUses:allowedDomains:blockedDomains:userLocation:) initializer reserved for future feature activation
         self.maxUses = maxUses
         self.allowedDomains = allowedDomains
         self.blockedDomains = blockedDomains
@@ -431,7 +416,6 @@ struct WebSearchConfig: Sendable {
 
 /// Web fetch tool configuration
 /// Pricing: FREE (only standard token costs)
-// periphery:ignore - Reserved: default static property reserved for future feature activation
 struct WebFetchConfig: Sendable {
     let maxUses: Int?
     let allowedDomains: [String]?
@@ -443,7 +427,6 @@ struct WebFetchConfig: Sendable {
         maxUses: Int? = nil,
         allowedDomains: [String]? = nil,
         blockedDomains: [String]? = nil,
-        // periphery:ignore - Reserved: init(maxUses:allowedDomains:blockedDomains:maxContentTokens:citationsEnabled:) initializer reserved for future feature activation
         maxContentTokens: Int? = nil,
         citationsEnabled: Bool = false
     ) {
@@ -457,7 +440,6 @@ struct WebFetchConfig: Sendable {
     static let `default` = WebFetchConfig()
 }
 
-// periphery:ignore - Reserved: default static property reserved for future feature activation
 /// User location for localized search results
 struct UserLocation: Sendable {
     let city: String?
@@ -467,7 +449,6 @@ struct UserLocation: Sendable {
 
     init(
         city: String? = nil,
-        // periphery:ignore - Reserved: init(city:region:country:timezone:) initializer reserved for future feature activation
         region: String? = nil,
         country: String? = nil,
         timezone: String? = nil
@@ -491,7 +472,6 @@ struct UserLocation: Sendable {
 // MARK: - Token Usage
 
 struct TokenUsage: Codable, Sendable {
-    // periphery:ignore - Reserved: TokenUsage type reserved for future feature activation
     let promptTokens: Int
     let completionTokens: Int
     let totalTokens: Int
@@ -528,7 +508,6 @@ struct ToolDefinition: Codable, Sendable {
         }
     }
 
-    // periphery:ignore - Reserved: init(name:description:parameters:) initializer reserved for future feature activation
     init(name: String, description: String, parameters: [String: Any] = [:]) {
         self.name = name
         self.description = description

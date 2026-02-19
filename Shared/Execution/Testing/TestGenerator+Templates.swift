@@ -157,7 +157,6 @@ extension TestGenerator {
     private func generateSwiftTestFile(
         tests: [GeneratedTest],
         framework: TestFramework,
-        // periphery:ignore - Reserved: framework parameter kept for API compatibility
         analysis: SourceAnalysis
     ) -> String {
         var content = """
@@ -215,7 +214,6 @@ extension TestGenerator {
         return content
     }
 
-    // periphery:ignore - Reserved: isTS parameter kept for API compatibility
     private func generateJSTestFile(tests: [GeneratedTest], framework: TestFramework, isTS: Bool) -> String {
         var content = """
         // Generated Tests

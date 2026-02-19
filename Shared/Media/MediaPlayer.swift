@@ -181,7 +181,6 @@ struct MediaPlaybackStats: Codable, Sendable {
             totalItemsPlayed: 0,
             totalPlayTime: 0,
             videoCount: 0,
-            // periphery:ignore - Reserved: empty static property reserved for future feature activation
             audioCount: 0,
             streamCount: 0,
             favoriteCount: 0,
@@ -235,7 +234,6 @@ final class MediaPlayer: ObservableObject {
 
     // MARK: - AVPlayer
 
-    // periphery:ignore - Reserved: isSubtitlesEnabled property reserved for future feature activation
     private(set) var player: AVPlayer?
     private var timeObserver: Any?
     private var statusObserver: NSKeyValueObservation?
@@ -410,7 +408,6 @@ final class MediaPlayer: ObservableObject {
     func stop() {
         savePosition()
         player?.pause()
-        // periphery:ignore - Reserved: stop() instance method reserved for future feature activation
         if let observer = timeObserver, let player {
             player.removeTimeObserver(observer)
         }
@@ -522,7 +519,6 @@ final class MediaPlayer: ObservableObject {
     /// Clear all history.
     func clearHistory() {
         history.removeAll()
-        // periphery:ignore - Reserved: clearHistory() instance method reserved for future feature activation
         saveHistory()
     }
 
@@ -541,7 +537,6 @@ final class MediaPlayer: ObservableObject {
 
     /// Get recently played items.
     func recentlyPlayed(limit: Int = 10) -> [PlayedMediaItem] {
-        // periphery:ignore - Reserved: recentlyPlayed(limit:) instance method reserved for future feature activation
         Array(history.sorted { $0.lastPlayedAt > $1.lastPlayedAt }.prefix(limit))
     }
 
@@ -673,7 +668,6 @@ final class MediaPlayer: ObservableObject {
     }
 
     /// Get supported file extensions.
-    // periphery:ignore - Reserved: supportedExtensions static property reserved for future feature activation
     nonisolated static var supportedExtensions: [String] {
         ["mp4", "mov", "mkv", "avi", "wmv", "flv", "webm", "m4v", "mpg", "mpeg",
          "mp3", "m4a", "aac", "wav", "flac", "ogg", "wma", "aiff", "opus",

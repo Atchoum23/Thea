@@ -289,7 +289,6 @@ extension ModelRouter {
         context _context: RoutingContext
     ) -> RoutingDecision {
         // Use default model from config
-        // periphery:ignore - Reserved: _context parameter kept for API compatibility
         let defaultModel = TheaConfig.shared.ai.defaultModel
         let defaultProvider = TheaConfig.shared.ai.defaultProvider
 
@@ -472,8 +471,6 @@ extension ModelRouter {
         latency: TimeInterval,
         tokens: Int,
         cost: Decimal
-    // periphery:ignore - Reserved: tokens parameter kept for API compatibility
-    // periphery:ignore - Reserved: cost parameter kept for API compatibility
     ) async {
         let modelId = decision.model.id
         let taskType = decision.taskType
@@ -557,7 +554,6 @@ extension ModelRouter {
     /// Detect contextual patterns in routing decisions
     private func detectAndStoreContextualPatterns(
         decision: RoutingDecision,
-        // periphery:ignore - Reserved: success parameter kept for API compatibility
         success: Bool
     ) async {
         // Analyze recent routing history for patterns

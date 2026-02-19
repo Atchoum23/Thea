@@ -28,7 +28,6 @@ final class CollaborativeMemorySystem {
 
     private(set) var shortTermMemory: [MemoryFragment] = []
     private(set) var longTermMemory: [ConsolidatedMemory] = []
-    // periphery:ignore - Reserved: shared static property reserved for future feature activation
     private(set) var contextualMemory: [ContextMemory] = []
     private(set) var semanticIndex = SemanticIndex()
     private(set) var memoryHealth = MemoryHealth()
@@ -81,7 +80,6 @@ final class CollaborativeMemorySystem {
             self.id = UUID()
             self.content = content
             self.embedding = embedding
-            // periphery:ignore - Reserved: init(content:embedding:context:source:importance:) initializer reserved for future feature activation
             self.timestamp = Date()
             self.context = context
             self.source = source
@@ -141,7 +139,6 @@ final class CollaborativeMemorySystem {
             self.activityCount = 0
             self.dominantIntent = nil
             self.userMood = nil
-            // periphery:ignore - Reserved: init(context:) initializer reserved for future feature activation
             self.topicProgression = []
         }
     }
@@ -159,8 +156,6 @@ final class CollaborativeMemorySystem {
             )
         }
     }
-
-// periphery:ignore - Reserved: current static property reserved for future feature activation
 
     enum MemorySource: String, Codable, Sendable {
         case userInput = "User Input"
@@ -199,7 +194,6 @@ final class CollaborativeMemorySystem {
         let embedding = await generateEmbedding(for: content)
 
         let fragment = MemoryFragment(
-            // periphery:ignore - Reserved: store(_:source:importance:) instance method reserved for future feature activation
             content: content,
             embedding: embedding,
             context: context,
@@ -236,7 +230,6 @@ final class CollaborativeMemorySystem {
         // Search semantic index first
         if configuration.enableSemanticIndexing {
             let embedding = await generateEmbedding(for: query)
-            // periphery:ignore - Reserved: retrieve(for:limit:) instance method reserved for future feature activation
             results = semanticIndex.search(embedding: embedding, limit: limit)
         }
 
@@ -302,13 +295,11 @@ final class CollaborativeMemorySystem {
         return contextualMemory.first { $0.context == contextId }
     }
 
-    // periphery:ignore - Reserved: getCurrentContext() instance method reserved for future feature activation
     /// Start a new context/session
     func startContext(projectId: String? = nil, topicId: String? = nil) {
         let context = ContextIdentifier(
             sessionId: UUID().uuidString,
             projectId: projectId,
-            // periphery:ignore - Reserved: startContext(projectId:topicId:) instance method reserved for future feature activation
             topicId: topicId
         )
 
@@ -326,7 +317,6 @@ final class CollaborativeMemorySystem {
     func endContext() {
         guard !activeContexts.isEmpty else { return }
         activeContexts.removeLast()
-    // periphery:ignore - Reserved: endContext() instance method reserved for future feature activation
     }
 
     // MARK: - Memory Consolidation
@@ -425,7 +415,6 @@ final class CollaborativeMemorySystem {
 
     private func updateContextMemory(with fragment: MemoryFragment) {
         guard let index = contextualMemory.firstIndex(where: { $0.context == fragment.context }) else {
-            // periphery:ignore - Reserved: updateContextMemory(with:) instance method reserved for future feature activation
             return
         }
 
@@ -470,7 +459,6 @@ final class CollaborativeMemorySystem {
     // MARK: - Configuration
 
     func updateConfiguration(_ config: Configuration) {
-        // periphery:ignore - Reserved: updateConfiguration(_:) instance method reserved for future feature activation
         configuration = config
         saveConfiguration()
     }
@@ -484,7 +472,6 @@ final class CollaborativeMemorySystem {
         }
     }
 
-    // periphery:ignore - Reserved: saveConfiguration() instance method reserved for future feature activation
     private func saveConfiguration() {
         do {
             let data = try JSONEncoder().encode(configuration)

@@ -23,7 +23,6 @@ extension CallMonitor {
     /// - Parameters:
     ///   - segment: The newly transcribed segment to analyze.
     ///   - callId: The UUID of the active call the segment belongs to.
-    // periphery:ignore - Reserved: callId parameter kept for API compatibility
     func performRealTimeAnalysis(_ segment: CallTranscriptSegment, callId: UUID) async {
         // Quick check for urgent patterns
         let text = segment.text.lowercased()

@@ -35,10 +35,6 @@ public class CloudKitService: ObservableObject {
     private var sharedDatabase: CKDatabase?
     private var publicDatabase: CKDatabase?
 
-// periphery:ignore - Reserved: sharedDatabase property reserved for future feature activation
-
-// periphery:ignore - Reserved: publicDatabase property reserved for future feature activation
-
     // MARK: - Record Types
 
     enum RecordType: String {
@@ -190,7 +186,6 @@ public class CloudKitService: ObservableObject {
     /// written to CloudKit. Only the enabled/disabled state per platform and auto-respond
     /// configuration are synced. Sensitive credentials remain in Keychain only.
     @discardableResult
-    // periphery:ignore - Reserved: pushMessagingSettings() instance method reserved for future feature activation
     func pushMessagingSettings() async -> Bool {
         guard syncEnabled, iCloudAvailable, let db = privateDatabase else {
             logger.debug("P12: Skipping messaging settings push (sync disabled or iCloud unavailable)")

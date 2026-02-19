@@ -7,7 +7,6 @@ import os.log
 
 /// Tracks Thea's performance metrics: response latency, token efficiency,
 /// user satisfaction, crash rate, test coverage. Generates weekly self-improvement reports.
-// periphery:ignore - Reserved: SelfBenchmark type reserved for future feature activation
 actor SelfBenchmark {
     static let shared = SelfBenchmark()
 

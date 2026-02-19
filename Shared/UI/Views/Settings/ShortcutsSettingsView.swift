@@ -3,7 +3,6 @@
 
 import SwiftUI
 
-// periphery:ignore - Reserved: ShortcutsSettingsView type reserved for future feature activation
 struct ShortcutsSettingsView: View {
     @State private var shortcuts: [ShortcutSetting] = []
     @State private var showingNewShortcut = false

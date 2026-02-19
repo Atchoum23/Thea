@@ -20,7 +20,6 @@ extension VoiceProactivity {
     /// (conservative — prefers relay or voice confirmation).
     /// - Parameter platform: The target messaging platform.
     /// - Returns: `true` if direct send is available.
-    // periphery:ignore - Reserved: platform parameter kept for API compatibility
     func canSendDirectly(platform: VoiceRelayPlatform) async -> Bool {
         #if os(iOS)
         // On iOS, might need to check if unlocked

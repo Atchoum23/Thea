@@ -133,7 +133,6 @@
     }
 
     /// State of Terminal.app windows
-    // periphery:ignore - Reserved: TerminalState type reserved for future feature activation
     struct TerminalState {
         let windowCount: Int
         let tabs: [TabInfo]

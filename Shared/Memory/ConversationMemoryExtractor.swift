@@ -22,9 +22,6 @@ final class ConversationMemoryExtractor {
     /// Whether memory extraction is enabled
     var isEnabled = true
 
-// periphery:ignore - Reserved: shared static property reserved for future feature activation
-
-    // periphery:ignore - Reserved: logger property reserved for future feature activation
     /// Minimum message length to consider for extraction
     var minMessageLength = 20
 
@@ -47,7 +44,6 @@ final class ConversationMemoryExtractor {
         let graph = PersonalKnowledgeGraph.shared
         var extracted = 0
 
-        // periphery:ignore - Reserved: extractFromConversation(_:) instance method reserved for future feature activation
         for message in conversation.messages {
             let text = message.content.textValue
 
@@ -130,7 +126,6 @@ final class ConversationMemoryExtractor {
 
         let graph = PersonalKnowledgeGraph.shared
         let dateString = ISO8601DateFormatter().string(from: timestamp)
-        // periphery:ignore - Reserved: extractFromMessage(_:timestamp:) instance method reserved for future feature activation
         var extracted = 0
 
         for pref in extractPreferences(from: text) {
@@ -163,7 +158,6 @@ final class ConversationMemoryExtractor {
         var preferences: [(key: String, value: String)] = []
         let lower = text.lowercased()
 
-        // periphery:ignore - Reserved: extractPreferences(from:) instance method reserved for future feature activation
         // "I prefer X" / "I like X" / "I love X"
         let preferPatterns = [
             "i prefer ", "i like ", "i love ", "i enjoy ",
@@ -211,8 +205,6 @@ final class ConversationMemoryExtractor {
     private func extractPeople(from text: String) -> [String] {
         var people: [String] = []
         let lower = text.lowercased()
-
-// periphery:ignore - Reserved: extractPeople(from:) instance method reserved for future feature activation
 
         let personPatterns = [
             "my (wife|husband|partner|friend|brother|sister|mom|dad|mother|father|son|daughter|boss|colleague) ",
@@ -276,7 +268,6 @@ final class ConversationMemoryExtractor {
 
     private func extractGoals(from text: String) -> [String] {
         var goals: [String] = []
-        // periphery:ignore - Reserved: extractGoals(from:) instance method reserved for future feature activation
         let lower = text.lowercased()
 
         let goalPatterns = [
@@ -300,7 +291,6 @@ final class ConversationMemoryExtractor {
     // MARK: - Topic Extraction
 
     private func extractTopics(from text: String) -> [String] {
-        // periphery:ignore - Reserved: extractTopics(from:) instance method reserved for future feature activation
         var topics: [String] = []
         let lower = text.lowercased()
 
@@ -324,7 +314,6 @@ final class ConversationMemoryExtractor {
 
     // MARK: - Text Helpers
 
-    // periphery:ignore - Reserved: extractUntilStop(_:) instance method reserved for future feature activation
     private func extractUntilStop(_ text: String) -> String {
         let stops: [String] = [". ", ", ", "! ", "? ", " and ", " but ", " or ", " because ", " since ", " when "]
         var result = text.trimmingCharacters(in: .whitespaces)

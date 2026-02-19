@@ -63,7 +63,6 @@ final class AppConfiguration {
         // swiftlint:disable:next force_unwrapping
         static let websiteURL = URL(string: "https://theathe.app")!
         // swiftlint:disable:next force_unwrapping
-        // periphery:ignore - Reserved: domain static property reserved for future feature activation
         static let privacyPolicyURL = URL(string: "https://theathe.app/privacy")!
         // swiftlint:disable:next force_unwrapping
         static let termsOfServiceURL = URL(string: "https://theathe.app/terms")!
@@ -498,24 +497,18 @@ final class AppConfiguration {
         providerConfig = ProviderConfiguration()
     }
 
-    // periphery:ignore - Reserved: resetProviderConfig() instance method reserved for future feature activation
     func resetVoiceConfig() {
         voiceConfig = VoiceConfiguration()
     }
 
-// periphery:ignore - Reserved: resetVoiceConfig() instance method reserved for future feature activation
-
     func resetKnowledgeScannerConfig() {
         knowledgeScannerConfig = KnowledgeScannerConfiguration()
-    // periphery:ignore - Reserved: resetKnowledgeScannerConfig() instance method reserved for future feature activation
     }
 
     func resetMetaAIConfig() {
-        // periphery:ignore - Reserved: resetMetaAIConfig() instance method reserved for future feature activation
         metaAIConfig = MetaAIConfiguration()
     }
 
-    // periphery:ignore - Reserved: resetQAToolsConfig() instance method reserved for future feature activation
     func resetQAToolsConfig() {
         qaToolsConfig = QAToolsConfiguration()
     }

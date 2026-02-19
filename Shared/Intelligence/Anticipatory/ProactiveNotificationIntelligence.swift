@@ -143,7 +143,6 @@ public final class ProactiveNotificationIntelligence {
         return recentNotifications.filter { $0.type == type && $0.sentAt > cutoff }.count
     }
 
-    // periphery:ignore - Reserved: context parameter kept for API compatibility
     private func estimateMeetingEnd(context: AmbientContext) -> Date {
         // Default to 30 minutes from now
         Date().addingTimeInterval(1800)

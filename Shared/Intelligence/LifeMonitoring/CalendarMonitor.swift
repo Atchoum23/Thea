@@ -204,7 +204,6 @@ public actor CalendarMonitor {
         logger.debug("Scheduled notifications for \(upcomingEvents.count) upcoming events")
     }
 
-    // periphery:ignore - Reserved: eventStarted(_:) instance method reserved for future feature activation
     private func eventStarted(_ event: EKEvent) async {
         let eventId = event.eventIdentifier ?? UUID().uuidString
 

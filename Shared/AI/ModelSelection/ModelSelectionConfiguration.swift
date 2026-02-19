@@ -84,7 +84,6 @@ struct ModelSelectionConfiguration: Codable, Sendable, Equatable {
     }
 
     func category(for modelID: String) -> ModelCategory? {
-        // periphery:ignore - Reserved: category(for:) instance method reserved for future feature activation
         if fastModels.contains(modelID) { return .fast }
         if balancedModels.contains(modelID) { return .balanced }
         if powerfulModels.contains(modelID) { return .powerful }
@@ -104,7 +103,6 @@ struct ModelSelectionConfiguration: Codable, Sendable, Equatable {
 
 // MARK: - Model Information
 
-// periphery:ignore - Reserved: ModelInfo type reserved for future feature activation
 struct ModelInfo: Identifiable, Sendable, Equatable {
     let id: String
     let name: String

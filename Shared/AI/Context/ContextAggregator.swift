@@ -251,7 +251,6 @@ public final class ContextAggregator: ObservableObject {
     /// Get best performing model for a context
     public func getBestModelForContext(
         taskType: TaskType,
-        // periphery:ignore - Reserved: context parameter kept for API compatibility
         context: AggregatedContext
     ) -> (model: String?, confidence: Double) {
         let similar = outcomeCorrelations.filter { correlation in

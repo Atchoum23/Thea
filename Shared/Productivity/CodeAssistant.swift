@@ -196,7 +196,6 @@ struct CodeFileEntry: Codable, Identifiable, Sendable {
     let relativePath: String
     let language: CodeLanguageType
     let lineCount: Int
-    // periphery:ignore - Reserved: CodeFileEntry type reserved for future feature activation
     let sizeBytes: Int64
     let lastModified: Date
 
@@ -277,7 +276,6 @@ final class CodeAssistant: ObservableObject {
 
     // MARK: - Published State
 
-    // periphery:ignore - Reserved: logger property reserved for future feature activation
     @Published private(set) var projects: [CodeProjectInfo] = []
     @Published private(set) var recentOperations: [CodeOperationResult] = []
     @Published private(set) var isScanning = false
@@ -396,7 +394,6 @@ final class CodeAssistant: ObservableObject {
     func listFiles(in project: CodeProjectInfo, language: CodeLanguageType? = nil) throws -> [CodeFileEntry] {
         let url = URL(fileURLWithPath: project.path)
         guard FileManager.default.fileExists(atPath: project.path) else {
-            // periphery:ignore - Reserved: listFiles(in:language:) instance method reserved for future feature activation
             throw CodeAssistantError.projectNotFound(project.path)
         }
 
@@ -509,7 +506,6 @@ final class CodeAssistant: ObservableObject {
     /// Generate an AI commit message from staged changes.
     func generateCommitMessage(at path: String) async -> String? {
         guard let gitPath = findExecutable("git") else { return nil }
-        // periphery:ignore - Reserved: generateCommitMessage(at:) instance method reserved for future feature activation
         let diff = await runCommand(gitPath, args: ["diff", "--cached", "--stat"], in: path)
         guard let diff, !diff.isEmpty else { return nil }
 
@@ -538,7 +534,6 @@ final class CodeAssistant: ObservableObject {
 
     /// Run git commit with message.
     func commit(at path: String, message: String) async throws {
-        // periphery:ignore - Reserved: commit(at:message:) instance method reserved for future feature activation
         guard let gitPath = findExecutable("git") else {
             throw CodeAssistantError.gitNotAvailable
         }
@@ -584,7 +579,6 @@ final class CodeAssistant: ObservableObject {
     // MARK: - Code Operations
 
     /// Read a file's content.
-    // periphery:ignore - Reserved: readFile(path:) instance method reserved for future feature activation
     func readFile(path: String) throws -> String {
         guard FileManager.default.fileExists(atPath: path) else {
             throw CodeAssistantError.fileNotReadable(path)

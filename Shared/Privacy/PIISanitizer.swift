@@ -310,7 +310,6 @@ final class PIISanitizer {
 
     func clearHistory() {
         detectionHistory.removeAll()
-    // periphery:ignore - Reserved: clearHistory() instance method reserved for future feature activation
     }
 }
 
@@ -325,7 +324,5 @@ struct SanitizationResult: Sendable {
 struct PIISanitizerStats: Sendable {
     let totalDetections: Int
     let detectionsByType: [PIISanitizer.PIIType: Int]
-    // periphery:ignore - Reserved: detectionsByType property reserved for future feature activation
-    // periphery:ignore - Reserved: lastDetection property reserved for future feature activation
     let lastDetection: Date?
 }

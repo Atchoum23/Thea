@@ -53,7 +53,6 @@ final class HDKnowledgeScanner {
         saveConfiguration()
     }
 
-    // periphery:ignore - Reserved: removeExcludedPath(_:) instance method reserved for future feature activation
     private func loadConfiguration() {
         // Load from UserDefaults
         if let data = UserDefaults.standard.data(forKey: "HDKnowledgeScanner.scanPaths") {
@@ -306,7 +305,6 @@ final class HDKnowledgeScanner {
         let searchTopK = topK ?? config.fullTextSearchTopK
         let lowercaseQuery = query.lowercased()
 
-        // periphery:ignore - Reserved: fullTextSearch(_:topK:) instance method reserved for future feature activation
         return indexedFiles
             .filter { $0.content.lowercased().contains(lowercaseQuery) }
             .prefix(searchTopK)
@@ -438,19 +436,14 @@ struct SearchResult: Identifiable {
     let relevanceScore: Float
 }
 
-// periphery:ignore - Reserved: similarity property reserved for future feature activation
-
 struct KnowledgeStatistics {
     let totalFiles: Int
     let totalSize: Int64
     let fileTypeDistribution: [FileType: Int]
     let oldestFile: ScannedFile?
-    // periphery:ignore - Reserved: fileTypeDistribution property reserved for future feature activation
-    // periphery:ignore - Reserved: oldestFile property reserved for future feature activation
     let newestFile: ScannedFile?
 }
 
-// periphery:ignore - Reserved: ScanProgress type reserved for future feature activation
 struct ScanProgress {
     let filesProcessed: Int
     let totalFiles: Int

@@ -45,7 +45,6 @@ public final class UnifiedIntelligenceHub {
     private let patternDecayDays = 30
     private let suggestionCooldownSeconds: TimeInterval = 60
 
-    // periphery:ignore - Reserved: suggestionCooldownSeconds property reserved for future feature activation
     // MARK: - Subsystems
 
     private var subsystems: [String: any IntelligenceSubsystem] = [:]
@@ -183,7 +182,6 @@ public final class UnifiedIntelligenceHub {
 
     /// Check for blockers in current context
     public func checkForBlockers(context: IntelligenceContext) async -> [DetectedBlocker] {
-        // periphery:ignore - Reserved: context parameter kept for API compatibility
         activeBlockers.filter { blocker in
             // Return blockers that haven't been resolved
             let age = Date().timeIntervalSince(blocker.detectedAt)
@@ -216,7 +214,6 @@ extension UnifiedIntelligenceHub {
 
     // MARK: - Private Event Handlers
 
-    // periphery:ignore - Reserved: _conversationId parameter kept for API compatibility
     private func handleQueryReceived(query: String, conversationId _conversationId: UUID) async {
         hubLogger.debug("📝 Query received: \(query.prefix(50))...")
 

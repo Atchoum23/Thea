@@ -7,7 +7,6 @@ import os.log
 
 /// Monitors dependency releases via GitHub API and Apple developer feeds.
 /// When a new version is detected, creates a task to evaluate compatibility.
-// periphery:ignore - Reserved: ReleaseMonitor type reserved for future feature activation
 actor ReleaseMonitor {
     static let shared = ReleaseMonitor()
 

@@ -45,7 +45,6 @@ extension FocusModeIntelligence {
     ///
     /// - Parameter mode: The ``FocusModeConfiguration`` being activated.
     func startSessionAnalytics(mode: FocusModeConfiguration) {
-        // periphery:ignore - Reserved: startSessionAnalytics(mode:) instance method reserved for future feature activation
         setCurrentSessionAnalytics(FocusSessionAnalytics(
             sessionId: UUID(),
             focusModeId: mode.id,
@@ -65,7 +64,6 @@ extension FocusModeIntelligence {
     /// new urgency indicators based on the session data and user feedback.
     ///
     /// - Parameter mode: The ``FocusModeConfiguration`` that was active during the session.
-    // periphery:ignore - Reserved: mode parameter kept for API compatibility
     func applyLearningFromSession(mode: FocusModeConfiguration) async {
         guard var analytics = getCurrentSessionAnalytics() else { return }
 

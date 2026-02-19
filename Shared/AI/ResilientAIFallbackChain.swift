@@ -109,7 +109,6 @@ final class ResilientAIFallbackChain {
             role: .user,
             content: .text(prompt),
             timestamp: Date(),
-            // periphery:ignore - Reserved: quickQuery(_:) instance method reserved for future feature activation
             model: "fallback"
         )
 
@@ -295,11 +294,9 @@ final class ResilientAIFallbackChain {
 
     func resetAllTiers() {
         for tier in FallbackTier.allCases {
-            // periphery:ignore - Reserved: tierStatus() instance method reserved for future feature activation
             tierHealth[tier]?.resetFailures()
         }
         failureLog.removeAll()
-    // periphery:ignore - Reserved: resetAllTiers() instance method reserved for future feature activation
     }
 }
 
@@ -354,15 +351,10 @@ struct FallbackChatResult: Sendable {
     let wasFallback: Bool
 }
 
-// periphery:ignore - Reserved: latencyMs property reserved for future feature activation
-// periphery:ignore - Reserved: wasFallback property reserved for future feature activation
 struct FallbackFailure: Sendable, Identifiable {
     let id = UUID()
     let tier: FallbackTier
     let error: String
-    // periphery:ignore - Reserved: tier property reserved for future feature activation
-    // periphery:ignore - Reserved: error property reserved for future feature activation
-    // periphery:ignore - Reserved: timestamp property reserved for future feature activation
     let timestamp: Date
 }
 

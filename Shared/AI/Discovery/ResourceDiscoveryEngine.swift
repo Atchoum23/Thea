@@ -66,10 +66,8 @@ public final class ResourceDiscoveryEngine: ObservableObject {
     // MARK: - Private State
 
     private var discoveryTask: Task<Void, Never>?
-    // periphery:ignore - Reserved: discoveryTask property reserved for future feature activation
     private var backgroundDiscoveryTask: Task<Void, Never>?
     private let urlSession: URLSession
-    // periphery:ignore - Reserved: cancellables property reserved for future feature activation
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Initialization

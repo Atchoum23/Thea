@@ -272,7 +272,6 @@ public actor RemindersMonitor {
 
     // MARK: - Event Emission
 
-    // periphery:ignore - Reserved: emitReminderEvent(_:action:) instance method reserved for future feature activation
     private func emitReminderEvent(_ reminder: EKReminder, action: ReminderAction) async {
         let eventType: LifeEventType
         let significance: EventSignificance

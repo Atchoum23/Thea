@@ -401,7 +401,6 @@ final class HabitManager {
         loadData()
     }
 
-    // periphery:ignore - Reserved: uncompleteHabit(_:date:) instance method reserved for future feature activation
     func uncompleteHabit(_ habit: TheaHabit, date: Date = Date()) {
         let calendar = Calendar.current
         let dayStart = calendar.startOfDay(for: date)

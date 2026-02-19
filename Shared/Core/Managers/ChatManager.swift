@@ -46,7 +46,6 @@ final class ChatManager: ObservableObject {
 
     func configure(modelContext: ModelContext) {
         setModelContext(modelContext)
-    // periphery:ignore - Reserved: configure(modelContext:) instance method reserved for future feature activation
     }
 
     // MARK: - Conversation Management
@@ -86,7 +85,6 @@ final class ChatManager: ObservableObject {
     }
 
     func clearAllData() {
-        // periphery:ignore - Reserved: clearAllData() instance method reserved for future feature activation
         guard let context = modelContext else { return }
 
         for conversation in conversations {
@@ -167,7 +165,6 @@ final class ChatManager: ObservableObject {
     #if os(macOS)
     /// Injects foreground app context into a user message if app pairing is enabled
     /// Returns the modified message with context, or the original message if pairing disabled
-    // periphery:ignore - Reserved: injectForegroundAppContext(into:) instance method reserved for future feature activation
     func injectForegroundAppContext(into message: String) -> String {
         guard ForegroundAppMonitor.shared.isPairingEnabled else {
             return message

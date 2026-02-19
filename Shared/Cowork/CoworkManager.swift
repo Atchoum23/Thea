@@ -34,8 +34,6 @@
         let skills = CoworkSkillsManager.shared
         let fileOps = FileOperationsManager()
 
-// periphery:ignore - Reserved: skills property reserved for future feature activation
-
         // MARK: - Callbacks
 
         var onStepStarted: ((CoworkStep) -> Void)?
@@ -67,14 +65,12 @@
         }
 
         func deleteSession(_ session: CoworkSession) {
-            // periphery:ignore - Reserved: deleteSession(_:) instance method reserved for future feature activation
             sessions.removeAll { $0.id == session.id }
             if currentSession?.id == session.id {
                 currentSession = sessions.first
             }
         }
 
-        // periphery:ignore - Reserved: switchToSession(_:) instance method reserved for future feature activation
         func switchToSession(_ session: CoworkSession) {
             currentSession = session
         }

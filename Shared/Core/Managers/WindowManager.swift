@@ -22,7 +22,6 @@ final class WindowManager {
     private init() {}
 
     func setModelContext(_ context: ModelContext) {
-        // periphery:ignore - Reserved: windowLogger global var reserved for future feature activation
         modelContext = context
         Task {
             await restoreWindowState()
@@ -31,7 +30,6 @@ final class WindowManager {
 
     // MARK: - Window Operations
 
-    // periphery:ignore - Reserved: shared static property reserved for future feature activation
     /// Opens a new chat window
     func openNewChatWindow(conversation: Conversation? = nil) {
         let window = WindowInstance(
@@ -39,8 +37,6 @@ final class WindowManager {
             title: conversation?.title ?? "New Chat",
             conversationID: conversation?.id
         )
-
-// periphery:ignore - Reserved: setModelContext(_:) instance method reserved for future feature activation
 
         openWindows.append(window)
         activeWindow = window
@@ -50,7 +46,6 @@ final class WindowManager {
         #if os(macOS)
             NSApp.activate(ignoringOtherApps: true)
         #endif
-    // periphery:ignore - Reserved: openNewChatWindow(conversation:) instance method reserved for future feature activation
     }
 
     /// Opens a new code editor window
@@ -68,7 +63,6 @@ final class WindowManager {
         #if os(macOS)
             NSApp.activate(ignoringOtherApps: true)
         #endif
-    // periphery:ignore - Reserved: openNewCodeWindow(project:) instance method reserved for future feature activation
     }
 
     /// Opens the life tracking dashboard
@@ -85,7 +79,6 @@ final class WindowManager {
         #if os(macOS)
             NSApp.activate(ignoringOtherApps: true)
         #endif
-    // periphery:ignore - Reserved: openNewDashboard() instance method reserved for future feature activation
     }
 
     /// Alias for openNewDashboard()
@@ -101,12 +94,10 @@ final class WindowManager {
             activeWindow = openWindows.last
         }
 
-        // periphery:ignore - Reserved: openNewLifeTrackingWindow() instance method reserved for future feature activation
         deleteWindowState(windowID)
     }
 
     /// Sets the active window
-    // periphery:ignore - Reserved: closeWindow(_:) instance method reserved for future feature activation
     func setActiveWindow(_ windowID: UUID) {
         if let window = openWindows.first(where: { $0.id == windowID }) {
             activeWindow = window
@@ -117,14 +108,12 @@ final class WindowManager {
     func updateWindowGeometry(
         _ windowID: UUID,
         position: CGPoint?,
-        // periphery:ignore - Reserved: setActiveWindow(_:) instance method reserved for future feature activation
         size: CGSize?
     ) {
         if let index = openWindows.firstIndex(where: { $0.id == windowID }) {
             if let position {
                 openWindows[index].position = position
             }
-            // periphery:ignore - Reserved: updateWindowGeometry(_:position:size:) instance method reserved for future feature activation
             if let size {
                 openWindows[index].size = size
             }
@@ -144,7 +133,6 @@ final class WindowManager {
         do {
             positionData = try JSONEncoder().encode(window.position)
         } catch {
-            // periphery:ignore - Reserved: saveWindowState(_:) instance method reserved for future feature activation
             windowLogger.debug("Could not encode window position: \(error.localizedDescription)")
             positionData = nil
         }
@@ -197,7 +185,6 @@ final class WindowManager {
         let descriptor = FetchDescriptor<WindowState>()
         let allStates: [WindowState]
         do {
-            // periphery:ignore - Reserved: deleteWindowState(_:) instance method reserved for future feature activation
             allStates = try context.fetch(descriptor)
         } catch {
             windowLogger.error("Failed to fetch window states for delete: \(error.localizedDescription)")
@@ -217,7 +204,6 @@ final class WindowManager {
         // Fetch all and sort in memory to avoid Swift 6 #Predicate Sendable issues
         let descriptor = FetchDescriptor<WindowState>()
 
-        // periphery:ignore - Reserved: restoreWindowState() instance method reserved for future feature activation
         do {
             let allStates = try context.fetch(descriptor)
             let states = allStates.sorted { $0.lastOpened > $1.lastOpened }
@@ -268,8 +254,6 @@ final class WindowManager {
         }
     }
 
-// periphery:ignore - Reserved: saveAllWindowStates() instance method reserved for future feature activation
-
     // MARK: - Window Queries
 
     /// Gets all windows of a specific type
@@ -277,23 +261,18 @@ final class WindowManager {
         openWindows.filter { $0.type == type }
     }
 
-    // periphery:ignore - Reserved: getWindows(ofType:) instance method reserved for future feature activation
     /// Gets window by ID
     func getWindow(_ windowID: UUID) -> WindowInstance? {
         openWindows.first { $0.id == windowID }
     }
 
-// periphery:ignore - Reserved: getWindow(_:) instance method reserved for future feature activation
-
     /// Gets window for a specific conversation
     func getWindow(forConversation conversationID: UUID) -> WindowInstance? {
         openWindows.first { $0.conversationID == conversationID }
-    // periphery:ignore - Reserved: getWindow(forConversation:) instance method reserved for future feature activation
     }
 
     /// Gets window for a specific project
     func getWindow(forProject projectID: UUID) -> WindowInstance? {
-        // periphery:ignore - Reserved: getWindow(forProject:) instance method reserved for future feature activation
         openWindows.first { $0.projectID == projectID }
     }
 }
@@ -309,7 +288,6 @@ struct WindowInstance: Identifiable, Codable, Sendable {
     var conversationID: UUID?
     var projectID: UUID?
 
-    // periphery:ignore - Reserved: init(id:type:title:position:size:conversationID:projectID:) initializer reserved for future feature activation
     init(
         id: UUID = UUID(),
         type: WindowType,

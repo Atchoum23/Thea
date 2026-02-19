@@ -37,13 +37,8 @@ public class NetworkDiscoveryService: ObservableObject {
     private var listener: NWListener?
     private var browser: NWBrowser?
     private var netService: NetService?
-    // periphery:ignore - Reserved: listener property reserved for future feature activation
     private var netServiceBrowser: NetServiceBrowser?
     private var browserDelegate: NetServiceBrowserDelegateHandler?
-
-// periphery:ignore - Reserved: netServiceBrowser property reserved for future feature activation
-
-// periphery:ignore - Reserved: browserDelegate property reserved for future feature activation
 
     // MARK: - Initialization
 
@@ -399,7 +394,6 @@ public struct DiscoveredDevice: Identifiable, Sendable {
 
 // MARK: - NetService Browser Delegate Handler
 
-// periphery:ignore - Reserved: NetServiceBrowserDelegateHandler type reserved for future feature activation
 private class NetServiceBrowserDelegateHandler: NSObject, NetServiceBrowserDelegate {
     var didFindService: ((NetService) -> Void)?
     var didRemoveService: ((NetService) -> Void)?

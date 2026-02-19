@@ -178,7 +178,6 @@ final class ExternalSubscriptionManager: ObservableObject {
     }
 
     func updateSubscription(_ sub: ExternalSubscription) {
-        // periphery:ignore - Reserved: updateSubscription(_:) instance method reserved for future feature activation
         if let idx = subscriptions.firstIndex(where: { $0.id == sub.id }) {
             subscriptions[idx] = sub
             save()
@@ -190,7 +189,6 @@ final class ExternalSubscriptionManager: ObservableObject {
         save()
     }
 
-    // periphery:ignore - Reserved: cancelSubscription(id:) instance method reserved for future feature activation
     func cancelSubscription(id: UUID) {
         if let idx = subscriptions.firstIndex(where: { $0.id == id }) {
             subscriptions[idx].isActive = false

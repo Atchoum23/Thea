@@ -293,20 +293,15 @@ final class SystemMonitor: ObservableObject {
     }
 
     var memoryHistory: [(Date, Double)] {
-        // periphery:ignore - Reserved: cpuHistory property reserved for future feature activation
         snapshots.map { ($0.timestamp, $0.memory.usagePercent) }
     }
 
-    // periphery:ignore - Reserved: memoryHistory property reserved for future feature activation
     var diskHistory: [(Date, Double)] {
         snapshots.map { ($0.timestamp, $0.disk.usagePercent) }
     }
 
-// periphery:ignore - Reserved: diskHistory property reserved for future feature activation
-
     var recentSnapshots: [SystemSnapshot] {
         Array(snapshots.suffix(60)) // Last hour
-    // periphery:ignore - Reserved: recentSnapshots property reserved for future feature activation
     }
 
     // MARK: - Platform-Specific Capture
@@ -571,7 +566,6 @@ final class SystemMonitor: ObservableObject {
     }
 
     func clearHistory() {
-        // periphery:ignore - Reserved: clearHistory() instance method reserved for future feature activation
         snapshots.removeAll()
         anomalies.removeAll()
         latestSnapshot = nil
@@ -584,7 +578,6 @@ final class SystemMonitor: ObservableObject {
 
     // MARK: - Summary
 
-    // periphery:ignore - Reserved: statusSummary property reserved for future feature activation
     var statusSummary: String {
         guard let snap = latestSnapshot else { return "No data" }
         return String(format: "CPU: %.0f%% | RAM: %.0f%% | Disk: %.0f%% | %@",

@@ -7,7 +7,6 @@ import OSLog
 // Credential: botToken from @BotFather.
 
 actor TelegramConnector: MessagingPlatformConnector {
-    // periphery:ignore - Reserved: platform property reserved for future feature activation
     let platform: MessagingPlatform = .telegram
     private(set) var isConnected = false
     var credentials: MessagingCredentials

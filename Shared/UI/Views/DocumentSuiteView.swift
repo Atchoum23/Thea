@@ -185,7 +185,6 @@ struct DocumentSuiteView: View {
 
     private var templateSection: some View {
         Section("Quick Start") {
-            // periphery:ignore - Reserved: templateSection property reserved for future feature activation
             Button {
                 Task { await createNewDocument() }
             } label: {
@@ -202,7 +201,6 @@ struct DocumentSuiteView: View {
 
     @ViewBuilder
     private var documentsSection: some View {
-        // periphery:ignore - Reserved: documentsSection property reserved for future feature activation
         if documents.isEmpty {
             Section {
                 Text("No documents yet")
@@ -326,7 +324,6 @@ struct DocumentSuiteView: View {
         .frame(minWidth: 300, minHeight: 200)
     }
 
-    // periphery:ignore - Reserved: iOSDocumentEditor(_:) instance method reserved for future feature activation
     private func iOSDocumentEditor(_ doc: TheaDocument) -> some View {
         VStack(spacing: 0) {
             HStack {

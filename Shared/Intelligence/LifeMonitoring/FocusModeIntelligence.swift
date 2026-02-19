@@ -118,7 +118,6 @@ public actor FocusModeIntelligence {
     private var currentSessionAnalytics: FocusSessionAnalytics?
     private var historicalAnalytics: [FocusSessionAnalytics] = []
 
-    // periphery:ignore - Reserved: escalationPending property reserved for future feature activation
     // Reliability
     private var pendingActions: [PendingAction] = []
 
@@ -128,7 +127,6 @@ public actor FocusModeIntelligence {
         public let id: UUID
         public let contactId: String?
         public let contactName: String?
-        // periphery:ignore - Reserved: pendingActions property reserved for future feature activation
         public let phoneNumber: String?
         public let platform: CommunicationPlatform
         public let type: CommunicationType
@@ -226,14 +224,7 @@ public actor FocusModeIntelligence {
     func addEscalationPending(_ contact: String) { escalationPending.insert(contact) }
     func removeEscalationPending(_ contact: String) { escalationPending.remove(contact) }
 
-// periphery:ignore - Reserved: getMessageCountTracking(for:) instance method reserved for future feature activation
-
-// periphery:ignore - Reserved: setMessageCountTracking(for:timestamps:) instance method reserved for future feature activation
-
     func getGroupChatAutoReplyCount(for groupId: String) -> Int { groupChatAutoReplies[groupId] ?? 0 }
-    // periphery:ignore - Reserved: getEscalationPending() instance method reserved for future feature activation
-    // periphery:ignore - Reserved: addEscalationPending(_:) instance method reserved for future feature activation
-    // periphery:ignore - Reserved: removeEscalationPending(_:) instance method reserved for future feature activation
     func setGroupChatAutoReplyCount(for groupId: String, count: Int) { groupChatAutoReplies[groupId] = count }
 
     func getCurrentSessionAnalytics() -> FocusSessionAnalytics? { currentSessionAnalytics }
@@ -246,8 +237,6 @@ public actor FocusModeIntelligence {
 
     func appendPendingAction(_ action: PendingAction) { pendingActions.append(action) }
     func markPendingActionVerified(_ id: UUID) {
-        // periphery:ignore - Reserved: appendPendingAction(_:) instance method reserved for future feature activation
-        // periphery:ignore - Reserved: markPendingActionVerified(_:) instance method reserved for future feature activation
         if let index = pendingActions.firstIndex(where: { $0.id == id }) {
             pendingActions[index].verified = true
         }
@@ -345,7 +334,6 @@ public actor FocusModeIntelligence {
     func setFocusMode(_ modeId: String, mode: FocusModeConfiguration) {
         focusModes[modeId] = mode
     }
-    // periphery:ignore - Reserved: deleteFocusMode(_:) instance method reserved for future feature activation
     func deleteFocusMode(_ modeId: String) {
         focusModes.removeValue(forKey: modeId)
     }

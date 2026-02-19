@@ -37,8 +37,6 @@ final class MLXVisionEngine {
 
     // MARK: - State
 
-// periphery:ignore - Reserved: qwen3VL32B static property reserved for future feature activation
-
     private(set) var loadedModel: ModelContainer?
     private(set) var loadedModelID: String?
     private(set) var isLoading = false
@@ -95,7 +93,6 @@ final class MLXVisionEngine {
     /// Load a VLM from a local directory
     func loadLocalModel(path: URL) async throws -> ModelContainer {
         let modelID = path.path
-        // periphery:ignore - Reserved: loadLocalModel(path:) instance method reserved for future feature activation
         if loadedModelID == modelID, let model = loadedModel {
             return model
         }
@@ -130,7 +127,6 @@ final class MLXVisionEngine {
     }
 
     func unloadModel() {
-        // periphery:ignore - Reserved: unloadModel() instance method reserved for future feature activation
         loadedModel = nil
         loadedModelID = nil
         loadingProgress = 0.0
@@ -185,7 +181,6 @@ final class MLXVisionEngine {
     }
 
     /// Analyze an image from a URL
-    // periphery:ignore - Reserved: analyzeImage(imageURL:prompt:parameters:) instance method reserved for future feature activation
     func analyzeImage(
         imageURL: URL,
         prompt: String,

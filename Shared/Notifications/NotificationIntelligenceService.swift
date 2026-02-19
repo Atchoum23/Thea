@@ -263,7 +263,6 @@ public final class NotificationIntelligenceService: ObservableObject {
     // MARK: - Suggested Actions
 
     private func determineSuggestedActions(
-        // periphery:ignore - Reserved: record parameter kept for API compatibility
         _ record: NotificationRecord,
         urgency: NotificationUrgency,
         category: IntelNotifCategory
