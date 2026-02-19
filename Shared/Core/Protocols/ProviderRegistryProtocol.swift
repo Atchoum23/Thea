@@ -10,7 +10,6 @@ import Foundation
 
 // MARK: - Provider Registry Protocol
 
-// periphery:ignore - Reserved: ProviderRegistryProtocol protocol — reserved for future feature activation
 /// Abstracts the ProviderRegistry singleton for testability and dependency injection.
 ///
 /// This protocol captures the public query API of ProviderRegistry — the methods
@@ -24,8 +23,6 @@ import Foundation
 ///   modifying existing consumers
 @MainActor
 protocol ProviderRegistryProtocol: AnyObject {
-
-// periphery:ignore - Reserved: ProviderRegistryProtocol protocol reserved for future feature activation
 
     // MARK: - Discovery
 
@@ -85,7 +82,6 @@ protocol ProviderRegistryProtocol: AnyObject {
 
 // MARK: - Default Implementation (for optional methods)
 
-// periphery:ignore - Reserved: ProviderRegistryProtocol protocol extension reserved for future feature activation
 extension ProviderRegistryProtocol {
     func getLocalProvider(modelName: String? = nil) -> AIProvider? {
         getLocalProvider(modelName: modelName)

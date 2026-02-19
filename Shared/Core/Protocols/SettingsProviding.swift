@@ -10,7 +10,6 @@ import Foundation
 
 // MARK: - Settings Providing Protocol
 
-// periphery:ignore - Reserved: SettingsProviding protocol — reserved for future feature activation
 /// Abstracts the read-only query surface of SettingsManager for testability.
 ///
 /// This protocol captures the feature-flag and configuration properties

@@ -10,7 +10,6 @@ import Foundation
 
 // MARK: - Device Registry Protocol
 
-// periphery:ignore - Reserved: DeviceRegistryProtocol protocol — reserved for future feature activation
 /// Abstracts the DeviceRegistry singleton for testability and dependency injection.
 ///
 /// This protocol captures the public API of DeviceRegistry — used by ChatManager,

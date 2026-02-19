@@ -3152,6 +3152,167 @@ ls Shared/UI/Views/ | grep -i "heatmap\|behavioral\|pattern"
 grep -r "ConfidenceIndicator" Shared/UI/Views/Chat/ --include="*.swift" | wc -l
 ```
 
+### AA3-COMPLETENESS: Wiring Script — Mechanical Verification of All Phase U3 Systems
+
+**Purpose**: Confirm every system listed in Phase U3 "Canonical-but-Unwired" table is now actually wired.
+Run this BEFORE declaring AA3 complete. Zero-count = that system was missed.
+
+```bash
+#!/usr/bin/env bash
+# Completeness Wiring Script — v3 Phase AA3
+# Every check must return ≥1. Zero = wiring incomplete.
+set -euo pipefail
+PASS=0; FAIL=0
+check() {
+  local name="$1"; local count="$2"
+  if [ "$count" -ge 1 ]; then
+    echo "✅ $name ($count refs)"; PASS=$((PASS+1))
+  else
+    echo "❌ UNWIRED: $name — add to Phase U3 immediately"; FAIL=$((FAIL+1))
+  fi
+}
+
+# ── Phase U3 canonical-but-unwired systems ──────────────────────────────────
+
+# 1. SmartNotificationScheduler
+check "SmartNotificationScheduler" \
+  "$(grep -r "SmartNotificationScheduler" Shared/ --include="*.swift" | grep -v "SmartNotificationScheduler.swift" | wc -l | tr -d ' ')"
+
+# 2. PredictiveLifeEngine
+check "PredictiveLifeEngine" \
+  "$(grep -r "PredictiveLifeEngine" Shared/ --include="*.swift" | grep -v "PredictiveLifeEngine.swift" | wc -l | tr -d ' ')"
+
+# 3. AmbientIntelligenceEngine
+check "AmbientIntelligenceEngine" \
+  "$(grep -r "AmbientIntelligenceEngine" Shared/ --include="*.swift" | grep -v "AmbientIntelligenceEngine.swift" | wc -l | tr -d ' ')"
+
+# 4. HealthCoachingPipeline
+check "HealthCoachingPipeline" \
+  "$(grep -r "HealthCoachingPipeline" Shared/ --include="*.swift" | grep -v "HealthCoachingPipeline.swift" | wc -l | tr -d ' ')"
+
+# 5. EnergyAdaptiveThrottler
+check "EnergyAdaptiveThrottler" \
+  "$(grep -r "EnergyAdaptiveThrottler" Shared/ --include="*.swift" | grep -v "EnergyAdaptiveThrottler.swift" | wc -l | tr -d ' ')"
+
+# 6. PersonalKnowledgeGraph
+check "PersonalKnowledgeGraph" \
+  "$(grep -r "PersonalKnowledgeGraph.shared\|PersonalKnowledgeGraph()" Shared/ --include="*.swift" | grep -v "PersonalKnowledgeGraph.swift" | wc -l | tr -d ' ')"
+
+# 7. TaskPlanDAG
+check "TaskPlanDAG" \
+  "$(grep -r "TaskPlanDAG" Shared/ --include="*.swift" | grep -v "TaskPlanDAG.swift" | wc -l | tr -d ' ')"
+
+# 8. BehavioralFingerprint
+check "BehavioralFingerprint" \
+  "$(grep -r "BehavioralFingerprint" Shared/ --include="*.swift" | grep -v "BehavioralFingerprint.swift" | wc -l | tr -d ' ')"
+
+# 9. DrivingDetectionService
+check "DrivingDetectionService" \
+  "$(grep -r "DrivingDetectionService" Shared/ --include="*.swift" | grep -v "DrivingDetectionService.swift" | wc -l | tr -d ' ')"
+
+# 10. ScreenTimeAnalyzer
+check "ScreenTimeAnalyzer" \
+  "$(grep -r "ScreenTimeAnalyzer" Shared/ --include="*.swift" | grep -v "ScreenTimeAnalyzer.swift" | wc -l | tr -d ' ')"
+
+# 11. CalendarIntelligenceService
+check "CalendarIntelligenceService" \
+  "$(grep -r "CalendarIntelligenceService" Shared/ --include="*.swift" | grep -v "CalendarIntelligenceService.swift" | wc -l | tr -d ' ')"
+
+# 12. LocationIntelligenceService
+check "LocationIntelligenceService" \
+  "$(grep -r "LocationIntelligenceService" Shared/ --include="*.swift" | grep -v "LocationIntelligenceService.swift" | wc -l | tr -d ' ')"
+
+# 13. SleepAnalysisService
+check "SleepAnalysisService" \
+  "$(grep -r "SleepAnalysisService" Shared/ --include="*.swift" | grep -v "SleepAnalysisService.swift" | wc -l | tr -d ' ')"
+
+# 14. MultiModalCoordinator
+check "MultiModalCoordinator" \
+  "$(grep -r "MultiModalCoordinator" Shared/ --include="*.swift" | grep -v "MultiModalCoordinator.swift" | wc -l | tr -d ' ')"
+
+# 15. ContextualMemoryManager
+check "ContextualMemoryManager" \
+  "$(grep -r "ContextualMemoryManager" Shared/ --include="*.swift" | grep -v "ContextualMemoryManager.swift" | wc -l | tr -d ' ')"
+
+# 16. ProactiveInsightEngine
+check "ProactiveInsightEngine" \
+  "$(grep -r "ProactiveInsightEngine" Shared/ --include="*.swift" | grep -v "ProactiveInsightEngine.swift" | wc -l | tr -d ' ')"
+
+# 17. FocusSessionManager
+check "FocusSessionManager" \
+  "$(grep -r "FocusSessionManager" Shared/ --include="*.swift" | grep -v "FocusSessionManager.swift" | wc -l | tr -d ' ')"
+
+# 18. HabitTrackingService
+check "HabitTrackingService" \
+  "$(grep -r "HabitTrackingService" Shared/ --include="*.swift" | grep -v "HabitTrackingService.swift" | wc -l | tr -d ' ')"
+
+# 19. GoalTrackingService
+check "GoalTrackingService" \
+  "$(grep -r "GoalTrackingService" Shared/ --include="*.swift" | grep -v "GoalTrackingService.swift" | wc -l | tr -d ' ')"
+
+# 20. WellbeingMonitor
+check "WellbeingMonitor" \
+  "$(grep -r "WellbeingMonitor" Shared/ --include="*.swift" | grep -v "WellbeingMonitor.swift" | wc -l | tr -d ' ')"
+
+# 21. NeuralContextCompressor
+check "NeuralContextCompressor" \
+  "$(grep -r "NeuralContextCompressor" Shared/ --include="*.swift" | grep -v "NeuralContextCompressor.swift" | wc -l | tr -d ' ')"
+
+# 22. SelfTuningEngine
+check "SelfTuningEngine" \
+  "$(grep -r "SelfTuningEngine" Shared/ --include="*.swift" | grep -v "SelfTuningEngine.swift" | wc -l | tr -d ' ')"
+
+# 23. DynamicConfigManager
+check "DynamicConfigManager" \
+  "$(grep -r "DynamicConfigManager\|DynamicConfig" Shared/ --include="*.swift" | grep -v "DynamicConfig.swift" | wc -l | tr -d ' ')"
+
+# 24. PrivacyPreservingAIRouter
+check "PrivacyPreservingAIRouter" \
+  "$(grep -r "PrivacyPreservingAIRouter" Shared/ --include="*.swift" | grep -v "PrivacyPreservingAIRouter.swift" | wc -l | tr -d ' ')"
+
+# 25. MultiModelConsensus (verification system)
+check "MultiModelConsensus" \
+  "$(grep -r "MultiModelConsensus" Shared/ --include="*.swift" | grep -v "MultiModelConsensus.swift" | wc -l | tr -d ' ')"
+
+# 26. WebSearchVerifier
+check "WebSearchVerifier" \
+  "$(grep -r "WebSearchVerifier" Shared/ --include="*.swift" | grep -v "WebSearchVerifier.swift" | wc -l | tr -d ' ')"
+
+# 27. UserFeedbackLearner
+check "UserFeedbackLearner" \
+  "$(grep -r "UserFeedbackLearner" Shared/ --include="*.swift" | grep -v "UserFeedbackLearner.swift" | wc -l | tr -d ' ')"
+
+# 28. SelfExecutionService (MetaAI TIER 0)
+check "SelfExecutionService" \
+  "$(grep -r "SelfExecutionService" Shared/ --include="*.swift" | grep -v "SelfExecutionService.swift" | wc -l | tr -d ' ')"
+
+# 29. PhaseOrchestrator (MetaAI TIER 0)
+check "PhaseOrchestrator" \
+  "$(grep -r "PhaseOrchestrator" Shared/ --include="*.swift" | grep -v "PhaseOrchestrator.swift" | wc -l | tr -d ' ')"
+
+# ── UI wiring: views accessible via navigation ───────────────────────────────
+
+# Life Tracking views reachable
+check "LifeTrackingView in nav" \
+  "$(grep -r "LifeTracking\|lifeTracking" Shared/UI/Views/ --include="*.swift" | grep -v "LifeTracking" | wc -l | tr -d ' ')"
+
+# MetaAI dashboard reachable
+check "MetaAIDashboardView in nav" \
+  "$(grep -r "MetaAIDashboard" Shared/UI/Views/ --include="*.swift" | grep -v "MetaAIDashboard.swift" | wc -l | tr -d ' ')"
+
+# ── Summary ──────────────────────────────────────────────────────────────────
+echo ""
+echo "═══════════════════════════════════════════"
+echo "WIRING SCRIPT RESULT: $PASS passed, $FAIL FAILED"
+[ "$FAIL" -eq 0 ] && echo "✅ ALL SYSTEMS WIRED — AA3 may proceed" \
+                  || echo "❌ $FAIL systems unwired — Phase U3 incomplete"
+echo "═══════════════════════════════════════════"
+exit "$FAIL"
+```
+
+**AA3 is BLOCKED until the above script exits 0 (zero failures).**
+Any ❌ item must be addressed in Phase U3 before AA3 can be marked done.
+
 ---
 
 ## PHASE AB3: NOTARIZATION

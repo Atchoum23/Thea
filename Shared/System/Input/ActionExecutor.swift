@@ -11,27 +11,22 @@ import AppKit
 
 @MainActor
 final class CGActionExecutor {
-    // periphery:ignore - Reserved: CGActionExecutor type reserved for future feature activation
     static let shared = CGActionExecutor()
 
     // MARK: - State
 
-    // periphery:ignore - Reserved: lastError property — reserved for future feature activation
     private(set) var lastError: Error?
-    // periphery:ignore - Reserved: isExecutingAction property — reserved for future feature activation
     private(set) var isExecutingAction = false
 
     private init() {}
 
     // MARK: - Permission Check
 
-    // periphery:ignore - Reserved: hasPermission property — reserved for future feature activation
     /// Check if Accessibility permission is granted
     var hasPermission: Bool {
         AXIsProcessTrusted()
     }
 
-    // periphery:ignore - Reserved: requestPermission() instance method — reserved for future feature activation
     /// Request Accessibility permission (opens System Settings)
     nonisolated func requestPermission() {
         // Use string literal to avoid concurrency warning on kAXTrustedCheckOptionPrompt global
@@ -47,7 +42,6 @@ final class CGActionExecutor {
 
     // MARK: - Mouse Actions
 
-    // periphery:ignore - Reserved: movePointer(to:) instance method — reserved for future feature activation
     /// Move mouse pointer to specific coordinates
     func movePointer(to point: CGPoint) throws {
         guard hasPermission else {
@@ -67,7 +61,6 @@ final class CGActionExecutor {
         print("[CGActionExecutor] Moved pointer to (\(point.x), \(point.y))")
     }
 
-    // periphery:ignore - Reserved: click(at:button:) instance method — reserved for future feature activation
     /// Click at specific coordinates
     func click(at point: CGPoint, button: MouseButton = .left) async throws {
         guard hasPermission else {
@@ -111,7 +104,6 @@ final class CGActionExecutor {
         print("[CGActionExecutor] Clicked at (\(point.x), \(point.y)) with \(button == .left ? "left" : "right") button")
     }
 
-    // periphery:ignore - Reserved: doubleClick(at:) instance method — reserved for future feature activation
     /// Double-click at specific coordinates
     func doubleClick(at point: CGPoint) async throws {
         guard hasPermission else {
@@ -135,7 +127,6 @@ final class CGActionExecutor {
 
     // MARK: - Keyboard Actions
 
-    // periphery:ignore - Reserved: type(_:) instance method — reserved for future feature activation
     /// Type text at current cursor position
     func type(_ text: String) async throws {
         guard hasPermission else {
@@ -154,7 +145,6 @@ final class CGActionExecutor {
         print("[CGActionExecutor] Typed text: '\(text)'")
     }
 
-    // periphery:ignore - Reserved: typeCharacter(_:) instance method — reserved for future feature activation
     /// Type a single character
     private func typeCharacter(_ character: Character) async throws {
         let string = String(character)
@@ -196,7 +186,6 @@ final class CGActionExecutor {
         keyUpEvent.post(tap: .cghidEventTap)
     }
 
-    // periphery:ignore - Reserved: pressKey(_:modifiers:) instance method — reserved for future feature activation
     /// Press a specific key (e.g., Enter, Tab, Escape)
     func pressKey(_ key: KeyCode, modifiers: [KeyModifier] = []) async throws {
         guard hasPermission else {
@@ -247,7 +236,6 @@ final class CGActionExecutor {
 
     // MARK: - Mouse Button
 
-    // periphery:ignore - Reserved: MouseButton enum — reserved for future feature activation
     enum MouseButton {
         case left
         case right
@@ -255,7 +243,6 @@ final class CGActionExecutor {
 
     // MARK: - Key Codes
 
-    // periphery:ignore - Reserved: KeyCode enum — reserved for future feature activation
     enum KeyCode: CGKeyCode {
         case returnKey = 36
         case tab = 48
@@ -290,7 +277,6 @@ final class CGActionExecutor {
         case upArrow = 126
     }
 
-    // periphery:ignore - Reserved: KeyModifier enum — reserved for future feature activation
     enum KeyModifier {
         case command
         case shift
@@ -301,7 +287,6 @@ final class CGActionExecutor {
 
 // MARK: - Errors
 
-// periphery:ignore - Reserved: ActionExecutionError type reserved for future feature activation
 enum ActionExecutionError: Error, LocalizedError {
     case permissionDenied
     case eventCreationFailed(String)

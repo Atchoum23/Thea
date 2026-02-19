@@ -165,6 +165,76 @@ global CLAUDE.md + Thea CLAUDE.md + MEMORY.md. Not just "the obvious one."
 
 ---
 
+## ⚠️ MANDATORY: MECHANICAL VERIFICATION — NOT SELF-ASSESSMENT
+
+**Rules and intentions are insufficient. Every deliverable must be mechanically verifiable.**
+
+LLMs optimize for *apparent* completeness, not *actual* completeness. The fix is explicit, mechanical checking — not trusting self-assessment.
+
+**For Thea code work:**
+- "Wired" → `grep -r "ClassName" Shared/ --include="*.swift" | grep -v "own file" | wc -l` ≥ 1
+- "View accessible" → NavigationLink/Tab reference found by grep
+- "No stubs" → grep for TODO/FIXME/empty bodies returns 0 in changed files
+- "Build passes" → actual xcodebuild BUILD SUCCEEDED (never assumed)
+
+**For Thea plan work:**
+- Every phase ends with its explicit verification bash script (already in each phase)
+- A "wiring check" runs before any phase is marked ✅ DONE
+- Every new file in Shared/ must map to a v3 phase — no file forgotten
+- The Completeness Wiring Script (Phase AA3) must pass before Wave 6 ends
+
+**Proactive gap discovery:**
+When working on any phase, if you encounter a disconnected/stubbed class/service/view, **immediately** add it to Phase U3 — do not wait to be asked.
+
+---
+
+## ⚠️ MANDATORY: TASK COMPLETENESS GUARANTEE PROTOCOL
+
+**Research finding (2025): only ~10% of complex multi-file AI agent workflows complete end-to-end with no errors. The fix is structural.**
+
+Based on: RTM (Requirements Traceability Matrix) methodology, Meta's SCARF dead-code framework, AI agent evaluation research (Anthropic/Amazon/Patronus), Definition of Done best practices.
+
+### GATE 1 — Pre-Task: Requirement Mapping (before first edit)
+Write this out explicitly before any work starts:
+```
+Task: [title]
+Requirements:
+  REQ-001: [verbatim from prompt, including parentheticals]
+  REQ-002: ...
+Artifacts: [files to create/modify]
+Scope IN: [what will be done]
+Scope OUT: [what will NOT be done, and why]
+```
+**Do not begin work until this list exists.**
+
+### GATE 2 — During Task: Execution Trace
+- Log key decisions: "Why X over Y?"
+- Mark each requirement as addressed: `[REQ-001 ✓]`
+- Validate tool outputs — never assume a command succeeded without checking its result
+
+### GATE 3 — Post-Task: Bidirectional RTM Verification
+- **Forward**: For each REQ-xxx, grep codebase to confirm implementation exists
+- **Backward**: For each file changed, confirm it traces back to a REQ-xxx
+- **Unmapped change = missed requirement** — fix before declaring done
+- **Inverse keyword search**: Search for requirement keywords you DIDN'T implement to catch gaps
+
+### GATE 4 — Git Certification
+- `git diff HEAD --stat` matches planned artifacts (no unexplained files)
+- `git status` clean — all changes committed
+- Commit message includes key decisions + requirement IDs addressed
+
+### Definition of Done Checklist (Non-Negotiable)
+Before marking ANY task complete:
+- [ ] All REQ-xxx traced and implemented (Gates 1–3)
+- [ ] Build passes — actual xcodebuild returned BUILD SUCCEEDED (never assumed)
+- [ ] No unaddressed TODO/FIXME added to changed files
+- [ ] Security-critical code verified not reverted by hooks
+- [ ] Cross-file consistency — universal rules verified in ALL relevant files simultaneously
+
+**The test**: Can Alexis reconstruct exactly what was done and why from `git log --stat`? If not, it's not done.
+
+---
+
 ## UNIVERSAL IMPLEMENTATION STANDARD — Non-Negotiable
 
 **This standard applies to ALL work: past, present, and future. Every feature, capability, phase, and deliverable must meet this bar.**
