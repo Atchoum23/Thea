@@ -2594,6 +2594,34 @@ cat /tmp/ship-report.txt
 git add -A && git commit -m "Auto-save: Final v2 verification report" || true
 ```
 
+### ⚡ PHASE U COMPLETION → AUTO-TRANSITION TO v3 (MANDATORY)
+
+After the report is committed, **do NOT stop**. Immediately execute:
+
+```bash
+# Notify Alexis that v2 is complete and v3 is starting
+curl -s -X POST "https://ntfy.sh/thea-msm3u" \
+  -H "Title: Thea v2 Complete — Starting v3" \
+  -d "Phase U done. v2 ship-ready baseline confirmed. Starting v3 Phase A3 now." || true
+
+# Pull latest plan (may have been updated from MBAM2)
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+git pull 2>/dev/null || true
+
+# ▶ START v3 — Read and execute the full v3 plan
+# The v3 plan is at: .claude/THEA_CAPABILITY_PLAN_v3.md
+# Instructions are at its top — Phase A3 is the first phase to execute
+# v2 Phase V (Manual Gate) is DEFERRED and MERGED into v3 Phase AD3
+
+echo "=== TRANSITIONING TO v3 ==="
+echo "Reading .claude/THEA_CAPABILITY_PLAN_v3.md ..."
+```
+
+**EXECUTOR ACTION**: Read `.claude/THEA_CAPABILITY_PLAN_v3.md` and execute all phases starting
+from **Phase A3**, in order through **Phase AH3**, then stop at **Phase AD3** (Manual Gate —
+wait for Alexis). Follow the SESSION SAFETY PROTOCOL at the top of that file. Commit after
+every file edit. Push with `git pushsync`. Send ntfy notification after each wave.
+
 ---
 
 ## PHASE V — MANUAL SHIP GATE (⚠️ DEFERRED — do NOT stop execution here)
