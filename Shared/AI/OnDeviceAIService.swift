@@ -140,6 +140,7 @@ public class OnDeviceAIService: ObservableObject {
                         }
                         continuation.finish()
                     #else
+                        // periphery:ignore - Reserved: tools parameter — kept for API compatibility
                         let response = try await generateText(prompt: prompt, systemPrompt: systemPrompt)
                         continuation.yield(response)
                         continuation.finish()

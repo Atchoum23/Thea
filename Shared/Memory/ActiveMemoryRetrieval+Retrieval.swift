@@ -232,6 +232,7 @@ extension ActiveMemoryRetrieval {
 
     // MARK: - Event History Retrieval
 
+    // periphery:ignore - Reserved: query parameter — kept for API compatibility
     func retrieveFromEventHistory(
         query: String,
         // periphery:ignore - Reserved: query parameter kept for API compatibility

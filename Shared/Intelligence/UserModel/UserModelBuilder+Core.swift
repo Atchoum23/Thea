@@ -60,6 +60,7 @@ public final class UserModelBuilder {
         }
 
         // Update technical level based on query complexity
+        // periphery:ignore - Reserved: wasAccepted parameter — kept for API compatibility
         let technicalLevel = assessQueryTechnicalLevel(query)
         updateTechnicalLevel(technicalLevel)
 

@@ -144,6 +144,7 @@ extension ChatManager {
     }
 
     /// Delegate a task to the sub-agent orchestrator. Returns the session for UI tracking.
+    // periphery:ignore - Reserved: taskType parameter — kept for API compatibility
     func delegateToAgent(
         text: String,
         conversationID: UUID,

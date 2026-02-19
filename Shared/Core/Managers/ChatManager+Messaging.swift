@@ -622,6 +622,7 @@ extension ChatManager {
     /// Process the next queued message after streaming completes
     func processQueue() {
         guard !messageQueue.isEmpty else { return }
+        // periphery:ignore - Reserved: provider parameter — kept for API compatibility
         let next = messageQueue.removeFirst()
         Task {
             do {

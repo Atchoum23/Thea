@@ -147,6 +147,7 @@ extension TestGenerator {
             return generateSwiftTestFile(tests: tests, framework: framework, analysis: analysis)
         case .python:
             return generatePythonTestFile(tests: tests, framework: framework)
+        // periphery:ignore - Reserved: framework parameter — kept for API compatibility
         case .javascript, .typescript:
             return generateJSTestFile(tests: tests, framework: framework, isTS: request.language == .typescript)
         default:

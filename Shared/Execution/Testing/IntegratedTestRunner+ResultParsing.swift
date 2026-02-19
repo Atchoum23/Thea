@@ -303,6 +303,7 @@ extension IntegratedTestRunner {
 
     // MARK: - Coverage Parsing
 
+    // periphery:ignore - Reserved: output parameter — kept for API compatibility
     func parseCoverageReport(
         output: String,
         framework: TestFramework,

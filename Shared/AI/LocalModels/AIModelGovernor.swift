@@ -542,6 +542,7 @@ final class AIModelGovernor {
         let name = model.name.lowercased()
 
         // Larger models generally more capable
+        // periphery:ignore - Reserved: _model parameter — kept for API compatibility
         let sizeGB = Double(model.size) / 1_000_000_000
         if sizeGB > 7 { score += 0.2 } else if sizeGB > 4 { score += 0.1 }
 

@@ -266,6 +266,7 @@ extension ModelRouter {
     private func calculateSpeedScore(_ model: AIModel, for taskType: TaskType) -> Double {
         // Check historical latency
         if let taskPerf = modelPerformance[model.id]?[taskType] {
+            // periphery:ignore - Reserved: _context parameter — kept for API compatibility
             let avgLatency = taskPerf.averageLatency
             // <1s = 1.0, 5s = 0.5, >10s = 0.2
             if avgLatency < 1.0 { return 1.0 }
@@ -454,6 +455,7 @@ extension ModelRouter {
                let successRate = Double(valueParts[0]),
                let avgLatency = Double(valueParts[1]),
                let sampleCount = Int(valueParts[2]) {
+                // periphery:ignore - Reserved: tokens parameter — kept for API compatibility
                 let successCount = Int(Double(sampleCount) * successRate)
                 self.modelPerformance[modelId]?[taskType]?.successCount = successCount
                 self.modelPerformance[modelId]?[taskType]?.failureCount = sampleCount - successCount

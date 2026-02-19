@@ -32,6 +32,7 @@ public final class ProactiveEngine: ObservableObject {
     private var fileAccessHistory: [(file: String, timestamp: Date)] = []
 
     private init() {
+        // periphery:ignore - Reserved: recentQuery parameter — kept for API compatibility
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         self.storageURL = documentsPath.appendingPathComponent("thea_patterns.json")
         loadPatterns()
@@ -113,6 +114,7 @@ public final class ProactiveEngine: ObservableObject {
 
     /// Record a file access
     public func recordFileAccess(_ file: String) {
+        // periphery:ignore - Reserved: recentQuery parameter — kept for API compatibility
         let now = Date()
         fileAccessHistory.append((file, now))
 

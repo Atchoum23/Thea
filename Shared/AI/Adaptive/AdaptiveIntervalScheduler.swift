@@ -366,6 +366,7 @@ public actor AdaptiveIntervalScheduler {
         let confidence = calculateConfidence(patternConfidence: patternConfidence)
 
         // Build reason string
+        // periphery:ignore - Reserved: actualInterval parameter — kept for API compatibility
         let reason = buildReason(
             activity: currentActivity,
             stability: currentStability,
@@ -542,6 +543,7 @@ public actor AdaptiveIntervalScheduler {
     }
 
     private func calculateEffectiveness(changesApplied: Int, issuesDetected: Int, resourceUsage: Double) -> Double {
+        // periphery:ignore - Reserved: _predictedActivity parameter — kept for API compatibility
         var score = 0.5
 
         // Good: Found issues and applied changes

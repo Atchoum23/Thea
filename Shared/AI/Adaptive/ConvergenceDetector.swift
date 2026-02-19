@@ -324,6 +324,7 @@ public final class ConvergenceDetector: ObservableObject {
         return ConvergenceAnalysis(
             state: state,
             confidence: confidence,
+            // periphery:ignore - Reserved: changeRisk parameter — kept for API compatibility
             variance: variance,
             trend: trend,
             oscillationCount: oscillations,

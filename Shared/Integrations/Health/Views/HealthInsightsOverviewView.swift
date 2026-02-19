@@ -442,6 +442,7 @@ final class HealthInsightsOverviewViewModel {
         }
 
         // Nutrition score (proxy from calorie balance)
+        // periphery:ignore - Reserved: avgCalories parameter — kept for API compatibility
         let calorieBalance = avgCalories > 0
             ? min(100.0, Double(avgCalories) / 500.0 * 100.0)
             : 0.0

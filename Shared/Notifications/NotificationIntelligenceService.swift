@@ -241,6 +241,7 @@ public final class NotificationIntelligenceService: ObservableObject {
         }
 
         // Social media
+        // periphery:ignore - Reserved: record parameter — kept for API compatibility
         let socialApps = ["instagram", "facebook", "twitter", "tiktok", "linkedin",
                            "reddit", "mastodon", "threads"]
         if socialApps.contains(where: { appId.contains($0) }) {

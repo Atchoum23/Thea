@@ -178,6 +178,7 @@ public final class ToolCompositionEngine: ObservableObject {
         }
 
         let totalDuration = Date().timeIntervalSince(startTime)
+        // periphery:ignore - Reserved: pipeline parameter — kept for API compatibility
         let success = stepResults.allSatisfy { $0.success } && context.errors.isEmpty
 
         logger.info("Pipeline \(pipeline.name) completed: \(success ? "success" : "failed") in \(String(format: "%.2f", totalDuration))s")

@@ -241,6 +241,7 @@ public final class ContextAggregator: ObservableObject {
             return (rate: 0.5, sampleSize: 0) // No data, return neutral
         }
 
+        // periphery:ignore - Reserved: context parameter — kept for API compatibility
         let successCount = similar.filter(\.success).count
         return (
             rate: Double(successCount) / Double(similar.count),

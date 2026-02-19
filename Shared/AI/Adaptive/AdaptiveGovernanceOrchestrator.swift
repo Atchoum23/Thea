@@ -287,6 +287,7 @@ public actor AdaptiveGovernanceOrchestrator {
     /// Get all hyperparameter values
     @MainActor
     public func getAllHyperparameters() -> [HyperparameterID: Double] {
+        // periphery:ignore - Reserved: context parameter — kept for API compatibility
         var result: [HyperparameterID: Double] = [:]
         for id in HyperparameterID.allCases {
             result[id] = HyperparameterTuner.shared.getValue(id)

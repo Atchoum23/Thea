@@ -124,6 +124,7 @@ final class ConversationMemory {
     // MARK: - Memory Operations
 
     /// Add a conversation exchange to memory and potentially trigger summarization
+    // periphery:ignore - Reserved: assistantResponse parameter — kept for API compatibility
     func recordConversation(
         userMessage: String,
         assistantResponse: String,

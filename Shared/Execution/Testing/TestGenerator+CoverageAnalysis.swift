@@ -9,6 +9,7 @@ import Foundation
 
 extension TestGenerator {
 
+    // periphery:ignore - Reserved: existingTests parameter — kept for API compatibility
     func analyzeCoverageGaps(
         sourceAnalysis: SourceAnalysis,
         // periphery:ignore - Reserved: existingTests parameter kept for API compatibility

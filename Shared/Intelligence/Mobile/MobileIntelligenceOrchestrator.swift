@@ -186,6 +186,7 @@ public final class MobileIntelligenceOrchestrator {
             )
         }
 
+        // periphery:ignore - Reserved: budget parameter — kept for API compatibility
         let fallbacks = modeScores.dropFirst().prefix(2).map { $0.0 }
 
         return MobileRoutingDecision(
@@ -313,6 +314,7 @@ public final class MobileIntelligenceOrchestrator {
                 timeoutSeconds: 60,
                 allowStreaming: true
             )
+        // periphery:ignore - Reserved: latency parameter — kept for API compatibility
         case .hybrid:
             return .init(
                 maxTokens: budget.maxTokensPerQuery,

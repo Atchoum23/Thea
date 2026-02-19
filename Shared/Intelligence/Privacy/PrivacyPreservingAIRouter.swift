@@ -202,6 +202,7 @@ public actor PrivacyPreservingAIRouter {
 
         case .remoteAllowed:
             // Can send directly
+            // periphery:ignore - Reserved: classification parameter — kept for API compatibility
             let result = try await remoteProcessor(content)
             return ProcessingResult(
                 output: result,

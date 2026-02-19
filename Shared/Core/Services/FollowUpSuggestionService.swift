@@ -43,6 +43,7 @@ final class FollowUpSuggestionService: ObservableObject {
 
     // Generate follow-up suggestions based on AI response content and task type.
     // swiftlint:disable:next function_body_length
+    // periphery:ignore - Reserved: query parameter — kept for API compatibility
     func generate(
         response: String,
         query: String,

@@ -62,6 +62,7 @@ public final class UsageAnalyticsService {
     public func endSession() {
         guard let startTime = sessionStartTime else { return }
 
+        // periphery:ignore - Reserved: provider parameter — kept for API compatibility
         let duration = Date().timeIntervalSince(startTime)
         sessionStats.totalSessionTime += duration
         sessionStats.averageSessionDuration = sessionStats.totalSessionTime / Double(sessionStats.totalSessions)
@@ -96,6 +97,7 @@ public final class UsageAnalyticsService {
         guard isEnabled else { return }
 
         // Update model stats
+        // periphery:ignore - Reserved: durationMs parameter — kept for API compatibility
         var stats = modelUsage[model] ?? ModelUsageStats(model: model)
         stats.totalRequests += 1
         stats.totalTokensIn += tokensIn

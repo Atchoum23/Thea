@@ -24,6 +24,7 @@ final class SwissTaxEstimator {
     // MARK: - Tax Estimation
 
     /// Estimate annual taxes for a given income in a specific canton.
+    // periphery:ignore - Reserved: municipality parameter — kept for API compatibility
     func estimateAnnualTax(
         grossIncome: Double,
         canton: SwissCanton,

@@ -286,6 +286,7 @@ public final class LifeInsightsAnalyzer: ObservableObject {
         var patterns: [InsightDetectedLifePattern] = []
 
         // Find top domains
+        // periphery:ignore - Reserved: _events parameter — kept for API compatibility
         let topDomains = domainCounts.sorted { $0.value > $1.value }.prefix(5)
 
         for (domain, count) in topDomains where count >= 3 {
@@ -428,6 +429,7 @@ public final class LifeInsightsAnalyzer: ObservableObject {
 
         case .fileActivity:
             if event.data["changeType"] == "created",
+               // periphery:ignore - Reserved: _events parameter — kept for API compatibility
                let fileType = event.data["fileType"],
                ["doc", "docx", "pdf", "txt", "md"].contains(fileType) {
                 return AnalyzedLifeInsight(

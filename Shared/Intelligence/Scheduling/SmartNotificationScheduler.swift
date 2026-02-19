@@ -46,6 +46,7 @@ final class SmartNotificationScheduler {
 
     /// Determine the optimal delivery time for a notification.
     /// Returns `.now` for immediate delivery, or a future `Date` for deferred delivery.
+    // periphery:ignore - Reserved: category parameter — kept for API compatibility
     func optimalDeliveryTime(
         priority: NotificationPriority,
         category: NotificationService.Category? = nil

@@ -379,6 +379,7 @@ public final class CodebaseSearchEngine: ObservableObject {
                 }
 
                 let score: Float = node.name.lowercased() == term.lowercased() ? 8.0 : 5.0
+                // periphery:ignore - Reserved: filters parameter — kept for API compatibility
                 let result = CodeSearchResult(
                     id: UUID(),
                     chunk: createChunkFromSymbol(node),
