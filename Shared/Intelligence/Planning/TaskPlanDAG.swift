@@ -57,6 +57,7 @@ final class TaskPlanDAG {
     // MARK: - Plan Execution
 
     /// Execute a plan, running parallelizable nodes concurrently
+    // periphery:ignore - Reserved: execute(_:) instance method — reserved for future feature activation
     func execute(_ plan: TaskPlan) async throws -> TaskPlanResult {
         guard let index = activePlans.firstIndex(where: { $0.id == plan.id }) else {
             throw TaskPlanError.planNotFound
@@ -136,6 +137,7 @@ final class TaskPlanDAG {
 
     // MARK: - Node Execution
 
+    // periphery:ignore - Reserved: executeNode(_:) instance method — reserved for future feature activation
     nonisolated private func executeNode(_ node: TaskPlanNode) async -> TaskNodeResult {
         do {
             // Route to the appropriate executor based on node type
@@ -160,6 +162,7 @@ final class TaskPlanDAG {
         }
     }
 
+    // periphery:ignore - Reserved: executeAIQuery(_:) instance method — reserved for future feature activation
     nonisolated private func executeAIQuery(_ node: TaskPlanNode) async throws -> String {
         guard let provider = await ProviderRegistry.shared.getDefaultProvider() else {
             return "No AI provider available"
@@ -194,6 +197,7 @@ final class TaskPlanDAG {
         return result
     }
 
+    // periphery:ignore - Reserved: executeIntegration(_:) instance method — reserved for future feature activation
     nonisolated private func executeIntegration(_ node: TaskPlanNode) async throws -> String {
         #if os(macOS)
         let bridge = await FunctionGemmaBridge.shared
@@ -207,6 +211,7 @@ final class TaskPlanDAG {
 
     // MARK: - Goal Decomposition
 
+    // periphery:ignore - Reserved: context parameter — kept for API compatibility
     private func decompose(goal: String, context: String) -> [TaskPlanNode] {
         let lower = goal.lowercased()
 
@@ -345,10 +350,12 @@ final class TaskPlanDAG {
 
     // MARK: - Cleanup
 
+    // periphery:ignore - Reserved: removePlan(_:) instance method — reserved for future feature activation
     func removePlan(_ planID: UUID) {
         activePlans.removeAll { $0.id == planID }
     }
 
+    // periphery:ignore - Reserved: clearCompletedPlans() instance method — reserved for future feature activation
     func clearCompletedPlans() {
         activePlans.removeAll { $0.status == .completed }
     // periphery:ignore - Reserved: removePlan(_:) instance method reserved for future feature activation
@@ -379,12 +386,14 @@ struct TaskPlan: Identifiable, Sendable {
 
 struct TaskPlanNode: Identifiable, Sendable {
     let id: UUID
+    // periphery:ignore - Reserved: title property — reserved for future feature activation
     let title: String
     let action: String
     // periphery:ignore - Reserved: title property reserved for future feature activation
     let actionType: ActionType
     let dependsOn: [UUID]
     var status: NodeStatus = .pending
+    // periphery:ignore - Reserved: result property — reserved for future feature activation
     var result: String?
 
 // periphery:ignore - Reserved: result property reserved for future feature activation

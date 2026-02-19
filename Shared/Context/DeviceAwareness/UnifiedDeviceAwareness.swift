@@ -17,6 +17,7 @@ import IOKit.ps
 @MainActor
 @Observable
 final class UnifiedDeviceAwareness {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = UnifiedDeviceAwareness()
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "UnifiedDeviceAwareness")
@@ -105,12 +106,14 @@ final class UnifiedDeviceAwareness {
         }
     }
 
+    // periphery:ignore - Reserved: stopMonitoring() instance method — reserved for future feature activation
     func stopMonitoring() {
         updateTask?.cancel()
         updateTask = nil
     // periphery:ignore - Reserved: stopMonitoring() instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: refreshNow() instance method — reserved for future feature activation
     func refreshNow() async {
         await gatherInitialInfo()
     // periphery:ignore - Reserved: refreshNow() instance method reserved for future feature activation
@@ -118,6 +121,7 @@ final class UnifiedDeviceAwareness {
 
     // MARK: - Configuration
 
+    // periphery:ignore - Reserved: updateConfiguration(_:) instance method — reserved for future feature activation
     func updateConfiguration(_ config: Configuration) {
         // periphery:ignore - Reserved: updateConfiguration(_:) instance method reserved for future feature activation
         configuration = config

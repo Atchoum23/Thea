@@ -12,6 +12,7 @@ import OSLog
 @MainActor
 @Observable
 final class AdaptivePromptEngine {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = AdaptivePromptEngine()
 
     // MARK: - State
@@ -48,6 +49,7 @@ final class AdaptivePromptEngine {
     // MARK: - Prompt Analysis
 
     /// Analyze a prompt and return enhanced interpretation
+    // periphery:ignore - Reserved: analyzePrompt(_:) instance method — reserved for future feature activation
     func analyzePrompt(_ prompt: String) async -> PromptAnalysis {
         isAnalyzing = true
         defer { isAnalyzing = false }
@@ -70,6 +72,7 @@ final class AdaptivePromptEngine {
     }
 
     /// Predict user's intent from partial prompt (for real-time suggestions)
+    // periphery:ignore - Reserved: predictIntentFromPartial(_:) instance method — reserved for future feature activation
     func predictIntentFromPartial(_ partialPrompt: String) -> [IntentPrediction] {
         guard configuration.enableIntentPrediction,
               partialPrompt.count >= 3 else { return [] }
@@ -99,6 +102,7 @@ final class AdaptivePromptEngine {
     }
 
     /// Get suggested completions for current prompt
+    // periphery:ignore - Reserved: getSuggestedCompletions(for:) instance method — reserved for future feature activation
     func getSuggestedCompletions(for prompt: String) -> [PromptCompletion] {
         let predictions = predictIntentFromPartial(prompt)
 
@@ -118,6 +122,7 @@ final class AdaptivePromptEngine {
     }
 
     /// Get proactive suggestions based on context and workflow
+    // periphery:ignore - Reserved: getProactiveSuggestions() instance method — reserved for future feature activation
     func getProactiveSuggestions() -> [AdaptiveSuggestion] {
         guard configuration.enablePreemptiveActions else { return [] }
 
@@ -218,6 +223,7 @@ final class AdaptivePromptEngine {
         return keywords.contains { text.contains($0) }
     }
 
+    // periphery:ignore - Reserved: detectGeneralIntents(_:) instance method — reserved for future feature activation
     private func detectGeneralIntents(_ prompt: String) -> [IntentPrediction] {
         var predictions: [IntentPrediction] = []
         let lower = prompt.lowercased()
@@ -253,6 +259,7 @@ final class AdaptivePromptEngine {
 
     // MARK: - Anticipation & Suggestions
 
+    // periphery:ignore - Reserved: anticipateNeeds(_:) instance method — reserved for future feature activation
     private func anticipateNeeds(_ prompt: String) -> [AnticipatedNeed] {
         // periphery:ignore - Reserved: detectGeneralIntents(_:) instance method reserved for future feature activation
         var needs: [AnticipatedNeed] = []
@@ -307,6 +314,7 @@ final class AdaptivePromptEngine {
         return needs
     }
 
+    // periphery:ignore - Reserved: suggestEnhancements(_:) instance method — reserved for future feature activation
     private func suggestEnhancements(_ prompt: String) -> [PromptEnhancement] {
         var enhancements: [PromptEnhancement] = []
 
@@ -345,6 +353,7 @@ final class AdaptivePromptEngine {
 
     // MARK: - Mood Detection
 
+    // periphery:ignore - Reserved: detectMood(_:) instance method — reserved for future feature activation
     private func detectMood(_ prompt: String) -> MoodIndicators {
         let lower = prompt.lowercased()
 
@@ -383,6 +392,7 @@ final class AdaptivePromptEngine {
 
     // MARK: - Workflow Management
 
+    // periphery:ignore - Reserved: getWorkflowContext() instance method — reserved for future feature activation
     private func getWorkflowContext() -> WorkflowContext? {
         guard let currentWorkflow = identifyCurrentWorkflow() else { return nil }
 
@@ -395,6 +405,7 @@ final class AdaptivePromptEngine {
         )
     }
 
+    // periphery:ignore - Reserved: identifyCurrentWorkflow() instance method — reserved for future feature activation
     private func identifyCurrentWorkflow() -> WorkflowPattern? {
         guard !workflowPatterns.isEmpty else { return nil }
 
@@ -413,6 +424,7 @@ final class AdaptivePromptEngine {
 
     // MARK: - Learning
 
+    // periphery:ignore - Reserved: learnFromPrompt(_:analysis:) instance method — reserved for future feature activation
     private func learnFromPrompt(_ prompt: String, analysis: PromptAnalysis) async {
         // periphery:ignore - Reserved: getWorkflowContext() instance method reserved for future feature activation
         guard configuration.enableAdaptiveLearning else { return }
@@ -469,6 +481,7 @@ final class AdaptivePromptEngine {
     }
 
     /// Learn from response feedback (was response helpful?)
+    // periphery:ignore - Reserved: recordFeedback(wasHelpful:forInteraction:) instance method — reserved for future feature activation
     func recordFeedback(wasHelpful: Bool, forInteraction interaction: PromptInteraction) {
         // Adjust pattern weights based on feedback
         let adjustment = wasHelpful ? configuration.learningRate : -configuration.learningRate
@@ -484,18 +497,21 @@ final class AdaptivePromptEngine {
 
     // MARK: - Helper Methods
 
+    // periphery:ignore - Reserved: adjustConfidenceFromHistory(_:for:) instance method — reserved for future feature activation
     private func adjustConfidenceFromHistory(_ base: Double, for intent: PromptIntent) -> Double {
         let matchingPatterns = userPromptProfile.commonPatterns.filter { $0.intent == intent }
         let historicalWeight = matchingPatterns.reduce(0.0) { $0 + $1.frequency }
         return min(1.0, base + (historicalWeight * 0.1))
     }
 
+    // periphery:ignore - Reserved: getHistoricalNeeds(for:) instance method — reserved for future feature activation
     private func getHistoricalNeeds(for intent: PromptIntent) -> [AnticipatedNeed] {
         // Return needs based on what user typically asked for after this intent
         // This would be populated over time through learning
         []
     }
 
+    // periphery:ignore - Reserved: suggestFollowUps(for:) instance method — reserved for future feature activation
     private func suggestFollowUps(for interaction: PromptInteraction) -> [AdaptiveSuggestion] {
         // periphery:ignore - Reserved: recordFeedback(wasHelpful:forInteraction:) instance method reserved for future feature activation
         var suggestions: [AdaptiveSuggestion] = []
@@ -530,6 +546,7 @@ final class AdaptivePromptEngine {
         return suggestions
     }
 
+    // periphery:ignore - Reserved: calculateConfidence(_:) instance method — reserved for future feature activation
     private func calculateConfidence(_ prompt: String) -> Double {
         // Calculate overall confidence in analysis based on:
         // - Pattern match strength
@@ -565,6 +582,7 @@ final class AdaptivePromptEngine {
         }
     }
 
+    // periphery:ignore - Reserved: saveProfile() instance method — reserved for future feature activation
     private func saveProfile() {
         do {
             let data = try JSONEncoder().encode(userPromptProfile)
@@ -584,6 +602,7 @@ final class AdaptivePromptEngine {
         }
     }
 
+    // periphery:ignore - Reserved: updateConfiguration(_:) instance method — reserved for future feature activation
     func updateConfiguration(_ config: Configuration) {
         configuration = config
         do {
@@ -595,6 +614,7 @@ final class AdaptivePromptEngine {
         }
     }
 
+    // periphery:ignore - Reserved: clearLearningData() instance method — reserved for future feature activation
     func clearLearningData() {
         userPromptProfile = UserPromptProfile()
         workflowPatterns.removeAll()
@@ -604,6 +624,7 @@ final class AdaptivePromptEngine {
 
 // MARK: - Supporting Types
 
+// periphery:ignore - Reserved: PromptAnalysis type — reserved for future feature activation
 struct PromptAnalysis: Sendable {
     let originalPrompt: String
     let detectedIntent: PromptIntent
@@ -651,17 +672,23 @@ struct IntentPrediction: Sendable {
     let intent: PromptIntent
     let confidence: Double
     let suggestedCompletion: String?
+    // periphery:ignore - Reserved: expectedResponse property — reserved for future feature activation
     let expectedResponse: ResponseType?
 }
 
 struct PromptCompletion: Sendable, Identifiable {
     let id = UUID()
+    // periphery:ignore - Reserved: completion property — reserved for future feature activation
     let completion: String
+    // periphery:ignore - Reserved: fullPrompt property — reserved for future feature activation
     let fullPrompt: String
+    // periphery:ignore - Reserved: intent property — reserved for future feature activation
     let intent: PromptIntent
+    // periphery:ignore - Reserved: confidence property — reserved for future feature activation
     let confidence: Double
 }
 
+// periphery:ignore - Reserved: AdaptiveSuggestion type — reserved for future feature activation
 struct AdaptiveSuggestion: Sendable, Identifiable {
     let id = UUID()
     let type: SuggestionType
@@ -685,8 +712,11 @@ struct AdaptiveSuggestion: Sendable, Identifiable {
 }
 
 struct AnticipatedNeed: Sendable {
+    // periphery:ignore - Reserved: type property — reserved for future feature activation
     let type: NeedType
+    // periphery:ignore - Reserved: description property — reserved for future feature activation
     let description: String
+    // periphery:ignore - Reserved: likelihood property — reserved for future feature activation
     let likelihood: Double
 
     enum NeedType: String, Codable, Sendable {
@@ -729,10 +759,15 @@ struct MoodIndicators: Codable, Sendable {
 }
 
 struct WorkflowContext: Sendable {
+    // periphery:ignore - Reserved: workflowType property — reserved for future feature activation
     let workflowType: String
+    // periphery:ignore - Reserved: currentStep property — reserved for future feature activation
     let currentStep: Int
+    // periphery:ignore - Reserved: totalSteps property — reserved for future feature activation
     let totalSteps: Int
+    // periphery:ignore - Reserved: completedSteps property — reserved for future feature activation
     let completedSteps: [String]
+    // periphery:ignore - Reserved: estimatedRemaining property — reserved for future feature activation
     let estimatedRemaining: Int
 }
 
@@ -790,6 +825,7 @@ struct WorkflowPattern: Sendable {
     var completedSteps: [String]
     var confidence: Double
 
+    // periphery:ignore - Reserved: matchScore(for:) instance method — reserved for future feature activation
     func matchScore(for intents: [PromptIntent]) -> Double {
         // Calculate how well the given intents match this workflow
         // periphery:ignore - Reserved: matchScore(for:) instance method reserved for future feature activation
@@ -805,6 +841,7 @@ struct WorkflowPattern: Sendable {
         return Double(matches) / Double(min(steps.count, intents.count))
     }
 
+    // periphery:ignore - Reserved: predictNextStep() instance method — reserved for future feature activation
     func predictNextStep() -> WorkflowStep? {
         // periphery:ignore - Reserved: predictNextStep() instance method reserved for future feature activation
         guard currentStepIndex < steps.count else { return nil }

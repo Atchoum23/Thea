@@ -39,6 +39,7 @@
                 }
             }
 
+            // periphery:ignore - Reserved: color property — reserved for future feature activation
             var color: String {
                 switch self {
                 case .idle: "gray"
@@ -51,6 +52,7 @@
                 }
             }
 
+            // periphery:ignore - Reserved: isActive property — reserved for future feature activation
             var isActive: Bool {
                 self == .planning || self == .executing
             // periphery:ignore - Reserved: color property reserved for future feature activation
@@ -78,6 +80,7 @@
 
         // MARK: - Session Control
 
+        // periphery:ignore - Reserved: start() instance method — reserved for future feature activation
         func start() {
             status = .planning
             lastActivityAt = Date()
@@ -128,12 +131,14 @@
             lastActivityAt = Date()
         }
 
+        // periphery:ignore - Reserved: addSteps(_:) instance method — reserved for future feature activation
         func addSteps(_ newSteps: [CoworkStep]) {
             steps.append(contentsOf: newSteps)
             updateProgress()
             lastActivityAt = Date()
         }
 
+        // periphery:ignore - Reserved: updateStep(_:with:) instance method — reserved for future feature activation
         func updateStep(_ stepId: UUID, with update: (inout CoworkStep) -> Void) {
             if let index = steps.firstIndex(where: { $0.id == stepId }) {
                 update(&steps[index])
@@ -143,15 +148,18 @@
             }
         }
 
+        // periphery:ignore - Reserved: startStep(_:) instance method — reserved for future feature activation
         func startStep(_ stepId: UUID) {
             updateStep(stepId) { $0.start() }
         // periphery:ignore - Reserved: updateStep(_:with:) instance method reserved for future feature activation
         }
 
+        // periphery:ignore - Reserved: completeStep(_:) instance method — reserved for future feature activation
         func completeStep(_ stepId: UUID) {
             updateStep(stepId) { $0.complete() }
         }
 
+        // periphery:ignore - Reserved: failStep(_:error:) instance method — reserved for future feature activation
         func failStep(_ stepId: UUID, error: String) {
             // periphery:ignore - Reserved: startStep(_:) instance method reserved for future feature activation
             updateStep(stepId) { $0.fail(with: error) }
@@ -176,6 +184,7 @@
 
         // MARK: - Artifact Management
 
+        // periphery:ignore - Reserved: addArtifact(_:) instance method — reserved for future feature activation
         func addArtifact(_ artifact: CoworkArtifact) {
             artifacts.append(artifact)
             lastActivityAt = Date()
@@ -190,6 +199,7 @@
             }
         }
 
+        // periphery:ignore - Reserved: removeArtifact(_:) instance method — reserved for future feature activation
         func removeArtifact(_ artifactId: UUID) {
             artifacts.removeAll { $0.id == artifactId }
         }
@@ -274,6 +284,7 @@
             let progress: Double
         }
 
+        // periphery:ignore - Reserved: toCodable() instance method — reserved for future feature activation
         func toCodable() -> CodableRepresentation {
             // periphery:ignore - Reserved: toCodable() instance method reserved for future feature activation
             CodableRepresentation(

@@ -17,6 +17,7 @@ import BackgroundTasks
 @MainActor
 @Observable
 final class AutonomousTaskExecutor {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = AutonomousTaskExecutor()
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "AutonomousTaskExecutor")
@@ -55,6 +56,7 @@ final class AutonomousTaskExecutor {
     // MARK: - Task Registration
 
     /// Register a new autonomous task
+    // periphery:ignore - Reserved: registerTask(_:) instance method — reserved for future feature activation
     func registerTask(_ task: AutonomousTask) {
         guard !registeredTasks.contains(where: { $0.id == task.id }) else { return }
         registeredTasks.append(task)
@@ -75,6 +77,7 @@ final class AutonomousTaskExecutor {
     }
 
     /// Enable/disable a task
+    // periphery:ignore - Reserved: setTaskEnabled(_:enabled:) instance method — reserved for future feature activation
     func setTaskEnabled(_ id: UUID, enabled: Bool) {
         // periphery:ignore - Reserved: unregisterTask(id:) instance method reserved for future feature activation
         guard let index = registeredTasks.firstIndex(where: { $0.id == id }) else { return }
@@ -92,6 +95,7 @@ final class AutonomousTaskExecutor {
     // MARK: - Predefined Task Templates
 
     /// Create an auto-reply task for messaging apps
+    // periphery:ignore - Reserved: createAutoReplyTask(appBundleId:appName:replyMessage:whenFocusModeActive:whenUserAway:) static method — reserved for future feature activation
     static func createAutoReplyTask(
         appBundleId: String,
         appName: String,
@@ -120,6 +124,7 @@ final class AutonomousTaskExecutor {
     }
 
     /// Create a scheduled task
+    // periphery:ignore - Reserved: createScheduledTask(name:description:schedule:actions:) static method — reserved for future feature activation
     static func createScheduledTask(
         name: String,
         description: String,
@@ -173,6 +178,7 @@ final class AutonomousTaskExecutor {
         activeConditionMonitors.removeValue(forKey: id)
     }
 
+    // periphery:ignore - Reserved: stopAllMonitoring() instance method — reserved for future feature activation
     func stopAllMonitoring() {
         for (id, _) in activeConditionMonitors {
             stopMonitoringTask(id: id)
@@ -619,6 +625,7 @@ final class AutonomousTaskExecutor {
         }
     }
 
+    // periphery:ignore - Reserved: updateConfiguration(_:) instance method — reserved for future feature activation
     func updateConfiguration(_ config: Configuration) {
         configuration = config
         // periphery:ignore - Reserved: updateConfiguration(_:) instance method reserved for future feature activation
@@ -660,6 +667,7 @@ struct AutonomousTask: Identifiable, Sendable {
     var isDestructive: Bool
     var createdAt: Date
 
+    // periphery:ignore - Reserved: init(id:name:description:triggerConditions:conditionLogic:actions:priority:isEnabled:isDestructive:) initializer — reserved for future feature activation
     init(
         // periphery:ignore - Reserved: init(id:name:description:triggerConditions:conditionLogic:actions:priority:isEnabled:isDestructive:) initializer reserved for future feature activation
         id: UUID = UUID(),

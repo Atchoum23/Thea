@@ -66,8 +66,10 @@ struct BonjourDiscoveredDevice: Identifiable, Codable, Sendable, Hashable {
 // periphery:ignore - Reserved: default static property reserved for future feature activation
 @Observable
 final class DeviceDiscoveryService {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = DeviceDiscoveryService()
 
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "ai.thea.app", category: "DeviceDiscovery")
 
     // Service type for Thea discovery
@@ -125,6 +127,7 @@ final class DeviceDiscoveryService {
     }
 
     /// Stop discovery
+    // periphery:ignore - Reserved: stopDiscovery() instance method — reserved for future feature activation
     func stopDiscovery() {
         browser?.cancel()
         browser = nil
@@ -136,6 +139,7 @@ final class DeviceDiscoveryService {
     }
 
     /// Refresh discovery
+    // periphery:ignore - Reserved: refresh() instance method — reserved for future feature activation
     func refresh() {
         stopDiscovery()
         discoveredDevices.removeAll()
@@ -177,6 +181,7 @@ final class DeviceDiscoveryService {
     }
 
     /// Stop advertising
+    // periphery:ignore - Reserved: stopAdvertising() instance method — reserved for future feature activation
     func stopAdvertising() {
         listener?.cancel()
         listener = nil

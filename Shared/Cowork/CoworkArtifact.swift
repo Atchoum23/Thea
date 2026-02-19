@@ -81,6 +81,7 @@
                 from(extension: url.pathExtension)
             }
 
+            // periphery:ignore - Reserved: from(utType:) static method — reserved for future feature activation
             static func from(utType: UTType?) -> ArtifactType {
                 guard let type = utType else { return .other }
 
@@ -158,6 +159,7 @@
             FileManager.default.fileExists(atPath: fileURL.path)
         }
 
+        // periphery:ignore - Reserved: updateSize() instance method — reserved for future feature activation
         mutating func updateSize() {
             do {
                 let attrs = try FileManager.default.attributesOfItem(atPath: fileURL.path)
@@ -172,6 +174,7 @@
             }
         }
 
+        // periphery:ignore - Reserved: addTag(_:) instance method — reserved for future feature activation
         mutating func addTag(_ tag: String) {
             if !tags.contains(tag) {
                 tags.append(tag)
@@ -198,6 +201,7 @@
             ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file)
         }
 
+        // periphery:ignore - Reserved: byType(_:) instance method — reserved for future feature activation
         func byType(_ type: CoworkArtifact.ArtifactType) -> [CoworkArtifact] {
             filter { $0.fileType == type }
         }
@@ -209,6 +213,7 @@
         // periphery:ignore - Reserved: finalArtifacts property reserved for future feature activation
         }
 
+        // periphery:ignore - Reserved: intermediateArtifacts property — reserved for future feature activation
         var intermediateArtifacts: [CoworkArtifact] {
             // periphery:ignore - Reserved: intermediateArtifacts property reserved for future feature activation
             filter(\.isIntermediate)

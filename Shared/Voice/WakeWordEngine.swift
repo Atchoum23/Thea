@@ -79,6 +79,7 @@ final class WakeWordEngine {
         let wakeWord: WakeWord
         let confidence: Float
         let timestamp: Date
+        // periphery:ignore - Reserved: audioLevel property — reserved for future feature activation
         let audioLevel: Float
         let speakerVerified: Bool
         // periphery:ignore - Reserved: audioLevel property reserved for future feature activation

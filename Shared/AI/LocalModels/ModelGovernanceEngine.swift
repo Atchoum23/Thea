@@ -25,6 +25,7 @@ import OSLog
 @MainActor
 @Observable
 final class ModelGovernanceEngine {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = ModelGovernanceEngine()
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "ModelGovernance")
@@ -228,6 +229,7 @@ final class ModelGovernanceEngine {
     }
 
     /// Get the current Supra-Model for inference
+    // periphery:ignore - Reserved: getSupraModelForInference() instance method — reserved for future feature activation
     func getSupraModelForInference() async -> LocalModel? {
         guard let supra = supraModel, supra.status == .active else {
             return nil
@@ -297,6 +299,7 @@ final class ModelGovernanceEngine {
     }
 
     /// Select optimal model for a task
+    // periphery:ignore - Reserved: selectModelForTask(_:context:) instance method — reserved for future feature activation
     func selectModelForTask(_ taskType: TaskType, context: GovernanceTaskContext = GovernanceTaskContext()) async -> GovernanceModelSelection? {
         // 1. Record the task request for learning
         preloader.recordTaskRequest(taskType)
@@ -484,6 +487,7 @@ final class ModelGovernanceEngine {
     }
 
     /// Check if resources allow downloading a model
+    // periphery:ignore - Reserved: canAccommodateModel(sizeGB:) instance method — reserved for future feature activation
     func canAccommodateModel(sizeGB: Double) -> Bool {
         // Need 1.5x space for safety margin
         let requiredSpace = sizeGB * 1.5
@@ -630,6 +634,7 @@ final class ModelGovernanceEngine {
     // MARK: - Quality Feedback
 
     /// Record quality feedback for a model
+    // periphery:ignore - Reserved: recordModelQuality(modelName:taskType:success:latency:userSatisfaction:) instance method — reserved for future feature activation
     func recordModelQuality(
         modelName: String,
         taskType: TaskType,
@@ -727,6 +732,7 @@ final class ModelGovernanceEngine {
 
     // MARK: - Cleanup
 
+    // periphery:ignore - Reserved: shutdown() instance method — reserved for future feature activation
     func shutdown() {
         governanceTask?.cancel()
         isActive = false
@@ -811,12 +817,16 @@ struct ModelFleet: Codable, Sendable {
 /// Model selection result for governance engine
 struct GovernanceModelSelection: Sendable {
     let model: LocalModel
+    // periphery:ignore - Reserved: tier property — reserved for future feature activation
     let tier: ModelTier
+    // periphery:ignore - Reserved: score property — reserved for future feature activation
     let score: Double
+    // periphery:ignore - Reserved: reason property — reserved for future feature activation
     let reason: String
 }
 
 /// Task context for model selection in governance engine
+// periphery:ignore - Reserved: GovernanceTaskContext type — reserved for future feature activation
 struct GovernanceTaskContext: Sendable {
     // periphery:ignore - Reserved: tier property reserved for future feature activation
     // periphery:ignore - Reserved: score property reserved for future feature activation
@@ -854,7 +864,9 @@ struct ResourceSnapshot: Sendable {
     var totalMemoryGB: Double = 16.0
     var availableDiskGB: Double = 50.0
     var totalDiskGB: Double = 500.0
+    // periphery:ignore - Reserved: modelStorageGB property — reserved for future feature activation
     var modelStorageGB: Double = 0.0
+    // periphery:ignore - Reserved: thermalState property — reserved for future feature activation
     var thermalState: ResourceThermalState = .nominal
     var timestamp = Date()
 
@@ -866,6 +878,7 @@ struct ResourceSnapshot: Sendable {
         1.0 - (availableMemoryGB / totalMemoryGB)
     }
 
+    // periphery:ignore - Reserved: diskPressure property — reserved for future feature activation
     var diskPressure: Double {
         // periphery:ignore - Reserved: diskPressure property reserved for future feature activation
         1.0 - (availableDiskGB / totalDiskGB)

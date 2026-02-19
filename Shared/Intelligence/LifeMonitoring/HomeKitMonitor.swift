@@ -127,6 +127,7 @@ public class HomeKitMonitor: NSObject, ObservableObject {
 
     // MARK: - State Change Handling
 
+    // periphery:ignore - Reserved: handleAccessoryStateChange(accessoryId:characteristicType:oldValue:newValue:) instance method — reserved for future feature activation
     private func handleAccessoryStateChange(
         // periphery:ignore - Reserved: handleAccessoryStateChange(accessoryId:characteristicType:oldValue:newValue:) instance method reserved for future feature activation
         accessoryId: String,

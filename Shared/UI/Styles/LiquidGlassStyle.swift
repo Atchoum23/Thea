@@ -10,6 +10,7 @@ import SwiftUI
 
 // MARK: - Capsule Glass Modifier
 
+// periphery:ignore - Reserved: LiquidGlassModifier type — reserved for future feature activation
 struct LiquidGlassModifier: ViewModifier {
     var isInteractive: Bool = false
 
@@ -45,6 +46,7 @@ struct RoundedGlassModifier: ViewModifier {
 
 // MARK: - Circular Glass Modifier
 
+// periphery:ignore - Reserved: CircularGlassModifier type — reserved for future feature activation
 struct CircularGlassModifier: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26, *) {
@@ -61,6 +63,7 @@ struct CircularGlassModifier: ViewModifier {
 
 // MARK: - Simple Glass Card Modifier
 
+// periphery:ignore - Reserved: SimpleGlassCardModifier type — reserved for future feature activation
 struct SimpleGlassCardModifier: ViewModifier {
     var cornerRadius: CGFloat = TheaCornerRadius.card
     var padding: CGFloat = TheaSpacing.lg
@@ -83,6 +86,7 @@ struct SimpleGlassCardModifier: ViewModifier {
 
 // MARK: - Soft Edge Modifier
 
+// periphery:ignore - Reserved: SoftEdgeModifier type — reserved for future feature activation
 struct SoftEdgeModifier: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 26, macOS 26, *) {
@@ -99,6 +103,7 @@ struct SoftEdgeModifier: ViewModifier {
 
 extension View {
     /// Applies Liquid Glass effect with capsule shape
+    // periphery:ignore - Reserved: liquidGlass(interactive:) instance method — reserved for future feature activation
     func liquidGlass(interactive: Bool = false) -> some View {
         modifier(LiquidGlassModifier(isInteractive: interactive))
     }
@@ -110,11 +115,13 @@ extension View {
     }
 
     /// Applies Liquid Glass effect with circular shape
+    // periphery:ignore - Reserved: liquidGlassCircle() instance method — reserved for future feature activation
     func liquidGlassCircle() -> some View {
         modifier(CircularGlassModifier())
     }
 
     /// Applies Liquid Glass to a card with concentric radius
+    // periphery:ignore - Reserved: liquidGlassCard(cornerRadius:padding:) instance method — reserved for future feature activation
     func liquidGlassCard(
         // periphery:ignore - Reserved: liquidGlassCircle() instance method reserved for future feature activation
         cornerRadius: CGFloat = TheaCornerRadius.card,
@@ -125,6 +132,7 @@ extension View {
     }
 
     /// Applies soft scroll-edge effects replacing hard dividers
+    // periphery:ignore - Reserved: softEdges() instance method — reserved for future feature activation
     func softEdges() -> some View {
         modifier(SoftEdgeModifier())
     }
@@ -140,6 +148,7 @@ extension View {
 
 // MARK: - Glass Effect Container
 
+// periphery:ignore - Reserved: GlassContainer type — reserved for future feature activation
 struct GlassContainer<Content: View>: View {
     let content: () -> Content
 

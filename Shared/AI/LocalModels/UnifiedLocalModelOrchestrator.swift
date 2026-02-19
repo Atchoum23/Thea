@@ -232,6 +232,7 @@ final class UnifiedLocalModelOrchestrator {
     }
 
     /// Select the best runtime for a specific model format
+    // periphery:ignore - Reserved: selectRuntime(for:) instance method — reserved for future feature activation
     func selectRuntime(for model: LocalModel) -> LocalRuntime {
         // If model has a specific runtime, use it
         let modelRuntime = mapModelRuntimeToLocal(model.runtime)
@@ -268,6 +269,7 @@ final class UnifiedLocalModelOrchestrator {
         }
     }
 
+    // periphery:ignore - Reserved: canRuntimeHandle(_:model:) instance method — reserved for future feature activation
     private func canRuntimeHandle(_ runtime: LocalRuntime, model: LocalModel) -> Bool {
         switch (runtime, model.type) {
         case (.mlx, .mlx): return true
@@ -435,6 +437,7 @@ final class UnifiedLocalModelOrchestrator {
 
     // MARK: - Performance Tracking
 
+    // periphery:ignore - Reserved: recordModelUsage(model:taskType:success:latency:tokensGenerated:) instance method — reserved for future feature activation
     func recordModelUsage(
         model: LocalModel,
         taskType: TaskType,
@@ -465,6 +468,7 @@ final class UnifiedLocalModelOrchestrator {
     // MARK: - Autonomous Recommendations
 
     /// Get model recommendations based on usage patterns and hardware
+    // periphery:ignore - Reserved: getModelRecommendations() instance method — reserved for future feature activation
     func getModelRecommendations() async -> [LocalModelSuggestion] {
         let engine = LocalModelRecommendationEngine.shared
         let recommendations = engine.recommendations
@@ -491,6 +495,7 @@ final class UnifiedLocalModelOrchestrator {
     }
 
     /// Check if a model should be recommended for download
+    // periphery:ignore - Reserved: shouldRecommendModel(_:) instance method — reserved for future feature activation
     func shouldRecommendModel(_ modelId: String) async -> Bool {
         let engine = LocalModelRecommendationEngine.shared
         return engine.recommendations.contains { $0.model.id == modelId }
@@ -524,6 +529,7 @@ final class UnifiedLocalModelOrchestrator {
         logger.debug("Loaded performance history for \(history.count) models")
     }
 
+    // periphery:ignore - Reserved: savePerformanceHistory() instance method — reserved for future feature activation
     private func savePerformanceHistory() {
         do {
             let data = try JSONEncoder().encode(modelPerformance)
@@ -535,6 +541,7 @@ final class UnifiedLocalModelOrchestrator {
 
     // MARK: - Cleanup
 
+    // periphery:ignore - Reserved: resetPerformanceHistory() instance method — reserved for future feature activation
     func resetPerformanceHistory() {
         // periphery:ignore - Reserved: savePerformanceHistory() instance method reserved for future feature activation
         modelPerformance.removeAll()
@@ -566,14 +573,19 @@ enum LocalRuntime: String, Codable, Sendable, CaseIterable {
 }
 
 struct RuntimeStatus: Sendable {
+    // periphery:ignore - Reserved: isAvailable property — reserved for future feature activation
     let isAvailable: Bool
+    // periphery:ignore - Reserved: version property — reserved for future feature activation
     let version: String?
+    // periphery:ignore - Reserved: lastChecked property — reserved for future feature activation
     let lastChecked: Date
+    // periphery:ignore - Reserved: errorMessage property — reserved for future feature activation
     var errorMessage: String?
 }
 
 struct LocalModelSelection: Sendable {
     let model: LocalModel
+    // periphery:ignore - Reserved: runtime property — reserved for future feature activation
     let runtime: LocalRuntime
     let score: Double
     // periphery:ignore - Reserved: isAvailable property reserved for future feature activation
@@ -581,14 +593,18 @@ struct LocalModelSelection: Sendable {
     // periphery:ignore - Reserved: lastChecked property reserved for future feature activation
     // periphery:ignore - Reserved: errorMessage property reserved for future feature activation
     let reason: String
+    // periphery:ignore - Reserved: alternatives property — reserved for future feature activation
     let alternatives: [LocalModel]
 // periphery:ignore - Reserved: LocalModelSelection type reserved for future feature activation
 }
 
 struct LocalRoutingContext: Sendable {
+    // periphery:ignore - Reserved: urgency property — reserved for future feature activation
     var urgency: RoutingContext.Urgency = .normal
     var maxModelSizeGB: Double?
+    // periphery:ignore - Reserved: preferOffline property — reserved for future feature activation
     var preferOffline: Bool = false
+    // periphery:ignore - Reserved: preferredQuantization property — reserved for future feature activation
     var preferredQuantization: String?
 
 // periphery:ignore - Reserved: LocalRoutingContext type reserved for future feature activation
@@ -612,6 +628,7 @@ struct LocalModelPerformanceMetrics: Codable, Sendable {
     var totalUsageCount: Int = 0
     var lastUsed: Date?
 
+    // periphery:ignore - Reserved: init(modelName:) initializer — reserved for future feature activation
     init(modelName: String) {
         self.modelName = modelName
     }
@@ -664,6 +681,7 @@ struct TaskPerformanceMetrics: Codable, Sendable {
     }
 }
 
+// periphery:ignore - Reserved: LocalModelSuggestion type — reserved for future feature activation
 struct LocalModelSuggestion: Identifiable, Sendable {
     // periphery:ignore - Reserved: LocalModelSuggestion type reserved for future feature activation
     var id: String { modelId }

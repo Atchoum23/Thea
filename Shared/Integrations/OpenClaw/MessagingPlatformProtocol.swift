@@ -101,6 +101,7 @@ struct OutboundMessagingMessage: Sendable {
     let chatId: String
     let content: String
     var replyToId: String?
+    // periphery:ignore - Reserved: attachments property — reserved for future feature activation
     var attachments: [MessagingAttachment]
 
     init(chatId: String, content: String, replyToId: String? = nil, attachments: [MessagingAttachment] = []) {
@@ -176,7 +177,9 @@ enum MessagingError: Error, LocalizedError, Sendable {
 /// All messaging platform connectors must implement this protocol.
 /// Connectors are Swift actors for safe concurrent access.
 protocol MessagingPlatformConnector: Actor {
+    // periphery:ignore - Reserved: platform property — reserved for future feature activation
     var platform: MessagingPlatform { get }
+    // periphery:ignore - Reserved: isConnected property — reserved for future feature activation
     var isConnected: Bool { get }
     // periphery:ignore - Reserved: platform property reserved for future feature activation
     // periphery:ignore - Reserved: isConnected property reserved for future feature activation

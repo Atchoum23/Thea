@@ -12,6 +12,7 @@ final class OpenAIProvider: AIProvider, Sendable {
         documentationURL: URL(string: "https://platform.openai.com/docs")!
     )
 
+    // periphery:ignore - Reserved: capabilities property — reserved for future feature activation
     let capabilities = ProviderCapabilities(
         // periphery:ignore - Reserved: capabilities property reserved for future feature activation
         supportsStreaming: true,

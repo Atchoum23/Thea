@@ -227,6 +227,7 @@ actor DNSBlocklistService {
         return all.sorted { $0.domain < $1.domain }
     }
 
+    // periphery:ignore - Reserved: getUserEntries() instance method — reserved for future feature activation
     func getUserEntries() -> [BlocklistEntry] {
         entries.values.filter { $0.source == .user }.sorted { $0.domain < $1.domain }
     }
@@ -248,6 +249,7 @@ actor DNSBlocklistService {
         )
     }
 
+    // periphery:ignore - Reserved: resetStats() instance method — reserved for future feature activation
     func resetStats() {
         blockedCountToday = 0
         // periphery:ignore - Reserved: resetStats() instance method reserved for future feature activation
@@ -256,6 +258,7 @@ actor DNSBlocklistService {
 
     // MARK: - Built-in Lists
 
+    // periphery:ignore - Reserved: loadBuiltinBlocklists() instance method — reserved for future feature activation
     private func loadBuiltinBlocklists() {
         // periphery:ignore - Reserved: loadBuiltinBlocklists() instance method reserved for future feature activation
         // Advertising domains

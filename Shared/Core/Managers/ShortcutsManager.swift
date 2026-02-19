@@ -8,12 +8,14 @@ import Intents
 @MainActor
 @Observable
 final class ShortcutsManager {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = ShortcutsManager()
 
     private init() {}
 
     // MARK: - Donate Shortcuts
 
+    // periphery:ignore - Reserved: donateNewConversationShortcut() instance method — reserved for future feature activation
     func donateNewConversationShortcut() {
         let intent = StartConversationIntent()
         intent.suggestedInvocationPhrase = "Start a THEA conversation"
@@ -27,6 +29,7 @@ final class ShortcutsManager {
         }
     }
 
+    // periphery:ignore - Reserved: donateAskQuestionShortcut(question:) instance method — reserved for future feature activation
     func donateAskQuestionShortcut(question: String) {
         let intent = AskQuestionIntent()
         // periphery:ignore - Reserved: donateNewConversationShortcut() instance method reserved for future feature activation
@@ -72,6 +75,7 @@ final class ShortcutsManager {
 
     // MARK: - Handle Shortcuts
 
+    // periphery:ignore - Reserved: handleShortcut(_:) instance method — reserved for future feature activation
     func handleShortcut(_ intent: INIntent) async throws -> ShortcutAction {
         if let startIntent = intent as? StartConversationIntent {
             return try await handleStartConversation(startIntent)
@@ -93,11 +97,13 @@ final class ShortcutsManager {
         throw ShortcutError.unsupportedIntent
     }
 
+    // periphery:ignore - Reserved: handleStartConversation(_:) instance method — reserved for future feature activation
     private func handleStartConversation(_: StartConversationIntent) async throws -> ShortcutAction {
         let conversation = ChatManager.shared.createConversation(title: "Siri Conversation")
         return .openConversation(conversation.id)
     }
 
+    // periphery:ignore - Reserved: handleAskQuestion(_:) instance method — reserved for future feature activation
     private func handleAskQuestion(_ intent: AskQuestionIntent) async throws -> ShortcutAction {
         guard let question = intent.question else {
             throw ShortcutError.missingParameter
@@ -116,11 +122,13 @@ final class ShortcutsManager {
         return .openConversation(conversation.id)
     }
 
+    // periphery:ignore - Reserved: handleVoiceCommand(_:) instance method — reserved for future feature activation
     private func handleVoiceCommand(_: VoiceCommandIntent) async throws -> ShortcutAction {
         let conversation = ChatManager.shared.createConversation(title: "Voice Command")
         return .startVoiceInput(conversation.id)
     }
 
+    // periphery:ignore - Reserved: handleOpenProject(_:) instance method — reserved for future feature activation
     private func handleOpenProject(_ intent: OpenProjectIntent) async throws -> ShortcutAction {
         guard let projectIDString = intent.projectID,
               // periphery:ignore - Reserved: handleVoiceCommand(_:) instance method reserved for future feature activation
@@ -137,6 +145,7 @@ final class ShortcutsManager {
 
 // MARK: - Intents
 
+// periphery:ignore - Reserved: StartConversationIntent class — reserved for future feature activation
 class StartConversationIntent: INIntent {
     override var suggestedInvocationPhrase: String? {
         get { "Start a THEA conversation" }
@@ -145,6 +154,7 @@ class StartConversationIntent: INIntent {
 // periphery:ignore - Reserved: StartConversationIntent type reserved for future feature activation
 }
 
+// periphery:ignore - Reserved: AskQuestionIntent class — reserved for future feature activation
 class AskQuestionIntent: INIntent {
     @NSManaged var question: String?
 
@@ -164,6 +174,7 @@ class VoiceCommandIntent: INIntent {
 }
 
 class OpenProjectIntent: INIntent {
+    // periphery:ignore - Reserved: projectName property — reserved for future feature activation
     @NSManaged var projectName: String?
     // periphery:ignore - Reserved: OpenProjectIntent type reserved for future feature activation
     @NSManaged var projectID: String?
@@ -176,6 +187,7 @@ class OpenProjectIntent: INIntent {
 
 // MARK: - Shortcut Actions
 
+// periphery:ignore - Reserved: ShortcutAction enum — reserved for future feature activation
 enum ShortcutAction {
     // periphery:ignore - Reserved: ShortcutAction type reserved for future feature activation
     case openConversation(UUID)

@@ -39,6 +39,7 @@ final class ProjectManager: ObservableObject {
         return project
     }
 
+    // periphery:ignore - Reserved: updateProject(_:title:customInstructions:) instance method — reserved for future feature activation
     func updateProject(_ project: Project, title: String? = nil, customInstructions: String? = nil) {
         if let title {
             project.title = title
@@ -65,6 +66,7 @@ final class ProjectManager: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: clearAllData() instance method — reserved for future feature activation
     func clearAllData() {
         guard let context = modelContext else { return }
 
@@ -78,6 +80,7 @@ final class ProjectManager: ObservableObject {
         activeProject = nil
     }
 
+    // periphery:ignore - Reserved: setActiveProject(_:) instance method — reserved for future feature activation
     func setActiveProject(_ project: Project?) {
         activeProject = project
     // periphery:ignore - Reserved: setActiveProject(_:) instance method reserved for future feature activation
@@ -99,6 +102,7 @@ final class ProjectManager: ObservableObject {
 
     // MARK: - File Management
 
+    // periphery:ignore - Reserved: addFile(to:name:path:size:) instance method — reserved for future feature activation
     func addFile(to project: Project, name: String, path: String, size: Int64) {
         // periphery:ignore - Reserved: addFile(to:name:path:size:) instance method reserved for future feature activation
         let file = ProjectFile(

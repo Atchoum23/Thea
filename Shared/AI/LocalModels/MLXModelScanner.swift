@@ -45,6 +45,7 @@ actor MLXModelScanner {
     }
 
     /// Quick scan for model count (doesn't extract full metadata)
+    // periphery:ignore - Reserved: quickScanCount(_:) instance method — reserved for future feature activation
     func quickScanCount(_ url: URL) async -> Int {
         guard FileManager.default.fileExists(atPath: url.path) else {
             return 0
@@ -301,8 +302,11 @@ struct ScannedModel: Identifiable, Sendable {
     let format: ModelFormat
     let sizeInBytes: Int64
     let parameters: String?
+    // periphery:ignore - Reserved: quantization property — reserved for future feature activation
     let quantization: String?
+    // periphery:ignore - Reserved: modifiedDate property — reserved for future feature activation
     let modifiedDate: Date
+    // periphery:ignore - Reserved: status property — reserved for future feature activation
     let status: ModelStatus
 
     // periphery:ignore - Reserved: quantization property reserved for future feature activation

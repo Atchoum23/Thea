@@ -127,6 +127,7 @@ struct ScanReport: Codable, Sendable, Identifiable {
 
 // MARK: - Signature Patterns
 
+// periphery:ignore - Reserved: MalwareSignature type — reserved for future feature activation
 private struct MalwareSignature: Sendable {
     let name: String
     let pattern: String // hex or string pattern
@@ -145,6 +146,7 @@ actor SystemSecurityScanner {
     private var isScanning = false
 
     // Known suspicious paths on macOS
+    // periphery:ignore - Reserved: suspiciousPaths property — reserved for future feature activation
     private let suspiciousPaths: [String] = [
         "/Library/LaunchDaemons",
         "/Library/LaunchAgents",
@@ -714,8 +716,10 @@ actor SystemSecurityScanner {
 
     func getHistory() -> [ScanReport] { scanHistory }
 
+    // periphery:ignore - Reserved: lastScan() instance method — reserved for future feature activation
     func lastScan() -> ScanReport? { scanHistory.last }
 
+    // periphery:ignore - Reserved: clearHistory() instance method — reserved for future feature activation
     func clearHistory() {
         // periphery:ignore - Reserved: lastScan() instance method reserved for future feature activation
         scanHistory.removeAll()
@@ -723,6 +727,7 @@ actor SystemSecurityScanner {
         saveHistory()
     }
 
+    // periphery:ignore - Reserved: getScanningStatus() instance method — reserved for future feature activation
     func getScanningStatus() -> Bool { isScanning }
 
 // periphery:ignore - Reserved: getScanningStatus() instance method reserved for future feature activation

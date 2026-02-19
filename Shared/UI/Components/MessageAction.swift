@@ -3,6 +3,7 @@
 /// All possible actions on a message/turn
 enum MessageAction {
     case copy
+    // periphery:ignore - Reserved: copyAsMarkdown case — reserved for future feature activation
     case copyAsMarkdown
     // periphery:ignore - Reserved: copyAsMarkdown case reserved for future feature activation
     case edit

@@ -27,6 +27,7 @@ public final class IntelligenceOrchestrator: ObservableObject {
 
     // MARK: - Connected Systems
 
+    // periphery:ignore - Reserved: agentState property — reserved for future feature activation
     private let agentState: AgentExecutionState
     private let skillRegistry: SkillRegistry
     private let knowledgeManager: ProjectKnowledgeManager
@@ -35,6 +36,7 @@ public final class IntelligenceOrchestrator: ObservableObject {
     private let learningManager: LearningManager
     // periphery:ignore - Reserved: knowledgeSourceManager property reserved for future feature activation
     private let activityTracker: ActivityTracker
+    // periphery:ignore - Reserved: autonomousAgent property — reserved for future feature activation
     private let autonomousAgent: AutonomousAgent
     // periphery:ignore - Reserved: autonomousAgent property reserved for future feature activation
     // periphery:ignore - Reserved: deviceManager property reserved for future feature activation

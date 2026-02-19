@@ -469,6 +469,7 @@ actor DataAnonymizer {
         return result
     }
 
+    // periphery:ignore - Reserved: type parameter — kept for API compatibility
     private func pseudonymize(_ content: String, type: PrivateDataType) -> (String, [String: String]) {
         var result = content
         var mapping: [String: String] = [:]
@@ -535,6 +536,7 @@ actor DataAnonymizer {
         return result
     }
 
+    // periphery:ignore - Reserved: level parameter — kept for API compatibility
     private func generalize(_ content: String, type: PrivateDataType, level: PrivacyPreservingAIRouter.Configuration.AnonymizationLevel) -> String {
         var result = content
 
@@ -562,6 +564,7 @@ actor DataAnonymizer {
         return result
     }
 
+    // periphery:ignore - Reserved: type parameter — kept for API compatibility
     private func aggregate(_ content: String, type: PrivateDataType) -> String {
         // periphery:ignore - Reserved: type parameter kept for API compatibility
         // Convert individual values to aggregates

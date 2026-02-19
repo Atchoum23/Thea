@@ -34,18 +34,21 @@ final class SettingsViewModel {
     // MARK: - Settings State (observed from managers)
 
     /// Default AI provider ID
+    // periphery:ignore - Reserved: defaultProviderId property — reserved for future feature activation
     var defaultProviderId: String {
         get { settingsManager.defaultProvider }
         set { settingsManager.defaultProvider = newValue }
     }
 
     /// Whether stream responses are enabled
+    // periphery:ignore - Reserved: streamResponses property — reserved for future feature activation
     var streamResponses: Bool {
         get { settingsManager.streamResponses }
         set { settingsManager.streamResponses = newValue }
     }
 
     /// Current theme
+    // periphery:ignore - Reserved: theme property — reserved for future feature activation
     var theme: String {
         get { settingsManager.theme }
         set { settingsManager.theme = newValue }
@@ -112,6 +115,7 @@ final class SettingsViewModel {
     }
 
     /// Navigate to a specific tab
+    // periphery:ignore - Reserved: navigateTo(_:) instance method — reserved for future feature activation
     func navigateTo(_ tab: SettingsTab) {
         selectedTab = tab
     }
@@ -125,6 +129,7 @@ final class SettingsViewModel {
     }
 
     /// Check if a provider has an API key configured
+    // periphery:ignore - Reserved: hasAPIKey(for:) instance method — reserved for future feature activation
     func hasAPIKey(for providerId: String) -> Bool {
         // periphery:ignore - Reserved: availableProviderInfo property reserved for future feature activation
         settingsManager.hasAPIKey(for: providerId)
@@ -155,6 +160,7 @@ final class SettingsViewModel {
     }
 
     /// Remove API key for a provider
+    // periphery:ignore - Reserved: removeAPIKey(for:) instance method — reserved for future feature activation
     func removeAPIKey(for providerId: String) {
         settingsManager.deleteAPIKey(for: providerId)
         // periphery:ignore - Reserved: removeAPIKey(for:) instance method reserved for future feature activation
@@ -164,6 +170,7 @@ final class SettingsViewModel {
     // MARK: - Reset
 
     /// Reset all settings to defaults
+    // periphery:ignore - Reserved: resetToDefaults() instance method — reserved for future feature activation
     func resetToDefaults() {
         // periphery:ignore - Reserved: resetToDefaults() instance method reserved for future feature activation
         isSaving = true

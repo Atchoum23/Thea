@@ -19,36 +19,53 @@ enum DeviceThermalState: String, Codable, Sendable {
 
 struct DeviceHardwareInfo: Sendable {
     var platform: Platform = .unknown
+    // periphery:ignore - Reserved: modelIdentifier property — reserved for future feature activation
     var modelIdentifier: String = ""
     var modelName: String = ""
     var osVersion: String = ""
     var processorType: String = ""
     var processorCores: Int = 0
     var totalMemoryGB: Double = 0
+    // periphery:ignore - Reserved: thermalState property — reserved for future feature activation
     var thermalState: DeviceThermalState = .nominal
+    // periphery:ignore - Reserved: isLowPowerMode property — reserved for future feature activation
     var isLowPowerMode: Bool = false
+    // periphery:ignore - Reserved: screenResolution property — reserved for future feature activation
     var screenResolution: String = ""
+    // periphery:ignore - Reserved: screenCount property — reserved for future feature activation
     var screenCount: Int = 1
 }
 
 struct SystemState: Sendable {
     var batteryLevel: Double?
     var isCharging: Bool?
+    // periphery:ignore - Reserved: uptime property — reserved for future feature activation
     var uptime: TimeInterval = 0
     var activeAppName: String?
+    // periphery:ignore - Reserved: activeAppBundleId property — reserved for future feature activation
     var activeAppBundleId: String?
+    // periphery:ignore - Reserved: isFocusModeActive property — reserved for future feature activation
     var isFocusModeActive: Bool = false
+    // periphery:ignore - Reserved: currentLocale property — reserved for future feature activation
     var currentLocale: String = ""
+    // periphery:ignore - Reserved: timezone property — reserved for future feature activation
     var timezone: String = ""
+    // periphery:ignore - Reserved: isDarkMode property — reserved for future feature activation
     var isDarkMode: Bool = false
 }
 
 struct SensorData: Sendable {
+    // periphery:ignore - Reserved: accelerometerData property — reserved for future feature activation
     var accelerometerData: (x: Double, y: Double, z: Double)?
+    // periphery:ignore - Reserved: gyroscopeData property — reserved for future feature activation
     var gyroscopeData: (x: Double, y: Double, z: Double)?
+    // periphery:ignore - Reserved: magnetometerData property — reserved for future feature activation
     var magnetometerData: (x: Double, y: Double, z: Double)?
+    // periphery:ignore - Reserved: altitude property — reserved for future feature activation
     var altitude: Double?
+    // periphery:ignore - Reserved: pressure property — reserved for future feature activation
     var pressure: Double?
+    // periphery:ignore - Reserved: ambientLight property — reserved for future feature activation
     var ambientLight: Double?
 }
 
@@ -56,7 +73,9 @@ struct StorageInfo: Sendable {
     var totalCapacityGB: Double = 0
     // periphery:ignore - Reserved: modelIdentifier property reserved for future feature activation
     var availableCapacityGB: Double = 0
+    // periphery:ignore - Reserved: usedCapacityGB property — reserved for future feature activation
     var usedCapacityGB: Double = 0
+    // periphery:ignore - Reserved: usagePercentage property — reserved for future feature activation
     var usagePercentage: Double = 0
 }
 

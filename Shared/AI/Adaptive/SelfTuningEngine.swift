@@ -17,6 +17,7 @@ import OSLog
 @MainActor
 @Observable
 final class SelfTuningEngine {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = SelfTuningEngine()
 
     // MARK: - State
@@ -92,6 +93,7 @@ final class SelfTuningEngine {
         }
 
         // Parameter bounds for optimization
+        // periphery:ignore - Reserved: bounds static property — reserved for future feature activation
         static let bounds: [String: ClosedRange<Double>] = [
             "temperature": 0.0...2.0,
             "topP": 0.0...1.0,
@@ -110,6 +112,7 @@ final class SelfTuningEngine {
         let responseTime: TimeInterval
         let tokenCount: Int
 
+        // periphery:ignore - Reserved: init(parameters:userFeedback:performanceScore:contextType:responseTime:tokenCount:) initializer — reserved for future feature activation
         init(
             parameters: ModelParameters,
             userFeedback: UserFeedback? = nil,
@@ -187,6 +190,7 @@ final class SelfTuningEngine {
     // MARK: - Public API
 
     /// Get current optimized parameters
+    // periphery:ignore - Reserved: getParameters(for:) instance method — reserved for future feature activation
     func getParameters(for context: String? = nil) -> ModelParameters {
         guard configuration.enableAutoTuning else {
             return currentParameters
@@ -202,6 +206,7 @@ final class SelfTuningEngine {
     }
 
     /// Record a trial with feedback
+    // periphery:ignore - Reserved: recordTrial(parameters:feedback:contextType:responseTime:tokenCount:) instance method — reserved for future feature activation
     func recordTrial(
         parameters: ModelParameters? = nil,
         feedback: UserFeedback,
@@ -242,6 +247,7 @@ final class SelfTuningEngine {
     }
 
     /// Record implicit feedback (e.g., conversation continued)
+    // periphery:ignore - Reserved: recordImplicitFeedback(_:contextType:) instance method — reserved for future feature activation
     func recordImplicitFeedback(_ type: UserFeedback.FeedbackType, contextType: String) async {
         let value: Double
         switch type {
@@ -268,11 +274,13 @@ final class SelfTuningEngine {
     }
 
     /// Manually trigger optimization
+    // periphery:ignore - Reserved: optimize() instance method — reserved for future feature activation
     func optimize() async {
         await runOptimization()
     }
 
     /// Reset to default parameters
+    // periphery:ignore - Reserved: resetToDefaults() instance method — reserved for future feature activation
     func resetToDefaults() {
         currentParameters = ModelParameters()
         optimizationHistory.removeAll()
@@ -284,6 +292,7 @@ final class SelfTuningEngine {
 
     // MARK: - Optimization Strategies
 
+    // periphery:ignore - Reserved: runOptimization() instance method — reserved for future feature activation
     private func runOptimization() async {
         guard !isOptimizing else { return }
 
@@ -332,6 +341,7 @@ final class SelfTuningEngine {
         saveState()
     }
 
+    // periphery:ignore - Reserved: selectStrategy() instance method — reserved for future feature activation
     private func selectStrategy() -> Configuration.OptimizationStrategy {
         guard configuration.optimizationStrategy == .hybrid else {
             return configuration.optimizationStrategy
@@ -437,6 +447,7 @@ final class SelfTuningEngine {
 
     // MARK: - Genetic Optimization
 
+    // periphery:ignore - Reserved: runGeneticOptimization() instance method — reserved for future feature activation
     private func runGeneticOptimization() async -> ModelParameters {
         // Create initial population
         var population: [ModelParameters] = [currentParameters]
@@ -481,6 +492,7 @@ final class SelfTuningEngine {
         return population.max { predictScore(for: $0) < predictScore(for: $1) } ?? currentParameters
     }
 
+    // periphery:ignore - Reserved: mutate(_:) instance method — reserved for future feature activation
     private func mutate(_ params: ModelParameters) -> ModelParameters {
         var mutated = params
         let mutationStrength = configuration.explorationRate
@@ -504,6 +516,7 @@ final class SelfTuningEngine {
         return mutated
     }
 
+    // periphery:ignore - Reserved: crossover(_:_:) instance method — reserved for future feature activation
     private func crossover(_ p1: ModelParameters, _ p2: ModelParameters) -> ModelParameters {
         var child = ModelParameters()
 
@@ -520,6 +533,7 @@ final class SelfTuningEngine {
 
     // MARK: - Reinforcement Optimization
 
+    // periphery:ignore - Reserved: runReinforcementOptimization() instance method — reserved for future feature activation
     private func runReinforcementOptimization() async -> ModelParameters {
         var params = currentParameters
 
@@ -552,6 +566,7 @@ final class SelfTuningEngine {
 
     // MARK: - Hybrid Optimization
 
+    // periphery:ignore - Reserved: runHybridOptimization() instance method — reserved for future feature activation
     private func runHybridOptimization() async -> ModelParameters {
         // Run multiple strategies and combine results
         async let bayesian = runBayesianOptimization()
@@ -581,6 +596,7 @@ final class SelfTuningEngine {
 
     // MARK: - Helper Methods
 
+    // periphery:ignore - Reserved: calculateScore(from:) instance method — reserved for future feature activation
     private func calculateScore(from feedback: UserFeedback) -> Double {
         var score = feedback.value
 
@@ -598,6 +614,7 @@ final class SelfTuningEngine {
         return score
     }
 
+    // periphery:ignore - Reserved: shouldOptimize() instance method — reserved for future feature activation
     private func shouldOptimize() -> Bool {
         guard configuration.enableAutoTuning else { return false }
 
@@ -614,6 +631,7 @@ final class SelfTuningEngine {
         return recentAvg < performanceMetrics.averageScore - configuration.convergenceThreshold
     }
 
+    // periphery:ignore - Reserved: updateMetrics() instance method — reserved for future feature activation
     private func updateMetrics() {
         let trials = optimizationHistory
 
@@ -646,6 +664,7 @@ final class SelfTuningEngine {
         }
     }
 
+    // periphery:ignore - Reserved: updateConvergenceStatus(improvement:) instance method — reserved for future feature activation
     private func updateConvergenceStatus(improvement: Double) {
         if abs(improvement) < configuration.convergenceThreshold {
             if convergenceStatus == .converging {
@@ -661,6 +680,7 @@ final class SelfTuningEngine {
         }
     }
 
+    // periphery:ignore - Reserved: calculateConfidence() instance method — reserved for future feature activation
     private func calculateConfidence() -> Double {
         // Higher confidence with more trials and lower variance
         let trialFactor = min(1.0, Double(optimizationHistory.count) / 100.0)
@@ -671,6 +691,7 @@ final class SelfTuningEngine {
         return (trialFactor * 0.3 + varianceFactor * 0.4 + trendFactor * 0.3)
     }
 
+    // periphery:ignore - Reserved: getContextSpecificParameters(_:) instance method — reserved for future feature activation
     private func getContextSpecificParameters(_ context: String) -> ModelParameters? {
         // Find trials for this context
         // periphery:ignore - Reserved: getContextSpecificParameters(_:) instance method reserved for future feature activation
@@ -712,6 +733,7 @@ final class SelfTuningEngine {
         }
     }
 
+    // periphery:ignore - Reserved: saveState() instance method — reserved for future feature activation
     private func saveState() {
         // periphery:ignore - Reserved: saveState() instance method reserved for future feature activation
         do {

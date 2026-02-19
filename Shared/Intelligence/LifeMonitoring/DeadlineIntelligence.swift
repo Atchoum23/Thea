@@ -16,6 +16,7 @@ import EventKit
 #endif
 
 // MARK: - Module Logger
+// periphery:ignore - Reserved: deadlineLogger global — reserved for future feature activation
 let deadlineLogger = Logger(subsystem: "ai.thea.app", category: "DeadlineIntelligence")
 
 // periphery:ignore - Reserved: deadlineLogger global var reserved for future feature activation

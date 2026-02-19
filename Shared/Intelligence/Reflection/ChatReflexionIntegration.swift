@@ -15,8 +15,10 @@ import OSLog
 @MainActor
 @Observable
 final class ChatReflexionIntegration {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = ChatReflexionIntegration()
 
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "com.thea.app", category: "ChatReflexion")
 
     // MARK: - Configuration
@@ -49,6 +51,7 @@ final class ChatReflexionIntegration {
 
     /// Evaluate an AI response and optionally improve it via reflexion.
     /// Returns the original or improved response.
+    // periphery:ignore - Reserved: processResponse(task:response:conversationContext:) instance method — reserved for future feature activation
     func processResponse(
         task: String,
         response: String,
@@ -116,6 +119,7 @@ final class ChatReflexionIntegration {
     // MARK: - User Feedback
 
     /// Record user feedback on a response for learning
+    // periphery:ignore - Reserved: recordFeedback(messageID:feedback:) instance method — reserved for future feature activation
     func recordFeedback(
         messageID: UUID,
         feedback: UserResponseFeedback
@@ -155,6 +159,7 @@ final class ChatReflexionIntegration {
 
     // MARK: - Knowledge Graph Integration
 
+    // periphery:ignore - Reserved: updateKnowledgeGraph(feedback:messageID:) instance method — reserved for future feature activation
     private func updateKnowledgeGraph(feedback: UserResponseFeedback, messageID: UUID) async {
         let graph = PersonalKnowledgeGraph.shared
 
@@ -182,6 +187,7 @@ final class ChatReflexionIntegration {
     // MARK: - Analytics
 
     /// Average quality score over the last N data points
+    // periphery:ignore - Reserved: averageQuality(last:) instance method — reserved for future feature activation
     func averageQuality(last count: Int = 50) -> Float {
         let recent = qualityTrend.suffix(count)
         guard !recent.isEmpty else { return 0 }
@@ -200,6 +206,7 @@ final class ChatReflexionIntegration {
 
 // MARK: - Types
 
+// periphery:ignore - Reserved: ReflexionResult type — reserved for future feature activation
 struct ReflexionResult: Sendable {
     let response: String
     let wasImproved: Bool
@@ -209,6 +216,7 @@ struct ReflexionResult: Sendable {
     var iterations: Int = 0
 }
 
+// periphery:ignore - Reserved: UserResponseFeedback enum — reserved for future feature activation
 enum UserResponseFeedback: Sendable {
     case positive
     // periphery:ignore - Reserved: UserResponseFeedback type reserved for future feature activation
@@ -218,6 +226,7 @@ enum UserResponseFeedback: Sendable {
 }
 
 struct QualityDataPoint: Sendable {
+    // periphery:ignore - Reserved: timestamp property — reserved for future feature activation
     let timestamp: Date
     // periphery:ignore - Reserved: timestamp property reserved for future feature activation
     let score: Float

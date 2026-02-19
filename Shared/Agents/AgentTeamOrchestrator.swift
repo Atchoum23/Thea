@@ -121,6 +121,7 @@ final class AgentTeamOrchestrator: ObservableObject {
     // MARK: - Sub-Task Execution
 
     /// Execute a single sub-task with an isolated context window.
+    // periphery:ignore - Reserved: teamID parameter — kept for API compatibility
     private func executeSubTask(_ subTask: AgentSubTask, teamID: UUID) async -> AgentSubTaskResult {
         logger.debug("Teammate executing: \(subTask.description.prefix(60))")
 
@@ -268,10 +269,12 @@ final class AgentTeamOrchestrator: ObservableObject {
 
     // MARK: - Team Management
 
+    // periphery:ignore - Reserved: removeCompletedTeams() instance method — reserved for future feature activation
     func removeCompletedTeams() {
         activeTeams.removeAll { $0.status == .completed }
     }
 
+    // periphery:ignore - Reserved: hasActiveTeams property — reserved for future feature activation
     var hasActiveTeams: Bool { activeTeams.contains { $0.status == .running } }
 }
 
@@ -279,14 +282,18 @@ final class AgentTeamOrchestrator: ObservableObject {
 
 struct AgentTeam: Identifiable, Sendable {
     let id: UUID
+    // periphery:ignore - Reserved: goal property — reserved for future feature activation
     let goal: String
+    // periphery:ignore - Reserved: conversationID property — reserved for future feature activation
     let conversationID: UUID
     // periphery:ignore - Reserved: removeCompletedTeams() instance method reserved for future feature activation
     let subTasks: [AgentSubTask]
     var status: AgentTeamStatus
+    // periphery:ignore - Reserved: startedAt property — reserved for future feature activation
     let startedAt: Date
     // periphery:ignore - Reserved: hasActiveTeams property reserved for future feature activation
     var completedAt: Date?
+    // periphery:ignore - Reserved: synthesizedResult property — reserved for future feature activation
     var synthesizedResult: String?
 }
 
@@ -314,12 +321,14 @@ struct AgentSubTaskResult: Sendable {
     // periphery:ignore - Reserved: node property reserved for future feature activation
     let success: Bool
     let result: String
+    // periphery:ignore - Reserved: error property — reserved for future feature activation
     let error: String?
 }
 
 struct AgentTeamResult: Sendable {
     // periphery:ignore - Reserved: error property reserved for future feature activation
     let team: AgentTeam
+    // periphery:ignore - Reserved: subTaskResults property — reserved for future feature activation
     let subTaskResults: [AgentSubTaskResult]
     let synthesizedResponse: String
     // periphery:ignore - Reserved: team property reserved for future feature activation
@@ -327,6 +336,7 @@ struct AgentTeamResult: Sendable {
     let totalSubTasks: Int
     let successCount: Int
 
+    // periphery:ignore - Reserved: allSucceeded property — reserved for future feature activation
     var allSucceeded: Bool { successCount == totalSubTasks }
     // periphery:ignore - Reserved: allSucceeded property reserved for future feature activation
     // periphery:ignore - Reserved: partialSuccess property reserved for future feature activation

@@ -21,6 +21,7 @@ import UserNotifications
 // MARK: - Life Intelligence Coordinator
 
 public actor LifeIntelligenceCoordinator {
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "ai.thea.app", category: "LifeIntelligenceCoordinator")
     public static let shared = LifeIntelligenceCoordinator()
 
@@ -35,6 +36,7 @@ public actor LifeIntelligenceCoordinator {
 
     private var isRunning = false
     private var currentContext = LifeContext()
+    // periphery:ignore - Reserved: pendingDecisions property — reserved for future feature activation
     private var pendingDecisions: [PendingDecision] = []
     private var dailyDigest: DailyDigest?
 
@@ -296,6 +298,7 @@ public actor LifeIntelligenceCoordinator {
         return min(0.5, score)
     }
 
+    // periphery:ignore - Reserved: contactId parameter — kept for API compatibility
     private func generateAutoReply(for contactId: String?, platform: String) -> String {
         // Would be more sophisticated with templates
         // periphery:ignore - Reserved: contactId parameter kept for API compatibility
@@ -386,6 +389,7 @@ public actor LifeIntelligenceCoordinator {
     }
 
     private enum NotificationPriority {
+        // periphery:ignore - Reserved: medium case — reserved for future feature activation
         case high, medium, low
     // periphery:ignore - Reserved: medium case reserved for future feature activation
     }

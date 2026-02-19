@@ -103,6 +103,7 @@ extension DynamicResourceAllocator {
         }
 
         /// Check if current time falls within this schedule
+        // periphery:ignore - Reserved: isActiveNow() instance method — reserved for future feature activation
         func isActiveNow() -> Bool {
             guard isEnabled else { return false }
 
@@ -259,6 +260,7 @@ extension DynamicResourceAllocator {
         let title: String
         let description: String
         let impact: ImpactLevel
+        // periphery:ignore - Reserved: action property — reserved for future feature activation
         let action: RecommendedAction
 
         enum ImpactLevel: String, Sendable {
@@ -268,7 +270,9 @@ extension DynamicResourceAllocator {
 
         enum RecommendedAction: Sendable {
             case reduceContextLength(to: Int)
+            // periphery:ignore - Reserved: switchQuantization(to:) case — reserved for future feature activation
             case switchQuantization(to: QuantizationLevel)
+            // periphery:ignore - Reserved: reduceModelSize case — reserved for future feature activation
             case reduceModelSize
             // periphery:ignore - Reserved: switchQuantization(to:) case reserved for future feature activation
             // periphery:ignore - Reserved: reduceModelSize case reserved for future feature activation

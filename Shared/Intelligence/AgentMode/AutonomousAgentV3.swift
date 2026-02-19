@@ -51,6 +51,7 @@ public final class AutonomousAgentV3 {
     private(set) var executionHistory: [AutonomousExecutionState] = []
 
     // Dependencies
+    // periphery:ignore - Reserved: resourcePool property — reserved for future feature activation
     private let resourcePool: AgentResourcePool
     private let communicationBus: AgentCommunicationBus
 

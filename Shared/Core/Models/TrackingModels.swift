@@ -16,6 +16,7 @@ final class HealthSnapshot {
     var workoutMinutes: Int
     var snapshotData: Data
 
+    // periphery:ignore - Reserved: init(id:date:steps:activeCalories:heartRateAverage:heartRateMin:heartRateMax:sleepDuration:workoutMinutes:snapshotData:) initializer — reserved for future feature activation
     init(
         id: UUID = UUID(),
         date: Date,
@@ -53,6 +54,7 @@ final class DailyScreenTimeRecord {
     var productivityScore: Double
     var focusTimeMinutes: Int
 
+    // periphery:ignore - Reserved: init(id:date:totalScreenTime:appUsageData:productivityScore:focusTimeMinutes:) initializer — reserved for future feature activation
     init(
         id: UUID = UUID(),
         date: Date,
@@ -150,6 +152,7 @@ final class LocationVisitRecord {
     var placeName: String?
     var category: String
 
+    // periphery:ignore - Reserved: init(id:latitude:longitude:arrivalTime:departureTime:placeName:category:) initializer — reserved for future feature activation
     init(
         id: UUID = UUID(),
         // periphery:ignore - Reserved: init(id:latitude:longitude:arrivalTime:departureTime:placeName:category:) initializer reserved for future feature activation
@@ -183,6 +186,7 @@ final class LifeInsight {
     var priority: String
     var isRead: Bool
 
+    // periphery:ignore - Reserved: init(id:date:insightType:title:insightDescription:actionableRecommendations:priority:isRead:) initializer — reserved for future feature activation
     init(
         // periphery:ignore - Reserved: init(id:date:insightType:title:insightDescription:actionableRecommendations:priority:isRead:) initializer reserved for future feature activation
         id: UUID = UUID(),

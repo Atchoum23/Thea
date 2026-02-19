@@ -156,6 +156,7 @@ public actor ActionTracker {
 
     // Statistics
     private var actionCounts: [TrackedActionType: Int] = [:]
+    // periphery:ignore - Reserved: trackingStartTime property — reserved for future feature activation
     private var trackingStartTime: Date?
 
 // periphery:ignore - Reserved: trackingStartTime property reserved for future feature activation

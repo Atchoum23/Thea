@@ -179,6 +179,7 @@ final class TheaTaskManager: ObservableObject {
 
     private init() {}
 
+    // periphery:ignore - Reserved: setModelContext(_:) instance method — reserved for future feature activation
     func setModelContext(_ context: ModelContext) {
         // periphery:ignore - Reserved: setModelContext(_:) instance method reserved for future feature activation
         self.modelContext = context

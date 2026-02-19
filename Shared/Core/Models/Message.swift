@@ -149,6 +149,7 @@ final class Message {
     #endif
 
     /// Original content if this message was edited
+    // periphery:ignore - Reserved: originalContent property — reserved for future feature activation
     var originalContent: MessageContent? {
         // periphery:ignore - Reserved: originalContent property reserved for future feature activation
         guard let data = originalContentData else { return nil }

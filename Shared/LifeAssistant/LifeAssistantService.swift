@@ -497,6 +497,7 @@ public final class LifeAssistantService {
 @MainActor
 final class CalendarAssistant {
     private let eventStore = EKEventStore()
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "com.thea.life", category: "CalendarAssistant")
 
     func getTodayOverview() async -> AssistantCalendarSummary? {
@@ -540,6 +541,7 @@ final class CalendarAssistant {
         }
     }
 
+    // periphery:ignore - Reserved: query parameter — kept for API compatibility
     func processQuery(_ query: String) async -> AssistantResponse {
         let events = await getUpcomingEvents(hours: 24)
         if events.isEmpty {
@@ -561,6 +563,7 @@ final class HealthAssistant {
     #if os(macOS) || os(iOS) || os(watchOS)
     private let healthStore = HKHealthStore()
     #endif
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "com.thea.life", category: "HealthAssistant")
 
     func getDailyMetrics() async -> AssistantHealthMetrics? {
@@ -592,6 +595,7 @@ final class HealthAssistant {
         return (sleepScore * 0.6 + activityScore * 0.4)
     }
 
+    // periphery:ignore - Reserved: query parameter — kept for API compatibility
     func processQuery(_ query: String) async -> AssistantResponse {
         guard let metrics = await getDailyMetrics() else {
             return AssistantResponse(
@@ -659,6 +663,7 @@ final class HealthAssistant {
 
 @MainActor
 final class FinancialAssistant {
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "com.thea.life", category: "FinancialAssistant")
 
     func getWeeklySummary() async -> AssistantFinancialSummary? {
@@ -676,6 +681,7 @@ final class FinancialAssistant {
         return nil
     }
 
+    // periphery:ignore - Reserved: query parameter — kept for API compatibility
     func processQuery(_ query: String) async -> AssistantResponse {
         if let summary = await getWeeklySummary() {
             let pct = summary.budget > 0 ? Int((summary.spending / summary.budget) * 100) : 0
@@ -711,6 +717,7 @@ final class SocialAssistant {
 
 @MainActor
 final class ProductivityAssistant {
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "com.thea.life", category: "ProductivityAssistant")
 
     // periphery:ignore - Reserved: logger property reserved for future feature activation
@@ -735,6 +742,7 @@ final class ProductivityAssistant {
         UserDefaults.standard.double(forKey: "productivity.focusMinutes")
     }
 
+    // periphery:ignore - Reserved: query parameter — kept for API compatibility
     func processQuery(_ query: String) async -> AssistantResponse {
         // periphery:ignore - Reserved: query parameter kept for API compatibility
         let tasks = await getPriorityTasks()

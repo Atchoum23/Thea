@@ -12,8 +12,10 @@ import OSLog
 @MainActor
 @Observable
 final class FunctionGemmaEngine {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = FunctionGemmaEngine()
 
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "com.thea.app", category: "FunctionGemma")
 
     // MARK: - State
@@ -34,6 +36,7 @@ final class FunctionGemmaEngine {
     // MARK: - Model Loading
 
     /// Load the FunctionGemma model via CoreML
+    // periphery:ignore - Reserved: loadModel() instance method — reserved for future feature activation
     func loadModel() async throws {
         guard !isModelLoaded else { return }
 
@@ -68,6 +71,7 @@ final class FunctionGemmaEngine {
     // MARK: - Function Call Parsing
 
     /// Parse a natural language instruction into a structured function call
+    // periphery:ignore - Reserved: parse(_:) instance method — reserved for future feature activation
     func parse(_ instruction: String) async throws -> FunctionCall? {
         isProcessing = true
         defer { isProcessing = false }
@@ -82,6 +86,7 @@ final class FunctionGemmaEngine {
     }
 
     /// Parse multiple instructions (e.g., "Create a reminder and then open Safari")
+    // periphery:ignore - Reserved: parseMultiple(_:) instance method — reserved for future feature activation
     func parseMultiple(_ instruction: String) async throws -> [FunctionCall] {
         isProcessing = true
         defer { isProcessing = false }
@@ -103,6 +108,7 @@ final class FunctionGemmaEngine {
 
     // MARK: - CoreML Parsing
 
+    // periphery:ignore - Reserved: parseWithCoreML(_:) instance method — reserved for future feature activation
     private func parseWithCoreML(_ instruction: String) async throws -> FunctionCall? {
         // periphery:ignore - Reserved: parseMultiple(_:) instance method reserved for future feature activation
         let engine = CoreMLInferenceEngine.shared
@@ -122,6 +128,7 @@ final class FunctionGemmaEngine {
 
     // MARK: - Rule-Based Parsing
 
+    // periphery:ignore - Reserved: parseWithRules(_:) instance method — reserved for future feature activation
     private func parseWithRules(_ instruction: String) -> FunctionCall? {
         // periphery:ignore - Reserved: parseWithCoreML(_:) instance method reserved for future feature activation
         let lower = instruction.lowercased().trimmingCharacters(in: .whitespaces)
@@ -180,6 +187,7 @@ final class FunctionGemmaEngine {
 // MARK: - Intent Parsing
 
 extension FunctionGemmaEngine {
+    // periphery:ignore - Reserved: parseCalendarIntent(_:original:) instance method — reserved for future feature activation
     func parseCalendarIntent(_ lower: String, original: String) -> FunctionCall? {
         let calendarTriggers = ["calendar", "event", "meeting", "appointment", "schedule"]
         guard calendarTriggers.contains(where: { lower.contains($0) }) else { return nil }
@@ -216,6 +224,7 @@ extension FunctionGemmaEngine {
         return nil
     }
 
+    // periphery:ignore - Reserved: parseReminderIntent(_:original:) instance method — reserved for future feature activation
     func parseReminderIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["reminder", "remind", "todo", "to-do", "task"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
@@ -245,6 +254,7 @@ extension FunctionGemmaEngine {
         return nil
     }
 
+    // periphery:ignore - Reserved: parseSafariIntent(_:original:) instance method — reserved for future feature activation
     func parseSafariIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["safari", "browse", "website", "web page", "open url", "search for", "search the web"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
@@ -271,6 +281,7 @@ extension FunctionGemmaEngine {
         return nil
     }
 
+    // periphery:ignore - Reserved: parseFinderIntent(_:original:) instance method — reserved for future feature activation
     func parseFinderIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["finder", "folder", "file", "directory"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
@@ -303,6 +314,7 @@ extension FunctionGemmaEngine {
         return nil
     }
 
+    // periphery:ignore - Reserved: parseMusicIntent(_:original:) instance method — reserved for future feature activation
     func parseMusicIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["music", "song", "play", "pause", "skip", "volume"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
@@ -321,6 +333,7 @@ extension FunctionGemmaEngine {
         return nil
     }
 
+    // periphery:ignore - Reserved: parseSystemIntent(_:original:) instance method — reserved for future feature activation
     func parseSystemIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["system", "brightness", "volume", "dark mode", "sleep", "lock"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
@@ -343,6 +356,7 @@ extension FunctionGemmaEngine {
         return nil
     }
 
+    // periphery:ignore - Reserved: parseMailIntent(_:original:) instance method — reserved for future feature activation
     func parseMailIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["email", "mail", "send an email", "compose"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
@@ -360,6 +374,7 @@ extension FunctionGemmaEngine {
         return nil
     }
 
+    // periphery:ignore - Reserved: parseShortcutsIntent(_:original:) instance method — reserved for future feature activation
     func parseShortcutsIntent(_ lower: String, original: String) -> FunctionCall? {
         let triggers = ["shortcut", "automation", "run shortcut"]
         guard triggers.contains(where: { lower.contains($0) }) else { return nil }
@@ -415,6 +430,7 @@ extension FunctionGemmaEngine {
         return result.trimmingCharacters(in: .whitespaces)
     }
 
+    // periphery:ignore - Reserved: extractURL(_:) instance method — reserved for future feature activation
     func extractURL(_ text: String) -> String? {
         let pattern = "https?://[^\\s]+"
         let regex: NSRegularExpression
@@ -434,6 +450,7 @@ extension FunctionGemmaEngine {
         return nil
     }
 
+    // periphery:ignore - Reserved: extractTimeExpression(_:) instance method — reserved for future feature activation
     func extractTimeExpression(_ text: String) -> String? {
         let patterns = [
             "tomorrow", "today", "tonight",
@@ -461,6 +478,7 @@ extension FunctionGemmaEngine {
         return nil
     }
 
+    // periphery:ignore - Reserved: splitInstruction(_:) instance method — reserved for future feature activation
     func splitInstruction(_ text: String) -> [String] {
         let separators = [" and then ", " then ", " and also ", ", and "]
         var parts = [text]
@@ -477,6 +495,7 @@ extension FunctionGemmaEngine {
         return parts.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
     }
 
+    // periphery:ignore - Reserved: parseFunctionCallFromOutput(_:) instance method — reserved for future feature activation
     func parseFunctionCallFromOutput(_ output: String) -> FunctionCall? {
         guard let data = output.data(using: .utf8) else { return nil }
         let jsonObject: Any
@@ -501,6 +520,7 @@ extension FunctionGemmaEngine {
         )
     }
 
+    // periphery:ignore - Reserved: buildFunctionCallingPrompt(instruction:) instance method — reserved for future feature activation
     func buildFunctionCallingPrompt(instruction: String) -> String {
         var prompt = "You are a function-calling assistant. Parse the user instruction into a function call.\n\n"
         // periphery:ignore - Reserved: buildFunctionCallingPrompt(instruction:) instance method reserved for future feature activation
@@ -563,6 +583,7 @@ struct FunctionCall: Sendable {
     let function: String
     let arguments: [String: String]
     let confidence: Double
+    // periphery:ignore - Reserved: originalInstruction property — reserved for future feature activation
     let originalInstruction: String
 // periphery:ignore - Reserved: originalInstruction property reserved for future feature activation
 }

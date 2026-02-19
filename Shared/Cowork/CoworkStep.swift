@@ -115,6 +115,7 @@
             addLog(.error, "Step failed: \(error)")
         }
 
+        // periphery:ignore - Reserved: skip(reason:) instance method — reserved for future feature activation
         mutating func skip(reason: String? = nil) {
             status = .skipped
             completedAt = Date()
@@ -138,6 +139,7 @@
             }
         }
 
+        // periphery:ignore - Reserved: addTool(_:) instance method — reserved for future feature activation
         mutating func addTool(_ tool: String) {
             if !toolsUsed.contains(tool) {
                 toolsUsed.append(tool)
@@ -172,12 +174,14 @@
                 return self
             }
 
+            // periphery:ignore - Reserved: tools(_:) instance method — reserved for future feature activation
             func tools(_ tools: [String]) -> Builder {
                 self.tools.append(contentsOf: tools)
                 // periphery:ignore - Reserved: tools(_:) instance method reserved for future feature activation
                 return self
             }
 
+            // periphery:ignore - Reserved: input(_:) instance method — reserved for future feature activation
             func input(_ url: URL) -> Builder {
                 // periphery:ignore - Reserved: input(_:) instance method reserved for future feature activation
                 inputs.append(url)

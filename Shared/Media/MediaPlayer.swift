@@ -176,6 +176,7 @@ struct MediaPlaybackStats: Codable, Sendable {
     var favoriteCount: Int
     var bookmarkCount: Int
 
+    // periphery:ignore - Reserved: empty static property — reserved for future feature activation
     static var empty: MediaPlaybackStats {
         MediaPlaybackStats(
             totalItemsPlayed: 0,
@@ -231,6 +232,7 @@ final class MediaPlayer: ObservableObject {
     @Published private(set) var volume: Float = 1.0
     @Published var speed: PlaybackSpeed = .normal
     @Published private(set) var history: [PlayedMediaItem] = []
+    // periphery:ignore - Reserved: isSubtitlesEnabled property — reserved for future feature activation
     @Published private(set) var isSubtitlesEnabled = false
 
     // MARK: - AVPlayer
@@ -407,6 +409,7 @@ final class MediaPlayer: ObservableObject {
     }
 
     /// Stop playback and save position.
+    // periphery:ignore - Reserved: stop() instance method — reserved for future feature activation
     func stop() {
         savePosition()
         player?.pause()
@@ -520,6 +523,7 @@ final class MediaPlayer: ObservableObject {
     }
 
     /// Clear all history.
+    // periphery:ignore - Reserved: clearHistory() instance method — reserved for future feature activation
     func clearHistory() {
         history.removeAll()
         // periphery:ignore - Reserved: clearHistory() instance method reserved for future feature activation
@@ -540,6 +544,7 @@ final class MediaPlayer: ObservableObject {
     }
 
     /// Get recently played items.
+    // periphery:ignore - Reserved: recentlyPlayed(limit:) instance method — reserved for future feature activation
     func recentlyPlayed(limit: Int = 10) -> [PlayedMediaItem] {
         // periphery:ignore - Reserved: recentlyPlayed(limit:) instance method reserved for future feature activation
         Array(history.sorted { $0.lastPlayedAt > $1.lastPlayedAt }.prefix(limit))

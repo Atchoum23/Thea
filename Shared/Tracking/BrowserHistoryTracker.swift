@@ -10,6 +10,7 @@ import Observation
 @MainActor
 @Observable
 final class BrowserHistoryTracker {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = BrowserHistoryTracker()
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "BrowserHistoryTracker")
@@ -24,6 +25,7 @@ final class BrowserHistoryTracker {
 
     private init() {}
 
+    // periphery:ignore - Reserved: setModelContext(_:) instance method — reserved for future feature activation
     func setModelContext(_ context: ModelContext) {
         modelContext = context
     // periphery:ignore - Reserved: shared static property reserved for future feature activation
@@ -222,6 +224,7 @@ final class BrowserHistoryTracker {
 
     // MARK: - Historical Data
 
+    // periphery:ignore - Reserved: getVisits(for:) instance method — reserved for future feature activation
     func getVisits(for date: Date) async -> [BrowsingRecord] {
         guard let context = modelContext else { return [] }
 
@@ -244,6 +247,7 @@ final class BrowserHistoryTracker {
             .sorted { $0.timestamp > $1.timestamp }
     }
 
+    // periphery:ignore - Reserved: getVisits(from:to:) instance method — reserved for future feature activation
     func getVisits(from start: Date, to end: Date) async -> [BrowsingRecord] {
         guard let context = modelContext else { return [] }
 
@@ -267,6 +271,7 @@ final class BrowserHistoryTracker {
 
 struct BrowsingSession: Identifiable {
     let id = UUID()
+    // periphery:ignore - Reserved: startTime property — reserved for future feature activation
     let startTime: Date
     var visits: [PageVisit]
 

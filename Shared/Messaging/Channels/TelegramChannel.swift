@@ -25,8 +25,10 @@ final class TelegramChannel: ObservableObject {
 
     // MARK: - Configuration
 
+    // periphery:ignore - Reserved: enabled property — reserved for future feature activation
     var enabled = true
     var monitorSubscribedChannels = true
+    // periphery:ignore - Reserved: maxHistoryMessages property — reserved for future feature activation
     var maxHistoryMessages = 500
 
     // MARK: - Storage
@@ -53,6 +55,7 @@ final class TelegramChannel: ObservableObject {
 
     // MARK: - Connection
 
+    // periphery:ignore - Reserved: connect() instance method — reserved for future feature activation
     func connect() async {
         guard enabled else { return }
         logger.info("Connecting Telegram channel via OpenClaw Bridge")
@@ -92,6 +95,7 @@ final class TelegramChannel: ObservableObject {
         logger.info("Telegram channel connected")
     }
 
+    // periphery:ignore - Reserved: disconnect() instance method — reserved for future feature activation
     func disconnect() {
         isConnected = false
         MessagingHub.shared.updateChannelStatus(.telegram, name: "Telegram", status: .disconnected)
@@ -101,6 +105,7 @@ final class TelegramChannel: ObservableObject {
 
     // MARK: - Message Handling
 
+    // periphery:ignore - Reserved: handleOpenClawMessage(_:) instance method — reserved for future feature activation
     private func handleOpenClawMessage(_ message: OpenClawMessage) async {
         guard message.platform == .telegram else { return }
         guard !processedMessageIDs.contains(message.id) else { return }
@@ -163,6 +168,7 @@ final class TelegramChannel: ObservableObject {
 
     // MARK: - Send Messages
 
+    // periphery:ignore - Reserved: sendMessage(to:text:) instance method — reserved for future feature activation
     func sendMessage(to chatID: String, text: String) async -> Bool {
         guard isConnected else {
             logger.warning("Cannot send: Telegram not connected")
@@ -179,6 +185,7 @@ final class TelegramChannel: ObservableObject {
     // periphery:ignore - Reserved: sendMessage(to:text:) instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: replyToMessage(chatID:messageID:text:) instance method — reserved for future feature activation
     func replyToMessage(chatID: String, messageID: String, text: String) async -> Bool {
         guard isConnected else { return false }
         do {
@@ -194,6 +201,7 @@ final class TelegramChannel: ObservableObject {
     // periphery:ignore - Reserved: replyToMessage(chatID:messageID:text:) instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: markAsRead(chatID:messageID:) instance method — reserved for future feature activation
     func markAsRead(chatID: String, messageID: String) async {
         guard isConnected else { return }
         do {
@@ -228,6 +236,7 @@ final class TelegramChannel: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: searchMessages(query:) instance method — reserved for future feature activation
     func searchMessages(query: String) -> [TelegramMessage] {
         let lower = query.lowercased()
         return conversationCache.values.flatMap { $0 }
@@ -384,6 +393,7 @@ final class TelegramChannel: ObservableObject {
 
     // MARK: - Contact & Group Management
 
+    // periphery:ignore - Reserved: updateContactFromMessage(_:) instance method — reserved for future feature activation
     private func updateContactFromMessage(_ message: TelegramMessage) {
         switch message.chatType {
         case .group, .supergroup:
@@ -421,6 +431,7 @@ final class TelegramChannel: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: updateChannelsFromOpenClaw() instance method — reserved for future feature activation
     private func updateChannelsFromOpenClaw() {
         for channel in OpenClawIntegration.shared.channels where channel.platform == .telegram {
             if channel.isGroup {
@@ -438,6 +449,7 @@ final class TelegramChannel: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: detectChatType(_:) instance method — reserved for future feature activation
     private func detectChatType(_ channelID: String) -> TelegramChatType {
         if groups.contains(where: { $0.id == channelID }) {
             return .group
@@ -455,6 +467,7 @@ final class TelegramChannel: ObservableObject {
 
     // MARK: - Helpers
 
+    // periphery:ignore - Reserved: mapAttachmentType(_:) instance method — reserved for future feature activation
     private func mapAttachmentType(_ type: OpenClawAttachment.AttachmentType) -> TelegramAttachmentType {
         switch type {
         case .image: return .photo
@@ -472,6 +485,7 @@ final class TelegramChannel: ObservableObject {
     var totalContacts: Int { contacts.count }
     var totalGroups: Int { groups.count }
     var totalChannels: Int { subscribedChannels.count }
+    // periphery:ignore - Reserved: conversationCount property — reserved for future feature activation
     var conversationCount: Int { conversationCache.count }
 
     // MARK: - Persistence
@@ -589,6 +603,7 @@ struct TelegramContact: Codable, Sendable, Identifiable {
     var isBot: Bool
     var lastMessageAt: Date?
 
+    // periphery:ignore - Reserved: init(id:name:username:isBot:lastMessageAt:) initializer — reserved for future feature activation
     init(
         id: String,
         // periphery:ignore - Reserved: init(id:name:username:isBot:lastMessageAt:) initializer reserved for future feature activation
@@ -613,6 +628,7 @@ struct TelegramGroup: Codable, Sendable, Identifiable {
     var type: TelegramChatType
     var isMuted: Bool
 
+    // periphery:ignore - Reserved: init(id:name:memberCount:lastMessageAt:type:isMuted:) initializer — reserved for future feature activation
     init(
         // periphery:ignore - Reserved: init(id:name:memberCount:lastMessageAt:type:isMuted:) initializer reserved for future feature activation
         id: String,

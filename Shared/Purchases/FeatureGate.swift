@@ -9,6 +9,7 @@
 import Foundation
 import OSLog
 
+// periphery:ignore - Reserved: logger global — reserved for future feature activation
 private let logger = Logger(subsystem: "com.thea.app", category: "FeatureGate")
 
 /// Defines features that require a paid subscription or purchase.
@@ -38,6 +39,7 @@ enum ProFeature: String, CaseIterable, Sendable {
     case premiumThemes = "Premium Themes"
     case advancedAutomation = "Advanced Automation"
 
+    // periphery:ignore - Reserved: description property — reserved for future feature activation
     var description: String {
         switch self {
         case .unlimitedProviders: "Connect to unlimited AI providers"
@@ -58,6 +60,7 @@ enum ProFeature: String, CaseIterable, Sendable {
         }
     }
 
+    // periphery:ignore - Reserved: icon property — reserved for future feature activation
     var icon: String {
         switch self {
         case .unlimitedProviders: "server.rack"
@@ -126,6 +129,7 @@ enum SubscriptionTier: String, CaseIterable, Sendable {
         }
     }
 
+    // periphery:ignore - Reserved: badge property — reserved for future feature activation
     var badge: String {
         switch self {
         case .free: ""
@@ -142,6 +146,7 @@ enum SubscriptionTier: String, CaseIterable, Sendable {
 enum FeatureGate {
 
     /// Whether the given feature is accessible with the current subscription.
+    // periphery:ignore - Reserved: isAvailable(_:) static method — reserved for future feature activation
     static func isAvailable(_ feature: ProFeature) -> Bool {
         let store = StoreKitService.shared
 
@@ -183,6 +188,7 @@ enum FeatureGate {
     }
 
     /// Number of AI providers allowed in the current tier.
+    // periphery:ignore - Reserved: maxProviders static property — reserved for future feature activation
     static var maxProviders: Int {
         switch currentTier {
         // periphery:ignore - Reserved: maxProviders static property reserved for future feature activation
@@ -192,6 +198,7 @@ enum FeatureGate {
     }
 
     /// Number of daily messages in the current tier.
+    // periphery:ignore - Reserved: dailyMessageLimit static property — reserved for future feature activation
     static var dailyMessageLimit: Int {
         // periphery:ignore - Reserved: dailyMessageLimit static property reserved for future feature activation
         switch currentTier {

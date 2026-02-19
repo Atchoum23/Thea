@@ -135,6 +135,7 @@ struct TripLeg: Codable, Sendable, Identifiable {
         }
     }
 
+    // periphery:ignore - Reserved: init(type:title:location:startTime:endTime:confirmationCode:cost:currency:notes:) initializer — reserved for future feature activation
     init(type: LegType, title: String, location: String = "", startTime: Date,
          endTime: Date? = nil, confirmationCode: String? = nil,
          cost: Double? = nil, currency: String = "CHF", notes: String = "") {
@@ -175,6 +176,7 @@ struct PackingItem: Codable, Sendable, Identifiable {
         }
     }
 
+    // periphery:ignore - Reserved: init(name:category:isPacked:quantity:) initializer — reserved for future feature activation
     init(name: String, category: PackingCategory = .other, isPacked: Bool = false, quantity: Int = 1) {
         self.id = UUID()
         self.name = name
@@ -216,6 +218,7 @@ final class TravelManager: ObservableObject {
         travelLogger.info("Added trip: \(trip.name) to \(trip.destination)")
     }
 
+    // periphery:ignore - Reserved: updateTrip(_:) instance method — reserved for future feature activation
     func updateTrip(_ trip: TravelTrip) {
         if let idx = trips.firstIndex(where: { $0.id == trip.id }) {
             // periphery:ignore - Reserved: updateTrip(_:) instance method reserved for future feature activation
@@ -226,6 +229,7 @@ final class TravelManager: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: deleteTrip(id:) instance method — reserved for future feature activation
     func deleteTrip(id: UUID) {
         // periphery:ignore - Reserved: deleteTrip(id:) instance method reserved for future feature activation
         trips.removeAll { $0.id == id }

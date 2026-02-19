@@ -108,6 +108,7 @@ struct ShortcutConfig: Identifiable, Codable, Sendable {
 @MainActor
 @Observable
 final class HardwareShortcutManager {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = HardwareShortcutManager()
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "HardwareShortcutManager")
@@ -135,6 +136,7 @@ final class HardwareShortcutManager {
     // MARK: - Public API
 
     /// Start monitoring for hardware shortcuts
+    // periphery:ignore - Reserved: startMonitoring() instance method — reserved for future feature activation
     func startMonitoring() {
         guard !isMonitoring else { return }
 
@@ -166,6 +168,7 @@ final class HardwareShortcutManager {
     }
 
     /// Register a new shortcut
+    // periphery:ignore - Reserved: registerShortcut(_:) instance method — reserved for future feature activation
     func registerShortcut(_ config: ShortcutConfig) {
         // Remove existing if same trigger
         registeredShortcuts.removeAll { $0.trigger == config.trigger }
@@ -181,6 +184,7 @@ final class HardwareShortcutManager {
     }
 
     /// Enable/disable a shortcut
+    // periphery:ignore - Reserved: setShortcutEnabled(_:enabled:) instance method — reserved for future feature activation
     func setShortcutEnabled(_ id: UUID, enabled: Bool) {
         // periphery:ignore - Reserved: unregisterShortcut(id:) instance method reserved for future feature activation
         if let index = registeredShortcuts.firstIndex(where: { $0.id == id }) {
@@ -222,6 +226,7 @@ final class HardwareShortcutManager {
     // MARK: - macOS Implementation
 
     #if os(macOS)
+    // periphery:ignore - Reserved: setupMacOSMonitors() instance method — reserved for future feature activation
     private func setupMacOSMonitors() {
         // Global monitor for when app is not focused
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
@@ -240,6 +245,7 @@ final class HardwareShortcutManager {
         }
     }
 
+    // periphery:ignore - Reserved: handleKeyEvent(_:) instance method — reserved for future feature activation
     private func handleKeyEvent(_ event: NSEvent) {
         // Check F5 key (keyCode 96) for function key trigger
         if event.keyCode == 96 {
@@ -276,6 +282,7 @@ final class HardwareShortcutManager {
 
     // MARK: - Trigger Handling
 
+    // periphery:ignore - Reserved: triggerShortcut(_:) instance method — reserved for future feature activation
     private func triggerShortcut(_ config: ShortcutConfig) {
         lastTriggeredShortcut = config
         onShortcutTriggered?(config.action)
@@ -283,6 +290,7 @@ final class HardwareShortcutManager {
     }
 
     /// Manually trigger an action (for external callers like ActionButton)
+    // periphery:ignore - Reserved: triggerAction(_:) instance method — reserved for future feature activation
     func triggerAction(_ action: HardwareShortcutAction) {
         onShortcutTriggered?(action)
     // periphery:ignore - Reserved: triggerAction(_:) instance method reserved for future feature activation

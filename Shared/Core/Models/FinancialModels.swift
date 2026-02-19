@@ -77,6 +77,7 @@ extension FinancialTransaction: Identifiable {}
 
 // MARK: - Supporting Types
 
+// periphery:ignore - Reserved: TimePeriod enum — reserved for future feature activation
 enum TimePeriod: String, Codable {
     case week
     case month
@@ -85,6 +86,7 @@ enum TimePeriod: String, Codable {
     case year
 }
 
+// periphery:ignore - Reserved: MonthlyData type — reserved for future feature activation
 struct MonthlyData: Identifiable {
     let id = UUID()
     // periphery:ignore - Reserved: MonthlyData type reserved for future feature activation
@@ -93,6 +95,7 @@ struct MonthlyData: Identifiable {
     let expenses: Decimal
 }
 
+// periphery:ignore - Reserved: BudgetRecommendation type — reserved for future feature activation
 struct BudgetRecommendation: Identifiable {
     // periphery:ignore - Reserved: BudgetRecommendation type reserved for future feature activation
     let id = UUID()

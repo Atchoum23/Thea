@@ -402,6 +402,7 @@ public struct ContextInsight: Identifiable, Sendable {
 public actor ContextInsightEngine {
     public static let shared = ContextInsightEngine()
 
+    // periphery:ignore - Reserved: patterns property — reserved for future feature activation
     private var patterns: [String: PatternData] = [:]
     // periphery:ignore - Reserved: patterns property reserved for future feature activation
     private var lastInsightTime: [String: Date] = [:]

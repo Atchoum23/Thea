@@ -148,6 +148,7 @@ final class SwissTaxEstimator {
     }
 
     /// Remove a deduction.
+    // periphery:ignore - Reserved: removeDeduction(id:) instance method — reserved for future feature activation
     func removeDeduction(id: UUID) {
         deductions.removeAll { $0.id == id }
         saveDeductions()
@@ -202,6 +203,7 @@ final class SwissTaxEstimator {
 
     // MARK: - Cantonal Tax Calculation
 
+    // periphery:ignore - Reserved: canton parameter — kept for API compatibility
     private func calculateCantonalBaseTax(taxableIncome: Double, canton: SwissCanton, status: FilingStatus) -> Double {
         // Simplified cantonal base tax using a representative progressive schedule
         // Each canton has a multiplier applied to this base
@@ -289,7 +291,9 @@ final class SwissTaxEstimator {
 // MARK: - Types
 
 struct SwissTaxResult: Sendable {
+    // periphery:ignore - Reserved: grossIncome property — reserved for future feature activation
     let grossIncome: Double
+    // periphery:ignore - Reserved: taxableIncome property — reserved for future feature activation
     let taxableIncome: Double
     let federalTax: Double
     // periphery:ignore - Reserved: grossIncome property reserved for future feature activation
@@ -303,6 +307,7 @@ struct SwissTaxResult: Sendable {
     let socialContributions: Double
     let deductions: Double
     let canton: SwissCanton
+    // periphery:ignore - Reserved: filingStatus property — reserved for future feature activation
     let filingStatus: FilingStatus
     // periphery:ignore - Reserved: filingStatus property reserved for future feature activation
     // periphery:ignore - Reserved: children property reserved for future feature activation

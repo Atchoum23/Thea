@@ -44,6 +44,7 @@ extension Font {
     // MARK: - Configurable Fonts (MainActor required)
 
     @MainActor
+    // periphery:ignore - Reserved: theaDisplay static property — reserved for future feature activation
     static var theaDisplay: Font {
         let config = AppConfiguration.shared.themeConfig
         return scalableFont(
@@ -144,6 +145,7 @@ extension Font {
     }
 
     @MainActor
+    // periphery:ignore - Reserved: theaCode static property — reserved for future feature activation
     static var theaCode: Font {
         let config = AppConfiguration.shared.themeConfig
         return scalableFont(
@@ -155,6 +157,7 @@ extension Font {
     }
 
     @MainActor
+    // periphery:ignore - Reserved: theaCodeInline static property — reserved for future feature activation
     static var theaCodeInline: Font {
         let config = AppConfiguration.shared.themeConfig
         return scalableFont(
@@ -174,17 +177,29 @@ extension Font {
 // periphery:ignore - Reserved: theaCodeInline static property reserved for future feature activation
 
     static let theaDisplayDefault = Font.system(size: 34, weight: .bold, design: .rounded)
+    // periphery:ignore - Reserved: theaTitle1Default static property — reserved for future feature activation
     static let theaTitle1Default = Font.system(size: 28, weight: .bold, design: .rounded)
+    // periphery:ignore - Reserved: theaTitle2Default static property — reserved for future feature activation
     static let theaTitle2Default = Font.system(size: 22, weight: .semibold, design: .rounded)
+    // periphery:ignore - Reserved: theaLargeDisplayDefault static property — reserved for future feature activation
     static let theaLargeDisplayDefault = Font.system(size: 42, weight: .bold, design: .rounded)
+    // periphery:ignore - Reserved: theaTitle3Default static property — reserved for future feature activation
     static let theaTitle3Default = Font.system(size: 20, weight: .semibold, design: .rounded)
+    // periphery:ignore - Reserved: theaHeadlineDefault static property — reserved for future feature activation
     static let theaHeadlineDefault = Font.system(size: 17, weight: .semibold)
+    // periphery:ignore - Reserved: theaBodyDefault static property — reserved for future feature activation
     static let theaBodyDefault = Font.system(size: 17, weight: .regular)
+    // periphery:ignore - Reserved: theaCalloutDefault static property — reserved for future feature activation
     static let theaCalloutDefault = Font.system(size: 16, weight: .regular)
+    // periphery:ignore - Reserved: theaSubheadDefault static property — reserved for future feature activation
     static let theaSubheadDefault = Font.system(size: 15, weight: .regular)
+    // periphery:ignore - Reserved: theaFootnoteDefault static property — reserved for future feature activation
     static let theaFootnoteDefault = Font.system(size: 13, weight: .regular)
+    // periphery:ignore - Reserved: theaCaption1Default static property — reserved for future feature activation
     static let theaCaption1Default = Font.system(size: 12, weight: .regular)
+    // periphery:ignore - Reserved: theaCaption2Default static property — reserved for future feature activation
     static let theaCaption2Default = Font.system(size: 11, weight: .regular)
+    // periphery:ignore - Reserved: theaCodeDefault static property — reserved for future feature activation
     static let theaCodeDefault = Font.system(size: 14, weight: .regular, design: .monospaced)
     // periphery:ignore - Reserved: theaDisplayDefault static property reserved for future feature activation
     // periphery:ignore - Reserved: theaTitle1Default static property reserved for future feature activation

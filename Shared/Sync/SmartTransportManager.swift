@@ -53,6 +53,7 @@ struct TransportProbeResult: Sendable {
     let isAvailable: Bool
     let latencyMs: Double?
     let endpoint: String?
+    // periphery:ignore - Reserved: probedAt property — reserved for future feature activation
     let probedAt: Date
 
     static func unavailable(_ transport: TheaTransport) -> TransportProbeResult {
@@ -68,8 +69,11 @@ struct TransportProbeResult: Sendable {
 
 /// Transport health status for monitoring
 struct TransportHealthStatus: Sendable {
+    // periphery:ignore - Reserved: transport property — reserved for future feature activation
     let transport: TheaTransport
+    // periphery:ignore - Reserved: isHealthy property — reserved for future feature activation
     let isHealthy: Bool
+    // periphery:ignore - Reserved: lastCheckedAt property — reserved for future feature activation
     let lastCheckedAt: Date
     let consecutiveFailures: Int
     // periphery:ignore - Reserved: transport property reserved for future feature activation
@@ -178,6 +182,7 @@ actor SmartTransportManager {
     }
 
     /// Stop monitoring and release resources
+    // periphery:ignore - Reserved: stopMonitoring() instance method — reserved for future feature activation
     func stopMonitoring() {
         // periphery:ignore - Reserved: stopMonitoring() instance method reserved for future feature activation
         monitoringTask?.cancel()

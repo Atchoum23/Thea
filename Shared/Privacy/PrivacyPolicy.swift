@@ -23,12 +23,15 @@ protocol PrivacyPolicy: Sendable {
     var allowFilePaths: Bool { get }
 
     /// Whether code snippets may be sent
+    // periphery:ignore - Reserved: allowCodeSnippets property — reserved for future feature activation
     var allowCodeSnippets: Bool { get }
 
     /// Whether health/medical data may be sent
+    // periphery:ignore - Reserved: allowHealthData property — reserved for future feature activation
     var allowHealthData: Bool { get }
 
     /// Whether financial data may be sent
+    // periphery:ignore - Reserved: allowFinancialData property — reserved for future feature activation
     var allowFinancialData: Bool { get }
 
     /// Keywords that trigger blocking (case-insensitive)
@@ -87,6 +90,7 @@ enum SanitizationOutcome: Sendable {
         }
     }
 
+    // periphery:ignore - Reserved: isAllowed property — reserved for future feature activation
     var isAllowed: Bool {
         switch self {
         case .clean, .redacted: true
@@ -129,10 +133,12 @@ struct PrivacyAuditEntry: Sendable, Identifiable {
     let id: UUID
     let timestamp: Date
     let channel: String
+    // periphery:ignore - Reserved: policyName property — reserved for future feature activation
     let policyName: String
     let outcome: AuditOutcome
     // periphery:ignore - Reserved: policyName property reserved for future feature activation
     let redactionCount: Int
+    // periphery:ignore - Reserved: originalLength property — reserved for future feature activation
     let originalLength: Int
     // periphery:ignore - Reserved: originalLength property reserved for future feature activation
     // periphery:ignore - Reserved: sanitizedLength property reserved for future feature activation

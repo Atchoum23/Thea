@@ -200,10 +200,15 @@ struct ImageDimensions: Codable, Sendable {
 
 struct ProcessedImage: Sendable {
     let data: Data
+    // periphery:ignore - Reserved: format property — reserved for future feature activation
     let format: ImageFormat
+    // periphery:ignore - Reserved: dimensions property — reserved for future feature activation
     let dimensions: ImageDimensions
+    // periphery:ignore - Reserved: operation property — reserved for future feature activation
     let operation: ImageOperation
+    // periphery:ignore - Reserved: originalSize property — reserved for future feature activation
     let originalSize: Int64
+    // periphery:ignore - Reserved: processedSize property — reserved for future feature activation
     let processedSize: Int64
 }
 
@@ -526,17 +531,20 @@ actor ImageIntelligence {
         processingHistory
     }
 
+    // periphery:ignore - Reserved: clearHistory() instance method — reserved for future feature activation
     func clearHistory() {
         processingHistory.removeAll()
         saveHistory()
     // periphery:ignore - Reserved: clearHistory() instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: totalBytesProcessed() instance method — reserved for future feature activation
     func totalBytesProcessed() -> Int64 {
         processingHistory.reduce(0) { $0 + $1.inputSize }
     // periphery:ignore - Reserved: totalBytesProcessed() instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: totalBytesSaved() instance method — reserved for future feature activation
     func totalBytesSaved() -> Int64 {
         // periphery:ignore - Reserved: totalBytesSaved() instance method reserved for future feature activation
         processingHistory.reduce(0) { $0 + max(0, $1.inputSize - $1.outputSize) }

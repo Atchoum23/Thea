@@ -58,6 +58,7 @@ struct AutomationNode: Identifiable, Codable, Sendable {
         var y: Double
     }
 
+    // periphery:ignore - Reserved: init(id:type:name:position:configuration:isEnabled:) initializer — reserved for future feature activation
     init(
         id: UUID = UUID(),
         type: AutomationNodeType,
@@ -142,6 +143,7 @@ struct NodeConfiguration: Codable, Sendable {
     var timeout: TimeInterval
     var continueOnError: Bool
 
+    // periphery:ignore - Reserved: init(parameters:retryCount:timeout:continueOnError:) initializer — reserved for future feature activation
     init(
         parameters: [String: String] = [:],
         retryCount: Int = 0,
@@ -165,6 +167,7 @@ struct Connection: Identifiable, Codable, Sendable {
     var targetPort: String
     var condition: String?
 
+    // periphery:ignore - Reserved: init(id:sourceNodeId:targetNodeId:sourcePort:targetPort:condition:) initializer — reserved for future feature activation
     init(
         id: UUID = UUID(),
         sourceNodeId: UUID,
@@ -198,6 +201,7 @@ enum AutomationWorkflowTrigger: Codable, Sendable {
 
 /// Result of workflow execution
 struct AutomationWorkflowResult: Sendable {
+    // periphery:ignore - Reserved: workflowId property — reserved for future feature activation
     let workflowId: UUID
     let startTime: Date
     let endTime: Date
@@ -208,9 +212,12 @@ struct AutomationWorkflowResult: Sendable {
     // periphery:ignore - Reserved: voiceCommand(phrase:) case reserved for future feature activation
     // periphery:ignore - Reserved: shortcut(name:) case reserved for future feature activation
     let status: AutomationExecutionStatus
+    // periphery:ignore - Reserved: nodeResults property — reserved for future feature activation
     let nodeResults: [UUID: NodeResult]
+    // periphery:ignore - Reserved: error property — reserved for future feature activation
     let error: String?
 
+    // periphery:ignore - Reserved: duration property — reserved for future feature activation
     var duration: TimeInterval {
         endTime.timeIntervalSince(startTime)
     // periphery:ignore - Reserved: workflowId property reserved for future feature activation

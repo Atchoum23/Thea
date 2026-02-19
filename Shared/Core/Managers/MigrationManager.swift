@@ -21,6 +21,7 @@ final class MigrationManager {
 
     // MARK: - Migration from other apps
 
+    // periphery:ignore - Reserved: migrateFromChatGPT(exportPath:) instance method — reserved for future feature activation
     func migrateFromChatGPT(exportPath _: URL) async throws {
         isMigrating = true
         migrationStatus = "Reading ChatGPT export..."
@@ -35,6 +36,7 @@ final class MigrationManager {
         isMigrating = false
     }
 
+    // periphery:ignore - Reserved: migrateFromClaude(exportPath:) instance method — reserved for future feature activation
     func migrateFromClaude(exportPath _: URL) async throws {
         isMigrating = true
         // periphery:ignore - Reserved: migrateFromClaude(exportPath:) instance method reserved for future feature activation
@@ -49,6 +51,7 @@ final class MigrationManager {
         isMigrating = false
     }
 
+    // periphery:ignore - Reserved: migrateFromCursor(path:) instance method — reserved for future feature activation
     func migrateFromCursor(path _: URL) async throws {
         // periphery:ignore - Reserved: migrateFromCursor(path:) instance method reserved for future feature activation
         isMigrating = true

@@ -209,6 +209,7 @@ struct OmniEpisodicMetadata: Codable {
         }
     }
 
+    // periphery:ignore - Reserved: decode(_:) static method — reserved for future feature activation
     static func decode(_ data: Data?) -> OmniEpisodicMetadata? {
         // periphery:ignore - Reserved: decode(_:) static method reserved for future feature activation
         guard let data else { return nil }

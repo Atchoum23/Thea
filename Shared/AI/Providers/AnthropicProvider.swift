@@ -14,6 +14,7 @@ final class AnthropicProvider: AIProvider, Sendable {
         documentationURL: URL(string: "https://docs.anthropic.com")!
     )
 
+    // periphery:ignore - Reserved: capabilities property — reserved for future feature activation
     let capabilities = ProviderCapabilities(
         supportsStreaming: true,
         supportsVision: true,
@@ -46,6 +47,7 @@ final class AnthropicProvider: AIProvider, Sendable {
 
     // MARK: - Validation
 
+    // periphery:ignore - Reserved: validateAPIKey(_:) instance method — reserved for future feature activation
     func validateAPIKey(_ key: String) async throws -> ValidationResult {
         guard let url = URL(string: "\(baseURL)/messages") else {
             return .failure("Invalid API URL configuration")
@@ -327,6 +329,7 @@ final class AnthropicProvider: AIProvider, Sendable {
     ///   - model: The model ID to use
     ///   - options: Advanced options including effort, context management, server tools
     /// - Returns: Streaming response
+    // periphery:ignore - Reserved: chatAdvanced(messages:model:options:) instance method — reserved for future feature activation
     func chatAdvanced(
         messages: [AIMessage],
         model: String,
@@ -345,6 +348,7 @@ final class AnthropicProvider: AIProvider, Sendable {
 
     // MARK: - Advanced Chat Helpers
 
+    // periphery:ignore - Reserved: buildAdvancedRequestBody(messages:model:options:) instance method — reserved for future feature activation
     private func buildAdvancedRequestBody(
         messages: [AIMessage],
         model: String,
@@ -421,6 +425,7 @@ final class AnthropicProvider: AIProvider, Sendable {
         return body
     }
 
+    // periphery:ignore - Reserved: buildAdvancedRequest(body:model:options:) instance method — reserved for future feature activation
     private func buildAdvancedRequest(
         body: [String: Any],
         model _: String,
@@ -457,6 +462,7 @@ final class AnthropicProvider: AIProvider, Sendable {
         return request
     }
 
+    // periphery:ignore - Reserved: streamAdvancedResponse(request:model:messages:) instance method — reserved for future feature activation
     private func streamAdvancedResponse(
         request: URLRequest,
         model: String,
@@ -552,6 +558,7 @@ final class AnthropicProvider: AIProvider, Sendable {
         }
     }
 
+    // periphery:ignore - Reserved: nonStreamAdvancedResponse(request:messages:model:) instance method — reserved for future feature activation
     private func nonStreamAdvancedResponse(
         request: URLRequest,
         messages: [AIMessage],
@@ -607,6 +614,7 @@ struct AnthropicChatOptions: Sendable {
     let contextManagement: ContextManagement?
     let serverTools: [ServerTool]?
     let toolChoice: AnthropicToolChoice?  // Controls tool selection behavior
+    // periphery:ignore - Reserved: compaction property — reserved for future feature activation
     let compaction: CompactionConfig?     // Context compaction for long sessions
     let extendedContextLimit: Int?        // For 1M token beta (nil = default 200K)
 

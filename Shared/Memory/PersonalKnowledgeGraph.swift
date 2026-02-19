@@ -60,6 +60,7 @@ actor PersonalKnowledgeGraph {
     }
 
     /// Get all entities of a specific type
+    // periphery:ignore - Reserved: entities(ofType:) instance method — reserved for future feature activation
     func entities(ofType type: KGEntityType) -> [KGEntity] {
         entities.values.filter { $0.type == type }
     }
@@ -67,6 +68,7 @@ actor PersonalKnowledgeGraph {
     // MARK: - Relationship Management
 
     /// Add a relationship between two entities
+    // periphery:ignore - Reserved: addRelationship(from:to:relationship:confidence:) instance method — reserved for future feature activation
     func addRelationship(from sourceID: String, to targetID: String, relationship: String, confidence: Double = 1.0) {
         // Ensure both entities exist
         // periphery:ignore - Reserved: entities(ofType:) instance method reserved for future feature activation
@@ -132,6 +134,7 @@ actor PersonalKnowledgeGraph {
     // MARK: - Querying
 
     /// Get entities most connected to a given entity
+    // periphery:ignore - Reserved: relatedEntities(to:limit:) instance method — reserved for future feature activation
     func relatedEntities(to entityID: String, limit: Int = 10) -> [(entity: KGEntity, edgeCount: Int)] {
         let related = relationships(for: entityID)
         var neighborCounts: [String: Int] = [:]
@@ -196,6 +199,7 @@ actor PersonalKnowledgeGraph {
     // MARK: - Extraction from Conversations
 
     /// Extract entities and relationships from a conversation message
+    // periphery:ignore - Reserved: extractAndStore(from:context:) instance method — reserved for future feature activation
     func extractAndStore(from text: String, context: String = "") {
         // Simple NER: look for capitalized words as potential entity names
         let words = text.components(separatedBy: .whitespaces)
@@ -225,6 +229,7 @@ actor PersonalKnowledgeGraph {
 
     /// Find an existing entity that is sufficiently similar to avoid duplicates.
     /// Returns the existing entity's ID if found, otherwise nil.
+    // periphery:ignore - Reserved: findSimilarEntity(name:type:) instance method — reserved for future feature activation
     func findSimilarEntity(name: String, type: KGEntityType) -> KGEntity? {
         let normalizedNew = name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         return entities.values.first { existing in
@@ -243,6 +248,7 @@ actor PersonalKnowledgeGraph {
     /// Add entity with deduplication: if a similar entity exists, update it instead of creating duplicate.
     /// Returns the entity ID (existing or new).
     @discardableResult
+    // periphery:ignore - Reserved: addOrMergeEntity(_:) instance method — reserved for future feature activation
     func addOrMergeEntity(_ entity: KGEntity) -> String {
         if let existing = findSimilarEntity(name: entity.name, type: entity.type) {
             // Merge: update lastUpdated and increment referenceCount
@@ -266,6 +272,7 @@ actor PersonalKnowledgeGraph {
 
     /// Decay importance of entities older than 90 days with no recent activity.
     /// Entities with referenceCount < 2 and lastUpdated > 90 days are pruned.
+    // periphery:ignore - Reserved: decayStaleEntities(daysThreshold:minimumReferenceCount:) instance method — reserved for future feature activation
     func decayStaleEntities(daysThreshold: Int = 90, minimumReferenceCount: Int = 2) {
         let cutoffDate = Date().addingTimeInterval(-Double(daysThreshold) * 86400)
         var removedIDs: Set<String> = []
@@ -289,7 +296,9 @@ actor PersonalKnowledgeGraph {
 
     // MARK: - Statistics
 
+    // periphery:ignore - Reserved: entityCount property — reserved for future feature activation
     var entityCount: Int { entities.count }
+    // periphery:ignore - Reserved: edgeCount property — reserved for future feature activation
     var edgeCount: Int { edges.count }
 
 // periphery:ignore - Reserved: entityCount property reserved for future feature activation

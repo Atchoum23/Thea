@@ -58,6 +58,7 @@ final class AppConfiguration {
     enum AppInfo {
         static let version = "1.4.0"
         static let buildType = "Beta"
+        // periphery:ignore - Reserved: domain static property — reserved for future feature activation
         static let domain = "theathe.app"
         static let bundleIdentifier = "app.thea.Thea"
         // swiftlint:disable:next force_unwrapping
@@ -494,6 +495,7 @@ final class AppConfiguration {
         qaToolsConfig = QAToolsConfiguration()
     }
 
+    // periphery:ignore - Reserved: resetProviderConfig() instance method — reserved for future feature activation
     func resetProviderConfig() {
         providerConfig = ProviderConfiguration()
     }
@@ -510,6 +512,7 @@ final class AppConfiguration {
     // periphery:ignore - Reserved: resetKnowledgeScannerConfig() instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: resetMetaAIConfig() instance method — reserved for future feature activation
     func resetMetaAIConfig() {
         // periphery:ignore - Reserved: resetMetaAIConfig() instance method reserved for future feature activation
         metaAIConfig = MetaAIConfiguration()

@@ -7,6 +7,7 @@ import SwiftUI
 import Highlightr
 import OSLog
 
+// periphery:ignore - Reserved: logger global — reserved for future feature activation
 private let logger = Logger(subsystem: "ai.thea.app", category: "EnhancedMessageBubbleTypes")
 #endif
 
@@ -46,6 +47,7 @@ struct IconActionButton: View {
 }
 
 /// Confidence indicator dot
+// periphery:ignore - Reserved: ConfidenceDot type — reserved for future feature activation
 struct ConfidenceDot: View {
     // periphery:ignore - Reserved: ConfidenceDot type reserved for future feature activation
     let confidence: Double

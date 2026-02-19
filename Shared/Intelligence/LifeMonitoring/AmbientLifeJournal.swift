@@ -296,6 +296,7 @@ final class AmbientLifeJournal: @unchecked Sendable {
     }
 
     /// Find the journal entry for a specific date.
+    // periphery:ignore - Reserved: entryFor(date:) instance method — reserved for future feature activation
     func entryFor(date: Date) -> JournalEntry? {
         let calendar = Calendar.current
         // periphery:ignore - Reserved: entryFor(date:) instance method reserved for future feature activation
@@ -303,6 +304,7 @@ final class AmbientLifeJournal: @unchecked Sendable {
     }
 
     /// Return the most recent N entries (sorted by date descending).
+    // periphery:ignore - Reserved: recentEntries(limit:) instance method — reserved for future feature activation
     func recentEntries(limit: Int = 7) -> [JournalEntry] {
         // periphery:ignore - Reserved: recentEntries(limit:) instance method reserved for future feature activation
         Array(entries.prefix(limit))

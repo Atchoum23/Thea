@@ -79,6 +79,7 @@ extension FocusModeIntelligence {
     ///   - platform: The communication platform the message arrived on.
     ///   - language: The BCP-47 language code for keyword matching.
     /// - Returns: An ``UrgencyAssessment`` with score, level, confidence, and recommendation.
+    // periphery:ignore - Reserved: assessUrgencyAutonomously(contactId:phoneNumber:messageContent:platform:language:) instance method — reserved for future feature activation
     func assessUrgencyAutonomously(
         contactId: String?,
         phoneNumber: String?,
@@ -218,6 +219,7 @@ extension FocusModeIntelligence {
     ///   - message: The message text to analyze.
     ///   - language: The BCP-47 language code for keyword selection.
     /// - Returns: A score from 0.0 (no urgency keywords) to 1.0 (strong urgency keywords).
+    // periphery:ignore - Reserved: analyzeKeywordsForUrgency(_:language:) instance method — reserved for future feature activation
     func analyzeKeywordsForUrgency(_ message: String, language: String) -> Double {
         let lowercased = message.lowercased()
         var score: Double = 0
@@ -254,6 +256,7 @@ extension FocusModeIntelligence {
     ///   - message: The message text to analyze.
     ///   - language: The BCP-47 language code for keyword selection.
     /// - Returns: A score from 0.0 (no time sensitivity) to 1.0 (strong time sensitivity).
+    // periphery:ignore - Reserved: analyzeTimeSensitiveLanguage(_:language:) instance method — reserved for future feature activation
     func analyzeTimeSensitiveLanguage(_ message: String, language: String) -> Double {
         let lowercased = message.lowercased()
         var score: Double = 0
@@ -285,6 +288,7 @@ extension FocusModeIntelligence {
     ///
     /// - Parameter message: The message text to analyze.
     /// - Returns: A score from 0.0 (calm) to 1.0 (high stress/urgency).
+    // periphery:ignore - Reserved: analyzeSentimentForUrgency(_:) instance method — reserved for future feature activation
     func analyzeSentimentForUrgency(_ message: String) -> Double {
         let lowercased = message.lowercased()
         var score: Double = 0
@@ -313,6 +317,7 @@ extension FocusModeIntelligence {
     ///
     /// - Parameter contactKey: The contact identifier or phone number.
     /// - Returns: The number of unique platforms used in the last 30 minutes.
+    // periphery:ignore - Reserved: countRecentPlatformAttempts(contactKey:) instance method — reserved for future feature activation
     func countRecentPlatformAttempts(contactKey: String) -> Int {
         // Count unique platforms this contact has used in last 30 min
         let cutoff = Date().addingTimeInterval(-1800)
@@ -329,6 +334,7 @@ extension FocusModeIntelligence {
     ///
     /// - Parameter score: The urgency score (0.0 to 1.0).
     /// - Returns: The corresponding ``IncomingCommunication.UrgencyLevel``.
+    // periphery:ignore - Reserved: scoreToUrgencyLevel(_:) instance method — reserved for future feature activation
     func scoreToUrgencyLevel(_ score: Double) -> IncomingCommunication.UrgencyLevel {
         switch score {
         case 0.8...: return .emergency
@@ -346,6 +352,7 @@ extension FocusModeIntelligence {
     ///   - score: The urgency score (0.0 to 1.0).
     ///   - signals: The urgency signals that contributed to the score.
     /// - Returns: The recommended ``UrgencyAssessment.UrgencyRecommendation``.
+    // periphery:ignore - Reserved: determineRecommendation(score:signals:) instance method — reserved for future feature activation
     func determineRecommendation(score: Double, signals: [UrgencySignal]) -> UrgencyAssessment.UrgencyRecommendation {
         // Check for emergency signals
         if signals.contains(where: { $0.type == .familyContact && $0.weight > 0.3 }) {
@@ -366,6 +373,7 @@ extension FocusModeIntelligence {
     ///
     /// - Parameter signals: The urgency signals to evaluate.
     /// - Returns: A confidence value from 0.0 to 0.95.
+    // periphery:ignore - Reserved: calculateConfidence(signals:) instance method — reserved for future feature activation
     func calculateConfidence(signals: [UrgencySignal]) -> Double {
         // More signals = higher confidence
         let signalCount = Double(signals.count)
@@ -386,6 +394,7 @@ extension FocusModeIntelligence {
     ///   - score: The overall urgency score.
     ///   - recommendation: The recommended action.
     /// - Returns: A human-readable explanation of the assessment.
+    // periphery:ignore - Reserved: generateReasoning(signals:score:recommendation:) instance method — reserved for future feature activation
     func generateReasoning(signals: [UrgencySignal], score: Double, recommendation: UrgencyAssessment.UrgencyRecommendation) -> String {
         if signals.isEmpty {
             return "No urgency signals detected. Will auto-reply and handle normally."
@@ -428,6 +437,7 @@ extension FocusModeIntelligence {
     ///   - contactId: The contact identifier, if known.
     ///   - messageContent: The message text for project reference analysis.
     /// - Returns: An enriched ``UrgencyAssessment`` with additional context signals.
+    // periphery:ignore - Reserved: enrichUrgencyWithContext(_:contactId:messageContent:) instance method — reserved for future feature activation
     func enrichUrgencyWithContext(
         _ assessment: UrgencyAssessment,
         contactId: String?,
@@ -485,6 +495,7 @@ extension FocusModeIntelligence {
     ///
     /// - Parameter contactId: The contact identifier to look up.
     /// - Returns: `true` if a meeting is scheduled soon, `false` otherwise.
+    // periphery:ignore - Reserved: hasMeetingWithContactSoon(_:) instance method — reserved for future feature activation
     func hasMeetingWithContactSoon(_ contactId: String) async -> Bool {
         // Would check calendar for events with this contact
         // periphery:ignore - Reserved: hasMeetingWithContactSoon(_:) instance method reserved for future feature activation
@@ -497,6 +508,7 @@ extension FocusModeIntelligence {
     ///
     /// - Parameter message: The message text to analyze.
     /// - Returns: `true` if a project reference pattern is found.
+    // periphery:ignore - Reserved: messageContainsProjectReference(_:) instance method — reserved for future feature activation
     func messageContainsProjectReference(_ message: String) -> Bool {
         // periphery:ignore - Reserved: messageContainsProjectReference(_:) instance method reserved for future feature activation
         // Would check against known project names, ticket numbers, etc.

@@ -37,9 +37,11 @@ final class PredictivePreloader: @unchecked Sendable {
     var recentTasks: [TaskTypeTimestamp] = []
 
     /// EMA alpha for recency weighting (higher = more weight to recent)
+    // periphery:ignore - Reserved: emaAlpha property — reserved for future feature activation
     let emaAlpha: Double = 0.3
 
     /// Maximum history size
+    // periphery:ignore - Reserved: maxHistorySize property — reserved for future feature activation
     let maxHistorySize = 500
 
     /// Persistence keys
@@ -58,6 +60,7 @@ final class PredictivePreloader: @unchecked Sendable {
     // MARK: - Recording
 
     /// Record a task request for learning
+    // periphery:ignore - Reserved: recordTaskRequest(_:) instance method — reserved for future feature activation
     func recordTaskRequest(_ taskType: TaskType) {
         let timestamp = Date()
         let hour = Calendar.current.component(.hour, from: timestamp)
@@ -90,6 +93,7 @@ final class PredictivePreloader: @unchecked Sendable {
     }
 
     /// Update transition matrix with new observation
+    // periphery:ignore - Reserved: updateTransitionMatrix(from:to:) instance method — reserved for future feature activation
     private func updateTransitionMatrix(from: TaskType, to: TaskType) {
         // Initialize if needed
         if transitionMatrix[from] == nil {
@@ -113,6 +117,7 @@ final class PredictivePreloader: @unchecked Sendable {
     }
 
     /// Update time-of-day patterns
+    // periphery:ignore - Reserved: updateTimeOfDayPattern(hour:taskType:) instance method — reserved for future feature activation
     private func updateTimeOfDayPattern(hour: Int, taskType: TaskType) {
         if timeOfDayPatterns[hour] == nil {
             // periphery:ignore - Reserved: updateTimeOfDayPattern(hour:taskType:) instance method reserved for future feature activation
@@ -198,6 +203,7 @@ final class PredictivePreloader: @unchecked Sendable {
     }
 
     /// Get transition probability between two tasks
+    // periphery:ignore - Reserved: getTransitionProbability(from:to:) instance method — reserved for future feature activation
     func getTransitionProbability(from: TaskType, to: TaskType) -> Double {
         // periphery:ignore - Reserved: getTransitionProbability(from:to:) instance method reserved for future feature activation
         guard let transitions = transitionMatrix[from] else { return 0.0 }

@@ -23,6 +23,7 @@ public final class HandoffManager: ObservableObject {
     private let conversationActivityType = "com.thea.app.conversation"
     private let compositionActivityType = "com.thea.app.composition"
     private let artifactActivityType = "com.thea.app.artifact"
+    // periphery:ignore - Reserved: browsingActivityType property — reserved for future feature activation
     private let browsingActivityType = "com.thea.app.browsing"
 
 // periphery:ignore - Reserved: browsingActivityType property reserved for future feature activation

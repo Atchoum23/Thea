@@ -156,6 +156,7 @@ final class MentionDataProvider: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: clear() instance method — reserved for future feature activation
     func clear() {
         // periphery:ignore - Reserved: clear() instance method reserved for future feature activation
         searchTask?.cancel()

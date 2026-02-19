@@ -18,6 +18,7 @@ final class VoiceActivationEngine {
     private var speechRecognizer: SFSpeechRecognizer?
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
+    // periphery:ignore - Reserved: audioEngine property — reserved for future feature activation
     private let audioEngine = AVAudioEngine()
 
     // Speech Synthesis
@@ -49,6 +50,7 @@ final class VoiceActivationEngine {
 
     // MARK: - Wake Word Detection
 
+    // periphery:ignore - Reserved: startWakeWordDetection() instance method — reserved for future feature activation
     func startWakeWordDetection() async throws {
         guard !isListening else { return }
 
@@ -62,6 +64,7 @@ final class VoiceActivationEngine {
         isListening = true
     }
 
+    // periphery:ignore - Reserved: stopWakeWordDetection() instance method — reserved for future feature activation
     func stopWakeWordDetection() {
         stopAudioEngine()
         isListening = false
@@ -69,6 +72,7 @@ final class VoiceActivationEngine {
     // periphery:ignore - Reserved: startWakeWordDetection() instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: requestSpeechAuthorization() instance method — reserved for future feature activation
     private func requestSpeechAuthorization() async -> SFSpeechRecognizerAuthorizationStatus {
         await withCheckedContinuation { continuation in
             SFSpeechRecognizer.requestAuthorization { status in
@@ -77,6 +81,7 @@ final class VoiceActivationEngine {
         }
     }
 
+    // periphery:ignore - Reserved: startAudioEngine() instance method — reserved for future feature activation
     private func startAudioEngine() throws {
         // Cancel any ongoing recognition
         // periphery:ignore - Reserved: stopWakeWordDetection() instance method reserved for future feature activation
@@ -146,6 +151,7 @@ final class VoiceActivationEngine {
         }
     }
 
+    // periphery:ignore - Reserved: stopAudioEngine() instance method — reserved for future feature activation
     private func stopAudioEngine() {
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
@@ -168,6 +174,7 @@ final class VoiceActivationEngine {
         }
     }
 
+    // periphery:ignore - Reserved: handleWakeWordDetected(fullTranscript:) instance method — reserved for future feature activation
     private func handleWakeWordDetected(fullTranscript: String) async {
         // Play activation sound
         if config.activationSoundEnabled {
@@ -285,6 +292,7 @@ final class VoiceActivationEngine {
         }
     }
 
+    // periphery:ignore - Reserved: stopSpeaking() instance method — reserved for future feature activation
     func stopSpeaking() {
         speechSynthesizer.stopSpeaking(at: .immediate)
         currentUtterance = nil

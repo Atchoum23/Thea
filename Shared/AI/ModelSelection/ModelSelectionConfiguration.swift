@@ -83,6 +83,7 @@ struct ModelSelectionConfiguration: Codable, Sendable, Equatable {
         }
     }
 
+    // periphery:ignore - Reserved: category(for:) instance method — reserved for future feature activation
     func category(for modelID: String) -> ModelCategory? {
         // periphery:ignore - Reserved: category(for:) instance method reserved for future feature activation
         if fastModels.contains(modelID) { return .fast }

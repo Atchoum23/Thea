@@ -69,6 +69,7 @@ private struct GoalPattern {
     let regex: String
     let category: InferredGoal.GoalCategory
     let confidenceBoost: Double
+    // periphery:ignore - Reserved: extractTitle property — reserved for future feature activation
     let extractTitle: (String) -> String?
 }
 

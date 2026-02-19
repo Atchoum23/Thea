@@ -43,6 +43,7 @@ public final class UnifiedIntelligenceHub {
     private let maxSuggestions = 3
     private let maxHistorySize = 1000
     private let patternDecayDays = 30
+    // periphery:ignore - Reserved: suggestionCooldownSeconds property — reserved for future feature activation
     private let suggestionCooldownSeconds: TimeInterval = 60
 
     // periphery:ignore - Reserved: suggestionCooldownSeconds property reserved for future feature activation
@@ -182,6 +183,7 @@ public final class UnifiedIntelligenceHub {
     }
 
     /// Check for blockers in current context
+    // periphery:ignore - Reserved: context parameter — kept for API compatibility
     public func checkForBlockers(context: IntelligenceContext) async -> [DetectedBlocker] {
         // periphery:ignore - Reserved: context parameter kept for API compatibility
         activeBlockers.filter { blocker in

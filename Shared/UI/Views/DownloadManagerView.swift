@@ -11,6 +11,7 @@ struct DownloadManagerView: View {
     @State private var stats = DownloadStats(totalDownloads: 0, completedDownloads: 0, failedDownloads: 0, totalBytesDownloaded: 0, activeDownloads: 0)
     @State private var selectedCategory: DownloadCategory?
     @State private var urlInput = ""
+    // periphery:ignore - Reserved: showAddSheet property — reserved for future feature activation
     @State private var showAddSheet = false
     @State private var errorMessage: String?
     @State private var showError = false
@@ -179,6 +180,7 @@ struct DownloadManagerView: View {
 
     // MARK: - iOS Sections
 
+    // periphery:ignore - Reserved: statsSection property — reserved for future feature activation
     private var statsSection: some View {
         Section("Overview") {
             HStack {
@@ -197,6 +199,7 @@ struct DownloadManagerView: View {
         }
     }
 
+    // periphery:ignore - Reserved: addSection property — reserved for future feature activation
     private var addSection: some View {
         Section("Add Download") {
             // periphery:ignore - Reserved: addSection property reserved for future feature activation
@@ -216,6 +219,7 @@ struct DownloadManagerView: View {
     }
 
     @ViewBuilder
+    // periphery:ignore - Reserved: activeSection property — reserved for future feature activation
     private var activeSection: some View {
         // periphery:ignore - Reserved: activeSection property reserved for future feature activation
         let active = downloads.filter { !$0.status.isTerminal }

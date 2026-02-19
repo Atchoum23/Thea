@@ -573,6 +573,7 @@ public class SecureConnectionManager: ObservableObject {
     }
 
     // SECURITY FIX (FINDING-011): Store whitelist in Keychain instead of UserDefaults
+    // periphery:ignore - Reserved: loadWhitelist() instance method — reserved for future feature activation
     private func loadWhitelist() {
         guard let data = loadKeyFromKeychain(identifier: "thea.remote.whitelist") else { return }
         // periphery:ignore - Reserved: loadWhitelist() instance method reserved for future feature activation
@@ -726,6 +727,7 @@ public class SecureConnectionManager: ObservableObject {
 // MARK: - Pairing Session
 
 private struct PairingSession {
+    // periphery:ignore - Reserved: code property — reserved for future feature activation
     let code: String
     // periphery:ignore - Reserved: code property reserved for future feature activation
     // periphery:ignore - Reserved: createdAt property reserved for future feature activation

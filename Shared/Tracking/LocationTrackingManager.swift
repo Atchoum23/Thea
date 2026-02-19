@@ -229,6 +229,7 @@ import Observation
     @MainActor
     @Observable
     final class LocationTrackingManager {
+        // periphery:ignore - Reserved: shared static property — reserved for future feature activation
         static let shared = LocationTrackingManager()
         // periphery:ignore - Reserved: shared static property reserved for future feature activation
         private init() {}

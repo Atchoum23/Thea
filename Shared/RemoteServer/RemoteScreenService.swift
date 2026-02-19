@@ -33,12 +33,14 @@ public class RemoteScreenService: ObservableObject {
 
     // MARK: - Stream Configuration
 
+    // periphery:ignore - Reserved: streamConfiguration property — reserved for future feature activation
     private var streamConfiguration: StreamConfiguration?
     private var frameCallback: ((ScreenFrame) -> Void)?
     private var streamTask: Task<Void, Never>?
 
     #if os(macOS)
         private var captureStream: SCStream?
+        // periphery:ignore - Reserved: streamOutput property — reserved for future feature activation
         private var streamOutput: ScreenCaptureOutput?
     #endif
 
@@ -87,7 +89,9 @@ public class RemoteScreenService: ObservableObject {
 
     // MARK: - Stream Configuration
 
+    // periphery:ignore - Reserved: activeCodec property — reserved for future feature activation
     private var activeCodec: VideoCodec = .jpeg
+    // periphery:ignore - Reserved: activeProfile property — reserved for future feature activation
     private var activeProfile: StreamQualityProfile = .balanced
 
     private func configureStreamCodec(codec: VideoCodec, profile: StreamQualityProfile) -> ScreenResponse {
@@ -473,9 +477,13 @@ public class RemoteScreenService: ObservableObject {
     // MARK: - Types
 
     private struct StreamConfiguration {
+        // periphery:ignore - Reserved: fps property — reserved for future feature activation
         let fps: Int
+        // periphery:ignore - Reserved: quality property — reserved for future feature activation
         let quality: Float
+        // periphery:ignore - Reserved: scale property — reserved for future feature activation
         let scale: Float
+        // periphery:ignore - Reserved: width property — reserved for future feature activation
         let width: Int
         // periphery:ignore - Reserved: fps property reserved for future feature activation
         // periphery:ignore - Reserved: quality property reserved for future feature activation

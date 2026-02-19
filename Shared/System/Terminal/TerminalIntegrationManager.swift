@@ -130,6 +130,7 @@ import OSLog
         }
 
         /// Read history from specific window/tab
+        // periphery:ignore - Reserved: readTerminalHistory(windowIndex:tabIndex:) instance method — reserved for future feature activation
         func readTerminalHistory(windowIndex: Int, tabIndex: Int) async throws -> String {
             try await windowReader.readHistory(windowIndex: windowIndex, tabIndex: tabIndex)
         }
@@ -245,6 +246,7 @@ import OSLog
         }
 
         /// Execute a sequence of commands
+        // periphery:ignore - Reserved: executeSequence(_:stopOnError:) instance method — reserved for future feature activation
         func executeSequence(_ commands: [String], stopOnError: Bool = true) async throws -> [ShellCommandResult] {
             try await executor.executeSequence(commands, workingDirectory: currentSession?.workingDirectory, stopOnError: stopOnError)
         }
@@ -323,6 +325,7 @@ import OSLog
         }
 
         /// Open a new tab in front window
+        // periphery:ignore - Reserved: openNewTab(withCommand:) instance method — reserved for future feature activation
         func openNewTab(withCommand command: String? = nil) async throws {
             try await executor.openNewTab(withCommand: command)
             await refreshWindowList()
@@ -330,6 +333,7 @@ import OSLog
         }
 
         /// Clear the Terminal screen
+        // periphery:ignore - Reserved: clearTerminal() instance method — reserved for future feature activation
         func clearTerminal() async throws {
             try await executor.clearTerminal()
         // periphery:ignore - Reserved: clearTerminal() instance method reserved for future feature activation
@@ -346,6 +350,7 @@ import OSLog
             return session
         }
 
+        // periphery:ignore - Reserved: deleteSession(_:) instance method — reserved for future feature activation
         func deleteSession(_ session: TerminalSession) {
             // periphery:ignore - Reserved: deleteSession(_:) instance method reserved for future feature activation
             sessions.removeAll { $0.id == session.id }

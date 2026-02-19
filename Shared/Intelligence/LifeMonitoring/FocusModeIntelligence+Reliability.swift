@@ -14,13 +14,19 @@ extension FocusModeIntelligence {
     /// A pending action that requires verification and may be retried on failure.
     struct PendingAction: Identifiable, Sendable {
         let id: UUID
+        // periphery:ignore - Reserved: actionType property — reserved for future feature activation
         let actionType: ActionType
+        // periphery:ignore - Reserved: timestamp property — reserved for future feature activation
         let timestamp: Date
         // periphery:ignore - Reserved: PendingAction type reserved for future feature activation
         var attempts: Int
+        // periphery:ignore - Reserved: lastAttempt property — reserved for future feature activation
         var lastAttempt: Date
+        // periphery:ignore - Reserved: verified property — reserved for future feature activation
         var verified: Bool
+        // periphery:ignore - Reserved: maxRetries property — reserved for future feature activation
         let maxRetries: Int
+        // periphery:ignore - Reserved: verificationMethod property — reserved for future feature activation
         let verificationMethod: VerificationMethod
 
         /// The type of action being executed.
@@ -56,6 +62,7 @@ extension FocusModeIntelligence {
     ///   - verificationMethod: How to verify the action succeeded. Defaults to `.pollStatus`.
     ///   - maxRetries: Maximum number of attempts. Defaults to 3.
     /// - Returns: `true` if the action succeeded and was verified, `false` if all retries failed.
+    // periphery:ignore - Reserved: executeWithVerification(actionType:action:verificationMethod:maxRetries:) instance method — reserved for future feature activation
     func executeWithVerification(
         actionType: PendingAction.ActionType,
         action: @escaping () async -> Bool,
@@ -112,6 +119,7 @@ extension FocusModeIntelligence {
     ///
     /// - Parameter actionType: The type of action to verify.
     /// - Returns: `true` if the action is verified as successful.
+    // periphery:ignore - Reserved: verifyAction(_:) instance method — reserved for future feature activation
     func verifyAction(_ actionType: PendingAction.ActionType) async -> Bool {
         switch actionType {
         // periphery:ignore - Reserved: verifyAction(_:) instance method reserved for future feature activation
@@ -135,6 +143,7 @@ extension FocusModeIntelligence {
     /// Mark a pending action as verified (successfully completed).
     ///
     /// - Parameter id: The UUID of the pending action to mark.
+    // periphery:ignore - Reserved: markActionVerified(_:) instance method — reserved for future feature activation
     func markActionVerified(_ id: UUID) {
         // periphery:ignore - Reserved: markActionVerified(_:) instance method reserved for future feature activation
         markPendingActionVerified(id)

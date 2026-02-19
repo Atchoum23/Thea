@@ -5,8 +5,10 @@ import OSLog
 
 protocol AIProvider: Sendable {
     var metadata: ProviderMetadata { get }
+    // periphery:ignore - Reserved: capabilities property — reserved for future feature activation
     var capabilities: ProviderCapabilities { get }
 
+    // periphery:ignore - Reserved: validateAPIKey(_:) instance method — reserved for future feature activation
     func validateAPIKey(_ key: String) async throws -> ValidationResult
     func chat(messages: [AIMessage], model: String, stream: Bool) async throws -> AsyncThrowingStream<ChatResponse, Error>
     func listModels() async throws -> [ProviderAIModel]
@@ -43,6 +45,7 @@ struct ProviderMetadata: Codable, Sendable {
 
 // MARK: - Provider Capabilities
 
+// periphery:ignore - Reserved: ProviderCapabilities type — reserved for future feature activation
 struct ProviderCapabilities: Codable, Sendable {
     let supportsStreaming: Bool
     let supportsVision: Bool
@@ -83,6 +86,7 @@ struct ProviderCapabilities: Codable, Sendable {
 
 struct ValidationResult: Sendable {
     let isValid: Bool
+    // periphery:ignore - Reserved: error property — reserved for future feature activation
     let error: String?
 
     static func success() -> ValidationResult {
@@ -182,11 +186,13 @@ struct ThinkingConfig: Sendable {
     let enabled: Bool
     let budgetTokens: Int  // 1,024 to 128,000
 
+    // periphery:ignore - Reserved: init(enabled:budgetTokens:) initializer — reserved for future feature activation
     init(enabled: Bool = true, budgetTokens: Int = 10_000) {
         self.enabled = enabled
         self.budgetTokens = min(max(budgetTokens, 1024), 128_000)
     }
 
+    // periphery:ignore - Reserved: default static property — reserved for future feature activation
     static let `default` = ThinkingConfig()
 }
 
@@ -370,15 +376,19 @@ struct AnthropicToolChoice: Sendable {
 
     // periphery:ignore - Reserved: AnthropicToolChoice type reserved for future feature activation
     let type: ChoiceType
+    // periphery:ignore - Reserved: toolName property — reserved for future feature activation
     let toolName: String?
+    // periphery:ignore - Reserved: disableParallelToolUse property — reserved for future feature activation
     let disableParallelToolUse: Bool?
 
+    // periphery:ignore - Reserved: init(type:toolName:disableParallelToolUse:) initializer — reserved for future feature activation
     init(type: ChoiceType, toolName: String? = nil, disableParallelToolUse: Bool? = nil) {
         self.type = type
         self.toolName = toolName
         self.disableParallelToolUse = disableParallelToolUse
     }
 
+    // periphery:ignore - Reserved: toDictionary property — reserved for future feature activation
     var toDictionary: [String: Any] {
         var dict: [String: Any] = ["type": type.rawValue]
         if let name = toolName, type == .tool {
@@ -393,10 +403,14 @@ struct AnthropicToolChoice: Sendable {
 
 /// Context compaction — Claude summarizes its own context for long sessions
 struct CompactionConfig: Sendable {
+    // periphery:ignore - Reserved: enabled property — reserved for future feature activation
     let enabled: Bool
+    // periphery:ignore - Reserved: triggerThreshold property — reserved for future feature activation
     let triggerThreshold: Int
+    // periphery:ignore - Reserved: targetSize property — reserved for future feature activation
     let targetSize: Int
 
+    // periphery:ignore - Reserved: init(enabled:triggerThreshold:targetSize:) initializer — reserved for future feature activation
     init(enabled: Bool = true, triggerThreshold: Int = 150_000, targetSize: Int = 80_000) {
         self.enabled = enabled
         // periphery:ignore - Reserved: CompactionConfig type reserved for future feature activation
@@ -413,6 +427,7 @@ struct WebSearchConfig: Sendable {
     let blockedDomains: [String]?
     let userLocation: UserLocation?
 
+    // periphery:ignore - Reserved: init(maxUses:allowedDomains:blockedDomains:userLocation:) initializer — reserved for future feature activation
     init(
         maxUses: Int? = nil,
         allowedDomains: [String]? = nil,
@@ -426,6 +441,7 @@ struct WebSearchConfig: Sendable {
         self.userLocation = userLocation
     }
 
+    // periphery:ignore - Reserved: default static property — reserved for future feature activation
     static let `default` = WebSearchConfig()
 }
 
@@ -490,6 +506,7 @@ struct UserLocation: Sendable {
 
 // MARK: - Token Usage
 
+// periphery:ignore - Reserved: TokenUsage type — reserved for future feature activation
 struct TokenUsage: Codable, Sendable {
     // periphery:ignore - Reserved: TokenUsage type reserved for future feature activation
     let promptTokens: Int

@@ -288,6 +288,7 @@ public actor MCPServerGenerator {
 
     // MARK: - List Handlers Generation
 
+    // periphery:ignore - Reserved: generateListHandlers(for:) instance method — reserved for future feature activation
     private func generateListHandlers(for spec: MCPServerSpec) -> String {
         // periphery:ignore - Reserved: generateListHandlers(for:) instance method reserved for future feature activation
         var code = """

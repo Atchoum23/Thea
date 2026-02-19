@@ -140,7 +140,9 @@ struct MarketplaceCache: Codable {
 actor DependencyScanner {
     struct Dependency: Sendable {
         let name: String
+        // periphery:ignore - Reserved: version property — reserved for future feature activation
         let version: String?
+        // periphery:ignore - Reserved: type property — reserved for future feature activation
         let type: DependencyType
     }
 

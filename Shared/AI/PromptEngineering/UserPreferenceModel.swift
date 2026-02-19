@@ -15,10 +15,12 @@ final class UserPreferenceModel {
     private var modelContext: ModelContext?
     private var preferencesCache: [String: [UserPromptPreference]] = [:]
 
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "ai.thea.app", category: "UserPreferenceModel")
 
     private init() {}
 
+    // periphery:ignore - Reserved: setModelContext(_:) instance method — reserved for future feature activation
     func setModelContext(_ context: ModelContext) {
         modelContext = context
         Task {
@@ -41,6 +43,7 @@ final class UserPreferenceModel {
     }
 
     /// Updates a preference with reinforcement learning
+    // periphery:ignore - Reserved: updatePreference(category:key:value:reinforcement:) instance method — reserved for future feature activation
     func updatePreference(
         category: String,
         key: String,
@@ -93,6 +96,7 @@ final class UserPreferenceModel {
     }
 
     /// Records user correction as negative feedback
+    // periphery:ignore - Reserved: recordUserCorrection(category:originalOutput:correctedOutput:) instance method — reserved for future feature activation
     func recordUserCorrection(
         category: String,
         originalOutput: String,
@@ -113,6 +117,7 @@ final class UserPreferenceModel {
     }
 
     /// Records user acceptance as positive feedback
+    // periphery:ignore - Reserved: recordUserAcceptance(category:output:) instance method — reserved for future feature activation
     func recordUserAcceptance(category: String, output: String) async {
         // Extract characteristics from accepted output
         let characteristics = extractCharacteristics(from: output, category: category)
@@ -151,6 +156,7 @@ final class UserPreferenceModel {
 
     // MARK: - Analysis Helpers
 
+    // periphery:ignore - Reserved: analyzeChanges(from:to:) instance method — reserved for future feature activation
     private func analyzeChanges(from original: String, to corrected: String) -> [(key: String, value: String)] {
         var changes: [(key: String, value: String)] = []
 
@@ -197,6 +203,7 @@ final class UserPreferenceModel {
         return changes
     }
 
+    // periphery:ignore - Reserved: extractCharacteristics(from:category:) instance method — reserved for future feature activation
     private func extractCharacteristics(from output: String, category: String) -> [(key: String, value: String)] {
         var characteristics: [(key: String, value: String)] = []
 
@@ -259,12 +266,14 @@ final class UserPreferenceModel {
     // MARK: - Preference Queries
 
     /// Gets top preferences for a category
+    // periphery:ignore - Reserved: getTopPreferences(for:limit:) instance method — reserved for future feature activation
     func getTopPreferences(for category: String, limit: Int = 5) async -> [UserPromptPreference] {
         let preferences = await getPreferences(for: category)
         return Array(preferences.prefix(limit))
     }
 
     /// Checks if user prefers a specific style
+    // periphery:ignore - Reserved: prefersStyle(_:in:) instance method — reserved for future feature activation
     func prefersStyle(_ style: String, in category: String) async -> Bool {
         // periphery:ignore - Reserved: getTopPreferences(for:limit:) instance method reserved for future feature activation
         let preferences = await getPreferences(for: category)
@@ -298,6 +307,7 @@ final class UserPreferenceModel {
     }
 
     /// Resets all preferences across all categories
+    // periphery:ignore - Reserved: resetAllPreferences() instance method — reserved for future feature activation
     func resetAllPreferences() async {
         guard let context = modelContext else { return }
 
@@ -320,6 +330,7 @@ final class UserPreferenceModel {
     // MARK: - Analytics
 
     /// Gets preference statistics
+    // periphery:ignore - Reserved: getPreferenceStats() instance method — reserved for future feature activation
     func getPreferenceStats() async -> PreferenceStats {
         guard let context = modelContext else {
             return PreferenceStats(
@@ -357,6 +368,7 @@ final class UserPreferenceModel {
     }
 
     /// Gets preference history for a specific key
+    // periphery:ignore - Reserved: getPreferenceHistory(category:key:) instance method — reserved for future feature activation
     func getPreferenceHistory(category: String, key: String) async -> [PreferenceHistory] {
         let preferences = await getPreferences(for: category)
         // periphery:ignore - Reserved: getPreferenceHistory(category:key:) instance method reserved for future feature activation
@@ -374,6 +386,7 @@ final class UserPreferenceModel {
 
 // MARK: - Supporting Structures
 
+// periphery:ignore - Reserved: PreferenceStats type — reserved for future feature activation
 struct PreferenceStats {
     // periphery:ignore - Reserved: PreferenceStats type reserved for future feature activation
     let totalPreferences: Int

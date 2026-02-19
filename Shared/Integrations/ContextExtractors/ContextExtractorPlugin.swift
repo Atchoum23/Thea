@@ -39,6 +39,7 @@ import Foundation
 ///     }
 /// }
 /// ```
+// periphery:ignore - Reserved: ContextExtractorPlugin protocol — reserved for future feature activation
 protocol ContextExtractorPlugin: Sendable {
 
     /// Unique identifier for this extractor (typically the primary bundle ID)
@@ -71,10 +72,13 @@ protocol ContextExtractorPlugin: Sendable {
 /// specific bundle IDs. The `GenericContextExtractor` uses this variant.
 protocol GenericContextExtractorPlugin: Sendable {
 
+    // periphery:ignore - Reserved: pluginID static property — reserved for future feature activation
     static var pluginID: String { get }
+    // periphery:ignore - Reserved: displayName static property — reserved for future feature activation
     static var displayName: String { get }
 
     /// Extract context from an arbitrary running application.
+    // periphery:ignore - Reserved: extract(app:includeSelectedText:includeWindowContent:) static method — reserved for future feature activation
     static func extract(
         // periphery:ignore - Reserved: GenericContextExtractorPlugin protocol reserved for future feature activation
         app: NSRunningApplication,
@@ -92,6 +96,7 @@ protocol GenericContextExtractorPlugin: Sendable {
 ///
 /// **Thread safety:** All access is MainActor-isolated (same as ForegroundAppMonitor).
 @MainActor
+// periphery:ignore - Reserved: ContextExtractorRegistry class — reserved for future feature activation
 final class ContextExtractorRegistry {
     static let shared = ContextExtractorRegistry()
 
@@ -175,6 +180,7 @@ final class ContextExtractorRegistry {
 // MARK: - Built-in Extractor Adapters
 
 /// Adapts the existing XcodeContextExtractor enum to the plugin protocol.
+// periphery:ignore - Reserved: XcodeExtractorAdapter enum — reserved for future feature activation
 private enum XcodeExtractorAdapter: ContextExtractorPlugin {
     static let pluginID = "com.apple.dt.Xcode"
     static let supportedBundleIDs = ["com.apple.dt.Xcode"]
@@ -189,6 +195,7 @@ private enum XcodeExtractorAdapter: ContextExtractorPlugin {
     }
 }
 
+// periphery:ignore - Reserved: VSCodeExtractorAdapter enum — reserved for future feature activation
 private enum VSCodeExtractorAdapter: ContextExtractorPlugin {
     static let pluginID = "com.microsoft.VSCode"
     static let supportedBundleIDs = ["com.microsoft.VSCode"]
@@ -204,6 +211,7 @@ private enum VSCodeExtractorAdapter: ContextExtractorPlugin {
     }
 }
 
+// periphery:ignore - Reserved: TerminalExtractorAdapter enum — reserved for future feature activation
 private enum TerminalExtractorAdapter: ContextExtractorPlugin {
     static let pluginID = "terminal-apps"
     static let supportedBundleIDs = [
@@ -222,6 +230,7 @@ private enum TerminalExtractorAdapter: ContextExtractorPlugin {
     }
 }
 
+// periphery:ignore - Reserved: TextEditorExtractorAdapter enum — reserved for future feature activation
 private enum TextEditorExtractorAdapter: ContextExtractorPlugin {
     static let pluginID = "text-editors"
     // periphery:ignore - Reserved: TextEditorExtractorAdapter type reserved for future feature activation
@@ -236,6 +245,7 @@ private enum TextEditorExtractorAdapter: ContextExtractorPlugin {
     }
 }
 
+// periphery:ignore - Reserved: SafariExtractorAdapter enum — reserved for future feature activation
 private enum SafariExtractorAdapter: ContextExtractorPlugin {
     // periphery:ignore - Reserved: SafariExtractorAdapter type reserved for future feature activation
     static let pluginID = "com.apple.Safari"

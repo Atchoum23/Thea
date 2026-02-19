@@ -22,6 +22,7 @@ public final class CrossDeviceNotificationPreferences: ObservableObject {
     private let logger = Logger(subsystem: "app.thea", category: "NotificationPreferences")
     private let defaults = UserDefaults.standard
     private let cloudKeyValueStore = NSUbiquitousKeyValueStore.default
+    // periphery:ignore - Reserved: cancellables property — reserved for future feature activation
     private var cancellables = Set<AnyCancellable>()
 
 // periphery:ignore - Reserved: cancellables property reserved for future feature activation

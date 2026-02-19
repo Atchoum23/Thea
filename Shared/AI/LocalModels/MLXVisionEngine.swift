@@ -33,6 +33,7 @@ final class MLXVisionEngine {
     /// Default VLM — works on all Macs (8B 4-bit quantization)
     static let qwen3VL8B  = "mlx-community/Qwen3-VL-8B-Instruct-4bit"
     /// High-capability VLM — MSM3U only (32B 4-bit quantization, requires ~20GB VRAM)
+    // periphery:ignore - Reserved: qwen3VL32B static property — reserved for future feature activation
     static let qwen3VL32B = "mlx-community/Qwen3-VL-32B-Instruct-4bit"
 
     // MARK: - State
@@ -93,6 +94,7 @@ final class MLXVisionEngine {
     }
 
     /// Load a VLM from a local directory
+    // periphery:ignore - Reserved: loadLocalModel(path:) instance method — reserved for future feature activation
     func loadLocalModel(path: URL) async throws -> ModelContainer {
         let modelID = path.path
         // periphery:ignore - Reserved: loadLocalModel(path:) instance method reserved for future feature activation
@@ -129,6 +131,7 @@ final class MLXVisionEngine {
         }
     }
 
+    // periphery:ignore - Reserved: unloadModel() instance method — reserved for future feature activation
     func unloadModel() {
         // periphery:ignore - Reserved: unloadModel() instance method reserved for future feature activation
         loadedModel = nil

@@ -63,6 +63,7 @@ final class AutomaticPromptEngineering {
         loadConfiguration()
     }
 
+    // periphery:ignore - Reserved: setModelContext(_:) instance method — reserved for future feature activation
     func setModelContext(_ context: ModelContext) {
         modelContext = context
     }
@@ -71,6 +72,7 @@ final class AutomaticPromptEngineering {
 
     /// Automatically engineers the optimal prompt for any user input
     /// This is the main method users should call - handles everything automatically
+    // periphery:ignore - Reserved: engineerPrompt(userInput:taskType:additionalContext:) instance method — reserved for future feature activation
     func engineerPrompt(
         userInput: String,
         taskType: TaskType? = nil,
@@ -122,6 +124,7 @@ final class AutomaticPromptEngineering {
 
     // MARK: - Context Gathering
 
+    // periphery:ignore - Reserved: GatheredContext type — reserved for future feature activation
     private struct GatheredContext {
         var systemContext: String = ""
         var domainContext: String = ""
@@ -132,6 +135,7 @@ final class AutomaticPromptEngineering {
         var estimatedComplexity: PromptComplexityLevel = .medium
     }
 
+    // periphery:ignore - Reserved: gatherContext(for:taskType:additional:) instance method — reserved for future feature activation
     private func gatherContext(
         for input: String,
         taskType: TaskType,
@@ -183,6 +187,7 @@ final class AutomaticPromptEngineering {
         return context
     }
 
+    // periphery:ignore - Reserved: getSystemContext() instance method — reserved for future feature activation
     private func getSystemContext() async -> String {
         var parts: [String] = []
 
@@ -209,6 +214,7 @@ final class AutomaticPromptEngineering {
         return parts.joined(separator: "\n")
     }
 
+    // periphery:ignore - Reserved: getDomainContext(for:) instance method — reserved for future feature activation
     private func getDomainContext(for taskType: TaskType) -> String {
         switch taskType {
         case .codeGeneration, .debugging:
@@ -282,6 +288,7 @@ final class AutomaticPromptEngineering {
         }
     }
 
+    // periphery:ignore - Reserved: getUserPreferences(for:) instance method — reserved for future feature activation
     private func getUserPreferences(for taskType: TaskType) async -> [String: String]? {
         guard let context = modelContext else { return nil }
 
@@ -304,6 +311,7 @@ final class AutomaticPromptEngineering {
         return filtered.isEmpty ? nil : filtered
     }
 
+    // periphery:ignore - Reserved: selectRelevantExamples(for:taskType:) instance method — reserved for future feature activation
     private func selectRelevantExamples(for input: String, taskType: TaskType) async -> [String] {
         guard let context = modelContext else { return [] }
 
@@ -346,6 +354,7 @@ final class AutomaticPromptEngineering {
         return topExamples.map { "Input: \($0.example.inputExample)\nOutput: \($0.example.outputExample)" }
     }
 
+    // periphery:ignore - Reserved: getRelevantErrorPatterns(for:) instance method — reserved for future feature activation
     private func getRelevantErrorPatterns(for taskType: TaskType) async -> [String] {
         guard let context = modelContext else { return [] }
 
@@ -374,6 +383,7 @@ final class AutomaticPromptEngineering {
             .map { $0.preventionRule.isEmpty ? "Avoid: \($0.errorMessage)" : $0.preventionRule }
     }
 
+    // periphery:ignore - Reserved: estimateComplexity(input:taskType:) instance method — reserved for future feature activation
     private func estimateComplexity(input: String, taskType: TaskType) -> PromptComplexityLevel {
         let wordCount = input.split(separator: " ").count
 
@@ -424,6 +434,7 @@ final class AutomaticPromptEngineering {
         case reAct            // Reasoning + Acting pattern
     }
 
+    // periphery:ignore - Reserved: selectReasoningStrategy(for:complexity:) instance method — reserved for future feature activation
     private func selectReasoningStrategy(
         for taskType: TaskType,
         complexity: PromptComplexityLevel
@@ -456,6 +467,7 @@ final class AutomaticPromptEngineering {
 
     // MARK: - Prompt Building
 
+    // periphery:ignore - Reserved: buildOptimizedPrompt(input:taskType:context:strategy:) instance method — reserved for future feature activation
     private func buildOptimizedPrompt(
         input: String,
         taskType: TaskType,
@@ -528,6 +540,7 @@ final class AutomaticPromptEngineering {
         )
     }
 
+    // periphery:ignore - Reserved: buildRoleSection(for:) instance method — reserved for future feature activation
     private func buildRoleSection(for taskType: TaskType) -> String {
         let role: String
         switch taskType {
@@ -553,6 +566,7 @@ final class AutomaticPromptEngineering {
         return "## Your Role\n\(role)"
     }
 
+    // periphery:ignore - Reserved: buildReasoningInstructions(for:) instance method — reserved for future feature activation
     private func buildReasoningInstructions(for strategy: ReasoningStrategy) -> String {
         switch strategy {
         case .direct:
@@ -611,6 +625,7 @@ final class AutomaticPromptEngineering {
         }
     }
 
+    // periphery:ignore - Reserved: buildOutputFormatSection(for:) instance method — reserved for future feature activation
     private func buildOutputFormatSection(for taskType: TaskType) -> String {
         switch taskType {
         case .codeGeneration:
@@ -707,6 +722,7 @@ final class AutomaticPromptEngineering {
         )
     }
 
+    // periphery:ignore - Reserved: getCachedPattern(for:) instance method — reserved for future feature activation
     func getCachedPattern(for key: String) -> String? {
         patternCache[key]?.pattern
     }
@@ -758,6 +774,7 @@ struct EngineeredPrompt: Sendable {
     let complexity: PromptComplexityLevel
     let appliedTechniques: [String]
 
+    // periphery:ignore - Reserved: summary property — reserved for future feature activation
     var summary: String {
         """
         Task: \(taskType.rawValue)

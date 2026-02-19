@@ -18,6 +18,7 @@ public final class NetworkManager: ObservableObject {
     // MARK: - URLSession
 
     private var defaultSession: URLSession
+    // periphery:ignore - Reserved: backgroundSession property — reserved for future feature activation
     private var backgroundSession: URLSession
     // periphery:ignore - Reserved: backgroundSession property reserved for future feature activation
     private let sessionDelegate = NetworkSessionDelegate()

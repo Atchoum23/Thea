@@ -10,6 +10,7 @@ import Foundation
 
 /// Manages execution context and handles compaction for long operations
 @MainActor
+// periphery:ignore - Reserved: BlueprintContextManager class — reserved for future feature activation
 final class BlueprintContextManager {
     // periphery:ignore - Reserved: BlueprintContextManager type reserved for future feature activation
     private var context: [String: Any] = [:]

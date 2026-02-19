@@ -336,6 +336,7 @@ final class PackageTracker: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: updateLabel(_:newLabel:) instance method — reserved for future feature activation
     func updateLabel(_ package: TrackedPackage, newLabel: String) {
         if let idx = packages.firstIndex(where: { $0.id == package.id }) {
             packages[idx].label = newLabel
@@ -344,6 +345,7 @@ final class PackageTracker: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: updateNotes(_:newNotes:) instance method — reserved for future feature activation
     func updateNotes(_ package: TrackedPackage, newNotes: String?) {
         if let idx = packages.firstIndex(where: { $0.id == package.id }) {
             // periphery:ignore - Reserved: updateNotes(_:newNotes:) instance method reserved for future feature activation
@@ -354,6 +356,7 @@ final class PackageTracker: ObservableObject {
 
     // MARK: - Detection
 
+    // periphery:ignore - Reserved: detectAndAdd(from:) instance method — reserved for future feature activation
     func detectAndAdd(from text: String) -> [TrackingNumberDetection] {
         // periphery:ignore - Reserved: detectAndAdd(from:) instance method reserved for future feature activation
         let detections = TrackingNumberDetection.detect(in: text)

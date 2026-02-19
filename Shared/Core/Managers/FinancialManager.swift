@@ -40,6 +40,7 @@ final class FinancialManager {
         return account
     }
 
+    // periphery:ignore - Reserved: removeAccount(_:) instance method — reserved for future feature activation
     func removeAccount(_ account: FinancialAccount) {
         modelContext?.delete(account)
         do { try modelContext?.save() } catch { financialLogger.error("Failed to save after removing account: \(error.localizedDescription)") }
@@ -71,6 +72,7 @@ final class FinancialManager {
         return transaction
     }
 
+    // periphery:ignore - Reserved: removeTransaction(_:) instance method — reserved for future feature activation
     func removeTransaction(_ transaction: FinancialTransaction) {
         modelContext?.delete(transaction)
         do { try modelContext?.save() } catch { financialLogger.error("Failed to save after removing transaction: \(error.localizedDescription)") }
@@ -78,6 +80,7 @@ final class FinancialManager {
     // periphery:ignore - Reserved: removeTransaction(_:) instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: clearAllData() instance method — reserved for future feature activation
     func clearAllData() {
         guard let context = modelContext else { return }
 
@@ -95,6 +98,7 @@ final class FinancialManager {
         isSyncing = false
     }
 
+    // periphery:ignore - Reserved: syncAccount(_:) instance method — reserved for future feature activation
     func syncAccount(_ account: FinancialAccount) async {
         isSyncing = true
 
@@ -116,6 +120,7 @@ final class FinancialManager {
 
     // MARK: - Analytics
 
+    // periphery:ignore - Reserved: getBalance(for:) instance method — reserved for future feature activation
     func getBalance(for accountId: UUID) -> Double {
         // periphery:ignore - Reserved: getBalance(for:) instance method reserved for future feature activation
         transactions

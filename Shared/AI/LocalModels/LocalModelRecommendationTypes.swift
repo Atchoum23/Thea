@@ -13,13 +13,19 @@ import Foundation
 struct InstalledLocalModel: Identifiable, Sendable {
     let id: UUID
     let name: String
+    // periphery:ignore - Reserved: source property — reserved for future feature activation
     let source: LocalModelSource
+    // periphery:ignore - Reserved: path property — reserved for future feature activation
     let path: String
     let sizeBytes: UInt64
+    // periphery:ignore - Reserved: quantization property — reserved for future feature activation
     let quantization: String?
+    // periphery:ignore - Reserved: capabilities property — reserved for future feature activation
     let capabilities: [LocalModelCapability]
+    // periphery:ignore - Reserved: installedDate property — reserved for future feature activation
     let installedDate: Date
 
+    // periphery:ignore - Reserved: formattedSize property — reserved for future feature activation
     var formattedSize: String {
         ByteCountFormatter.string(fromByteCount: Int64(sizeBytes), countStyle: .file)
     }
@@ -30,8 +36,11 @@ struct InstalledLocalModel: Identifiable, Sendable {
 struct DiscoveredModel: Identifiable, Sendable {
     let id: String
     let name: String
+    // periphery:ignore - Reserved: source property — reserved for future feature activation
     let source: LocalModelSource
+    // periphery:ignore - Reserved: author property — reserved for future feature activation
     let author: String
+    // periphery:ignore - Reserved: description property — reserved for future feature activation
     let description: String?
     // periphery:ignore - Reserved: source property reserved for future feature activation
     // periphery:ignore - Reserved: path property reserved for future feature activation
@@ -42,10 +51,13 @@ struct DiscoveredModel: Identifiable, Sendable {
     let likes: Int
     // periphery:ignore - Reserved: formattedSize property reserved for future feature activation
     let estimatedSizeGB: Double
+    // periphery:ignore - Reserved: quantization property — reserved for future feature activation
     let quantization: String?
     let capabilities: [LocalModelCapability]
     let benchmarks: ModelBenchmarks?
+    // periphery:ignore - Reserved: lastUpdated property — reserved for future feature activation
     let lastUpdated: Date
+    // periphery:ignore - Reserved: downloadURL property — reserved for future feature activation
     let downloadURL: String
 }
 
@@ -84,6 +96,7 @@ struct UserUsageProfile: Codable, Sendable {
     var totalTasks: Int = 0
     var lastActivityDate: Date?
 
+    // periphery:ignore - Reserved: recordTask(_:) instance method — reserved for future feature activation
     mutating func recordTask(_ type: TaskType) {
         totalTasks += 1
         let current = taskDistribution[type] ?? 0
@@ -104,10 +117,15 @@ struct UserUsageProfile: Codable, Sendable {
 struct SystemCapabilities: Sendable {
     let totalMemoryGB: Double
     let availableMemoryGB: Double
+    // periphery:ignore - Reserved: hasGPU property — reserved for future feature activation
     let hasGPU: Bool
+    // periphery:ignore - Reserved: isAppleSilicon property — reserved for future feature activation
     let isAppleSilicon: Bool
+    // periphery:ignore - Reserved: gpuCores property — reserved for future feature activation
     let gpuCores: Int
+    // periphery:ignore - Reserved: neuralEngineTOPS property — reserved for future feature activation
     let neuralEngineTOPS: Double
+    // periphery:ignore - Reserved: recommendedMaxModelGB property — reserved for future feature activation
     let recommendedMaxModelGB: Double
 }
 

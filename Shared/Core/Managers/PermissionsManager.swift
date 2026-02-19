@@ -50,6 +50,7 @@ final class PermissionsManager {
 
     // MARK: - State
 
+    // periphery:ignore - Reserved: hasCompletedOnboarding property — reserved for future feature activation
     private(set) var hasCompletedOnboarding: Bool {
         get { UserDefaults.standard.bool(forKey: "hasCompletedOnboarding") }
         set { UserDefaults.standard.set(newValue, forKey: "hasCompletedOnboarding") }
@@ -247,6 +248,7 @@ final class PermissionsManager {
 
     // MARK: - Request All Permissions
 
+    // periphery:ignore - Reserved: requestAllPermissions() instance method — reserved for future feature activation
     func requestAllPermissions() async {
         await requestSpeechRecognition()
         await requestMicrophone()
@@ -267,6 +269,7 @@ final class PermissionsManager {
 
     // MARK: - Individual Permission Requests
 
+    // periphery:ignore - Reserved: requestSpeechRecognition() instance method — reserved for future feature activation
     func requestSpeechRecognition() async {
         let status = await withCheckedContinuation { continuation in
             SFSpeechRecognizer.requestAuthorization { status in
@@ -300,6 +303,7 @@ final class PermissionsManager {
         }
     }
 
+    // periphery:ignore - Reserved: requestContacts() instance method — reserved for future feature activation
     func requestContacts() async {
         #if os(iOS) || os(macOS)
             let store = CNContactStore()
@@ -313,6 +317,7 @@ final class PermissionsManager {
         #endif
     }
 
+    // periphery:ignore - Reserved: requestCalendar() instance method — reserved for future feature activation
     func requestCalendar() async {
         let store = EKEventStore()
         do {
@@ -324,6 +329,7 @@ final class PermissionsManager {
         }
     }
 
+    // periphery:ignore - Reserved: requestPhotos() instance method — reserved for future feature activation
     func requestPhotos() async {
         #if os(iOS) || os(macOS)
             let status = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
@@ -332,6 +338,7 @@ final class PermissionsManager {
     // periphery:ignore - Reserved: requestPhotos() instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: requestLocation() instance method — reserved for future feature activation
     func requestLocation() async {
         #if os(iOS)
             let manager = CLLocationManager()
@@ -340,6 +347,7 @@ final class PermissionsManager {
         #endif
     }
 
+    // periphery:ignore - Reserved: requestFullDiskAccess() instance method — reserved for future feature activation
     func requestFullDiskAccess() async {
         #if os(macOS)
             fullDiskAccessStatus = checkFullDiskAccess()
@@ -413,6 +421,7 @@ final class PermissionsManager {
         }
     }
 
+    // periphery:ignore - Reserved: convertLocationStatus(_:) instance method — reserved for future feature activation
     private func convertLocationStatus(_ status: CLAuthorizationStatus) -> PermissionStatus {
         switch status {
         // periphery:ignore - Reserved: convertLocationStatus(_:) instance method reserved for future feature activation
@@ -456,6 +465,7 @@ final class PermissionsManager {
 
     // MARK: - Computed Properties
 
+    // periphery:ignore - Reserved: allPermissionsGranted property — reserved for future feature activation
     var allPermissionsGranted: Bool {
         // periphery:ignore - Reserved: allPermissionsGranted property reserved for future feature activation
         speechRecognitionStatus == .authorized &&

@@ -94,6 +94,7 @@ public final class ProactiveEngine: ObservableObject {
     // MARK: - Pattern Learning
 
     /// Record an action for pattern learning
+    // periphery:ignore - Reserved: context parameter — kept for API compatibility
     public func recordAction(_ action: String, context: [String: String] = [:]) {
         // periphery:ignore - Reserved: context parameter kept for API compatibility
         let now = Date()

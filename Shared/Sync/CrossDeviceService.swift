@@ -15,6 +15,7 @@ import os.log
 
 /// Central service for cross-device synchronization
 public actor CrossDeviceService {
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "ai.thea.app", category: "CrossDeviceService")
     public static let shared = CrossDeviceService()
 
@@ -29,6 +30,7 @@ public actor CrossDeviceService {
 
     private let container: CKContainer
     private let privateDatabase: CKDatabase
+    // periphery:ignore - Reserved: sharedDatabase property — reserved for future feature activation
     private let sharedDatabase: CKDatabase
     private let zoneID: CKRecordZone.ID
 
@@ -45,6 +47,7 @@ public actor CrossDeviceService {
     // MARK: - Transport
 
     /// Active transport for direct device communication (non-CloudKit paths)
+    // periphery:ignore - Reserved: activeTransport property — reserved for future feature activation
     private(set) var activeTransport: TheaTransport = .cloudKit
 
 // periphery:ignore - Reserved: activeTransport property reserved for future feature activation

@@ -14,6 +14,7 @@ final class OpenRouterProvider: AIProvider, Sendable {
         documentationURL: URL(string: "https://openrouter.ai/docs")!
     )
 
+    // periphery:ignore - Reserved: capabilities property — reserved for future feature activation
     let capabilities = ProviderCapabilities(
         supportsStreaming: true,
         // periphery:ignore - Reserved: capabilities property reserved for future feature activation
@@ -34,6 +35,7 @@ final class OpenRouterProvider: AIProvider, Sendable {
 
     // MARK: - Validation
 
+    // periphery:ignore - Reserved: validateAPIKey(_:) instance method — reserved for future feature activation
     func validateAPIKey(_ key: String) async throws -> ValidationResult {
         // periphery:ignore - Reserved: validateAPIKey(_:) instance method reserved for future feature activation
         guard let url = URL(string: "\(baseURL)/models") else {

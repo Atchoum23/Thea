@@ -42,6 +42,7 @@ extension FocusModeIntelligence {
     /// - Parameters:
     ///   - contactKey: The unique key identifying the contact.
     ///   - messageContent: The message text (used for confirmation checks).
+    // periphery:ignore - Reserved: trackMessageForEscalation(contactKey:messageContent:) instance method — reserved for future feature activation
     func trackMessageForEscalation(contactKey: String, messageContent: String) async {
         guard getGlobalSettings().smartEscalationEnabled else { return }
 
@@ -74,6 +75,7 @@ extension FocusModeIntelligence {
     /// - Parameters:
     ///   - contactKey: The unique key identifying the contact.
     ///   - messageCount: The number of messages received in the escalation window.
+    // periphery:ignore - Reserved: handleEscalation(contactKey:messageCount:) instance method — reserved for future feature activation
     func handleEscalation(contactKey: String, messageCount: Int) async {
         print("[Escalation] Contact \(contactKey) sent \(messageCount) messages in \(Int(getGlobalSettings().escalationTimeWindow))s window")
 
@@ -100,6 +102,7 @@ extension FocusModeIntelligence {
     /// - Parameters:
     ///   - contactKey: The unique key identifying the contact.
     ///   - messageContent: The response message to analyze.
+    // periphery:ignore - Reserved: checkEscalationConfirmation(contactKey:messageContent:) instance method — reserved for future feature activation
     func checkEscalationConfirmation(contactKey: String, messageContent: String) async {
         let language = await detectLanguage(for: contactKey, phoneNumber: contactKey, messageContent: messageContent)
 
@@ -141,6 +144,7 @@ extension FocusModeIntelligence {
     /// Send a local notification to the user about an urgent contact.
     ///
     /// - Parameter contactKey: The unique key identifying the urgent contact.
+    // periphery:ignore - Reserved: notifyUserOfUrgentContact(contactKey:) instance method — reserved for future feature activation
     func notifyUserOfUrgentContact(contactKey: String) async {
         let content = UNMutableNotificationContent()
         content.title = "\u{26A0}\u{FE0F} Urgent Message"
@@ -165,6 +169,7 @@ extension FocusModeIntelligence {
     ///
     /// - Parameter language: The BCP-47 language code for localization.
     /// - Returns: A localized availability message, or `nil` if unavailable.
+    // periphery:ignore - Reserved: getCalendarAwareMessage(language:) instance method — reserved for future feature activation
     func getCalendarAwareMessage(language: String) async -> String? {
         guard getGlobalSettings().calendarAwareRepliesEnabled else { return nil }
 
@@ -206,6 +211,7 @@ extension FocusModeIntelligence {
     ///
     /// - Parameter language: The BCP-47 language code for localization.
     /// - Returns: A localized next-available message, or `nil`.
+    // periphery:ignore - Reserved: getNextAvailableSlot(language:) instance method — reserved for future feature activation
     func getNextAvailableSlot(language: String) async -> String? {
         guard getGlobalSettings().includeNextAvailableSlot else { return nil }
 

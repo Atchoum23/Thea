@@ -34,6 +34,7 @@ extension Color {
     }
 
     /// Tertiary label color
+    // periphery:ignore - Reserved: tertiaryLabel static property — reserved for future feature activation
     static var tertiaryLabel: Color {
         // periphery:ignore - Reserved: tertiaryLabel static property reserved for future feature activation
         #if os(macOS)

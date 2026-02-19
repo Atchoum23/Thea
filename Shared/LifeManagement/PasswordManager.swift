@@ -192,6 +192,7 @@ private enum KeychainHelper {
         return status == errSecSuccess
     }
 
+    // periphery:ignore - Reserved: load(key:) static method — reserved for future feature activation
     static func load(key: String) -> Data? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -252,6 +253,7 @@ final class PasswordManager: ObservableObject {
         pwLogger.info("Added credential: \(entry.title)")
     }
 
+    // periphery:ignore - Reserved: updateEntry(_:newPassword:) instance method — reserved for future feature activation
     func updateEntry(_ entry: PasswordEntry, newPassword: String? = nil) {
         if let idx = entries.firstIndex(where: { $0.id == entry.id }) {
             // periphery:ignore - Reserved: updateEntry(_:newPassword:) instance method reserved for future feature activation
@@ -272,6 +274,7 @@ final class PasswordManager: ObservableObject {
         saveMetadata()
     }
 
+    // periphery:ignore - Reserved: getPassword(for:) instance method — reserved for future feature activation
     func getPassword(for id: UUID) -> String? {
         // periphery:ignore - Reserved: getPassword(for:) instance method reserved for future feature activation
         guard let data = KeychainHelper.load(key: keychainPrefix + id.uuidString) else { return nil }

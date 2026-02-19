@@ -20,6 +20,7 @@ import Intents
 // MARK: Ask with Context Intent
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
+// periphery:ignore - Reserved: AskWithContextIntent type — reserved for future feature activation
 struct AskWithContextIntent: AppIntent {
     nonisolated(unsafe) static var title: LocalizedStringResource = "Ask Thea with Context"
     nonisolated(unsafe) static var description: IntentDescription = "Ask Thea a question with additional context from files or clipboard"
@@ -126,6 +127,7 @@ enum ShortcutsAIHelper {
 // MARK: Generate Code Intent
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
+// periphery:ignore - Reserved: GenerateCodeIntent type — reserved for future feature activation
 struct GenerateCodeIntent: AppIntent {
     nonisolated(unsafe) static var title: LocalizedStringResource = "Generate Code"
     nonisolated(unsafe) static var description: IntentDescription = "Generate code using Thea AI"
@@ -169,6 +171,7 @@ struct GenerateCodeIntent: AppIntent {
 // MARK: Summarize Content Intent
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
+// periphery:ignore - Reserved: SummarizeContentIntent type — reserved for future feature activation
 struct SummarizeContentIntent: AppIntent {
     nonisolated(unsafe) static var title: LocalizedStringResource = "Summarize Content"
     // periphery:ignore - Reserved: SummarizeContentIntent type reserved for future feature activation
@@ -245,6 +248,7 @@ struct SummarizeContentIntent: AppIntent {
 // MARK: Translate Intent
 
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
+// periphery:ignore - Reserved: AutomationTranslateIntent type — reserved for future feature activation
 struct AutomationTranslateIntent: AppIntent {
     // periphery:ignore - Reserved: AutomationTranslateIntent type reserved for future feature activation
     nonisolated(unsafe) static var title: LocalizedStringResource = "Translate with Thea"

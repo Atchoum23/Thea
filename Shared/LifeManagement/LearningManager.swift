@@ -174,6 +174,7 @@ struct TrackedLearningResource: Codable, Sendable, Identifiable {
         }
     }
 
+    // periphery:ignore - Reserved: init(title:type:url:isCompleted:) initializer — reserved for future feature activation
     init(title: String, type: ResourceType = .article, url: String? = nil, isCompleted: Bool = false) {
         self.id = UUID()
         self.title = title
@@ -192,6 +193,7 @@ struct StudySession: Codable, Sendable, Identifiable {
     var notes: String
     var rating: Int // 1-5
 
+    // periphery:ignore - Reserved: init(date:durationMinutes:notes:rating:) initializer — reserved for future feature activation
     init(date: Date = Date(), durationMinutes: Int, notes: String = "", rating: Int = 3) {
         self.id = UUID()
         self.date = date
@@ -233,6 +235,7 @@ final class LearningTracker: ObservableObject {
         learnLogger.info("Added learning goal: \(goal.title)")
     }
 
+    // periphery:ignore - Reserved: updateGoal(_:) instance method — reserved for future feature activation
     func updateGoal(_ goal: TrackedLearningGoal) {
         if let idx = goals.firstIndex(where: { $0.id == goal.id }) {
             var updated = goal
@@ -248,6 +251,7 @@ final class LearningTracker: ObservableObject {
         save()
     }
 
+    // periphery:ignore - Reserved: addStudySession(goalID:session:) instance method — reserved for future feature activation
     func addStudySession(goalID: UUID, session: StudySession) {
         if let idx = goals.firstIndex(where: { $0.id == goalID }) {
             // periphery:ignore - Reserved: addStudySession(goalID:session:) instance method reserved for future feature activation
@@ -260,6 +264,7 @@ final class LearningTracker: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: addResource(goalID:resource:) instance method — reserved for future feature activation
     func addResource(goalID: UUID, resource: TrackedLearningResource) {
         // periphery:ignore - Reserved: addResource(goalID:resource:) instance method reserved for future feature activation
         if let idx = goals.firstIndex(where: { $0.id == goalID }) {

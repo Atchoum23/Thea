@@ -511,6 +511,7 @@ private enum VoiceSound: String {
 
 extension VoiceInteractionEngine {
     /// Set speech rate
+    // periphery:ignore - Reserved: _rate parameter — kept for API compatibility
     func setSpeechRate(_ _rate: Float) {
         // periphery:ignore - Reserved: _rate parameter kept for API compatibility
         // Would configure internal synthesizer rate

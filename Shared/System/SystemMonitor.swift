@@ -288,10 +288,12 @@ final class SystemMonitor: ObservableObject {
 
     // MARK: - Trend Data
 
+    // periphery:ignore - Reserved: cpuHistory property — reserved for future feature activation
     var cpuHistory: [(Date, Double)] {
         snapshots.map { ($0.timestamp, $0.cpu.totalUsage) }
     }
 
+    // periphery:ignore - Reserved: memoryHistory property — reserved for future feature activation
     var memoryHistory: [(Date, Double)] {
         // periphery:ignore - Reserved: cpuHistory property reserved for future feature activation
         snapshots.map { ($0.timestamp, $0.memory.usagePercent) }
@@ -570,6 +572,7 @@ final class SystemMonitor: ObservableObject {
         anomalies.removeAll()
     }
 
+    // periphery:ignore - Reserved: clearHistory() instance method — reserved for future feature activation
     func clearHistory() {
         // periphery:ignore - Reserved: clearHistory() instance method reserved for future feature activation
         snapshots.removeAll()

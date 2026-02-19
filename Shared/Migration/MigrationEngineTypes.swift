@@ -28,8 +28,10 @@ struct MigrationOptions: Sendable {
 struct MigrationEstimate: Sendable {
     let conversationCount: Int
     let projectCount: Int
+    // periphery:ignore - Reserved: attachmentCount property — reserved for future feature activation
     let attachmentCount: Int
     let totalSizeBytes: Int64
+    // periphery:ignore - Reserved: estimatedDurationSeconds property — reserved for future feature activation
     let estimatedDurationSeconds: Int
 }
 
@@ -46,6 +48,7 @@ struct MigrationProgress: Sendable {
     var projects: [MigratedProject]?
 }
 
+// periphery:ignore - Reserved: MigrationStats type — reserved for future feature activation
 struct MigrationStats: Sendable {
     let conversationCount: Int
     let messageCount: Int
@@ -70,6 +73,7 @@ struct MigratedConversation: Sendable {
     let createdAt: Date
     let updatedAt: Date
     let model: String
+    // periphery:ignore - Reserved: provider property — reserved for future feature activation
     let provider: String
 }
 
@@ -82,6 +86,7 @@ struct MigratedMessage: Sendable {
 
 struct MigratedProject: Sendable {
     let name: String
+    // periphery:ignore - Reserved: description property — reserved for future feature activation
     let description: String
     let instructions: String
     let createdAt: Date
@@ -101,8 +106,11 @@ struct MigrationSourceInfo {
 class MigrationJob: Identifiable, @unchecked Sendable {
     let id: UUID
     let source: String
+    // periphery:ignore - Reserved: startTime property — reserved for future feature activation
     let startTime: Date
+    // periphery:ignore - Reserved: endTime property — reserved for future feature activation
     var endTime: Date?
+    // periphery:ignore - Reserved: status property — reserved for future feature activation
     var status: MigrationStatus
     var progress: MigrationProgress
 
@@ -304,6 +312,7 @@ struct ChatGPTMigration: MigrationSource {
         }
     }
 
+    // periphery:ignore - Reserved: importFromExport(fileURL:) instance method — reserved for future feature activation
     func importFromExport(fileURL: URL) async throws -> AsyncThrowingStream<MigrationProgress, Error> {
         // periphery:ignore - Reserved: importFromExport(fileURL:) instance method reserved for future feature activation
         AsyncThrowingStream { continuation in

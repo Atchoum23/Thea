@@ -20,10 +20,12 @@ final class PromptTemplateLibrary {
         AppConfiguration.shared.promptEngineeringConfig
     }
 
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "ai.thea.app", category: "PromptTemplateLibrary")
 
     private init() {}
 
+    // periphery:ignore - Reserved: setModelContext(_:) instance method — reserved for future feature activation
     func setModelContext(_ context: ModelContext) {
         modelContext = context
         Task {
@@ -91,6 +93,7 @@ final class PromptTemplateLibrary {
 
     // MARK: - Default Templates Initialization
 
+    // periphery:ignore - Reserved: initializeDefaultTemplates() instance method — reserved for future feature activation
     private func initializeDefaultTemplates() async {
         guard let context = modelContext else { return }
 
@@ -123,6 +126,7 @@ final class PromptTemplateLibrary {
         }
     }
 
+    // periphery:ignore - Reserved: createDefaultTemplates() instance method — reserved for future feature activation
     private func createDefaultTemplates() -> [PromptTemplate] {
         var templates: [PromptTemplate] = []
 
@@ -435,6 +439,7 @@ final class PromptTemplateLibrary {
 
     // MARK: - Template CRUD Operations
 
+    // periphery:ignore - Reserved: getAllTemplates() instance method — reserved for future feature activation
     func getAllTemplates() async -> [PromptTemplate] {
         guard let context = modelContext else { return [] }
 
@@ -451,6 +456,7 @@ final class PromptTemplateLibrary {
         return allTemplates.sorted { ($0.category, $1.successRate) < ($1.category, $0.successRate) }
     }
 
+    // periphery:ignore - Reserved: getTemplatesByCategory(_:) instance method — reserved for future feature activation
     func getTemplatesByCategory(_ category: String) async -> [PromptTemplate] {
         guard let context = modelContext else { return [] }
 
@@ -469,6 +475,7 @@ final class PromptTemplateLibrary {
             .sorted { $0.successRate > $1.successRate }
     }
 
+    // periphery:ignore - Reserved: createTemplate(name:category:templateText:) instance method — reserved for future feature activation
     func createTemplate(
         name: String,
         category: String,
@@ -494,6 +501,7 @@ final class PromptTemplateLibrary {
         await refreshCache()
     }
 
+    // periphery:ignore - Reserved: updateTemplate(_:newText:createVersion:) instance method — reserved for future feature activation
     func updateTemplate(_ template: PromptTemplate, newText: String, createVersion: Bool) async {
         guard let context = modelContext else { return }
 
@@ -521,6 +529,7 @@ final class PromptTemplateLibrary {
         await refreshCache()
     }
 
+    // periphery:ignore - Reserved: deleteTemplate(_:) instance method — reserved for future feature activation
     func deleteTemplate(_ template: PromptTemplate) async {
         guard let context = modelContext else { return }
 
@@ -539,6 +548,7 @@ final class PromptTemplateLibrary {
 
     // MARK: - Analytics
 
+    // periphery:ignore - Reserved: getTemplatePerformance() instance method — reserved for future feature activation
     func getTemplatePerformance() async -> [TemplatePerformance] {
         // periphery:ignore - Reserved: getTemplatePerformance() instance method reserved for future feature activation
         let templates = await getAllTemplates()

@@ -37,6 +37,7 @@ final class FinancialIntegration {
 
     // MARK: - Account Connection
 
+    // periphery:ignore - Reserved: connectAccount(provider:credentials:) instance method — reserved for future feature activation
     func connectAccount(provider: String, credentials: FinancialCredentials) async throws -> ProviderAccount {
         guard let financialProvider = providers.first(where: { $0.providerName == provider }) else {
             throw FinancialError.providerNotFound
@@ -61,6 +62,7 @@ final class FinancialIntegration {
         return account
     }
 
+    // periphery:ignore - Reserved: disconnectAccount(_:) instance method — reserved for future feature activation
     func disconnectAccount(_ accountId: UUID) {
         connectedAccounts.removeAll { $0.id == accountId }
         transactions.removeAll { $0.accountId == accountId }
@@ -256,6 +258,7 @@ final class FinancialIntegration {
 
     // MARK: - Budgets
 
+    // periphery:ignore - Reserved: createBudget(category:limit:period:) instance method — reserved for future feature activation
     func createBudget(category: TransactionCategory, limit: Double, period: Budget.BudgetPeriod) -> Budget {
         let budget = Budget(
             id: UUID(),
@@ -271,6 +274,7 @@ final class FinancialIntegration {
         return budget
     }
 
+    // periphery:ignore - Reserved: updateBudgetSpending() instance method — reserved for future feature activation
     func updateBudgetSpending() {
         let now = Date()
 
@@ -323,6 +327,7 @@ final class FinancialIntegration {
         }
     }
 
+    // periphery:ignore - Reserved: calculateEndDate(_:) instance method — reserved for future feature activation
     private func calculateEndDate(_ period: Budget.BudgetPeriod) -> Date {
         let calendar = Calendar.current
         let now = Date()
@@ -341,6 +346,7 @@ final class FinancialIntegration {
 
     // MARK: - Investment Insights
 
+    // periphery:ignore - Reserved: getInvestmentStrategy() instance method — reserved for future feature activation
     func getInvestmentStrategy() async -> InvestmentStrategy {
         // AI-powered investment recommendations
         let totalBalance = connectedAccounts.reduce(0) { $0 + $1.balance }
@@ -362,6 +368,7 @@ final class FinancialIntegration {
         )
     }
 
+    // periphery:ignore - Reserved: estimateMonthlyIncome() instance method — reserved for future feature activation
     private func estimateMonthlyIncome() -> Double {
         // Estimate based on incoming transactions
         let income = transactions
@@ -383,6 +390,7 @@ final class FinancialIntegration {
         }
     }
 
+    // periphery:ignore - Reserved: saveAccounts() instance method — reserved for future feature activation
     private func saveAccounts() {
         do {
             let data = try JSONEncoder().encode(connectedAccounts)
@@ -402,6 +410,7 @@ final class FinancialIntegration {
         }
     }
 
+    // periphery:ignore - Reserved: saveBudgets() instance method — reserved for future feature activation
     private func saveBudgets() {
         do {
             let data = try JSONEncoder().encode(budgets)
@@ -427,6 +436,7 @@ protocol FinancialProvider: Sendable {
     // periphery:ignore - Reserved: saveBudgets() instance method reserved for future feature activation
     var providerType: FinancialProviderType { get }
 
+    // periphery:ignore - Reserved: authenticate(credentials:) instance method — reserved for future feature activation
     func authenticate(credentials: FinancialCredentials) async throws
     func fetchAccounts() async throws -> [ProviderAccount]
     func fetchTransactions(accountId: UUID, days: Int) async throws -> [Transaction]
@@ -492,10 +502,15 @@ struct Budget: Identifiable, Codable, Sendable {
 
 struct FinancialAlert: Identifiable, Sendable {
     let id: UUID
+    // periphery:ignore - Reserved: type property — reserved for future feature activation
     let type: AlertType
+    // periphery:ignore - Reserved: title property — reserved for future feature activation
     let title: String
+    // periphery:ignore - Reserved: message property — reserved for future feature activation
     let message: String
+    // periphery:ignore - Reserved: severity property — reserved for future feature activation
     let severity: AlertSeverity
+    // periphery:ignore - Reserved: timestamp property — reserved for future feature activation
     let timestamp: Date
 
     enum AlertType: String, Sendable {
@@ -528,7 +543,9 @@ struct FinancialInsight: Identifiable {
     let type: InsightType
     let title: String
     let description: String
+    // periphery:ignore - Reserved: actionable property — reserved for future feature activation
     let actionable: Bool
+    // periphery:ignore - Reserved: action property — reserved for future feature activation
     let action: String?
 
 // periphery:ignore - Reserved: FinancialProviderType type reserved for future feature activation
@@ -538,6 +555,7 @@ struct FinancialInsight: Identifiable {
     }
 }
 
+// periphery:ignore - Reserved: InvestmentStrategy type — reserved for future feature activation
 struct InvestmentStrategy {
     let recommendedSavingsRate: Double
     // periphery:ignore - Reserved: actionable property reserved for future feature activation
@@ -575,6 +593,7 @@ struct BinanceProvider: FinancialProvider {
     let providerName = "Binance"
     let providerType = FinancialProviderType.crypto
 
+    // periphery:ignore - Reserved: authenticate(credentials:) instance method — reserved for future feature activation
     func authenticate(credentials _: FinancialCredentials) async throws {
         // Binance API authentication
     }
@@ -595,6 +614,7 @@ struct CoinbaseProvider: FinancialProvider {
     let providerName = "Coinbase"
     let providerType = FinancialProviderType.crypto
 
+    // periphery:ignore - Reserved: authenticate(credentials:) instance method — reserved for future feature activation
     func authenticate(credentials _: FinancialCredentials) async throws {
         // periphery:ignore - Reserved: providerType property reserved for future feature activation
         // Coinbase API authentication

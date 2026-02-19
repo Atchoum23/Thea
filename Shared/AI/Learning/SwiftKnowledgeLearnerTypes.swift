@@ -13,6 +13,7 @@ enum UserFeedback: String, Codable, Sendable {
     case none
 }
 
+// periphery:ignore - Reserved: ConversationData type — reserved for future feature activation
 struct ConversationData: Sendable {
     let id: UUID
     let turns: [ConversationTurn]
@@ -25,6 +26,7 @@ struct ConversationTurn: Sendable {
     let feedback: UserFeedback?
 }
 
+// periphery:ignore - Reserved: LearningReport type — reserved for future feature activation
 struct LearningReport: Sendable {
     var turnsAnalyzed: Int = 0
     var patternsExtracted: Int = 0
@@ -44,6 +46,7 @@ final class SwiftLearnedPattern: Identifiable {
     var occurrenceCount = 1
     var lastSeen = Date()
 
+    // periphery:ignore - Reserved: init(category:patternSignature:exampleCode:context:confidence:) initializer — reserved for future feature activation
     init(category: String, patternSignature: String, exampleCode: String, context: String, confidence: Double) {
         // periphery:ignore - Reserved: ConversationData type reserved for future feature activation
         self.category = category
@@ -102,8 +105,10 @@ final class CodeSnippet: Identifiable {
     let purpose: String
     let tags: [String]
     let qualityScore: Double
+    // periphery:ignore - Reserved: createdAt property — reserved for future feature activation
     let createdAt = Date()
 
+    // periphery:ignore - Reserved: init(code:language:purpose:tags:qualityScore:) initializer — reserved for future feature activation
     init(code: String, language: String, purpose: String, tags: [String], qualityScore: Double) {
         self.code = code
         self.language = language
@@ -210,9 +215,13 @@ final class BestPractice: Identifiable {
     let id = UUID()
     let practiceId: String
     let category: String
+    // periphery:ignore - Reserved: title property — reserved for future feature activation
     let title: String
+    // periphery:ignore - Reserved: practiceDescription property — reserved for future feature activation
     let practiceDescription: String
+    // periphery:ignore - Reserved: exampleCode property — reserved for future feature activation
     let exampleCode: String
+    // periphery:ignore - Reserved: context property — reserved for future feature activation
     let context: String
 
     // periphery:ignore - Reserved: practiceId property reserved for future feature activation

@@ -73,17 +73,24 @@ enum DocumentComplexity: Sendable {
 
 /// Result from OCR processing
 struct OCRResult: Sendable {
+    // periphery:ignore - Reserved: text property — reserved for future feature activation
     let text: String
     let confidence: Double  // 0.0 - 1.0
     let detectedScript: OCRScript
+    // periphery:ignore - Reserved: provider property — reserved for future feature activation
     let provider: String
+    // periphery:ignore - Reserved: boundingBoxes property — reserved for future feature activation
     let boundingBoxes: [TextRegion]
     let processingTime: TimeInterval
+    // periphery:ignore - Reserved: languageHints property — reserved for future feature activation
     let languageHints: [String]
 
     struct TextRegion: Sendable {
+        // periphery:ignore - Reserved: text property — reserved for future feature activation
         let text: String
+        // periphery:ignore - Reserved: boundingBox property — reserved for future feature activation
         let boundingBox: CGRect
+        // periphery:ignore - Reserved: confidence property — reserved for future feature activation
         let confidence: Double
     }
 }
@@ -122,10 +129,12 @@ enum OCRError: Error, LocalizedError {
 
 /// Protocol for OCR providers
 protocol OCRProvider: Sendable {
+    // periphery:ignore - Reserved: providerName property — reserved for future feature activation
     var providerName: String { get }
     var supportedScripts: Set<OCRScript> { get }
     var accuracyTier: OCRAccuracyTier { get }
     var isAvailable: Bool { get }
+    // periphery:ignore - Reserved: requiresNetwork property — reserved for future feature activation
     var requiresNetwork: Bool { get }
 
     func extractText(from image: CGImage, languages: [String]?) async throws -> OCRResult
@@ -139,6 +148,7 @@ protocol OCRProvider: Sendable {
 final class VisionOCRProvider: OCRProvider, @unchecked Sendable {
     let providerName = "Apple Vision"
     let accuracyTier = OCRAccuracyTier.standard
+    // periphery:ignore - Reserved: requiresNetwork property — reserved for future feature activation
     let requiresNetwork = false
 
     var supportedScripts: Set<OCRScript> {
@@ -276,6 +286,7 @@ final class VisionOCRProvider: OCRProvider, @unchecked Sendable {
 @MainActor
 @Observable
 final class AdaptiveOCREngine {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = AdaptiveOCREngine()
 
     // Available providers
@@ -406,11 +417,13 @@ final class AdaptiveOCREngine {
     // MARK: - Configuration
 
     /// Set preference for offline processing
+    // periphery:ignore - Reserved: setPreferOffline(_:) instance method — reserved for future feature activation
     func setPreferOffline(_ prefer: Bool) {
         preferOffline = prefer
     }
 
     /// Set minimum accuracy tier required
+    // periphery:ignore - Reserved: setMinimumAccuracyTier(_:) instance method — reserved for future feature activation
     func setMinimumAccuracyTier(_ tier: OCRAccuracyTier) {
         // periphery:ignore - Reserved: setPreferOffline(_:) instance method reserved for future feature activation
         minimumAccuracyTier = tier
@@ -438,6 +451,7 @@ final class AdaptiveOCREngine {
     }
 
     /// Get available providers
+    // periphery:ignore - Reserved: availableProviders property — reserved for future feature activation
     var availableProviders: [OCRProvider] {
         var providers: [OCRProvider] = [visionProvider]
         // periphery:ignore - Reserved: availableProviders property reserved for future feature activation
@@ -446,6 +460,7 @@ final class AdaptiveOCREngine {
     }
 
     /// Get supported scripts across all providers
+    // periphery:ignore - Reserved: supportedScripts property — reserved for future feature activation
     var supportedScripts: Set<OCRScript> {
         // periphery:ignore - Reserved: supportedScripts property reserved for future feature activation
         var scripts = visionProvider.supportedScripts

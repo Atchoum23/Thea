@@ -55,6 +55,7 @@
         }
 
         /// Strip all ANSI codes from text
+        // periphery:ignore - Reserved: stripANSI(_:) static method — reserved for future feature activation
         static func stripANSI(_ text: String) -> String {
             let pattern = "\u{001B}\\[[0-9;]*m"
             let regex: NSRegularExpression
@@ -71,6 +72,7 @@
         // MARK: - Structured Output Parsing
 
         /// Detect if output is JSON
+        // periphery:ignore - Reserved: isJSON(_:) static method — reserved for future feature activation
         static func isJSON(_ text: String) -> Bool {
             let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
             return (trimmed.hasPrefix("{") && trimmed.hasSuffix("}")) ||
@@ -79,6 +81,7 @@
         }
 
         /// Parse JSON output
+        // periphery:ignore - Reserved: parseJSON(_:) static method — reserved for future feature activation
         static func parseJSON(_ text: String) -> Any? {
             guard let data = text.data(using: .utf8) else { return nil }
             do {
@@ -187,11 +190,15 @@
 
     struct ANSIStyle {
         var foregroundColor: Color?
+        // periphery:ignore - Reserved: backgroundColor property — reserved for future feature activation
         var backgroundColor: Color?
         var isBold: Bool = false
+        // periphery:ignore - Reserved: isDim property — reserved for future feature activation
         var isDim: Bool = false
+        // periphery:ignore - Reserved: isItalic property — reserved for future feature activation
         var isItalic: Bool = false
         var isUnderline: Bool = false
+        // periphery:ignore - Reserved: isStrikethrough property — reserved for future feature activation
         var isStrikethrough: Bool = false
 
         func applying(codes: [Int]) -> ANSIStyle {
@@ -263,7 +270,9 @@
 
     struct TerminalErrorInfo: Identifiable {
         let id = UUID()
+        // periphery:ignore - Reserved: line property — reserved for future feature activation
         let line: String
+        // periphery:ignore - Reserved: type property — reserved for future feature activation
         let type: ErrorType
     }
 

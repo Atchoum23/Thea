@@ -32,6 +32,7 @@ final class HomeViewModel {
     var showingCommandPalette: Bool = false
 
     /// Active conversation (synced with ChatManager)
+    // periphery:ignore - Reserved: activeConversation property — reserved for future feature activation
     var activeConversation: Conversation? {
         chatManager.activeConversation
     }
@@ -39,6 +40,7 @@ final class HomeViewModel {
     // MARK: - Dependencies
 
     @ObservationIgnored private let chatManager: ChatManager
+    // periphery:ignore - Reserved: settingsManager property — reserved for future feature activation
     @ObservationIgnored private let settingsManager: SettingsManager
 
     // MARK: - Child ViewModels
@@ -74,6 +76,7 @@ final class HomeViewModel {
     }
 
     /// Show new conversation UI
+    // periphery:ignore - Reserved: showNewConversation() instance method — reserved for future feature activation
     func showNewConversation() {
         showingNewConversation = true
     // periphery:ignore - Reserved: toggleSidebar() instance method reserved for future feature activation

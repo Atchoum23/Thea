@@ -111,6 +111,7 @@ extension LocalModelRecommendationEngine {
     }
 
     /// Get AI-powered recommendation for optimal model based on current system state
+    // periphery:ignore - Reserved: getOptimalModelRecommendation() instance method — reserved for future feature activation
     func getOptimalModelRecommendation() -> ModelRecommendation? {
         // periphery:ignore - Reserved: getOptimalModelRecommendation() instance method reserved for future feature activation
         recommendations.first

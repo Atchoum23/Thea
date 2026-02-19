@@ -496,12 +496,14 @@ import Network
         // SECURITY: These methods are kept as stubs but will never be called
         // They remain for API compatibility but throw immediately
 
+        // periphery:ignore - Reserved: performHTTPRequest(url:method:headers:body:) instance method — reserved for future feature activation
         private func performHTTPRequest(url _: URL, method _: String, headers _: [String: String], body _: Data?) async throws -> NetworkProxyResponse {
             // SECURITY FIX (FINDING-001): HTTP proxy disabled
             // periphery:ignore - Reserved: performHTTPRequest(url:method:headers:body:) instance method reserved for future feature activation
             throw RemoteServerError.featureDisabled("HTTP proxy disabled for security")
         }
 
+        // periphery:ignore - Reserved: establishTCPProxy(host:port:) instance method — reserved for future feature activation
         private func establishTCPProxy(host _: String, port _: Int) async throws -> NetworkProxyResponse {
             // periphery:ignore - Reserved: establishTCPProxy(host:port:) instance method reserved for future feature activation
             // SECURITY FIX (FINDING-001): TCP proxy disabled

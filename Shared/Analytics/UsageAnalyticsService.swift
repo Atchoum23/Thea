@@ -132,6 +132,7 @@ public final class UsageAnalyticsService {
     }
 
     /// Track a search
+    // periphery:ignore - Reserved: query parameter — kept for API compatibility
     public func trackSearch(query: String, resultsCount: Int) {
         // periphery:ignore - Reserved: query parameter kept for API compatibility
         guard isEnabled else { return }

@@ -60,6 +60,7 @@ enum CDCorrelationStrength: String, Codable, Sendable {
     case strong       // 0.5 <= |r| < 0.7
     case veryStrong   // |r| >= 0.7
 
+    // periphery:ignore - Reserved: from(coefficient:) static method — reserved for future feature activation
     static func from(coefficient: Double) -> CDCorrelationStrength {
         let absR = abs(coefficient)
         switch absR {
@@ -85,6 +86,7 @@ struct CorrelationResult: Codable, Sendable, Identifiable {
     // periphery:ignore - Reserved: from(coefficient:) static method reserved for future feature activation
     let discoveredAt: Date
 
+    // periphery:ignore - Reserved: init(metric1:metric2:coefficient:sampleSize:insight:discoveredAt:) initializer — reserved for future feature activation
     init(
         metric1: String,
         metric2: String,
@@ -121,6 +123,7 @@ private struct MetricPair {
 @MainActor
 @Observable
 final class CrossDomainCorrelationEngine {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = CrossDomainCorrelationEngine()
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "CrossDomainCorrelation")
@@ -165,6 +168,7 @@ final class CrossDomainCorrelationEngine {
     // MARK: - Capture Today's Snapshot
 
     /// Builds today's DailyLifeSnapshot by querying all data sources.
+    // periphery:ignore - Reserved: captureToday() instance method — reserved for future feature activation
     func captureToday() async {
         guard !isCaptureInProgress else {
             logger.debug("Capture already in progress, skipping")
@@ -235,6 +239,7 @@ final class CrossDomainCorrelationEngine {
     // MARK: - Correlation Analysis
 
     /// Runs Pearson correlation on all metric pairs. Requires at least 7 days of data.
+    // periphery:ignore - Reserved: analyzeCorrelations() instance method — reserved for future feature activation
     func analyzeCorrelations() {
         guard snapshots.count >= 7 else {
             logger.info("Need at least 7 snapshots for correlation analysis (have \(self.snapshots.count))")
@@ -297,6 +302,7 @@ final class CrossDomainCorrelationEngine {
 
     /// Standard Pearson product-moment correlation coefficient.
     /// Returns a value in [-1, 1], or NaN if computation fails.
+    // periphery:ignore - Reserved: pearsonCorrelation(_:_:) instance method — reserved for future feature activation
     func pearsonCorrelation(_ x: [Double], _ y: [Double]) -> Double {
         let n = Double(x.count)
         guard x.count == y.count, x.count >= 2 else { return .nan }
@@ -325,6 +331,7 @@ final class CrossDomainCorrelationEngine {
     // MARK: - Insight Generation
 
     /// Produces human-readable insights from significant correlations.
+    // periphery:ignore - Reserved: generateInsights() instance method — reserved for future feature activation
     func generateInsights() -> [String] {
         discoveredCorrelations
             .sorted { abs($0.coefficient) > abs($1.coefficient) }
@@ -334,6 +341,7 @@ final class CrossDomainCorrelationEngine {
     // MARK: - Top Correlations
 
     /// Returns the top N correlations sorted by absolute coefficient value.
+    // periphery:ignore - Reserved: topCorrelations(limit:) instance method — reserved for future feature activation
     func topCorrelations(limit: Int = 5) -> [CorrelationResult] {
         Array(
             discoveredCorrelations
@@ -346,6 +354,7 @@ final class CrossDomainCorrelationEngine {
     // MARK: - Metric Pair Definitions
 
     // swiftlint:disable:next function_body_length
+    // periphery:ignore - Reserved: buildMetricPairs() instance method — reserved for future feature activation
     private func buildMetricPairs() -> [MetricPair] {
         [
             // periphery:ignore - Reserved: topCorrelations(limit:) instance method reserved for future feature activation
@@ -494,6 +503,7 @@ final class CrossDomainCorrelationEngine {
 
     /// Overrides analyzeCorrelations to handle the deep sleep -> next-day productivity offset pair.
     /// Called internally within analyzeCorrelations.
+    // periphery:ignore - Reserved: analyzeOffsetPairs() instance method — reserved for future feature activation
     private func analyzeOffsetPairs() -> [CorrelationResult] {
         var results: [CorrelationResult] = []
         let calendar = Calendar.current
@@ -544,6 +554,7 @@ final class CrossDomainCorrelationEngine {
 
     // MARK: - Insight Generators (Static)
 
+    // periphery:ignore - Reserved: generateSleepProductivityInsight(r:snapshots:) static method — reserved for future feature activation
     private static func generateSleepProductivityInsight(r: Double, snapshots: [DailyLifeSnapshot]) -> String {
         let highSleepDays = snapshots.filter { $0.sleepHours >= 7 }
         let lowSleepDays = snapshots.filter { $0.sleepHours < 7 }
@@ -565,6 +576,7 @@ final class CrossDomainCorrelationEngine {
         return "Sleep duration and productivity are correlated (r=\(String(format: "%.2f", r)))."
     }
 
+    // periphery:ignore - Reserved: generateExerciseMoodInsight(r:snapshots:) static method — reserved for future feature activation
     private static func generateExerciseMoodInsight(r: Double, snapshots: [DailyLifeSnapshot]) -> String {
         let exerciseDays = snapshots.filter { $0.exerciseMinutes >= 30 }
         let sedentaryDays = snapshots.filter { $0.exerciseMinutes < 30 }
@@ -587,6 +599,7 @@ final class CrossDomainCorrelationEngine {
 
     #if canImport(HealthKit)
 
+    // periphery:ignore - Reserved: fetchSleepData(start:end:) instance method — reserved for future feature activation
     private func fetchSleepData(start: Date, end: Date) async -> (hours: Double, quality: Double, remMin: Double, deepMin: Double) {
         // Query sleep analysis for the preceding night (look back 24h from start of day)
         let sleepStart = start.addingTimeInterval(-12 * 3600) // 12h before start of day
@@ -640,6 +653,7 @@ final class CrossDomainCorrelationEngine {
         }
     }
 
+    // periphery:ignore - Reserved: fetchActivityData(start:end:) instance method — reserved for future feature activation
     private func fetchActivityData(start: Date, end: Date) async -> (exerciseMin: Double, steps: Double, activeCal: Double) {
         async let exerciseMin = fetchQuantitySum(.appleExerciseTime, unit: .minute(), start: start, end: end)
         async let steps = fetchQuantitySum(.stepCount, unit: .count(), start: start, end: end)
@@ -667,6 +681,7 @@ final class CrossDomainCorrelationEngine {
         }
     }
 
+    // periphery:ignore - Reserved: fetchHRV(start:end:) instance method — reserved for future feature activation
     private func fetchHRV(start: Date, end: Date) async -> Double {
         let hrvType = HKQuantityType(.heartRateVariabilitySDNN)
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
@@ -684,6 +699,7 @@ final class CrossDomainCorrelationEngine {
         }
     }
 
+    // periphery:ignore - Reserved: fetchQuantitySum(_:unit:start:end:) instance method — reserved for future feature activation
     private func fetchQuantitySum(_ identifier: HKQuantityTypeIdentifier, unit: HKUnit, start: Date, end: Date) async -> Double? {
         let quantityType = HKQuantityType(identifier)
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
@@ -720,6 +736,7 @@ final class CrossDomainCorrelationEngine {
 
     // MARK: - Mood / Stress Estimation
 
+    // periphery:ignore - Reserved: estimateStressLevel() instance method — reserved for future feature activation
     private func estimateStressLevel() -> Double {
         let mood = MoodTracker.shared.currentMood
         let trend = MoodTracker.shared.moodTrend(hours: 6)
@@ -738,6 +755,7 @@ final class CrossDomainCorrelationEngine {
 
     // MARK: - Productivity Estimation
 
+    // periphery:ignore - Reserved: estimateProductivity() instance method — reserved for future feature activation
     private func estimateProductivity() -> (score: Double, deepWorkMinutes: Double) {
         let context = BehavioralFingerprint.shared.currentContext()
 
@@ -779,6 +797,7 @@ final class CrossDomainCorrelationEngine {
 
     // MARK: - Weather Data
 
+    // periphery:ignore - Reserved: fetchWeatherData() instance method — reserved for future feature activation
     private func fetchWeatherData() -> (temp: Double, humidity: Double, pressure: Double, uv: Double) {
         // periphery:ignore - Reserved: fetchWeatherData() instance method reserved for future feature activation
         guard let weather = WeatherMonitor.shared.currentWeather else {

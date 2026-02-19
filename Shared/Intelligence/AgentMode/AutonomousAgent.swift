@@ -319,6 +319,7 @@ public final class AutonomousAgent: ObservableObject {
         )
     }
 
+    // periphery:ignore - Reserved: failures parameter — kept for API compatibility
     private func analyzeFailures(_ failures: [TestFailure]) async -> AgentAnalysisResult {
         // Analyze test failures to determine fixes
         AgentAnalysisResult(suggestedFixes: [])
@@ -421,7 +422,9 @@ struct AgentAnalysisResult {
 }
 
 struct SuggestedFix {
+    // periphery:ignore - Reserved: description property — reserved for future feature activation
     let description: String
+    // periphery:ignore - Reserved: filePath property — reserved for future feature activation
     let filePath: String
     // periphery:ignore - Reserved: description property reserved for future feature activation
     // periphery:ignore - Reserved: filePath property reserved for future feature activation

@@ -32,6 +32,7 @@ extension LocalModelRecommendationEngine {
         }
     }
 
+    // periphery:ignore - Reserved: stopMonitoring() instance method — reserved for future feature activation
     func stopMonitoring() {
         monitoringTask?.cancel()
         monitoringTask = nil
@@ -43,6 +44,7 @@ extension LocalModelRecommendationEngine {
 
 extension LocalModelRecommendationEngine {
     /// Record user activity to improve recommendations
+    // periphery:ignore - Reserved: recordUserActivity(taskType:) instance method — reserved for future feature activation
     func recordUserActivity(taskType: TaskType) {
         userProfile.recordTask(taskType)
         // periphery:ignore - Reserved: recordUserActivity(taskType:) instance method reserved for future feature activation
@@ -58,6 +60,7 @@ extension LocalModelRecommendationEngine {
 // MARK: - Configuration
 
 extension LocalModelRecommendationEngine {
+    // periphery:ignore - Reserved: updateConfiguration(_:) instance method — reserved for future feature activation
     func updateConfiguration(_ config: Configuration) {
         // periphery:ignore - Reserved: updateConfiguration(_:) instance method reserved for future feature activation
         configuration = config

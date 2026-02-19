@@ -180,6 +180,7 @@ final class SyncConflictManager: ObservableObject {
     @Published var pendingConflicts: [SyncConflictItem] = []
     @Published var activeConflict: SyncConflictItem?
 
+    // periphery:ignore - Reserved: hasConflicts property — reserved for future feature activation
     var hasConflicts: Bool { !pendingConflicts.isEmpty }
 
 // periphery:ignore - Reserved: hasConflicts property reserved for future feature activation

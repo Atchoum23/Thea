@@ -99,6 +99,7 @@ final class BehavioralFingerprint {
     // MARK: - Convenience Aliases
 
     /// Alias for saveToDisk() — used by orchestrator
+    // periphery:ignore - Reserved: save() instance method — reserved for future feature activation
     func save() { saveToDisk() }
 
     /// Alias for loadFromDisk() — used by orchestrator
@@ -126,6 +127,7 @@ final class BehavioralFingerprint {
     }
 
     /// Find the best time for a specific activity type on a given day
+    // periphery:ignore - Reserved: bestTimeFor(_:on:) instance method — reserved for future feature activation
     func bestTimeFor(_ activity: BehavioralActivityType, on day: DayOfWeek) -> Int? {
         let daySlots = timeSlots[day.index]
         var bestHour: Int?
@@ -270,6 +272,7 @@ struct TimeSlot: Codable, Sendable {
         if engaged { notificationsEngaged += 1 }
     }
 
+    // periphery:ignore - Reserved: activityScore(for:) instance method — reserved for future feature activation
     func activityScore(for activity: BehavioralActivityType) -> Double {
         let total = activityCounts.values.reduce(0, +)
         guard total > 0 else { return 0 }
@@ -309,6 +312,7 @@ enum DayOfWeek: String, Sendable, CaseIterable {
 }
 
 struct BehavioralHourSummary: Sendable {
+    // periphery:ignore - Reserved: hour property — reserved for future feature activation
     let hour: Int
     let dominantActivity: BehavioralActivityType
     // periphery:ignore - Reserved: hour property reserved for future feature activation

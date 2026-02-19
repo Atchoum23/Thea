@@ -418,6 +418,7 @@ public actor IdleTimeMonitor: ActivityMonitor {
 
     private let logger: ActivityLogger
     private var checkTask: Task<Void, Never>?
+    // periphery:ignore - Reserved: lastActiveTime property — reserved for future feature activation
     private var lastActiveTime: Date?
     // periphery:ignore - Reserved: lastActiveTime property reserved for future feature activation
     private var isCurrentlyIdle = false

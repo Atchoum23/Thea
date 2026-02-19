@@ -26,6 +26,7 @@ enum ErrorLogger {
     }
 
     /// Log a warning (non-error condition that may indicate a problem)
+    // periphery:ignore - Reserved: warn(_:file:function:line:) static method — reserved for future feature activation
     static func warn(
         // periphery:ignore - Reserved: warn(_:file:function:line:) static method reserved for future feature activation
         _ message: String,

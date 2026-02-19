@@ -31,6 +31,7 @@ public final class SkillsRegistryService: ObservableObject {
 
     private let cacheURL: URL
     private let installedSkillsURL: URL
+    // periphery:ignore - Reserved: dependencyScanner property — reserved for future feature activation
     private var dependencyScanner: DependencyScanner?
 
     // periphery:ignore - Reserved: dependencyScanner property reserved for future feature activation
@@ -166,6 +167,7 @@ public final class SkillsRegistryService: ObservableObject {
     // MARK: - Reviews & Votes (Smithery Feature)
 
     /// Get reviews for a skill
+    // periphery:ignore - Reserved: skillId parameter — kept for API compatibility
     public func getReviews(skillId: String) async throws -> [SkillReview] {
         // periphery:ignore - Reserved: skillId parameter kept for API compatibility
         // In production, this would fetch from API

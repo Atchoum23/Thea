@@ -9,8 +9,10 @@ struct DiscoveredDeviceInfo: Identifiable {
     let id = UUID()
     let name: String
     let host: String
+    // periphery:ignore - Reserved: port property — reserved for future feature activation
     let port: Int
     let platform: String
+    // periphery:ignore - Reserved: lastSeen property — reserved for future feature activation
     let lastSeen: Date
 // periphery:ignore - Reserved: port property reserved for future feature activation
 }
@@ -49,6 +51,7 @@ struct DeviceRow: View {
 
 // MARK: - Remote Authentication Settings
 
+// periphery:ignore - Reserved: RemoteAuthenticationSettingsView type — reserved for future feature activation
 struct RemoteAuthenticationSettingsView: View {
     // periphery:ignore - Reserved: RemoteAuthenticationSettingsView type reserved for future feature activation
     @State private var authMethod = AuthMethod.token

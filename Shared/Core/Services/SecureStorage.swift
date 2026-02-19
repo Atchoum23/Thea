@@ -42,12 +42,14 @@ final class SecureStorage {
 
     // MARK: - Financial Credentials
 
+    // periphery:ignore - Reserved: saveFinancialCredentials(_:for:) instance method — reserved for future feature activation
     func saveFinancialCredentials(_ credentials: FinancialCredentials, for provider: String) throws {
         let data = try JSONEncoder().encode(credentials)
         try keychain.set(data, key: "financial.\(provider)")
     // periphery:ignore - Reserved: saveFinancialCredentials(_:for:) instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: loadFinancialCredentials(for:) instance method — reserved for future feature activation
     func loadFinancialCredentials(for provider: String) throws -> FinancialCredentials? {
         guard let data = try keychain.getData("financial.\(provider)") else {
             // periphery:ignore - Reserved: loadFinancialCredentials(for:) instance method reserved for future feature activation
@@ -56,6 +58,7 @@ final class SecureStorage {
         return try JSONDecoder().decode(FinancialCredentials.self, from: data)
     }
 
+    // periphery:ignore - Reserved: deleteFinancialCredentials(for:) instance method — reserved for future feature activation
     func deleteFinancialCredentials(for provider: String) throws {
         // periphery:ignore - Reserved: deleteFinancialCredentials(for:) instance method reserved for future feature activation
         try keychain.remove("financial.\(provider)")

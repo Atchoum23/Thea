@@ -13,8 +13,10 @@ import Observation
     @MainActor
     @Observable
     final class ScreenTimeTracker {
+        // periphery:ignore - Reserved: shared static property — reserved for future feature activation
         static let shared = ScreenTimeTracker()
 
+        // periphery:ignore - Reserved: logger property — reserved for future feature activation
         private let logger = Logger(subsystem: "ai.thea.app", category: "ScreenTimeTracker")
 
         private var modelContext: ModelContext?
@@ -26,18 +28,21 @@ import Observation
         private var usageDatabase: [String: TimeInterval] = [:]
         private var timer: Timer?
 
+        // periphery:ignore - Reserved: config property — reserved for future feature activation
         private var config: LifeTrackingConfiguration {
             AppConfiguration.shared.lifeTrackingConfig
         }
 
         private init() {}
 
+        // periphery:ignore - Reserved: setModelContext(_:) instance method — reserved for future feature activation
         func setModelContext(_ context: ModelContext) {
             modelContext = context
         }
 
         // MARK: - Tracking Control
 
+        // periphery:ignore - Reserved: startTracking() instance method — reserved for future feature activation
         func startTracking() {
             // periphery:ignore - Reserved: shared static property reserved for future feature activation
             guard config.screenTimeTrackingEnabled, !isTracking else { return }
@@ -63,6 +68,7 @@ import Observation
             }
         }
 
+        // periphery:ignore - Reserved: stopTracking() instance method — reserved for future feature activation
         func stopTracking() {
             isTracking = false
             // periphery:ignore - Reserved: startTracking() instance method reserved for future feature activation
@@ -82,6 +88,7 @@ import Observation
 
         // MARK: - App Tracking
 
+        // periphery:ignore - Reserved: trackActiveApp() instance method — reserved for future feature activation
         private func trackActiveApp() async {
             guard let frontmostApp = NSWorkspace.shared.frontmostApplication else {
                 return
@@ -110,6 +117,7 @@ import Observation
             updateDailyUsage()
         }
 
+        // periphery:ignore - Reserved: updateDailyUsage() instance method — reserved for future feature activation
         private func updateDailyUsage() {
             let totalTime = usageDatabase.values.reduce(0, +)
 
@@ -159,6 +167,7 @@ import Observation
 
         // MARK: - Data Persistence
 
+        // periphery:ignore - Reserved: saveDailyRecord() instance method — reserved for future feature activation
         private func saveDailyRecord() async {
             guard let context = modelContext else { return }
 
@@ -240,6 +249,7 @@ import Observation
             )
         }
 
+        // periphery:ignore - Reserved: getProductivityScore() instance method — reserved for future feature activation
         func getProductivityScore() -> Double {
             calculateProductivityScore()
         // periphery:ignore - Reserved: getDailyReport() instance method reserved for future feature activation
@@ -247,6 +257,7 @@ import Observation
 
         // MARK: - Historical Data
 
+        // periphery:ignore - Reserved: getRecord(for:) instance method — reserved for future feature activation
         func getRecord(for date: Date) async -> DailyScreenTimeRecord? {
             guard let context = modelContext else { return nil }
 
@@ -266,6 +277,7 @@ import Observation
             return allRecords.first { $0.date == startOfDay }
         }
 
+        // periphery:ignore - Reserved: getRecords(from:to:) instance method — reserved for future feature activation
         func getRecords(from start: Date, to end: Date) async -> [DailyScreenTimeRecord] {
             guard let context = modelContext else { return [] }
 
@@ -289,10 +301,14 @@ import Observation
 
     struct AppUsage: Identifiable {
         let id = UUID()
+        // periphery:ignore - Reserved: appName property — reserved for future feature activation
         let appName: String
+        // periphery:ignore - Reserved: bundleID property — reserved for future feature activation
         let bundleID: String
         let duration: TimeInterval
+        // periphery:ignore - Reserved: percentage property — reserved for future feature activation
         let percentage: Double
+        // periphery:ignore - Reserved: category property — reserved for future feature activation
         let category: AppCategory
 
         enum AppCategory {

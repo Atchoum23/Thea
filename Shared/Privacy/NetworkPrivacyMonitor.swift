@@ -267,6 +267,7 @@ actor NetworkPrivacyMonitor {
         serviceStats.values.sorted { $0.bytesEstimate > $1.bytesEstimate }
     }
 
+    // periphery:ignore - Reserved: getServiceStats(for:) instance method — reserved for future feature activation
     func getServiceStats(for service: String) -> ServiceStats? {
         // periphery:ignore - Reserved: getServiceStats(for:) instance method reserved for future feature activation
         serviceStats[service]

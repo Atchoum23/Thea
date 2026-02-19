@@ -9,6 +9,7 @@ import Foundation
 import NaturalLanguage
 import OSLog
 
+// periphery:ignore - Reserved: tlLogger global — reserved for future feature activation
 private let tlLogger = Logger(subsystem: "ai.thea.app", category: "TranslationEngine")
 
 // periphery:ignore - Reserved: tlLogger global var reserved for future feature activation
@@ -290,6 +291,7 @@ final class TranslationEngine: ObservableObject {
     }
 
     /// Quick translate — auto-detect source, translate to target
+    // periphery:ignore - Reserved: quickTranslate(_:to:) instance method — reserved for future feature activation
     func quickTranslate(_ text: String, to targetLanguage: String) async throws -> String {
         // periphery:ignore - Reserved: quickTranslate(_:to:) instance method reserved for future feature activation
         let result = try await translate(

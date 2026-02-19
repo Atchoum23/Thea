@@ -40,13 +40,18 @@ enum AudioSourceType: String, Sendable {
 /// Audio buffer with metadata
 struct AudioBuffer: Sendable {
     let samples: [Float]
+    // periphery:ignore - Reserved: timestamp property — reserved for future feature activation
     let timestamp: Date
+    // periphery:ignore - Reserved: sampleRate property — reserved for future feature activation
     let sampleRate: Double
+    // periphery:ignore - Reserved: channelCount property — reserved for future feature activation
     let channelCount: Int
     // periphery:ignore - Reserved: highQuality static property reserved for future feature activation
     let duration: TimeInterval
+    // periphery:ignore - Reserved: hasVoiceActivity property — reserved for future feature activation
     let hasVoiceActivity: Bool
 
+    // periphery:ignore - Reserved: rmsLevel property — reserved for future feature activation
     var rmsLevel: Float {
         guard !samples.isEmpty else { return 0 }
         let sumOfSquares = samples.reduce(0) { $0 + $1 * $1 }

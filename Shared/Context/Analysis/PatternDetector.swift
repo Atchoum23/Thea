@@ -7,17 +7,20 @@ import os.log
 public actor PatternDetector {
     public static let shared = PatternDetector()
 
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "app.thea", category: "PatternDetector")
 
     // Pattern storage
     private var dailyPatterns: [DailyPattern] = []
     private var locationPatterns: [LocationPattern] = []
     private var appUsagePatterns: [AppUsagePattern] = []
+    // periphery:ignore - Reserved: communicationPatterns property — reserved for future feature activation
     private var communicationPatterns: [CommunicationPattern] = []
 
     // Configuration
     // periphery:ignore - Reserved: logger property reserved for future feature activation
     private let minimumOccurrencesForPattern = 3
+    // periphery:ignore - Reserved: patternExpirationDays property — reserved for future feature activation
     private let patternExpirationDays = 30
 
     private init() {}
@@ -343,6 +346,7 @@ public struct PredictedActivity: Identifiable, Sendable {
 private struct DailyPattern {
     var activity: String
     var hour: Int
+    // periphery:ignore - Reserved: weekday property — reserved for future feature activation
     var weekday: Int
     var occurrences: Int
     var confidence: Double
@@ -354,6 +358,7 @@ private struct DailyPattern {
 }
 
 private struct LocationPattern {
+    // periphery:ignore - Reserved: placeName property — reserved for future feature activation
     var placeName: String
     var latitude: Double
     var longitude: Double
@@ -361,6 +366,7 @@ private struct LocationPattern {
     var occurrences: Int
     // periphery:ignore - Reserved: placeName property reserved for future feature activation
     var confidence: Double
+    // periphery:ignore - Reserved: lastSeen property — reserved for future feature activation
     var lastSeen: Date
 
     func matchesLocation(latitude: Double, longitude: Double) -> Bool {
@@ -372,8 +378,10 @@ private struct LocationPattern {
 
 private struct AppUsagePattern {
     var bundleID: String
+    // periphery:ignore - Reserved: appName property — reserved for future feature activation
     var appName: String
     var hour: Int
+    // periphery:ignore - Reserved: weekday property — reserved for future feature activation
     var weekday: Int
     // periphery:ignore - Reserved: appName property reserved for future feature activation
     var occurrences: Int

@@ -137,6 +137,7 @@ final class MLXInferenceEngine {
     }
 
     /// Unload the current model to free memory
+    // periphery:ignore - Reserved: unloadModel() instance method — reserved for future feature activation
     func unloadModel() {
         loadedModel = nil
         loadedModelID = nil
@@ -441,11 +442,13 @@ final class MLXInferenceEngine {
     }
 
     /// Clear the chat history for a conversation (resets KV cache)
+    // periphery:ignore - Reserved: clearChatSession(for:) instance method — reserved for future feature activation
     func clearChatSession(for conversationID: UUID) {
         chatSessions.removeValue(forKey: conversationID)
     }
 
     /// Clear all chat sessions
+    // periphery:ignore - Reserved: clearAllChatSessions() instance method — reserved for future feature activation
     func clearAllChatSessions() {
         // periphery:ignore - Reserved: clearChatSession(for:) instance method reserved for future feature activation
         chatSessions.removeAll()
@@ -467,6 +470,7 @@ final class MLXInferenceEngine {
     }
 
     /// Get the current model's context window size
+    // periphery:ignore - Reserved: contextWindowSize property — reserved for future feature activation
     var contextWindowSize: Int {
         // Default context window - would need model config inspection for accurate value
         8192
@@ -500,6 +504,7 @@ enum MLXInferenceError: LocalizedError {
 
 extension GenerateParameters {
     /// Create parameters optimized for chat/assistant use
+    // periphery:ignore - Reserved: chat static property — reserved for future feature activation
     static var chat: GenerateParameters {
         GenerateParameters(
             // periphery:ignore - Reserved: chat static property reserved for future feature activation
@@ -510,6 +515,7 @@ extension GenerateParameters {
     }
 
     /// Create parameters for deterministic/factual responses
+    // periphery:ignore - Reserved: deterministic static property — reserved for future feature activation
     static var deterministic: GenerateParameters {
         // periphery:ignore - Reserved: deterministic static property reserved for future feature activation
         GenerateParameters(

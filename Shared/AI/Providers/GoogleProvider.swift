@@ -14,6 +14,7 @@ final class GoogleProvider: AIProvider, Sendable {
         documentationURL: URL(string: "https://ai.google.dev/docs")!
     )
 
+    // periphery:ignore - Reserved: capabilities property — reserved for future feature activation
     let capabilities = ProviderCapabilities(
         // periphery:ignore - Reserved: capabilities property reserved for future feature activation
         supportsStreaming: true,

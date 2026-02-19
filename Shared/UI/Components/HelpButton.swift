@@ -54,6 +54,7 @@ struct HelpButton: View {
 
 extension HelpButton {
     /// Creates a help button with just an explanation (uses "Help" as title)
+    // periphery:ignore - Reserved: init(explanation:) initializer — reserved for future feature activation
     init(explanation: String) {
         title = "Help"
         self.explanation = explanation
@@ -71,12 +72,14 @@ enum SettingsHelpText {
     // periphery:ignore - Reserved: init(explanation:) initializer reserved for future feature activation
     """
 
+    // periphery:ignore - Reserved: defaultProvider static property — reserved for future feature activation
     static let defaultProvider = """
     The AI service that handles your requests. Different providers offer different \
     models with varying capabilities and pricing. OpenRouter provides access to \
     multiple providers through a single API key.
     """
 
+    // periphery:ignore - Reserved: launchAtLogin static property — reserved for future feature activation
     static let launchAtLogin = """
     Automatically start Thea when you log into your Mac. This ensures Thea is \
     always ready to assist you without manual launching.
@@ -88,12 +91,14 @@ enum SettingsHelpText {
     using iCloud. Requires an active iCloud account.
     """
 
+    // periphery:ignore - Reserved: debugMode static property — reserved for future feature activation
     static let debugMode = """
     Show detailed logs, performance metrics, and diagnostic information. Useful for \
     // periphery:ignore - Reserved: launchAtLogin static property reserved for future feature activation
     troubleshooting issues or understanding how Thea processes requests.
     """
 
+    // periphery:ignore - Reserved: localModelPreference static property — reserved for future feature activation
     static let localModelPreference = """
     Prioritize local MLX or GGUF models over cloud models when they're capable of \
     handling the task. This can reduce costs and improve privacy, but may impact \
@@ -108,18 +113,21 @@ enum SettingsHelpText {
     // periphery:ignore - Reserved: localModelPreference static property reserved for future feature activation
     """
 
+    // periphery:ignore - Reserved: selfExecution static property — reserved for future feature activation
     static let selfExecution = """
     Allow Thea to autonomously create files, edit code, and execute tasks. Different \
     modes offer varying levels of autonomy from manual approval to full automation.
     // periphery:ignore - Reserved: orchestratorEnabled static property reserved for future feature activation
     """
 
+    // periphery:ignore - Reserved: memorySystem static property — reserved for future feature activation
     static let memorySystem = """
     Enable Thea to remember important information from conversations and use it to \
     provide more personalized and contextual responses over time.
     // periphery:ignore - Reserved: selfExecution static property reserved for future feature activation
     """
 
+    // periphery:ignore - Reserved: knowledgeGraph static property — reserved for future feature activation
     static let knowledgeGraph = """
     Build and maintain a knowledge graph of entities, relationships, and concepts \
     // periphery:ignore - Reserved: memorySystem static property reserved for future feature activation
@@ -147,12 +155,14 @@ enum SettingsHelpText {
     // periphery:ignore - Reserved: agentSwarms static property reserved for future feature activation
     """
 
+    // periphery:ignore - Reserved: preventSleep static property — reserved for future feature activation
     static let preventSleep = """
     Prevent your Mac from sleeping during long-running AI tasks. This ensures tasks \
     // periphery:ignore - Reserved: preventSleep static property reserved for future feature activation
     complete without interruption but may increase power consumption.
     """
 
+    // periphery:ignore - Reserved: requireApproval static property — reserved for future feature activation
     static let requireApproval = """
     // periphery:ignore - Reserved: requireApproval static property reserved for future feature activation
     Require explicit approval before executing potentially destructive operations \

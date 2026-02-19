@@ -3,6 +3,7 @@
 
 import SwiftUI
 
+// periphery:ignore - Reserved: WorkflowSettingsView type — reserved for future feature activation
 struct WorkflowSettingsView: View {
     // periphery:ignore - Reserved: WorkflowSettingsView type reserved for future feature activation
     @State private var workflows: [WorkflowSummary] = []

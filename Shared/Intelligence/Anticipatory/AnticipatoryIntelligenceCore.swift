@@ -177,6 +177,7 @@ public final class AnticipatoryIntelligenceCore {
         predictedIntents = intents
     }
 
+    // periphery:ignore - Reserved: action parameter — kept for API compatibility
     private func updateMentalModel(from action: AnticipatedUserAction) {
         // periphery:ignore - Reserved: action parameter kept for API compatibility
         // Update focus level based on action frequency

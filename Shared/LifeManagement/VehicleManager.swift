@@ -139,6 +139,7 @@ struct ServiceRecord: Codable, Sendable, Identifiable {
         }
     }
 
+    // periphery:ignore - Reserved: init(type:date:mileage:cost:currency:provider:notes:) initializer — reserved for future feature activation
     init(type: ServiceType, date: Date = Date(), mileage: Int = 0, cost: Double = 0,
          currency: String = "CHF", provider: String = "", notes: String = "") {
         self.id = UUID()
@@ -164,6 +165,7 @@ struct FuelLog: Codable, Sendable, Identifiable {
     var distance: Double
     var isFullTank: Bool
 
+    // periphery:ignore - Reserved: init(date:liters:cost:currency:mileage:distance:isFullTank:) initializer — reserved for future feature activation
     init(date: Date = Date(), liters: Double, cost: Double, currency: String = "CHF",
          mileage: Int = 0, distance: Double = 0, isFullTank: Bool = true) {
         self.id = UUID()
@@ -241,6 +243,7 @@ final class VehicleManager: ObservableObject {
         vehicleLogger.info("Added vehicle: \(vehicle.displayTitle)")
     }
 
+    // periphery:ignore - Reserved: updateVehicle(_:) instance method — reserved for future feature activation
     func updateVehicle(_ vehicle: Vehicle) {
         if let idx = vehicles.firstIndex(where: { $0.id == vehicle.id }) {
             vehicles[idx] = vehicle
@@ -249,12 +252,14 @@ final class VehicleManager: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: deleteVehicle(id:) instance method — reserved for future feature activation
     func deleteVehicle(id: UUID) {
         vehicles.removeAll { $0.id == id }
         save()
     // periphery:ignore - Reserved: deleteVehicle(id:) instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: addServiceRecord(vehicleID:record:) instance method — reserved for future feature activation
     func addServiceRecord(vehicleID: UUID, record: ServiceRecord) {
         if let idx = vehicles.firstIndex(where: { $0.id == vehicleID }) {
             // periphery:ignore - Reserved: addServiceRecord(vehicleID:record:) instance method reserved for future feature activation
@@ -266,6 +271,7 @@ final class VehicleManager: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: addFuelLog(vehicleID:log:) instance method — reserved for future feature activation
     func addFuelLog(vehicleID: UUID, log: FuelLog) {
         // periphery:ignore - Reserved: addFuelLog(vehicleID:log:) instance method reserved for future feature activation
         if let idx = vehicles.firstIndex(where: { $0.id == vehicleID }) {

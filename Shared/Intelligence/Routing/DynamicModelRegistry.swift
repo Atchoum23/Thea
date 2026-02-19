@@ -11,6 +11,7 @@ import os
 final class DynamicModelRegistry: ObservableObject {
     static let shared = DynamicModelRegistry()
 
+    // periphery:ignore - Reserved: availableModels property — reserved for future feature activation
     @Published private(set) var availableModels: [AIModel] = AIModel.allKnownModels
     // periphery:ignore - Reserved: availableModels property reserved for future feature activation
     @Published private(set) var lastRefresh: Date?

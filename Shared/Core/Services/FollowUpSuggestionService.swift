@@ -14,6 +14,7 @@ final class FollowUpSuggestionService: ObservableObject {
     static let shared = FollowUpSuggestionService()
     private let logger = Logger(subsystem: "com.thea.app", category: "FollowUpSuggestionService")
 
+    // periphery:ignore - Reserved: latestSuggestions property — reserved for future feature activation
     @Published var latestSuggestions: [FollowUpSuggestion] = []
 
     /// Track how often each suggestion pattern is selected (for learning)
@@ -24,7 +25,9 @@ final class FollowUpSuggestionService: ObservableObject {
     // periphery:ignore - Reserved: latestSuggestions property reserved for future feature activation
     /// Auto-prompt threshold: after N consecutive acceptances of same pattern, auto-execute
     private var consecutiveAutoAccepts: [String: Int] = [:]
+    // periphery:ignore - Reserved: autoPromptThreshold property — reserved for future feature activation
     private let autoPromptThreshold = 5
+    // periphery:ignore - Reserved: isAutoPromptEnabled property — reserved for future feature activation
     var isAutoPromptEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: "followUp.autoPrompt") }
         set { UserDefaults.standard.set(newValue, forKey: "followUp.autoPrompt") }
@@ -183,6 +186,7 @@ final class FollowUpSuggestionService: ObservableObject {
     }
 
     /// Record that the user dismissed/ignored suggestions.
+    // periphery:ignore - Reserved: recordDismissal() instance method — reserved for future feature activation
     func recordDismissal() {
         totalDismissals += 1
         // periphery:ignore - Reserved: recordDismissal() instance method reserved for future feature activation
@@ -193,6 +197,7 @@ final class FollowUpSuggestionService: ObservableObject {
     }
 
     /// Check if a suggestion pattern should auto-execute (user always picks it).
+    // periphery:ignore - Reserved: shouldAutoPrompt(_:) instance method — reserved for future feature activation
     func shouldAutoPrompt(_ suggestion: FollowUpSuggestion) -> Bool {
         // periphery:ignore - Reserved: shouldAutoPrompt(_:) instance method reserved for future feature activation
         guard isAutoPromptEnabled else { return false }

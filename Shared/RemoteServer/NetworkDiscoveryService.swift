@@ -34,11 +34,13 @@ public class NetworkDiscoveryService: ObservableObject {
 
     // MARK: - Network Services
 
+    // periphery:ignore - Reserved: listener property — reserved for future feature activation
     private var listener: NWListener?
     private var browser: NWBrowser?
     private var netService: NetService?
     // periphery:ignore - Reserved: listener property reserved for future feature activation
     private var netServiceBrowser: NetServiceBrowser?
+    // periphery:ignore - Reserved: browserDelegate property — reserved for future feature activation
     private var browserDelegate: NetServiceBrowserDelegateHandler?
 
 // periphery:ignore - Reserved: netServiceBrowser property reserved for future feature activation

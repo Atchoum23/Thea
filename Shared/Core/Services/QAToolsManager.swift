@@ -285,6 +285,7 @@
         }
 
         /// Check if a QA tool is available on the system
+        // periphery:ignore - Reserved: isToolAvailable(_:) instance method — reserved for future feature activation
         func isToolAvailable(_ tool: QATool) async -> Bool {
             // periphery:ignore - Reserved: isToolAvailable(_:) instance method reserved for future feature activation
             switch tool {

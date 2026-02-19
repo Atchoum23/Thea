@@ -65,6 +65,7 @@ public final class ResourceDiscoveryEngine: ObservableObject {
 
     // MARK: - Private State
 
+    // periphery:ignore - Reserved: discoveryTask property — reserved for future feature activation
     private var discoveryTask: Task<Void, Never>?
     // periphery:ignore - Reserved: discoveryTask property reserved for future feature activation
     private var backgroundDiscoveryTask: Task<Void, Never>?

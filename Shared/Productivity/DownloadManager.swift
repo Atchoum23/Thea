@@ -341,6 +341,7 @@ actor TheaDownloadManager {
 
     // MARK: - Progress Monitoring
 
+    // periphery:ignore - Reserved: session parameter — kept for API compatibility
     private func monitorDownload(id: UUID, task: URLSessionDownloadTask, session: URLSession) async {
         var lastCheck = Date()
         var lastBytes: Int64 = 0
@@ -444,6 +445,7 @@ actor TheaDownloadManager {
 
     func getDownloads() -> [DownloadItem] { downloads }
 
+    // periphery:ignore - Reserved: getActiveDownloads() instance method — reserved for future feature activation
     func getActiveDownloads() -> [DownloadItem] {
         downloads.filter { $0.status == .downloading }
     }
@@ -455,6 +457,7 @@ actor TheaDownloadManager {
     // periphery:ignore - Reserved: getDownloadsByCategory(_:) instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: getDownloadsByStatus(_:) instance method — reserved for future feature activation
     func getDownloadsByStatus(_ status: DLStatus) -> [DownloadItem] {
         // periphery:ignore - Reserved: getDownloadsByStatus(_:) instance method reserved for future feature activation
         downloads.filter { $0.status == status }

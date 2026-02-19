@@ -14,8 +14,11 @@ struct CloudAPIPolicy: PrivacyPolicy {
     let strictnessLevel: StrictnessLevel = .standard
     let allowPII = false
     let allowFilePaths = false
+    // periphery:ignore - Reserved: allowCodeSnippets property — reserved for future feature activation
     let allowCodeSnippets = true
+    // periphery:ignore - Reserved: allowHealthData property — reserved for future feature activation
     let allowHealthData = false
+    // periphery:ignore - Reserved: allowFinancialData property — reserved for future feature activation
     let allowFinancialData = false
     let blockedKeywords: Set<String> = []
     let allowedTopics: Set<String>? = nil
@@ -34,8 +37,11 @@ struct MessagingPolicy: PrivacyPolicy {
     // periphery:ignore - Reserved: allowFinancialData property reserved for future feature activation
     let allowPII = false
     let allowFilePaths = false
+    // periphery:ignore - Reserved: allowCodeSnippets property — reserved for future feature activation
     let allowCodeSnippets = false
+    // periphery:ignore - Reserved: allowHealthData property — reserved for future feature activation
     let allowHealthData = false
+    // periphery:ignore - Reserved: allowFinancialData property — reserved for future feature activation
     let allowFinancialData = false
     let blockedKeywords: Set<String> = [
         "password", "secret", "api key", "token",
@@ -104,8 +110,11 @@ struct MoltbookPolicy: PrivacyPolicy {
     let strictnessLevel: StrictnessLevel = .paranoid
     let allowPII = false
     let allowFilePaths = false
+    // periphery:ignore - Reserved: allowCodeSnippets property — reserved for future feature activation
     let allowCodeSnippets = false
+    // periphery:ignore - Reserved: allowHealthData property — reserved for future feature activation
     let allowHealthData = false
+    // periphery:ignore - Reserved: allowFinancialData property — reserved for future feature activation
     let allowFinancialData = false
     // periphery:ignore - Reserved: allowCodeSnippets property reserved for future feature activation
     // periphery:ignore - Reserved: allowHealthData property reserved for future feature activation

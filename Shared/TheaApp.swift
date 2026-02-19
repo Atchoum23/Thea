@@ -4,6 +4,7 @@ import SwiftUI
 // Note: @main is defined in platform-specific app files
 // This file contains shared app configuration
 
+// periphery:ignore - Reserved: TheaAppConfiguration enum — reserved for future feature activation
 enum TheaAppConfiguration {
     static let appName = "Thea"
     // periphery:ignore - Reserved: TheaAppConfiguration type reserved for future feature activation
@@ -64,6 +65,7 @@ enum TheaAppConfiguration {
 
 extension Notification.Name {
     static let newConversation = Notification.Name("newConversation")
+    // periphery:ignore - Reserved: newProject static property — reserved for future feature activation
     static let newProject = Notification.Name("newProject")
     // periphery:ignore - Reserved: newProject static property reserved for future feature activation
     // periphery:ignore - Reserved: refreshData static property reserved for future feature activation

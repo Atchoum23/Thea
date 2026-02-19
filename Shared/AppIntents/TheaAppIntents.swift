@@ -59,6 +59,7 @@ public struct QuickChatIntent: AppIntent {
     var message: String
 
     @Parameter(title: "Conversation", optionsProvider: ConversationOptionsProvider())
+    // periphery:ignore - Reserved: conversationId property — reserved for future feature activation
     var conversationId: String?
 
     public init() {}
@@ -104,6 +105,7 @@ public struct CreateProjectIntent: AppIntent {
     var name: String
 
     @Parameter(title: "Description")
+    // periphery:ignore - Reserved: projectDescription property — reserved for future feature activation
     var projectDescription: String?
 
     // periphery:ignore - Reserved: projectDescription property reserved for future feature activation
@@ -149,6 +151,7 @@ public struct LogHealthDataIntent: AppIntent {
     var value: String
 
     @Parameter(title: "Notes")
+    // periphery:ignore - Reserved: notes property — reserved for future feature activation
     var notes: String?
 
 // periphery:ignore - Reserved: notes property reserved for future feature activation

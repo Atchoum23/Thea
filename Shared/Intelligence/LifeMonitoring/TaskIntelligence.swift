@@ -131,6 +131,7 @@ public actor TaskIntelligence {
     // MARK: - Properties
 
     private var tasks: [UUID: IntelligenceTask] = [:]
+    // periphery:ignore - Reserved: projects property — reserved for future feature activation
     private var projects: [String: ProjectInfo] = [:]
     private var completionPatterns: [String: CompletionPattern] = [:]
     // periphery:ignore - Reserved: projects property reserved for future feature activation
@@ -398,6 +399,7 @@ public actor TaskIntelligence {
         return nil
     }
 
+    // periphery:ignore - Reserved: task parameter — kept for API compatibility
     private func cleanTitle(_ input: String, task: IntelligenceTask) -> String {
         // periphery:ignore - Reserved: task parameter kept for API compatibility
         var title = input

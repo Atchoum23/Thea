@@ -14,6 +14,7 @@ import Observation
     @MainActor
     @Observable
     final class InputTrackingManager {
+        // periphery:ignore - Reserved: shared static property — reserved for future feature activation
         static let shared = InputTrackingManager()
 
         private let logger = Logger(subsystem: "ai.thea.app", category: "InputTrackingManager")
@@ -38,6 +39,7 @@ import Observation
 
         private init() {}
 
+        // periphery:ignore - Reserved: setModelContext(_:) instance method — reserved for future feature activation
         func setModelContext(_ context: ModelContext) {
             modelContext = context
         }
@@ -94,6 +96,7 @@ import Observation
             }
         }
 
+        // periphery:ignore - Reserved: stopTracking() instance method — reserved for future feature activation
         func stopTracking() {
             isTracking = false
 
@@ -256,6 +259,7 @@ import Observation
 
         // MARK: - Historical Data
 
+        // periphery:ignore - Reserved: getRecord(for:) instance method — reserved for future feature activation
         func getRecord(for date: Date) async -> DailyInputStatistics? {
             guard let context = modelContext else { return nil }
 
@@ -275,6 +279,7 @@ import Observation
             return allRecords.first { $0.date == startOfDay }
         }
 
+        // periphery:ignore - Reserved: getRecords(from:to:) instance method — reserved for future feature activation
         func getRecords(from start: Date, to end: Date) async -> [DailyInputStatistics] {
             guard let context = modelContext else { return [] }
 
@@ -297,6 +302,7 @@ import Observation
     // MARK: - Supporting Structures
 
     struct InputStatistics {
+        // periphery:ignore - Reserved: date property — reserved for future feature activation
         let date: Date
         let mouseClicks: Int
         // periphery:ignore - Reserved: date property reserved for future feature activation

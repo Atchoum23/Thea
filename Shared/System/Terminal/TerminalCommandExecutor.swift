@@ -128,6 +128,7 @@
         }
 
         /// Execute multiple commands in sequence
+        // periphery:ignore - Reserved: executeSequence(_:workingDirectory:stopOnError:) instance method — reserved for future feature activation
         func executeSequence(
             _ commands: [String],
             workingDirectory: URL? = nil,
@@ -275,6 +276,7 @@
         }
 
         /// Open a new tab in the front window
+        // periphery:ignore - Reserved: openNewTab(withCommand:) instance method — reserved for future feature activation
         func openNewTab(withCommand command: String? = nil) async throws {
             let script: String
             // periphery:ignore - Reserved: openNewTab(withCommand:) instance method reserved for future feature activation
@@ -302,6 +304,7 @@
         }
 
         /// Close the front Terminal window
+        // periphery:ignore - Reserved: closeFrontWindow() instance method — reserved for future feature activation
         func closeFrontWindow() async throws {
             // periphery:ignore - Reserved: closeFrontWindow() instance method reserved for future feature activation
             let script = """

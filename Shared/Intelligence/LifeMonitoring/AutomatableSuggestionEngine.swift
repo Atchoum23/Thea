@@ -189,6 +189,7 @@ public actor AutomatableSuggestionEngine {
 
     private var pendingSuggestions: [UUID: AutomatableSuggestion] = [:]
     private var executedSuggestions: [AutomatableSuggestion] = []
+    // periphery:ignore - Reserved: suggestionPatterns property — reserved for future feature activation
     private var suggestionPatterns: [SuggestionPattern] = []
     private var actionRegistry: [UUID: SuggestionAction] = [:] // Store actions by ID for reverse lookups
     // periphery:ignore - Reserved: suggestionPatterns property reserved for future feature activation
@@ -467,6 +468,7 @@ public actor AutomatableSuggestionEngine {
         }
     }
 
+    // periphery:ignore - Reserved: suggestion parameter — kept for API compatibility
     private func learnFromDismissal(_ suggestion: AutomatableSuggestion) async {
         // periphery:ignore - Reserved: suggestion parameter kept for API compatibility
         // Learn what types of suggestions users don't want

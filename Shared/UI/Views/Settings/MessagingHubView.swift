@@ -15,6 +15,7 @@ struct MessagingHubView: View {
 
     @State private var selectedChannel: MessagingChannelType?
     @State private var searchText = ""
+    // periphery:ignore - Reserved: showingChannelDetail property — reserved for future feature activation
     @State private var showingChannelDetail = false
 
     var body: some View {
@@ -162,6 +163,7 @@ struct MessagingHubView: View {
 
     // MARK: - Recent Messages Section
 
+    // periphery:ignore - Reserved: recentMessagesSection property — reserved for future feature activation
     private var recentMessagesSection: some View {
         Section {
             // periphery:ignore - Reserved: recentMessagesSection property reserved for future feature activation
@@ -218,6 +220,7 @@ struct MessagingHubView: View {
 
     // MARK: - Settings Section
 
+    // periphery:ignore - Reserved: settingsSection property — reserved for future feature activation
     private var settingsSection: some View {
         // periphery:ignore - Reserved: settingsSection property reserved for future feature activation
         Section {

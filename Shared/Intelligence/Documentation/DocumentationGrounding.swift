@@ -30,8 +30,11 @@ public final class DocumentationGroundingService: ObservableObject {
     private let cacheDuration: TimeInterval = 86400 // 24 hours
 
     // Context7 API v2 endpoints
+    // periphery:ignore - Reserved: context7BaseURL property — reserved for future feature activation
     private let context7BaseURL = "https://context7.com"
+    // periphery:ignore - Reserved: context7MCPURL property — reserved for future feature activation
     private let context7MCPURL = "https://mcp.context7.com/mcp"
+    // periphery:ignore - Reserved: searchEndpoint property — reserved for future feature activation
     private let searchEndpoint = "/api/v2/libs/search"  // params: query, libraryName
     // periphery:ignore - Reserved: context7BaseURL property reserved for future feature activation
     // periphery:ignore - Reserved: context7MCPURL property reserved for future feature activation

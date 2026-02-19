@@ -281,6 +281,7 @@ extension TaskClassifier {
     }
 
     /// Update calibration data with a classification outcome
+    // periphery:ignore - Reserved: updateCalibration(confidence:wasCorrect:) instance method — reserved for future feature activation
     func updateCalibration(confidence: Double, wasCorrect: Bool) {
         let bucketIndex = min(9, Int(confidence * 10))
         // periphery:ignore - Reserved: updateCalibration(confidence:wasCorrect:) instance method reserved for future feature activation
@@ -288,6 +289,7 @@ extension TaskClassifier {
     }
 
     /// Get current calibration statistics
+    // periphery:ignore - Reserved: getCalibrationStats() instance method — reserved for future feature activation
     func getCalibrationStats() -> [(range: String, accuracy: Double, count: Int)] {
         // periphery:ignore - Reserved: getCalibrationStats() instance method reserved for future feature activation
         calibrationData.map { bucket in

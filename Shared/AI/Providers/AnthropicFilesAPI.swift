@@ -18,6 +18,7 @@ import OSLog
 /// Beta header: files-api-2025-04-14
 /// Max: 500MB per file, 29-day retention
 /// Pricing: FREE
+// periphery:ignore - Reserved: AnthropicFilesAPI class — reserved for future feature activation
 final class AnthropicFilesAPI: Sendable {
     private let apiKey: String
     private let baseURL = "https://api.anthropic.com/v1/files"
@@ -243,6 +244,7 @@ struct FileUploadResponse: Codable, Sendable {
     let createdAt: Date
     let expiresAt: Date      // 29 days after creation
 
+    // periphery:ignore - Reserved: init(id:filename:mimeType:sizeBytes:createdAt:expiresAt:) initializer — reserved for future feature activation
     init(
         id: String,
         // periphery:ignore - Reserved: init(id:filename:mimeType:sizeBytes:createdAt:expiresAt:) initializer reserved for future feature activation
@@ -261,6 +263,7 @@ struct FileUploadResponse: Codable, Sendable {
     }
 }
 
+// periphery:ignore - Reserved: FileListResponse type — reserved for future feature activation
 struct FileListResponse: Codable, Sendable {
     // periphery:ignore - Reserved: FileListResponse type reserved for future feature activation
     let data: [FileUploadResponse]

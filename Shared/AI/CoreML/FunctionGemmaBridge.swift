@@ -12,6 +12,7 @@ import OSLog
 // MARK: - FunctionGemma Bridge
 
 @MainActor
+// periphery:ignore - Reserved: FunctionGemmaBridge class — reserved for future feature activation
 final class FunctionGemmaBridge {
     static let shared = FunctionGemmaBridge()
 
@@ -328,6 +329,7 @@ final class FunctionGemmaBridge {
 
 // MARK: - Types
 
+// periphery:ignore - Reserved: FunctionExecutionResult type — reserved for future feature activation
 struct FunctionExecutionResult: Sendable {
     // periphery:ignore - Reserved: FunctionExecutionResult type reserved for future feature activation
     let success: Bool

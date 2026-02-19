@@ -98,6 +98,7 @@
             accessedFiles.append(access)
         }
 
+        // periphery:ignore - Reserved: trackFileDelete(_:) instance method — reserved for future feature activation
         mutating func trackFileDelete(_ url: URL) {
             let access = FileAccess(url: url, accessType: .delete, wasModified: true)
             accessedFiles.append(access)
@@ -122,6 +123,7 @@
             }
         }
 
+        // periphery:ignore - Reserved: deactivateConnector(_:) instance method — reserved for future feature activation
         mutating func deactivateConnector(_ name: String) {
             activeConnectors.removeAll { $0 == name }
         // periphery:ignore - Reserved: deactivateConnector(_:) instance method reserved for future feature activation
@@ -156,6 +158,7 @@
         }
 
         /// Build context string for LLM prompt
+        // periphery:ignore - Reserved: buildContextPrompt() instance method — reserved for future feature activation
         func buildContextPrompt() -> String {
             // periphery:ignore - Reserved: buildContextPrompt() instance method reserved for future feature activation
             var parts: [String] = []

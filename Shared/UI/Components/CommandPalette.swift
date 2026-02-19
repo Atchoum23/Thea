@@ -48,6 +48,7 @@ enum CommandCategory: String, CaseIterable {
     case model = "Model"
     case file = "File"
 
+    // periphery:ignore - Reserved: icon property — reserved for future feature activation
     var icon: String {
         switch self {
         case .general: return "command"
@@ -327,15 +328,18 @@ class CommandPaletteManager: ObservableObject {
         registerDefaultCommands()
     }
 
+    // periphery:ignore - Reserved: toggle() instance method — reserved for future feature activation
     func toggle() {
         isPresented.toggle()
     }
 
+    // periphery:ignore - Reserved: show() instance method — reserved for future feature activation
     func show() {
         isPresented = true
     // periphery:ignore - Reserved: toggle() instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: hide() instance method — reserved for future feature activation
     func hide() {
         // periphery:ignore - Reserved: show() instance method reserved for future feature activation
         isPresented = false
@@ -348,6 +352,7 @@ class CommandPaletteManager: ObservableObject {
     // periphery:ignore - Reserved: registerCommand(_:) instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: registerCommands(_:) instance method — reserved for future feature activation
     func registerCommands(_ newCommands: [PaletteCommand]) {
         for command in newCommands {
             // periphery:ignore - Reserved: registerCommands(_:) instance method reserved for future feature activation

@@ -306,6 +306,7 @@ public final class SmartModelRouter: ObservableObject {
 
     // MARK: - Private Helpers
 
+    // periphery:ignore - Reserved: taskType parameter — kept for API compatibility
     private func classifyComplexity(task: String, taskType: String) -> TaskComplexity {
         // periphery:ignore - Reserved: taskType parameter kept for API compatibility
         let lowercased = task.lowercased()

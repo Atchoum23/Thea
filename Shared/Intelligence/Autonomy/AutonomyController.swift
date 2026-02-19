@@ -303,6 +303,7 @@ public final class AutonomyController: ObservableObject {
     // MARK: - Tracking
 
     private var actionsThisHour: Int = 0
+    // periphery:ignore - Reserved: hourResetTask property — reserved for future feature activation
     private var hourResetTask: Task<Void, Never>?
 
 // periphery:ignore - Reserved: hourResetTask property reserved for future feature activation

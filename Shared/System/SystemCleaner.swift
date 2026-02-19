@@ -152,6 +152,7 @@ struct CleanerScanResult: Sendable {
     let totalBytes: UInt64
     let categoryBreakdown: [CleanableCategory: UInt64]
 
+    // periphery:ignore - Reserved: formattedTotal property — reserved for future feature activation
     var formattedTotal: String {
         // periphery:ignore - Reserved: formattedTotal property reserved for future feature activation
         SystemCleaner.formatBytes(totalBytes)

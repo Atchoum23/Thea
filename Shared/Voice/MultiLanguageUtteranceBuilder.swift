@@ -17,7 +17,9 @@ struct LanguageSegment: Identifiable, Sendable {
     let id: UUID
     let text: String
     let language: String  // BCP-47 code
+    // periphery:ignore - Reserved: confidence property — reserved for future feature activation
     let confidence: Double
+    // periphery:ignore - Reserved: range property — reserved for future feature activation
     let range: Range<String.Index>
 
     init(text: String, language: String, confidence: Double, range: Range<String.Index>) {
@@ -301,6 +303,7 @@ final class MultiLanguageUtteranceBuilder {
 /// Extension to integrate with existing speech synthesis
 extension MultiLanguageUtteranceBuilder {
     /// Speak text with automatic language detection
+    // periphery:ignore - Reserved: speak(_:using:) instance method — reserved for future feature activation
     func speak(_ text: String, using synthesizer: AVSpeechSynthesizer) {
         // periphery:ignore - Reserved: speak(_:using:) instance method reserved for future feature activation
         let utterances = buildUtterances(from: text)

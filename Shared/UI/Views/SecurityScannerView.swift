@@ -11,7 +11,9 @@ struct SecurityScannerView: View {
     @State private var scanHistory: [ScanReport] = []
     @State private var isScanning = false
     @State private var selectedCategories = Set(ScanCategory.allCases)
+    // periphery:ignore - Reserved: selectedFinding property — reserved for future feature activation
     @State private var selectedFinding: SystemSecurityFinding?
+    // periphery:ignore - Reserved: showCategoryPicker property — reserved for future feature activation
     @State private var showCategoryPicker = false
 
     var body: some View {
@@ -154,6 +156,7 @@ struct SecurityScannerView: View {
 
     // MARK: - iOS Sections
 
+    // periphery:ignore - Reserved: scanSection property — reserved for future feature activation
     private var scanSection: some View {
         Section {
             Button {
@@ -174,6 +177,7 @@ struct SecurityScannerView: View {
     }
 
     @ViewBuilder
+    // periphery:ignore - Reserved: lastScanSummary property — reserved for future feature activation
     private var lastScanSummary: some View {
         if let report = lastReport {
             // periphery:ignore - Reserved: lastScanSummary property reserved for future feature activation
@@ -213,6 +217,7 @@ struct SecurityScannerView: View {
     }
 
     @ViewBuilder
+    // periphery:ignore - Reserved: findingsSection property — reserved for future feature activation
     private var findingsSection: some View {
         // periphery:ignore - Reserved: findingsSection property reserved for future feature activation
         if let report = lastReport, !report.findings.isEmpty {

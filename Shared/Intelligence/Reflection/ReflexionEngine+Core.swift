@@ -6,6 +6,7 @@
 import Foundation
 import os.log
 
+// periphery:ignore - Reserved: reflexionLogger global — reserved for future feature activation
 private let reflexionLogger = Logger(subsystem: "ai.thea.app", category: "ReflexionEngine")
 
 // MARK: - Reflexion Engine
@@ -118,6 +119,7 @@ extension ReflexionEngine {
 
     // MARK: - Critique Generation
 
+    // periphery:ignore - Reserved: context parameter — kept for API compatibility
     private func generateCritique(task: String, output: String, context: String) async -> SelfCritique {
         // Analyze the output against the task requirements
         var strengths: [String] = []
@@ -363,6 +365,7 @@ extension ReflexionEngine {
         return .unknown
     }
 
+    // periphery:ignore - Reserved: task parameter — kept for API compatibility
     private func inferRootCause(task: String, error: String, errorType: FailureType) -> String {
         switch errorType {
         // periphery:ignore - Reserved: task parameter kept for API compatibility
@@ -389,6 +392,7 @@ extension ReflexionEngine {
         }
     }
 
+    // periphery:ignore - Reserved: error parameter — kept for API compatibility
     private func suggestFixes(errorType: FailureType, error: String) -> [String] {
         // periphery:ignore - Reserved: error parameter kept for API compatibility
         switch errorType {

@@ -39,6 +39,7 @@ final class ProactiveModelManager {
     // These are kept for backward compatibility only
 
     @available(*, deprecated, message: "Use AIModelGovernor for intelligent storage management")
+    // periphery:ignore - Reserved: maxDiskSpaceGB property — reserved for future feature activation
     var maxDiskSpaceGB: Double {
         get { 0 } // AI-determined
         // swiftlint:disable:next unused_setter_value
@@ -46,6 +47,7 @@ final class ProactiveModelManager {
     }
 
     @available(*, deprecated, message: "Use AIModelGovernor for value-based cleanup decisions")
+    // periphery:ignore - Reserved: inactiveDaysThreshold property — reserved for future feature activation
     var inactiveDaysThreshold: Int {
         get { 0 } // AI-determined
         // swiftlint:disable:next unused_setter_value
@@ -53,6 +55,7 @@ final class ProactiveModelManager {
     }
 
     // Confidence threshold is now AI-determined based on proactivity score
+    // periphery:ignore - Reserved: autoDownloadConfidenceThreshold property — reserved for future feature activation
     var autoDownloadConfidenceThreshold: Double {
         // Dynamic threshold based on proactivity level
         let proactivity = AIModelGovernor.shared.proactivityScore
@@ -165,6 +168,7 @@ final class ProactiveModelManager {
     }
 
     /// Quick pre-flight check - call this at the START of any task
+    // periphery:ignore - Reserved: preflightCheck(for:) instance method — reserved for future feature activation
     func preflightCheck(for taskType: TaskType) async -> PreflightResult {
         let orchestrator = UnifiedLocalModelOrchestrator.shared
         let localSelection = await orchestrator.selectModel(for: taskType)
@@ -496,6 +500,7 @@ final class ProactiveModelManager {
 
     /// Legacy method - now delegates to AI-guided cleanup
     @available(*, deprecated, message: "Use performAIGuidedCleanup for intelligent cleanup")
+    // periphery:ignore - Reserved: checkAndPerformCleanup() instance method — reserved for future feature activation
     private func checkAndPerformCleanup() async {
         await performAIGuidedCleanup()
     }
@@ -520,6 +525,7 @@ final class ProactiveModelManager {
 
     // MARK: - Usage Tracking
 
+    // periphery:ignore - Reserved: recordTaskRequest(_:) instance method — reserved for future feature activation
     private func recordTaskRequest(_ taskType: TaskType) {
         // This helps us understand what the user needs
         let key = "taskRequest:\(taskType.rawValue)"
@@ -579,6 +585,7 @@ final class ProactiveModelManager {
 
     /// Request user consent for autonomous model management
     @available(*, deprecated, message: "Use AIModelGovernor for consent management")
+    // periphery:ignore - Reserved: requestAutonomousConsent() instance method — reserved for future feature activation
     func requestAutonomousConsent() -> AutonomousConsentRequest {
         AutonomousConsentRequest(
             enableAutoDownload: enableAutoDownload,
@@ -589,6 +596,7 @@ final class ProactiveModelManager {
     }
 
     @available(*, deprecated, message: "Use AIModelGovernor for consent management")
+    // periphery:ignore - Reserved: applyConsentSettings(_:) instance method — reserved for future feature activation
     func applyConsentSettings(_ settings: AutonomousConsentRequest) {
         enableAutoDownload = settings.enableAutoDownload
         enableAutoCleanup = settings.enableAutoCleanup
@@ -604,17 +612,25 @@ final class ProactiveModelManager {
 // MARK: - Supporting Types
 
 struct RequestAnalysis: Sendable {
+    // periphery:ignore - Reserved: request property — reserved for future feature activation
     let request: String
+    // periphery:ignore - Reserved: taskType property — reserved for future feature activation
     let taskType: TaskType
+    // periphery:ignore - Reserved: confidence property — reserved for future feature activation
     let confidence: Double
+    // periphery:ignore - Reserved: hasOptimalModel property — reserved for future feature activation
     let hasOptimalModel: Bool
     // periphery:ignore - Reserved: requestAutonomousConsent() instance method reserved for future feature activation
     var currentModel: String?
+    // periphery:ignore - Reserved: currentModelScore property — reserved for future feature activation
     var currentModelScore: Double?
+    // periphery:ignore - Reserved: recommendation property — reserved for future feature activation
     var recommendation: ProactiveModelRecommendation?
+    // periphery:ignore - Reserved: estimatedWaitTime property — reserved for future feature activation
     var estimatedWaitTime: TimeInterval?
 }
 
+// periphery:ignore - Reserved: PreflightResult type — reserved for future feature activation
 struct PreflightResult: Sendable {
     let ready: Bool
     let selectedModel: String?
@@ -624,10 +640,15 @@ struct PreflightResult: Sendable {
 }
 
 enum PreflightAction: Sendable {
+    // periphery:ignore - Reserved: proceed case — reserved for future feature activation
     case proceed
+    // periphery:ignore - Reserved: waitForDownload(progress:) case — reserved for future feature activation
     case waitForDownload(progress: Double)
+    // periphery:ignore - Reserved: downloadStarted(model:) case — reserved for future feature activation
     case downloadStarted(model: String)
+    // periphery:ignore - Reserved: suggestDownload(_:) case — reserved for future feature activation
     case suggestDownload(ProactiveModelRecommendation)
+    // periphery:ignore - Reserved: useRemote case — reserved for future feature activation
     case useRemote
 }
 
@@ -645,6 +666,7 @@ struct ProactiveModelRecommendation: Sendable, Identifiable {
     let modelName: String
     // periphery:ignore - Reserved: PreflightResult type reserved for future feature activation
     let estimatedSizeGB: Double
+    // periphery:ignore - Reserved: downloadURL property — reserved for future feature activation
     let downloadURL: String
     let reason: String
     let taskTypes: [TaskType]
@@ -688,10 +710,13 @@ struct DownloadProgress: Sendable {
     let modelId: String
     let modelName: String
     var percentage: Double
+    // periphery:ignore - Reserved: bytesDownloaded property — reserved for future feature activation
     var bytesDownloaded: Int64
+    // periphery:ignore - Reserved: totalBytes property — reserved for future feature activation
     let totalBytes: Int64
     let startedAt: Date
 
+    // periphery:ignore - Reserved: remainingTime property — reserved for future feature activation
     var remainingTime: TimeInterval? {
         guard percentage > 0 else { return nil }
         let elapsed = Date().timeIntervalSince(startedAt)
@@ -708,6 +733,7 @@ struct CleanupCandidate: Sendable, Identifiable {
     let model: LocalModel
     let lastUsed: Date
     let sizeGB: Double
+    // periphery:ignore - Reserved: usageCount property — reserved for future feature activation
     let usageCount: Int
 }
 
@@ -718,6 +744,7 @@ struct ModelUsageRecord: Codable, Sendable {
     var lastUsed = Date.distantPast
 }
 
+// periphery:ignore - Reserved: AutonomousConsentRequest type — reserved for future feature activation
 struct AutonomousConsentRequest: Sendable {
     var enableAutoDownload: Bool
     var enableAutoCleanup: Bool
@@ -730,7 +757,9 @@ struct AutonomousConsentRequest: Sendable {
 
 extension Notification.Name {
     static let modelDownloadCompleted = Notification.Name("ProactiveModelManager.downloadCompleted")
+    // periphery:ignore - Reserved: modelDownloadFailed static property — reserved for future feature activation
     static let modelDownloadFailed = Notification.Name("ProactiveModelManager.downloadFailed")
+    // periphery:ignore - Reserved: modelCleanupCompleted static property — reserved for future feature activation
     static let modelCleanupCompleted = Notification.Name("ProactiveModelManager.cleanupCompleted")
 }
 

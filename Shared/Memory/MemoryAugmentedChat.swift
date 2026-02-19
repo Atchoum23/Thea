@@ -14,6 +14,7 @@ import OSLog
 public final class MemoryAugmentedChat {
     public static let shared = MemoryAugmentedChat()
 
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "com.thea.ai", category: "MemoryAugmentedChat")
     private let retrieval = ActiveMemoryRetrieval.shared
 
@@ -30,6 +31,7 @@ public final class MemoryAugmentedChat {
     // MARK: - Public API
 
     /// Process a user message with memory augmentation
+    // periphery:ignore - Reserved: processMessage(_:conversationId:projectId:existingMessages:) instance method — reserved for future feature activation
     func processMessage(
         _ userMessage: String,
         conversationId: UUID,
@@ -111,6 +113,7 @@ public final class MemoryAugmentedChat {
     }
 
     /// Get context-aware suggestions based on current state
+    // periphery:ignore - Reserved: getSuggestions(conversationId:recentMessages:projectId:) instance method — reserved for future feature activation
     func getSuggestions(
         conversationId: UUID,
         recentMessages: [AIMessage],
@@ -164,6 +167,7 @@ public final class MemoryAugmentedChat {
 
     // MARK: - Private Methods
 
+    // periphery:ignore - Reserved: classifyTask(_:) instance method — reserved for future feature activation
     private func classifyTask(_ message: String) async -> TaskType {
         #if os(macOS)
         // periphery:ignore - Reserved: classifyTask(_:) instance method reserved for future feature activation
@@ -180,6 +184,7 @@ public final class MemoryAugmentedChat {
         #endif
     }
 
+    // periphery:ignore - Reserved: buildSystemContext(taskType:retrievedSources:projectId:) instance method — reserved for future feature activation
     private func buildSystemContext(
         // periphery:ignore - Reserved: buildSystemContext(taskType:retrievedSources:projectId:) instance method reserved for future feature activation
         taskType: TaskType,

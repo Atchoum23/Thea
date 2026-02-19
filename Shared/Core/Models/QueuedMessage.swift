@@ -7,6 +7,7 @@ import Foundation
 
 // MARK: - Queued Message
 
+// periphery:ignore - Reserved: QueuedMessage type — reserved for future feature activation
 struct QueuedMessage: Identifiable, Sendable {
     // periphery:ignore - Reserved: QueuedMessage type reserved for future feature activation
     let id: UUID

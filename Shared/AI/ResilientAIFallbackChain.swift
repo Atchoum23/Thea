@@ -289,10 +289,12 @@ final class ResilientAIFallbackChain {
 
     // MARK: - Status
 
+    // periphery:ignore - Reserved: tierStatus() instance method — reserved for future feature activation
     func tierStatus() -> [FallbackTier: TierHealthStatus] {
         tierHealth
     }
 
+    // periphery:ignore - Reserved: resetAllTiers() instance method — reserved for future feature activation
     func resetAllTiers() {
         for tier in FallbackTier.allCases {
             // periphery:ignore - Reserved: tierStatus() instance method reserved for future feature activation
@@ -350,7 +352,9 @@ struct TierHealthStatus: Sendable {
 struct FallbackChatResult: Sendable {
     let response: String
     let tier: FallbackTier
+    // periphery:ignore - Reserved: latencyMs property — reserved for future feature activation
     let latencyMs: Int
+    // periphery:ignore - Reserved: wasFallback property — reserved for future feature activation
     let wasFallback: Bool
 }
 

@@ -116,6 +116,7 @@ enum TheaSchemaMigrationPlan: SchemaMigrationPlan {
 
 extension TheaSchemaMigrationPlan {
     /// Creates a backup of the database before migration
+    // periphery:ignore - Reserved: backupDatabase(context:) static method — reserved for future feature activation
     static func backupDatabase(context: ModelContext) throws {
         // periphery:ignore - Reserved: backupDatabase(context:) static method reserved for future feature activation
         // Implementation: Export to JSON, copy .sqlite file, etc.

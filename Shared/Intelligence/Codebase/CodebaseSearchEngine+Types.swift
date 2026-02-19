@@ -11,7 +11,9 @@ import Accelerate
 struct ParsedQuery {
     let terms: [String]
     let exactPhrases: [String]
+    // periphery:ignore - Reserved: excludeTerms property — reserved for future feature activation
     let excludeTerms: [String]
+    // periphery:ignore - Reserved: filePatterns property — reserved for future feature activation
     let filePatterns: [String]
     let symbolPatterns: [String]
 }

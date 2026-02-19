@@ -12,6 +12,7 @@
         var allowedFolders: [AllowedFolder] = []
         var recentFolders: [URL] = []
 
+        // periphery:ignore - Reserved: logger property — reserved for future feature activation
         private let logger = Logger(subsystem: "ai.thea.app", category: "FolderAccessManager")
         private let bookmarksKey = "cowork.folderBookmarks"
         private let recentFoldersKey = "cowork.recentFolders"
@@ -72,6 +73,7 @@
 
         /// Request access to a folder via system dialog
         @MainActor
+        // periphery:ignore - Reserved: requestFolderAccess(initialDirectory:) instance method — reserved for future feature activation
         func requestFolderAccess(initialDirectory: URL? = nil) -> URL? {
             let panel = NSOpenPanel()
             // periphery:ignore - Reserved: requestFolderAccess(initialDirectory:) instance method reserved for future feature activation
@@ -113,6 +115,7 @@
         }
 
         /// Remove a folder by URL
+        // periphery:ignore - Reserved: removeAllowedFolder(_:) instance method — reserved for future feature activation
         func removeAllowedFolder(_ url: URL) {
             // periphery:ignore - Reserved: removeAllowedFolder(_:) instance method reserved for future feature activation
             allowedFolders.removeAll { $0.url == url }

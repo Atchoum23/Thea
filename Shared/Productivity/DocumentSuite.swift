@@ -349,6 +349,7 @@ actor DocumentSuiteService {
 
     func getDocuments() -> [TheaDocument] { documents }
 
+    // periphery:ignore - Reserved: getDocument(_:) instance method — reserved for future feature activation
     func getDocument(_ id: UUID) -> TheaDocument? {
         documents.first { $0.id == id }
     }
@@ -367,6 +368,7 @@ actor DocumentSuiteService {
 
     // MARK: - Export
 
+    // periphery:ignore - Reserved: exportDocument(_:format:) instance method — reserved for future feature activation
     func exportDocument(_ id: UUID, format: DocExportFormat) throws -> Data {
         // periphery:ignore - Reserved: exportDocument(_:format:) instance method reserved for future feature activation
         guard let doc = documents.first(where: { $0.id == id }) else {

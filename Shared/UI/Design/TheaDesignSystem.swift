@@ -35,6 +35,7 @@ public struct LayeredDepthModifier: ViewModifier {
 /// Hover lift effect for interactive cards
 public struct HoverLiftModifier: ViewModifier {
     @State private var isHovered = false
+    // periphery:ignore - Reserved: maxLift property — reserved for future feature activation
     let maxLift: CGFloat
 
 // periphery:ignore - Reserved: maxLift property reserved for future feature activation

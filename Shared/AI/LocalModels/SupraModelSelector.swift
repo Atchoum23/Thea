@@ -450,6 +450,7 @@ struct SupraModelCandidate: Sendable {
     let model: LocalModel
     let score: Double
     let reason: String
+    // periphery:ignore - Reserved: breakdown property — reserved for future feature activation
     let breakdown: SupraScoreBreakdown
 }
 
@@ -457,9 +458,13 @@ struct SupraModelCandidate: Sendable {
 struct SupraScoreBreakdown: Sendable {
     // periphery:ignore - Reserved: breakdown property reserved for future feature activation
     let total: Double
+    // periphery:ignore - Reserved: qualityScore property — reserved for future feature activation
     let qualityScore: Double
+    // periphery:ignore - Reserved: resourceFitScore property — reserved for future feature activation
     let resourceFitScore: Double
+    // periphery:ignore - Reserved: versatilityScore property — reserved for future feature activation
     let versatilityScore: Double
+    // periphery:ignore - Reserved: recencyScore property — reserved for future feature activation
     let recencyScore: Double
     // periphery:ignore - Reserved: qualityScore property reserved for future feature activation
     // periphery:ignore - Reserved: resourceFitScore property reserved for future feature activation

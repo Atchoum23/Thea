@@ -19,8 +19,10 @@ import OSLog
 @MainActor
 @Observable
 final class ProactiveEngagementEngine {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = ProactiveEngagementEngine()
 
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "com.thea.app", category: "ProactiveEngine")
 
     // MARK: - Configuration
@@ -54,6 +56,7 @@ final class ProactiveEngagementEngine {
 
     /// Evaluate all trigger sources and generate proactive engagements.
     /// Call this periodically (e.g., every 30 minutes from app lifecycle).
+    // periphery:ignore - Reserved: evaluate() instance method — reserved for future feature activation
     func evaluate() async {
         guard isEnabled else { return }
         resetDailyCounterIfNeeded()
@@ -110,6 +113,7 @@ final class ProactiveEngagementEngine {
 
     // MARK: - Time-Based Triggers
 
+    // periphery:ignore - Reserved: evaluateTimeTriggers() instance method — reserved for future feature activation
     private func evaluateTimeTriggers() -> [ProactiveEngagement] {
         var engagements: [ProactiveEngagement] = []
         let calendar = Calendar.current
@@ -147,6 +151,7 @@ final class ProactiveEngagementEngine {
 
     // MARK: - Health Triggers
 
+    // periphery:ignore - Reserved: evaluateHealthTriggers() instance method — reserved for future feature activation
     private func evaluateHealthTriggers() async -> [ProactiveEngagement] {
         let pipeline = HealthCoachingPipeline.shared
 
@@ -169,6 +174,7 @@ final class ProactiveEngagementEngine {
 
     // MARK: - Calendar Triggers
 
+    // periphery:ignore - Reserved: evaluateCalendarTriggers() instance method — reserved for future feature activation
     private func evaluateCalendarTriggers() async -> [ProactiveEngagement] {
         #if os(macOS)
         let integration = CalendarIntegration.shared
@@ -204,6 +210,7 @@ final class ProactiveEngagementEngine {
 
     // MARK: - Pattern Deviation Triggers
 
+    // periphery:ignore - Reserved: evaluatePatternTriggers() instance method — reserved for future feature activation
     private func evaluatePatternTriggers() -> [ProactiveEngagement] {
         let fingerprint = BehavioralFingerprint.shared
         let context = fingerprint.currentContext()
@@ -225,6 +232,7 @@ final class ProactiveEngagementEngine {
 
     // MARK: - Goal Triggers
 
+    // periphery:ignore - Reserved: evaluateGoalTriggers() instance method — reserved for future feature activation
     private func evaluateGoalTriggers() -> [ProactiveEngagement] {
         // Check behavioral fingerprint for activity patterns
         let fingerprint = BehavioralFingerprint.shared
@@ -253,6 +261,7 @@ final class ProactiveEngagementEngine {
 
     // MARK: - Delivery
 
+    // periphery:ignore - Reserved: deliverEngagement(_:) instance method — reserved for future feature activation
     private func deliverEngagement(_ engagement: ProactiveEngagement) async {
         logger.info("Delivering proactive engagement: \(engagement.title)")
 
@@ -270,6 +279,7 @@ final class ProactiveEngagementEngine {
 
     // MARK: - Helpers
 
+    // periphery:ignore - Reserved: hasDeliveredToday(type:) instance method — reserved for future feature activation
     private func hasDeliveredToday(type: EngagementType) -> Bool {
         let calendar = Calendar.current
         return deliveredEngagements.contains { engagement in
@@ -278,6 +288,7 @@ final class ProactiveEngagementEngine {
         }
     }
 
+    // periphery:ignore - Reserved: resetDailyCounterIfNeeded() instance method — reserved for future feature activation
     private func resetDailyCounterIfNeeded() {
         let calendar = Calendar.current
         if let lastReset = lastResetDate, calendar.isDateInToday(lastReset) {
@@ -289,6 +300,7 @@ final class ProactiveEngagementEngine {
         lastResetDate = Date()
     }
 
+    // periphery:ignore - Reserved: dayOfWeek(from:) instance method — reserved for future feature activation
     private func dayOfWeek(from index: Int) -> DayOfWeek? {
         switch index {
         // periphery:ignore - Reserved: dayOfWeek(from:) instance method reserved for future feature activation
@@ -321,6 +333,7 @@ struct ProactiveEngagement: Identifiable, Sendable {
     let title: String
     let message: String
     let priority: Int  // 1-10
+    // periphery:ignore - Reserved: actionSuggestion property — reserved for future feature activation
     let actionSuggestion: String?
     // periphery:ignore - Reserved: actionSuggestion property reserved for future feature activation
     // periphery:ignore - Reserved: timestamp property reserved for future feature activation

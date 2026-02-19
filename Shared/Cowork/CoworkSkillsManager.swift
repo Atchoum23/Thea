@@ -123,6 +123,7 @@
 
         // MARK: - Skill Execution
 
+        // periphery:ignore - Reserved: canHandle(extension:) instance method — reserved for future feature activation
         func canHandle(extension ext: String) -> SkillType? {
             let lowercased = ext.lowercased()
             for skill in enabledSkills {
@@ -133,6 +134,7 @@
             return nil
         }
 
+        // periphery:ignore - Reserved: canHandle(url:) instance method — reserved for future feature activation
         func canHandle(url: URL) -> SkillType? {
             canHandle(extension: url.pathExtension)
         }
@@ -292,11 +294,13 @@
 
             // periphery:ignore - Reserved: OrganizationResult type reserved for future feature activation
             var movedCount: Int { movedFiles.count }
+            // periphery:ignore - Reserved: createdCount property — reserved for future feature activation
             var createdCount: Int { createdDirectories.count }
         }
 
         // MARK: - Archive Skills
 
+        // periphery:ignore - Reserved: createArchive(from:to:format:) instance method — reserved for future feature activation
         func createArchive(
             from files: [URL],
             to destination: URL,
@@ -332,6 +336,7 @@
             return destination
         }
 
+        // periphery:ignore - Reserved: extractArchive(from:to:) instance method — reserved for future feature activation
         func extractArchive(
             from archive: URL,
             // periphery:ignore - Reserved: extractArchive(from:to:) instance method reserved for future feature activation
@@ -366,6 +371,7 @@
             }
         }
 
+        // periphery:ignore - Reserved: ArchiveFormat enum — reserved for future feature activation
         enum ArchiveFormat: String, CaseIterable {
             // periphery:ignore - Reserved: ArchiveFormat type reserved for future feature activation
             case zip = "ZIP"

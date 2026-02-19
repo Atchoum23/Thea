@@ -4,6 +4,7 @@ import Foundation
 // Shared protocol for all voice backends (Apple Speech, MLX Audio, etc.)
 // Enables swapping voice engines while keeping the same interface
 
+// periphery:ignore - Reserved: VoiceSynthesisBackend protocol — reserved for future feature activation
 protocol VoiceSynthesisBackend: Sendable {
     // periphery:ignore - Reserved: VoiceSynthesisBackend protocol reserved for future feature activation
     var isAvailable: Bool { get async }

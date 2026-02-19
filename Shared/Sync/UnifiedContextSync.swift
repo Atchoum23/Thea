@@ -55,6 +55,7 @@ public actor UnifiedContextSync {
     // MARK: - State
 
     private var isSyncing = false
+    // periphery:ignore - Reserved: lastSyncTime property — reserved for future feature activation
     private var lastSyncTime: Date?
     // periphery:ignore - Reserved: lastSyncTime property reserved for future feature activation
     private var syncTimer: Task<Void, Never>?

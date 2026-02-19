@@ -50,6 +50,7 @@ final class MLXModelManager {
         await scanDirectory(url)
     }
 
+    // periphery:ignore - Reserved: removeModelDirectory(_:) instance method — reserved for future feature activation
     func removeModelDirectory(_ url: URL) async {
         modelDirectories.removeAll { $0 == url }
         saveModelDirectories()
@@ -138,6 +139,7 @@ final class MLXModelManager {
         }
     }
 
+    // periphery:ignore - Reserved: quickScanCount() instance method — reserved for future feature activation
     func quickScanCount() async -> Int {
         var total = 0
         for directory in modelDirectories {
@@ -148,15 +150,18 @@ final class MLXModelManager {
 
     // MARK: - Model Information
 
+    // periphery:ignore - Reserved: getModel(byID:) instance method — reserved for future feature activation
     func getModel(byID id: UUID) -> ScannedModel? {
         scannedModels.first { $0.id == id }
     // periphery:ignore - Reserved: quickScanCount() instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: getModel(byName:) instance method — reserved for future feature activation
     func getModel(byName name: String) -> ScannedModel? {
         scannedModels.first { $0.name == name }
     }
 
+    // periphery:ignore - Reserved: getModels(format:) instance method — reserved for future feature activation
     func getModels(format: ModelFormat) -> [ScannedModel] {
         scannedModels.filter { $0.format == format }
     }
@@ -168,6 +173,7 @@ final class MLXModelManager {
     // periphery:ignore - Reserved: getModel(byName:) instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: formattedTotalSize property — reserved for future feature activation
     var formattedTotalSize: String {
         // periphery:ignore - Reserved: getModels(format:) instance method reserved for future feature activation
         ByteCountFormatter.string(fromByteCount: getTotalModelsSize(), countStyle: .file)
@@ -186,6 +192,7 @@ final class MLXModelManager {
     // periphery:ignore - Reserved: deleteModel(_:) instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: openModelLocation(_:) instance method — reserved for future feature activation
     func openModelLocation(_ model: ScannedModel) {
         #if os(macOS)
             NSWorkspace.shared.selectFile(model.path.path, inFileViewerRootedAtPath: "")
@@ -214,6 +221,7 @@ final class MLXModelManager {
 
     // MARK: - Model Import
 
+    // periphery:ignore - Reserved: importModel(from:to:) instance method — reserved for future feature activation
     func importModel(from sourceURL: URL, to destinationDirectory: URL) async throws -> ScannedModel {
         let destinationURL = destinationDirectory.appendingPathComponent(sourceURL.lastPathComponent)
 
@@ -244,6 +252,7 @@ final class MLXModelManager {
 
     // MARK: - Statistics
 
+    // periphery:ignore - Reserved: getStatistics() instance method — reserved for future feature activation
     func getStatistics() -> ModelStatistics {
         let mlxCount = scannedModels.count { $0.format == .mlx }
         // periphery:ignore - Reserved: getStatistics() instance method reserved for future feature activation
@@ -263,6 +272,7 @@ final class MLXModelManager {
 
 // MARK: - Data Structures
 
+// periphery:ignore - Reserved: ModelStatistics type — reserved for future feature activation
 struct ModelStatistics {
     // periphery:ignore - Reserved: ModelStatistics type reserved for future feature activation
     let totalModels: Int

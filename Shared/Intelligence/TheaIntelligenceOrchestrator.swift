@@ -25,6 +25,7 @@ import OSLog
 @MainActor
 @Observable
 final class TheaIntelligenceOrchestrator {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = TheaIntelligenceOrchestrator()
 
     private let logger = Logger(subsystem: "com.thea.app", category: "IntelligenceOrchestrator")
@@ -58,6 +59,7 @@ final class TheaIntelligenceOrchestrator {
     // MARK: - Lifecycle
 
     /// Start the intelligence orchestrator. Call this from app startup.
+    // periphery:ignore - Reserved: start() instance method — reserved for future feature activation
     func start() {
         guard !isRunning else { return }
         isRunning = true
@@ -81,6 +83,7 @@ final class TheaIntelligenceOrchestrator {
     }
 
     /// Stop the intelligence orchestrator.
+    // periphery:ignore - Reserved: stop() instance method — reserved for future feature activation
     func stop() {
         isRunning = false
         systemStatus = .idle
@@ -109,6 +112,7 @@ final class TheaIntelligenceOrchestrator {
 
     // MARK: - Periodic Evaluation
 
+    // periphery:ignore - Reserved: startPeriodicEvaluation() instance method — reserved for future feature activation
     private func startPeriodicEvaluation() {
         evaluationTimer?.invalidate()
         evaluationTimer = Timer.scheduledTimer(
@@ -123,6 +127,7 @@ final class TheaIntelligenceOrchestrator {
     }
 
     /// Run a full evaluation cycle across all intelligence systems.
+    // periphery:ignore - Reserved: evaluate() instance method — reserved for future feature activation
     func evaluate() async {
         guard isEnabled else { return }
 
@@ -161,6 +166,7 @@ final class TheaIntelligenceOrchestrator {
 
     /// Process an AI response through the intelligence pipeline.
     /// Call this after receiving a response from any AI provider.
+    // periphery:ignore - Reserved: processAIResponse(task:response:conversationContext:) instance method — reserved for future feature activation
     func processAIResponse(
         task: String,
         response: String,
@@ -181,6 +187,7 @@ final class TheaIntelligenceOrchestrator {
     }
 
     /// Extract memory from a completed conversation
+    // periphery:ignore - Reserved: extractConversationMemory(_:) instance method — reserved for future feature activation
     func extractConversationMemory(_ conversation: Conversation) async {
         guard isEnabled else { return }
         await ConversationMemoryExtractor.shared.extractFromConversation(conversation)
@@ -213,6 +220,7 @@ final class TheaIntelligenceOrchestrator {
     // MARK: - System Status
 
     /// Get a comprehensive status report of all intelligence systems
+    // periphery:ignore - Reserved: statusReport() instance method — reserved for future feature activation
     func statusReport() async -> IntelligenceStatusReport {
         // periphery:ignore - Reserved: statusReport() instance method reserved for future feature activation
         let graph = PersonalKnowledgeGraph.shared

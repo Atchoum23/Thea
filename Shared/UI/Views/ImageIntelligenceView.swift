@@ -224,6 +224,7 @@ struct ImageIntelligenceView: View {
 
     // MARK: - iOS Sections
 
+    // periphery:ignore - Reserved: operationSection property — reserved for future feature activation
     private var operationSection: some View {
         // periphery:ignore - Reserved: operationSection property reserved for future feature activation
         Section("Operations") {

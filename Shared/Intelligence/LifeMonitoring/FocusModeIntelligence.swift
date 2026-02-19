@@ -109,6 +109,7 @@ public actor FocusModeIntelligence {
 
     // Escalation tracking
     private var messageCountTracking: [String: [Date]] = [:] // Contact -> message timestamps
+    // periphery:ignore - Reserved: escalationPending property — reserved for future feature activation
     private var escalationPending: Set<String> = [] // Contacts awaiting urgency confirmation
 
     // Group chat tracking
@@ -218,12 +219,17 @@ public actor FocusModeIntelligence {
     }
     #endif
 
+    // periphery:ignore - Reserved: getMessageCountTracking(for:) instance method — reserved for future feature activation
     func getMessageCountTracking(for contact: String) -> [Date] { messageCountTracking[contact] ?? [] }
+    // periphery:ignore - Reserved: setMessageCountTracking(for:timestamps:) instance method — reserved for future feature activation
     func setMessageCountTracking(for contact: String, timestamps: [Date]) { messageCountTracking[contact] = timestamps }
     func getAllMessageCountTracking() -> [String: [Date]] { messageCountTracking }
 
+    // periphery:ignore - Reserved: getEscalationPending() instance method — reserved for future feature activation
     func getEscalationPending() -> Set<String> { escalationPending }
+    // periphery:ignore - Reserved: addEscalationPending(_:) instance method — reserved for future feature activation
     func addEscalationPending(_ contact: String) { escalationPending.insert(contact) }
+    // periphery:ignore - Reserved: removeEscalationPending(_:) instance method — reserved for future feature activation
     func removeEscalationPending(_ contact: String) { escalationPending.remove(contact) }
 
 // periphery:ignore - Reserved: getMessageCountTracking(for:) instance method reserved for future feature activation
@@ -244,7 +250,9 @@ public actor FocusModeIntelligence {
     func getContactPriorityValue(_ contactId: String) -> Double { contactPriorities[contactId] ?? 0.5 }
     func setContactPriorityValue(_ contactId: String, priority: Double) { contactPriorities[contactId] = priority }
 
+    // periphery:ignore - Reserved: appendPendingAction(_:) instance method — reserved for future feature activation
     func appendPendingAction(_ action: PendingAction) { pendingActions.append(action) }
+    // periphery:ignore - Reserved: markPendingActionVerified(_:) instance method — reserved for future feature activation
     func markPendingActionVerified(_ id: UUID) {
         // periphery:ignore - Reserved: appendPendingAction(_:) instance method reserved for future feature activation
         // periphery:ignore - Reserved: markPendingActionVerified(_:) instance method reserved for future feature activation

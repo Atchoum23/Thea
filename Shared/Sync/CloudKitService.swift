@@ -32,7 +32,9 @@ public class CloudKitService: ObservableObject {
     private let containerIdentifier = "iCloud.app.theathe"
     private var container: CKContainer?
     var privateDatabase: CKDatabase?
+    // periphery:ignore - Reserved: sharedDatabase property — reserved for future feature activation
     private var sharedDatabase: CKDatabase?
+    // periphery:ignore - Reserved: publicDatabase property — reserved for future feature activation
     private var publicDatabase: CKDatabase?
 
 // periphery:ignore - Reserved: sharedDatabase property reserved for future feature activation

@@ -98,6 +98,7 @@ final class CoreMLInferenceEngine {
         }
     }
 
+    // periphery:ignore - Reserved: loadBundledModel(name:) instance method — reserved for future feature activation
     func loadBundledModel(name: String) async throws {
         guard let url = Bundle.main.url(forResource: name, withExtension: "mlmodelc") else {
             // periphery:ignore - Reserved: loadBundledModel(name:) instance method reserved for future feature activation
@@ -106,6 +107,7 @@ final class CoreMLInferenceEngine {
         try await loadModel(at: url, id: name)
     }
 
+    // periphery:ignore - Reserved: unloadModel() instance method — reserved for future feature activation
     func unloadModel() {
         // periphery:ignore - Reserved: unloadModel() instance method reserved for future feature activation
         loadedModel = nil

@@ -34,6 +34,7 @@ final class InvestmentTracker {
         return portfolio
     }
 
+    // periphery:ignore - Reserved: removePortfolio(id:) instance method — reserved for future feature activation
     func removePortfolio(id: UUID) {
         portfolios.removeAll { $0.id == id }
         holdings.removeAll { $0.portfolioId == id }
@@ -71,6 +72,7 @@ final class InvestmentTracker {
         return holding
     }
 
+    // periphery:ignore - Reserved: updatePrice(holdingId:newPrice:) instance method — reserved for future feature activation
     func updatePrice(holdingId: UUID, newPrice: Double) {
         if let index = holdings.firstIndex(where: { $0.id == holdingId }) {
             holdings[index].currentPrice = newPrice
@@ -79,6 +81,7 @@ final class InvestmentTracker {
         }
     }
 
+    // periphery:ignore - Reserved: removeHolding(id:) instance method — reserved for future feature activation
     func removeHolding(id: UUID) {
         holdings.removeAll { $0.id == id }
         saveData()
@@ -218,6 +221,7 @@ final class InvestmentTracker {
     // MARK: - CSV Import
 
     /// Import holdings from a broker CSV export.
+    // periphery:ignore - Reserved: importHoldingsCSV(from:portfolioId:) instance method — reserved for future feature activation
     func importHoldingsCSV(from url: URL, portfolioId: UUID) throws -> [Holding] {
         let data = try Data(contentsOf: url)
         guard let content = String(data: data, encoding: .utf8) else {
@@ -379,6 +383,7 @@ struct PortfolioPerformance: Sendable {
     let annualizedReturn: Double
     let totalDividends: Double
     let holdingCount: Int
+    // periphery:ignore - Reserved: holdings property — reserved for future feature activation
     let holdings: [HoldingPerformance]
 
     static let empty = PortfolioPerformance(

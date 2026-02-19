@@ -129,6 +129,7 @@ public final class SmartDeviceManager: ObservableObject {
 
     // MARK: - Command Handlers
 
+    // periphery:ignore - Reserved: command parameter — kept for API compatibility
     private func handleNavigationCommand(_ command: DeviceVoiceCommand) async -> DeviceVoiceCommandResult {
         // Handle: "Next page", "Move up", "Go back", etc.
         DeviceVoiceCommandResult(success: true, message: "Navigation executed")
@@ -144,6 +145,7 @@ public final class SmartDeviceManager: ObservableObject {
         return DeviceVoiceCommandResult(success: true, message: "Playback command executed")
     }
 
+    // periphery:ignore - Reserved: command parameter — kept for API compatibility
     private func handleSelectionCommand(_ command: DeviceVoiceCommand) async -> DeviceVoiceCommandResult {
         // Handle: "Select first", "Select this", "Select {title}", etc.
         DeviceVoiceCommandResult(success: true, message: "Selection executed")
@@ -155,12 +157,14 @@ public final class SmartDeviceManager: ObservableObject {
         DeviceVoiceCommandResult(success: true, message: "Search initiated", data: command.parameters)
     }
 
+    // periphery:ignore - Reserved: command parameter — kept for API compatibility
     private func handleControlCommand(_ command: DeviceVoiceCommand) async -> DeviceVoiceCommandResult {
         // Handle: "Turn on subtitles", "Increase volume", etc.
         // periphery:ignore - Reserved: command parameter kept for API compatibility
         DeviceVoiceCommandResult(success: true, message: "Control command executed")
     }
 
+    // periphery:ignore - Reserved: command parameter — kept for API compatibility
     private func handleCustomCommand(_ command: DeviceVoiceCommand) async -> DeviceVoiceCommandResult {
         // periphery:ignore - Reserved: command parameter kept for API compatibility
         // Handle app-specific custom commands

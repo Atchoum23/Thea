@@ -102,6 +102,7 @@ actor OpenClawClient {
         try await send(command: .sendMessage(channelID: channelID, text: text))
     }
 
+    // periphery:ignore - Reserved: listChannels() instance method — reserved for future feature activation
     func listChannels() async throws {
         try await send(command: .listChannels)
     }

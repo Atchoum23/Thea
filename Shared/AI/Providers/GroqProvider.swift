@@ -14,6 +14,7 @@ final class GroqProvider: AIProvider, Sendable {
         documentationURL: URL(string: "https://console.groq.com/docs")!
     )
 
+    // periphery:ignore - Reserved: capabilities property — reserved for future feature activation
     let capabilities = ProviderCapabilities(
         // periphery:ignore - Reserved: capabilities property reserved for future feature activation
         supportsStreaming: true,

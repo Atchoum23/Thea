@@ -67,6 +67,7 @@ final class ConversationListViewModel {
     }
 
     /// Pinned conversations (filtered)
+    // periphery:ignore - Reserved: pinnedConversations property — reserved for future feature activation
     var pinnedConversations: [Conversation] {
         filteredConversations.filter(\.isPinned)
     }
@@ -121,6 +122,7 @@ final class ConversationListViewModel {
     // MARK: - Actions
 
     /// Create a new conversation and select it
+    // periphery:ignore - Reserved: createNewConversation() instance method — reserved for future feature activation
     func createNewConversation() {
         let conversation = chatManager.createConversation()
         selectedConversation = conversation
@@ -157,6 +159,7 @@ final class ConversationListViewModel {
     }
 
     /// Cancel deletion
+    // periphery:ignore - Reserved: cancelDelete() instance method — reserved for future feature activation
     func cancelDelete() {
         conversationToDelete = nil
         showingDeleteConfirmation = false
@@ -164,12 +167,14 @@ final class ConversationListViewModel {
     }
 
     /// Toggle pin status of a conversation
+    // periphery:ignore - Reserved: togglePin(_:) instance method — reserved for future feature activation
     func togglePin(_ conversation: Conversation) {
         chatManager.togglePin(conversation)
     // periphery:ignore - Reserved: togglePin(_:) instance method reserved for future feature activation
     }
 
     /// Update conversation title
+    // periphery:ignore - Reserved: updateTitle(_:to:) instance method — reserved for future feature activation
     func updateTitle(_ conversation: Conversation, to title: String) {
         // periphery:ignore - Reserved: updateTitle(_:to:) instance method reserved for future feature activation
         chatManager.updateConversationTitle(conversation, title: title)

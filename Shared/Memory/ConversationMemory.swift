@@ -225,6 +225,7 @@ final class ConversationMemory {
     }
 
     /// Build a context prompt from retrieved memory
+    // periphery:ignore - Reserved: buildContextPrompt(for:projectId:) instance method — reserved for future feature activation
     func buildContextPrompt(for query: String, projectId: UUID? = nil) -> String? {
         let context = retrieveContext(for: query, projectId: projectId)
 
@@ -457,6 +458,7 @@ final class ConversationMemory {
         return fallbackSummary(factsContext: factsContext)
     }
 
+    // periphery:ignore - Reserved: factsContext parameter — kept for API compatibility
     private func fallbackSummary(factsContext: String) -> AISummaryResult {
         // Deterministic fallback when no AI provider is available
         let topics = Array(learnedFacts.suffix(5).map { $0.fact })
@@ -474,11 +476,13 @@ final class ConversationMemory {
 
     // MARK: - User Preferences
 
+    // periphery:ignore - Reserved: setUserPreference(key:value:) instance method — reserved for future feature activation
     func setUserPreference(key: String, value: String) {
         userPreferences[key] = value
         saveMemory()
     }
 
+    // periphery:ignore - Reserved: removeUserPreference(key:) instance method — reserved for future feature activation
     func removeUserPreference(key: String) {
         userPreferences.removeValue(forKey: key)
         saveMemory()
@@ -493,6 +497,7 @@ final class ConversationMemory {
         saveMemory()
     }
 
+    // periphery:ignore - Reserved: forgetSummary(id:) instance method — reserved for future feature activation
     func forgetSummary(id: UUID) {
         // periphery:ignore - Reserved: forgetFact(id:) instance method reserved for future feature activation
         conversationSummaries.removeAll { $0.id == id }
@@ -507,6 +512,7 @@ final class ConversationMemory {
         saveMemory()
     }
 
+    // periphery:ignore - Reserved: clearProjectMemory(projectId:) instance method — reserved for future feature activation
     func clearProjectMemory(projectId: UUID) {
         conversationSummaries.removeAll { $0.projectId == projectId }
         saveMemory()
@@ -591,6 +597,7 @@ final class ConversationMemory {
 
     // MARK: - Helpers
 
+    // periphery:ignore - Reserved: formatRelativeTime(_:) instance method — reserved for future feature activation
     private func formatRelativeTime(_ date: Date) -> String {
         let interval = Date().timeIntervalSince(date)
 
@@ -627,6 +634,7 @@ struct RetrievedContext: Sendable {
     let facts: [ConversationMemory.LearnedFact]
     let userPreferences: [String: String]
 
+    // periphery:ignore - Reserved: isEmpty property — reserved for future feature activation
     var isEmpty: Bool {
         summaries.isEmpty && facts.isEmpty && userPreferences.isEmpty
     // periphery:ignore - Reserved: isEmpty property reserved for future feature activation
@@ -636,6 +644,7 @@ struct RetrievedContext: Sendable {
 struct ConversationMemoryStats: Sendable {
     let totalSummaries: Int
     let totalFacts: Int
+    // periphery:ignore - Reserved: factsByCategory property — reserved for future feature activation
     let factsByCategory: [ConversationMemory.FactCategory: Int]
     // periphery:ignore - Reserved: factsByCategory property reserved for future feature activation
     let preferencesCount: Int

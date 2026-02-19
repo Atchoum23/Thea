@@ -22,6 +22,7 @@ import Foundation
 /// - New provider sources (e.g., remote model catalogs) can conform without
 ///   modifying existing consumers
 @MainActor
+// periphery:ignore - Reserved: ProviderRegistryProtocol protocol — reserved for future feature activation
 protocol ProviderRegistryProtocol: AnyObject {
 
 // periphery:ignore - Reserved: ProviderRegistryProtocol protocol reserved for future feature activation

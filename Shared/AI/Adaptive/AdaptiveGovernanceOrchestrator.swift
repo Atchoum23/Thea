@@ -137,6 +137,7 @@ public actor AdaptiveGovernanceOrchestrator {
     /// Cycle tracking
     private var cycleCount: Int = 0
     private var consecutiveFailures: Int = 0
+    // periphery:ignore - Reserved: lastCycleTimestamp property — reserved for future feature activation
     private var lastCycleTimestamp: Date?
 
 // periphery:ignore - Reserved: lastCycleTimestamp property reserved for future feature activation

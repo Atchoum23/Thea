@@ -612,6 +612,7 @@ extension ChatManager {
     }
 
     /// Remove a queued message at the given index
+    // periphery:ignore - Reserved: removeQueuedMessage(at:) instance method — reserved for future feature activation
     func removeQueuedMessage(at index: Int) {
         // periphery:ignore - Reserved: removeQueuedMessage(at:) instance method reserved for future feature activation
         guard messageQueue.indices.contains(index) else { return }

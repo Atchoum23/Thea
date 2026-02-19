@@ -32,6 +32,7 @@ public actor CrossDeviceNotificationService {
 
     var currentDeviceRegistration: CrossDeviceRegistration?
     var registeredDevices: [CrossDeviceRegistration] = []
+    // periphery:ignore - Reserved: pendingNotifications property — reserved for future feature activation
     var pendingNotifications: [CrossDeviceNotificationPayload] = []
     // periphery:ignore - Reserved: pendingNotifications property reserved for future feature activation
     var deliveryTracking: [UUID: [CrossDeviceNotificationDelivery]] = [:]

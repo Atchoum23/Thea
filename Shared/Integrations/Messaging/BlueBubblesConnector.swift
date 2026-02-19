@@ -7,6 +7,7 @@ import OSLog
 // Credentials: serverUrl (e.g. "http://localhost:1234") + apiKey (BlueBubbles password).
 
 actor BlueBubblesConnector: MessagingPlatformConnector {
+    // periphery:ignore - Reserved: platform property — reserved for future feature activation
     let platform: MessagingPlatform = .imessage
     // periphery:ignore - Reserved: platform property reserved for future feature activation
     private(set) var isConnected = false

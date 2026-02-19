@@ -64,6 +64,7 @@ actor SyncEncryption {
     }
 
     /// Encrypt a Codable value to Data
+    // periphery:ignore - Reserved: encryptCodable(_:) instance method — reserved for future feature activation
     func encryptCodable<T: Codable>(_ value: T) throws -> Data {
         let plainData = try JSONEncoder().encode(value)
         // periphery:ignore - Reserved: encryptCodable(_:) instance method reserved for future feature activation
@@ -71,6 +72,7 @@ actor SyncEncryption {
     }
 
     /// Decrypt Data to a Codable value
+    // periphery:ignore - Reserved: decryptCodable(_:as:) instance method — reserved for future feature activation
     func decryptCodable<T: Codable>(_ data: Data, as type: T.Type) throws -> T {
         // periphery:ignore - Reserved: decryptCodable(_:as:) instance method reserved for future feature activation
         let plainData = try decrypt(data)

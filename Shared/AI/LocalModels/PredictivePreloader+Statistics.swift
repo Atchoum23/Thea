@@ -21,6 +21,7 @@ extension PredictivePreloader {
     /// Shannon entropy as a measure of user behavior predictability.
     ///
     /// - Returns: A ``PredictionStats`` snapshot of the current state.
+    // periphery:ignore - Reserved: getPredictionStats() instance method — reserved for future feature activation
     func getPredictionStats() -> PredictionStats {
         var taskCounts: [TaskType: Int] = [:]
         // periphery:ignore - Reserved: getPredictionStats() instance method reserved for future feature activation

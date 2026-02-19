@@ -353,6 +353,7 @@ struct AboutView: View {
 
 // MARK: - Terminal Settings Section View
 
+// periphery:ignore - Reserved: TerminalSettingsSectionView type — reserved for future feature activation
 struct TerminalSettingsSectionView: View {
     // periphery:ignore - Reserved: TerminalSettingsSectionView type reserved for future feature activation
     @State private var shellPath = "/bin/zsh"

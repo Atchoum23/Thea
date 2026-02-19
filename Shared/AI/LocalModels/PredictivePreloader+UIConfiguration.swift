@@ -21,6 +21,7 @@ extension PredictivePreloader {
     /// suggestions, and theme preferences.
     ///
     /// - Returns: A ``TimeBasedUIConfiguration`` reflecting the recommended UI state.
+    // periphery:ignore - Reserved: getTimeBasedUIConfiguration() instance method — reserved for future feature activation
     func getTimeBasedUIConfiguration() -> TimeBasedUIConfiguration {
         let currentHour = Calendar.current.component(.hour, from: Date())
         let dayOfWeek = Calendar.current.component(.weekday, from: Date())
@@ -77,6 +78,7 @@ extension PredictivePreloader {
     ///   - distribution: Task type to probability mapping for the current hour.
     ///   - hour: The current hour (0-23).
     /// - Returns: The recommended ``UIMode``.
+    // periphery:ignore - Reserved: determinePrimaryMode(from:hour:) instance method — reserved for future feature activation
     func determinePrimaryMode(from distribution: [TaskType: Double], hour: Int) -> UIMode {
         // Check for dominant task type
         if let dominant = distribution.max(by: { $0.value < $1.value }),
@@ -125,6 +127,7 @@ extension PredictivePreloader {
     ///   - hour: The current hour (0-23).
     ///   - dayOfWeek: The current day of week (1=Sunday, 7=Saturday).
     /// - Returns: An array of ``UIRecommendation`` values to apply.
+    // periphery:ignore - Reserved: generateUIRecommendations(primaryMode:taskDistribution:hour:dayOfWeek:) instance method — reserved for future feature activation
     func generateUIRecommendations(
         primaryMode: UIMode,
         taskDistribution: [TaskType: Double],
@@ -186,6 +189,7 @@ extension PredictivePreloader {
     ///
     /// - Parameter taskDistribution: Task type to probability mapping.
     /// - Returns: An array of ``PredictedQuickAction`` for the UI.
+    // periphery:ignore - Reserved: getSuggestedPredictedQuickActions(taskDistribution:) instance method — reserved for future feature activation
     func getSuggestedPredictedQuickActions(taskDistribution: [TaskType: Double]) -> [PredictedQuickAction] {
         var actions: [PredictedQuickAction] = []
 
@@ -257,6 +261,7 @@ extension PredictivePreloader {
     ///
     /// - Parameter hour: The current hour (0-23).
     /// - Returns: The recommended ``ThemePreference``.
+    // periphery:ignore - Reserved: getThemePreference(hour:) instance method — reserved for future feature activation
     func getThemePreference(hour: Int) -> ThemePreference {
         switch hour {
         case 6..<8:
@@ -280,6 +285,7 @@ extension PredictivePreloader {
     ///
     /// - Parameter hourPatterns: Task type to count mapping for the relevant hour.
     /// - Returns: A confidence score in the range `0.0...1.0`.
+    // periphery:ignore - Reserved: calculateConfidence(hourPatterns:) instance method — reserved for future feature activation
     func calculateConfidence(hourPatterns: [TaskType: Double]) -> Double {
         let totalCount = hourPatterns.values.reduce(0, +)
 
@@ -311,6 +317,7 @@ extension PredictivePreloader {
     /// each to produce dominant task types and weighted productivity scores.
     ///
     /// - Returns: An array of ``TimeBlockAnalysis`` for each time block.
+    // periphery:ignore - Reserved: analyzeTimeBlocks() instance method — reserved for future feature activation
     func analyzeTimeBlocks() -> [TimeBlockAnalysis] {
         // periphery:ignore - Reserved: analyzeTimeBlocks() instance method reserved for future feature activation
         var blocks: [TimeBlockAnalysis] = []

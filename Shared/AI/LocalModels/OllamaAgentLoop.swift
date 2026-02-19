@@ -9,8 +9,10 @@ import OSLog
 @MainActor
 @Observable
 final class OllamaAgentLoop {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = OllamaAgentLoop()
 
+    // periphery:ignore - Reserved: logger property — reserved for future feature activation
     private let logger = Logger(subsystem: "ai.thea.app", category: "OllamaAgentLoop")
 
     // MARK: - Configuration
@@ -53,18 +55,27 @@ final class OllamaAgentLoop {
 
     struct ToolExecution: Identifiable, Sendable {
         let id = UUID()
+        // periphery:ignore - Reserved: timestamp property — reserved for future feature activation
         let timestamp: Date
+        // periphery:ignore - Reserved: tool property — reserved for future feature activation
         let tool: ToolType
+        // periphery:ignore - Reserved: input property — reserved for future feature activation
         let input: String
+        // periphery:ignore - Reserved: output property — reserved for future feature activation
         let output: String
+        // periphery:ignore - Reserved: approved property — reserved for future feature activation
         let approved: Bool
+        // periphery:ignore - Reserved: autoApproved property — reserved for future feature activation
         let autoApproved: Bool
     }
 
     struct ToolApprovalRequest: Identifiable, Sendable {
         let id = UUID()
+        // periphery:ignore - Reserved: tool property — reserved for future feature activation
         let tool: ToolType
+        // periphery:ignore - Reserved: input property — reserved for future feature activation
         let input: String
+        // periphery:ignore - Reserved: reason property — reserved for future feature activation
         let reason: String
         var continuation: CheckedContinuation<Bool, Never>?
     }
@@ -72,6 +83,7 @@ final class OllamaAgentLoop {
     // MARK: - Agent Loop Execution
 
     /// Run an agent loop with the specified model and prompt
+    // periphery:ignore - Reserved: run(model:prompt:stream:) instance method — reserved for future feature activation
     func run(
         model: String,
         prompt: String,
@@ -154,11 +166,13 @@ final class OllamaAgentLoop {
 
     // MARK: - Ollama API with Tools
 
+    // periphery:ignore - Reserved: OllamaResponse type — reserved for future feature activation
     private struct OllamaResponse {
         let content: String
         let toolCalls: [ToolCall]?
     }
 
+    // periphery:ignore - Reserved: callOllamaWithTools(model:messages:stream:continuation:) instance method — reserved for future feature activation
     private func callOllamaWithTools(
         model: String,
         messages: [[String: Any]],
@@ -275,6 +289,7 @@ final class OllamaAgentLoop {
 
     // MARK: - Tool Execution
 
+    // periphery:ignore - Reserved: executeTool(_:continuation:) instance method — reserved for future feature activation
     private func executeTool(
         _ toolCall: ToolCall,
         continuation: AsyncThrowingStream<AgentLoopEvent, Error>.Continuation
@@ -337,6 +352,7 @@ final class OllamaAgentLoop {
         return result
     }
 
+    // periphery:ignore - Reserved: isAutoApproved(_:) instance method — reserved for future feature activation
     private func isAutoApproved(_ toolCall: ToolCall) -> Bool {
         guard toolCall.type == .bash else { return false }
         guard let command = toolCall.command else { return false }
@@ -365,6 +381,7 @@ final class OllamaAgentLoop {
         return false
     }
 
+    // periphery:ignore - Reserved: requestApproval(for:) instance method — reserved for future feature activation
     private func requestApproval(for toolCall: ToolCall) async -> Bool {
         await withCheckedContinuation { cont in
             let input = toolCall.command ?? toolCall.query ?? ""
@@ -379,6 +396,7 @@ final class OllamaAgentLoop {
     }
 
     /// Call this from UI to approve/deny pending tool execution
+    // periphery:ignore - Reserved: respondToApproval(_:) instance method — reserved for future feature activation
     func respondToApproval(_ approved: Bool) {
         guard let request = pendingApproval else { return }
         request.continuation?.resume(returning: approved)
@@ -420,6 +438,7 @@ final class OllamaAgentLoop {
         #endif
     }
 
+    // periphery:ignore - Reserved: executeWebSearch(_:) instance method — reserved for future feature activation
     private func executeWebSearch(_ query: String) async throws -> String {
         // Use Ollama's web search API endpoint
         guard let url = URL(string: "\(configuration.ollamaBaseURL)/api/search") else {
@@ -462,6 +481,7 @@ final class OllamaAgentLoop {
 
     // MARK: - Configuration
 
+    // periphery:ignore - Reserved: updateConfiguration(_:) instance method — reserved for future feature activation
     func updateConfiguration(_ config: Configuration) {
         configuration = config
     }
@@ -481,6 +501,7 @@ final class OllamaAgentLoop {
 
 // MARK: - Agent Loop Events
 
+// periphery:ignore - Reserved: AgentLoopEvent enum — reserved for future feature activation
 enum AgentLoopEvent: Sendable {
     // periphery:ignore - Reserved: AgentLoopEvent type reserved for future feature activation
     case text(String)

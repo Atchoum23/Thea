@@ -41,9 +41,13 @@ public actor PrivacyPreservingAIRouter {
     private var routingHistory: [RoutingHistoryEntry] = []
 
     private struct RoutingHistoryEntry: Sendable {
+        // periphery:ignore - Reserved: timestamp property — reserved for future feature activation
         let timestamp: Date
+        // periphery:ignore - Reserved: dataTypes property — reserved for future feature activation
         let dataTypes: [PrivateDataType]
+        // periphery:ignore - Reserved: decision property — reserved for future feature activation
         let decision: PrivacyRoutingDecision
+        // periphery:ignore - Reserved: wasOverridden property — reserved for future feature activation
         let wasOverridden: Bool
     }
 

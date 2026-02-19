@@ -336,10 +336,12 @@ private struct CachedValue {
 }
 
 private struct PerformanceMetrics {
+    // periphery:ignore - Reserved: averageResponseTime property — reserved for future feature activation
     let averageResponseTime: Double
     let errorRate: Double
     // periphery:ignore - Reserved: averageResponseTime property reserved for future feature activation
     let cacheHitRate: Double
+    // periphery:ignore - Reserved: memoryUsage property — reserved for future feature activation
     let memoryUsage: Double
     // periphery:ignore - Reserved: memoryUsage property reserved for future feature activation
     // periphery:ignore - Reserved: batteryDrain property reserved for future feature activation

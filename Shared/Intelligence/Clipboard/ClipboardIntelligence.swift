@@ -56,8 +56,11 @@ enum ClipCategory: String, Codable, Sendable, CaseIterable {
 
 struct ClipSmartAction: Identifiable, Sendable {
     let id = UUID()
+    // periphery:ignore - Reserved: title property — reserved for future feature activation
     let title: String
+    // periphery:ignore - Reserved: icon property — reserved for future feature activation
     let icon: String
+    // periphery:ignore - Reserved: actionType property — reserved for future feature activation
     let actionType: ClipActionType
 
     // periphery:ignore - Reserved: title property reserved for future feature activation
@@ -82,6 +85,7 @@ struct ClipSmartAction: Identifiable, Sendable {
 struct ClipAnalysisResult: Sendable {
     let category: ClipCategory
     let summary: String
+    // periphery:ignore - Reserved: suggestedActions property — reserved for future feature activation
     let suggestedActions: [ClipSmartAction]
     // periphery:ignore - Reserved: suggestedActions property reserved for future feature activation
     let tags: [String]

@@ -100,6 +100,7 @@ final class FileAttachmentManager {
     }
 
     /// Add multiple files
+    // periphery:ignore - Reserved: addAttachments(from:) instance method — reserved for future feature activation
     func addAttachments(from urls: [URL]) async throws {
         for (index, url) in urls.enumerated() {
             processingProgress = Double(index) / Double(urls.count)
@@ -456,6 +457,7 @@ final class FileAttachmentManager {
     // MARK: - AI Formatting
 
     /// Format all attachments for AI context
+    // periphery:ignore - Reserved: formatForAI() instance method — reserved for future feature activation
     func formatForAI() -> String {
         guard !attachments.isEmpty else { return "" }
 
@@ -488,6 +490,7 @@ final class FileAttachmentManager {
     }
 
     /// Get base64 encoded images for vision models
+    // periphery:ignore - Reserved: getBase64Images() instance method — reserved for future feature activation
     func getBase64Images() -> [(name: String, base64: String, mimeType: String)] {
         attachments
             .filter { $0.fileType == .image }
@@ -501,6 +504,7 @@ final class FileAttachmentManager {
 
     // MARK: - Configuration
 
+    // periphery:ignore - Reserved: updateConfiguration(_:) instance method — reserved for future feature activation
     func updateConfiguration(_ config: Configuration) {
         configuration = config
         saveConfiguration()
@@ -516,6 +520,7 @@ final class FileAttachmentManager {
         }
     }
 
+    // periphery:ignore - Reserved: saveConfiguration() instance method — reserved for future feature activation
     private func saveConfiguration() {
         do {
             // periphery:ignore - Reserved: saveConfiguration() instance method reserved for future feature activation
@@ -536,6 +541,7 @@ struct FileAttachment: Identifiable, Sendable {
     let fileType: AttachmentFileType
     let sizeBytes: UInt64
     let mimeType: String
+    // periphery:ignore - Reserved: addedAt property — reserved for future feature activation
     let addedAt: Date
 
 // periphery:ignore - Reserved: addedAt property reserved for future feature activation

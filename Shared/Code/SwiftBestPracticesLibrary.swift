@@ -16,6 +16,7 @@ final class SwiftBestPracticesLibrary: Sendable {
 
     // MARK: - Practice Retrieval
 
+    // periphery:ignore - Reserved: getPracticesForContext(_:) instance method — reserved for future feature activation
     func getPracticesForContext(_ code: String) -> [SwiftBestPractice] {
         var relevant: [SwiftBestPractice] = []
 
@@ -54,10 +55,12 @@ final class SwiftBestPracticesLibrary: Sendable {
         return Array(Set(relevant)).sorted { $0.priority.rawValue > $1.priority.rawValue }
     }
 
+    // periphery:ignore - Reserved: getPracticesByCategory(_:) instance method — reserved for future feature activation
     func getPracticesByCategory(_ category: SwiftBestPractice.Category) -> [SwiftBestPractice] {
         practices.filter { $0.category == category }
     }
 
+    // periphery:ignore - Reserved: formatForPrompt(_:) instance method — reserved for future feature activation
     func formatForPrompt(_ practices: [SwiftBestPractice]) -> String {
         guard !practices.isEmpty else { return "" }
 
@@ -72,6 +75,7 @@ final class SwiftBestPracticesLibrary: Sendable {
         return formatted
     }
 
+    // periphery:ignore - Reserved: searchPractices(query:) instance method — reserved for future feature activation
     func searchPractices(query: String) -> [SwiftBestPractice] {
         let lowercased = query.lowercased()
 

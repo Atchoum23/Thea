@@ -89,6 +89,7 @@ struct MediaPlayerView: View {
 
     // MARK: - iOS Layout
 
+    // periphery:ignore - Reserved: iOSLayout property — reserved for future feature activation
     private var iOSLayout: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -292,6 +293,7 @@ struct MediaPlayerView: View {
     }
     #endif
 
+    // periphery:ignore - Reserved: compactPlayerArea property — reserved for future feature activation
     private var compactPlayerArea: some View {
         Group {
             if let avPlayer = player.player, player.currentItem?.mediaType == .video {
@@ -438,6 +440,7 @@ struct MediaPlayerView: View {
     }
     #endif
 
+    // periphery:ignore - Reserved: compactControlBar property — reserved for future feature activation
     private var compactControlBar: some View {
         VStack(spacing: 8) {
             // Progress
@@ -551,6 +554,7 @@ struct MediaPlayerView: View {
 
     // MARK: - List Sections (iOS / Sidebar)
 
+    // periphery:ignore - Reserved: nowPlayingSection property — reserved for future feature activation
     private var nowPlayingSection: some View {
         Group {
             // periphery:ignore - Reserved: nowPlayingSection property reserved for future feature activation
@@ -597,6 +601,7 @@ struct MediaPlayerView: View {
         }
     }
 
+    // periphery:ignore - Reserved: historySection property — reserved for future feature activation
     private var historySection: some View {
         // periphery:ignore - Reserved: historySection property reserved for future feature activation
         Section("Recent (\(player.history.count))") {

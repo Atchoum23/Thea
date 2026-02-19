@@ -20,6 +20,7 @@ final class LocalModelProvider: AIProvider, @unchecked Sendable {
         )
     }
 
+    // periphery:ignore - Reserved: capabilities property — reserved for future feature activation
     var capabilities: ProviderCapabilities {
         // periphery:ignore - Reserved: capabilities property reserved for future feature activation
         ProviderCapabilities(

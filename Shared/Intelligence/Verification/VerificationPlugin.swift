@@ -37,6 +37,7 @@ import Foundation
 ///     }
 /// }
 /// ```
+// periphery:ignore - Reserved: VerificationPlugin protocol — reserved for future feature activation
 protocol VerificationPlugin: AnyObject, Sendable {
 
     /// Unique identifier for this verifier
@@ -69,6 +70,7 @@ protocol VerificationPlugin: AnyObject, Sendable {
 /// Standardized input for all verification plugins.
 /// Contains everything a verifier might need — plugins use what they need
 /// and ignore the rest.
+// periphery:ignore - Reserved: VerificationInput type — reserved for future feature activation
 struct VerificationInput: Sendable {
     /// The AI response being verified
     let response: String
@@ -101,6 +103,7 @@ struct VerificationInput: Sendable {
 
 /// Standardized output from all verification plugins.
 /// Maps directly to what ConfidenceSystem aggregates.
+// periphery:ignore - Reserved: VerificationOutput type — reserved for future feature activation
 struct VerificationOutput: Sendable {
     /// The confidence source with score and details
     // periphery:ignore - Reserved: VerificationOutput type reserved for future feature activation
@@ -153,6 +156,7 @@ final class VerificationPluginRegistry {
     static let shared = VerificationPluginRegistry()
 
     /// Registered verification plugins, keyed by plugin ID
+    // periphery:ignore - Reserved: plugins property — reserved for future feature activation
     private var plugins: [String: any VerificationPlugin] = [:]
 
     private init() {}
@@ -160,11 +164,13 @@ final class VerificationPluginRegistry {
     // MARK: - Registration
 
     /// Register a verification plugin.
+    // periphery:ignore - Reserved: register(_:) instance method — reserved for future feature activation
     func register(_ plugin: any VerificationPlugin) {
         plugins[plugin.pluginID] = plugin
     }
 
     /// Unregister a plugin by ID.
+    // periphery:ignore - Reserved: unregister(pluginID:) instance method — reserved for future feature activation
     func unregister(pluginID: String) {
         plugins.removeValue(forKey: pluginID)
     }
@@ -172,16 +178,19 @@ final class VerificationPluginRegistry {
     // MARK: - Query
 
     /// All registered plugins.
+    // periphery:ignore - Reserved: allPlugins property — reserved for future feature activation
     var allPlugins: [any VerificationPlugin] {
         Array(plugins.values)
     }
 
     /// Only enabled plugins.
+    // periphery:ignore - Reserved: enabledPlugins property — reserved for future feature activation
     var enabledPlugins: [any VerificationPlugin] {
         plugins.values.filter(\.isEnabled)
     }
 
     /// Plugins that should run for the given task type and context.
+    // periphery:ignore - Reserved: applicablePlugins(taskType:context:) instance method — reserved for future feature activation
     func applicablePlugins(
         taskType: TaskType,
         context: ValidationContext
@@ -190,11 +199,13 @@ final class VerificationPluginRegistry {
     }
 
     /// Get a specific plugin by ID.
+    // periphery:ignore - Reserved: plugin(id:) instance method — reserved for future feature activation
     func plugin(id: String) -> (any VerificationPlugin)? {
         plugins[id]
     }
 
     /// Summary of all registered plugins for diagnostics.
+    // periphery:ignore - Reserved: diagnosticSummary property — reserved for future feature activation
     var diagnosticSummary: [(id: String, name: String, enabled: Bool, weight: Double)] {
         plugins.values.map { plugin in
             (

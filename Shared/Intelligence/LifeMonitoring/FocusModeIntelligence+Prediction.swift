@@ -17,6 +17,7 @@ extension FocusModeIntelligence {
         let suggestedMode: String?
         let confidence: Double
         let signals: [PredictionSignal]
+        // periphery:ignore - Reserved: suggestedTime property — reserved for future feature activation
         let suggestedTime: Date?
     // periphery:ignore - Reserved: suggestedTime property reserved for future feature activation
     }

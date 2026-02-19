@@ -15,6 +15,7 @@ final class ScreenCaptureManager {
 
     // MARK: - Singleton
 
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = ScreenCaptureManager()
 
     // MARK: - State
@@ -60,6 +61,7 @@ final class ScreenCaptureManager {
         }
     }
 
+    // periphery:ignore - Reserved: requestAuthorization() instance method — reserved for future feature activation
     func requestAuthorization() async throws {
         // Trigger authorization prompt by attempting capture
         _ = try await SCShareableContent.excludingDesktopWindows(
@@ -77,6 +79,7 @@ final class ScreenCaptureManager {
     // MARK: - Capture Operations
 
     /// Capture the main display
+    // periphery:ignore - Reserved: captureScreen() instance method — reserved for future feature activation
     func captureScreen() async throws -> CGImage {
         guard isAuthorized else {
             throw ScreenCaptureError.notAuthorized
@@ -98,6 +101,7 @@ final class ScreenCaptureManager {
     }
 
     /// Capture a specific window by bundle ID
+    // periphery:ignore - Reserved: captureWindow(bundleID:) instance method — reserved for future feature activation
     func captureWindow(bundleID: String) async throws -> CGImage {
         guard isAuthorized else {
             throw ScreenCaptureError.notAuthorized
@@ -122,6 +126,7 @@ final class ScreenCaptureManager {
     }
 
     /// Capture the currently active (frontmost) window
+    // periphery:ignore - Reserved: captureActiveWindow() instance method — reserved for future feature activation
     func captureActiveWindow() async throws -> CGImage {
         guard isAuthorized else {
             throw ScreenCaptureError.notAuthorized
@@ -138,6 +143,7 @@ final class ScreenCaptureManager {
     }
 
     /// Capture a specific region of the screen
+    // periphery:ignore - Reserved: captureRegion(_:) instance method — reserved for future feature activation
     func captureRegion(_ rect: CGRect) async throws -> CGImage {
         guard isAuthorized else {
             // periphery:ignore - Reserved: captureRegion(_:) instance method reserved for future feature activation
@@ -157,6 +163,7 @@ final class ScreenCaptureManager {
 
     // MARK: - Private Capture Logic
 
+    // periphery:ignore - Reserved: captureWithFilter(_:) instance method — reserved for future feature activation
     private func captureWithFilter(_ filter: SCContentFilter) async throws -> CGImage {
         // periphery:ignore - Reserved: captureWithFilter(_:) instance method reserved for future feature activation
         let config = SCStreamConfiguration()

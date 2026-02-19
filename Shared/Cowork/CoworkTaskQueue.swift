@@ -6,6 +6,7 @@
     @MainActor
     @Observable
     final class CoworkTaskQueue {
+        // periphery:ignore - Reserved: logger property — reserved for future feature activation
         private let logger = Logger(subsystem: "ai.thea.app", category: "CoworkTaskQueue")
 
         var tasks: [CoworkTask] = []
@@ -24,6 +25,7 @@
             tasks.append(task)
         }
 
+        // periphery:ignore - Reserved: enqueue(_:) instance method — reserved for future feature activation
         func enqueue(_ tasks: [CoworkTask]) {
             self.tasks.append(contentsOf: tasks)
         }
@@ -37,6 +39,7 @@
             return task
         }
 
+        // periphery:ignore - Reserved: dequeue(_:) instance method — reserved for future feature activation
         func dequeue(_ taskId: UUID) {
             tasks.removeAll { $0.id == taskId }
         }
@@ -128,6 +131,7 @@
             isPaused = true
         }
 
+        // periphery:ignore - Reserved: resume(executor:) instance method — reserved for future feature activation
         func resume(executor: @escaping (CoworkTask) async throws -> Void) async {
             isPaused = false
             await startProcessing(executor: executor)
@@ -188,6 +192,7 @@
             tasks.sort { $0.priority.rawValue > $1.priority.rawValue }
         }
 
+        // periphery:ignore - Reserved: onCompletion(of:handler:) instance method — reserved for future feature activation
         func onCompletion(of taskId: UUID, handler: @escaping (Result<Void, Error>) -> Void) {
             completionHandlers[taskId] = handler
         }

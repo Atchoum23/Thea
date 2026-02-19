@@ -292,6 +292,7 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "HealthTrackingM
     @MainActor
     @Observable
     final class HealthTrackingManager {
+        // periphery:ignore - Reserved: shared static property — reserved for future feature activation
         static let shared = HealthTrackingManager()
         // periphery:ignore - Reserved: shared static property reserved for future feature activation
         private init() {}

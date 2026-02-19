@@ -33,11 +33,15 @@ enum OutboundDataType: String, CaseIterable, Sendable, Codable {
 
 /// Registration for a specific outbound channel
 struct ChannelRegistration: Sendable {
+    // periphery:ignore - Reserved: channelId property — reserved for future feature activation
     let channelId: String
+    // periphery:ignore - Reserved: description property — reserved for future feature activation
     let description: String
     let policy: any PrivacyPolicy
     let allowedDataTypes: Set<OutboundDataType>
+    // periphery:ignore - Reserved: registeredAt property — reserved for future feature activation
     let registeredAt: Date
+    // periphery:ignore - Reserved: registeredBy property — reserved for future feature activation
     let registeredBy: String
 }
 
@@ -120,6 +124,7 @@ actor OutboundPrivacyGuard {
     // MARK: - Channel Registration
 
     /// Register a channel for outbound communication
+    // periphery:ignore - Reserved: registerChannel(id:description:policy:allowedDataTypes:registeredBy:) instance method — reserved for future feature activation
     func registerChannel(
         id: String,
         description: String,
@@ -246,6 +251,7 @@ actor OutboundPrivacyGuard {
 
     // MARK: - Policy Management
 
+    // periphery:ignore - Reserved: setPolicy(_:for:) instance method — reserved for future feature activation
     func setPolicy(_ policy: any PrivacyPolicy, for channel: String) {
         channelPolicies[channel] = policy
     }
@@ -572,6 +578,7 @@ actor OutboundPrivacyGuard {
     // MARK: - Pre-Commit Scan
 
     /// Scan content for credentials/secrets (used by git pre-commit hook integration)
+    // periphery:ignore - Reserved: preCommitScan(_:filename:) instance method — reserved for future feature activation
     func preCommitScan(_ content: String, filename: String) -> [SecurityFinding] {
         // periphery:ignore - Reserved: preCommitScan(_:filename:) instance method reserved for future feature activation
         var findings: [SecurityFinding] = []

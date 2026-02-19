@@ -85,6 +85,7 @@ struct StressSnapshot: Codable, Sendable {
 @MainActor
 @Observable
 final class StressDetector {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = StressDetector()
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "StressDetector")
@@ -105,26 +106,34 @@ final class StressDetector {
     private let maxHistoryCount = 2016
 
     /// App switch frequency threshold: >10 switches in 5 minutes
+    // periphery:ignore - Reserved: appSwitchThreshold property — reserved for future feature activation
     private let appSwitchThreshold = 10
+    // periphery:ignore - Reserved: appSwitchWindowSeconds property — reserved for future feature activation
     private let appSwitchWindowSeconds: TimeInterval = 300
 
     /// Heart rate baseline and elevation threshold (bpm above baseline)
     private var heartRateBaseline: Double = 72.0
+    // periphery:ignore - Reserved: heartRateElevationDelta property — reserved for future feature activation
     private let heartRateElevationDelta: Double = 15.0
 
     // periphery:ignore - Reserved: shared static property reserved for future feature activation
     /// HRV baseline and depression threshold (percentage below baseline)
     private var hrvBaseline: Double = 50.0
+    // periphery:ignore - Reserved: hrvDepressionFraction property — reserved for future feature activation
     private let hrvDepressionFraction: Double = 0.20
 
     /// Negative sentiment threshold (LifeEvent sentiment range: -1 to 1)
+    // periphery:ignore - Reserved: negativeSentimentThreshold property — reserved for future feature activation
     private let negativeSentimentThreshold: Double = -0.3
 
     /// Calendar density: overlapping events threshold
+    // periphery:ignore - Reserved: calendarDensityThreshold property — reserved for future feature activation
     private let calendarDensityThreshold = 3
 
     /// Late-night activity cutoff hour (24h)
+    // periphery:ignore - Reserved: lateNightStartHour property — reserved for future feature activation
     private let lateNightStartHour = 23
+    // periphery:ignore - Reserved: lateNightEndHour property — reserved for future feature activation
     private let lateNightEndHour = 5
 
 // periphery:ignore - Reserved: emaAlpha property reserved for future feature activation
@@ -166,6 +175,7 @@ final class StressDetector {
     // MARK: - Lifecycle
 
     /// Subscribe to LifeMonitoringCoordinator event stream and begin processing
+    // periphery:ignore - Reserved: start() instance method — reserved for future feature activation
     func start() {
         guard cancellables.isEmpty else {
             logger.info("StressDetector already running")
@@ -186,6 +196,7 @@ final class StressDetector {
     }
 
     /// Stop processing events
+    // periphery:ignore - Reserved: stop() instance method — reserved for future feature activation
     func stop() {
         cancellables.removeAll()
         saveToDisk()
@@ -194,6 +205,7 @@ final class StressDetector {
 
     // MARK: - Event Processing
 
+    // periphery:ignore - Reserved: processEvent(_:) instance method — reserved for future feature activation
     func processEvent(_ event: LifeEvent) {
         let now = event.timestamp
 
@@ -235,6 +247,7 @@ final class StressDetector {
 
     // MARK: - Signal Evaluators
 
+    // periphery:ignore - Reserved: recordAppSwitch(at:) instance method — reserved for future feature activation
     private func recordAppSwitch(at timestamp: Date) {
         recentAppSwitches.append(timestamp)
 
@@ -267,6 +280,7 @@ final class StressDetector {
         }
     }
 
+    // periphery:ignore - Reserved: evaluateCalendarDensity(_:) instance method — reserved for future feature activation
     private func evaluateCalendarDensity(_ event: LifeEvent) {
         // Check for overlapping events via event data
         if let countStr = event.data["overlappingCount"],
@@ -292,6 +306,7 @@ final class StressDetector {
         }
     }
 
+    // periphery:ignore - Reserved: evaluateHealthMetric(_:) instance method — reserved for future feature activation
     private func evaluateHealthMetric(_ event: LifeEvent) {
         guard let category = event.data["category"],
               let valueStr = event.data["value"],
@@ -325,6 +340,7 @@ final class StressDetector {
         }
     }
 
+    // periphery:ignore - Reserved: evaluateLateNightActivity(at:) instance method — reserved for future feature activation
     private func evaluateLateNightActivity(at timestamp: Date) {
         let hour = Calendar.current.component(.hour, from: timestamp)
 
@@ -391,6 +407,7 @@ final class StressDetector {
 
     // MARK: - BehavioralFingerprint Integration
 
+    // periphery:ignore - Reserved: feedBehavioralFingerprint() instance method — reserved for future feature activation
     func feedBehavioralFingerprint() {
         if currentLevel >= .high {
             BehavioralFingerprint.shared.recordActivity(.healthSuggestion)
@@ -422,6 +439,7 @@ final class StressDetector {
     // MARK: - Querying
 
     /// Average stress score over the last N hours
+    // periphery:ignore - Reserved: averageScore(hours:) instance method — reserved for future feature activation
     func averageScore(hours: Int = 6) -> Double? {
         let cutoff = Date().addingTimeInterval(-Double(hours) * 3600)
         let recent = history.filter { $0.timestamp >= cutoff }
@@ -431,6 +449,7 @@ final class StressDetector {
     }
 
     /// Stress trend direction over the last N hours
+    // periphery:ignore - Reserved: trend(hours:) instance method — reserved for future feature activation
     func trend(hours: Int = 6) -> StressTrend {
         let cutoff = Date().addingTimeInterval(-Double(hours) * 3600)
         let recent = history.filter { $0.timestamp >= cutoff }
@@ -451,6 +470,7 @@ final class StressDetector {
     }
 
     /// Peak stress level in the last N hours
+    // periphery:ignore - Reserved: peakLevel(hours:) instance method — reserved for future feature activation
     func peakLevel(hours: Int = 24) -> StressLevel {
         let cutoff = Date().addingTimeInterval(-Double(hours) * 3600)
         // periphery:ignore - Reserved: peakLevel(hours:) instance method reserved for future feature activation

@@ -24,6 +24,7 @@ final class SpeechTranscriptionService: ObservableObject {
     private let logger = Logger(subsystem: "ai.thea.app", category: "SpeechTranscriptionService")
 
     @Published private(set) var isTranscribing = false
+    // periphery:ignore - Reserved: lastError property — reserved for future feature activation
     @Published private(set) var lastError: String?
 
     // periphery:ignore - Reserved: lastError property reserved for future feature activation
@@ -47,6 +48,7 @@ final class SpeechTranscriptionService: ObservableObject {
     }
 
     /// Transcribe from raw PCM audio data (16kHz mono, Float32).
+    // periphery:ignore - Reserved: transcribe(pcmData:sampleRate:locale:) instance method — reserved for future feature activation
     func transcribe(pcmData: Data, sampleRate: Double = 16000, locale: Locale = .current) async throws -> String {
         // periphery:ignore - Reserved: transcribe(pcmData:sampleRate:locale:) instance method reserved for future feature activation
         // Write to temp WAV file then transcribe

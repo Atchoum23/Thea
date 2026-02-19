@@ -77,10 +77,12 @@ final class MessagingSessionManager: ObservableObject {
 
     // MARK: - Session Operations
 
+    // periphery:ignore - Reserved: session(for:) instance method — reserved for future feature activation
     func session(for message: TheaGatewayMessage) -> MessagingSession? {
         activeSessions.first(where: { $0.key == sessionKey(for: message) })
     }
 
+    // periphery:ignore - Reserved: resetSession(key:) instance method — reserved for future feature activation
     func resetSession(key: String) {
         guard let session = activeSessions.first(where: { $0.key == key }) else { return }
         session.clearHistory()
@@ -95,6 +97,7 @@ final class MessagingSessionManager: ObservableObject {
         logger.info("All messaging sessions reset")
     }
 
+    // periphery:ignore - Reserved: deleteSession(key:) instance method — reserved for future feature activation
     func deleteSession(key: String) {
         guard let session = activeSessions.first(where: { $0.key == key }),
               let ctx = modelContext else { return }
@@ -109,6 +112,7 @@ final class MessagingSessionManager: ObservableObject {
     // Balances relevance to query vs. diversity among selected messages.
 
     /// Returns the most relevant + diverse context messages for AI prompting.
+    // periphery:ignore - Reserved: relevantContext(for:sessionKey:maxItems:) instance method — reserved for future feature activation
     func relevantContext(for query: String, sessionKey: String, maxItems: Int = 10) -> [String] {
         guard let session = activeSessions.first(where: { $0.key == sessionKey }) else { return [] }
         let history = session.decodedHistory()
@@ -164,6 +168,7 @@ final class MessagingSessionManager: ObservableObject {
 
     // MARK: - Daily Reset
 
+    // periphery:ignore - Reserved: scheduleDailyReset() instance method — reserved for future feature activation
     func scheduleDailyReset() {
         // Reset all sessions at 04:00 daily via background task
         Task {
@@ -272,6 +277,7 @@ struct MessagingCredentialsStore {
         keychainWrite(key: key, data: data)
     }
 
+    // periphery:ignore - Reserved: delete(for:) static method — reserved for future feature activation
     static func delete(for platform: MessagingPlatform) {
         let key = "\(service).\(platform.rawValue)"
         // periphery:ignore - Reserved: delete(for:) static method reserved for future feature activation
@@ -304,6 +310,7 @@ struct MessagingCredentialsStore {
         return result as? Data
     }
 
+    // periphery:ignore - Reserved: keychainDelete(key:) static method — reserved for future feature activation
     private static func keychainDelete(key: String) {
         // periphery:ignore - Reserved: keychainDelete(key:) static method reserved for future feature activation
         let query: [CFString: Any] = [

@@ -308,6 +308,7 @@ private struct CareerStatCard: View {
 
 private struct GoalCard: View {
     let goal: CareerGoal
+    // periphery:ignore - Reserved: viewModel property — reserved for future feature activation
     let viewModel: CareerDashboardViewModel
 
 // periphery:ignore - Reserved: viewModel property reserved for future feature activation

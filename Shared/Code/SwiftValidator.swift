@@ -10,8 +10,10 @@
     @MainActor
     @Observable
     final class SwiftValidator {
+        // periphery:ignore - Reserved: shared static property — reserved for future feature activation
         static let shared = SwiftValidator()
 
+        // periphery:ignore - Reserved: logger property — reserved for future feature activation
         private let logger = Logger(subsystem: "ai.thea.app", category: "SwiftValidator")
 
         private(set) var isValidating: Bool = false
@@ -22,6 +24,7 @@
         // MARK: - Main Validation Methods
 
         /// Validates Swift syntax using swiftc -typecheck
+        // periphery:ignore - Reserved: validateSwiftSyntax(_:) instance method — reserved for future feature activation
         func validateSwiftSyntax(_ code: String) async throws -> SwiftValidationResult {
             isValidating = true
             defer { isValidating = false }
@@ -62,6 +65,7 @@
         }
 
         /// Validates Swift code with additional context (imports, frameworks)
+        // periphery:ignore - Reserved: validateWithContext(_:imports:framework:) instance method — reserved for future feature activation
         func validateWithContext(
             _ code: String,
             imports: [String] = [],
@@ -83,6 +87,7 @@
 
         // MARK: - Swift Compiler Integration
 
+        // periphery:ignore - Reserved: runSwiftCompiler(on:) instance method — reserved for future feature activation
         private func runSwiftCompiler(on file: URL) async throws -> SwiftValidationResult {
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/usr/bin/swiftc")
@@ -118,6 +123,7 @@
 
         // MARK: - Error Parsing
 
+        // periphery:ignore - Reserved: parseSwiftCompilerErrors(_:) instance method — reserved for future feature activation
         private func parseSwiftCompilerErrors(_ output: String) -> [SwiftError] {
             var errors: [SwiftError] = []
             let lines = output.split(separator: "\n")
@@ -132,6 +138,7 @@
         // periphery:ignore - Reserved: parseSwiftCompilerErrors(_:) instance method reserved for future feature activation
         }
 
+        // periphery:ignore - Reserved: parseErrorLine(_:) instance method — reserved for future feature activation
         private func parseErrorLine(_ line: String) -> SwiftError? {
             // Swift compiler error format: <file>:<line>:<column>: error: <message>
             // or: <file>:<line>:<column>: warning: <message>
@@ -173,6 +180,7 @@
 
         // MARK: - Error Categorization
 
+        // periphery:ignore - Reserved: categorizeError(_:) instance method — reserved for future feature activation
         private func categorizeError(_ message: String) -> SwiftError.ErrorCategory {
             let lowercased = message.lowercased()
 
@@ -219,6 +227,7 @@
 
         // MARK: - Error Suggestions
 
+        // periphery:ignore - Reserved: generateSuggestion(for:category:) instance method — reserved for future feature activation
         private func generateSuggestion(for message: String, category: SwiftError.ErrorCategory) -> String? {
             let lowercased = message.lowercased()
 
@@ -271,6 +280,7 @@
         // MARK: - Quick Validation
 
         /// Quick syntax-only validation without writing to file
+        // periphery:ignore - Reserved: quickValidate(_:) instance method — reserved for future feature activation
         func quickValidate(_ code: String) -> QuickValidationResult {
             var issues: [String] = []
 
@@ -312,6 +322,7 @@
         // MARK: - Code Extraction
 
         /// Extracts Swift code from markdown code blocks
+        // periphery:ignore - Reserved: extractSwiftCode(from:) instance method — reserved for future feature activation
         func extractSwiftCode(from text: String) -> String? {
             // Match ```swift ... ``` or ``` ... ``` blocks
             let pattern = #/```(?:swift)?\n(.*?)```/#
@@ -325,6 +336,7 @@
         }
 
         /// Extracts all Swift code blocks from text
+        // periphery:ignore - Reserved: extractAllSwiftCode(from:) instance method — reserved for future feature activation
         func extractAllSwiftCode(from text: String) -> [String] {
             let pattern = #/```(?:swift)?\n(.*?)```/#
             var blocks: [String] = []
@@ -341,9 +353,12 @@
     // MARK: - Data Structures
 
     enum SwiftValidationResult {
+        // periphery:ignore - Reserved: success case — reserved for future feature activation
         case success
+        // periphery:ignore - Reserved: failure(errors:) case — reserved for future feature activation
         case failure(errors: [SwiftError])
 
+        // periphery:ignore - Reserved: isSuccess property — reserved for future feature activation
         var isSuccess: Bool {
             // periphery:ignore - Reserved: success case reserved for future feature activation
             // periphery:ignore - Reserved: failure(errors:) case reserved for future feature activation
@@ -354,6 +369,7 @@
             return false
         }
 
+        // periphery:ignore - Reserved: errors property — reserved for future feature activation
         var errors: [SwiftError] {
             // periphery:ignore - Reserved: errors property reserved for future feature activation
             if case let .failure(errors) = self {

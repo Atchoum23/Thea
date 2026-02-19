@@ -10,6 +10,7 @@ import Foundation
 /// Request sent to Gateway: {"type":"req","id":"uuid","method":"...","params":{...}}
 /// @unchecked Sendable: params contains only JSON-serializable primitives (String/Int/Double/Bool/Array)
 /// built at call site; never escapes across concurrency boundaries after construction.
+// periphery:ignore - Reserved: OpenClawWireRequest type — reserved for future feature activation
 struct OpenClawWireRequest: @unchecked Sendable {
     let type = "req"
     let id: String
@@ -34,6 +35,7 @@ struct OpenClawWireRequest: @unchecked Sendable {
 }
 
 /// Response from Gateway: {"type":"res","id":"uuid","ok":bool,"payload":{...}|"error":{...}}
+// periphery:ignore - Reserved: OpenClawWireResponse type — reserved for future feature activation
 struct OpenClawWireResponse: Codable, Sendable {
     let type: String   // "res"
     let id: String?
@@ -43,6 +45,7 @@ struct OpenClawWireResponse: Codable, Sendable {
 }
 
 /// Event pushed by Gateway: {"type":"event","event":"...","payload":{...},"seq":42}
+// periphery:ignore - Reserved: OpenClawWireEvent type — reserved for future feature activation
 struct OpenClawWireEvent: Codable, Sendable {
     let type: String    // "event"
     let event: String
@@ -107,6 +110,7 @@ enum OpenClawJSONValue: Codable, Sendable {
     }
 
     /// Decode this JSON value as a strongly-typed Codable
+    // periphery:ignore - Reserved: decode(as:) instance method — reserved for future feature activation
     func decode<T: Decodable>(as type: T.Type) throws -> T {
         let data = try JSONEncoder().encode(self)
         return try JSONDecoder().decode(type, from: data)
@@ -244,6 +248,7 @@ struct OpenClawSession: Identifiable, Codable, Sendable {
 // MARK: - Agent (O1)
 
 /// Named agent configured in the Gateway
+// periphery:ignore - Reserved: OpenClawAgent type — reserved for future feature activation
 struct OpenClawAgent: Identifiable, Codable, Sendable {
     let id: String
     let name: String
@@ -278,6 +283,7 @@ enum OpenClawNodeCapability: String, Codable, Sendable {
 }
 
 /// Paired node (remote device)
+// periphery:ignore - Reserved: OpenClawNode type — reserved for future feature activation
 struct OpenClawNode: Identifiable, Codable, Sendable {
     let id: String
     let name: String
@@ -323,6 +329,7 @@ struct OpenClawGatewayStatus: Codable, Sendable {
 
 // MARK: - Memory (O1)
 
+// periphery:ignore - Reserved: OpenClawMemoryResult type — reserved for future feature activation
 struct OpenClawMemoryResult: Identifiable, Codable, Sendable {
     let id: String
     // periphery:ignore - Reserved: OpenClawMemoryResult type reserved for future feature activation
@@ -334,6 +341,7 @@ struct OpenClawMemoryResult: Identifiable, Codable, Sendable {
 
 // MARK: - Security Audit (O1)
 
+// periphery:ignore - Reserved: OpenClawSecurityAuditResult type — reserved for future feature activation
 struct OpenClawSecurityAuditResult: Codable, Sendable {
     // periphery:ignore - Reserved: OpenClawSecurityAuditResult type reserved for future feature activation
     let riskScore: Double      // 0.0 (safe) – 10.0 (critical)

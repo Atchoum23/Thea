@@ -11,6 +11,7 @@ import AppKit
 @MainActor
 @Observable
 final class PointerTracker {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = PointerTracker()
 
     // MARK: - State
@@ -28,6 +29,7 @@ final class PointerTracker {
     // MARK: - Permission Check
 
     /// Check if Accessibility permission is granted
+    // periphery:ignore - Reserved: hasPermission property — reserved for future feature activation
     var hasPermission: Bool {
         AXIsProcessTrusted()
     }
@@ -51,6 +53,7 @@ final class PointerTracker {
     // MARK: - Tracking
 
     /// Start tracking pointer position
+    // periphery:ignore - Reserved: startTracking() instance method — reserved for future feature activation
     func startTracking() {
         guard hasPermission else {
             lastError = PointerTrackingError.permissionDenied
@@ -116,6 +119,7 @@ final class PointerTracker {
     }
 
     /// Stop tracking pointer position
+    // periphery:ignore - Reserved: stopTracking() instance method — reserved for future feature activation
     func stopTracking() {
         guard isTracking else { return }
 
@@ -137,6 +141,7 @@ final class PointerTracker {
     }
 
     /// Get current pointer position without continuous tracking
+    // periphery:ignore - Reserved: getCurrentPosition() instance method — reserved for future feature activation
     func getCurrentPosition() -> CGPoint {
         // periphery:ignore - Reserved: getCurrentPosition() instance method reserved for future feature activation
         if let currentEvent = CGEvent(source: nil) {

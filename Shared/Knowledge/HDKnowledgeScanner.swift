@@ -48,6 +48,7 @@ final class HDKnowledgeScanner {
         saveConfiguration()
     }
 
+    // periphery:ignore - Reserved: removeExcludedPath(_:) instance method — reserved for future feature activation
     func removeExcludedPath(_ path: URL) {
         excludedPaths.remove(path)
         saveConfiguration()
@@ -302,6 +303,7 @@ final class HDKnowledgeScanner {
             .map(\.self)
     }
 
+    // periphery:ignore - Reserved: fullTextSearch(_:topK:) instance method — reserved for future feature activation
     func fullTextSearch(_ query: String, topK: Int? = nil) -> [ScannedFile] {
         let searchTopK = topK ?? config.fullTextSearchTopK
         let lowercaseQuery = query.lowercased()
@@ -434,6 +436,7 @@ enum FileType: String, Codable, Sendable {
 struct SearchResult: Identifiable {
     let id = UUID()
     let file: ScannedFile
+    // periphery:ignore - Reserved: similarity property — reserved for future feature activation
     let similarity: Float
     let relevanceScore: Float
 }

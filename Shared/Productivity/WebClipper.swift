@@ -270,6 +270,7 @@ struct HTMLExtractor: Sendable {
         return iso.date(from: dateString)
     }
 
+    // periphery:ignore - Reserved: title parameter — kept for API compatibility
     private static func extractTags(from html: String, title: String, content: String) -> [String] {
         var tags: [String] = []
 
@@ -343,6 +344,7 @@ final class WebClipper {
         }
     }
 
+    // periphery:ignore - Reserved: clipFromHTML(_:url:) instance method — reserved for future feature activation
     func clipFromHTML(_ html: String, url: String) -> ClippedArticle {
         // periphery:ignore - Reserved: clipFromHTML(_:url:) instance method reserved for future feature activation
         let article = HTMLExtractor.extractReadableContent(from: html, url: url)

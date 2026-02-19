@@ -21,6 +21,7 @@ extension SettingsManager {
     ///     // Use local model inference
     /// }
     /// ```
+    // periphery:ignore - Reserved: isFeatureEnabled(_:) instance method — reserved for future feature activation
     func isFeatureEnabled(_ flag: TheaFeatureFlag) -> Bool {
         switch flag {
         // AI & Models
@@ -89,6 +90,7 @@ extension SettingsManager {
     }
 
     /// Returns a snapshot of all feature flag states for diagnostics.
+    // periphery:ignore - Reserved: featureFlagSnapshot property — reserved for future feature activation
     var featureFlagSnapshot: [TheaFeatureFlag: Bool] {
         var snapshot: [TheaFeatureFlag: Bool] = [:]
         for flag in TheaFeatureFlag.allCases {
@@ -99,6 +101,7 @@ extension SettingsManager {
     }
 
     /// Returns all enabled feature flags.
+    // periphery:ignore - Reserved: enabledTheaFeatureFlags property — reserved for future feature activation
     var enabledTheaFeatureFlags: [TheaFeatureFlag] {
         TheaFeatureFlag.allCases.filter { isFeatureEnabled($0) }
     // periphery:ignore - Reserved: enabledTheaFeatureFlags property reserved for future feature activation

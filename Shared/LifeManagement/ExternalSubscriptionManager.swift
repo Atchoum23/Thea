@@ -177,6 +177,7 @@ final class ExternalSubscriptionManager: ObservableObject {
         subLogger.info("Added subscription: \(sub.name) (\(sub.billingCycle.displayName) \(sub.currency) \(sub.cost))")
     }
 
+    // periphery:ignore - Reserved: updateSubscription(_:) instance method — reserved for future feature activation
     func updateSubscription(_ sub: ExternalSubscription) {
         // periphery:ignore - Reserved: updateSubscription(_:) instance method reserved for future feature activation
         if let idx = subscriptions.firstIndex(where: { $0.id == sub.id }) {

@@ -14,6 +14,7 @@ public final class SafetyGuardrailsManager: ObservableObject {
     public static let shared = SafetyGuardrailsManager()
 
     private let logger = Logger(subsystem: "com.thea.safety", category: "Guardrails")
+    // periphery:ignore - Reserved: auditStorageURL property — reserved for future feature activation
     private let auditStorageURL: URL
     private let rollbackStorageURL: URL
 
@@ -407,6 +408,7 @@ extension SafetyGuardrailsManager {
         }
     }
 
+    // periphery:ignore - Reserved: action parameter — kept for API compatibility
     private func checkReversibility(_ action: String, category: SafetyActionCategory) -> Bool {
         // periphery:ignore - Reserved: action parameter kept for API compatibility
         switch category {

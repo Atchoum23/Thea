@@ -478,42 +478,72 @@
 
     // swiftlint:disable large_tuple
     private struct proc_bsdinfo {
+        // periphery:ignore - Reserved: pbi_flags property — reserved for future feature activation
         var pbi_flags: UInt32 = 0
+        // periphery:ignore - Reserved: pbi_status property — reserved for future feature activation
         var pbi_status: UInt32 = 0
+        // periphery:ignore - Reserved: pbi_xstatus property — reserved for future feature activation
         var pbi_xstatus: UInt32 = 0
+        // periphery:ignore - Reserved: pbi_pid property — reserved for future feature activation
         var pbi_pid: UInt32 = 0
+        // periphery:ignore - Reserved: pbi_ppid property — reserved for future feature activation
         var pbi_ppid: UInt32 = 0
         var pbi_uid: uid_t = 0
+        // periphery:ignore - Reserved: pbi_gid property — reserved for future feature activation
         var pbi_gid: gid_t = 0
+        // periphery:ignore - Reserved: pbi_ruid property — reserved for future feature activation
         var pbi_ruid: uid_t = 0
+        // periphery:ignore - Reserved: pbi_rgid property — reserved for future feature activation
         var pbi_rgid: gid_t = 0
+        // periphery:ignore - Reserved: pbi_svuid property — reserved for future feature activation
         var pbi_svuid: uid_t = 0
+        // periphery:ignore - Reserved: pbi_svgid property — reserved for future feature activation
         var pbi_svgid: gid_t = 0
+        // periphery:ignore - Reserved: rfu_1 property — reserved for future feature activation
         var rfu_1: UInt32 = 0
+        // periphery:ignore - Reserved: pbi_comm property — reserved for future feature activation
         var pbi_comm: (CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        // periphery:ignore - Reserved: pbi_name property — reserved for future feature activation
         var pbi_name: (CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar, CChar) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        // periphery:ignore - Reserved: pbi_nfiles property — reserved for future feature activation
         var pbi_nfiles: UInt32 = 0
+        // periphery:ignore - Reserved: pbi_pgid property — reserved for future feature activation
         var pbi_pgid: UInt32 = 0
+        // periphery:ignore - Reserved: pbi_pjobc property — reserved for future feature activation
         var pbi_pjobc: UInt32 = 0
+        // periphery:ignore - Reserved: e_tdev property — reserved for future feature activation
         var e_tdev: UInt32 = 0
+        // periphery:ignore - Reserved: e_tpgid property — reserved for future feature activation
         var e_tpgid: UInt32 = 0
+        // periphery:ignore - Reserved: pbi_nice property — reserved for future feature activation
         var pbi_nice: Int32 = 0
+        // periphery:ignore - Reserved: pbi_start_tvsec property — reserved for future feature activation
         var pbi_start_tvsec: UInt64 = 0
+        // periphery:ignore - Reserved: pbi_start_tvusec property — reserved for future feature activation
         var pbi_start_tvusec: UInt64 = 0
     }
 
     private struct proc_taskinfo {
+        // periphery:ignore - Reserved: pti_virtual_size property — reserved for future feature activation
         var pti_virtual_size: UInt64 = 0
         var pti_resident_size: UInt64 = 0
         var pti_total_user: UInt64 = 0
         var pti_total_system: UInt64 = 0
+        // periphery:ignore - Reserved: pti_threads_user property — reserved for future feature activation
         var pti_threads_user: UInt64 = 0
+        // periphery:ignore - Reserved: pti_threads_system property — reserved for future feature activation
         var pti_threads_system: UInt64 = 0
+        // periphery:ignore - Reserved: pti_policy property — reserved for future feature activation
         var pti_policy: Int32 = 0
+        // periphery:ignore - Reserved: pti_faults property — reserved for future feature activation
         var pti_faults: Int32 = 0
+        // periphery:ignore - Reserved: pti_pageins property — reserved for future feature activation
         var pti_pageins: Int32 = 0
+        // periphery:ignore - Reserved: pti_cow_faults property — reserved for future feature activation
         var pti_cow_faults: Int32 = 0
+        // periphery:ignore - Reserved: pti_messages_sent property — reserved for future feature activation
         var pti_messages_sent: Int32 = 0
+        // periphery:ignore - Reserved: pti_messages_received property — reserved for future feature activation
         var pti_messages_received: Int32 = 0
         // periphery:ignore - Reserved: pbi_flags property reserved for future feature activation
         // periphery:ignore - Reserved: pbi_status property reserved for future feature activation
@@ -538,10 +568,13 @@
         // periphery:ignore - Reserved: pbi_start_tvsec property reserved for future feature activation
         // periphery:ignore - Reserved: pbi_start_tvusec property reserved for future feature activation
         var pti_syscalls_unix: Int32 = 0
+        // periphery:ignore - Reserved: pti_csw property — reserved for future feature activation
         var pti_csw: Int32 = 0
+        // periphery:ignore - Reserved: pti_threadnum property — reserved for future feature activation
         var pti_threadnum: Int32 = 0
         // periphery:ignore - Reserved: pti_virtual_size property reserved for future feature activation
         var pti_numrunning: Int32 = 0
+        // periphery:ignore - Reserved: pti_priority property — reserved for future feature activation
         var pti_priority: Int32 = 0
     }
 

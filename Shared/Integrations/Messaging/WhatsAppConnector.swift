@@ -10,6 +10,7 @@ import OSLog
 // For local dev, use ngrok or Cloudflare Tunnel pointing to port 18789.
 
 actor WhatsAppConnector: MessagingPlatformConnector {
+    // periphery:ignore - Reserved: platform property — reserved for future feature activation
     let platform: MessagingPlatform = .whatsapp
     private(set) var isConnected = false
     // periphery:ignore - Reserved: platform property reserved for future feature activation
@@ -59,6 +60,7 @@ actor WhatsAppConnector: MessagingPlatformConnector {
     // MARK: - Webhook Processing
     // Called by TheaGatewayWSServer when it receives a POST from Meta's servers.
 
+    // periphery:ignore - Reserved: processWebhook(body:) instance method — reserved for future feature activation
     func processWebhook(body: Data) async {
         // periphery:ignore - Reserved: processWebhook(body:) instance method reserved for future feature activation
         guard let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],

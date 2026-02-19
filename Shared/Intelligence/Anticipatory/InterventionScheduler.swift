@@ -162,9 +162,13 @@ public struct ScheduledIntervention: Sendable {
 }
 
 struct InterventionRecord: Sendable {
+    // periphery:ignore - Reserved: interventionId property — reserved for future feature activation
     let interventionId: UUID
+    // periphery:ignore - Reserved: type property — reserved for future feature activation
     let type: String
+    // periphery:ignore - Reserved: triggeredAt property — reserved for future feature activation
     let triggeredAt: Date
+    // periphery:ignore - Reserved: wasAccepted property — reserved for future feature activation
     let wasAccepted: Bool
     // periphery:ignore - Reserved: interventionId property reserved for future feature activation
     // periphery:ignore - Reserved: type property reserved for future feature activation

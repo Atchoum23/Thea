@@ -8,6 +8,7 @@ public actor IncomeService: IncomeServiceProtocol {
 
     private var streams: [UUID: IncomeStream] = [:]
     private var entries: [UUID: IncomeEntry] = [:]
+    // periphery:ignore - Reserved: gigIntegration property — reserved for future feature activation
     private let gigIntegration: GigPlatformIntegration
 
     // MARK: - Initialization
@@ -191,6 +192,7 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
 
     // MARK: - Platform-Specific Sync
 
+    // periphery:ignore - Reserved: syncUpwork(apiKey:) instance method — reserved for future feature activation
     private func syncUpwork(apiKey _: String) async throws -> [IncomeEntry] {
         // Would call Upwork API
         // GET /api/profiles/v2/search/jobs.json
@@ -198,6 +200,7 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
         []
     }
 
+    // periphery:ignore - Reserved: syncFiverr(apiKey:) instance method — reserved for future feature activation
     private func syncFiverr(apiKey _: String) async throws -> [IncomeEntry] {
         // Would call Fiverr API
         // periphery:ignore - Reserved: syncFiverr(apiKey:) instance method reserved for future feature activation
@@ -205,6 +208,7 @@ public actor GigPlatformIntegration: GigPlatformIntegrationProtocol {
         []
     }
 
+    // periphery:ignore - Reserved: syncUber(apiKey:) instance method — reserved for future feature activation
     private func syncUber(apiKey _: String) async throws -> [IncomeEntry] {
         // periphery:ignore - Reserved: syncUber(apiKey:) instance method reserved for future feature activation
         // Would call Uber Driver API

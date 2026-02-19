@@ -74,6 +74,7 @@ final class ChatViewModel {
     }
 
     /// Cancel the current streaming operation
+    // periphery:ignore - Reserved: cancelStreaming() instance method — reserved for future feature activation
     func cancelStreaming() {
         chatManager.cancelStreaming()
         isStreaming = false
@@ -81,6 +82,7 @@ final class ChatViewModel {
     }
 
     /// Regenerate the last assistant message
+    // periphery:ignore - Reserved: regenerateLastMessage(in:) instance method — reserved for future feature activation
     func regenerateLastMessage(in conversation: Conversation) async {
         isStreaming = true
 
@@ -100,11 +102,13 @@ final class ChatViewModel {
     // MARK: - Provider Selection
 
     /// Get available provider info
+    // periphery:ignore - Reserved: availableProviderInfo property — reserved for future feature activation
     var availableProviderInfo: [ProviderRegistry.ProviderInfo] {
         providerRegistry.availableProviders
     }
 
     /// Get configured providers
+    // periphery:ignore - Reserved: configuredProviders property — reserved for future feature activation
     var configuredProviders: [AIProvider] {
         providerRegistry.configuredProviders
     // periphery:ignore - Reserved: availableProviderInfo property reserved for future feature activation

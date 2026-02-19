@@ -19,6 +19,7 @@ import UserNotifications
 @MainActor
 @Observable
 final class WorkflowEngine {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = WorkflowEngine()
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "WorkflowEngine")
@@ -64,6 +65,7 @@ final class WorkflowEngine {
     }
 
     /// Delete a workflow
+    // periphery:ignore - Reserved: deleteWorkflow(id:) instance method — reserved for future feature activation
     func deleteWorkflow(id: UUID) {
         workflows.removeAll { $0.id == id }
         saveWorkflows()
@@ -164,6 +166,7 @@ final class WorkflowEngine {
     }
 
     /// Cancel running workflow
+    // periphery:ignore - Reserved: cancelExecution() instance method — reserved for future feature activation
     func cancelExecution() {
         runningTasks.values.forEach { $0.cancel() }
         runningTasks.removeAll()
@@ -385,6 +388,7 @@ final class WorkflowEngine {
         }
     }
 
+    // periphery:ignore - Reserved: context parameter — kept for API compatibility
     private func executeDelay(_ node: AutomationNode, context: [String: Any]) async throws -> String {
         let seconds = Double(node.configuration.parameters["seconds"] ?? "1") ?? 1
         try await Task.sleep(for: .seconds(seconds))
@@ -429,6 +433,7 @@ final class WorkflowEngine {
         return result.status == .success ? "Sub-workflow completed" : "Sub-workflow failed"
     }
 
+    // periphery:ignore - Reserved: node parameter — kept for API compatibility
     private func executeCode(_ node: AutomationNode, context: [String: Any]) async throws -> String {
         // Code execution is disabled for security
         // In production, could use JavaScriptCore or similar

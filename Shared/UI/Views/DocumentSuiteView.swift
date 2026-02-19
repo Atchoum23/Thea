@@ -183,6 +183,7 @@ struct DocumentSuiteView: View {
 
     // MARK: - iOS Sections
 
+    // periphery:ignore - Reserved: templateSection property — reserved for future feature activation
     private var templateSection: some View {
         Section("Quick Start") {
             // periphery:ignore - Reserved: templateSection property reserved for future feature activation
@@ -201,6 +202,7 @@ struct DocumentSuiteView: View {
     }
 
     @ViewBuilder
+    // periphery:ignore - Reserved: documentsSection property — reserved for future feature activation
     private var documentsSection: some View {
         // periphery:ignore - Reserved: documentsSection property reserved for future feature activation
         if documents.isEmpty {

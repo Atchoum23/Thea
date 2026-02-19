@@ -156,6 +156,7 @@ final class SmartNotificationScheduler {
     }
 
     /// Record that the user engaged with a notification (opens, responds, etc.)
+    // periphery:ignore - Reserved: recordEngagement() instance method — reserved for future feature activation
     func recordEngagement() {
         // periphery:ignore - Reserved: recordEngagement() instance method reserved for future feature activation
         BehavioralFingerprint.shared.recordNotificationEngagement(engaged: true)

@@ -29,6 +29,7 @@ actor TranscriptionEngine {
     private var tasks: [UUID: SFSpeechRecognitionTask] = [:]
     #endif
     /// The speaker label for the current segment being transcribed.
+    // periphery:ignore - Reserved: currentSpeaker property — reserved for future feature activation
     private var currentSpeaker: String = "Unknown"
     // periphery:ignore - Reserved: currentSpeaker property reserved for future feature activation
     /// The start time of the current transcript segment.

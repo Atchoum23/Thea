@@ -21,6 +21,7 @@ final class CodeIntelligenceManager {
 
     // MARK: - Code Analysis
 
+    // periphery:ignore - Reserved: analyzeCode(_:language:) instance method — reserved for future feature activation
     func analyzeCode(_: String, language: String) async -> CodeAnalysisResult {
         isAnalyzing = true
 
@@ -40,6 +41,7 @@ final class CodeIntelligenceManager {
         return result
     }
 
+    // periphery:ignore - Reserved: analyzeRepository(at:) instance method — reserved for future feature activation
     func analyzeRepository(at _: URL) async throws -> [CodeAnalysisResult] {
         isAnalyzing = true
         let results: [CodeAnalysisResult] = []
@@ -50,12 +52,14 @@ final class CodeIntelligenceManager {
         return results
     }
 
+    // periphery:ignore - Reserved: getSuggestions(for:language:) instance method — reserved for future feature activation
     func getSuggestions(for _: String, language _: String) async -> [String] {
         // periphery:ignore - Reserved: analyzeRepository(at:) instance method reserved for future feature activation
         // AI-powered code suggestions
         []
     }
 
+    // periphery:ignore - Reserved: explainCode(_:language:) instance method — reserved for future feature activation
     func explainCode(_: String, language _: String) async -> String {
         // AI-powered code explanation
         "Code explanation would appear here."
@@ -83,8 +87,11 @@ struct CodeIssue: Identifiable {
     // periphery:ignore - Reserved: complexity property reserved for future feature activation
     // periphery:ignore - Reserved: analyzedAt property reserved for future feature activation
     let id: UUID
+    // periphery:ignore - Reserved: severity property — reserved for future feature activation
     let severity: IssueSeverity
+    // periphery:ignore - Reserved: message property — reserved for future feature activation
     let message: String
+    // periphery:ignore - Reserved: line property — reserved for future feature activation
     let line: Int
     // periphery:ignore - Reserved: severity property reserved for future feature activation
     // periphery:ignore - Reserved: message property reserved for future feature activation

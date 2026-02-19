@@ -149,6 +149,7 @@ public actor RelationshipIntelligence {
 
     // Callbacks
     private var onRelationshipDecay: ((ContactRelationship) -> Void)?
+    // periphery:ignore - Reserved: onFollowUpSuggested property — reserved for future feature activation
     private var onFollowUpSuggested: ((ContactRelationship, String) -> Void)?
     // periphery:ignore - Reserved: onFollowUpSuggested property reserved for future feature activation
     private var onNewContactDetected: ((ContactRelationship) -> Void)?

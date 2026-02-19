@@ -31,6 +31,7 @@
         // MARK: - Managers
 
         let folderAccess = FolderAccessManager.shared
+        // periphery:ignore - Reserved: skills property — reserved for future feature activation
         let skills = CoworkSkillsManager.shared
         let fileOps = FileOperationsManager()
 
@@ -66,6 +67,7 @@
             return session
         }
 
+        // periphery:ignore - Reserved: deleteSession(_:) instance method — reserved for future feature activation
         func deleteSession(_ session: CoworkSession) {
             // periphery:ignore - Reserved: deleteSession(_:) instance method reserved for future feature activation
             sessions.removeAll { $0.id == session.id }

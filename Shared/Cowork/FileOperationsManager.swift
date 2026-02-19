@@ -101,6 +101,7 @@
 
         // MARK: - Write Operations
 
+        // periphery:ignore - Reserved: writeFile(data:to:overwrite:) instance method — reserved for future feature activation
         func writeFile(data: Data, to url: URL, overwrite: Bool = false) throws {
             let validation = folderAccess.validateOperation(.write, at: url)
             if case let .denied(reason) = validation {
@@ -117,6 +118,7 @@
             }
         }
 
+        // periphery:ignore - Reserved: writeTextFile(_:to:encoding:overwrite:) instance method — reserved for future feature activation
         func writeTextFile(_ text: String, to url: URL, encoding: String.Encoding = .utf8, overwrite: Bool = false) throws {
             guard let data = text.data(using: encoding) else {
                 throw OperationError.operationFailed("Could not encode text")
@@ -178,6 +180,7 @@
             try fileManager.moveItem(at: source, to: destination)
         }
 
+        // periphery:ignore - Reserved: copyFile(from:to:overwrite:) instance method — reserved for future feature activation
         func copyFile(from source: URL, to destination: URL, overwrite: Bool = false) throws {
             // Check source read access
             var validation = folderAccess.validateOperation(.read, at: source)
@@ -210,6 +213,7 @@
             try fileManager.copyItem(at: source, to: destination)
         }
 
+        // periphery:ignore - Reserved: renameFile(at:to:) instance method — reserved for future feature activation
         func renameFile(at url: URL, to newName: String) throws {
             let newURL = url.deletingLastPathComponent().appendingPathComponent(newName)
             try moveFile(from: url, to: newURL)
@@ -240,6 +244,7 @@
 
         // MARK: - Batch Operations
 
+        // periphery:ignore - Reserved: batchCopy(files:to:overwrite:) instance method — reserved for future feature activation
         func batchCopy(files: [URL], to directory: URL, overwrite: Bool = false) throws -> [URL] {
             var copiedFiles: [URL] = []
 
@@ -253,6 +258,7 @@
             return copiedFiles
         }
 
+        // periphery:ignore - Reserved: batchMove(files:to:overwrite:) instance method — reserved for future feature activation
         func batchMove(files: [URL], to directory: URL, overwrite: Bool = false) throws -> [URL] {
             var movedFiles: [URL] = []
 
@@ -266,6 +272,7 @@
             return movedFiles
         }
 
+        // periphery:ignore - Reserved: batchDelete(files:moveToTrash:) instance method — reserved for future feature activation
         func batchDelete(files: [URL], moveToTrash: Bool = true) throws {
             for file in files {
                 try deleteFile(at: file, moveToTrash: moveToTrash)
@@ -275,6 +282,7 @@
 
         // MARK: - Search Operations
 
+        // periphery:ignore - Reserved: searchFiles(in:matching:recursive:caseSensitive:) instance method — reserved for future feature activation
         func searchFiles(
             in directory: URL,
             // periphery:ignore - Reserved: searchFiles(in:matching:recursive:caseSensitive:) instance method reserved for future feature activation
@@ -311,6 +319,7 @@
             }
         }
 
+        // periphery:ignore - Reserved: findFiles(in:withExtensions:recursive:) instance method — reserved for future feature activation
         func findFiles(
             // periphery:ignore - Reserved: findFiles(in:withExtensions:recursive:) instance method reserved for future feature activation
             in directory: URL,

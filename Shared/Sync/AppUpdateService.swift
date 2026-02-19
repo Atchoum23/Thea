@@ -370,6 +370,7 @@ public final class AppUpdateService: ObservableObject {
 
     // MARK: - Handle Notification Action
 
+    // periphery:ignore - Reserved: userInfo parameter — kept for API compatibility
     public func handleNotificationAction(_ actionID: String, userInfo: [AnyHashable: Any]) {
         // periphery:ignore - Reserved: userInfo parameter kept for API compatibility
         switch actionID {

@@ -26,6 +26,7 @@ import AppKit
 import PDFKit
 #endif
 
+// periphery:ignore - Reserved: pmLogger global — reserved for future feature activation
 private let pmLogger = Logger(subsystem: "ai.thea.app", category: "PhysicalMailChannel")
 
 // MARK: - Physical Mail Item
@@ -174,6 +175,7 @@ struct ExtractedMailAmount: Codable, Sendable, Identifiable {
     let currency: String
     let label: String?
 
+    // periphery:ignore - Reserved: init(value:currency:label:) initializer — reserved for future feature activation
     init(value: Double, currency: String = "CHF", label: String? = nil) {
         self.id = UUID()
         // periphery:ignore - Reserved: init(value:currency:label:) initializer reserved for future feature activation
@@ -193,6 +195,7 @@ struct ExtractedMailAmount: Codable, Sendable, Identifiable {
 
 // MARK: - Error Types
 
+// periphery:ignore - Reserved: PhysicalMailError enum — reserved for future feature activation
 enum PhysicalMailError: LocalizedError, Sendable {
     // periphery:ignore - Reserved: PhysicalMailError type reserved for future feature activation
     case storageDirectoryCreationFailed(Error)

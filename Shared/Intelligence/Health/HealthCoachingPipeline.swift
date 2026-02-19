@@ -471,6 +471,7 @@ final class HealthCoachingPipeline {
 struct HealthAnalysisReport: Sendable {
     let date: Date
     let dataPoints: [HealthDataPoint]
+    // periphery:ignore - Reserved: insights property — reserved for future feature activation
     let insights: [CoachingInsight]
     // periphery:ignore - Reserved: insights property reserved for future feature activation
     let overallScore: Double // 0.0-1.0

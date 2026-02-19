@@ -198,6 +198,7 @@ struct SlashCommandOverlay: View {
     // MARK: - Keyboard Navigation
 
     /// Move selection up in the command list
+    // periphery:ignore - Reserved: moveSelectionUp() instance method — reserved for future feature activation
     func moveSelectionUp() {
         guard !filteredCommands.isEmpty else { return }
         withAnimation(TheaAnimation.micro) {
@@ -207,6 +208,7 @@ struct SlashCommandOverlay: View {
     }
 
     /// Move selection down in the command list
+    // periphery:ignore - Reserved: moveSelectionDown() instance method — reserved for future feature activation
     func moveSelectionDown() {
         guard !filteredCommands.isEmpty else { return }
         // periphery:ignore - Reserved: moveSelectionDown() instance method reserved for future feature activation
@@ -216,6 +218,7 @@ struct SlashCommandOverlay: View {
     }
 
     /// Confirm the currently selected command
+    // periphery:ignore - Reserved: confirmSelection() instance method — reserved for future feature activation
     func confirmSelection() {
         // periphery:ignore - Reserved: confirmSelection() instance method reserved for future feature activation
         guard !filteredCommands.isEmpty,

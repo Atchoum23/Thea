@@ -311,6 +311,7 @@ final class ClipboardHistoryManager: ObservableObject {
         Task { await TheaClipSyncService.shared.pushPinboard(pinboard) }
     }
 
+    // periphery:ignore - Reserved: removeFromPinboard(_:pinboard:) instance method — reserved for future feature activation
     func removeFromPinboard(_ entry: TheaClipEntry, pinboard: TheaClipPinboard) {
         guard let junction = entry.pinboardEntries.first(where: { $0.pinboard?.id == pinboard.id }) else { return }
         modelContext?.delete(junction)
@@ -321,6 +322,7 @@ final class ClipboardHistoryManager: ObservableObject {
 
     // MARK: - Search
 
+    // periphery:ignore - Reserved: search(query:contentType:dateRange:) instance method — reserved for future feature activation
     func search(query: String, contentType: TheaClipContentType? = nil, dateRange: ClosedRange<Date>? = nil) -> [TheaClipEntry] {
         guard let context = modelContext else { return [] }
 
@@ -411,6 +413,7 @@ final class ClipboardHistoryManager: ObservableObject {
         pasteStack.append(entry)
     }
 
+    // periphery:ignore - Reserved: pasteNextFromStack() instance method — reserved for future feature activation
     func pasteNextFromStack() -> TheaClipEntry? {
         guard !pasteStack.isEmpty else { return nil }
         // periphery:ignore - Reserved: pasteNextFromStack() instance method reserved for future feature activation
@@ -421,6 +424,7 @@ final class ClipboardHistoryManager: ObservableObject {
         return entry
     }
 
+    // periphery:ignore - Reserved: clearStack() instance method — reserved for future feature activation
     func clearStack() {
         // periphery:ignore - Reserved: clearStack() instance method reserved for future feature activation
         pasteStack.removeAll()

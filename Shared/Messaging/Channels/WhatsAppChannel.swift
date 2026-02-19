@@ -18,6 +18,7 @@ final class WhatsAppChannel: ObservableObject {
     // MARK: - Published State
 
     @Published private(set) var isConnected = false
+    // periphery:ignore - Reserved: isPaired property — reserved for future feature activation
     @Published private(set) var isPaired = false
     @Published private(set) var contacts: [WhatsAppContact] = []
     @Published private(set) var groups: [WhatsAppGroup] = []
@@ -27,9 +28,12 @@ final class WhatsAppChannel: ObservableObject {
 
     // MARK: - Configuration
 
+    // periphery:ignore - Reserved: enabled property — reserved for future feature activation
     var enabled = true
     var autoTranscribeVoiceNotes = true
+    // periphery:ignore - Reserved: syncMediaFiles property — reserved for future feature activation
     var syncMediaFiles = false
+    // periphery:ignore - Reserved: maxHistoryMessages property — reserved for future feature activation
     var maxHistoryMessages = 500
 
     // MARK: - Storage
@@ -58,6 +62,7 @@ final class WhatsAppChannel: ObservableObject {
 
     // MARK: - Connection
 
+    // periphery:ignore - Reserved: connect() instance method — reserved for future feature activation
     func connect() async {
         guard enabled else { return }
         logger.info("Connecting WhatsApp channel via OpenClaw Bridge")
@@ -98,6 +103,7 @@ final class WhatsAppChannel: ObservableObject {
         logger.info("WhatsApp channel connected")
     }
 
+    // periphery:ignore - Reserved: disconnect() instance method — reserved for future feature activation
     func disconnect() {
         isConnected = false
         MessagingHub.shared.updateChannelStatus(.whatsApp, name: "WhatsApp", status: .disconnected)
@@ -107,6 +113,7 @@ final class WhatsAppChannel: ObservableObject {
 
     // MARK: - Message Handling
 
+    // periphery:ignore - Reserved: handleOpenClawMessage(_:) instance method — reserved for future feature activation
     private func handleOpenClawMessage(_ message: OpenClawMessage) async {
         guard message.platform == .whatsapp else { return }
         guard !processedMessageIDs.contains(message.id) else { return }
@@ -177,6 +184,7 @@ final class WhatsAppChannel: ObservableObject {
 
     // MARK: - Send Messages
 
+    // periphery:ignore - Reserved: sendMessage(to:text:) instance method — reserved for future feature activation
     func sendMessage(to chatID: String, text: String) async -> Bool {
         guard isConnected else {
             logger.warning("Cannot send: WhatsApp not connected")
@@ -193,6 +201,7 @@ final class WhatsAppChannel: ObservableObject {
     // periphery:ignore - Reserved: sendMessage(to:text:) instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: replyToMessage(chatID:messageID:text:) instance method — reserved for future feature activation
     func replyToMessage(chatID: String, messageID: String, text: String) async -> Bool {
         guard isConnected else { return false }
         do {
@@ -208,6 +217,7 @@ final class WhatsAppChannel: ObservableObject {
     // periphery:ignore - Reserved: replyToMessage(chatID:messageID:text:) instance method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: markAsRead(chatID:messageID:) instance method — reserved for future feature activation
     func markAsRead(chatID: String, messageID: String) async {
         guard isConnected else { return }
         do {
@@ -245,6 +255,7 @@ final class WhatsAppChannel: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: searchMessages(query:) instance method — reserved for future feature activation
     func searchMessages(query: String) -> [WhatsAppMessage] {
         let lower = query.lowercased()
         return conversationCache.values.flatMap { $0 }
@@ -417,6 +428,7 @@ final class WhatsAppChannel: ObservableObject {
 
     // MARK: - Voice Note Transcription
 
+    // periphery:ignore - Reserved: transcribeVoiceNote(_:) instance method — reserved for future feature activation
     private func transcribeVoiceNote(_ message: WhatsAppMessage) async {
         #if os(macOS) || os(iOS)
         guard let voiceNote = message.attachments.first(where: { $0.type == .voiceNote }),
@@ -444,6 +456,7 @@ final class WhatsAppChannel: ObservableObject {
     }
 
     #if os(macOS) || os(iOS)
+    // periphery:ignore - Reserved: transcribeAudio(at:) instance method — reserved for future feature activation
     private func transcribeAudio(at url: URL) async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
             let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
@@ -464,6 +477,7 @@ final class WhatsAppChannel: ObservableObject {
 
     // MARK: - Contact & Group Management
 
+    // periphery:ignore - Reserved: updateContactFromMessage(_:) instance method — reserved for future feature activation
     private func updateContactFromMessage(_ message: WhatsAppMessage) {
         if message.isGroup {
             if !groups.contains(where: { $0.id == message.chatID }) {
@@ -489,6 +503,7 @@ final class WhatsAppChannel: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: updateChannelsFromOpenClaw() instance method — reserved for future feature activation
     private func updateChannelsFromOpenClaw() {
         for channel in OpenClawIntegration.shared.channels where channel.platform == .whatsapp {
             if channel.isGroup {
@@ -505,6 +520,7 @@ final class WhatsAppChannel: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: isGroupChat(_:) instance method — reserved for future feature activation
     private func isGroupChat(_ channelID: String) -> Bool {
         // WhatsApp group IDs typically end with @g.us
         channelID.hasSuffix("@g.us") || groups.contains { $0.id == channelID }
@@ -534,6 +550,7 @@ final class WhatsAppChannel: ObservableObject {
 
     // MARK: - Persistence
 
+    // periphery:ignore - Reserved: saveState() instance method — reserved for future feature activation
     private func saveState() {
         let state = WhatsAppState(
             // periphery:ignore - Reserved: saveState() instance method reserved for future feature activation
@@ -615,6 +632,7 @@ struct WhatsAppContact: Codable, Sendable, Identifiable {
     var lastMessageAt: Date?
     var isBlocked: Bool
 
+    // periphery:ignore - Reserved: init(id:name:phoneNumber:profilePictureURL:lastMessageAt:isBlocked:) initializer — reserved for future feature activation
     init(
         // periphery:ignore - Reserved: init(id:name:phoneNumber:profilePictureURL:lastMessageAt:isBlocked:) initializer reserved for future feature activation
         id: String,

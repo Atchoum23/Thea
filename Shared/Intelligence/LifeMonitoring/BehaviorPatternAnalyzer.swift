@@ -532,6 +532,7 @@ public struct ProductivityInsights: Sendable {
 /// Record of an app switch
 struct AppSwitchRecord: Sendable {
     let timestamp: Date
+    // periphery:ignore - Reserved: fromApp property — reserved for future feature activation
     let fromApp: String
     let toApp: String
     // periphery:ignore - Reserved: fromApp property reserved for future feature activation

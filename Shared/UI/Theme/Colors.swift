@@ -16,11 +16,13 @@ extension Color {
     // MARK: - Secondary Colors (Configurable)
 
     @MainActor
+    // periphery:ignore - Reserved: theaPurple static property — reserved for future feature activation
     static var theaPurple: Color {
         Color(hex: AppConfiguration.shared.themeConfig.purpleColor)
     }
 
     @MainActor
+    // periphery:ignore - Reserved: theaGold static property — reserved for future feature activation
     static var theaGold: Color {
         Color(hex: AppConfiguration.shared.themeConfig.goldColor)
     }
@@ -76,6 +78,7 @@ extension Color {
         endPoint: .bottomTrailing
     )
 
+    // periphery:ignore - Reserved: theaHeroGradientDefault static property — reserved for future feature activation
     static let theaHeroGradientDefault = LinearGradient(
         colors: [theaPurpleDefault, theaPrimaryDefault, theaAccentDefault],
         startPoint: .topLeading,
@@ -90,6 +93,7 @@ extension Color {
     static let theaGlassTint = Color(hex: "0066FF").opacity(0.3)
 
     /// Subtle accent tint for Liquid Glass surfaces
+    // periphery:ignore - Reserved: theaGlassAccentTint static property — reserved for future feature activation
     static let theaGlassAccentTint = Color(hex: "00D4AA").opacity(0.25)
 
     /// Platform-adaptive surface color for cards and containers
@@ -106,6 +110,7 @@ extension Color {
     }
 
     /// Elevated surface color for nested containers
+    // periphery:ignore - Reserved: theaSurfaceElevated static property — reserved for future feature activation
     static var theaSurfaceElevated: Color {
         #if os(macOS)
         Color(nsColor: .windowBackgroundColor)
@@ -132,6 +137,7 @@ extension Color {
     }
 
     /// Subtle brand gradient for glass tinting
+    // periphery:ignore - Reserved: theaGlassGradient static property — reserved for future feature activation
     static let theaGlassGradient = LinearGradient(
         colors: [
             Color(hex: "0066FF").opacity(0.08),
@@ -179,12 +185,14 @@ extension ShapeStyle where Self == Color {
     }
 
     /// Accent brand color for Thea - nonisolated version using default
+    // periphery:ignore - Reserved: theaAccent static property — reserved for future feature activation
     static var theaAccent: Color {
         Color.theaAccentDefault
     // periphery:ignore - Reserved: theaAccent static property reserved for future feature activation
     }
 
     /// Purple brand color for Thea - nonisolated version using default
+    // periphery:ignore - Reserved: theaPurple static property — reserved for future feature activation
     static var theaPurple: Color {
         // periphery:ignore - Reserved: theaPurple static property reserved for future feature activation
         Color.theaPurpleDefault

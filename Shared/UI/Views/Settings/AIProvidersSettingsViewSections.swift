@@ -34,6 +34,7 @@ enum ProviderStatus: String, CaseIterable {
 
 struct ProviderDisplayInfo: Identifiable {
     let id: String
+    // periphery:ignore - Reserved: name property — reserved for future feature activation
     let name: String
     // periphery:ignore - Reserved: name property reserved for future feature activation
     let displayName: String

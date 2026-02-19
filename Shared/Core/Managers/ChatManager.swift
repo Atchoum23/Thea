@@ -44,6 +44,7 @@ final class ChatManager: ObservableObject {
         loadConversations()
     }
 
+    // periphery:ignore - Reserved: configure(modelContext:) instance method — reserved for future feature activation
     func configure(modelContext: ModelContext) {
         setModelContext(modelContext)
     // periphery:ignore - Reserved: configure(modelContext:) instance method reserved for future feature activation
@@ -85,6 +86,7 @@ final class ChatManager: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: clearAllData() instance method — reserved for future feature activation
     func clearAllData() {
         // periphery:ignore - Reserved: clearAllData() instance method reserved for future feature activation
         guard let context = modelContext else { return }

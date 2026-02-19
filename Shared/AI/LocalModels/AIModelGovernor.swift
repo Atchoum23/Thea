@@ -470,6 +470,7 @@ final class AIModelGovernor {
         return reasons.joined(separator: "; ")
     }
 
+    // periphery:ignore - Reserved: taskType parameter — kept for API compatibility
     private func suggestAlternative(existingCoverage: Double, taskType: TaskType) -> String? {
         if existingCoverage > 0.5 {
             return "Use existing local model"
@@ -605,6 +606,7 @@ final class AIModelGovernor {
         return Double(helpful) / Double(recent.count)
     }
 
+    // periphery:ignore - Reserved: taskType parameter — kept for API compatibility
     private func recordDecision(_ decision: DownloadDecision, forTask taskType: TaskType) {
         // Record for future learning
         let event = ProactivityEvent(
@@ -752,9 +754,13 @@ final class AIModelGovernor {
 // MARK: - Supporting Types
 
 struct GovernancePolicy: Sendable {
+    // periphery:ignore - Reserved: downloadAggressiveness property — reserved for future feature activation
     var downloadAggressiveness: Double // 0-1
+    // periphery:ignore - Reserved: cleanupAggressiveness property — reserved for future feature activation
     var cleanupAggressiveness: Double // 0-1
+    // periphery:ignore - Reserved: resourceUsageLimit property — reserved for future feature activation
     var resourceUsageLimit: Double // 0-1
+    // periphery:ignore - Reserved: proactivityMultiplier property — reserved for future feature activation
     var proactivityMultiplier: Double // 0.5-2.0
 
     static let `default` = GovernancePolicy(
@@ -767,6 +773,7 @@ struct GovernancePolicy: Sendable {
 
 struct DownloadDecision: Sendable {
     let shouldDownload: Bool
+    // periphery:ignore - Reserved: confidence property — reserved for future feature activation
     let confidence: Double
     let reasoning: String
     // periphery:ignore - Reserved: downloadAggressiveness property reserved for future feature activation
@@ -774,7 +781,9 @@ struct DownloadDecision: Sendable {
     // periphery:ignore - Reserved: resourceUsageLimit property reserved for future feature activation
     // periphery:ignore - Reserved: proactivityMultiplier property reserved for future feature activation
     let alternativeAction: String?
+    // periphery:ignore - Reserved: estimatedBenefit property — reserved for future feature activation
     let estimatedBenefit: Double
+    // periphery:ignore - Reserved: storageCost property — reserved for future feature activation
     let storageCost: Double
 }
 
@@ -784,6 +793,7 @@ struct CleanupDecision: Sendable {
     let valueScore: Double
     // periphery:ignore - Reserved: DownloadDecision type reserved for future feature activation
     let reasoning: String
+    // periphery:ignore - Reserved: alternativeAction property — reserved for future feature activation
     let alternativeAction: String?
     let freedSpace: Double
 }
@@ -798,10 +808,13 @@ struct ResourceAllocation: Sendable {
 struct StorageAnalysis: Sendable {
     // periphery:ignore - Reserved: alternativeAction property reserved for future feature activation
     let freeSpaceGB: Double
+    // periphery:ignore - Reserved: totalSpaceGB property — reserved for future feature activation
     let totalSpaceGB: Double
     let usedPercent: Double
+    // periphery:ignore - Reserved: modelStorageGB property — reserved for future feature activation
     let modelStorageGB: Double
     let canAccommodate: Bool
+    // periphery:ignore - Reserved: pressureLevel property — reserved for future feature activation
     let pressureLevel: StoragePressure
 }
 
@@ -817,10 +830,14 @@ enum StoragePressure: String, Sendable {
 }
 
 struct ModelValueAssessment: Sendable {
+    // periphery:ignore - Reserved: modelName property — reserved for future feature activation
     let modelName: String
     let currentValue: Double
+    // periphery:ignore - Reserved: recencyScore property — reserved for future feature activation
     let recencyScore: Double
+    // periphery:ignore - Reserved: frequencyScore property — reserved for future feature activation
     let frequencyScore: Double
+    // periphery:ignore - Reserved: capabilityScore property — reserved for future feature activation
     let capabilityScore: Double
     let sizeEfficiency: Double
     let daysSinceLastUse: Double
@@ -833,8 +850,11 @@ struct ModelValueAssessment: Sendable {
 }
 
 struct SystemResourceState: Sendable {
+    // periphery:ignore - Reserved: cpuUsage property — reserved for future feature activation
     var cpuUsage: Double = 0
+    // periphery:ignore - Reserved: memoryUsage property — reserved for future feature activation
     var memoryUsage: Double = 0
+    // periphery:ignore - Reserved: gpuUsage property — reserved for future feature activation
     var gpuUsage: Double = 0
     // periphery:ignore - Reserved: cpuUsage property reserved for future feature activation
     // periphery:ignore - Reserved: memoryUsage property reserved for future feature activation

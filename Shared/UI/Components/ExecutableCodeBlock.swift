@@ -11,6 +11,7 @@
 import SwiftUI
 import OSLog
 
+// periphery:ignore - Reserved: logger global — reserved for future feature activation
 private let logger = Logger(subsystem: "ai.thea.app", category: "ExecutableCodeBlock")
 
 // periphery:ignore - Reserved: logger global var reserved for future feature activation

@@ -45,6 +45,7 @@ final class LocalModelManager {
 
     // MARK: - Custom Paths Management
 
+    // periphery:ignore - Reserved: addCustomModelPath(_:) instance method — reserved for future feature activation
     func addCustomModelPath(_ path: URL) {
         guard !customModelPaths.contains(path) else { return }
         customModelPaths.append(path)
@@ -55,6 +56,7 @@ final class LocalModelManager {
         }
     }
 
+    // periphery:ignore - Reserved: removeCustomModelPath(_:) instance method — reserved for future feature activation
     func removeCustomModelPath(_ path: URL) {
         customModelPaths.removeAll { $0 == path }
         saveCustomPaths()
@@ -92,6 +94,7 @@ final class LocalModelManager {
         }
     }
 
+    // periphery:ignore - Reserved: saveCustomPaths() instance method — reserved for future feature activation
     private func saveCustomPaths() {
         do {
             let data = try JSONEncoder().encode(customModelPaths)
@@ -502,6 +505,7 @@ extension LocalModelManager {
         return instance
     }
 
+    // periphery:ignore - Reserved: unloadModel(_:) instance method — reserved for future feature activation
     func unloadModel(_ modelName: String) {
         runningModels.removeValue(forKey: modelName)
     // periphery:ignore - Reserved: unloadModel(_:) instance method reserved for future feature activation
@@ -511,6 +515,7 @@ extension LocalModelManager {
 // MARK: - Model Installation
 
 extension LocalModelManager {
+    // periphery:ignore - Reserved: installOllamaModel(_:) instance method — reserved for future feature activation
     func installOllamaModel(_ modelName: String) async throws {
         // periphery:ignore - Reserved: installOllamaModel(_:) instance method reserved for future feature activation
         guard isOllamaInstalled else {

@@ -150,20 +150,31 @@ extension FocusModeIntelligence {
     }
 
     public struct FocusSessionSummary: Sendable {
+        // periphery:ignore - Reserved: duration property — reserved for future feature activation
         let duration: TimeInterval
+        // periphery:ignore - Reserved: messagesReceived property — reserved for future feature activation
         let messagesReceived: Int
+        // periphery:ignore - Reserved: callsMissed property — reserved for future feature activation
         let callsMissed: Int
+        // periphery:ignore - Reserved: autoRepliesSent property — reserved for future feature activation
         let autoRepliesSent: Int
+        // periphery:ignore - Reserved: urgentContacts property — reserved for future feature activation
         let urgentContacts: [String]
+        // periphery:ignore - Reserved: pendingResponses property — reserved for future feature activation
         let pendingResponses: Int
+        // periphery:ignore - Reserved: topPriorityContacts property — reserved for future feature activation
         let topPriorityContacts: [String]
+        // periphery:ignore - Reserved: suggestedFollowUps property — reserved for future feature activation
         let suggestedFollowUps: [ContactFollowUpSuggestion]
     }
 
     public struct ContactFollowUpSuggestion: Sendable {
+        // periphery:ignore - Reserved: contactId property — reserved for future feature activation
         let contactId: String
+        // periphery:ignore - Reserved: reason property — reserved for future feature activation
         let reason: String
         let priority: Int // 1 = highest
+        // periphery:ignore - Reserved: suggestedAction property — reserved for future feature activation
         let suggestedAction: String
     }
 
@@ -241,10 +252,15 @@ extension FocusModeIntelligence {
     }
 
     public struct VoicemailInfo: Sendable {
+        // periphery:ignore - Reserved: callerNumber property — reserved for future feature activation
         let callerNumber: String
+        // periphery:ignore - Reserved: callerName property — reserved for future feature activation
         let callerName: String?
+        // periphery:ignore - Reserved: timestamp property — reserved for future feature activation
         let timestamp: Date
+        // periphery:ignore - Reserved: duration property — reserved for future feature activation
         let duration: TimeInterval
+        // periphery:ignore - Reserved: transcription property — reserved for future feature activation
         let transcription: String? // If available
         // periphery:ignore - Reserved: callerNumber property reserved for future feature activation
         // periphery:ignore - Reserved: callerName property reserved for future feature activation

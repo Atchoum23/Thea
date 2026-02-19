@@ -33,6 +33,7 @@ public class MediaMonitor: ObservableObject {
     @Published public private(set) var playbackState: MediaPlaybackState = .stopped
     @Published public private(set) var activeService: MediaService?
 
+    // periphery:ignore - Reserved: cancellables property — reserved for future feature activation
     private var cancellables = Set<AnyCancellable>()
     // periphery:ignore - Reserved: cancellables property reserved for future feature activation
     private var pollingTask: Task<Void, Never>?

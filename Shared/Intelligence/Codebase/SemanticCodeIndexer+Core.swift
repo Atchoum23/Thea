@@ -613,6 +613,7 @@ extension SemanticCodeIndexer {
         }
     }
 
+    // periphery:ignore - Reserved: shouldExclude(path:) instance method — reserved for future feature activation
     private func shouldExclude(path: String) -> Bool {
         for pattern in configuration.excludePatterns {
             // periphery:ignore - Reserved: shouldExclude(path:) instance method reserved for future feature activation
@@ -623,6 +624,7 @@ extension SemanticCodeIndexer {
         return false
     }
 
+    // periphery:ignore - Reserved: shouldInclude(path:) instance method — reserved for future feature activation
     private func shouldInclude(path: String) -> Bool {
         // periphery:ignore - Reserved: shouldInclude(path:) instance method reserved for future feature activation
         for pattern in configuration.includePatterns {

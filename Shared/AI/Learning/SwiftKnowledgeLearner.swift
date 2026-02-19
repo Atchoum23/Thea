@@ -12,6 +12,7 @@ import SwiftData
 @MainActor
 @Observable
 final class SwiftKnowledgeLearner {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = SwiftKnowledgeLearner()
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "SwiftKnowledgeLearner")
@@ -50,6 +51,7 @@ final class SwiftKnowledgeLearner {
         loadConfiguration()
     }
 
+    // periphery:ignore - Reserved: setModelContext(_:) instance method — reserved for future feature activation
     func setModelContext(_ context: ModelContext) {
         modelContext = context
         Task {
@@ -60,6 +62,7 @@ final class SwiftKnowledgeLearner {
     // MARK: - Knowledge Extraction from Conversations
 
     /// Analyzes a conversation turn and extracts learnable knowledge
+    // periphery:ignore - Reserved: analyzeConversationTurn(userMessage:assistantResponse:wasSuccessful:userFeedback:) instance method — reserved for future feature activation
     func analyzeConversationTurn(
         userMessage: String,
         assistantResponse: String,
@@ -102,6 +105,7 @@ final class SwiftKnowledgeLearner {
     }
 
     /// Bulk analyze historical conversation data
+    // periphery:ignore - Reserved: analyzeHistoricalData(conversations:) instance method — reserved for future feature activation
     func analyzeHistoricalData(conversations: [ConversationData]) async -> LearningReport {
         var report = LearningReport()
 
@@ -144,6 +148,7 @@ final class SwiftKnowledgeLearner {
         return keywordMatches >= 2 || hasCodeBlocks
     }
 
+    // periphery:ignore - Reserved: extractCodeBlocks(from:) instance method — reserved for future feature activation
     private func extractCodeBlocks(from text: String) -> [String] {
         var blocks: [String] = []
         let pattern = "```(?:swift)?\\n?([\\s\\S]*?)```"
@@ -171,6 +176,7 @@ final class SwiftKnowledgeLearner {
 
     // MARK: - Learning Methods
 
+    // periphery:ignore - Reserved: learnFromSuccessfulCode(_:context:) instance method — reserved for future feature activation
     private func learnFromSuccessfulCode(_ code: String, context: String) async {
         guard configuration.enablePatternExtraction else { return }
 
@@ -214,6 +220,7 @@ final class SwiftKnowledgeLearner {
         await persistKnowledge()
     }
 
+    // periphery:ignore - Reserved: learnFromCorrection(original:correctedContext:) instance method — reserved for future feature activation
     private func learnFromCorrection(original: String, correctedContext: String) async {
         guard configuration.enableErrorLearning else { return }
 
@@ -239,6 +246,7 @@ final class SwiftKnowledgeLearner {
         await persistKnowledge()
     }
 
+    // periphery:ignore - Reserved: extractBestPractices(from:context:) instance method — reserved for future feature activation
     private func extractBestPractices(from codeBlocks: [String], context: String) async {
         for code in codeBlocks {
             let practices = detectBestPracticesInCode(code)
@@ -265,11 +273,13 @@ final class SwiftKnowledgeLearner {
 // MARK: - Pattern Extraction Helpers
 
 extension SwiftKnowledgeLearner {
+    // periphery:ignore - Reserved: ExtractedPattern type — reserved for future feature activation
     struct ExtractedPattern {
         let category: String
         let signature: String
     }
 
+    // periphery:ignore - Reserved: extractPatterns(from:) instance method — reserved for future feature activation
     func extractPatterns(from code: String) -> [ExtractedPattern] {
         var patterns: [ExtractedPattern] = []
 
@@ -306,6 +316,7 @@ extension SwiftKnowledgeLearner {
         return patterns
     }
 
+    // periphery:ignore - Reserved: isHighQualityCode(_:) instance method — reserved for future feature activation
     func isHighQualityCode(_ code: String) -> Bool {
         var score = 0
         if code.contains("///") || code.contains("/**") { score += 2 }
@@ -316,6 +327,7 @@ extension SwiftKnowledgeLearner {
         return score >= 3
     }
 
+    // periphery:ignore - Reserved: calculateQualityScore(_:) instance method — reserved for future feature activation
     func calculateQualityScore(_ code: String) -> Double {
         var score = 0.5
         if code.contains("///") { score += 0.1 }
@@ -329,6 +341,7 @@ extension SwiftKnowledgeLearner {
         return min(1.0, max(0.0, score))
     }
 
+    // periphery:ignore - Reserved: inferPurpose(from:) instance method — reserved for future feature activation
     func inferPurpose(from context: String) -> String {
         let lowercased = context.lowercased()
         // periphery:ignore - Reserved: calculateQualityScore(_:) instance method reserved for future feature activation
@@ -347,6 +360,7 @@ extension SwiftKnowledgeLearner {
         return "General"
     }
 
+    // periphery:ignore - Reserved: extractTags(from:) instance method — reserved for future feature activation
     func extractTags(from code: String) -> [String] {
         var tags: [String] = []
         if code.contains("@MainActor") { tags.append("MainActor") }
@@ -365,6 +379,7 @@ extension SwiftKnowledgeLearner {
 // MARK: - Error Detection & Best Practices
 
 extension SwiftKnowledgeLearner {
+    // periphery:ignore - Reserved: DetectedError type — reserved for future feature activation
     struct DetectedError {
         let pattern: String
         let type: String
@@ -372,6 +387,7 @@ extension SwiftKnowledgeLearner {
         let preventionRule: String
     }
 
+    // periphery:ignore - Reserved: detectErrorPatterns(in:correction:) instance method — reserved for future feature activation
     func detectErrorPatterns(in original: String, correction: String) -> [DetectedError] {
         var errors: [DetectedError] = []
         let lowerCorrection = correction.lowercased()
@@ -410,6 +426,7 @@ extension SwiftKnowledgeLearner {
         return errors
     }
 
+    // periphery:ignore - Reserved: DetectedBestPractice type — reserved for future feature activation
     struct DetectedBestPractice {
         let id: String
         let category: String
@@ -418,6 +435,7 @@ extension SwiftKnowledgeLearner {
         let example: String
     }
 
+    // periphery:ignore - Reserved: detectBestPracticesInCode(_:) instance method — reserved for future feature activation
     func detectBestPracticesInCode(_ code: String) -> [DetectedBestPractice] {
         // periphery:ignore - Reserved: DetectedBestPractice type reserved for future feature activation
         var practices: [DetectedBestPractice] = []
@@ -456,6 +474,7 @@ extension SwiftKnowledgeLearner {
 
 extension SwiftKnowledgeLearner {
     /// Get relevant patterns for a given coding task
+    // periphery:ignore - Reserved: getRelevantPatterns(for:limit:) instance method — reserved for future feature activation
     func getRelevantPatterns(for query: String, limit: Int = 5) -> [SwiftLearnedPattern] {
         let queryWords = Set(query.lowercased().split(separator: " ").map(String.init))
 
@@ -474,6 +493,7 @@ extension SwiftKnowledgeLearner {
     }
 
     /// Get code snippets relevant to a task
+    // periphery:ignore - Reserved: getRelevantSnippets(for:tags:limit:) instance method — reserved for future feature activation
     func getRelevantSnippets(for purpose: String, tags: [String] = [], limit: Int = 3) -> [CodeSnippet] {
         codeSnippets
             .filter { snippet in
@@ -490,6 +510,7 @@ extension SwiftKnowledgeLearner {
     }
 
     /// Get error prevention rules
+    // periphery:ignore - Reserved: getErrorPreventionRules(for:) instance method — reserved for future feature activation
     func getErrorPreventionRules(for errorType: String) -> [String] {
         errorResolutions
             .filter { $0.errorType.lowercased().contains(errorType.lowercased()) }
@@ -499,6 +520,7 @@ extension SwiftKnowledgeLearner {
     }
 
     /// Get best practices for a category
+    // periphery:ignore - Reserved: getBestPractices(for:) instance method — reserved for future feature activation
     func getBestPractices(for category: String) -> [BestPractice] {
         bestPractices.filter { $0.category.lowercased() == category.lowercased() }
     }

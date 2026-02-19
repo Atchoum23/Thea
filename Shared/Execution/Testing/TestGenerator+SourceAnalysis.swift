@@ -18,11 +18,14 @@ struct SourceAnalysis {
 
 struct FunctionInfo {
     let name: String
+    // periphery:ignore - Reserved: parameters property — reserved for future feature activation
     let parameters: [(name: String, type: String)]
+    // periphery:ignore - Reserved: returnType property — reserved for future feature activation
     let returnType: String?
     let isAsync: Bool
     let canThrow: Bool
     let visibility: String
+    // periphery:ignore - Reserved: lineNumber property — reserved for future feature activation
     let lineNumber: Int
 // periphery:ignore - Reserved: parameters property reserved for future feature activation
 // periphery:ignore - Reserved: returnType property reserved for future feature activation
@@ -31,8 +34,11 @@ struct FunctionInfo {
 struct ClassInfo {
     // periphery:ignore - Reserved: lineNumber property reserved for future feature activation
     let name: String
+    // periphery:ignore - Reserved: methods property — reserved for future feature activation
     let methods: [FunctionInfo]
+    // periphery:ignore - Reserved: properties property — reserved for future feature activation
     let properties: [String]
+    // periphery:ignore - Reserved: protocols property — reserved for future feature activation
     let protocols: [String]
 // periphery:ignore - Reserved: methods property reserved for future feature activation
 // periphery:ignore - Reserved: properties property reserved for future feature activation

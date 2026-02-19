@@ -44,6 +44,7 @@ extension FocusModeIntelligence {
     /// Start collecting analytics for a new Focus session.
     ///
     /// - Parameter mode: The ``FocusModeConfiguration`` being activated.
+    // periphery:ignore - Reserved: startSessionAnalytics(mode:) instance method — reserved for future feature activation
     func startSessionAnalytics(mode: FocusModeConfiguration) {
         // periphery:ignore - Reserved: startSessionAnalytics(mode:) instance method reserved for future feature activation
         setCurrentSessionAnalytics(FocusSessionAnalytics(

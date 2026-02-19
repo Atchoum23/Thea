@@ -9,6 +9,7 @@
     @MainActor
     @Observable
     final class CodeIntelligence {
+        // periphery:ignore - Reserved: shared static property — reserved for future feature activation
         static let shared = CodeIntelligence()
 
         private let logger = Logger(subsystem: "com.thea.app", category: "CodeIntelligence")
@@ -21,6 +22,7 @@
 
         // MARK: - Project Management
 
+        // periphery:ignore - Reserved: openProject(at:) instance method — reserved for future feature activation
         func openProject(at url: URL) async throws -> CodeProject {
             let project = try await scanProject(url)
 
@@ -32,6 +34,7 @@
             return project
         }
 
+        // periphery:ignore - Reserved: scanProject(_:) instance method — reserved for future feature activation
         private func scanProject(_ url: URL) async throws -> CodeProject {
             let fileManager = FileManager.default
 
@@ -72,11 +75,13 @@
             )
         }
 
+        // periphery:ignore - Reserved: isCodeFile(_:) instance method — reserved for future feature activation
         private func isCodeFile(_ url: URL) -> Bool {
             let codeExtensions = AppConfiguration.shared.codeIntelligenceConfig.codeFileExtensions
             return codeExtensions.contains(url.pathExtension.lowercased())
         }
 
+        // periphery:ignore - Reserved: detectLanguage(_:) instance method — reserved for future feature activation
         private func detectLanguage(_ url: URL) -> ProgrammingLanguage {
             let ext = url.pathExtension.lowercased()
 
@@ -95,6 +100,7 @@
 
         // MARK: - Codebase Indexing
 
+        // periphery:ignore - Reserved: indexCodebase(_:) instance method — reserved for future feature activation
         private func indexCodebase(_ project: CodeProject) async throws -> CodebaseIndex {
             var symbols: [CodeSymbol] = []
 
@@ -112,6 +118,7 @@
             )
         }
 
+        // periphery:ignore - Reserved: extractSymbols(from:) instance method — reserved for future feature activation
         private func extractSymbols(from file: CodeFile) async throws -> [CodeSymbol] {
             var symbols: [CodeSymbol] = []
 
@@ -133,6 +140,7 @@
             return symbols
         }
 
+        // periphery:ignore - Reserved: extractSwiftSymbols(_:fileURL:) instance method — reserved for future feature activation
         private func extractSwiftSymbols(_ content: String, fileURL: URL) -> [CodeSymbol] {
             var symbols: [CodeSymbol] = []
 
@@ -173,6 +181,7 @@
             return symbols
         }
 
+        // periphery:ignore - Reserved: extractPythonSymbols(_:fileURL:) instance method — reserved for future feature activation
         private func extractPythonSymbols(_ content: String, fileURL: URL) -> [CodeSymbol] {
             var symbols: [CodeSymbol] = []
 
@@ -195,6 +204,7 @@
             return symbols
         }
 
+        // periphery:ignore - Reserved: extractJSSymbols(_:fileURL:) instance method — reserved for future feature activation
         private func extractJSSymbols(_ content: String, fileURL: URL) -> [CodeSymbol] {
             var symbols: [CodeSymbol] = []
 
@@ -279,6 +289,7 @@
 
         // MARK: - Code Explanation
 
+        // periphery:ignore - Reserved: explainCode(_:language:) instance method — reserved for future feature activation
         func explainCode(_ code: String, language: ProgrammingLanguage) async throws -> String {
             guard let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
                 throw CodeError.noProvider
@@ -323,6 +334,7 @@
 
         // MARK: - Code Review
 
+        // periphery:ignore - Reserved: reviewCode(_:language:) instance method — reserved for future feature activation
         func reviewCode(_ code: String, language: ProgrammingLanguage) async throws -> CodeReview {
             guard let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
                 throw CodeError.noProvider
@@ -388,6 +400,7 @@
 
         // MARK: - Symbol Search
 
+        // periphery:ignore - Reserved: searchSymbol(_:) instance method — reserved for future feature activation
         func searchSymbol(_ query: String) -> [CodeSymbol] {
             guard let index = codebaseIndex else { return [] }
 
@@ -398,6 +411,7 @@
 
         // MARK: - Git Integration
 
+        // periphery:ignore - Reserved: getGitStatus(project:) instance method — reserved for future feature activation
         func getGitStatus(project: CodeProject) async throws -> GitStatus {
             let codeConfig = AppConfiguration.shared.codeIntelligenceConfig
 
@@ -442,6 +456,7 @@
             )
         }
 
+        // periphery:ignore - Reserved: getCurrentBranch(_:) instance method — reserved for future feature activation
         private func getCurrentBranch(_ project: CodeProject) async throws -> String {
             let codeConfig = AppConfiguration.shared.codeIntelligenceConfig
 
@@ -466,9 +481,11 @@
 
     struct CodeProject: Identifiable, Hashable {
         let id: UUID
+        // periphery:ignore - Reserved: name property — reserved for future feature activation
         let name: String
         let rootURL: URL
         var files: [CodeFile]
+        // periphery:ignore - Reserved: openedAt property — reserved for future feature activation
         let openedAt: Date
 
         func hash(into hasher: inout Hasher) {
@@ -487,6 +504,7 @@
         let language: ProgrammingLanguage
         // periphery:ignore - Reserved: openedAt property reserved for future feature activation
         var content: String
+        // periphery:ignore - Reserved: lastModified property — reserved for future feature activation
         var lastModified: Date
 
         func hash(into hasher: inout Hasher) {
@@ -504,16 +522,21 @@
         // periphery:ignore - Reserved: lastModified property reserved for future feature activation
         let projectId: UUID
         var symbols: [CodeSymbol]
+        // periphery:ignore - Reserved: lastIndexed property — reserved for future feature activation
         let lastIndexed: Date
     }
 
     struct CodeSymbol {
         let name: String
+        // periphery:ignore - Reserved: type property — reserved for future feature activation
         let type: SymbolType
+        // periphery:ignore - Reserved: fileURL property — reserved for future feature activation
         let fileURL: URL
+        // periphery:ignore - Reserved: line property — reserved for future feature activation
         let line: Int
 
         enum SymbolType {
+            // periphery:ignore - Reserved: class case — reserved for future feature activation
             case `class`, function, variable, `enum`, `protocol`, `struct`
         // periphery:ignore - Reserved: projectId property reserved for future feature activation
         }
@@ -545,8 +568,11 @@
     }
 
     struct CodeEdit {
+        // periphery:ignore - Reserved: fileURL property — reserved for future feature activation
         let fileURL: URL
+        // periphery:ignore - Reserved: timestamp property — reserved for future feature activation
         let timestamp: Date
+        // periphery:ignore - Reserved: changeType property — reserved for future feature activation
         let changeType: ChangeType
 
         enum ChangeType {
@@ -558,6 +584,7 @@
     // periphery:ignore - Reserved: addition case reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: GitStatus type — reserved for future feature activation
     struct GitStatus {
         // periphery:ignore - Reserved: GitStatus type reserved for future feature activation
         let modified: [URL]

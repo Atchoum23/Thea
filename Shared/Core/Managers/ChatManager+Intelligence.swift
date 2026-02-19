@@ -65,6 +65,7 @@ extension ChatManager {
     }
 
     /// Switch the visible branch for a message position
+    // periphery:ignore - Reserved: switchToBranch(_:for:in:) instance method — reserved for future feature activation
     func switchToBranch(
         _ branchIndex: Int,
         // periphery:ignore - Reserved: switchToBranch(_:for:in:) instance method reserved for future feature activation

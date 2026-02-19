@@ -17,6 +17,7 @@ import OSLog
 @MainActor
 @Observable
 final class CollaborativeMemorySystem {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = CollaborativeMemorySystem()
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "CollaborativeMemory")
@@ -71,6 +72,7 @@ final class CollaborativeMemorySystem {
         var importance: Double
         var decayScore: Double
 
+        // periphery:ignore - Reserved: init(content:embedding:context:source:importance:) initializer — reserved for future feature activation
         init(
             content: String,
             embedding: [Float]? = nil,
@@ -151,6 +153,7 @@ final class CollaborativeMemorySystem {
         let projectId: String?
         let topicId: String?
 
+        // periphery:ignore - Reserved: current static property — reserved for future feature activation
         static var current: ContextIdentifier {
             ContextIdentifier(
                 sessionId: UUID().uuidString,
@@ -192,6 +195,7 @@ final class CollaborativeMemorySystem {
     // MARK: - Memory Operations
 
     /// Store a new memory fragment
+    // periphery:ignore - Reserved: store(_:source:importance:) instance method — reserved for future feature activation
     func store(_ content: String, source: MemorySource, importance: Double = 0.5) async {
         let context = activeContexts.last ?? .current
 
@@ -230,6 +234,7 @@ final class CollaborativeMemorySystem {
     }
 
     /// Retrieve relevant memories for a query
+    // periphery:ignore - Reserved: retrieve(for:limit:) instance method — reserved for future feature activation
     func retrieve(for query: String, limit: Int = 10) async -> [MemoryFragment] {
         var results: [MemoryFragment] = []
 
@@ -297,6 +302,7 @@ final class CollaborativeMemorySystem {
     }
 
     /// Get context for current session
+    // periphery:ignore - Reserved: getCurrentContext() instance method — reserved for future feature activation
     func getCurrentContext() -> ContextMemory? {
         guard let contextId = activeContexts.last else { return nil }
         return contextualMemory.first { $0.context == contextId }
@@ -323,6 +329,7 @@ final class CollaborativeMemorySystem {
     }
 
     /// End current context
+    // periphery:ignore - Reserved: endContext() instance method — reserved for future feature activation
     func endContext() {
         guard !activeContexts.isEmpty else { return }
         activeContexts.removeLast()
@@ -423,6 +430,7 @@ final class CollaborativeMemorySystem {
 
     // MARK: - Context Management
 
+    // periphery:ignore - Reserved: updateContextMemory(with:) instance method — reserved for future feature activation
     private func updateContextMemory(with fragment: MemoryFragment) {
         guard let index = contextualMemory.firstIndex(where: { $0.context == fragment.context }) else {
             // periphery:ignore - Reserved: updateContextMemory(with:) instance method reserved for future feature activation
@@ -469,6 +477,7 @@ final class CollaborativeMemorySystem {
 
     // MARK: - Configuration
 
+    // periphery:ignore - Reserved: updateConfiguration(_:) instance method — reserved for future feature activation
     func updateConfiguration(_ config: Configuration) {
         // periphery:ignore - Reserved: updateConfiguration(_:) instance method reserved for future feature activation
         configuration = config

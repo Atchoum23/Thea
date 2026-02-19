@@ -13,6 +13,7 @@ private let windowLogger = Logger(subsystem: "ai.thea.app", category: "WindowMan
 @MainActor
 @Observable
 final class WindowManager {
+    // periphery:ignore - Reserved: shared static property — reserved for future feature activation
     static let shared = WindowManager()
 
     private var modelContext: ModelContext?
@@ -21,6 +22,7 @@ final class WindowManager {
 
     private init() {}
 
+    // periphery:ignore - Reserved: setModelContext(_:) instance method — reserved for future feature activation
     func setModelContext(_ context: ModelContext) {
         // periphery:ignore - Reserved: windowLogger global var reserved for future feature activation
         modelContext = context
@@ -54,6 +56,7 @@ final class WindowManager {
     }
 
     /// Opens a new code editor window
+    // periphery:ignore - Reserved: openNewCodeWindow(project:) instance method — reserved for future feature activation
     func openNewCodeWindow(project: Project? = nil) {
         let window = WindowInstance(
             type: .codeEditor,
@@ -72,6 +75,7 @@ final class WindowManager {
     }
 
     /// Opens the life tracking dashboard
+    // periphery:ignore - Reserved: openNewDashboard() instance method — reserved for future feature activation
     func openNewDashboard() {
         let window = WindowInstance(
             type: .lifeTracking,
@@ -89,11 +93,13 @@ final class WindowManager {
     }
 
     /// Alias for openNewDashboard()
+    // periphery:ignore - Reserved: openNewLifeTrackingWindow() instance method — reserved for future feature activation
     func openNewLifeTrackingWindow() {
         openNewDashboard()
     }
 
     /// Closes a window
+    // periphery:ignore - Reserved: closeWindow(_:) instance method — reserved for future feature activation
     func closeWindow(_ windowID: UUID) {
         openWindows.removeAll { $0.id == windowID }
 
@@ -114,6 +120,7 @@ final class WindowManager {
     }
 
     /// Updates window position and size
+    // periphery:ignore - Reserved: updateWindowGeometry(_:position:size:) instance method — reserved for future feature activation
     func updateWindowGeometry(
         _ windowID: UUID,
         position: CGPoint?,
@@ -190,6 +197,7 @@ final class WindowManager {
     }
 
     /// Deletes window state from SwiftData
+    // periphery:ignore - Reserved: deleteWindowState(_:) instance method — reserved for future feature activation
     private func deleteWindowState(_ windowID: UUID) {
         guard let context = modelContext else { return }
 
@@ -211,6 +219,7 @@ final class WindowManager {
     }
 
     /// Restores window state on app launch
+    // periphery:ignore - Reserved: restoreWindowState() instance method — reserved for future feature activation
     func restoreWindowState() async {
         guard let context = modelContext else { return }
 
@@ -262,6 +271,7 @@ final class WindowManager {
     }
 
     /// Saves all window states
+    // periphery:ignore - Reserved: saveAllWindowStates() instance method — reserved for future feature activation
     func saveAllWindowStates() {
         for window in openWindows {
             saveWindowState(window)
@@ -292,6 +302,7 @@ final class WindowManager {
     }
 
     /// Gets window for a specific project
+    // periphery:ignore - Reserved: getWindow(forProject:) instance method — reserved for future feature activation
     func getWindow(forProject projectID: UUID) -> WindowInstance? {
         // periphery:ignore - Reserved: getWindow(forProject:) instance method reserved for future feature activation
         openWindows.first { $0.projectID == projectID }
