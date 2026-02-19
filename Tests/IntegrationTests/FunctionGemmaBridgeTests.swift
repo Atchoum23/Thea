@@ -15,8 +15,6 @@
 @testable import TheaCore
 import XCTest
 
-// swiftlint:disable type_body_length file_length
-
 /// Tests for FunctionGemmaBridge — macOS only.
 @MainActor
 final class FunctionGemmaBridgeTests: XCTestCase {
@@ -681,7 +679,5 @@ final class FunctionGemmaBridgeTests: XCTestCase {
         }
     }
 }
-
-// swiftlint:enable type_body_length file_length
 
 #endif

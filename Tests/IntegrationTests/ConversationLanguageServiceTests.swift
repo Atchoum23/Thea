@@ -21,8 +21,6 @@
 @testable import TheaCore
 import XCTest
 
-// swiftlint:disable type_body_length
-
 /// Tests for ConversationLanguageService — @MainActor, @Observable.
 @MainActor
 final class ConversationLanguageServiceTests: XCTestCase {
@@ -336,10 +334,8 @@ final class ConversationLanguageServiceTests: XCTestCase {
         let result = service.detectAndSuggestLanguage(from: frenchText)
         // NL should detect French; result should be "fr" or nil if NL is uncertain
         if let code = result {
-            XCTAssertTrue(
-                code == "fr" || service.supportedLanguages.contains(where: { $0.code == code || $0.code.hasPrefix(code) }),
-                "Detected code '\(code)' should be in supported languages"
-            )
+            let isSupported = code == "fr" || service.supportedLanguages.contains { $0.code == code || $0.code.hasPrefix(code) }
+            XCTAssertTrue(isSupported, "Detected code '\(code)' should be in supported languages")
         }
     }
 
@@ -364,10 +360,8 @@ final class ConversationLanguageServiceTests: XCTestCase {
         let result = service.detectAndSuggestLanguage(from: japaneseText)
         if let code = result {
             // Japanese is in supported list
-            XCTAssertTrue(
-                service.supportedLanguages.contains(where: { $0.code == code || $0.code.hasPrefix(code) }),
-                "Japanese should be in supported languages, got code: '\(code)'"
-            )
+            let isSupported = service.supportedLanguages.contains { $0.code == code || $0.code.hasPrefix(code) }
+            XCTAssertTrue(isSupported, "Japanese should be in supported languages, got code: '\(code)'")
         }
     }
 
@@ -377,7 +371,7 @@ final class ConversationLanguageServiceTests: XCTestCase {
             "Привет, как дела?",          // Russian
             "مرحبا كيف حالك؟",              // Arabic
             "안녕하세요, 잘 지내세요?",          // Korean
-            "Olá, tudo bem?",              // Portuguese
+            "Olá, tudo bem?"               // Portuguese
         ]
         for text in texts {
             let result = service.detectAndSuggestLanguage(from: text)
@@ -440,5 +434,3 @@ final class ConversationLanguageServiceTests: XCTestCase {
         XCTAssertEqual(lang.id, code, "id (== code) mismatch for \(code)", file: file, line: line)
     }
 }
-
-// swiftlint:enable type_body_length

@@ -7,8 +7,6 @@
 @testable import TheaCore
 import XCTest
 
-// swiftlint:disable type_body_length
-
 /// Full branch coverage for OpenClawSecurityGuard.validate(_:) and its private helper
 /// checkPromptInjection(_:).  Every detection pattern is exercised via a positive
 /// (should be blocked) and a negative (should pass or be sanitised) case.
@@ -133,7 +131,7 @@ final class OpenClawSecurityGuardTests: XCTestCase {
         let result = await guard_.validate(makeMessage(content: "Short message"))
         // Not truncated — should be clean (assuming no injection patterns)
         if case let .sanitized(_, warnings) = result {
-            XCTAssertFalse(warnings.contains(where: { $0.contains("truncated") }))
+            XCTAssertFalse(warnings.contains { $0.contains("truncated") })
         }
     }
 
@@ -145,7 +143,7 @@ final class OpenClawSecurityGuardTests: XCTestCase {
         let result = await guard_.validate(makeMessage(content: longContent))
         if case let .sanitized(content, warnings) = result {
             XCTAssertLessThanOrEqual(content.count, 20)
-            XCTAssertTrue(warnings.contains(where: { $0.contains("truncated") || $0.contains("20") }))
+            XCTAssertTrue(warnings.contains { $0.contains("truncated") || $0.contains("20") })
         } else {
             XCTFail("Expected .sanitized for over-limit message, got \(result)")
         }
@@ -573,5 +571,3 @@ extension OpenClawSecurityGuard {
         blockedKeywords = keywords
     }
 }
-
-// swiftlint:enable type_body_length

@@ -1,8 +1,6 @@
 @testable import TheaCore
 import XCTest
 
-// swiftlint:disable file_length type_body_length
-
 /// Tests for OutboundPrivacyGuard, PrivacyPolicy, and built-in policies
 /// Goal: 100% branch coverage on OutboundPrivacyGuard.swift + PrivacyPolicies.swift
 @MainActor
@@ -905,5 +903,3 @@ final class OutboundPrivacyGuardTests: XCTestCase {
         )
     }
 }
-
-// swiftlint:enable file_length type_body_length
