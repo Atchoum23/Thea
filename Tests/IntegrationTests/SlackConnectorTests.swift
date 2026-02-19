@@ -9,7 +9,7 @@ final class SlackConnectorTests: XCTestCase {
     // MARK: - Initial State
 
     func testConnectorInitiallyDisconnected() async {
-        let connector = SlackConnector()
+        let connector = SlackConnector(credentials: MessagingCredentials())
         let isConn = await connector.isConnected
         XCTAssertFalse(isConn)
     }
@@ -17,15 +17,15 @@ final class SlackConnectorTests: XCTestCase {
     // MARK: - Platform Identity
 
     func testPlatformIsSlack() async {
-        let connector = SlackConnector()
+        let connector = SlackConnector(credentials: MessagingCredentials())
         let platform = await connector.platform
-        XCTAssertEqual(platform, .slack)
+        XCTAssertEqual(platform, MessagingPlatform.slack)
     }
 
     // MARK: - Connect Without Tokens
 
     func testConnectWithNoTokensFails() async {
-        let connector = SlackConnector()
+        let connector = SlackConnector(credentials: MessagingCredentials())
         // Missing both botToken and apiKey (Socket Mode app token)
         do {
             try await connector.connect()
@@ -39,7 +39,7 @@ final class SlackConnectorTests: XCTestCase {
     // MARK: - Disconnect Is Safe
 
     func testDisconnectWhenNotConnectedIsNoOp() async {
-        let connector = SlackConnector()
+        let connector = SlackConnector(credentials: MessagingCredentials())
         await connector.disconnect()
         let isConn = await connector.isConnected
         XCTAssertFalse(isConn)
@@ -48,7 +48,7 @@ final class SlackConnectorTests: XCTestCase {
     // MARK: - Send Throws When Disconnected
 
     func testSendThrowsWhenDisconnected() async {
-        let connector = SlackConnector()
+        let connector = SlackConnector(credentials: MessagingCredentials())
         let msg = OutboundMessagingMessage(chatId: "C01234567", content: "Hello from Thea")
         do {
             try await connector.send(msg)

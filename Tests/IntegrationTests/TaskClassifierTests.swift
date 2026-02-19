@@ -120,9 +120,9 @@ final class TaskClassifierTests: XCTestCase {
     }
 
     func testResponseLengthTokenLimits() {
-        XCTAssertEqual(ResponseLength.short.maxTokens, 500)
-        XCTAssertEqual(ResponseLength.medium.maxTokens, 2000)
-        XCTAssertEqual(ResponseLength.long.maxTokens, 8000)
+        XCTAssertEqual(ResponseLength.short.suggestedMaxTokens, 500)
+        XCTAssertEqual(ResponseLength.medium.suggestedMaxTokens, 2000)
+        XCTAssertEqual(ResponseLength.long.suggestedMaxTokens, 8000)
     }
 
     // MARK: - Legacy Alias Tests

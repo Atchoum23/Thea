@@ -102,7 +102,7 @@ final class MessagingPlatformProtocolTests: XCTestCase {
         let msg = OutboundMessagingMessage(chatId: "room-1", content: "Reply text")
         XCTAssertEqual(msg.chatId, "room-1")
         XCTAssertEqual(msg.content, "Reply text")
-        XCTAssertNil(msg.replyToMessageId)
+        XCTAssertNil(msg.replyToId)
     }
 
     func testOutboundMessageWithReplyTo() {

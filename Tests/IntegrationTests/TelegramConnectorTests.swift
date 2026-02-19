@@ -9,7 +9,7 @@ final class TelegramConnectorTests: XCTestCase {
     // MARK: - Connector Init
 
     func testConnectorInitialState() async {
-        let connector = TelegramConnector()
+        let connector = TelegramConnector(credentials: MessagingCredentials())
         let isConn = await connector.isConnected
         XCTAssertFalse(isConn)
     }
@@ -17,7 +17,7 @@ final class TelegramConnectorTests: XCTestCase {
     // MARK: - Connect Without Token (should not crash, returns error state)
 
     func testConnectWithoutTokenSetsDisconnected() async {
-        let connector = TelegramConnector()
+        let connector = TelegramConnector(credentials: MessagingCredentials())
         // No token → should fail gracefully (connect() reads credentials set on the connector)
         do {
             try await connector.connect()
@@ -31,7 +31,7 @@ final class TelegramConnectorTests: XCTestCase {
     // MARK: - Disconnect Is Safe When Not Connected
 
     func testDisconnectWhenNotConnectedIsNoOp() async {
-        let connector = TelegramConnector()
+        let connector = TelegramConnector(credentials: MessagingCredentials())
         await connector.disconnect() // Must not throw or crash
         let isConn = await connector.isConnected
         XCTAssertFalse(isConn)
@@ -40,7 +40,7 @@ final class TelegramConnectorTests: XCTestCase {
     // MARK: - Send Without Connection Throws
 
     func testSendWithoutConnectionThrows() async {
-        let connector = TelegramConnector()
+        let connector = TelegramConnector(credentials: MessagingCredentials())
         let msg = OutboundMessagingMessage(chatId: "123456", content: "Test")
         do {
             try await connector.send(msg)
@@ -53,8 +53,8 @@ final class TelegramConnectorTests: XCTestCase {
     // MARK: - Platform Identity
 
     func testPlatformIsTelegram() async {
-        let connector = TelegramConnector()
+        let connector = TelegramConnector(credentials: MessagingCredentials())
         let platform = await connector.platform
-        XCTAssertEqual(platform, .telegram)
+        XCTAssertEqual(platform, MessagingPlatform.telegram)
     }
 }
