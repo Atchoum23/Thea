@@ -311,7 +311,7 @@ public final class ConfidenceSystem {
         var flags: [String] = []
 
         // Flag overly precise statistics without citation
-        let statisticPattern = #"\b\d{1,3}(?:\.\d+)?\s*%\b"#
+        let statisticPattern = #"\b\d{1,3}(?:\.\d+)?\s*%"#
         // Safe: compile-time known pattern; invalid regex → skip statistics hallucination check
         if let regex = try? NSRegularExpression(pattern: statisticPattern),
            regex.numberOfMatches(in: response, range: NSRange(response.startIndex..., in: response)) > 2 {

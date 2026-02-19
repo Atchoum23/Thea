@@ -220,8 +220,10 @@ final class PersonalKnowledgeGraphTests: XCTestCase {
     }
 
     func testAddRelationshipBetweenTwoEntities() async {
-        let alice = KGEntity(name: "TestRel_Alice2", type: .person)
-        let bob   = KGEntity(name: "TestRel_Bob2", type: .person)
+        // Use UUID suffix to ensure unique IDs across test runs (edges are persisted)
+        let suffix = UUID().uuidString.prefix(8)
+        let alice = KGEntity(name: "TestRel_Alice_\(suffix)", type: .person)
+        let bob   = KGEntity(name: "TestRel_Bob_\(suffix)", type: .person)
         await graph.addEntity(alice)
         await graph.addEntity(bob)
 
@@ -337,10 +339,11 @@ final class PersonalKnowledgeGraphTests: XCTestCase {
     }
 
     func testFindSimilarEntityExactMatch() async {
-        let entity = KGEntity(name: "TestSimilar_Rust", type: .skill)
+        // Use exact name — findSimilarEntity checks normalized equality
+        let entity = KGEntity(name: "Rust_ExactMatchTest", type: .skill)
         await graph.addEntity(entity)
 
-        let found = await graph.findSimilarEntity(name: "Rust", type: .skill)
+        let found = await graph.findSimilarEntity(name: "Rust_ExactMatchTest", type: .skill)
         XCTAssertNotNil(found)
         XCTAssertEqual(found?.id, entity.id)
     }
