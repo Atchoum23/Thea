@@ -212,7 +212,17 @@ final class FunctionGemmaBridge {
         "chmod -R 777", "chmod 777 /", "curl.*|.*sh", "wget.*|.*sh",
         "sudo", "su -", ":(){:|:&};:", "shutdown", "reboot", "halt",
         "launchctl unload", "killall", "kill -9", "diskutil erase",
-        "diskutil unmount"
+        "diskutil unmount",
+        // Thea Messaging Gateway protection — prevent gateway shutdown/manipulation
+        "thea", "theagateway", "port 18789", "18789",
+        // Token/credential extraction attempts
+        "api_key", "apikey", "auth_token", "device_token", "keychain",
+        // Network scanning that could expose gateway
+        "nmap", "netstat", "lsof -i", "tcpdump",
+        // Script injection via environment
+        "export PATH", "alias ", "function ",
+        // Process manipulation
+        "pkill", "killall"
     ]
 
     private func executeTerminalAction(_ call: FunctionCall) async throws -> String {
