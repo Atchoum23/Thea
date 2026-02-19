@@ -69,6 +69,45 @@ extension ChatManager {
 
         configureAgentMode(for: taskType, text: text)
 
+        // P4: Use AgentTeamOrchestrator for auto mode + complex multi-step tasks
+        if shouldUseAgentTeam(taskType: taskType, text: text) {
+            let currentDevice = DeviceRegistry.shared.currentDevice
+            let userMessage = createUserMessage(text, in: conversation, device: currentDevice)
+            conversation.messages.append(userMessage)
+            context.insert(userMessage)
+            agentState.updateProgress(0.1, message: "Decomposing task for agent team…")
+
+            do {
+                let teamResult = try await AgentTeamOrchestrator.shared.orchestrate(
+                    goal: text,
+                    conversationID: conversation.id
+                )
+                agentState.updateProgress(0.9, message: "Synthesizing results from \(teamResult.successCount) agents…")
+                let orderIndex = (conversation.messages.map(\.orderIndex).max() ?? -1) + 1
+                let teamMsg = Message(
+                    conversationID: conversation.id,
+                    role: .assistant,
+                    content: .text(teamResult.synthesizedResponse),
+                    orderIndex: orderIndex,
+                    deviceID: currentDevice.id,
+                    deviceName: currentDevice.name,
+                    deviceType: currentDevice.type.rawValue
+                )
+                teamMsg.model = model
+                conversation.messages.append(teamMsg)
+                context.insert(teamMsg)
+                try context.save()
+                agentState.transition(to: .done)
+                agentState.updateProgress(1.0, message: "Agent team complete (\(teamResult.successCount)/\(teamResult.totalSubTasks) subtasks)")
+                msgLogger.info("P4: AgentTeamOrchestrator completed — \(teamResult.successCount)/\(teamResult.totalSubTasks) subtasks")
+                return
+            } catch {
+                // Fall through to single AI call on orchestration failure
+                msgLogger.warning("P4: AgentTeamOrchestrator failed, using single AI: \(error.localizedDescription)")
+                agentState.updateProgress(0.0)
+            }
+        }
+
         // Create and persist user message
         let currentDevice = DeviceRegistry.shared.currentDevice
         let userMessage = createUserMessage(text, in: conversation, device: currentDevice)

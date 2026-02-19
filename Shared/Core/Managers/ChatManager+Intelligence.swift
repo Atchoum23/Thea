@@ -156,6 +156,28 @@ extension ChatManager {
         return session
     }
 
+    // MARK: - P4: Agent Team Orchestration
+
+    /// Whether a task should use AgentTeamOrchestrator (auto mode + complex multi-step query).
+    ///
+    /// Triggers when:
+    /// - `agentState.mode == .auto` (configured by classifying the task type)
+    /// - Agent delegation is enabled in settings
+    /// - The query is genuinely multi-step (explicit sequencing language OR long complex query)
+    /// - The task type benefits from parallel reasoning (research, planning, codeGeneration, etc.)
+    func shouldUseAgentTeam(taskType: TaskType?, text: String) -> Bool {
+        guard agentState.mode == .auto,
+              SettingsManager.shared.agentDelegationEnabled else { return false }
+
+        let lower = text.lowercased()
+        let hasSequencing = lower.contains(" and then ") || lower.contains(" after that ")
+            || lower.contains(" in parallel ") || lower.contains(", then ")
+        let isLongComplex = text.split(separator: " ").count > 20
+        let isComplexType = taskType?.benefitsFromReasoning == true && taskType?.isActionable == true
+
+        return (hasSequencing || isLongComplex) && isComplexType
+    }
+
     // MARK: - Vision OCR for Image Attachments
 
     #if os(macOS) || os(iOS)
