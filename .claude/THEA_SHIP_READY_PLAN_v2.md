@@ -47,7 +47,7 @@ phase and run all steps fully and autonomously, committing after each step."
 |---------------------------|-----------------|-------|
 | v1 phases (A–L)           | ✅ ALL DONE     | See Progress Tracking section |
 | Phase N: Workflows        | ✅ DONE         | All 6 YAML files written + committed (2026-02-19) |
-| Phase O: Messaging Gateway| 🔶 IN PROGRESS  | O_PRE✅ OpenClaw installed(stopped). O0/O1✅ Types done. O2–O10 pending |
+| Phase O: Messaging Gateway| 🔶 IN PROGRESS  | O_CLEAN✅ OpenClaw fully uninstalled. Types✅. O0 foundation files: pending |
 | Phase P: Components       | ⏳ PENDING      | 16 subsystem analyses + AI 2026 upgrades |
 | Phase Q: Tests ≥80%       | ⏳ PENDING      | Baseline measurement first |
 | Phase R: Periphery        | ⏳ PARTIAL      | ~2,667 items remain from v1 D3 |
@@ -151,11 +151,11 @@ phase and run all steps fully and autonomously, committing after each step."
 ## PHASE EXECUTION ORDER (optimized for parallelism + dependencies)
 
 ```
-Wave 0 — PREREQUISITE (DONE):
-  ntfy-setup ✅ — Subscribe to ntfy.sh/thea-msm3u on your iPhone (see NTFY SETUP below)
-  O_PRE ✅     — OpenClaw v2026.2.17 was installed (prior session). Gateway stopped by user.
-  O0/O1 ✅    — OpenClawTypes.swift rewritten (wire types, platforms, sessions, agents)
-  O_CLEAN ⏳  — Uninstall OpenClaw entirely (first step of Phase O, see O_CLEAN section)
+Wave 0 — PREREQUISITE (ALL DONE ✅):
+  ntfy-setup ✅ — Subscribed to ntfy.sh/thea-msm3u
+  O_PRE ✅     — OpenClaw v2026.2.17 was installed by a prior session (a mistake — now corrected)
+  O_CLEAN ✅  — OpenClaw fully uninstalled on MSM3U (launchd removed, binary gone, port 18789 free)
+  Types ✅    — OpenClawTypes.swift rewritten with wire protocol types (commits cb56f4c1, dcea2272)
 
 Wave 1 — PARALLEL (no dependencies between O, P):
   ✅ N — GitHub Workflows Overhaul   [DONE 2026-02-19 — all 6 YAML files written + committed]
