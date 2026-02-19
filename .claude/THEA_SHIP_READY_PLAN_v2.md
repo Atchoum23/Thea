@@ -151,11 +151,12 @@ phase and run all steps fully and autonomously, committing after each step."
 
 ```
 Wave 0 — PREREQUISITE (do first, unblocks everything):
-  O_PRE — OpenClaw Gateway Install + Config on MSM3U  [~20 min]
-            (npm install, oncboard, openclaw doctor, gateway start)
+  ntfy-setup — Subscribe to ntfy.sh/thea-msm3u on your iPhone (see NTFY SETUP below)
+  O_PRE      — OpenClaw Gateway Install + Config on MSM3U  [~20 min]
+               (npm install, oncboard, openclaw doctor, gateway start)
 
-Wave 1 — PARALLEL (no dependencies between N, O, P):
-  N — GitHub Workflows Overhaul        [MSM3U, ~3h, critical path to green CI]
+Wave 1 — PARALLEL (no dependencies between O, P):
+  ✅ N — GitHub Workflows Overhaul   [DONE 2026-02-19 — all 6 YAML files written + committed]
   O — OpenClaw Deep Integration        [MSM3U, ~6h, largest new feature, needs O_PRE]
   P — Component Analysis + Fixes       [MSM3U, ~4h, P1–P16 including AI 2026 upgrades]
 
@@ -164,7 +165,8 @@ Wave 2 — AFTER WAVE 1 (parallel with each other):
   R — Periphery Full Resolution        [MSM3U, ~4h, independent, can overlap with Q]
 
 Wave 3 — AFTER WAVE 2:
-  S — CI/CD Green Verification         [MSM3U, ~2h, after N complete]
+  W — V1 Re-verification               [MSM3U, ~1h, verify O+P changes didn't break v1 state]
+  S — CI/CD Green Verification         [MSM3U, ~2h, after W passes]
   T — Notarization Pipeline Setup      [MSM3U, ~1h, after S green]
 
 Wave 4 — FINAL:
@@ -172,17 +174,194 @@ Wave 4 — FINAL:
   V — Manual Ship Gate                 [Alexis only, last step]
 
 Agent parallelism within waves:
-  Wave 1: Spawn 3 Claude Code sessions simultaneously on MSM3U:
-    Session 1: "Execute Phase N — GitHub Workflows Overhaul"
-    Session 2: "Execute Phase O — OpenClaw Deep Integration (O_PRE already done)"
-    Session 3: "Execute Phase P — Component Analysis + Fixes (P1–P16)"
-  Monitor all 3 and merge results via git when each session commits.
+  Wave 1: Spawn 2 Claude Code sessions simultaneously on MSM3U (N is already done):
+    Session 1: "Execute Phase O — OpenClaw Deep Integration (O_PRE already done)"
+    Session 2: "Execute Phase P — Component Analysis + Fixes (P1–P16)"
+  Each session sends ntfy progress notifications on phase start/complete/failure.
+  Monitor both and merge results via git pushsync when each session commits.
+```
+
+---
+
+## NTFY PROGRESS NOTIFICATIONS — SETUP GUIDE
+
+All autonomous phases send real-time push notifications to your phone/devices via ntfy.sh.
+**No account required** — ntfy.sh is free and open source.
+
+### Step 1: Subscribe on iPhone
+```
+1. Install ntfy app from App Store (free)
+2. Subscribe to topic: thea-msm3u
+   URL: https://ntfy.sh/thea-msm3u
+3. Allow notifications when prompted
+```
+
+### Step 2: Add GitHub Secret
+```
+1. Go to: https://github.com/Atchoum23/Thea/settings/secrets/actions
+2. Add secret: NTFY_TOPIC = thea-msm3u
+3. Done — all 6 workflows now send notifications automatically
+```
+
+### Step 3: Agent Session Notifications
+For autonomous Claude Code sessions (Phase O, P, Q, R, W, S, T), start each session with:
+```
+"Throughout this session, send ntfy.sh progress notifications using:
+ curl -H 'Title: Thea [PHASE] - [STATUS]' -H 'Priority: N' -H 'Tags: TAG' \
+      -d 'MESSAGE' https://ntfy.sh/thea-msm3u
+ Priority: 5=urgent/failure, 4=high/milestone, 3=normal/progress, 2=low/info
+ Tags: rotating_light (failure), white_check_mark (success), arrow_forward (start),
+       hammer (building), test_tube (testing)"
+```
+
+### Notification Matrix
+| Event | Priority | Tag | When |
+|---|---|---|---|
+| Phase start | 2 | arrow_forward | Agent begins phase |
+| Milestone complete | 3 | white_check_mark | Phase step done |
+| Build failure | 5 | rotating_light | Build error |
+| Tests pass | 4 | tada | All tests pass |
+| Phase complete | 4 | white_check_mark | Full phase done |
+| Security alert | 5 | warning | Critical finding |
+| CI green | 4 | rocket | All CI passes |
+
+### ntfy Curl Template (for manual use)
+```bash
+NTFY_TOPIC="thea-msm3u"
+curl -s -o /dev/null \
+  -H "Title: Thea - TITLE" \
+  -H "Priority: PRIORITY" \
+  -H "Tags: TAG" \
+  -H "Click: https://github.com/Atchoum23/Thea/actions" \
+  -d "MESSAGE" \
+  "https://ntfy.sh/$NTFY_TOPIC"
+```
+
+---
+
+## PHASE W — V1 RE-VERIFICATION (Run after O+P complete)
+
+**Goal**: Verify that all v1 ship-ready criteria still hold after Phase O and Phase P code changes.
+**Why needed**: New code from O (OpenClaw protocol rewrite) and P (component upgrades) may inadvertently break v1 achievements — builds, tests, security files, schema migration, Liquid Glass.
+**Estimated time**: ~1 hour
+**Run after**: Phase O AND Phase P both complete
+
+### W1: Re-run All 16 Builds
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+git pull
+xcodegen generate
+
+# All 4 platforms, Debug + Release = 8 builds
+for scheme in Thea-macOS Thea-iOS Thea-watchOS Thea-tvOS; do
+  for config in Debug Release; do
+    echo "=== Building $scheme ($config) ==="
+    xcodebuild build \
+      -project Thea.xcodeproj \
+      -scheme "$scheme" \
+      -configuration "$config" \
+      -derivedDataPath /tmp/TheaBuild \
+      CODE_SIGNING_ALLOWED=NO \
+      2>&1 | grep -E "(error:|warning:|BUILD SUCCEEDED|BUILD FAILED)"
+  done
+done
+# ✅ Expected: 0 errors, 0 warnings across all 8 builds
+```
+
+### W2: Re-run All Tests
+```bash
+xcrun swift test 2>&1 | tail -20
+# ✅ Expected: 0 failures, count ≥ 4045 (may be higher due to O+P new tests)
+
+xcodebuild test \
+  -project Thea.xcodeproj -scheme Thea-macOS \
+  -destination 'platform=macOS' -derivedDataPath /tmp/TheaBuild \
+  CODE_SIGNING_ALLOWED=NO \
+  2>&1 | grep -E "(Test Suite|PASSED|FAILED|error:)"
+# ✅ Expected: Test Suite ... passed
+```
+
+### W3: SwiftLint Clean Pass
+```bash
+swiftlint lint --strict --reporter emoji 2>&1 | tail -5
+# ✅ Expected: Done linting! Found 0 violations, 0 serious in ... files.
+```
+
+### W4: Security File Integrity Check
+```bash
+# Verify security-critical files were NOT modified by linter or new commits:
+for f in \
+  "Shared/Integrations/OpenClaw/FunctionGemmaBridge.swift" \
+  "Shared/Integrations/OpenClaw/OpenClawBridge.swift" \
+  "Shared/Integrations/OpenClaw/OpenClawSecurityGuard.swift" \
+  "Shared/Localization/ConversationLanguageService.swift" \
+  "Shared/Privacy/OutboundPrivacyGuard.swift"; do
+  echo "=== $f ==="
+  # Check key security markers are present
+done
+
+# FunctionGemmaBridge.swift: must contain "blocklist" and "shell metacharacter"
+grep -l "blocklist" "Shared/Integrations/OpenClaw/FunctionGemmaBridge.swift" && echo "✅ blocklist present" || echo "❌ MISSING"
+# OpenClawSecurityGuard.swift: must have 22 patterns in 6 categories
+grep -c "pattern" "Shared/Integrations/OpenClaw/OpenClawSecurityGuard.swift"  # should be > 20
+# ConversationLanguageService.swift: BCP-47 whitelist must be present
+grep -l "BCP-47\|allowedLanguages\|whitelistCodes" "Shared/Localization/ConversationLanguageService.swift" && echo "✅ whitelist present"
+# OutboundPrivacyGuard.swift: credential patterns must be present
+grep -l "SSH\|PEM\|JWT\|Firebase" "Shared/Privacy/OutboundPrivacyGuard.swift" && echo "✅ credential patterns present"
+```
+
+### W5: Schema Migration Intact
+```bash
+# Verify SwiftData schema version migration is still wired
+grep -r "VersionedSchema\|SchemaMigrationPlan\|migrateFrom" Shared/ --include="*.swift" | head -5
+# ✅ Expected: Multiple results showing migration code
+```
+
+### W6: thea-audit Clean Pass
+```bash
+# Build and run thea-audit
+cd Tools/thea-audit && xcrun swift build -c release
+.build/release/thea-audit scan \
+  --path ../../ \
+  --format json \
+  --output /tmp/audit-recheck.json \
+  --severity high
+
+python3 -c "
+import json
+d = json.load(open('/tmp/audit-recheck.json'))
+findings = d if isinstance(d, list) else d.get('findings', [])
+critical = sum(1 for f in findings if f.get('severity','').lower() == 'critical')
+high = sum(1 for f in findings if f.get('severity','').lower() == 'high')
+print(f'Critical: {critical}, High: {high}')
+if critical > 0 or high > 0:
+  import sys; sys.exit(1)
+print('✅ thea-audit: 0 critical, 0 high')
+"
+```
+
+### W7: Update V1 Checkboxes in This File
+After all W1–W6 pass:
+```
+Update the v1 checkboxes in END GOAL section:
+- All ✅ that were checked before must still be checked
+- If any broke during O+P, fix before proceeding to S
+```
+
+### W8: Notify + Commit
+```bash
+git add -A && git commit -m "Auto-save: Phase W V1 Re-verification — all checks passed"
+# Send ntfy notification
+curl -H "Title: Thea Phase W - Complete" -H "Priority: 4" -H "Tags: white_check_mark" \
+     -d "V1 re-verification passed: builds ✅ tests ✅ SwiftLint ✅ security ✅" \
+     https://ntfy.sh/thea-msm3u
 ```
 
 ---
 
 ## PHASE N — GITHUB WORKFLOWS OVERHAUL (MSM3U)
 
+**Status: ✅ DONE (2026-02-19)** — All 6 workflow YAML files written, improved, and committed.
 **Goal**: All 6 workflows green, state-of-the-art, production-grade. Automate everything possible.
 **Why this phase first**: Green CI is the foundation for everything else. Broken CI blocks releases.
 
@@ -2175,6 +2354,47 @@ npm update -g openclaw
 openclaw gateway restart
 ```
 
+### OpenClaw Changelog 2026.2.18 — Key New APIs
+
+```swift
+// NEW FEATURES in OpenClaw 2026.2.18 — implement all in Phase O:
+
+// 1. Slack streaming (new methods for Slack channel):
+//    chat.startStream(channelID:) → streamID: String
+//    chat.appendStream(streamID:token:)
+//    chat.stopStream(streamID:)
+// Implementation: OpenClawIntegration.streamMessage(to:via:) for Slack channel
+
+// 2. 1M context window (Anthropic):
+//    In openclaw.json: params.context1m: true
+//    Context upgraded from 24K → 150K tokens for all sessions
+
+// 3. Memory MMR re-ranking (replaces cosine similarity):
+//    memory.search(query:topK:mmr:true) → diversified results with temporal decay
+//    Old: memory.search(query:) with flat similarity
+
+// 4. Discord Components v2 (interactive elements):
+//    discord.sendComponent(buttons:selects:modals:) — new method
+//    Enables interactive Thea responses in Discord (confirmations, forms, menus)
+
+// 5. Subagent nesting:
+//    agent.runSubagent(id:task:context:) → SubagentResult
+//    Maps to TaskPlanDAG leaf node execution
+
+// 6. Exec tool hardening:
+//    In openclaw.json: tools.exec.safeBins: ["git","swift","xcodebuild","npm","python3"]
+//    All other executables blocked by default in Phase O config
+
+// 7. iOS companion app pairing:
+//    gateway.getDeviceToken(deviceID:) for iOS app auth
+//    Requires: gateway.enableMobileCompanion: true in config
+
+// 8. BREAKING: Tool schema changes (no anyOf/oneOf/allOf):
+//    Before: { "type": "string", "anyOf": [...] }
+//    After:  { "type": "string", "enum": [...] }
+//    Audit all Thea tool definitions sent to OpenClaw gateway
+```
+
 ### Claude Opus 4.6 + Sonnet 4.6 — Model IDs (Feb 2026)
 ```swift
 // Use these EXACT model IDs in AnthropicProvider + AIModel catalog:
@@ -2251,6 +2471,56 @@ brew upgrade swiftlint  # Keep updated on dev machines
 - Phases N and O can run in parallel (no dependency between them)
 - Phase Q (coverage) requires Phase O complete (OpenClaw tests are counted in coverage)
 
+**2026-02-19 (v2 update #2)**: OpenClaw changelog 2026.2.18 + community risk research:
+
+KEY CHANGELOG FEATURES (must be implemented in Phase O):
+- iOS/Watch companion app: inbox UI + gateway commands + iOS Share Extension + Talk Mode (background)
+  → Phase O: Add iOS companion registration/pairing support in OpenClawIntegration
+- Slack streaming: `chat.startStream`, `chat.appendStream`, `chat.stopStream` new methods
+  → Phase O9: Add streaming response delivery for Slack channel (tokenwise vs chunkwise)
+- Anthropic 1M context: set `params.context1m: true` in agent config for extended context
+  → Phase P13: Add 1M context toggle in AnthropicProvider config
+- Sonnet 4.6 officially supported in OpenClaw model lists (use "anthropic/claude-sonnet-4-6")
+  → Phase P13: Update model catalog
+- Memory MMR re-ranking + temporal decay (replaces flat cosine similarity)
+  → Phase O6: Implement MMR search in OpenClaw memory integration
+- Context window: upgraded from 24K → 150K tokens for OpenClaw sessions
+  → Phase O: Remove any artificial 24K context truncation
+- Discord Components v2: buttons/selects/modals now available in Discord channel
+  → Phase O8: Add interactive Discord components in bot responses
+- Subagent nesting: agents can spawn sub-agents, each with clean context window
+  → Phase P16: Wire into TaskPlanDAG for teammate pattern
+- SSRF protection: new gateway-level protection against server-side request forgery
+  → Phase O_PRE: Set SSRF protection level in openclaw.json config
+- exec tool hardening: `tools.exec.safeBins` list (allowlisted executables only)
+  → Phase O_PRE: Add safeBins allowlist in config
+- Telegram token redaction: tokens now redacted in all gateway logs automatically
+  → Phase O: Remove any custom Telegram token redaction (now handled by gateway)
+- BREAKING: Model schema changed — no longer accepts anyOf/oneOf/allOf in tool schemas
+  → Phase O: Audit all tool definitions, replace anyOf/oneOf/allOf with explicit types
+
+COMMUNITY RISK WARNINGS (incorporate into OpenClaw setup):
+1. COST RUNAWAY: Agent loops can easily spend $300-750/month. Mitigation:
+   - Set `maxTokensPerHour` in openclaw.json
+   - Enable `budgetAlert` with daily cost threshold
+   - Monitor with: openclaw stats --period 24h
+   - OpenClawBridge.maxResponsesPerMinute=5 already addresses this for Thea
+2. MALICIOUS EXTENSION: "ClawdBot Agent" on VS Code marketplace is MALWARE (not official).
+   - Install ONLY official: `npm install -g openclaw` from npmjs.com
+   - Never install VS Code extensions claiming to be "OpenClaw" — no official extension exists
+3. RELIABILITY: Gateway may silently report "success" for failed deliveries on some platforms.
+   - Add delivery confirmation tracking in Phase O (use ACK events where available)
+4. SETUP COMPLEXITY: First-time setup takes ~2 hours. Use `openclaw doctor` liberally.
+   - `openclaw doctor --fix` auto-remediates most common config issues
+
+PDF SECURITY KIT FINDINGS (Kit Sécurité OpenClaw, from ~/Downloads):
+The PDF identified 5 critical risks that must be addressed in O_PRE config:
+  Risk 1: Public gateway exposure → Fix: bind to loopback (127.0.0.1) only — NEVER 0.0.0.0
+  Risk 2: Anyone can DM the bot → Fix: dmPolicy: "pairing" + dmScope: "per-channel-peer"
+  Risk 3: Credentials in plain text → Fix: use keychain/environment vars; encrypt openclaw.json
+  Risk 4: Prompt injection → Fix: OpenClawSecurityGuard already handles (22 patterns, NFD norm)
+  Risk 5: Dangerous commands → Fix: tools.exec.safeBins allowlist + sandbox: "non-main" mode
+
 **2026-02-19 (v2 update)**: OpenClaw + AI research incorporated:
 - OpenClaw iOS app is in "internal preview" as of Feb 2026 — iOS node code should be ready but
   pairing cannot be fully tested until app is publicly available. Code must still be written.
@@ -2286,3 +2556,7 @@ brew upgrade swiftlint  # Keep updated on dev machines
 - [SwiftLint releases](https://github.com/realm/SwiftLint/releases)
 - [GitHub Actions iOS CI/CD 2026](https://devtoolbox.dedyn.io/blog/github-actions-cicd-complete-guide)
 - [Apple notarytool documentation](https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution)
+- [OpenClaw Changelog 2026.2.18](https://openclaw.ai/changelog) — iOS/Watch app, Slack streaming, 1M context, MMR memory, Discord v2
+- [ntfy.sh documentation](https://docs.ntfy.sh) — curl syntax, priorities, tags, GitHub Actions
+- [Kit Sécurité OpenClaw PDF](local:~/Library/Mobile Documents/.../🔐 Kit Sécurité OpenClaw.pdf) — 5 security risks + mitigations
+- [OpenClaw community reviews 2026](https://reddit.com/r/openclaw) — cost runaway warnings, malicious extension "ClawdBot Agent"
