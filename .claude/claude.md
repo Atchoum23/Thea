@@ -76,6 +76,95 @@ find ~/Library/Developer/Xcode/DerivedData -maxdepth 1 -name "Thea-*" -type d -e
 
 ---
 
+## ⚠️ PROJECT CONTEXT — READ FIRST
+
+**Thea is a personal-use app. It will NEVER be distributed on the App Store or any public marketplace.**
+
+- Quality bar = App Store strict. Distribution = personal only.
+- All life-monitoring features stay active: HealthKit, location, behavioral fingerprinting, driving detection, screen time, ambient intelligence — these are core capabilities, not App Store review concerns.
+- **NEVER REMOVE anything.** Every class, feature, and capability must be kept and wired. If something seems unused, wire it — never delete it.
+- This applies to ALL platforms: macOS, iOS, watchOS, tvOS, Tizen, TheaWeb.
+
+---
+
+## ⚠️ MANDATORY: COMPLETE EVERY POINT IN EVERY PROMPT (NON-NEGOTIABLE)
+
+Every user message may contain multiple independent requests. **EVERY SINGLE ONE must be actioned.**
+
+**Pre-work protocol (mandatory for any message with 2+ requests):**
+1. Read the ENTIRE message before doing ANYTHING
+2. Write out EVERY distinct request, task, or question as a numbered list — including parenthetical ones ("including claude.md?"), implicit ones ("edit all relevant files"), and meta ones ("how to resolve this?")
+3. TaskCreate an entry for EACH item
+4. Work through them all — in order of dependency, not order of "importance"
+5. Before finalizing: re-read original message and confirm every item was actioned
+
+**Forbidden failure modes:**
+- Doing the "big" task and omitting smaller requests
+- Treating parenthetical requests as optional (e.g. "including claude.md?" means YES, DO IT)
+- Assuming one action "covers" another that wasn't explicitly done
+- Leaving any request for a "follow-up session"
+
+**Accountability**: If Alexis has to follow up with "you didn't address X", that is a process failure. Zero follow-up corrections is the goal.
+
+---
+
+## ⚠️ MANDATORY: NO-INTERRUPT — NEW PROMPTS QUEUE, NOT INTERRUPT
+
+When Alexis sends a new message while work is in progress:
+1. **Acknowledge briefly** (one line)
+2. **TaskCreate for EACH new request** in the message
+3. **FINISH current in-progress task completely** before switching
+4. **THEN address all queued requests** in order
+
+**Exception**: Explicit stop/override signals ("stop", "pause", "urgent:", "cancel that", "ignore") take immediate priority.
+
+**Why**: Interrupting mid-task produces partial/incomplete work. For Thea specifically: the executor on MSM3U should continue running; new requests go into the plan file as queued phases.
+
+---
+
+## ⚠️ MANDATORY: SYSTEMATIC COMPLETENESS PROTOCOL
+
+Root cause of missed items: starting work before fully parsing the prompt.
+
+**Step 1 — PARSE FIRST, WORK SECOND:**
+Before any edit, enumerate ALL requests:
+```
+User asked for:
+1. [exact item 1]
+2. [exact item 2]  ...
+```
+This list is the contract. Every item gets done or explicitly noted as blocked.
+
+**Step 2 — TRACK EACH ITEM:** TaskCreate for every non-trivial item.
+
+**Step 3 — FINAL CHECK before any commit/response:**
+Re-read original message. For each sentence/clause that implies action: confirm it was done.
+
+**Step 4 — WHEN IN DOUBT, DO IT:**
+If unsure whether something was requested, do it. "Better done than debated."
+
+**Step 5 — CROSS-FILE CONSISTENCY:**
+Any rule that applies universally must be added to ALL relevant files simultaneously:
+global CLAUDE.md + Thea CLAUDE.md + MEMORY.md. Not just "the obvious one."
+
+---
+
+## ⚠️ MANDATORY: RESEARCH-BEFORE-RECOMMEND (NON-NEGOTIABLE)
+
+**NEVER make recommendations about code, files, or architecture without reading the actual source files first.**
+
+- Before recommending which files to add, merge, activate, or cherry-pick: **READ THEM ALL**.
+- Before recommending an integration strategy: **READ both the target files and source files**.
+- Before recommending a fix: **READ the failing code first**.
+- "I haven't read the files but I think..." is **FORBIDDEN** in this project.
+- Sampling a few files is **INSUFFICIENT** when a decision affects an entire set of files.
+- For MetaAI specifically: all ~71 cherry-pick candidates were individually reviewed at snippet level.
+  Any future archive activation requires the same thoroughness.
+
+**Enforcement**: If you catch yourself about to recommend without reading, STOP. Read first.
+
+---
+
 ## UNIVERSAL IMPLEMENTATION STANDARD — Non-Negotiable
 
 **This standard applies to ALL work: past, present, and future. Every feature, capability, phase, and deliverable must meet this bar.**
