@@ -478,36 +478,58 @@ xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
 
 ---
 
-## PHASE A3: META-AI FULL ACTIVATION (UI LAYER + ~45 CHERRY-PICKED FILES)
+## PHASE A3: META-AI FULL ACTIVATION (UI LAYER + ~57 CHERRY-PICKED FILES)
 
 **Status: ⏳ PENDING (starts after v2 Phase U auto-transition)**
 
-**Goal**: Activate ALL ~45 MetaAI files with genuinely unique capabilities. Create
-`MetaAIDashboardView` as the branded UI face. Skip only the ~15 files superseded by canonical
-Intelligence/. This unlocks Thea's full multi-agent, reasoning, autonomous-build, workflow,
-and plugin capabilities — all previously silenced by blanket exclusion.
+**Goal**: Activate ALL ~57 MetaAI files with genuinely unique capabilities (including the
+SelfExecution/ subdirectory — 11 files — which powers Thea's autonomous plan execution).
+Create `MetaAIDashboardView` as the branded UI face. Skip only the ~15 files superseded by
+canonical Intelligence/. This unlocks Thea's full multi-agent, reasoning, autonomous-build,
+self-execution, workflow, and plugin capabilities — all previously silenced by blanket exclusion.
+
+⚠️ SelfExecution/ is the HIGHEST PRIORITY subsystem: it makes Thea capable of executing
+its own plans (v3 plan itself) autonomously — PhaseOrchestrator, CodeGenerator, ApprovalGate,
+SelfExecutionService, ProgressTracker, SpecParser, SleepPrevention, TaskDecomposer.
 
 **Run after**: v2 Phase U complete (executor auto-transitions to v3)
 
 **Audited file classification (all 73 files reviewed 2026-02-19):**
 
-SKIP — superseded by canonical Intelligence/ (15 files):
-- `MetaAIModelRouter.swift` → SmartModelRouter supersedes (file header confirms this)
-- `MetaAITaskClassifier.swift` → TaskClassifier supersedes (file header confirms this)
-- `KnowledgeGraph.swift` → PersonalKnowledgeGraph supersedes
-- `MemorySystem.swift` → Memory/ folder supersedes
-- `TaskTypes.swift` → TaskType.swift supersedes (check for `TaskContext` type conflict first)
+SKIP — superseded by canonical Intelligence/ or non-code (17 items):
+- `MetaAIModelRouter.swift` → SmartModelRouter supersedes (file header explicitly says so)
+- `MetaAITaskClassifier.swift` → TaskClassifier supersedes (file header explicitly says so)
+- `KnowledgeGraph.swift` → PersonalKnowledgeGraph supersedes; KnowledgeGraphViewer uses
+  `KnowledgeGraph.shared` — wire viewer to PersonalKnowledgeGraph instead
+- `MemorySystem.swift` → Intelligence/Memory/ supersedes; MemoryInspectorView uses
+  `MemorySystem.shared` — adapt viewer to LongTermMemorySystem instead
+- `TaskTypes.swift` → CONFLICT: `Shared/Intelligence/Classification/TaskContext.swift` already
+  defines `TaskContext`. Rename MetaAI uses to `MetaAITaskContext` where needed.
 - Build docs: `BUILD_ISSUES_RESOLUTION.md`, `SESSION_SUMMARY.md`, `PHASE_*.md`, `verify-*.sh`
 
-CHERRY-PICK — ~45 files with unique capabilities (grouped by category):
+CHERRY-PICK — ~57 files with unique capabilities (grouped by category):
+
+TIER 0 — CRITICAL (SelfExecution/ subdirectory — 11 files — Thea executing its own plans):
+  SelfExecution/SelfExecutionService.swift     — main entry: automatic/supervised/dryRun modes
+  SelfExecution/PhaseOrchestrator.swift        — orchestrates phase execution, PhaseResult tracking
+  SelfExecution/CodeGenerator.swift           — generates code files for phases dynamically
+  SelfExecution/FileCreator.swift             — creates project files for phases
+  SelfExecution/ApprovalGate.swift            — approval gate per level (phase/file/build/dmg)
+  SelfExecution/PhaseDefinition.swift         — phase definition with deliverables/verifications
+  SelfExecution/ProgressTracker.swift         — phase progress tracking
+  SelfExecution/SpecParser.swift              — parses THEA_MASTER_SPEC.md for requirements
+  SelfExecution/SleepPrevention.swift         — IOPMAssertion keeps system awake during execution
+  SelfExecution/TaskDecomposer.swift          — decomposes phases into typed tasks
+  SelfExecution/SelfExecutionConfiguration.swift — provider priority, preferred models per AI
 
 TIER 1 — HIGHEST VALUE (wire into IntelligenceOrchestrator + ChatManager):
+  Learning:    AIIntelligence (taskClassificationLearnings, codeAnalysisLearnings, modelPerformanceData)
   Multi-Agent: MultiAgentOrchestrator, SubAgentOrchestrator, AgentSwarm, AgentRegistry,
                AgentCommunication, AgentCommunicationHub, DeepAgentEngine
   Reasoning:   ReActExecutor, ReasoningEngine, ChainOfThought, LogicalInference,
                HypothesisTesting, ReflectionEngine
   Autonomy:    AutonomousBuildLoop, AICodeFixGenerator, CodeFixer, CodeSandbox, SwiftCodeAnalyzer
-  Resilience:  ResilienceManager (circuit breakers + exponential backoff — wire into providers)
+  Resilience:  ResilienceManager (circuit breakers + exponential backoff — wire into all providers)
 
 TIER 2 — HIGH VALUE (add to builds, wire into dashboard):
   Error AI:    ErrorKnowledgeBase, ErrorParser, KnownFixes, ImprovementSuggestions
@@ -515,37 +537,70 @@ TIER 2 — HIGH VALUE (add to builds, wire into dashboard):
   Plugins:     PluginSystem
   Parallel:    ParallelQueryExecutor, QueryDecomposer, ResultAggregator
   Tools:       ToolCall (SwiftData model), ToolCallView, ToolFramework, SystemToolBridge
-  Benchmarks:  ModelBenchmarkService, ModelCapabilityDatabase, ModelCapabilityView, PerformanceMetrics
+  Benchmarks:  ModelBenchmarkService, ModelCapabilityDatabase, ModelCapabilityView(*), PerformanceMetrics
   Self-Model:  THEASelfAwareness
   Directives:  UserDirectivesConfiguration, UserDirectivesView
+  Coordinator: THEAOrchestrator → RENAME class to `MetaAICoordinator` in copy (name conflict)
+  Training:    ModelTraining (fine-tuning, few-shot learning, continual learning)
 
 TIER 3 — ADD TO BUILDS (wire in Phase B3/later):
-  MCP:         MCPBrowserView, MCPServerLifecycleManager, MCPToolBridge, MCPToolList
-  UI Views:    KnowledgeGraphViewer, MemoryInspectorView, PluginManagerView, WorkflowBuilderView
+  MCP:         MCPBrowserView, MCPServerLifecycleManager, MCPToolBridge, MCPToolList, MCPServerRow
+  UI Views:    PluginManagerView, WorkflowBuilderView (KnowledgeGraphViewer/MemoryInspectorView adapted)
   Utility:     FileOperations, ExecutionPipeline, InteractionAnalyzer, MultiModalAI
-  Coordinator: THEAOrchestrator → RENAME to `MetaAICoordinator` (conflicts with IntelligenceOrchestrator)
-  Training:    ModelTraining (fine-tuning + few-shot)
+               APIIntegrator, ConnectivityMonitor, AsyncTimeout
+
+(*) ModelCapabilityView.swift has a typo: `ModelCapabilityRecordRecord` — fix to `ModelCapabilityRecord`
+
+KNOWN CONFLICTS TO RESOLVE:
+- `TaskContext` → already in Shared/Intelligence/Classification/TaskContext.swift.
+  In MetaAI copies: rename `TaskContext` → `MetaAITaskContext` everywhere it appears.
+- `THEAOrchestrator` → rename class to `MetaAICoordinator` in copied file.
+- `KnowledgeGraph.shared` in KnowledgeGraphViewer → adapt to `PersonalKnowledgeGraph.shared`.
+- `MemorySystem.shared` in MemoryInspectorView → adapt to `LongTermMemorySystem.shared`.
+- `ModelCapabilityRecordRecord` typo in ModelCapabilityView → fix to `ModelCapabilityRecord`.
 
 **Meta-AI brand:** IntelligenceOrchestrator stays unchanged — `MetaAICoordinator` wraps it,
-adding multi-agent dispatch, ReAct reasoning, and autonomous build capabilities on top.
+adding multi-agent dispatch, ReAct reasoning, self-execution, and autonomous build on top.
+SelfExecutionService is how Thea executes its own plans — wire to v3 plan execution.
 
 ### A3-0: Pre-flight — Confirm Archive Location + Conflict Check
 
 ```bash
-ls .v1-archive/Shared/AI/MetaAI/ | wc -l   # should be ~65 Swift files
-ls .v1-archive/Shared/UI/Views/MetaAI/      # should be 4 view files
+ls .v1-archive/Shared/AI/MetaAI/ | wc -l         # should be ~62 Swift files
+ls .v1-archive/Shared/AI/MetaAI/SelfExecution/   # should be 11 files
+ls .v1-archive/Shared/UI/Views/MetaAI/           # should be 4 view files
 
-# Check for known type conflicts before copying anything:
-grep -rn "struct TaskContext\|class TaskContext" Shared/ --include="*.swift"
-grep -rn "class THEAOrchestrator\|final class THEAOrchestrator" Shared/ --include="*.swift"
-grep -rn "struct ModelCapabilityRecord" Shared/ --include="*.swift"
-grep -rn "final class MultiAgentOrchestrator" Shared/ --include="*.swift"
+# CRITICAL: Check every known conflict before copying:
+grep -rn "class TaskContext\|struct TaskContext" Shared/ --include="*.swift"
+# → found in Shared/Intelligence/Classification/TaskContext.swift — RENAME MetaAI uses
+grep -rn "class THEAOrchestrator" Shared/ --include="*.swift"
+# → none in canonical — safe to copy but rename to MetaAICoordinator
+grep -rn "class MultiAgentOrchestrator\|class AgentSwarm\|class ReActExecutor" Shared/ --include="*.swift"
+# → none expected — verify before proceeding
+grep -rn "class ResilienceManager\|class WorkflowBuilder\|class PluginSystem" Shared/ --include="*.swift"
+# → none expected — verify before proceeding
 ```
 
-### A3-1: Copy Tier 1 Files (Multi-Agent + Reasoning + Autonomy + Resilience)
+### A3-1: Copy Tier 0 (SelfExecution) + Tier 1 Files
 
 ```bash
 mkdir -p Shared/Intelligence/MetaAI
+mkdir -p Shared/Intelligence/MetaAI/SelfExecution
+
+# ⭐ TIER 0 — SelfExecution (HIGHEST PRIORITY — Thea executing its own plans)
+for f in SelfExecutionService PhaseOrchestrator CodeGenerator FileCreator ApprovalGate \
+          PhaseDefinition ProgressTracker SpecParser SleepPrevention \
+          SelfExecutionConfiguration; do
+  cp ".v1-archive/Shared/AI/MetaAI/SelfExecution/${f}.swift" \
+     Shared/Intelligence/MetaAI/SelfExecution/
+done
+# Note: SelfExecution/TaskDecomposer.swift is different from main MetaAI/TaskDecomposition.swift:
+cp ".v1-archive/Shared/AI/MetaAI/SelfExecution/TaskDecomposer.swift" \
+   Shared/Intelligence/MetaAI/SelfExecution/SelfExecTaskDecomposer.swift
+# fullAuto mode was already removed for security (FINDING-014) — do NOT re-add it
+
+# Tier 1 — Learning/Intelligence
+cp ".v1-archive/Shared/AI/MetaAI/AIIntelligence.swift" Shared/Intelligence/MetaAI/
 
 # Tier 1 — Multi-Agent
 for f in MultiAgentOrchestrator SubAgentOrchestrator AgentSwarm AgentRegistry \
@@ -603,17 +658,31 @@ for f in KnowledgeGraphViewer MemoryInspectorView PluginManagerView WorkflowBuil
 done
 ```
 
-Check for TaskContext conflict: if `TaskTypes.swift` conflicts, copy but rename `TaskContext`
-to `MetaAITaskContext` in the MetaAI copy only.
+After Tier 0+1 copy: apply conflict resolutions:
+```bash
+# Fix TaskContext conflict — rename in MetaAI copies only (canonical is unchanged):
+find Shared/Intelligence/MetaAI -name "*.swift" -exec \
+  sed -i '' 's/\bTaskContext\b/MetaAITaskContext/g' {} \;
+# Rename THEAOrchestrator → MetaAICoordinator:
+sed -i '' 's/class THEAOrchestrator/class MetaAICoordinator/g; s/THEAOrchestrator\.shared/MetaAICoordinator.shared/g' \
+  Shared/Intelligence/MetaAI/MetaAICoordinator.swift
+# Fix ModelCapabilityView typo:
+sed -i '' 's/ModelCapabilityRecordRecord/ModelCapabilityRecord/g' \
+  Shared/Intelligence/MetaAI/ModelCapabilityView.swift
+```
+Build after conflict resolution. Fix any remaining errors before proceeding to Tier 2.
 
 ### A3-3: Add to project.yml (Targeted)
 
 ```yaml
 # Add these new paths to macOS + iOS targets:
-# - Shared/Intelligence/MetaAI/**           (all cherry-picked files)
-# - Shared/UI/Views/MetaAI/**               (4 view files)
+# - Shared/Intelligence/MetaAI/**                    (all cherry-picked files)
+# - Shared/Intelligence/MetaAI/SelfExecution/**      (SelfExecution subsystem)
+# - Shared/UI/Views/MetaAI/**                        (4 view files)
 # Do NOT touch the **/AI/MetaAI/** exclusion — archive stays excluded
-# Use #if os(macOS) guards in files that use AppKit/IOKit (AutonomousBuildLoop, SystemToolBridge)
+# Files requiring #if os(macOS) guards: AutonomousBuildLoop, CodeFixer, AICodeFixGenerator,
+#   CodeSandbox, ErrorKnowledgeBase, ErrorParser, KnownFixes, SystemToolBridge,
+#   SleepPrevention (IOKit), SelfExecutionService, PhaseOrchestrator
 ```
 
 Run `xcodegen generate` after project.yml update.
