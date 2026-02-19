@@ -48,17 +48,17 @@ phase and run all steps fully and autonomously, committing after each step."
 | v1 phases (A–L)           | ✅ ALL DONE     | See Progress Tracking section |
 | Phase N: Workflows        | ✅ DONE         | All 6 YAML files written + committed (2026-02-19) |
 | Phase O: Messaging Gateway| ✅ DONE         | All O0–O10, O_Tests, O_Wire complete. iOS+macOS wired. (2026-02-19) |
-| Phase P: Components       | ⏳ PENDING      | 16 subsystem analyses + AI 2026 upgrades |
+| Phase P: Components       | ✅ DONE         | P1-P16 all complete (2026-02-19). All 4 builds GREEN. |
 | Phase Q: Tests ≥80%       | ⏳ PENDING      | Baseline measurement first |
 | Phase R: Periphery        | ⏳ PARTIAL      | ~2,667 items remain from v1 D3 |
-| Phase S: CI Green         | ⏳ PENDING      | Blocked by O + P |
+| Phase S: CI Green         | ⏳ PENDING      | Blocked by Q + R |
 | Phase T: Notarization     | ⏳ PENDING      | Blocked by S |
-| Phase W: V1 Re-verify     | ⏳ PENDING      | Run after O + P complete |
+| Phase W: V1 Re-verify     | ⏳ PENDING      | Run after O + P complete — NOW UNBLOCKED |
 | Phase U: Final Report     | ⏳ PENDING      | Blocked by all above |
 | Phase V: Manual Gate      | ⏳ MANUAL       | Alexis only — last step |
-| **Overall ship-ready %**  | **~55%**        | N+O done; P in progress; Q/R/W/S/T/U pending |
+| **Overall ship-ready %**  | **~65%**        | N+O+P done; Q/R/W/S/T/U pending |
 
-*Last updated: 2026-02-19 — Phase O ✅ complete, Session Safety Protocol added, build gates added, CLAUDE.md updated, Phase P ready*
+*Last updated: 2026-02-19 — Phase P ✅ complete. P1-P16: Claude 4.6 catalog, ConfidenceSystem.messaging, OpenClawBridge+injection resistance, PersonalKnowledgeGraph dedup, HealthCoachingPipeline gateway, SpeechTranscriptionService, AgentTeamOrchestrator, OutboundPrivacyGuard+credentials, FunctionGemmaBridge+blocklist, CloudKitService+messaging sync, audio/image attachments, MLXVisionEngine+vllm-mlx. Phase W now unblocked.*
 
 ---
 
