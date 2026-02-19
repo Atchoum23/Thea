@@ -24,7 +24,9 @@
 #   - Squads: defined but never integrated
 #   - MLXAudioEngine: temporarily excluded (Release build issue)
 #
-# v3 GOAL: Close every gap. Wire everything. Activate everything.
+# v3 MISSION: Autonomously make Thea as reliable, omnipotent, omniscient, omnipresent,
+# and omnificent as possible — ship-ready across all platforms per industry's highest standards.
+# Close every gap. Wire everything. Activate everything.
 # Transform Thea from 30% to 100% realized capability.
 #
 # v3 ADDITIONS OVER v2:
@@ -62,7 +64,7 @@
 
 Rationale:
 1. Phase Q's test fixes are permanent value — v3 benefits from a clean test base
-2. Adding 73+ MetaAI files + new features BEFORE Phase Q makes Q much harder
+2. Adding ~57 cherry-picked MetaAI files + new features BEFORE Phase Q makes Q much harder
 3. v3's Wave 6 verification re-runs ALL checks on ALL code (v2 + v3 together)
 4. v3 does NOT re-run v2's implementation phases (N/O/P were cumulative improvements)
 5. v2 delivers a notarized, CI-green baseline — safer to add v3 features on top
@@ -147,7 +149,7 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 ### Meta-AI (Intelligence Layer UI)
 - [ ] "Meta-AI" brand visible in MacSettingsView sidebar and iOS tab
 - [ ] MetaAIDashboardView shows real-time decisions from all intelligence subsystems
-- [ ] 6 cherry-picked unique MetaAI files active (ModelBenchmarkService, QueryDecomposer, LogicalInference, THEASelfAwareness, ToolCallView, WorkflowTemplates)
+- [ ] ~57 cherry-picked MetaAI files active across 4 tiers: TIER 0 (11 SelfExecution files), TIER 1 (18 Multi-Agent/Reasoning/Autonomy/Resilience), TIER 2 (23 Error AI/Workflow/Plugins/Tools/Benchmarks), TIER 3 (11 MCP/UI/Utility)
 - [ ] Zero type conflicts — cherry-picked files use canonical Intelligence/ types where overlap exists
 - [ ] Model benchmarking UI active and accessible under "Meta-AI" section
 
@@ -551,34 +553,60 @@ TIER 3 — ADD TO BUILDS (wire in Phase B3/later):
 
 (*) ModelCapabilityView.swift has a typo: `ModelCapabilityRecordRecord` — fix to `ModelCapabilityRecord`
 
-KNOWN CONFLICTS TO RESOLVE:
-- `TaskContext` → already in Shared/Intelligence/Classification/TaskContext.swift.
-  In MetaAI copies: rename `TaskContext` → `MetaAITaskContext` everywhere it appears.
-- `THEAOrchestrator` → rename class to `MetaAICoordinator` in copied file.
+KNOWN CONFLICTS TO RESOLVE (all confirmed by grep on 2026-02-19):
+- `TaskContext` → canonical: Shared/Intelligence/Classification/TaskContext.swift.
+  Rename MetaAI uses: `sed -i '' 's/\bTaskContext\b/MetaAITaskContext/g'` across all MetaAI copies.
+- `THEAOrchestrator` → no canonical clash but rename to `MetaAICoordinator` for clarity.
+- `MemorySystem` → canonical: Shared/Memory/MemorySystem.swift.
+  Rename MetaAI copy: `MetaAIMemorySystem`; adapt MemoryInspectorView to use `LongTermMemorySystem`.
 - `KnowledgeGraph.shared` in KnowledgeGraphViewer → adapt to `PersonalKnowledgeGraph.shared`.
-- `MemorySystem.shared` in MemoryInspectorView → adapt to `LongTermMemorySystem.shared`.
+- `PerformanceMetrics` → CONFLICT: exists in Shared/Core/Configuration/DynamicConfig.swift
+  AND Shared/AI/Adaptive/SelfTuningEngine.swift. Rename MetaAI copy to `MetaAIPerformanceMetrics`.
+- `ToolCall` → CONFLICT: exists in Shared/AI/OnDeviceAIService.swift (not excluded!).
+  Rename MetaAI's SwiftData `ToolCall` model to `MetaAIToolCall` to avoid collision.
 - `ModelCapabilityRecordRecord` typo in ModelCapabilityView → fix to `ModelCapabilityRecord`.
+
+EXISTING STUBS — REPLACE WITH REAL FILES WHEN ACTIVATING:
+- `ModelBenchmarkService` → a stub was placed in the canonical codebase when MetaAI was archived.
+  Phase A3 must REPLACE the stub with the real MetaAI ModelBenchmarkService.swift.
+- `WorkflowTemplates` → same: stub exists in canonical. Replace with real MetaAI WorkflowTemplates.swift.
+- `AIFeaturesSettingsView` → deps were replaced with UserDefaults stubs. Restore real wiring in Phase A3.
+⚠️ Before copying any MetaAI file, grep canonical Shared/ for its class/struct/actor name. Trust the audit above but ALWAYS verify — stubs may have been added after the audit.
 
 **Meta-AI brand:** IntelligenceOrchestrator stays unchanged — `MetaAICoordinator` wraps it,
 adding multi-agent dispatch, ReAct reasoning, self-execution, and autonomous build on top.
 SelfExecutionService is how Thea executes its own plans — wire to v3 plan execution.
 
-### A3-0: Pre-flight — Confirm Archive Location + Conflict Check
+### A3-0: Pre-flight — Confirm Archive Location + Full Conflict Check
 
 ```bash
 ls .v1-archive/Shared/AI/MetaAI/ | wc -l         # should be ~62 Swift files
 ls .v1-archive/Shared/AI/MetaAI/SelfExecution/   # should be 11 files
 ls .v1-archive/Shared/UI/Views/MetaAI/           # should be 4 view files
 
-# CRITICAL: Check every known conflict before copying:
-grep -rn "class TaskContext\|struct TaskContext" Shared/ --include="*.swift"
-# → found in Shared/Intelligence/Classification/TaskContext.swift — RENAME MetaAI uses
-grep -rn "class THEAOrchestrator" Shared/ --include="*.swift"
-# → none in canonical — safe to copy but rename to MetaAICoordinator
-grep -rn "class MultiAgentOrchestrator\|class AgentSwarm\|class ReActExecutor" Shared/ --include="*.swift"
-# → none expected — verify before proceeding
-grep -rn "class ResilienceManager\|class WorkflowBuilder\|class PluginSystem" Shared/ --include="*.swift"
-# → none expected — verify before proceeding
+# CRITICAL: Verify ALL known conflicts before copying (run every time — stubs may change):
+grep -rn "class TaskContext\|struct TaskContext" Shared/ --include="*.swift" | grep -v ".v1-archive"
+# → found in Classification/TaskContext.swift — RENAME MetaAI uses to MetaAITaskContext
+
+grep -rn "class MemorySystem\|final class MemorySystem\|actor MemorySystem" Shared/ --include="*.swift" | grep -v ".v1-archive"
+# → found in Shared/Memory/MemorySystem.swift — RENAME MetaAI copy to MetaAIMemorySystem
+
+grep -rn "struct PerformanceMetrics\|class PerformanceMetrics" Shared/ --include="*.swift" | grep -v ".v1-archive"
+# → found in DynamicConfig.swift + SelfTuningEngine.swift — RENAME MetaAI to MetaAIPerformanceMetrics
+
+grep -rn "@Model final class ToolCall\|struct ToolCall\|class ToolCall" Shared/ --include="*.swift" | grep -v ".v1-archive"
+# → found in OnDeviceAIService.swift — RENAME MetaAI SwiftData model to MetaAIToolCall
+
+grep -rn "class ModelBenchmarkService" Shared/ --include="*.swift" | grep -v ".v1-archive"
+# → if found (stub), DELETE the stub before copying real MetaAI version
+
+grep -rn "class WorkflowTemplates" Shared/ --include="*.swift" | grep -v ".v1-archive"
+# → if found (stub), DELETE the stub before copying real MetaAI version
+
+grep -rn "class THEAOrchestrator" Shared/ --include="*.swift" | grep -v ".v1-archive"
+grep -rn "class MultiAgentOrchestrator\|class AgentSwarm\|class ReActExecutor" Shared/ --include="*.swift" | grep -v ".v1-archive"
+grep -rn "class ResilienceManager\|class WorkflowBuilder\|class PluginSystem" Shared/ --include="*.swift" | grep -v ".v1-archive"
+# → none expected for above — verify before proceeding
 ```
 
 ### A3-1: Copy Tier 0 (SelfExecution) + Tier 1 Files
@@ -658,19 +686,39 @@ for f in KnowledgeGraphViewer MemoryInspectorView PluginManagerView WorkflowBuil
 done
 ```
 
-After Tier 0+1 copy: apply conflict resolutions:
+After Tier 0+1 copy: apply ALL conflict resolutions:
 ```bash
-# Fix TaskContext conflict — rename in MetaAI copies only (canonical is unchanged):
+# 1. Fix TaskContext → MetaAITaskContext in ALL MetaAI copies:
 find Shared/Intelligence/MetaAI -name "*.swift" -exec \
   sed -i '' 's/\bTaskContext\b/MetaAITaskContext/g' {} \;
-# Rename THEAOrchestrator → MetaAICoordinator:
-sed -i '' 's/class THEAOrchestrator/class MetaAICoordinator/g; s/THEAOrchestrator\.shared/MetaAICoordinator.shared/g' \
+
+# 2. Rename THEAOrchestrator → MetaAICoordinator:
+sed -i '' 's/class THEAOrchestrator/class MetaAICoordinator/g' \
   Shared/Intelligence/MetaAI/MetaAICoordinator.swift
-# Fix ModelCapabilityView typo:
+sed -i '' 's/THEAOrchestrator\.shared/MetaAICoordinator.shared/g' \
+  Shared/Intelligence/MetaAI/MetaAICoordinator.swift
+
+# 3. Rename MemorySystem → MetaAIMemorySystem in MetaAI copies:
+find Shared/Intelligence/MetaAI -name "*.swift" -exec \
+  sed -i '' 's/\bMemorySystem\b/MetaAIMemorySystem/g' {} \;
+# Also update MemoryInspectorView to use LongTermMemorySystem:
+sed -i '' 's/MetaAIMemorySystem\.shared/LongTermMemorySystem.shared/g' \
+  Shared/UI/Views/MetaAI/MemoryInspectorView.swift
+
+# 4. Rename PerformanceMetrics → MetaAIPerformanceMetrics in MetaAI copies:
+find Shared/Intelligence/MetaAI -name "*.swift" -exec \
+  sed -i '' 's/\bPerformanceMetrics\b/MetaAIPerformanceMetrics/g' {} \;
+
+# 5. Rename ToolCall → MetaAIToolCall in MetaAI copies (SwiftData model conflict):
+find Shared/Intelligence/MetaAI -name "*.swift" -exec \
+  sed -i '' 's/\bToolCall\b/MetaAIToolCall/g' {} \;
+
+# 6. Fix ModelCapabilityView typo:
 sed -i '' 's/ModelCapabilityRecordRecord/ModelCapabilityRecord/g' \
   Shared/Intelligence/MetaAI/ModelCapabilityView.swift
 ```
-Build after conflict resolution. Fix any remaining errors before proceeding to Tier 2.
+Build after ALL conflict resolutions. The build gate must pass before proceeding to Tier 2.
+If any new conflict is found by the compiler, fix it here before continuing.
 
 ### A3-3: Add to project.yml (Targeted)
 
@@ -2225,12 +2273,624 @@ Wire into MacSettingsView → "Developer" → "MCP Server Builder".
 
 ---
 
+## PHASE T3: INTEGRATION BACKENDS RE-ENABLEMENT
+
+**Status: ⏳ PENDING (blocked by B3; MBAM2 assignment — pure Swift, no ML dependency)**
+
+**Goal**: Re-enable Safari, Calendar, Shortcuts, Reminders, Notes, Finder, and Mail integrations.
+These 7 integration backends are built and tested but excluded from all builds. Each integration
+becomes a live tool handler in Phase B3's AnthropicToolCatalog — re-enabling them turns 7
+categories of Anthropic tool calls into real actions Thea can perform on the user's Mac.
+
+**Machine**: MBAM2 (pure Swift, no ML; can run in parallel with MSM3U Wave 5 phases)
+
+### T3-0: Locate Integration Files
+
+```bash
+# All 7 integrations live in the excluded Integrations/ directory:
+ls Shared/Integrations/{Safari,Calendar,Shortcuts,Reminders,Notes,Finder,Mail}*/
+
+# Verify they're excluded from project.yml:
+grep -A2 "SafariIntegration\|CalendarIntegration\|ShortcutsIntegration" project.yml
+```
+
+### T3-1: Add to project.yml (macOS target only)
+
+```yaml
+# In project.yml, under the macOS target sources, add:
+# Each integration file gets #if os(macOS) guard INSIDE the file (verify or add)
+- path: Shared/Integrations/Safari
+  includes: ["SafariIntegration.swift"]
+- path: Shared/Integrations/Calendar
+  includes: ["CalendarIntegration.swift"]
+- path: Shared/Integrations/Shortcuts
+  includes: ["ShortcutsIntegration.swift"]
+- path: Shared/Integrations/Reminders
+  includes: ["RemindersIntegration.swift"]
+- path: Shared/Integrations/Notes
+  includes: ["NotesIntegration.swift"]
+- path: Shared/Integrations/Finder
+  includes: ["FinderIntegration.swift"]
+- path: Shared/Integrations/Mail
+  includes: ["MailIntegration.swift"]
+```
+
+Verify API signatures match what Phase B3 tool handlers expect:
+- `SafariIntegration.navigateTo(_ url:)` — no label (confirmed in MEMORY.md)
+- `ShortcutsIntegration.runShortcut(_ name:)` — no label, returns `String?`
+- `NotificationService.scheduleReminder(title:body:at:repeats:)` — `at:` not `date:`
+
+### T3-2: Wire Each Integration as a Tool Handler
+
+For each integration, add a handler in `AnthropicToolHandler.swift` (from Phase B3):
+
+```swift
+// Example: Safari handler
+case "safari_navigate":
+    guard let url = params["url"] as? String,
+          let parsedURL = URL(string: url) else {
+        return .failure("Invalid URL")
+    }
+    #if os(macOS)
+    await SafariIntegration.shared.navigateTo(parsedURL)
+    return .success("Navigated Safari to \(url)")
+    #else
+    return .failure("Safari integration macOS only")
+    #endif
+```
+
+Implement handlers for all 7 integrations using their existing APIs.
+Do NOT redesign APIs — use exact signatures as-built.
+
+### T3-3: Verify All Integrations Build + Execute
+
+```bash
+# Build macOS only (integrations are macOS-exclusive):
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
+  -destination 'platform=macOS' -derivedDataPath /tmp/TheaBuild \
+  CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|BUILD" | tail -5
+
+# Verify integrations are included:
+grep -r "SafariIntegration\|CalendarIntegration\|ShortcutsIntegration" \
+  Shared/ --include="*.swift" | grep -v ".v1-archive" | wc -l  # > 0
+
+# Verify tool handlers reference integrations:
+grep -r "safari_navigate\|calendar_create\|shortcuts_run\|reminders_add\|notes_create\|finder_open\|mail_send" \
+  Shared/ --include="*.swift" | wc -l  # ≥7
+```
+
+Commit: `git add Shared/Integrations/ Shared/AI/ project.yml && git commit -m "Auto-save: T3 — integration backends re-enabled, 7 tool handlers wired"`
+
+---
+
+## PHASE U3: AI SUBSYSTEM RE-EVALUATION — WRONGFULLY DISCONNECTED SYSTEMS
+
+**Status: ⏳ PENDING (blocked by A3; MSM3U assignment — requires full audit + wiring)**
+
+**Goal**: Audit and re-activate ALL AI subsystems that are built but wrongfully disconnected,
+excluded, unwired, absent, feedbackless, historyless, never-executing, or framework-only.
+This addresses the original user question: "What else in Thea's codebase is wrongfully
+disconnected, excluded, unwired, absent, feedbackless, archived, empty, orphaned, unpassed,
+cachingless, historyless, never-executing, framework-only, UI-less?"
+
+**Machine**: MSM3U (heavy audit, multi-file wiring, potential ML-dependent systems)
+
+### U3-0: Two Categories of Wrongfully Disconnected Systems
+
+**CATEGORY A — Excluded from builds** (in project.yml exclusion list):
+These files exist and compile but are excluded from ALL targets. Must be re-evaluated
+individually: does a canonical equivalent supersede them, or do they have unique value?
+
+```
+AI/Context/          — context window management, message pruning, context scoring
+AI/Adaptive/         — adaptive behavior, self-tuning engine (SelfTuningEngine.swift)
+AI/MultiModal/       — multi-modal processing beyond MLXVisionEngine
+AI/Proactive/        — proactive suggestions (distinct from Intelligence/Proactive/)
+PatternLearning/     — pattern recognition and learning
+LifeMonitoring/      — excluded (but canonical Intelligence/LifeMonitoring/ is active — verify!)
+Prediction/          — predictive models and forecasting
+PromptEngineering/   — prompt quality improvement, template management
+ResourceManagement/  — compute resource allocation, memory pressure management
+Anticipatory/        — excluded (but canonical Intelligence/Anticipatory/ is active — verify!)
+Squads/              — excluded top-level (canonical Intelligence/Squads/ may differ)
+Automation/          — automation workflows (Automator-level)
+SelfEvolution/       — self-evolution pipeline (distinct from Phase R3 SelfEvolution Wiring)
+```
+
+**CATEGORY B — Canonical but never wired** (files exist in Shared/Intelligence/ but nothing calls them):
+These are built, pass compilation, but are never instantiated or called at runtime.
+
+```
+Shared/Intelligence/AdaptiveLearning/AdaptiveLearningEngine.swift
+  → Adaptive learning from user interactions — not called by TaskClassifier or ChatManager
+Shared/Intelligence/Analysis/CausalPatternAnalyzer.swift (+ Core)
+  → Causal analysis of user behavior — not called by LifeMonitoringCoordinator
+Shared/Intelligence/Analysis/CrossDomainCorrelationEngine.swift
+  → Cross-domain pattern correlation — not called anywhere
+Shared/Intelligence/CognitiveAssistant/CognitiveAssistant.swift
+  → Cognitive assistance layer — not wired into ChatManager or IntelligenceOrchestrator
+Shared/Intelligence/Context/SemanticContextPreFetcher.swift
+  → Pre-fetches context before user sends message — not started on app launch
+Shared/Intelligence/Goals/GoalInferenceEngine.swift
+  → Infers user goals from behavior — not wired into ProactiveEngine
+Shared/Intelligence/Intent/IntentDisambiguation.swift (+ Core)
+  → Disambiguates ambiguous requests — not called by ChatManager on message receive
+Shared/Intelligence/Knowledge/KnowledgeSourceManager.swift (+ Core)
+  → Manages knowledge sources for RAG — not wired into SemanticSearchService
+Shared/Intelligence/Learning/PersonalizedLearning.swift
+  → Personalized learning from user preferences — not called by TaskClassifier
+Shared/Intelligence/Prefetching/IntelligentPrefetcher.swift
+  → Prefetches model responses for predicted queries — not started
+Shared/Intelligence/Reliability/ReliabilityMonitor.swift
+  → Monitors AI response reliability — not wired into ConfidenceSystem
+Shared/Intelligence/Safety/SafetyGuardrails.swift (+ Core)
+  → Safety guardrails for AI responses — not called by ChatManager on responses
+Shared/Intelligence/Trust/TrustScoreSystem.swift
+  → Trust scoring for AI sources — not wired into ConfidenceSystem
+Shared/Intelligence/Suggestions/UnifiedSuggestionCoordinator.swift
+  → Unified suggestion layer — not called by ChatManager or ProactiveEngine
+Shared/Intelligence/DeviceIntegration/SmartDeviceIntegration.swift
+  → Smart device integration (HomeKit, etc.) — not started
+Shared/Intelligence/Documentation/DocumentationGrounding.swift
+  → Grounds responses in documentation — not wired into ChatManager context
+Shared/Intelligence/Tools/ToolComposition.swift (+ Engine)
+  → Tool composition and chaining — not wired into AnthropicToolCatalog
+Shared/Intelligence/Agents/AgentCommunicationBus.swift
+  → Inter-agent communication — not wired into AgentTeamOrchestrator
+Shared/Intelligence/Agents/AgentResourcePool.swift
+  → Agent resource pooling — not started by orchestration layer
+Shared/Intelligence/Agents/EnhancedSubagentSystem.swift (+ Core)
+  → Enhanced sub-agent orchestration — not used by AgentTeamOrchestrator
+Shared/Intelligence/Reflection/ReflexionEngine.swift (+ Core)
+  → Self-correction via reflexion loops — not called after AI responses
+Shared/Intelligence/Reflection/ChatReflexionIntegration.swift
+  → ChatManager integration for reflexion — exists but not wired
+Shared/Intelligence/Clipboard/ClipboardIntelligence.swift
+  → Clipboard content intelligence — not started
+Shared/Intelligence/Codebase/CodebaseSearchEngine.swift (+ Types)
+  → Codebase-aware search — not wired into SemanticSearchService
+Shared/Intelligence/Codebase/SemanticCodeIndexer.swift (+ Core)
+  → Semantic code indexing — not started on project open
+Shared/Intelligence/Observability/AgentObservability.swift (+ Core)
+  → Agent execution observability — not wired into AgentTeamOrchestrator
+Shared/Intelligence/Core/UnifiedIntelligenceHub.swift (+ Core)
+  → Central intelligence hub — exists but may not be the primary entry point
+Shared/Intelligence/Orchestration/TheaAgentOrchestrator.swift
+  → Agent orchestration layer — relationship to IntelligenceOrchestrator unclear
+Shared/Intelligence/Orchestration/TheaAgentRunner.swift
+  → Agent runner — not used
+Shared/Intelligence/Orchestration/TheaContextMonitor.swift
+  → Context monitoring — not started
+```
+
+### U3-1: Category A Audit — Excluded Subsystem Re-evaluation
+
+For each excluded subsystem in Category A:
+1. Read the key files (first 40 lines minimum)
+2. Compare against canonical Intelligence/ equivalent
+3. Decision: SKIP (superseded) | ACTIVATE (unique value) | MERGE (partial unique value)
+
+```bash
+# For each subsystem, check for canonical equivalent:
+ls Shared/AI/Context/ && ls Shared/Intelligence/Context/    # compare
+ls Shared/AI/Adaptive/ && ls Shared/Intelligence/AdaptiveLearning/   # compare
+ls Shared/PatternLearning/ 2>/dev/null || ls Shared/Intelligence/Analysis/  # check
+ls Shared/PromptEngineering/ 2>/dev/null   # check for unique prompt engineering
+
+# RULE: If canonical exists AND supersedes, SKIP.
+# If canonical is empty/framework-only, ACTIVATE the excluded version.
+# If both have unique value, MERGE (rename excluded types with prefix if needed).
+```
+
+**Pre-determined decisions (based on prior audit):**
+- `AI/Adaptive/SelfTuningEngine.swift` — has unique `PerformanceMetrics` struct (conflicts with MetaAI); evaluate merge into ConfidenceSystem feedback loop
+- `PromptEngineering/` — evaluate: if it has real prompt quality improvement, activate for all ChatManager requests
+- `ResourceManagement/` — evaluate: if it manages compute pressure for MLX models, activate for Wave 4
+
+### U3-2: Category B Wiring — Wire All Canonical-But-Disconnected Systems
+
+For each Category B system, wire it into the appropriate entry point:
+
+| System | Wire Into | How |
+|--------|-----------|-----|
+| AdaptiveLearningEngine | TaskClassifier | Call after each successful task |
+| CausalPatternAnalyzer | LifeMonitoringCoordinator | Called on behavior data updates |
+| CrossDomainCorrelationEngine | LifeMonitoringCoordinator | Called on weekly pattern runs |
+| CognitiveAssistant | IntelligenceOrchestrator | Called when cognitive load detected |
+| SemanticContextPreFetcher | ChatManager | Start prefetch when user begins typing |
+| GoalInferenceEngine | ProactiveEngine | Update goal model on every conversation |
+| IntentDisambiguation | ChatManager | Called before task classification on ambiguous input |
+| KnowledgeSourceManager | SemanticSearchService | Register all knowledge sources on init |
+| PersonalizedLearning | TaskClassifier | Update personalization model on task completion |
+| IntelligentPrefetcher | ChatManager | Start prefetch queue on app foreground |
+| ReliabilityMonitor | ConfidenceSystem | Report reliability data after each response |
+| SafetyGuardrails | ChatManager | Apply to every outbound AI response |
+| TrustScoreSystem | ConfidenceSystem | Feed trust scores into confidence calculation |
+| UnifiedSuggestionCoordinator | ProactiveEngine | Aggregate all suggestion sources |
+| SmartDeviceIntegration | LifeMonitoringCoordinator | Start on app launch (macOS only) |
+| DocumentationGrounding | ChatManager | Inject doc context for code-related queries |
+| ToolComposition | AnthropicToolCatalog | Register composed tools as catalog entries |
+| AgentCommunicationBus | AgentTeamOrchestrator | Replace direct method calls with bus |
+| AgentResourcePool | AgentTeamOrchestrator | Acquire/release agents from pool |
+| EnhancedSubagentSystem | AgentTeamOrchestrator | Use enhanced system for all sub-agents |
+| ReflexionEngine | ChatManager | Apply reflexion loop on low-confidence responses |
+| ChatReflexionIntegration | ChatManager | Direct wiring for reflexion post-response |
+| ClipboardIntelligence | LifeMonitoringCoordinator | Start monitoring on app launch (macOS) |
+| CodebaseSearchEngine | SemanticSearchService | Register as a specialized search source |
+| SemanticCodeIndexer | SemanticSearchService | Start indexing on project open |
+| AgentObservability | AgentTeamOrchestrator | Wrap all agent executions for observability |
+| UnifiedIntelligenceHub | IntelligenceOrchestrator | Verify it IS the primary hub or wire it in |
+| TheaAgentOrchestrator | IntelligenceOrchestrator | Verify relationship + wire correctly |
+| TheaContextMonitor | ChatManager | Start monitoring on conversation start |
+
+### U3-3: Verify Wiring
+
+```bash
+# All Category B systems must have ≥1 non-self reference in Shared/ after wiring:
+for TYPE in AdaptiveLearningEngine CausalPatternAnalyzer CognitiveAssistant \
+    SemanticContextPreFetcher GoalInferenceEngine IntentDisambiguation \
+    KnowledgeSourceManager PersonalizedLearning IntelligentPrefetcher \
+    ReliabilityMonitor SafetyGuardrails TrustScoreSystem UnifiedSuggestionCoordinator \
+    SmartDeviceIntegration DocumentationGrounding ToolComposition \
+    AgentCommunicationBus AgentResourcePool ReflexionEngine; do
+  COUNT=$(grep -r "$TYPE" Shared/ --include="*.swift" | grep -v "\.swift:.*class $TYPE\|\.swift:.*struct $TYPE\|\.swift:.*actor $TYPE" | grep -v ".v1-archive" | wc -l)
+  echo "$TYPE: $COUNT non-self references"
+done
+# Each must be ≥1 (wired somewhere beyond its own definition)
+```
+
+Commit: `git add -p && git commit -m "Auto-save: U3 — all wrongfully disconnected systems wired"`
+
+---
+
+## PHASE V3: TRANSPARENCY & ANALYTICS UIs
+
+**Status: ⏳ PENDING (blocked by H3; MBAM2 assignment — pure SwiftUI, no ML dependency)**
+
+**Goal**: Create visibility dashboards for every life-monitoring and analytics system.
+Users should be able to see what Thea sees: behavioral patterns, privacy decisions, messaging
+health, notification intelligence. Every active backend system gets a corresponding UI panel.
+
+**Machine**: MBAM2 (pure SwiftUI — can run in parallel with MSM3U Wave 5 phases)
+
+### V3-1: BehavioralAnalyticsView
+
+New file: `Shared/UI/Views/Analytics/BehavioralAnalyticsView.swift`
+
+```swift
+struct BehavioralAnalyticsView: View {
+    @StateObject private var fingerprint = BehavioralFingerprint.shared
+    @State private var selectedWeek: Int = 0
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                // 7×24 Activity Heatmap
+                Text("Activity Pattern (7-day × 24-hour)").font(.headline)
+                ActivityHeatmapGrid(data: fingerprint.activityMatrix)
+                    .frame(height: 120)
+
+                // Wake/Sleep patterns
+                Text("Sleep/Wake Patterns").font(.headline)
+                SleepWakePatternView(patterns: fingerprint.sleepWakePatterns)
+
+                // App usage breakdown
+                Text("Focus Distribution").font(.headline)
+                AppUsageBreakdownView(data: fingerprint.appUsagePatterns)
+
+                // Peak productivity windows
+                Text("Peak Productivity Windows").font(.headline)
+                ProductivityWindowsView(windows: fingerprint.peakProductivityWindows)
+            }
+            .padding()
+        }
+        .navigationTitle("Behavioral Analytics")
+    }
+}
+
+struct ActivityHeatmapGrid: View {
+    let data: [[Double]]  // [day][hour] 0.0–1.0 intensity
+    var body: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 24), spacing: 2) {
+            ForEach(0..<7, id: \.self) { day in
+                ForEach(0..<24, id: \.self) { hour in
+                    let intensity = data.indices.contains(day) && data[day].indices.contains(hour)
+                        ? data[day][hour] : 0.0
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Color.purple.opacity(0.1 + intensity * 0.9))
+                        .aspectRatio(1, contentMode: .fit)
+                }
+            }
+        }
+    }
+}
+```
+
+### V3-2: PrivacyTransparencyView
+
+New file: `Shared/UI/Views/Analytics/PrivacyTransparencyView.swift`
+
+Shows every outbound data item that `OutboundPrivacyGuard` blocked, masked PII log,
+policy decisions, and sanitization statistics from `PrivacyAuditLogService`.
+
+```swift
+struct PrivacyTransparencyView: View {
+    @StateObject private var guard_ = OutboundPrivacyGuard.shared
+    var body: some View {
+        List {
+            Section("Blocked Outbound (last 24h)") {
+                ForEach(guard_.recentBlockedItems) { item in
+                    PrivacyBlockRow(item: item)
+                }
+            }
+            Section("PII Masked (last 24h)") {
+                ForEach(guard_.recentMaskedItems) { item in
+                    PIIMaskRow(item: item)
+                }
+            }
+            Section("Policy Stats") {
+                LabeledContent("Total Sanitizations", value: "\(guard_.totalSanitizations)")
+                LabeledContent("Active Policy", value: guard_.activePolicy.name)
+            }
+        }
+        .navigationTitle("Privacy Transparency")
+    }
+}
+```
+
+### V3-3: MessagingGatewayStatusView
+
+New file: `Shared/UI/Views/Analytics/MessagingGatewayStatusView.swift`
+
+Live health dashboard for all 7 messaging connectors with message throughput graphs.
+
+```swift
+struct MessagingGatewayStatusView: View {
+    @StateObject private var gateway = TheaMessagingGateway.shared
+    var body: some View {
+        List {
+            Section("Gateway Status") {
+                LabeledContent("Server", value: gateway.isRunning ? "Running :18789" : "Stopped")
+                    .foregroundStyle(gateway.isRunning ? .green : .red)
+            }
+            Section("Connectors (7)") {
+                ForEach(gateway.connectorStatuses) { status in
+                    ConnectorHealthRow(status: status)
+                }
+            }
+            Section("Throughput (last 1h)") {
+                MessageThroughputChart(data: gateway.messageRates)
+            }
+        }
+        .navigationTitle("Messaging Gateway")
+        .refreshable { await gateway.refreshStatuses() }
+    }
+}
+```
+
+### V3-4: NotificationIntelligenceView
+
+New file: `Shared/UI/Views/Analytics/NotificationIntelligenceView.swift`
+
+Shows `SmartNotificationScheduler` deferral history, delivery stats, optimal window adherence.
+
+### V3-5: Wire into MacSettingsView + iOS Navigation
+
+```swift
+// MacSettingsView sidebar (new "Analytics" section):
+NavigationLink(destination: BehavioralAnalyticsView()) {
+    Label("Behavioral Analytics", systemImage: "chart.bar.xaxis")
+}
+NavigationLink(destination: PrivacyTransparencyView()) {
+    Label("Privacy Transparency", systemImage: "eye.slash")
+}
+NavigationLink(destination: MessagingGatewayStatusView()) {
+    Label("Messaging Gateway", systemImage: "antenna.radiowaves.left.and.right")
+}
+NavigationLink(destination: NotificationIntelligenceView()) {
+    Label("Notification Intel", systemImage: "bell.badge")
+}
+```
+
+### V3-6: Verify
+
+```bash
+for VIEW in BehavioralAnalyticsView PrivacyTransparencyView MessagingGatewayStatusView NotificationIntelligenceView; do
+  grep -r "$VIEW" Shared/ macOS/ --include="*.swift" | wc -l  # ≥2 (definition + wiring)
+done
+```
+
+Commit: `git add Shared/UI/Views/Analytics/ && git commit -m "Auto-save: V3 — transparency & analytics UIs created and wired"`
+
+---
+
+## PHASE W3: CHAT ENHANCEMENT FEATURES
+
+**Status: ⏳ PENDING (blocked by I3; MBAM2 assignment — pure SwiftUI, no ML dependency)**
+
+**Goal**: Complete ChatView with all production-grade features currently invisible to the user.
+These features are ALL built in the backend — W3 makes them visible and interactive.
+
+**Machine**: MBAM2 (pure SwiftUI — can run in parallel with MSM3U Wave 5 phases)
+
+### W3-1: AnthropicFilesAPI File Attachment UI
+
+Wire `AnthropicFilesAPIService` into ChatView toolbar with a file picker.
+
+```swift
+// In ChatView toolbar, add attachment button:
+ToolbarItem(placement: .primaryAction) {
+    Button { showFilePicker = true } label: {
+        Image(systemName: "paperclip")
+    }
+    .fileImporter(isPresented: $showFilePicker,
+                  allowedContentTypes: [.pdf, .plainText, .image]) { result in
+        if case .success(let url) = result {
+            Task { await viewModel.attachFile(url) }
+        }
+    }
+}
+```
+
+Show attached files as chips above the text input field.
+When sending, include file references via `AnthropicFilesAPIService.uploadFile()`.
+
+### W3-2: Token Counter Display
+
+Show per-message token counts (in + out) in `MessageBubble` footer.
+Source: `AnthropicTokenCounter.countTokens()` — already wired into `MessageMetadata`.
+
+```swift
+// In MessageBubble footer:
+if let metadata = message.metadata, let tokens = metadata.tokenCount {
+    Text("\(tokens.inputTokens)↑ \(tokens.outputTokens)↓")
+        .font(.caption2)
+        .foregroundStyle(.tertiary)
+}
+```
+
+### W3-3: MultiModelConsensus Breakdown Panel
+
+When `ConfidenceSystem` used `MultiModelConsensus`, show which models agreed/disagreed.
+Tap the confidence indicator → expand to show per-model verdicts.
+
+```swift
+struct ConsensusBreakdownView: View {
+    let consensus: MultiModelConsensusResult
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ForEach(consensus.modelVerdicts) { verdict in
+                HStack {
+                    Image(systemName: verdict.agreed ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .foregroundStyle(verdict.agreed ? .green : .red)
+                    Text(verdict.modelName).font(.caption)
+                    Spacer()
+                    Text(String(format: "%.0f%%", verdict.confidence * 100)).font(.caption2)
+                }
+            }
+        }
+    }
+}
+```
+
+### W3-4: AgentMode Phase Progress Bar
+
+Show `AgentExecutionState` phases as a linear progress indicator below the chat input.
+
+```swift
+// In ChatView, below text input (visible only when agentState.isActive):
+if chatManager.agentState.isActive {
+    AgentPhaseProgressBar(state: chatManager.agentState)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
+}
+
+struct AgentPhaseProgressBar: View {
+    let state: AgentExecutionState
+    let phases: [AgentPhase] = [.gatherContext, .takeAction, .verifyResults, .done]
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(phases, id: \.self) { phase in
+                Capsule()
+                    .fill(state.currentPhase >= phase ? Color.purple : Color.secondary.opacity(0.3))
+                    .frame(height: 4)
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+```
+
+### W3-5: Enhanced AutonomyController Approval UI
+
+Replace simple approval dialog with a rich action detail sheet:
+
+```swift
+struct ActionApprovalSheet: View {
+    let pendingAction: PendingAction
+    @Binding var isPresented: Bool
+    var onDecision: (ApprovalDecision) -> Void
+
+    var body: some View {
+        VStack(spacing: 16) {
+            // Risk level badge
+            RiskLevelBadge(level: pendingAction.riskLevel)
+            Text(pendingAction.actionDescription).font(.body)
+            // Action details
+            ActionDetailsGrid(action: pendingAction)
+            // Reversibility warning
+            if !pendingAction.isReversible {
+                Label("This action cannot be undone", systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+            }
+            // Decision buttons
+            HStack {
+                Button("Deny") { onDecision(.denied); isPresented = false }
+                    .buttonStyle(.bordered)
+                Spacer()
+                Button("Modify") { onDecision(.modified(prompt: "")); isPresented = false }
+                    .buttonStyle(.bordered)
+                Button("Allow") { onDecision(.approved); isPresented = false }
+                    .buttonStyle(.borderedProminent)
+            }
+        }
+        .padding()
+    }
+}
+```
+
+### W3-6: CloudKit Sync Indicator in Toolbar
+
+```swift
+// In ChatView/MainView toolbar:
+ToolbarItem {
+    CloudSyncStatusView(status: cloudKitService.syncStatus)
+}
+
+struct CloudSyncStatusView: View {
+    let status: CloudSyncStatus
+    var body: some View {
+        switch status {
+        case .syncing:
+            ProgressView().scaleEffect(0.7)
+        case .synced:
+            Image(systemName: "checkmark.icloud").foregroundStyle(.secondary)
+        case .error(let msg):
+            Image(systemName: "exclamationmark.icloud").foregroundStyle(.red)
+                .help(msg)
+        case .offline:
+            Image(systemName: "icloud.slash").foregroundStyle(.secondary)
+        }
+    }
+}
+```
+
+### W3-7: MoltbookAgent Activity Log
+
+Small status view accessible from MacSettingsView → Moltbook → "Activity":
+Shows message count, recent topics, last active timestamp, daily post limit progress.
+
+### W3-8: Verify
+
+```bash
+# All new UI components wired into ChatView or navigation:
+grep -r "AgentPhaseProgressBar\|ConsensusBreakdownView\|ActionApprovalSheet\|CloudSyncStatusView" \
+  Shared/ macOS/ iOS/ --include="*.swift" | grep -v "\.swift:struct\|\.swift:class" | wc -l  # ≥4
+
+# Token counter visible in MessageBubble:
+grep -r "tokenCount\|inputTokens\|outputTokens" \
+  Shared/UI/Views/Chat/MessageBubble.swift 2>/dev/null | wc -l  # ≥1
+```
+
+Commit: `git add Shared/UI/ && git commit -m "Auto-save: W3 — chat enhancement features: FilesAPI UI, token counter, consensus breakdown, AgentMode progress bar, approval sheet, CloudKit indicator"`
+
+---
+
 ## PHASE X3: TEST COVERAGE ≥80%
 
-**Status: ⏳ PENDING (blocked by A3–S3)**
+**Status: ⏳ PENDING (blocked by A3–W3)**
 
 **Goal**: Run the same test coverage process as v2's Phase Q, but on ALL code
-including all v3 additions. Every new file in A3–S3 needs tests.
+including all v3 additions. Every new file in A3–W3 needs tests.
 
 ### X3-1: Test All New Files
 
