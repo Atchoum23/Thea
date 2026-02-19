@@ -1,7 +1,9 @@
 # Thea Navigation Flow - Test tab navigation and basic screen transitions
 appId: app.thea.ios
 ---
-- launchApp
+- launchApp:
+    permissions:
+      all: allow
 
 # Wait for app UI to settle
 - waitForAnimationToEnd

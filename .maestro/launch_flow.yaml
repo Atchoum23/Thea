@@ -3,6 +3,8 @@ appId: app.thea.ios
 ---
 - launchApp:
     clearState: true
+    permissions:
+      all: allow
 
 # Wait for app UI to fully settle after fresh install
 - waitForAnimationToEnd

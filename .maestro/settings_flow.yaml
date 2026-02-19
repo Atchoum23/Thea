@@ -1,7 +1,9 @@
 # Thea Settings Flow - Test settings navigation and major sections
 appId: app.thea.ios
 ---
-- launchApp
+- launchApp:
+    permissions:
+      all: allow
 
 # Wait for app UI to settle
 - waitForAnimationToEnd

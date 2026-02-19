@@ -1,7 +1,9 @@
 # Thea Chat Flow - Test chat input and conversation creation
 appId: app.thea.ios
 ---
-- launchApp
+- launchApp:
+    permissions:
+      all: allow
 
 # Wait for app UI to settle
 - waitForAnimationToEnd
