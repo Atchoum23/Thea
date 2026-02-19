@@ -23,6 +23,32 @@
    ```
    **IMPORTANT**: Always use `git pushsync` instead of `git push`. This pushes to origin AND triggers a sync build + install on the other Mac. A Claude Code hook enforces this — plain `git push` will be blocked.
 
+### ⚠️ AUTONOMOUS SESSION START — MANDATORY FIRST STEPS
+
+Every autonomous Claude Code session on MSM3U MUST begin with:
+```bash
+# 1. Suspend thea-sync (runs git stash every 5min — will silently revert your work)
+launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+
+# 2. Pull latest + check state (plan may have changed since you were spawned)
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+git pull && git log --oneline -5 && git status --short && git stash list
+
+# 3. Run build gate — fix any errors BEFORE touching new code
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
+  -destination 'platform=macOS' build -derivedDataPath /tmp/TheaBuild \
+  CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "(error:|BUILD SUCCEEDED|BUILD FAILED)" | tail -5
+```
+
+And MUST end with:
+```bash
+git add -A && git commit -m "Auto-save: session end" || true
+launchctl load ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+git pushsync
+```
+
+Full protocol: See `## SESSION SAFETY PROTOCOL` in THEA_SHIP_READY_PLAN_v2.md
+
 ### 🚫 FORBIDDEN Commands
 
 **NEVER execute these commands under ANY circumstances:**
@@ -33,6 +59,7 @@
 - `git clean -fdx` without explicit user confirmation
 - `git reset --hard` without explicit user confirmation
 - Any command that could delete the project directory
+- `openclaw` anything — OpenClaw is uninstalled. Thea is the gateway. Do not reinstall.
 
 ### ✅ Safe DerivedData Cleanup
 
@@ -178,11 +205,21 @@ done
 - **AnthropicToolCatalog** (`AI/Providers/AnthropicToolCatalog.swift`): 50+ tool definitions for tool_search
 - **AnthropicProvider** enhanced: tool_search, compaction, 1M context, interleaved thinking + tool use
 
-### OpenClaw Integration (ACTIVE all platforms)
-- **OpenClawClient** (`Integrations/OpenClaw/OpenClawClient.swift`): WebSocket client to Gateway at `ws://127.0.0.1:18789`
-- **OpenClawIntegration** (`Integrations/OpenClaw/OpenClawIntegration.swift`): Lifecycle management
-- **OpenClawBridge** (`Integrations/OpenClaw/OpenClawBridge.swift`): AI message routing with prompt injection mitigation (user input sanitization, zero-width Unicode stripping, explicit message delimiters). Routes Moltbook messages to MoltbookAgent
-- **OpenClawSecurityGuard** (`Integrations/OpenClaw/OpenClawSecurityGuard.swift`): Prompt injection detection with Unicode NFD normalization and invisible character stripping
+### Thea Native Messaging Gateway (ACTIVE all platforms) — Phase O complete 2026-02-19
+Thea replaced OpenClaw entirely. No external daemon. Thea owns port 18789 natively.
+- **TheaMessagingGateway** (`Integrations/OpenClaw/TheaMessagingGateway.swift`): @MainActor orchestrator. Starts/stops all connectors, routes inbound messages through security guard → bridge → ChatManager. Hosts WS server on port 18789.
+- **TheaGatewayWSServer** (`Integrations/OpenClaw/TheaGatewayWSServer.swift`): NWListener/NWProtocolWebSocket server on port 18789. External clients connect here.
+- **MessagingPlatformProtocol** (`Integrations/OpenClaw/MessagingPlatformProtocol.swift`): Swift actor protocol all 7 connectors implement.
+- **MessagingSessionManager** (`Integrations/OpenClaw/MessagingSessionManager.swift`): SwiftData-backed per-platform-per-peer session isolation + MMR memory re-ranking. Session key: `"{platform}:{chatId}:{senderId}"`.
+- **Platform connectors** (`Integrations/Messaging/`): TelegramConnector (Bot API long-poll), DiscordConnector (WS Gateway v10), SlackConnector (Socket Mode), BlueBubblesConnector (iMessage local HTTP/WS), WhatsAppConnector (Meta Cloud API v21.0), SignalConnector (signal-cli JSON-RPC), MatrixConnector (C-S API v3).
+- **OpenClawClient** (`Integrations/OpenClaw/OpenClawClient.swift`): REPURPOSED — internal WS client connecting to Thea's own port 18789 server. No external dependency.
+- **OpenClawIntegration** (`Integrations/OpenClaw/OpenClawIntegration.swift`): REPURPOSED — lifecycle manager that starts/stops TheaMessagingGateway. Wired into macOS + iOS app lifecycle.
+- **OpenClawBridge** (`Integrations/OpenClaw/OpenClawBridge.swift`): REPURPOSED — multi-platform message router. Routes all inbound (Telegram/Discord/Slack/etc.) to correct AI agent. Keeps ALL injection mitigation. Routes Moltbook messages to MoltbookAgent.
+- **OpenClawSecurityGuard** (`Integrations/OpenClaw/OpenClawSecurityGuard.swift`): UNCHANGED — 22-pattern prompt injection detection, Unicode NFD normalization, invisible character stripping. Applied to ALL inbound from ALL platforms.
+- **TheaMessagingSettingsView** (`UI/Views/Settings/TheaMessagingSettingsView.swift`): Credentials UI for all 7 platforms. Wired into MacSettingsView sidebar → "Messaging Gateway".
+- **TheaMessagingChatView** (`UI/Views/OpenClaw/TheaMessagingChatView.swift`): Platform selector + conversation thread. Wired into MacSettingsView sidebar.
+
+⚠️ NEVER: delete any OpenClaw*.swift file. NEVER install the OpenClaw npm package. NEVER start the openclaw gateway daemon (it's uninstalled). Thea IS the gateway.
 
 ### Privacy System (ACTIVE all platforms)
 - **OutboundPrivacyGuard** (`Privacy/OutboundPrivacyGuard.swift`): System-wide outbound data sanitization
@@ -192,7 +229,7 @@ done
 - **PrivacyPreservingAIRouter** (`Intelligence/Privacy/`): Sensitivity-based routing (pre-existing)
 
 ### Moltbook Agent (ACTIVE + WIRED all platforms)
-- **MoltbookAgent** (`Agents/MoltbookAgent.swift`): Privacy-preserving dev discussion agent with kill switch + preview mode. **WIRED** into TheamacOSApp lifecycle (deferred 2s init, guarded by `SettingsManager.moltbookAgentEnabled`), OpenClawBridge routes Moltbook messages to it
+- **MoltbookAgent** (`Agents/MoltbookAgent.swift`): Privacy-preserving dev discussion agent with kill switch + preview mode. **WIRED** into TheamacOSApp lifecycle (deferred 2s init, guarded by `SettingsManager.moltbookAgentEnabled`), OpenClawBridge (now TheaMessagingGateway's multi-platform router) routes Moltbook messages to it
 - **MoltbookSettingsView** (`UI/Views/Settings/MoltbookSettingsView.swift`): Settings UI (enable/disable, preview mode, daily post limit) in MacSettingsView sidebar
 
 ### AgentMode + Autonomy (ACTIVE + WIRED all platforms)
