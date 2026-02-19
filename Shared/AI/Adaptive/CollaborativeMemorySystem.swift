@@ -194,8 +194,8 @@ final class CollaborativeMemorySystem {
 
     // MARK: - Memory Operations
 
-    /// Store a new memory fragment
     // periphery:ignore - Reserved: store(_:source:importance:) instance method — reserved for future feature activation
+    /// Store a new memory fragment
     func store(_ content: String, source: MemorySource, importance: Double = 0.5) async {
         let context = activeContexts.last ?? .current
 
@@ -233,8 +233,8 @@ final class CollaborativeMemorySystem {
         saveMemory()
     }
 
-    /// Retrieve relevant memories for a query
     // periphery:ignore - Reserved: retrieve(for:limit:) instance method — reserved for future feature activation
+    /// Retrieve relevant memories for a query
     func retrieve(for query: String, limit: Int = 10) async -> [MemoryFragment] {
         var results: [MemoryFragment] = []
 
@@ -301,8 +301,8 @@ final class CollaborativeMemorySystem {
         }.prefix(limit).map { $0 }
     }
 
-    /// Get context for current session
     // periphery:ignore - Reserved: getCurrentContext() instance method — reserved for future feature activation
+    /// Get context for current session
     func getCurrentContext() -> ContextMemory? {
         guard let contextId = activeContexts.last else { return nil }
         return contextualMemory.first { $0.context == contextId }
@@ -328,8 +328,8 @@ final class CollaborativeMemorySystem {
         }
     }
 
-    /// End current context
     // periphery:ignore - Reserved: endContext() instance method — reserved for future feature activation
+    /// End current context
     func endContext() {
         guard !activeContexts.isEmpty else { return }
         activeContexts.removeLast()

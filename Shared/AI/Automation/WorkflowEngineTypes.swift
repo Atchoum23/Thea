@@ -76,8 +76,8 @@ struct AutomationNode: Identifiable, Codable, Sendable {
     }
 }
 
-/// Types of automation nodes available
 // periphery:ignore - Reserved: init(id:type:name:position:configuration:isEnabled:) initializer reserved for future feature activation
+/// Types of automation nodes available
 enum AutomationNodeType: String, Codable, Sendable, CaseIterable {
     case llmPrompt = "LLM Prompt"
     case httpRequest = "HTTP Request"

@@ -88,8 +88,8 @@
             }
         }
 
-        /// Read selected text from Terminal
         // periphery:ignore - Reserved: readSelectedText() static method — reserved for future feature activation
+        /// Read selected text from Terminal
         static func readSelectedText() throws -> String? {
             guard isAccessibilityEnabled() else {
                 throw AccessibilityError.accessDenied
@@ -123,8 +123,8 @@
             return nil
         }
 
-        /// Get Terminal window bounds
         // periphery:ignore - Reserved: getTerminalWindowBounds() static method — reserved for future feature activation
+        /// Get Terminal window bounds
         static func getTerminalWindowBounds() throws -> CGRect? {
             guard isAccessibilityEnabled() else {
                 throw AccessibilityError.accessDenied
@@ -222,8 +222,8 @@
             return nil
         }
 
-        /// Get all children elements of a given element
         // periphery:ignore - Reserved: getChildren(of:) static method — reserved for future feature activation
+        /// Get all children elements of a given element
         static func getChildren(of element: AXUIElement) -> [AXUIElement] {
             var children: CFTypeRef?
             if AXUIElementCopyAttributeValue(element, kAXChildrenAttribute as CFString, &children) == .success {
@@ -233,8 +233,8 @@
             return []
         }
 
-        /// Get the role of an element
         // periphery:ignore - Reserved: getRole(of:) static method — reserved for future feature activation
+        /// Get the role of an element
         static func getRole(of element: AXUIElement) -> String? {
             var role: CFTypeRef?
             if AXUIElementCopyAttributeValue(element, kAXRoleAttribute as CFString, &role) == .success {
@@ -244,8 +244,8 @@
             return nil
         }
 
-        /// Get the title of an element
         // periphery:ignore - Reserved: getTitle(of:) static method — reserved for future feature activation
+        /// Get the title of an element
         static func getTitle(of element: AXUIElement) -> String? {
             var title: CFTypeRef?
             // periphery:ignore - Reserved: getTitle(of:) static method reserved for future feature activation

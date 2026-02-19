@@ -145,8 +145,8 @@ enum SubscriptionTier: String, CaseIterable, Sendable {
 @MainActor
 enum FeatureGate {
 
-    /// Whether the given feature is accessible with the current subscription.
     // periphery:ignore - Reserved: isAvailable(_:) static method — reserved for future feature activation
+    /// Whether the given feature is accessible with the current subscription.
     static func isAvailable(_ feature: ProFeature) -> Bool {
         let store = StoreKitService.shared
 
@@ -187,8 +187,8 @@ enum FeatureGate {
         return .free
     }
 
-    /// Number of AI providers allowed in the current tier.
     // periphery:ignore - Reserved: maxProviders static property — reserved for future feature activation
+    /// Number of AI providers allowed in the current tier.
     static var maxProviders: Int {
         switch currentTier {
         // periphery:ignore - Reserved: maxProviders static property reserved for future feature activation
@@ -197,8 +197,8 @@ enum FeatureGate {
         }
     }
 
-    /// Number of daily messages in the current tier.
     // periphery:ignore - Reserved: dailyMessageLimit static property — reserved for future feature activation
+    /// Number of daily messages in the current tier.
     static var dailyMessageLimit: Int {
         // periphery:ignore - Reserved: dailyMessageLimit static property reserved for future feature activation
         switch currentTier {
@@ -207,8 +207,8 @@ enum FeatureGate {
         }
     }
 
-    /// Maximum conversation history depth in free tier.
     // periphery:ignore - Reserved: maxConversationHistory static property reserved for future feature activation
+    /// Maximum conversation history depth in free tier.
     static var maxConversationHistory: Int {
         switch currentTier {
         case .free: 100

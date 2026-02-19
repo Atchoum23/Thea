@@ -61,12 +61,12 @@ enum TheaFeatureFlag: String, CaseIterable, Sendable {
 
     // MARK: - Metadata
 
-    /// The UserDefaults key backing this flag
     // periphery:ignore - Reserved: defaultsKey property — reserved for future feature activation
+    /// The UserDefaults key backing this flag
     var defaultsKey: String { rawValue }
 
-    /// Human-readable description for settings UI
     // periphery:ignore - Reserved: displayName property — reserved for future feature activation
+    /// Human-readable description for settings UI
     var displayName: String {
         switch self {
         case .localModels: return "Local Models"
@@ -123,8 +123,8 @@ enum TheaFeatureFlag: String, CaseIterable, Sendable {
         }
     }
 
-    /// Brief explanation shown in settings UI
     // periphery:ignore - Reserved: helpText property — reserved for future feature activation
+    /// Brief explanation shown in settings UI
     var helpText: String {
         switch self {
         case .localModels: return "Prefer on-device models over cloud providers"

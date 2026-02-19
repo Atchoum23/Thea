@@ -55,8 +55,8 @@ final class AutonomousTaskExecutor {
 
     // MARK: - Task Registration
 
-    /// Register a new autonomous task
     // periphery:ignore - Reserved: registerTask(_:) instance method — reserved for future feature activation
+    /// Register a new autonomous task
     func registerTask(_ task: AutonomousTask) {
         guard !registeredTasks.contains(where: { $0.id == task.id }) else { return }
         registeredTasks.append(task)
@@ -76,8 +76,8 @@ final class AutonomousTaskExecutor {
         saveRegisteredTasks()
     }
 
-    /// Enable/disable a task
     // periphery:ignore - Reserved: setTaskEnabled(_:enabled:) instance method — reserved for future feature activation
+    /// Enable/disable a task
     func setTaskEnabled(_ id: UUID, enabled: Bool) {
         // periphery:ignore - Reserved: unregisterTask(id:) instance method reserved for future feature activation
         guard let index = registeredTasks.firstIndex(where: { $0.id == id }) else { return }
@@ -94,8 +94,8 @@ final class AutonomousTaskExecutor {
 
     // MARK: - Predefined Task Templates
 
-    /// Create an auto-reply task for messaging apps
     // periphery:ignore - Reserved: createAutoReplyTask(appBundleId:appName:replyMessage:whenFocusModeActive:whenUserAway:) static method — reserved for future feature activation
+    /// Create an auto-reply task for messaging apps
     static func createAutoReplyTask(
         appBundleId: String,
         appName: String,
@@ -123,8 +123,8 @@ final class AutonomousTaskExecutor {
         )
     }
 
-    /// Create a scheduled task
     // periphery:ignore - Reserved: createScheduledTask(name:description:schedule:actions:) static method — reserved for future feature activation
+    /// Create a scheduled task
     static func createScheduledTask(
         name: String,
         description: String,

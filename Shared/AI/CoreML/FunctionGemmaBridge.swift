@@ -77,8 +77,8 @@ final class FunctionGemmaBridge {
         )
     }
 
-    /// Execute a single confirmed function call
     // periphery:ignore - Reserved: executeConfirmedCall(_:) instance method — reserved for future feature activation
+    /// Execute a single confirmed function call
     func executeConfirmedCall(_ call: FunctionCall) async throws -> String {
         try await executeCall(call)
     }

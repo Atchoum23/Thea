@@ -209,8 +209,8 @@ public extension [String: SendableValue] {
         self = dict.mapValues { SendableValue($0) }
     }
 
-    /// Convert to [String: Any] dictionary
     // periphery:ignore - Reserved: toAnyDict() instance method reserved for future feature activation
+    /// Convert to [String: Any] dictionary
     func toAnyDict() -> [String: Any] {
         mapValues { $0.value }
     }

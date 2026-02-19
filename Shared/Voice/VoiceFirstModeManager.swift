@@ -510,15 +510,15 @@ private enum VoiceSound: String {
 // MARK: - VoiceInteractionEngine Extensions
 
 extension VoiceInteractionEngine {
-    /// Set speech rate
     // periphery:ignore - Reserved: _rate parameter — kept for API compatibility
+    /// Set speech rate
     func setSpeechRate(_ _rate: Float) {
         // periphery:ignore - Reserved: _rate parameter kept for API compatibility
         // Would configure internal synthesizer rate
     }
 
-    /// Set preferred voice
     // periphery:ignore - Reserved: _identifier parameter kept for API compatibility
+    /// Set preferred voice
     func setPreferredVoice(identifier _identifier: String) {
         // Would configure voice selection
     }

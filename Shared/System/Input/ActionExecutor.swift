@@ -25,14 +25,14 @@ final class CGActionExecutor {
 
     // MARK: - Permission Check
 
-    /// Check if Accessibility permission is granted
     // periphery:ignore - Reserved: hasPermission property — reserved for future feature activation
+    /// Check if Accessibility permission is granted
     var hasPermission: Bool {
         AXIsProcessTrusted()
     }
 
-    /// Request Accessibility permission (opens System Settings)
     // periphery:ignore - Reserved: requestPermission() instance method — reserved for future feature activation
+    /// Request Accessibility permission (opens System Settings)
     nonisolated func requestPermission() {
         // Use string literal to avoid concurrency warning on kAXTrustedCheckOptionPrompt global
         let options: NSDictionary = ["AXTrustedCheckOptionPrompt": true as CFBoolean]
@@ -47,8 +47,8 @@ final class CGActionExecutor {
 
     // MARK: - Mouse Actions
 
-    /// Move mouse pointer to specific coordinates
     // periphery:ignore - Reserved: movePointer(to:) instance method — reserved for future feature activation
+    /// Move mouse pointer to specific coordinates
     func movePointer(to point: CGPoint) throws {
         guard hasPermission else {
             throw ActionExecutionError.permissionDenied
@@ -67,8 +67,8 @@ final class CGActionExecutor {
         print("[CGActionExecutor] Moved pointer to (\(point.x), \(point.y))")
     }
 
-    /// Click at specific coordinates
     // periphery:ignore - Reserved: click(at:button:) instance method — reserved for future feature activation
+    /// Click at specific coordinates
     func click(at point: CGPoint, button: MouseButton = .left) async throws {
         guard hasPermission else {
             throw ActionExecutionError.permissionDenied
@@ -111,8 +111,8 @@ final class CGActionExecutor {
         print("[CGActionExecutor] Clicked at (\(point.x), \(point.y)) with \(button == .left ? "left" : "right") button")
     }
 
-    /// Double-click at specific coordinates
     // periphery:ignore - Reserved: doubleClick(at:) instance method — reserved for future feature activation
+    /// Double-click at specific coordinates
     func doubleClick(at point: CGPoint) async throws {
         guard hasPermission else {
             throw ActionExecutionError.permissionDenied
@@ -135,8 +135,8 @@ final class CGActionExecutor {
 
     // MARK: - Keyboard Actions
 
-    /// Type text at current cursor position
     // periphery:ignore - Reserved: type(_:) instance method — reserved for future feature activation
+    /// Type text at current cursor position
     func type(_ text: String) async throws {
         guard hasPermission else {
             throw ActionExecutionError.permissionDenied
@@ -154,8 +154,8 @@ final class CGActionExecutor {
         print("[CGActionExecutor] Typed text: '\(text)'")
     }
 
-    /// Type a single character
     // periphery:ignore - Reserved: typeCharacter(_:) instance method — reserved for future feature activation
+    /// Type a single character
     private func typeCharacter(_ character: Character) async throws {
         let string = String(character)
 
@@ -196,8 +196,8 @@ final class CGActionExecutor {
         keyUpEvent.post(tap: .cghidEventTap)
     }
 
-    /// Press a specific key (e.g., Enter, Tab, Escape)
     // periphery:ignore - Reserved: pressKey(_:modifiers:) instance method — reserved for future feature activation
+    /// Press a specific key (e.g., Enter, Tab, Escape)
     func pressKey(_ key: KeyCode, modifiers: [KeyModifier] = []) async throws {
         guard hasPermission else {
             throw ActionExecutionError.permissionDenied

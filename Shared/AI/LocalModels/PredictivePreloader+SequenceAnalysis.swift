@@ -57,6 +57,7 @@ extension PredictivePreloader {
         return result
     }
 
+    // periphery:ignore - Reserved: matchesSequenceStart() instance method reserved for future feature activation
     /// Check if the most recent tasks match the beginning of a known sequence.
     ///
     /// Compares the last few tasks against all detected common sequences. If the
@@ -64,7 +65,6 @@ extension PredictivePreloader {
     /// returned — enabling the caller to predict what comes next.
     ///
     /// - Returns: The matching ``TaskSequence`` if found, or `nil` if no match.
-    // periphery:ignore - Reserved: matchesSequenceStart() instance method reserved for future feature activation
     func matchesSequenceStart() -> TaskSequence? {
         let sequences = detectCommonSequences()
         let recentTaskTypes = recentTasks.suffix(3).map { $0.taskType }

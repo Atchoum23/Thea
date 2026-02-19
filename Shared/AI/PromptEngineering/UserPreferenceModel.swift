@@ -42,8 +42,8 @@ final class UserPreferenceModel {
         return preferencesCache[category] ?? []
     }
 
-    /// Updates a preference with reinforcement learning
     // periphery:ignore - Reserved: updatePreference(category:key:value:reinforcement:) instance method — reserved for future feature activation
+    /// Updates a preference with reinforcement learning
     func updatePreference(
         category: String,
         key: String,
@@ -95,8 +95,8 @@ final class UserPreferenceModel {
         await loadPreferences()
     }
 
-    /// Records user correction as negative feedback
     // periphery:ignore - Reserved: recordUserCorrection(category:originalOutput:correctedOutput:) instance method — reserved for future feature activation
+    /// Records user correction as negative feedback
     func recordUserCorrection(
         category: String,
         originalOutput: String,
@@ -116,8 +116,8 @@ final class UserPreferenceModel {
         }
     }
 
-    /// Records user acceptance as positive feedback
     // periphery:ignore - Reserved: recordUserAcceptance(category:output:) instance method — reserved for future feature activation
+    /// Records user acceptance as positive feedback
     func recordUserAcceptance(category: String, output: String) async {
         // Extract characteristics from accepted output
         let characteristics = extractCharacteristics(from: output, category: category)
@@ -265,15 +265,15 @@ final class UserPreferenceModel {
 
     // MARK: - Preference Queries
 
-    /// Gets top preferences for a category
     // periphery:ignore - Reserved: getTopPreferences(for:limit:) instance method — reserved for future feature activation
+    /// Gets top preferences for a category
     func getTopPreferences(for category: String, limit: Int = 5) async -> [UserPromptPreference] {
         let preferences = await getPreferences(for: category)
         return Array(preferences.prefix(limit))
     }
 
-    /// Checks if user prefers a specific style
     // periphery:ignore - Reserved: prefersStyle(_:in:) instance method — reserved for future feature activation
+    /// Checks if user prefers a specific style
     func prefersStyle(_ style: String, in category: String) async -> Bool {
         // periphery:ignore - Reserved: getTopPreferences(for:limit:) instance method reserved for future feature activation
         let preferences = await getPreferences(for: category)
@@ -306,8 +306,8 @@ final class UserPreferenceModel {
         }
     }
 
-    /// Resets all preferences across all categories
     // periphery:ignore - Reserved: resetAllPreferences() instance method — reserved for future feature activation
+    /// Resets all preferences across all categories
     func resetAllPreferences() async {
         guard let context = modelContext else { return }
 
@@ -329,8 +329,8 @@ final class UserPreferenceModel {
 
     // MARK: - Analytics
 
-    /// Gets preference statistics
     // periphery:ignore - Reserved: getPreferenceStats() instance method — reserved for future feature activation
+    /// Gets preference statistics
     func getPreferenceStats() async -> PreferenceStats {
         guard let context = modelContext else {
             return PreferenceStats(
@@ -367,8 +367,8 @@ final class UserPreferenceModel {
         }
     }
 
-    /// Gets preference history for a specific key
     // periphery:ignore - Reserved: getPreferenceHistory(category:key:) instance method — reserved for future feature activation
+    /// Gets preference history for a specific key
     func getPreferenceHistory(category: String, key: String) async -> [PreferenceHistory] {
         let preferences = await getPreferences(for: category)
         // periphery:ignore - Reserved: getPreferenceHistory(category:key:) instance method reserved for future feature activation

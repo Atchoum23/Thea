@@ -55,8 +55,8 @@ final class WindowManager {
     // periphery:ignore - Reserved: openNewChatWindow(conversation:) instance method reserved for future feature activation
     }
 
-    /// Opens a new code editor window
     // periphery:ignore - Reserved: openNewCodeWindow(project:) instance method — reserved for future feature activation
+    /// Opens a new code editor window
     func openNewCodeWindow(project: Project? = nil) {
         let window = WindowInstance(
             type: .codeEditor,
@@ -74,8 +74,8 @@ final class WindowManager {
     // periphery:ignore - Reserved: openNewCodeWindow(project:) instance method reserved for future feature activation
     }
 
-    /// Opens the life tracking dashboard
     // periphery:ignore - Reserved: openNewDashboard() instance method — reserved for future feature activation
+    /// Opens the life tracking dashboard
     func openNewDashboard() {
         let window = WindowInstance(
             type: .lifeTracking,
@@ -92,14 +92,14 @@ final class WindowManager {
     // periphery:ignore - Reserved: openNewDashboard() instance method reserved for future feature activation
     }
 
-    /// Alias for openNewDashboard()
     // periphery:ignore - Reserved: openNewLifeTrackingWindow() instance method — reserved for future feature activation
+    /// Alias for openNewDashboard()
     func openNewLifeTrackingWindow() {
         openNewDashboard()
     }
 
-    /// Closes a window
     // periphery:ignore - Reserved: closeWindow(_:) instance method — reserved for future feature activation
+    /// Closes a window
     func closeWindow(_ windowID: UUID) {
         openWindows.removeAll { $0.id == windowID }
 
@@ -111,16 +111,16 @@ final class WindowManager {
         deleteWindowState(windowID)
     }
 
-    /// Sets the active window
     // periphery:ignore - Reserved: closeWindow(_:) instance method reserved for future feature activation
+    /// Sets the active window
     func setActiveWindow(_ windowID: UUID) {
         if let window = openWindows.first(where: { $0.id == windowID }) {
             activeWindow = window
         }
     }
 
-    /// Updates window position and size
     // periphery:ignore - Reserved: updateWindowGeometry(_:position:size:) instance method — reserved for future feature activation
+    /// Updates window position and size
     func updateWindowGeometry(
         _ windowID: UUID,
         position: CGPoint?,
@@ -196,8 +196,8 @@ final class WindowManager {
         do { try context.save() } catch { windowLogger.error("Failed to save window state: \(error.localizedDescription)") }
     }
 
-    /// Deletes window state from SwiftData
     // periphery:ignore - Reserved: deleteWindowState(_:) instance method — reserved for future feature activation
+    /// Deletes window state from SwiftData
     private func deleteWindowState(_ windowID: UUID) {
         guard let context = modelContext else { return }
 
@@ -218,8 +218,8 @@ final class WindowManager {
         }
     }
 
-    /// Restores window state on app launch
     // periphery:ignore - Reserved: restoreWindowState() instance method — reserved for future feature activation
+    /// Restores window state on app launch
     func restoreWindowState() async {
         guard let context = modelContext else { return }
 
@@ -270,8 +270,8 @@ final class WindowManager {
         }
     }
 
-    /// Saves all window states
     // periphery:ignore - Reserved: saveAllWindowStates() instance method — reserved for future feature activation
+    /// Saves all window states
     func saveAllWindowStates() {
         for window in openWindows {
             saveWindowState(window)
@@ -301,8 +301,8 @@ final class WindowManager {
     // periphery:ignore - Reserved: getWindow(forConversation:) instance method reserved for future feature activation
     }
 
-    /// Gets window for a specific project
     // periphery:ignore - Reserved: getWindow(forProject:) instance method — reserved for future feature activation
+    /// Gets window for a specific project
     func getWindow(forProject projectID: UUID) -> WindowInstance? {
         // periphery:ignore - Reserved: getWindow(forProject:) instance method reserved for future feature activation
         openWindows.first { $0.projectID == projectID }

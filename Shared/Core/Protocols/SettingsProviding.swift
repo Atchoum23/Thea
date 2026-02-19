@@ -10,6 +10,7 @@ import Foundation
 
 // MARK: - Settings Providing Protocol
 
+// periphery:ignore - Reserved: SettingsProviding protocol — reserved for future feature activation
 /// Abstracts the read-only query surface of SettingsManager for testability.
 ///
 /// This protocol captures the feature-flag and configuration properties
@@ -21,7 +22,6 @@ import Foundation
 ///   `SettingsManager.shared`, making them unit-testable with mock settings
 /// - Feature flag state can be overridden in tests without touching UserDefaults
 /// - The FeatureFlag enum provides a unified, discoverable API for all flags
-// periphery:ignore - Reserved: SettingsProviding protocol — reserved for future feature activation
 @MainActor
 protocol SettingsProviding: AnyObject {
 

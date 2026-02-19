@@ -15,13 +15,13 @@ import Foundation
 
 extension PredictivePreloader {
 
+    // periphery:ignore - Reserved: getPredictionStats() instance method — reserved for future feature activation
     /// Compute aggregate statistics about the prediction engine's learned state.
     ///
     /// Includes task counts, transition diversity, data coverage by hour, and
     /// Shannon entropy as a measure of user behavior predictability.
     ///
     /// - Returns: A ``PredictionStats`` snapshot of the current state.
-    // periphery:ignore - Reserved: getPredictionStats() instance method — reserved for future feature activation
     func getPredictionStats() -> PredictionStats {
         var taskCounts: [TaskType: Int] = [:]
         // periphery:ignore - Reserved: getPredictionStats() instance method reserved for future feature activation
@@ -139,11 +139,11 @@ extension PredictivePreloader {
         }
     }
 
+    // periphery:ignore - Reserved: reset() instance method reserved for future feature activation
     /// Clear all learned data and persist the empty state.
     ///
     /// Removes the transition matrix, time-of-day patterns, and task history.
     /// The engine will begin learning from scratch after this call.
-    // periphery:ignore - Reserved: reset() instance method reserved for future feature activation
     func reset() {
         transitionMatrix.removeAll()
         timeOfDayPatterns.removeAll()

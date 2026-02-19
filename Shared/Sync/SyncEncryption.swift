@@ -63,16 +63,16 @@ actor SyncEncryption {
         return try AES.GCM.open(sealedBox, using: key)
     }
 
-    /// Encrypt a Codable value to Data
     // periphery:ignore - Reserved: encryptCodable(_:) instance method — reserved for future feature activation
+    /// Encrypt a Codable value to Data
     func encryptCodable<T: Codable>(_ value: T) throws -> Data {
         let plainData = try JSONEncoder().encode(value)
         // periphery:ignore - Reserved: encryptCodable(_:) instance method reserved for future feature activation
         return try encrypt(plainData)
     }
 
-    /// Decrypt Data to a Codable value
     // periphery:ignore - Reserved: decryptCodable(_:as:) instance method — reserved for future feature activation
+    /// Decrypt Data to a Codable value
     func decryptCodable<T: Codable>(_ data: Data, as type: T.Type) throws -> T {
         // periphery:ignore - Reserved: decryptCodable(_:as:) instance method reserved for future feature activation
         let plainData = try decrypt(data)
@@ -87,8 +87,8 @@ actor SyncEncryption {
         logger.info("Sync encryption key rotated")
     }
 
-    /// Check if encryption is available (key exists or can be created)
     // periphery:ignore - Reserved: isAvailable property reserved for future feature activation
+    /// Check if encryption is available (key exists or can be created)
     var isAvailable: Bool {
         do {
             _ = try getOrCreateKey()

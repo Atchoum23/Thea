@@ -53,8 +53,8 @@ struct HelpButton: View {
 // MARK: - Help Button Variants
 
 extension HelpButton {
-    /// Creates a help button with just an explanation (uses "Help" as title)
     // periphery:ignore - Reserved: init(explanation:) initializer — reserved for future feature activation
+    /// Creates a help button with just an explanation (uses "Help" as title)
     init(explanation: String) {
         title = "Help"
         self.explanation = explanation

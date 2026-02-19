@@ -71,8 +71,8 @@
 
         // MARK: - Folder Access
 
-        /// Request access to a folder via system dialog
         // periphery:ignore - Reserved: requestFolderAccess(initialDirectory:) instance method — reserved for future feature activation
+        /// Request access to a folder via system dialog
         @MainActor
         func requestFolderAccess(initialDirectory: URL? = nil) -> URL? {
             let panel = NSOpenPanel()
@@ -114,16 +114,16 @@
             saveAllowedFolders()
         }
 
-        /// Remove a folder by URL
         // periphery:ignore - Reserved: removeAllowedFolder(_:) instance method — reserved for future feature activation
+        /// Remove a folder by URL
         func removeAllowedFolder(_ url: URL) {
             // periphery:ignore - Reserved: removeAllowedFolder(_:) instance method reserved for future feature activation
             allowedFolders.removeAll { $0.url == url }
             saveAllowedFolders()
         }
 
-        /// Update permissions for a folder
         // periphery:ignore - Reserved: updatePermissions(for:permissions:) instance method reserved for future feature activation
+        /// Update permissions for a folder
         func updatePermissions(for folderId: UUID, permissions: AllowedFolder.Permissions) {
             if let index = allowedFolders.firstIndex(where: { $0.id == folderId }) {
                 allowedFolders[index].permissions = permissions

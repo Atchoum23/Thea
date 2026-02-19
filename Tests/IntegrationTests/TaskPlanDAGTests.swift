@@ -241,8 +241,7 @@ final class TaskPlanDAGTests: XCTestCase {
     func testValidPlanPassesValidation() async throws {
         // createPlan internally calls validateDAG — if cyclic, it throws
         // A simple linear plan is always valid, so no throw expected
-        do { _ = try await dag.createPlan(goal: "Simple query") }
-        catch { XCTFail("Valid plan unexpectedly threw: \(error)") }
+        do { _ = try await dag.createPlan(goal: "Simple query") }         catch { XCTFail("Valid plan unexpectedly threw: \(error)") }
     }
 
     func testPlanNodeDependenciesReferenceExistingNodes() async throws {
@@ -258,18 +257,15 @@ final class TaskPlanDAGTests: XCTestCase {
 
     func testWeeklyPlanIsAcyclic() async throws {
         // If the DAG had a cycle, createPlan would throw .cyclicDependency
-        do { _ = try await dag.createPlan(goal: "plan my week please") }
-        catch { XCTFail("Weekly plan unexpectedly threw: \(error)") }
+        do { _ = try await dag.createPlan(goal: "plan my week please") }         catch { XCTFail("Weekly plan unexpectedly threw: \(error)") }
     }
 
     func testMorningRoutineIsAcyclic() async throws {
-        do { _ = try await dag.createPlan(goal: "start my day with a briefing") }
-        catch { XCTFail("Morning routine plan unexpectedly threw: \(error)") }
+        do { _ = try await dag.createPlan(goal: "start my day with a briefing") }         catch { XCTFail("Morning routine plan unexpectedly threw: \(error)") }
     }
 
     func testResearchIsAcyclic() async throws {
-        do { _ = try await dag.createPlan(goal: "research machine learning trends") }
-        catch { XCTFail("Research plan unexpectedly threw: \(error)") }
+        do { _ = try await dag.createPlan(goal: "research machine learning trends") }         catch { XCTFail("Research plan unexpectedly threw: \(error)") }
     }
 
     // MARK: - Plan Properties

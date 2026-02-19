@@ -197,8 +197,8 @@ struct SlashCommandOverlay: View {
 
     // MARK: - Keyboard Navigation
 
-    /// Move selection up in the command list
     // periphery:ignore - Reserved: moveSelectionUp() instance method — reserved for future feature activation
+    /// Move selection up in the command list
     func moveSelectionUp() {
         guard !filteredCommands.isEmpty else { return }
         withAnimation(TheaAnimation.micro) {
@@ -207,8 +207,8 @@ struct SlashCommandOverlay: View {
         }
     }
 
-    /// Move selection down in the command list
     // periphery:ignore - Reserved: moveSelectionDown() instance method — reserved for future feature activation
+    /// Move selection down in the command list
     func moveSelectionDown() {
         guard !filteredCommands.isEmpty else { return }
         // periphery:ignore - Reserved: moveSelectionDown() instance method reserved for future feature activation
@@ -217,8 +217,8 @@ struct SlashCommandOverlay: View {
         }
     }
 
-    /// Confirm the currently selected command
     // periphery:ignore - Reserved: confirmSelection() instance method — reserved for future feature activation
+    /// Confirm the currently selected command
     func confirmSelection() {
         // periphery:ignore - Reserved: confirmSelection() instance method reserved for future feature activation
         guard !filteredCommands.isEmpty,
@@ -285,8 +285,8 @@ private struct SlashCommandRow: View {
 // MARK: - View Modifier for Easy Integration
 
 extension View {
-    /// Attach a slash command overlay above this view
     // periphery:ignore - Reserved: withSlashCommands(inputText:onSelect:) instance method reserved for future feature activation
+    /// Attach a slash command overlay above this view
     func withSlashCommands(
         inputText: Binding<String>,
         onSelect: @escaping (SlashCommand) -> Void

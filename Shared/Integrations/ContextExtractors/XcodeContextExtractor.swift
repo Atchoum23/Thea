@@ -7,8 +7,8 @@ private let xcodeLogger = Logger(subsystem: "ai.thea.app", category: "XcodeConte
 
 // periphery:ignore - Reserved: xcodeLogger global var reserved for future feature activation
 
-/// Extracts context from Xcode using Accessibility API
 // periphery:ignore - Reserved: XcodeContextExtractor type reserved for future feature activation
+/// Extracts context from Xcode using Accessibility API
 enum XcodeContextExtractor {
     /// Extract context from frontmost Xcode window
     static func extract(

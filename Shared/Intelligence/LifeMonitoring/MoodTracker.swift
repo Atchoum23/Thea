@@ -184,8 +184,8 @@ final class MoodTracker {
         return filtered.reduce(0.0) { $0 + $1.score } / Double(filtered.count)
     }
 
-    /// Hourly breakdown for the last N hours
     // periphery:ignore - Reserved: hourlySamples(hours:) instance method reserved for future feature activation
+    /// Hourly breakdown for the last N hours
     func hourlySamples(hours: Int = 24) -> [(hour: Int, average: Double)] {
         let cutoff = Date().addingTimeInterval(-Double(hours) * 3600)
         let recent = samples.filter { $0.timestamp >= cutoff }

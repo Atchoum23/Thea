@@ -102,8 +102,8 @@ extension DynamicResourceAllocator {
             self.isEnabled = isEnabled
         }
 
-        /// Check if current time falls within this schedule
         // periphery:ignore - Reserved: isActiveNow() instance method — reserved for future feature activation
+        /// Check if current time falls within this schedule
         func isActiveNow() -> Bool {
             guard isEnabled else { return false }
 

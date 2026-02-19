@@ -13,8 +13,8 @@ private let msgComprehensionLogger = Logger(subsystem: "ai.thea.app", category: 
 
 // periphery:ignore - Reserved: msgComprehensionLogger global var reserved for future feature activation
 
-/// Analyzes messages to extract structured understanding.
 // periphery:ignore - Reserved: MsgComprehensionEngine type reserved for future feature activation
+/// Analyzes messages to extract structured understanding.
 enum MsgComprehensionEngine {
 
     // MARK: - Main Analysis

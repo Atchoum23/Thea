@@ -216,8 +216,8 @@ enum PhysicalMailError: LocalizedError, Sendable {
 
 // MARK: - Physical Mail Channel
 
-/// Bridges physical mail scanning into MessagingHub.
 // periphery:ignore - Reserved: PhysicalMailChannel class — reserved for future feature activation
+/// Bridges physical mail scanning into MessagingHub.
 @MainActor
 final class PhysicalMailChannel: ObservableObject {
     static let shared = PhysicalMailChannel()

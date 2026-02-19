@@ -141,8 +141,8 @@ struct MoltbookPolicy: PrivacyPolicy {
 
 // MARK: - Permissive Policy
 
-/// Minimal filtering for fully trusted local channels.
 // periphery:ignore - Reserved: PermissivePolicy type reserved for future feature activation
+/// Minimal filtering for fully trusted local channels.
 struct PermissivePolicy: PrivacyPolicy {
     let name = "Permissive"
     let strictnessLevel: StrictnessLevel = .permissive

@@ -323,13 +323,13 @@ final class AnthropicProvider: AIProvider, Sendable {
 
     // MARK: - Advanced Chat (with Claude API 2026 features)
 
+    // periphery:ignore - Reserved: chatAdvanced(messages:model:options:) instance method — reserved for future feature activation
     /// Advanced chat with support for all Claude API features
     /// - Parameters:
     ///   - messages: The messages to send
     ///   - model: The model ID to use
     ///   - options: Advanced options including effort, context management, server tools
     /// - Returns: Streaming response
-    // periphery:ignore - Reserved: chatAdvanced(messages:model:options:) instance method — reserved for future feature activation
     func chatAdvanced(
         messages: [AIMessage],
         model: String,

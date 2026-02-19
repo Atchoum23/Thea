@@ -61,8 +61,8 @@ final class SwiftKnowledgeLearner {
 
     // MARK: - Knowledge Extraction from Conversations
 
-    /// Analyzes a conversation turn and extracts learnable knowledge
     // periphery:ignore - Reserved: analyzeConversationTurn(userMessage:assistantResponse:wasSuccessful:userFeedback:) instance method — reserved for future feature activation
+    /// Analyzes a conversation turn and extracts learnable knowledge
     func analyzeConversationTurn(
         userMessage: String,
         assistantResponse: String,
@@ -104,8 +104,8 @@ final class SwiftKnowledgeLearner {
         lastLearningUpdate = Date()
     }
 
-    /// Bulk analyze historical conversation data
     // periphery:ignore - Reserved: analyzeHistoricalData(conversations:) instance method — reserved for future feature activation
+    /// Bulk analyze historical conversation data
     func analyzeHistoricalData(conversations: [ConversationData]) async -> LearningReport {
         var report = LearningReport()
 
@@ -473,8 +473,8 @@ extension SwiftKnowledgeLearner {
 // MARK: - Knowledge Retrieval
 
 extension SwiftKnowledgeLearner {
-    /// Get relevant patterns for a given coding task
     // periphery:ignore - Reserved: getRelevantPatterns(for:limit:) instance method — reserved for future feature activation
+    /// Get relevant patterns for a given coding task
     func getRelevantPatterns(for query: String, limit: Int = 5) -> [SwiftLearnedPattern] {
         let queryWords = Set(query.lowercased().split(separator: " ").map(String.init))
 
@@ -492,8 +492,8 @@ extension SwiftKnowledgeLearner {
             .map(\.pattern)
     }
 
-    /// Get code snippets relevant to a task
     // periphery:ignore - Reserved: getRelevantSnippets(for:tags:limit:) instance method — reserved for future feature activation
+    /// Get code snippets relevant to a task
     func getRelevantSnippets(for purpose: String, tags: [String] = [], limit: Int = 3) -> [CodeSnippet] {
         codeSnippets
             .filter { snippet in
@@ -509,8 +509,8 @@ extension SwiftKnowledgeLearner {
             .map { $0 }
     }
 
-    /// Get error prevention rules
     // periphery:ignore - Reserved: getErrorPreventionRules(for:) instance method — reserved for future feature activation
+    /// Get error prevention rules
     func getErrorPreventionRules(for errorType: String) -> [String] {
         errorResolutions
             .filter { $0.errorType.lowercased().contains(errorType.lowercased()) }
@@ -519,8 +519,8 @@ extension SwiftKnowledgeLearner {
     // periphery:ignore - Reserved: getErrorPreventionRules(for:) instance method reserved for future feature activation
     }
 
-    /// Get best practices for a category
     // periphery:ignore - Reserved: getBestPractices(for:) instance method — reserved for future feature activation
+    /// Get best practices for a category
     func getBestPractices(for category: String) -> [BestPractice] {
         bestPractices.filter { $0.category.lowercased() == category.lowercased() }
     }
@@ -628,8 +628,8 @@ extension SwiftKnowledgeLearner {
         }
     }
 
-    /// Clear all learned knowledge
     // periphery:ignore - Reserved: clearAllKnowledge() instance method reserved for future feature activation
+    /// Clear all learned knowledge
     func clearAllKnowledge() async {
         learnedPatterns.removeAll()
         codeSnippets.removeAll()

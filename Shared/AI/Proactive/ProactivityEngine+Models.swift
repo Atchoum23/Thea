@@ -273,7 +273,7 @@ struct NewFactResult {
     let content: String
     /// The source system that provided this fact.
     let source: String
-    /// When the fact was recorded.
     // periphery:ignore - Reserved: timestamp property reserved for future feature activation
+    /// When the fact was recorded.
     let timestamp: Date
 }

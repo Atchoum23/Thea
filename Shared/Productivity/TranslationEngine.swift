@@ -290,8 +290,8 @@ final class TranslationEngine: ObservableObject {
         return result
     }
 
-    /// Quick translate — auto-detect source, translate to target
     // periphery:ignore - Reserved: quickTranslate(_:to:) instance method — reserved for future feature activation
+    /// Quick translate — auto-detect source, translate to target
     func quickTranslate(_ text: String, to targetLanguage: String) async throws -> String {
         // periphery:ignore - Reserved: quickTranslate(_:to:) instance method reserved for future feature activation
         let result = try await translate(
@@ -308,8 +308,8 @@ final class TranslationEngine: ObservableObject {
         return lang.rawValue
     }
 
-    /// Get language confidence scores for text
     // periphery:ignore - Reserved: detectLanguageConfidences(_:) instance method reserved for future feature activation
+    /// Get language confidence scores for text
     func detectLanguageConfidences(_ text: String) -> [(code: String, confidence: Double)] {
         let recognizer = NLLanguageRecognizer()
         recognizer.processString(text)

@@ -188,12 +188,12 @@ extension FocusModeIntelligence {
 
     // MARK: - iOS Focus Mode Detection
 
+    // periphery:ignore - Reserved: startIOSFocusMonitoring() instance method reserved for future feature activation
     /// Start monitoring Focus mode on iOS via `INFocusStatusCenter`.
     ///
     /// Note: iOS does not expose which specific Focus mode is active,
     /// only whether any Focus mode is enabled. Shortcuts automations
     /// are used to bridge this gap.
-    // periphery:ignore - Reserved: startIOSFocusMonitoring() instance method reserved for future feature activation
     func startIOSFocusMonitoring() async {
         let center = INFocusStatusCenter.default
 

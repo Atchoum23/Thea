@@ -10,6 +10,7 @@ import Foundation
 
 extension SettingsManager {
 
+    // periphery:ignore - Reserved: isFeatureEnabled(_:) instance method — reserved for future feature activation
     /// Query whether a feature flag is enabled.
     ///
     /// Provides a unified API for runtime feature-flag queries, mapping each
@@ -21,7 +22,6 @@ extension SettingsManager {
     ///     // Use local model inference
     /// }
     /// ```
-    // periphery:ignore - Reserved: isFeatureEnabled(_:) instance method — reserved for future feature activation
     func isFeatureEnabled(_ flag: TheaFeatureFlag) -> Bool {
         switch flag {
         // AI & Models
@@ -89,8 +89,8 @@ extension SettingsManager {
         }
     }
 
-    /// Returns a snapshot of all feature flag states for diagnostics.
     // periphery:ignore - Reserved: featureFlagSnapshot property — reserved for future feature activation
+    /// Returns a snapshot of all feature flag states for diagnostics.
     var featureFlagSnapshot: [TheaFeatureFlag: Bool] {
         var snapshot: [TheaFeatureFlag: Bool] = [:]
         for flag in TheaFeatureFlag.allCases {
@@ -100,8 +100,8 @@ extension SettingsManager {
         return snapshot
     }
 
-    /// Returns all enabled feature flags.
     // periphery:ignore - Reserved: enabledTheaFeatureFlags property — reserved for future feature activation
+    /// Returns all enabled feature flags.
     var enabledTheaFeatureFlags: [TheaFeatureFlag] {
         TheaFeatureFlag.allCases.filter { isFeatureEnabled($0) }
     // periphery:ignore - Reserved: enabledTheaFeatureFlags property reserved for future feature activation
@@ -113,8 +113,8 @@ extension SettingsManager {
         setFeatureEnabled(flag, enabled: flag.defaultValue)
     }
 
-    /// Reset all feature flags to their default values.
     // periphery:ignore - Reserved: resetAllTheaFeatureFlags() instance method reserved for future feature activation
+    /// Reset all feature flags to their default values.
     func resetAllTheaFeatureFlags() {
         for flag in TheaFeatureFlag.allCases {
             resetTheaFeatureFlag(flag)

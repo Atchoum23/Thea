@@ -78,8 +78,8 @@ final class ScreenCaptureManager {
 
     // MARK: - Capture Operations
 
-    /// Capture the main display
     // periphery:ignore - Reserved: captureScreen() instance method — reserved for future feature activation
+    /// Capture the main display
     func captureScreen() async throws -> CGImage {
         guard isAuthorized else {
             throw ScreenCaptureError.notAuthorized
@@ -100,8 +100,8 @@ final class ScreenCaptureManager {
         return try await captureWithFilter(filter)
     }
 
-    /// Capture a specific window by bundle ID
     // periphery:ignore - Reserved: captureWindow(bundleID:) instance method — reserved for future feature activation
+    /// Capture a specific window by bundle ID
     func captureWindow(bundleID: String) async throws -> CGImage {
         guard isAuthorized else {
             throw ScreenCaptureError.notAuthorized
@@ -125,8 +125,8 @@ final class ScreenCaptureManager {
         return try await captureWithFilter(filter)
     }
 
-    /// Capture the currently active (frontmost) window
     // periphery:ignore - Reserved: captureActiveWindow() instance method — reserved for future feature activation
+    /// Capture the currently active (frontmost) window
     func captureActiveWindow() async throws -> CGImage {
         guard isAuthorized else {
             throw ScreenCaptureError.notAuthorized
@@ -142,8 +142,8 @@ final class ScreenCaptureManager {
         return try await captureWindow(bundleID: bundleID)
     }
 
-    /// Capture a specific region of the screen
     // periphery:ignore - Reserved: captureRegion(_:) instance method — reserved for future feature activation
+    /// Capture a specific region of the screen
     func captureRegion(_ rect: CGRect) async throws -> CGImage {
         guard isAuthorized else {
             // periphery:ignore - Reserved: captureRegion(_:) instance method reserved for future feature activation

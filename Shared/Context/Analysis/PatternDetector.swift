@@ -28,8 +28,8 @@ public actor PatternDetector {
     // periphery:ignore - Reserved: communicationPatterns property reserved for future feature activation
     // MARK: - Public API
 
-    /// Analyze context history and detect patterns
     // periphery:ignore - Reserved: patternExpirationDays property reserved for future feature activation
+    /// Analyze context history and detect patterns
     public func analyzePatterns(from history: [ContextSnapshot]) async -> [DetectedPattern] {
         var patterns: [DetectedPattern] = []
 

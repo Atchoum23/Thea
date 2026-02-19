@@ -36,16 +36,16 @@ final class PredictivePreloader: @unchecked Sendable {
     /// Recent task history (for recency weighting)
     var recentTasks: [TaskTypeTimestamp] = []
 
-    /// EMA alpha for recency weighting (higher = more weight to recent)
     // periphery:ignore - Reserved: emaAlpha property — reserved for future feature activation
+    /// EMA alpha for recency weighting (higher = more weight to recent)
     let emaAlpha: Double = 0.3
 
-    /// Maximum history size
     // periphery:ignore - Reserved: maxHistorySize property — reserved for future feature activation
+    /// Maximum history size
     let maxHistorySize = 500
 
-    /// Persistence keys
     // periphery:ignore - Reserved: emaAlpha property reserved for future feature activation
+    /// Persistence keys
     let transitionMatrixKey = "PredictivePreloader.transitionMatrix"
     let timeOfDayPatternsKey = "PredictivePreloader.timeOfDayPatterns"
     // periphery:ignore - Reserved: maxHistorySize property reserved for future feature activation
@@ -59,8 +59,8 @@ final class PredictivePreloader: @unchecked Sendable {
 
     // MARK: - Recording
 
-    /// Record a task request for learning
     // periphery:ignore - Reserved: recordTaskRequest(_:) instance method — reserved for future feature activation
+    /// Record a task request for learning
     func recordTaskRequest(_ taskType: TaskType) {
         let timestamp = Date()
         let hour = Calendar.current.component(.hour, from: timestamp)
@@ -92,8 +92,8 @@ final class PredictivePreloader: @unchecked Sendable {
         logger.debug("Recorded task: \(taskType.rawValue) at hour \(hour)")
     }
 
-    /// Update transition matrix with new observation
     // periphery:ignore - Reserved: updateTransitionMatrix(from:to:) instance method — reserved for future feature activation
+    /// Update transition matrix with new observation
     private func updateTransitionMatrix(from: TaskType, to: TaskType) {
         // Initialize if needed
         if transitionMatrix[from] == nil {
@@ -116,8 +116,8 @@ final class PredictivePreloader: @unchecked Sendable {
         }
     }
 
-    /// Update time-of-day patterns
     // periphery:ignore - Reserved: updateTimeOfDayPattern(hour:taskType:) instance method — reserved for future feature activation
+    /// Update time-of-day patterns
     private func updateTimeOfDayPattern(hour: Int, taskType: TaskType) {
         if timeOfDayPatterns[hour] == nil {
             // periphery:ignore - Reserved: updateTimeOfDayPattern(hour:taskType:) instance method reserved for future feature activation
@@ -202,8 +202,8 @@ final class PredictivePreloader: @unchecked Sendable {
         return .combined
     }
 
-    /// Get transition probability between two tasks
     // periphery:ignore - Reserved: getTransitionProbability(from:to:) instance method — reserved for future feature activation
+    /// Get transition probability between two tasks
     func getTransitionProbability(from: TaskType, to: TaskType) -> Double {
         // periphery:ignore - Reserved: getTransitionProbability(from:to:) instance method reserved for future feature activation
         guard let transitions = transitionMatrix[from] else { return 0.0 }
@@ -212,8 +212,8 @@ final class PredictivePreloader: @unchecked Sendable {
         return (transitions[to] ?? 0) / totalCount
     }
 
-    /// Get most likely next task after a given task
     // periphery:ignore - Reserved: getMostLikelyNextTask(after:) instance method reserved for future feature activation
+    /// Get most likely next task after a given task
     func getMostLikelyNextTask(after task: TaskType) -> TaskType? {
         guard let transitions = transitionMatrix[task] else { return nil }
         return transitions.max { $0.value < $1.value }?.key

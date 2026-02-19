@@ -8,8 +8,8 @@ enum TemporalValidator {
 
     // MARK: - Day-of-Week Validation
 
-    /// Returns the correct day-of-week name for a given date.
     // periphery:ignore - Reserved: dayOfWeek(for:locale:) static method — reserved for future feature activation
+    /// Returns the correct day-of-week name for a given date.
     static func dayOfWeek(for date: Date, locale: Locale = .current) -> String {
         let formatter = DateFormatter()
         formatter.locale = locale
@@ -28,9 +28,9 @@ enum TemporalValidator {
     // periphery:ignore - Reserved: abbreviatedDayOfWeek(for:locale:) static method reserved for future feature activation
     }
 
+    // periphery:ignore - Reserved: validateDayDatePair(claimedDay:date:) static method — reserved for future feature activation
     /// Validates whether a claimed day-of-week matches the actual date.
     /// Returns nil if valid, or a corrected string if the day was wrong.
-    // periphery:ignore - Reserved: validateDayDatePair(claimedDay:date:) static method — reserved for future feature activation
     static func validateDayDatePair(claimedDay: String, date: Date) -> String? {
         let actualDay = dayOfWeek(for: date).lowercased()
         let claimed = claimedDay.lowercased().trimmingCharacters(in: .whitespaces)
@@ -46,9 +46,9 @@ enum TemporalValidator {
 
     // MARK: - AI Response Scanning
 
+    // periphery:ignore - Reserved: scanAndCorrectDateDayMismatches(in:) static method — reserved for future feature activation
     /// Scans AI response text for date-day mismatches and returns corrected text.
     /// Catches patterns like "Saturday February 15" when Feb 15 is actually a Sunday.
-    // periphery:ignore - Reserved: scanAndCorrectDateDayMismatches(in:) static method — reserved for future feature activation
     static func scanAndCorrectDateDayMismatches(in text: String) -> String {
         var corrected = text
 
@@ -115,15 +115,15 @@ enum TemporalValidator {
         return formatter.string(from: Date())
     }
 
-    /// Returns true if the given date falls on a weekend.
     // periphery:ignore - Reserved: isWeekend(_:) static method — reserved for future feature activation
+    /// Returns true if the given date falls on a weekend.
     static func isWeekend(_ date: Date) -> Bool {
         Calendar.current.isDateInWeekend(date)
     // periphery:ignore - Reserved: isWeekend(_:) static method reserved for future feature activation
     }
 
-    /// Returns the number of days between two dates.
     // periphery:ignore - Reserved: daysBetween(_:and:) static method — reserved for future feature activation
+    /// Returns the number of days between two dates.
     static func daysBetween(_ from: Date, and to: Date) -> Int {
         // periphery:ignore - Reserved: daysBetween(_:and:) static method reserved for future feature activation
         Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: from),
@@ -141,8 +141,8 @@ enum TemporalValidator {
         }
     }
 
-    /// Validates a DateComponents object is consistent.
     // periphery:ignore - Reserved: isValid(components:) static method reserved for future feature activation
+    /// Validates a DateComponents object is consistent.
     static func isValid(components: DateComponents) -> Bool {
         Calendar.current.date(from: components) != nil
     }

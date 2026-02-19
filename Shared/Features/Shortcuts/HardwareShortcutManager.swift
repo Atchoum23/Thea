@@ -135,8 +135,8 @@ final class HardwareShortcutManager {
 
     // MARK: - Public API
 
-    /// Start monitoring for hardware shortcuts
     // periphery:ignore - Reserved: startMonitoring() instance method — reserved for future feature activation
+    /// Start monitoring for hardware shortcuts
     func startMonitoring() {
         guard !isMonitoring else { return }
 
@@ -167,8 +167,8 @@ final class HardwareShortcutManager {
         isMonitoring = false
     }
 
-    /// Register a new shortcut
     // periphery:ignore - Reserved: registerShortcut(_:) instance method — reserved for future feature activation
+    /// Register a new shortcut
     func registerShortcut(_ config: ShortcutConfig) {
         // Remove existing if same trigger
         registeredShortcuts.removeAll { $0.trigger == config.trigger }
@@ -176,15 +176,15 @@ final class HardwareShortcutManager {
         saveShortcuts()
     }
 
-    /// Unregister a shortcut
     // periphery:ignore - Reserved: registerShortcut(_:) instance method reserved for future feature activation
+    /// Unregister a shortcut
     func unregisterShortcut(id: UUID) {
         registeredShortcuts.removeAll { $0.id == id }
         saveShortcuts()
     }
 
-    /// Enable/disable a shortcut
     // periphery:ignore - Reserved: setShortcutEnabled(_:enabled:) instance method — reserved for future feature activation
+    /// Enable/disable a shortcut
     func setShortcutEnabled(_ id: UUID, enabled: Bool) {
         // periphery:ignore - Reserved: unregisterShortcut(id:) instance method reserved for future feature activation
         if let index = registeredShortcuts.firstIndex(where: { $0.id == id }) {
@@ -289,8 +289,8 @@ final class HardwareShortcutManager {
     // periphery:ignore - Reserved: triggerShortcut(_:) instance method reserved for future feature activation
     }
 
-    /// Manually trigger an action (for external callers like ActionButton)
     // periphery:ignore - Reserved: triggerAction(_:) instance method — reserved for future feature activation
+    /// Manually trigger an action (for external callers like ActionButton)
     func triggerAction(_ action: HardwareShortcutAction) {
         onShortcutTriggered?(action)
     // periphery:ignore - Reserved: triggerAction(_:) instance method reserved for future feature activation
@@ -325,8 +325,8 @@ final class HardwareShortcutManager {
 // MARK: - Key Code Reference
 
 #if os(macOS)
-/// Common key codes for macOS
 // periphery:ignore - Reserved: MacKeyCode type reserved for future feature activation
+/// Common key codes for macOS
 enum MacKeyCode: Int {
     case space = 49
     case returnKey = 36

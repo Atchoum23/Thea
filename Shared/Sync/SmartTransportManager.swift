@@ -181,8 +181,8 @@ actor SmartTransportManager {
         }
     }
 
-    /// Stop monitoring and release resources
     // periphery:ignore - Reserved: stopMonitoring() instance method — reserved for future feature activation
+    /// Stop monitoring and release resources
     func stopMonitoring() {
         // periphery:ignore - Reserved: stopMonitoring() instance method reserved for future feature activation
         monitoringTask?.cancel()
@@ -194,8 +194,8 @@ actor SmartTransportManager {
         logger.info("Transport monitoring stopped")
     }
 
-    /// Get the endpoint for the active transport
     // periphery:ignore - Reserved: activeEndpoint() instance method reserved for future feature activation
+    /// Get the endpoint for the active transport
     func activeEndpoint() -> String? {
         peerEndpoints[activeTransport]
     }

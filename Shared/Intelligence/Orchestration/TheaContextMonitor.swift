@@ -12,9 +12,9 @@ import os.log
 
 // MARK: - TheaContextMonitor
 
+// periphery:ignore - Reserved: TheaContextMonitor type reserved for future feature activation
 /// Monitors context pressure across all active agent sessions.
 /// Triggers preemptive summarization and budget reallocation.
-// periphery:ignore - Reserved: TheaContextMonitor type reserved for future feature activation
 actor TheaContextMonitor {
     private let logger = Logger(subsystem: "app.thea", category: "ContextMonitor")
     private var monitorTask: Task<Void, Never>?

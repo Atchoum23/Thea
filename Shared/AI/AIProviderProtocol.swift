@@ -445,9 +445,9 @@ struct WebSearchConfig: Sendable {
     static let `default` = WebSearchConfig()
 }
 
+// periphery:ignore - Reserved: default static property reserved for future feature activation
 /// Web fetch tool configuration
 /// Pricing: FREE (only standard token costs)
-// periphery:ignore - Reserved: default static property reserved for future feature activation
 struct WebFetchConfig: Sendable {
     let maxUses: Int?
     let allowedDomains: [String]?

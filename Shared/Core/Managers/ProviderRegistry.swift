@@ -166,8 +166,8 @@ final class ProviderRegistry {
         #endif
     }
 
-    /// Discover and register CoreML models for iOS on-device inference
     // periphery:ignore - Reserved: refreshCoreMLProviders() instance method — reserved for future feature activation
+    /// Discover and register CoreML models for iOS on-device inference
     func refreshCoreMLProviders() async {
         localProviders.removeAll()
 
@@ -210,8 +210,8 @@ final class ProviderRegistry {
         Array(localProviders.keys).map { $0.replacingOccurrences(of: "local:", with: "") }
     }
 
-    /// Check if any local models are available
     // periphery:ignore - Reserved: hasLocalModels property — reserved for future feature activation
+    /// Check if any local models are available
     var hasLocalModels: Bool {
         !localProviders.isEmpty
     }
@@ -356,8 +356,8 @@ final class ProviderRegistry {
         return localProviders.values.first
     }
 
-    /// Get a provider based on task complexity (for orchestrator)
     // periphery:ignore - Reserved: getProviderForTask(complexity:) instance method — reserved for future feature activation
+    /// Get a provider based on task complexity (for orchestrator)
     func getProviderForTask(complexity: QueryComplexity) -> AIProvider? {
         let preference = orchestratorConfig.localModelPreference
 

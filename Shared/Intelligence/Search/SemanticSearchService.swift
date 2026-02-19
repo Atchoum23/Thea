@@ -56,16 +56,16 @@ actor EmbeddingIndexActor {
         }
     }
 
-    /// Async load method wrapper
     // periphery:ignore - Reserved: asyncLoad() instance method — reserved for future feature activation
+    /// Async load method wrapper
     private func asyncLoad() async {
         loadFromDisk()
     }
 
     // MARK: - Index Operations
 
-    /// Store an embedding for a message
     // periphery:ignore - Reserved: store(messageID:conversationID:embedding:content:) instance method — reserved for future feature activation
+    /// Store an embedding for a message
     func store(messageID: UUID, conversationID: UUID, embedding: [Float], content: String) {
         embeddings[messageID] = embedding
         metadata[messageID] = EmbeddingMetadata(
@@ -84,8 +84,8 @@ actor EmbeddingIndexActor {
         isDirty = true
     }
 
-    /// Batch store multiple embeddings
     // periphery:ignore - Reserved: storeBatch(_:) instance method — reserved for future feature activation
+    /// Batch store multiple embeddings
     func storeBatch(_ batch: [(messageID: UUID, conversationID: UUID, embedding: [Float], content: String)]) {
         for item in batch {
             embeddings[item.messageID] = item.embedding
@@ -105,21 +105,21 @@ actor EmbeddingIndexActor {
         isDirty = true
     }
 
-    /// Get embedding for a message
     // periphery:ignore - Reserved: getEmbedding(for:) instance method — reserved for future feature activation
+    /// Get embedding for a message
     func getEmbedding(for messageID: UUID) -> [Float]? {
         embeddings[messageID]
     }
 
-    /// Check if message is indexed
     // periphery:ignore - Reserved: hasEmbedding(for:) instance method — reserved for future feature activation
+    /// Check if message is indexed
     func hasEmbedding(for messageID: UUID) -> Bool {
         embeddings[messageID] != nil
     // periphery:ignore - Reserved: getEmbedding(for:) instance method reserved for future feature activation
     }
 
-    /// Check if content has changed (by hash comparison)
     // periphery:ignore - Reserved: contentChanged(messageID:currentHash:) instance method — reserved for future feature activation
+    /// Check if content has changed (by hash comparison)
     func contentChanged(messageID: UUID, currentHash: Int) -> Bool {
         // periphery:ignore - Reserved: hasEmbedding(for:) instance method reserved for future feature activation
         guard let meta = metadata[messageID] else { return true }
@@ -261,8 +261,8 @@ actor EmbeddingIndexActor {
 
     // MARK: - Vector Math
 
-    /// Calculate cosine similarity using Accelerate framework
     // periphery:ignore - Reserved: cosineSimilarity(_:_:) instance method reserved for future feature activation
+    /// Calculate cosine similarity using Accelerate framework
     private func cosineSimilarity(_ a: [Float], _ b: [Float]) -> Float {
         guard a.count == b.count, !a.isEmpty else { return 0 }
 

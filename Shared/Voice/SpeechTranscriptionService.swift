@@ -47,8 +47,8 @@ final class SpeechTranscriptionService: ObservableObject {
         return result
     }
 
-    /// Transcribe from raw PCM audio data (16kHz mono, Float32).
     // periphery:ignore - Reserved: transcribe(pcmData:sampleRate:locale:) instance method — reserved for future feature activation
+    /// Transcribe from raw PCM audio data (16kHz mono, Float32).
     func transcribe(pcmData: Data, sampleRate: Double = 16000, locale: Locale = .current) async throws -> String {
         // periphery:ignore - Reserved: transcribe(pcmData:sampleRate:locale:) instance method reserved for future feature activation
         // Write to temp WAV file then transcribe

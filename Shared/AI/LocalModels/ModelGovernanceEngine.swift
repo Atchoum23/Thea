@@ -38,8 +38,8 @@ final class ModelGovernanceEngine {
     /// Dynamic model fleet organized by tier
     private(set) var modelFleet = ModelFleet()
 
-    /// Current governance policy
     // periphery:ignore - Reserved: shared static property reserved for future feature activation
+    /// Current governance policy
     private(set) var policy: GovernanceEnginePolicy = .default
 
     /// System resource snapshot
@@ -228,8 +228,8 @@ final class ModelGovernanceEngine {
         )
     }
 
-    /// Get the current Supra-Model for inference
     // periphery:ignore - Reserved: getSupraModelForInference() instance method — reserved for future feature activation
+    /// Get the current Supra-Model for inference
     func getSupraModelForInference() async -> LocalModel? {
         guard let supra = supraModel, supra.status == .active else {
             return nil
@@ -298,8 +298,8 @@ final class ModelGovernanceEngine {
         return Double(record.usageCount) / Double(totalUsage)
     }
 
-    /// Select optimal model for a task
     // periphery:ignore - Reserved: selectModelForTask(_:context:) instance method — reserved for future feature activation
+    /// Select optimal model for a task
     func selectModelForTask(_ taskType: TaskType, context: GovernanceTaskContext = GovernanceTaskContext()) async -> GovernanceModelSelection? {
         // 1. Record the task request for learning
         preloader.recordTaskRequest(taskType)
@@ -486,8 +486,8 @@ final class ModelGovernanceEngine {
         #endif
     }
 
-    /// Check if resources allow downloading a model
     // periphery:ignore - Reserved: canAccommodateModel(sizeGB:) instance method — reserved for future feature activation
+    /// Check if resources allow downloading a model
     func canAccommodateModel(sizeGB: Double) -> Bool {
         // Need 1.5x space for safety margin
         let requiredSpace = sizeGB * 1.5
@@ -633,8 +633,8 @@ final class ModelGovernanceEngine {
 
     // MARK: - Quality Feedback
 
-    /// Record quality feedback for a model
     // periphery:ignore - Reserved: recordModelQuality(modelName:taskType:success:latency:userSatisfaction:) instance method — reserved for future feature activation
+    /// Record quality feedback for a model
     func recordModelQuality(
         modelName: String,
         taskType: TaskType,
@@ -825,8 +825,8 @@ struct GovernanceModelSelection: Sendable {
     let reason: String
 }
 
-/// Task context for model selection in governance engine
 // periphery:ignore - Reserved: GovernanceTaskContext type — reserved for future feature activation
+/// Task context for model selection in governance engine
 struct GovernanceTaskContext: Sendable {
     // periphery:ignore - Reserved: tier property reserved for future feature activation
     // periphery:ignore - Reserved: score property reserved for future feature activation

@@ -321,8 +321,8 @@ public actor MetaLearningController {
         explorationRate
     }
 
-    /// Record outcome of an optimization attempt
     // periphery:ignore - Reserved: metrics parameter kept for API compatibility
+    /// Record outcome of an optimization attempt
     public func recordOutcome(success: Bool, reward: Double, metrics: [String: Double] = [:]) {
         // Update strategy performance
         if success {

@@ -64,8 +64,8 @@ final class ConversationLanguageService {
         }
     }
 
-    /// Toggle language on/off for a conversation
     // periphery:ignore - Reserved: toggleLanguage(_:for:) instance method — reserved for future feature activation
+    /// Toggle language on/off for a conversation
     func toggleLanguage(_ languageCode: String, for conversation: Conversation) {
         if conversation.metadata.preferredLanguage == languageCode {
             // periphery:ignore - Reserved: toggleLanguage(_:for:) instance method reserved for future feature activation
@@ -83,8 +83,8 @@ final class ConversationLanguageService {
         return supportedLanguages.first { $0.code == code }
     }
 
-    /// Check if a specific language is active for a conversation
     // periphery:ignore - Reserved: isLanguageActive(_:for:) instance method — reserved for future feature activation
+    /// Check if a specific language is active for a conversation
     func isLanguageActive(_ languageCode: String, for conversation: Conversation) -> Bool {
         // periphery:ignore - Reserved: isLanguageActive(_:for:) instance method reserved for future feature activation
         conversation.metadata.preferredLanguage == languageCode
@@ -92,8 +92,8 @@ final class ConversationLanguageService {
 
     // MARK: - Language Detection
 
-    /// Detect the language of a user message and optionally auto-set it
     // periphery:ignore - Reserved: detectAndSuggestLanguage(from:) instance method reserved for future feature activation
+    /// Detect the language of a user message and optionally auto-set it
     func detectAndSuggestLanguage(from text: String) -> String? {
         // Use NaturalLanguage framework for detection
         let recognizer = NLLanguageRecognizer()

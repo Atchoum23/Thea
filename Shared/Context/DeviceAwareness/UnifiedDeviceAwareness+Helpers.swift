@@ -214,8 +214,8 @@ extension UnifiedDeviceAwareness {
 
     // MARK: - Context Summary for AI
 
-    /// Generate a context summary for the AI to understand the device state
     // periphery:ignore - Reserved: generateContextSummary() instance method reserved for future feature activation
+    /// Generate a context summary for the AI to understand the device state
     func generateContextSummary() -> String {
         var summary = """
         ## Device Context

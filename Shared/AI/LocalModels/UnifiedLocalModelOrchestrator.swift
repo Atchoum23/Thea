@@ -231,8 +231,8 @@ final class UnifiedLocalModelOrchestrator {
         )
     }
 
-    /// Select the best runtime for a specific model format
     // periphery:ignore - Reserved: selectRuntime(for:) instance method — reserved for future feature activation
+    /// Select the best runtime for a specific model format
     func selectRuntime(for model: LocalModel) -> LocalRuntime {
         // If model has a specific runtime, use it
         let modelRuntime = mapModelRuntimeToLocal(model.runtime)
@@ -258,8 +258,8 @@ final class UnifiedLocalModelOrchestrator {
         return modelRuntime
     }
 
-    /// Map from existing ModelRuntime to our LocalRuntime
     // periphery:ignore - Reserved: selectRuntime(for:) instance method reserved for future feature activation
+    /// Map from existing ModelRuntime to our LocalRuntime
     private func mapModelRuntimeToLocal(_ runtime: ModelRuntime) -> LocalRuntime {
         switch runtime {
         case .mlx: return .mlx
@@ -467,8 +467,8 @@ final class UnifiedLocalModelOrchestrator {
 
     // MARK: - Autonomous Recommendations
 
-    /// Get model recommendations based on usage patterns and hardware
     // periphery:ignore - Reserved: getModelRecommendations() instance method — reserved for future feature activation
+    /// Get model recommendations based on usage patterns and hardware
     func getModelRecommendations() async -> [LocalModelSuggestion] {
         let engine = LocalModelRecommendationEngine.shared
         let recommendations = engine.recommendations
@@ -494,8 +494,8 @@ final class UnifiedLocalModelOrchestrator {
         }
     }
 
-    /// Check if a model should be recommended for download
     // periphery:ignore - Reserved: shouldRecommendModel(_:) instance method — reserved for future feature activation
+    /// Check if a model should be recommended for download
     func shouldRecommendModel(_ modelId: String) async -> Bool {
         let engine = LocalModelRecommendationEngine.shared
         return engine.recommendations.contains { $0.model.id == modelId }
@@ -702,8 +702,8 @@ enum SuggestionPriority: String, Codable, Sendable {
 // MARK: - ModelRouter Extension for Local Models
 
 extension ModelRouter {
-    /// Route with local model preference
     // periphery:ignore - Reserved: routeWithLocalPreference(classification:preferLocal:) instance method reserved for future feature activation
+    /// Route with local model preference
     func routeWithLocalPreference(
         classification: ClassificationResult,
         preferLocal: Bool = false

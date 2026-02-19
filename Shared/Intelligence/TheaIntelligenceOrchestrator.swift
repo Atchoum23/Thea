@@ -58,8 +58,8 @@ final class TheaIntelligenceOrchestrator {
 
     // MARK: - Lifecycle
 
-    /// Start the intelligence orchestrator. Call this from app startup.
     // periphery:ignore - Reserved: start() instance method — reserved for future feature activation
+    /// Start the intelligence orchestrator. Call this from app startup.
     func start() {
         guard !isRunning else { return }
         isRunning = true
@@ -82,8 +82,8 @@ final class TheaIntelligenceOrchestrator {
         logger.info("Intelligence Orchestrator started")
     }
 
-    /// Stop the intelligence orchestrator.
     // periphery:ignore - Reserved: stop() instance method — reserved for future feature activation
+    /// Stop the intelligence orchestrator.
     func stop() {
         isRunning = false
         systemStatus = .idle
@@ -126,8 +126,8 @@ final class TheaIntelligenceOrchestrator {
         }
     }
 
-    /// Run a full evaluation cycle across all intelligence systems.
     // periphery:ignore - Reserved: evaluate() instance method — reserved for future feature activation
+    /// Run a full evaluation cycle across all intelligence systems.
     func evaluate() async {
         guard isEnabled else { return }
 
@@ -164,9 +164,9 @@ final class TheaIntelligenceOrchestrator {
 
     // MARK: - Chat Integration
 
+    // periphery:ignore - Reserved: processAIResponse(task:response:conversationContext:) instance method — reserved for future feature activation
     /// Process an AI response through the intelligence pipeline.
     /// Call this after receiving a response from any AI provider.
-    // periphery:ignore - Reserved: processAIResponse(task:response:conversationContext:) instance method — reserved for future feature activation
     func processAIResponse(
         task: String,
         response: String,
@@ -186,8 +186,8 @@ final class TheaIntelligenceOrchestrator {
         return reflexionResult.response
     }
 
-    /// Extract memory from a completed conversation
     // periphery:ignore - Reserved: extractConversationMemory(_:) instance method — reserved for future feature activation
+    /// Extract memory from a completed conversation
     func extractConversationMemory(_ conversation: Conversation) async {
         guard isEnabled else { return }
         await ConversationMemoryExtractor.shared.extractFromConversation(conversation)
@@ -219,8 +219,8 @@ final class TheaIntelligenceOrchestrator {
 
     // MARK: - System Status
 
-    /// Get a comprehensive status report of all intelligence systems
     // periphery:ignore - Reserved: statusReport() instance method — reserved for future feature activation
+    /// Get a comprehensive status report of all intelligence systems
     func statusReport() async -> IntelligenceStatusReport {
         // periphery:ignore - Reserved: statusReport() instance method reserved for future feature activation
         let graph = PersonalKnowledgeGraph.shared

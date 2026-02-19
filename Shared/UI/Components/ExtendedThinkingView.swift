@@ -165,8 +165,8 @@ class ThinkingTimer: ObservableObject {
 
 // MARK: - Streaming Thinking View
 
-/// View that displays thinking content as it streams in
 // periphery:ignore - Reserved: StreamingThinkingView type reserved for future feature activation
+/// View that displays thinking content as it streams in
 struct StreamingThinkingView: View {
     @ObservedObject var timer: ThinkingTimer
     let thinkingText: String

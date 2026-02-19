@@ -62,8 +62,8 @@ final class PermissionsManager {
     /// Loading state
     private(set) var isRefreshing = false
 
-    /// Last refresh date
     // periphery:ignore - Reserved: hasCompletedOnboarding property reserved for future feature activation
+    /// Last refresh date
     private(set) var lastRefreshDate: Date?
 
     // Legacy permission states (for backward compatibility)

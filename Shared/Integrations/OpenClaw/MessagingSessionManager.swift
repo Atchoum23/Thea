@@ -111,8 +111,8 @@ final class MessagingSessionManager: ObservableObject {
     // Implements Maximal Marginal Relevance for context retrieval.
     // Balances relevance to query vs. diversity among selected messages.
 
-    /// Returns the most relevant + diverse context messages for AI prompting.
     // periphery:ignore - Reserved: relevantContext(for:sessionKey:maxItems:) instance method — reserved for future feature activation
+    /// Returns the most relevant + diverse context messages for AI prompting.
     func relevantContext(for query: String, sessionKey: String, maxItems: Int = 10) -> [String] {
         guard let session = activeSessions.first(where: { $0.key == sessionKey }) else { return [] }
         let history = session.decodedHistory()
@@ -324,8 +324,8 @@ struct MessagingCredentialsStore {
 // MARK: - PersonalKnowledgeGraph Extension
 
 extension PersonalKnowledgeGraph {
-    /// Returns frequently-referenced entities for messaging context injection.
     // periphery:ignore - Reserved: contextForMessaging() instance method reserved for future feature activation
+    /// Returns frequently-referenced entities for messaging context injection.
     func contextForMessaging() -> [String] {
         recentEntities(limit: 20)
             .filter { $0.referenceCount > 2 }

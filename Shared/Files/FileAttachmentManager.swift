@@ -99,8 +99,8 @@ final class FileAttachmentManager {
         attachments.append(attachment)
     }
 
-    /// Add multiple files
     // periphery:ignore - Reserved: addAttachments(from:) instance method — reserved for future feature activation
+    /// Add multiple files
     func addAttachments(from urls: [URL]) async throws {
         for (index, url) in urls.enumerated() {
             processingProgress = Double(index) / Double(urls.count)
@@ -456,8 +456,8 @@ final class FileAttachmentManager {
 
     // MARK: - AI Formatting
 
-    /// Format all attachments for AI context
     // periphery:ignore - Reserved: formatForAI() instance method — reserved for future feature activation
+    /// Format all attachments for AI context
     func formatForAI() -> String {
         guard !attachments.isEmpty else { return "" }
 
@@ -489,8 +489,8 @@ final class FileAttachmentManager {
         return context
     }
 
-    /// Get base64 encoded images for vision models
     // periphery:ignore - Reserved: getBase64Images() instance method — reserved for future feature activation
+    /// Get base64 encoded images for vision models
     func getBase64Images() -> [(name: String, base64: String, mimeType: String)] {
         attachments
             .filter { $0.fileType == .image }

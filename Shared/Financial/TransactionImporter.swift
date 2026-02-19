@@ -117,8 +117,8 @@ final class TransactionImporter {
 
     // MARK: - Category Detection
 
-    /// AI-ready category detection with rule-based fallback.
     // periphery:ignore - Reserved: type parameter — kept for API compatibility
+    /// AI-ready category detection with rule-based fallback.
     func categorizeTransaction(description: String, amount: Double, type: String = "OTHER") -> String {
         let desc = description.lowercased()
 
@@ -185,9 +185,9 @@ final class TransactionImporter {
 
     // MARK: - Recurring Transaction Detection
 
+    // periphery:ignore - Reserved: detectRecurring(in:) instance method — reserved for future feature activation
     /// Detect recurring transactions from a list.
     /// Groups by similar description + amount, checks interval consistency.
-    // periphery:ignore - Reserved: detectRecurring(in:) instance method — reserved for future feature activation
     func detectRecurring(in transactions: [ImportedTransaction]) -> [RecurringPattern] {
         // periphery:ignore - Reserved: detectRecurring(in:) instance method reserved for future feature activation
         var patterns: [RecurringPattern] = []

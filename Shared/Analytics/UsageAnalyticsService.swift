@@ -84,8 +84,8 @@ public final class UsageAnalyticsService {
         }
     }
 
-    /// Track a chat interaction
     // periphery:ignore:parameters provider - Reserved: parameter(s) kept for API compatibility
+    /// Track a chat interaction
     public func trackChat(
         model: String,
         provider: String,
@@ -119,8 +119,8 @@ public final class UsageAnalyticsService {
         }
     }
 
-    /// Track a task completion
     // periphery:ignore:parameters durationMs - Reserved: parameter(s) kept for API compatibility
+    /// Track a task completion
     public func trackTask(
         type: String,
         durationMs: Int,
@@ -135,8 +135,8 @@ public final class UsageAnalyticsService {
         }
     }
 
-    /// Track a search
     // periphery:ignore - Reserved: query parameter — kept for API compatibility
+    /// Track a search
     public func trackSearch(query: String, resultsCount: Int) {
         // periphery:ignore - Reserved: query parameter kept for API compatibility
         guard isEnabled else { return }
@@ -146,8 +146,8 @@ public final class UsageAnalyticsService {
         }
     }
 
-    /// Track autonomous action
     // periphery:ignore - Reserved: type parameter kept for API compatibility
+    /// Track autonomous action
     public func trackAutonomousAction(type: String, approved: Bool) {
         guard isEnabled else { return }
 

@@ -30,8 +30,8 @@ public final class MemoryAugmentedChat {
 
     // MARK: - Public API
 
-    /// Process a user message with memory augmentation
     // periphery:ignore - Reserved: processMessage(_:conversationId:projectId:existingMessages:) instance method — reserved for future feature activation
+    /// Process a user message with memory augmentation
     func processMessage(
         _ userMessage: String,
         conversationId: UUID,
@@ -112,8 +112,8 @@ public final class MemoryAugmentedChat {
         )
     }
 
-    /// Get context-aware suggestions based on current state
     // periphery:ignore - Reserved: getSuggestions(conversationId:recentMessages:projectId:) instance method — reserved for future feature activation
+    /// Get context-aware suggestions based on current state
     func getSuggestions(
         conversationId: UUID,
         recentMessages: [AIMessage],

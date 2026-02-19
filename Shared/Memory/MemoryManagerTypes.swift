@@ -277,8 +277,8 @@ struct MemoryImportanceWeights {
     /// Weight for source credibility
     var source: Double = 0.15
 
-    /// Weight for user feedback (explicit corrections)
     // periphery:ignore - Reserved: feedback property reserved for future feature activation
+    /// Weight for user feedback (explicit corrections)
     var feedback: Double = 0.10
 }
 

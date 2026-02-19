@@ -182,8 +182,8 @@ public final class UnifiedIntelligenceHub {
         )
     }
 
-    /// Check for blockers in current context
     // periphery:ignore - Reserved: context parameter — kept for API compatibility
+    /// Check for blockers in current context
     public func checkForBlockers(context: IntelligenceContext) async -> [DetectedBlocker] {
         // periphery:ignore - Reserved: context parameter kept for API compatibility
         activeBlockers.filter { blocker in

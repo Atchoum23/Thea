@@ -33,8 +33,8 @@ extension Color {
         #endif
     }
 
-    /// Tertiary label color
     // periphery:ignore - Reserved: tertiaryLabel static property — reserved for future feature activation
+    /// Tertiary label color
     static var tertiaryLabel: Color {
         // periphery:ignore - Reserved: tertiaryLabel static property reserved for future feature activation
         #if os(macOS)
@@ -44,8 +44,8 @@ extension Color {
         #endif
     }
 
-    /// Quaternary label color
     // periphery:ignore - Reserved: quaternaryLabel static property reserved for future feature activation
+    /// Quaternary label color
     static var quaternaryLabel: Color {
         #if os(macOS)
             Color(nsColor: .quaternaryLabelColor)

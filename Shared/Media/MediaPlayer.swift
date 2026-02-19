@@ -408,8 +408,8 @@ final class MediaPlayer: ObservableObject {
         }
     }
 
-    /// Stop playback and save position.
     // periphery:ignore - Reserved: stop() instance method — reserved for future feature activation
+    /// Stop playback and save position.
     func stop() {
         savePosition()
         player?.pause()
@@ -522,8 +522,8 @@ final class MediaPlayer: ObservableObject {
         saveHistory()
     }
 
-    /// Clear all history.
     // periphery:ignore - Reserved: clearHistory() instance method — reserved for future feature activation
+    /// Clear all history.
     func clearHistory() {
         history.removeAll()
         // periphery:ignore - Reserved: clearHistory() instance method reserved for future feature activation
@@ -543,8 +543,8 @@ final class MediaPlayer: ObservableObject {
         )
     }
 
-    /// Get recently played items.
     // periphery:ignore - Reserved: recentlyPlayed(limit:) instance method — reserved for future feature activation
+    /// Get recently played items.
     func recentlyPlayed(limit: Int = 10) -> [PlayedMediaItem] {
         // periphery:ignore - Reserved: recentlyPlayed(limit:) instance method reserved for future feature activation
         Array(history.sorted { $0.lastPlayedAt > $1.lastPlayedAt }.prefix(limit))
@@ -677,8 +677,8 @@ final class MediaPlayer: ObservableObject {
         return String(format: "%d:%02d", minutes, secs)
     }
 
-    /// Get supported file extensions.
     // periphery:ignore - Reserved: supportedExtensions static property reserved for future feature activation
+    /// Get supported file extensions.
     nonisolated static var supportedExtensions: [String] {
         ["mp4", "mov", "mkv", "avi", "wmv", "flv", "webm", "m4v", "mpg", "mpeg",
          "mp3", "m4a", "aac", "wav", "flac", "ogg", "wma", "aiff", "opus",

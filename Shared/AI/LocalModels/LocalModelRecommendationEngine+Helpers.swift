@@ -43,8 +43,8 @@ extension LocalModelRecommendationEngine {
 // MARK: - User Profile
 
 extension LocalModelRecommendationEngine {
-    /// Record user activity to improve recommendations
     // periphery:ignore - Reserved: recordUserActivity(taskType:) instance method — reserved for future feature activation
+    /// Record user activity to improve recommendations
     func recordUserActivity(taskType: TaskType) {
         userProfile.recordTask(taskType)
         // periphery:ignore - Reserved: recordUserActivity(taskType:) instance method reserved for future feature activation

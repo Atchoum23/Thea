@@ -70,9 +70,9 @@ final class AutomaticPromptEngineering {
 
     // MARK: - Main Entry Point
 
+    // periphery:ignore - Reserved: engineerPrompt(userInput:taskType:additionalContext:) instance method — reserved for future feature activation
     /// Automatically engineers the optimal prompt for any user input
     /// This is the main method users should call - handles everything automatically
-    // periphery:ignore - Reserved: engineerPrompt(userInput:taskType:additionalContext:) instance method — reserved for future feature activation
     func engineerPrompt(
         userInput: String,
         taskType: TaskType? = nil,

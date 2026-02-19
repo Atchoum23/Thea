@@ -126,8 +126,8 @@ final class DeviceDiscoveryService {
         isDiscovering = true
     }
 
-    /// Stop discovery
     // periphery:ignore - Reserved: stopDiscovery() instance method — reserved for future feature activation
+    /// Stop discovery
     func stopDiscovery() {
         browser?.cancel()
         browser = nil
@@ -138,8 +138,8 @@ final class DeviceDiscoveryService {
         deviceTimeouts.removeAll()
     }
 
-    /// Refresh discovery
     // periphery:ignore - Reserved: refresh() instance method — reserved for future feature activation
+    /// Refresh discovery
     func refresh() {
         stopDiscovery()
         discoveredDevices.removeAll()
@@ -180,8 +180,8 @@ final class DeviceDiscoveryService {
         listener?.start(queue: .main)
     }
 
-    /// Stop advertising
     // periphery:ignore - Reserved: stopAdvertising() instance method — reserved for future feature activation
+    /// Stop advertising
     func stopAdvertising() {
         listener?.cancel()
         listener = nil
@@ -467,8 +467,8 @@ extension NWTXTRecord {
         return pairs
     }
 
-    /// Factory method to create TXT record from dictionary
     // periphery:ignore - Reserved: fromDictionary(_:) static method reserved for future feature activation
+    /// Factory method to create TXT record from dictionary
     static func fromDictionary(_ dict: [String: String]) -> NWTXTRecord {
         var record = NWTXTRecord()
         for (key, value) in dict {

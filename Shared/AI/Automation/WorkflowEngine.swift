@@ -64,8 +64,8 @@ final class WorkflowEngine {
         }
     }
 
-    /// Delete a workflow
     // periphery:ignore - Reserved: deleteWorkflow(id:) instance method — reserved for future feature activation
+    /// Delete a workflow
     func deleteWorkflow(id: UUID) {
         workflows.removeAll { $0.id == id }
         saveWorkflows()
@@ -165,8 +165,8 @@ final class WorkflowEngine {
         return result
     }
 
-    /// Cancel running workflow
     // periphery:ignore - Reserved: cancelExecution() instance method — reserved for future feature activation
+    /// Cancel running workflow
     func cancelExecution() {
         runningTasks.values.forEach { $0.cancel() }
         runningTasks.removeAll()

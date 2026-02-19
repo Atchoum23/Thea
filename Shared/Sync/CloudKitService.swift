@@ -186,12 +186,12 @@ public class CloudKitService: ObservableObject {
         zoneID: .default
     )
 
+    // periphery:ignore - Reserved: pushMessagingSettings() instance method — reserved for future feature activation
     /// Push non-sensitive messaging gateway settings to CloudKit.
     ///
     /// **Privacy guarantee**: Credentials (botToken, apiKey, webhookSecret, serverUrl) are NEVER
     /// written to CloudKit. Only the enabled/disabled state per platform and auto-respond
     /// configuration are synced. Sensitive credentials remain in Keychain only.
-    // periphery:ignore - Reserved: pushMessagingSettings() instance method — reserved for future feature activation
     @discardableResult
     func pushMessagingSettings() async -> Bool {
         guard syncEnabled, iCloudAvailable, let db = privateDatabase else {

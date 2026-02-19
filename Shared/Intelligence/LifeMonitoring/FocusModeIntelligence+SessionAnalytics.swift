@@ -41,10 +41,10 @@ extension FocusModeIntelligence {
 
     // MARK: - Session Lifecycle
 
+    // periphery:ignore - Reserved: startSessionAnalytics(mode:) instance method — reserved for future feature activation
     /// Start collecting analytics for a new Focus session.
     ///
     /// - Parameter mode: The ``FocusModeConfiguration`` being activated.
-    // periphery:ignore - Reserved: startSessionAnalytics(mode:) instance method — reserved for future feature activation
     func startSessionAnalytics(mode: FocusModeConfiguration) {
         // periphery:ignore - Reserved: startSessionAnalytics(mode:) instance method reserved for future feature activation
         setCurrentSessionAnalytics(FocusSessionAnalytics(
@@ -60,13 +60,13 @@ extension FocusModeIntelligence {
         ))
     }
 
+    // periphery:ignore - Reserved: mode parameter kept for API compatibility
     /// Apply machine-learning analysis to the completed Focus session.
     ///
     /// Analyzes contact patterns, adjusts priorities, evaluates timing, and learns
     /// new urgency indicators based on the session data and user feedback.
     ///
     /// - Parameter mode: The ``FocusModeConfiguration`` that was active during the session.
-    // periphery:ignore - Reserved: mode parameter kept for API compatibility
     func applyLearningFromSession(mode: FocusModeConfiguration) async {
         guard var analytics = getCurrentSessionAnalytics() else { return }
 

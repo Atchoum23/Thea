@@ -66,8 +66,8 @@ final class ConversationListViewModel {
     // periphery:ignore - Reserved: filteredConversations property reserved for future feature activation
     }
 
-    /// Pinned conversations (filtered)
     // periphery:ignore - Reserved: pinnedConversations property — reserved for future feature activation
+    /// Pinned conversations (filtered)
     var pinnedConversations: [Conversation] {
         filteredConversations.filter(\.isPinned)
     }
@@ -77,8 +77,8 @@ final class ConversationListViewModel {
         filteredConversations.filter { !$0.isPinned }
     }
 
-    /// Conversations grouped by date
     // periphery:ignore - Reserved: pinnedConversations property reserved for future feature activation
+    /// Conversations grouped by date
     var conversationsByDate: [(title: String, conversations: [Conversation])] {
         let unpinned = recentConversations
         let calendar = Calendar.current
@@ -121,23 +121,23 @@ final class ConversationListViewModel {
 
     // MARK: - Actions
 
-    /// Create a new conversation and select it
     // periphery:ignore - Reserved: createNewConversation() instance method — reserved for future feature activation
+    /// Create a new conversation and select it
     func createNewConversation() {
         let conversation = chatManager.createConversation()
         selectedConversation = conversation
         chatManager.selectConversation(conversation)
     }
 
-    /// Select a conversation
     // periphery:ignore - Reserved: createNewConversation() instance method reserved for future feature activation
+    /// Select a conversation
     func selectConversation(_ conversation: Conversation) {
         selectedConversation = conversation
         chatManager.selectConversation(conversation)
     }
 
-    /// Request deletion of a conversation (shows confirmation)
     // periphery:ignore - Reserved: selectConversation(_:) instance method reserved for future feature activation
+    /// Request deletion of a conversation (shows confirmation)
     func requestDelete(_ conversation: Conversation) {
         conversationToDelete = conversation
         showingDeleteConfirmation = true
@@ -158,30 +158,30 @@ final class ConversationListViewModel {
         showingDeleteConfirmation = false
     }
 
-    /// Cancel deletion
     // periphery:ignore - Reserved: cancelDelete() instance method — reserved for future feature activation
+    /// Cancel deletion
     func cancelDelete() {
         conversationToDelete = nil
         showingDeleteConfirmation = false
     // periphery:ignore - Reserved: cancelDelete() instance method reserved for future feature activation
     }
 
-    /// Toggle pin status of a conversation
     // periphery:ignore - Reserved: togglePin(_:) instance method — reserved for future feature activation
+    /// Toggle pin status of a conversation
     func togglePin(_ conversation: Conversation) {
         chatManager.togglePin(conversation)
     // periphery:ignore - Reserved: togglePin(_:) instance method reserved for future feature activation
     }
 
-    /// Update conversation title
     // periphery:ignore - Reserved: updateTitle(_:to:) instance method — reserved for future feature activation
+    /// Update conversation title
     func updateTitle(_ conversation: Conversation, to title: String) {
         // periphery:ignore - Reserved: updateTitle(_:to:) instance method reserved for future feature activation
         chatManager.updateConversationTitle(conversation, title: title)
     }
 
-    /// Clear search text
     // periphery:ignore - Reserved: clearSearch() instance method reserved for future feature activation
+    /// Clear search text
     func clearSearch() {
         searchText = ""
     }

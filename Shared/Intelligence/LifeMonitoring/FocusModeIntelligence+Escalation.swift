@@ -34,6 +34,7 @@ extension FocusModeIntelligence {
     // If contact confirms, only then is user notified. This prevents unnecessary
     // interruptions from people who just send many messages but aren't urgent.
 
+    // periphery:ignore - Reserved: trackMessageForEscalation(contactKey:messageContent:) instance method — reserved for future feature activation
     /// Track an incoming message for potential escalation based on frequency.
     ///
     /// Maintains a sliding window of message timestamps per contact. When the
@@ -42,7 +43,6 @@ extension FocusModeIntelligence {
     /// - Parameters:
     ///   - contactKey: The unique key identifying the contact.
     ///   - messageContent: The message text (used for confirmation checks).
-    // periphery:ignore - Reserved: trackMessageForEscalation(contactKey:messageContent:) instance method — reserved for future feature activation
     func trackMessageForEscalation(contactKey: String, messageContent: String) async {
         guard getGlobalSettings().smartEscalationEnabled else { return }
 
@@ -67,6 +67,7 @@ extension FocusModeIntelligence {
         }
     }
 
+    // periphery:ignore - Reserved: handleEscalation(contactKey:messageCount:) instance method — reserved for future feature activation
     /// Handle a contact that has exceeded the message frequency threshold.
     ///
     /// Sends a localized inquiry asking if the matter is truly urgent, rather than
@@ -75,7 +76,6 @@ extension FocusModeIntelligence {
     /// - Parameters:
     ///   - contactKey: The unique key identifying the contact.
     ///   - messageCount: The number of messages received in the escalation window.
-    // periphery:ignore - Reserved: handleEscalation(contactKey:messageCount:) instance method — reserved for future feature activation
     func handleEscalation(contactKey: String, messageCount: Int) async {
         print("[Escalation] Contact \(contactKey) sent \(messageCount) messages in \(Int(getGlobalSettings().escalationTimeWindow))s window")
 
@@ -97,12 +97,12 @@ extension FocusModeIntelligence {
         print("[Escalation] Sent inquiry to \(contactKey) - waiting for confirmation before notifying user")
     }
 
+    // periphery:ignore - Reserved: checkEscalationConfirmation(contactKey:messageContent:) instance method — reserved for future feature activation
     /// Check if a pending escalation contact has confirmed or denied urgency.
     ///
     /// - Parameters:
     ///   - contactKey: The unique key identifying the contact.
     ///   - messageContent: The response message to analyze.
-    // periphery:ignore - Reserved: checkEscalationConfirmation(contactKey:messageContent:) instance method — reserved for future feature activation
     func checkEscalationConfirmation(contactKey: String, messageContent: String) async {
         let language = await detectLanguage(for: contactKey, phoneNumber: contactKey, messageContent: messageContent)
 
@@ -141,10 +141,10 @@ extension FocusModeIntelligence {
         }
     }
 
+    // periphery:ignore - Reserved: notifyUserOfUrgentContact(contactKey:) instance method — reserved for future feature activation
     /// Send a local notification to the user about an urgent contact.
     ///
     /// - Parameter contactKey: The unique key identifying the urgent contact.
-    // periphery:ignore - Reserved: notifyUserOfUrgentContact(contactKey:) instance method — reserved for future feature activation
     func notifyUserOfUrgentContact(contactKey: String) async {
         let content = UNMutableNotificationContent()
         content.title = "\u{26A0}\u{FE0F} Urgent Message"
@@ -163,13 +163,13 @@ extension FocusModeIntelligence {
     // PRIVACY: Never share meeting details or calendar info!
     // Only share when user will be available again - no meeting titles or details.
 
+    // periphery:ignore - Reserved: getCalendarAwareMessage(language:) instance method — reserved for future feature activation
     /// Get a privacy-safe calendar-aware message showing only availability time.
     ///
     /// PRIVACY: Only reveals when the user will be available, never what the event is.
     ///
     /// - Parameter language: The BCP-47 language code for localization.
     /// - Returns: A localized availability message, or `nil` if unavailable.
-    // periphery:ignore - Reserved: getCalendarAwareMessage(language:) instance method — reserved for future feature activation
     func getCalendarAwareMessage(language: String) async -> String? {
         guard getGlobalSettings().calendarAwareRepliesEnabled else { return nil }
 
@@ -207,11 +207,11 @@ extension FocusModeIntelligence {
         return nil
     }
 
+    // periphery:ignore - Reserved: getNextAvailableSlot(language:) instance method — reserved for future feature activation
     /// Find the next available time slot (privacy-safe: time only, no event details).
     ///
     /// - Parameter language: The BCP-47 language code for localization.
     /// - Returns: A localized next-available message, or `nil`.
-    // periphery:ignore - Reserved: getNextAvailableSlot(language:) instance method — reserved for future feature activation
     func getNextAvailableSlot(language: String) async -> String? {
         guard getGlobalSettings().includeNextAvailableSlot else { return nil }
 
@@ -341,6 +341,7 @@ extension FocusModeIntelligence {
     // - Only respond to direct mentions
     // - Track group activity separately
 
+    // periphery:ignore:parameters groupName - Reserved: parameter(s) kept for API compatibility
     /// Handle an incoming group chat message with mention-aware auto-reply.
     ///
     /// Only responds to direct mentions (not all group messages), and respects
@@ -353,7 +354,6 @@ extension FocusModeIntelligence {
     ///   - platform: The communication platform.
     ///   - messageContent: The message text.
     ///   - isMention: Whether the user was directly mentioned/tagged.
-    // periphery:ignore:parameters groupName - Reserved: parameter(s) kept for API compatibility
     public func handleIncomingGroupMessage(
         groupId: String,
         groupName: String?,
@@ -393,13 +393,13 @@ extension FocusModeIntelligence {
         }
     }
 
+    // periphery:ignore - Reserved: platform parameter kept for API compatibility
     /// Send a message to a group chat.
     ///
     /// - Parameters:
     ///   - groupId: The unique identifier of the group chat.
     ///   - message: The message text to send.
     ///   - platform: The communication platform.
-    // periphery:ignore - Reserved: platform parameter kept for API compatibility
     func sendGroupMessage(groupId: String, message: String, platform: CommunicationPlatform) async {
         print("[GroupChat] Would send to group \(groupId): \(message)")
     }

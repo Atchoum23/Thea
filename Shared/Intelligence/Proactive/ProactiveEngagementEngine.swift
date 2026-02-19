@@ -33,8 +33,8 @@ final class ProactiveEngagementEngine {
     /// Maximum proactive messages per day
     var maxDailyEngagements = 5
 
-    /// Minimum hours between engagements
     // periphery:ignore - Reserved: shared static property reserved for future feature activation
+    /// Minimum hours between engagements
     var minEngagementIntervalHours = 2.0
 
 // periphery:ignore - Reserved: logger property reserved for future feature activation
@@ -54,9 +54,9 @@ final class ProactiveEngagementEngine {
 
     // MARK: - Main Evaluation Loop
 
+    // periphery:ignore - Reserved: evaluate() instance method — reserved for future feature activation
     /// Evaluate all trigger sources and generate proactive engagements.
     /// Call this periodically (e.g., every 30 minutes from app lifecycle).
-    // periphery:ignore - Reserved: evaluate() instance method — reserved for future feature activation
     func evaluate() async {
         guard isEnabled else { return }
         resetDailyCounterIfNeeded()

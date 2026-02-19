@@ -58,8 +58,8 @@ enum ContextSource: String, Codable, Sendable {
     case tool = "tool"
 }
 
-/// Managed conversation context container for the context manager
 // periphery:ignore - Reserved: ManagedConversationContext type — reserved for future feature activation
+/// Managed conversation context container for the context manager
 struct ManagedConversationContext: Codable, Sendable {
     var conversationId: UUID
     // periphery:ignore - Reserved: ManagedConversationContext type reserved for future feature activation
@@ -133,30 +133,30 @@ actor ConversationContextManager {
         // Defer loading to first access since we can't call actor-isolated methods from init
     }
 
-    /// Initialize and load any persisted contexts
     // periphery:ignore - Reserved: initialize() instance method — reserved for future feature activation
+    /// Initialize and load any persisted contexts
     func initialize() async {
         loadPersistedContexts()
     }
 
     // MARK: - Dynamic Token Limit
 
-    /// Set max tokens based on available resources
     // periphery:ignore - Reserved: setMaxContextTokens(_:) instance method — reserved for future feature activation
+    /// Set max tokens based on available resources
     func setMaxContextTokens(_ tokens: Int) {
         maxContextTokens = tokens
     }
 
-    /// Get current max tokens
     // periphery:ignore - Reserved: getMaxContextTokens() instance method — reserved for future feature activation
+    /// Get current max tokens
     func getMaxContextTokens() -> Int {
         maxContextTokens
     }
 
     // MARK: - Context Creation
 
-    /// Create a new conversation context
     // periphery:ignore - Reserved: createContext() instance method — reserved for future feature activation
+    /// Create a new conversation context
     func createContext() -> UUID {
         let context = ManagedConversationContext()
         contexts[context.conversationId] = context
@@ -164,8 +164,8 @@ actor ConversationContextManager {
         return context.conversationId
     }
 
-    /// Get or create context for a conversation
     // periphery:ignore - Reserved: getOrCreateContext(for:) instance method — reserved for future feature activation
+    /// Get or create context for a conversation
     func getOrCreateContext(for conversationId: UUID) -> ManagedConversationContext {
         if let existing = contexts[conversationId] {
             return existing
@@ -177,8 +177,8 @@ actor ConversationContextManager {
 
     // MARK: - Adding Context
 
-    /// Add content to a conversation's context
     // periphery:ignore - Reserved: addContext(_:source:for:relevanceScore:) instance method — reserved for future feature activation
+    /// Add content to a conversation's context
     func addContext(
         _ content: String,
         source: ContextSource,
@@ -202,34 +202,34 @@ actor ConversationContextManager {
         }
     }
 
-    /// Add a user message to context
     // periphery:ignore - Reserved: addUserMessage(_:for:) instance method — reserved for future feature activation
+    /// Add a user message to context
     func addUserMessage(_ message: String, for conversationId: UUID) {
         addContext(message, source: .userMessage, for: conversationId, relevanceScore: 1.0)
     }
 
-    /// Add an assistant response to context
     // periphery:ignore - Reserved: addAssistantMessage(_:for:) instance method — reserved for future feature activation
+    /// Add an assistant response to context
     func addAssistantMessage(_ message: String, for conversationId: UUID) {
         addContext(message, source: .assistantMessage, for: conversationId, relevanceScore: 0.9)
     }
 
-    /// Add system prompt to context
     // periphery:ignore - Reserved: addSystemPrompt(_:for:) instance method — reserved for future feature activation
+    /// Add system prompt to context
     func addSystemPrompt(_ prompt: String, for conversationId: UUID) {
         addContext(prompt, source: .systemPrompt, for: conversationId, relevanceScore: 1.0)
     }
 
     // MARK: - Retrieving Context
 
-    /// Get all context for a conversation
     // periphery:ignore - Reserved: getContext(for:) instance method — reserved for future feature activation
+    /// Get all context for a conversation
     func getContext(for conversationId: UUID) -> ManagedConversationContext? {
         contexts[conversationId]
     }
 
-    /// Get relevant context blocks for a query
     // periphery:ignore - Reserved: getRelevantContext(for:conversationId:maxTokens:) instance method — reserved for future feature activation
+    /// Get relevant context blocks for a query
     func getRelevantContext(
         for query: String,
         conversationId: UUID,
@@ -287,8 +287,8 @@ actor ConversationContextManager {
         return selected.sorted { $0.timestamp < $1.timestamp }
     }
 
-    /// Get context as formatted messages
     // periphery:ignore - Reserved: getFormattedContext(for:maxTokens:) instance method — reserved for future feature activation
+    /// Get context as formatted messages
     func getFormattedContext(for conversationId: UUID, maxTokens: Int? = nil) -> [ContextMessage] {
         let blocks = getRelevantContext(for: "", conversationId: conversationId, maxTokens: maxTokens)
 
@@ -306,8 +306,8 @@ actor ConversationContextManager {
 
     // MARK: - Context Management
 
-    /// Prune context to stay within limits
     // periphery:ignore - Reserved: pruneContext(for:keeping:) instance method — reserved for future feature activation
+    /// Prune context to stay within limits
     func pruneContext(for conversationId: UUID, keeping targetTokens: Int? = nil) {
         guard var context = contexts[conversationId] else { return }
 
@@ -341,14 +341,14 @@ actor ConversationContextManager {
         contexts[conversationId] = context
     }
 
-    /// Clear all context for a conversation
     // periphery:ignore - Reserved: clearContext(for:) instance method — reserved for future feature activation
+    /// Clear all context for a conversation
     func clearContext(for conversationId: UUID) {
         contexts[conversationId] = nil
     }
 
-    /// Archive a conversation context
     // periphery:ignore - Reserved: archiveContext(for:) instance method — reserved for future feature activation
+    /// Archive a conversation context
     func archiveContext(for conversationId: UUID) {
         guard var context = contexts[conversationId] else { return }
         context.metadata.isArchived = true
@@ -385,18 +385,18 @@ actor ConversationContextManager {
 
     // MARK: - Context Carryover (Stalled Conversation Detection)
 
-    /// Stalled conversation threshold (seconds of inactivity)
     // periphery:ignore - Reserved: stalledThreshold property — reserved for future feature activation
+    /// Stalled conversation threshold (seconds of inactivity)
     private var stalledThreshold: TimeInterval = 300 // 5 minutes
 
-    /// Configure stalled threshold
     // periphery:ignore - Reserved: setStalledThreshold(_:) instance method — reserved for future feature activation
+    /// Configure stalled threshold
     func setStalledThreshold(_ seconds: TimeInterval) {
         stalledThreshold = seconds
     }
 
-    /// Detect if a conversation is stalled (inactive)
     // periphery:ignore - Reserved: detectStalledConversation(for:) instance method — reserved for future feature activation
+    /// Detect if a conversation is stalled (inactive)
     func detectStalledConversation(for conversationId: UUID) -> Bool {
         guard let context = contexts[conversationId] else { return false }
 
@@ -404,8 +404,8 @@ actor ConversationContextManager {
         return timeSinceUpdate > stalledThreshold
     }
 
-    /// Get how long a conversation has been stalled
     // periphery:ignore - Reserved: getStalledConversationAge(for:) instance method — reserved for future feature activation
+    /// Get how long a conversation has been stalled
     func getStalledConversationAge(for conversationId: UUID) -> TimeInterval? {
         guard let context = contexts[conversationId] else { return nil }
 
@@ -416,8 +416,8 @@ actor ConversationContextManager {
         return nil
     }
 
-    /// Suggest related topics for a stalled conversation
     // periphery:ignore - Reserved: suggestRelatedTopics(for:using:) instance method — reserved for future feature activation
+    /// Suggest related topics for a stalled conversation
     func suggestRelatedTopics(for conversationId: UUID, using memoryService: @escaping () async -> [String]) async -> [String] {
         guard let context = contexts[conversationId] else { return [] }
 
@@ -450,8 +450,8 @@ actor ConversationContextManager {
         return Array(suggestions.prefix(5))
     }
 
-    /// Suggest follow-up questions based on conversation context
     // periphery:ignore - Reserved: suggestFollowUpQuestions(for:) instance method — reserved for future feature activation
+    /// Suggest follow-up questions based on conversation context
     func suggestFollowUpQuestions(for conversationId: UUID) -> [String] {
         guard let context = contexts[conversationId] else { return [] }
 
@@ -495,8 +495,8 @@ actor ConversationContextManager {
         return Array(suggestions.prefix(3))
     }
 
-    /// Check if conversation needs context refresh
     // periphery:ignore - Reserved: needsContextRefresh(for:) instance method — reserved for future feature activation
+    /// Check if conversation needs context refresh
     func needsContextRefresh(for conversationId: UUID) -> Bool {
         guard let context = contexts[conversationId] else { return false }
 
@@ -518,8 +518,8 @@ actor ConversationContextManager {
         return false
     }
 
-    /// Get a summary of the conversation for context refresh
     // periphery:ignore - Reserved: getConversationSummary(for:) instance method — reserved for future feature activation
+    /// Get a summary of the conversation for context refresh
     func getConversationSummary(for conversationId: UUID) -> String? {
         guard let context = contexts[conversationId] else { return nil }
 
@@ -567,8 +567,8 @@ actor ConversationContextManager {
 
     // MARK: - Statistics
 
-    /// Get context statistics
     // periphery:ignore - Reserved: getStatistics(for:) instance method — reserved for future feature activation
+    /// Get context statistics
     func getStatistics(for conversationId: UUID) -> ContextStatistics? {
         guard let context = contexts[conversationId] else { return nil }
 
@@ -595,8 +595,8 @@ actor ConversationContextManager {
 
 // MARK: - Context Message Type
 
-/// Lightweight message DTO for context formatting
 // periphery:ignore - Reserved: ContextMessage type reserved for future feature activation
+/// Lightweight message DTO for context formatting
 struct ContextMessage: Codable, Sendable {
     enum Role: String, Codable, Sendable {
         case system

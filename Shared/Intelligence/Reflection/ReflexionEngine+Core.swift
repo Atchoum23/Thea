@@ -11,8 +11,8 @@ private let reflexionLogger = Logger(subsystem: "ai.thea.app", category: "Reflex
 
 // MARK: - Reflexion Engine
 
-/// Main engine for self-reflection and improvement
 // periphery:ignore - Reserved: reflexionLogger global var reserved for future feature activation
+/// Main engine for self-reflection and improvement
 @MainActor
 public final class ReflexionEngine: ObservableObject {
     public static let shared = ReflexionEngine()
@@ -280,8 +280,8 @@ extension ReflexionEngine {
 
     // MARK: - Failure Analysis
 
-    /// Analyze a failure and extract learnings
     // periphery:ignore:parameters context - Reserved: parameter(s) kept for API compatibility
+    /// Analyze a failure and extract learnings
     public func analyzeFailure(
         task: String,
         error: String,

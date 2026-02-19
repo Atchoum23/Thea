@@ -166,8 +166,8 @@ public final class SkillsRegistryService: ObservableObject {
 
     // MARK: - Reviews & Votes (Smithery Feature)
 
-    /// Get reviews for a skill
     // periphery:ignore - Reserved: skillId parameter — kept for API compatibility
+    /// Get reviews for a skill
     public func getReviews(skillId: String) async throws -> [SkillReview] {
         // periphery:ignore - Reserved: skillId parameter kept for API compatibility
         // In production, this would fetch from API
@@ -180,8 +180,8 @@ public final class SkillsRegistryService: ObservableObject {
         logger.info("Submitted \(voteType.rawValue) vote for skill: \(skillId)")
     }
 
-    /// Submit a review for a skill
     // periphery:ignore - Reserved: comment parameter kept for API compatibility
+    /// Submit a review for a skill
     public func submitReview(skillId: String, rating: Int, comment: String) async throws {
         // In production, this would submit to API
         logger.info("Submitted review for skill: \(skillId) with rating: \(rating)")

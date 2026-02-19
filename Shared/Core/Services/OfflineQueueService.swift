@@ -49,8 +49,8 @@ public final class OfflineQueueService {
         startNetworkMonitoring()
     }
 
-    /// Testing initializer — bypasses network monitoring and uses custom UserDefaults
     // periphery:ignore - Reserved: init(forTesting:userDefaults:) initializer reserved for future feature activation
+    /// Testing initializer — bypasses network monitoring and uses custom UserDefaults
     init(forTesting: Bool, userDefaults: UserDefaults) {
         self.testingUserDefaults = userDefaults
         // Do NOT start network monitoring in tests (no NWPathMonitor side effects)

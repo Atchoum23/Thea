@@ -127,8 +127,8 @@
             }
         }
 
-        /// Execute multiple commands in sequence
         // periphery:ignore - Reserved: executeSequence(_:workingDirectory:stopOnError:) instance method — reserved for future feature activation
+        /// Execute multiple commands in sequence
         func executeSequence(
             _ commands: [String],
             workingDirectory: URL? = nil,
@@ -275,8 +275,8 @@
             try await runAppleScript(script)
         }
 
-        /// Open a new tab in the front window
         // periphery:ignore - Reserved: openNewTab(withCommand:) instance method — reserved for future feature activation
+        /// Open a new tab in the front window
         func openNewTab(withCommand command: String? = nil) async throws {
             let script: String
             // periphery:ignore - Reserved: openNewTab(withCommand:) instance method reserved for future feature activation
@@ -303,8 +303,8 @@
             try await runAppleScript(script)
         }
 
-        /// Close the front Terminal window
         // periphery:ignore - Reserved: closeFrontWindow() instance method — reserved for future feature activation
+        /// Close the front Terminal window
         func closeFrontWindow() async throws {
             // periphery:ignore - Reserved: closeFrontWindow() instance method reserved for future feature activation
             let script = """
@@ -318,8 +318,8 @@
             try await runAppleScript(script)
         }
 
-        /// Clear the current Terminal buffer
         // periphery:ignore - Reserved: clearTerminal() instance method reserved for future feature activation
+        /// Clear the current Terminal buffer
         func clearTerminal() async throws {
             try await executeInFrontWindow("clear")
         }

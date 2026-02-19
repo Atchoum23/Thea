@@ -31,8 +31,8 @@ final class HomeViewModel {
     /// Whether to show the command palette
     var showingCommandPalette: Bool = false
 
-    /// Active conversation (synced with ChatManager)
     // periphery:ignore - Reserved: activeConversation property — reserved for future feature activation
+    /// Active conversation (synced with ChatManager)
     var activeConversation: Conversation? {
         chatManager.activeConversation
     }
@@ -75,8 +75,8 @@ final class HomeViewModel {
         columnVisibility = isSidebarVisible ? .all : .detailOnly
     }
 
-    /// Show new conversation UI
     // periphery:ignore - Reserved: showNewConversation() instance method — reserved for future feature activation
+    /// Show new conversation UI
     func showNewConversation() {
         showingNewConversation = true
     // periphery:ignore - Reserved: toggleSidebar() instance method reserved for future feature activation
@@ -141,8 +141,8 @@ final class HomeViewModel {
 
     // MARK: - Sync
 
-    /// Sync state with ChatManager
     // periphery:ignore - Reserved: syncWithChatManager() instance method reserved for future feature activation
+    /// Sync state with ChatManager
     func syncWithChatManager() {
         chatViewModel.syncWithChatManager()
         if let active = chatManager.activeConversation,

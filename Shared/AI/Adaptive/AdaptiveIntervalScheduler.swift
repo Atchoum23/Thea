@@ -389,8 +389,8 @@ public actor AdaptiveIntervalScheduler {
 
     // MARK: - Learning
 
-    /// Record outcome of a governance cycle for learning
     // periphery:ignore:parameters actualInterval - Reserved: parameter(s) kept for API compatibility
+    /// Record outcome of a governance cycle for learning
     public func recordGovernanceOutcome(
         actualInterval: TimeInterval,
         // periphery:ignore - Reserved: actualInterval parameter kept for API compatibility

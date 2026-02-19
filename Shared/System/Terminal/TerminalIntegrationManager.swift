@@ -129,8 +129,8 @@ import OSLog
             try await windowReader.readHistory()
         }
 
-        /// Read history from specific window/tab
         // periphery:ignore - Reserved: readTerminalHistory(windowIndex:tabIndex:) instance method — reserved for future feature activation
+        /// Read history from specific window/tab
         func readTerminalHistory(windowIndex: Int, tabIndex: Int) async throws -> String {
             try await windowReader.readHistory(windowIndex: windowIndex, tabIndex: tabIndex)
         }
@@ -141,8 +141,8 @@ import OSLog
             try await windowReader.isBusy()
         }
 
-        /// Get current processes in Terminal
         // periphery:ignore - Reserved: readTerminalHistory(windowIndex:tabIndex:) instance method reserved for future feature activation
+        /// Get current processes in Terminal
         func getCurrentProcesses() async throws -> [String] {
             try await windowReader.getCurrentProcesses()
         }
@@ -245,16 +245,16 @@ import OSLog
             try await executor.executeInTerminalTab(command, windowIndex: windowIndex, tabIndex: tabIndex)
         }
 
-        /// Execute a sequence of commands
         // periphery:ignore - Reserved: executeSequence(_:stopOnError:) instance method — reserved for future feature activation
+        /// Execute a sequence of commands
         func executeSequence(_ commands: [String], stopOnError: Bool = true) async throws -> [ShellCommandResult] {
             try await executor.executeSequence(commands, workingDirectory: currentSession?.workingDirectory, stopOnError: stopOnError)
         }
 
         // MARK: - MONITOR Output
 
-        /// Start monitoring Terminal output for changes
         // periphery:ignore - Reserved: executeSequence(_:stopOnError:) instance method reserved for future feature activation
+        /// Start monitoring Terminal output for changes
         func startMonitoring(interval: TimeInterval = 0.5, onChange: @escaping (String) -> Void) {
             stopMonitoring()
 
@@ -324,16 +324,16 @@ import OSLog
             await refreshWindowList()
         }
 
-        /// Open a new tab in front window
         // periphery:ignore - Reserved: openNewTab(withCommand:) instance method — reserved for future feature activation
+        /// Open a new tab in front window
         func openNewTab(withCommand command: String? = nil) async throws {
             try await executor.openNewTab(withCommand: command)
             await refreshWindowList()
         // periphery:ignore - Reserved: openNewTab(withCommand:) instance method reserved for future feature activation
         }
 
-        /// Clear the Terminal screen
         // periphery:ignore - Reserved: clearTerminal() instance method — reserved for future feature activation
+        /// Clear the Terminal screen
         func clearTerminal() async throws {
             try await executor.clearTerminal()
         // periphery:ignore - Reserved: clearTerminal() instance method reserved for future feature activation

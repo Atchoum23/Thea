@@ -605,8 +605,8 @@ public final class ContextualMultiArmedBandit: ObservableObject {
         return (global, contextCount)
     }
 
-    /// Get exploration rate (proportion of non-optimal selections)
     // periphery:ignore - Reserved: recentWindow parameter kept for API compatibility
+    /// Get exploration rate (proportion of non-optimal selections)
     public func getExplorationRate(recentWindow: Int = 100) -> Double {
         // This would require tracking recent selections
         // For now, return estimated rate based on statistics

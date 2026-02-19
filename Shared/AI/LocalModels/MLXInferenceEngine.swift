@@ -136,8 +136,8 @@ final class MLXInferenceEngine {
         }
     }
 
-    /// Unload the current model to free memory
     // periphery:ignore - Reserved: unloadModel() instance method — reserved for future feature activation
+    /// Unload the current model to free memory
     func unloadModel() {
         loadedModel = nil
         loadedModelID = nil
@@ -441,14 +441,14 @@ final class MLXInferenceEngine {
         }
     }
 
-    /// Clear the chat history for a conversation (resets KV cache)
     // periphery:ignore - Reserved: clearChatSession(for:) instance method — reserved for future feature activation
+    /// Clear the chat history for a conversation (resets KV cache)
     func clearChatSession(for conversationID: UUID) {
         chatSessions.removeValue(forKey: conversationID)
     }
 
-    /// Clear all chat sessions
     // periphery:ignore - Reserved: clearAllChatSessions() instance method — reserved for future feature activation
+    /// Clear all chat sessions
     func clearAllChatSessions() {
         // periphery:ignore - Reserved: clearChatSession(for:) instance method reserved for future feature activation
         chatSessions.removeAll()
@@ -469,8 +469,8 @@ final class MLXInferenceEngine {
         loadedModelID == modelID && loadedModel != nil
     }
 
-    /// Get the current model's context window size
     // periphery:ignore - Reserved: contextWindowSize property — reserved for future feature activation
+    /// Get the current model's context window size
     var contextWindowSize: Int {
         // Default context window - would need model config inspection for accurate value
         8192
@@ -503,8 +503,8 @@ enum MLXInferenceError: LocalizedError {
 // MARK: - Generation Parameters Extension
 
 extension GenerateParameters {
-    /// Create parameters optimized for chat/assistant use
     // periphery:ignore - Reserved: chat static property — reserved for future feature activation
+    /// Create parameters optimized for chat/assistant use
     static var chat: GenerateParameters {
         GenerateParameters(
             // periphery:ignore - Reserved: chat static property reserved for future feature activation
@@ -514,8 +514,8 @@ extension GenerateParameters {
         )
     }
 
-    /// Create parameters for deterministic/factual responses
     // periphery:ignore - Reserved: deterministic static property — reserved for future feature activation
+    /// Create parameters for deterministic/factual responses
     static var deterministic: GenerateParameters {
         // periphery:ignore - Reserved: deterministic static property reserved for future feature activation
         GenerateParameters(
@@ -524,8 +524,8 @@ extension GenerateParameters {
         )
     }
 
-    /// Create parameters for creative/diverse responses
     // periphery:ignore - Reserved: creative static property reserved for future feature activation
+    /// Create parameters for creative/diverse responses
     static var creative: GenerateParameters {
         GenerateParameters(
             maxTokens: 4096,

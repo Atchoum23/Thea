@@ -611,8 +611,8 @@ extension ChatManager {
         }
     }
 
-    /// Remove a queued message at the given index
     // periphery:ignore - Reserved: removeQueuedMessage(at:) instance method — reserved for future feature activation
+    /// Remove a queued message at the given index
     func removeQueuedMessage(at index: Int) {
         // periphery:ignore - Reserved: removeQueuedMessage(at:) instance method reserved for future feature activation
         guard messageQueue.indices.contains(index) else { return }
@@ -635,9 +635,9 @@ extension ChatManager {
 
     // MARK: - Token Counting
 
+    // periphery:ignore:parameters provider - Reserved: parameter(s) kept for API compatibility
     /// Count input tokens using Anthropic's free token counting endpoint.
     /// Falls back to heuristic (~4 chars per token) for non-Anthropic models.
-    // periphery:ignore:parameters provider - Reserved: parameter(s) kept for API compatibility
     private func countInputTokens(
         // periphery:ignore - Reserved: provider parameter kept for API compatibility
         messages: [AIMessage], model: String, provider: any AIProvider

@@ -123,8 +123,8 @@ final class ConversationMemory {
 
     // MARK: - Memory Operations
 
-    /// Add a conversation exchange to memory and potentially trigger summarization
     // periphery:ignore - Reserved: assistantResponse parameter — kept for API compatibility
+    /// Add a conversation exchange to memory and potentially trigger summarization
     func recordConversation(
         userMessage: String,
         assistantResponse: String,
@@ -225,8 +225,8 @@ final class ConversationMemory {
         )
     }
 
-    /// Build a context prompt from retrieved memory
     // periphery:ignore - Reserved: buildContextPrompt(for:projectId:) instance method — reserved for future feature activation
+    /// Build a context prompt from retrieved memory
     func buildContextPrompt(for query: String, projectId: UUID? = nil) -> String? {
         let context = retrieveContext(for: query, projectId: projectId)
 

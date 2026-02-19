@@ -41,8 +41,8 @@ public final class ProactiveEngine: ObservableObject {
 
     // MARK: - Analysis
 
-    /// Analyze current context and generate suggestions
     // periphery:ignore:parameters recentQuery - Reserved: parameter(s) kept for API compatibility
+    /// Analyze current context and generate suggestions
     public func analyzeContext(
         currentFile: String? = nil,
         recentQuery: String? = nil,
@@ -95,8 +95,8 @@ public final class ProactiveEngine: ObservableObject {
 
     // MARK: - Pattern Learning
 
-    /// Record an action for pattern learning
     // periphery:ignore - Reserved: context parameter — kept for API compatibility
+    /// Record an action for pattern learning
     public func recordAction(_ action: String, context: [String: String] = [:]) {
         // periphery:ignore - Reserved: context parameter kept for API compatibility
         let now = Date()
@@ -127,8 +127,8 @@ public final class ProactiveEngine: ObservableObject {
 
     // MARK: - Intent Prediction
 
-    /// Predict user's likely intent based on context
     // periphery:ignore:parameters recentQuery - Reserved: parameter(s) kept for API compatibility
+    /// Predict user's likely intent based on context
     public func predictIntent(
         currentFile: String? = nil,
         // periphery:ignore - Reserved: recentQuery parameter kept for API compatibility

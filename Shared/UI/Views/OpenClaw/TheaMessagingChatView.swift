@@ -11,7 +11,7 @@ struct TheaMessagingChatView: View {
     @ObservedObject private var sessions = MessagingSessionManager.shared
     @State private var selectedSessionKey: String?
     @State private var replyText = ""
-    @State private var selectedPlatform: MessagingPlatform? = nil
+    @State private var selectedPlatform: MessagingPlatform?
 
     var body: some View {
         NavigationSplitView {

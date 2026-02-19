@@ -8,8 +8,8 @@ import Foundation
 
 // MARK: - Context Manager
 
-/// Manages execution context and handles compaction for long operations
 // periphery:ignore - Reserved: BlueprintContextManager class — reserved for future feature activation
+/// Manages execution context and handles compaction for long operations
 @MainActor
 final class BlueprintContextManager {
     // periphery:ignore - Reserved: BlueprintContextManager type reserved for future feature activation

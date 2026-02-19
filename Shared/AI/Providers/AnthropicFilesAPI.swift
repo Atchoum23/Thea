@@ -14,11 +14,11 @@ import OSLog
 
 // MARK: - Anthropic Files API
 
+// periphery:ignore - Reserved: AnthropicFilesAPI class — reserved for future feature activation
 /// Files API for uploading and managing files
 /// Beta header: files-api-2025-04-14
 /// Max: 500MB per file, 29-day retention
 /// Pricing: FREE
-// periphery:ignore - Reserved: AnthropicFilesAPI class — reserved for future feature activation
 final class AnthropicFilesAPI: Sendable {
     private let apiKey: String
     private let baseURL = "https://api.anthropic.com/v1/files"

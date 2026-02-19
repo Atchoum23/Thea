@@ -404,8 +404,8 @@ public actor ActionTracker {
         logger.debug("Registered pattern: \(pattern.name)")
     }
 
-    /// Check if recent actions match any patterns
     // periphery:ignore - Reserved: newAction parameter kept for API compatibility
+    /// Check if recent actions match any patterns
     private func detectPatterns(with newAction: TrackedAction) async {
         let recentWindow = Array(recentActions.suffix(10))
 

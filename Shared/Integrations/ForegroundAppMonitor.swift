@@ -5,8 +5,8 @@ import os.log
 
 private let appMonitorLogger = Logger(subsystem: "ai.thea.app", category: "ForegroundAppMonitor")
 
-/// Monitors foreground app changes and extracts context for AI assistance
 // periphery:ignore - Reserved: appMonitorLogger global var reserved for future feature activation
+/// Monitors foreground app changes and extracts context for AI assistance
 @MainActor
 final class ForegroundAppMonitor: ObservableObject {
     static let shared = ForegroundAppMonitor()

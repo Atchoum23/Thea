@@ -26,8 +26,8 @@ final class TabManager {
 
     // MARK: - Tab Operations
 
-    /// Opens a new tab with optional conversation
     // periphery:ignore - Reserved: openNewTab(conversation:) instance method — reserved for future feature activation
+    /// Opens a new tab with optional conversation
     func openNewTab(conversation: Conversation? = nil) {
         let tab: ConversationTab
 
@@ -62,8 +62,8 @@ final class TabManager {
         selectedTab = tab.id
     }
 
-    /// Closes a tab
     // periphery:ignore - Reserved: closeTab(_:) instance method — reserved for future feature activation
+    /// Closes a tab
     func closeTab(_ tabID: UUID) {
         guard let index = openTabs.firstIndex(where: { $0.id == tabID }) else {
             return
@@ -94,8 +94,8 @@ final class TabManager {
         selectedTab = nil
     }
 
-    /// Closes all tabs except pinned ones
     // periphery:ignore - Reserved: closeAllUnpinnedTabs() instance method — reserved for future feature activation
+    /// Closes all tabs except pinned ones
     func closeAllUnpinnedTabs() {
         openTabs.removeAll { !$0.isPinned }
 
@@ -106,8 +106,8 @@ final class TabManager {
         }
     }
 
-    /// Selects a tab
     // periphery:ignore - Reserved: selectTab(_:) instance method — reserved for future feature activation
+    /// Selects a tab
     func selectTab(_ tabID: UUID) {
         if openTabs.contains(where: { $0.id == tabID }) {
             selectedTab = tabID
@@ -129,8 +129,8 @@ final class TabManager {
         selectedTab = openTabs[nextIndex].id
     }
 
-    /// Selects the previous tab
     // periphery:ignore - Reserved: selectPreviousTab() instance method — reserved for future feature activation
+    /// Selects the previous tab
     func selectPreviousTab() {
         // periphery:ignore - Reserved: selectTab(_:) instance method reserved for future feature activation
         guard let currentID = selectedTab,
@@ -146,8 +146,8 @@ final class TabManager {
 
     // MARK: - Tab Modifications
 
-    /// Pins or unpins a tab
     // periphery:ignore - Reserved: togglePin(_:) instance method — reserved for future feature activation
+    /// Pins or unpins a tab
     func togglePin(_ tabID: UUID) {
         if let index = openTabs.firstIndex(where: { $0.id == tabID }) {
             openTabs[index].isPinned.toggle()
@@ -162,8 +162,8 @@ final class TabManager {
         }
     }
 
-    /// Reorders tabs
     // periphery:ignore - Reserved: reorderTabs(from:to:) instance method — reserved for future feature activation
+    /// Reorders tabs
     func reorderTabs(from source: IndexSet, to destination: Int) {
         openTabs.move(fromOffsets: source, toOffset: destination)
     }
@@ -179,22 +179,22 @@ final class TabManager {
 
     // MARK: - Tab Queries
 
-    /// Gets currently selected tab
     // periphery:ignore - Reserved: getSelectedTab() instance method — reserved for future feature activation
+    /// Gets currently selected tab
     func getSelectedTab() -> ConversationTab? {
         guard let selectedID = selectedTab else { return nil }
         // periphery:ignore - Reserved: reorderTabs(from:to:) instance method reserved for future feature activation
         return openTabs.first { $0.id == selectedID }
     }
 
-    /// Gets tab by ID
     // periphery:ignore - Reserved: updateTabTitle(_:title:) instance method reserved for future feature activation
+    /// Gets tab by ID
     func getTab(_ tabID: UUID) -> ConversationTab? {
         openTabs.first { $0.id == tabID }
     }
 
-    /// Gets tab for conversation
     // periphery:ignore - Reserved: getTab(forConversation:) instance method — reserved for future feature activation
+    /// Gets tab for conversation
     func getTab(forConversation conversationID: UUID) -> ConversationTab? {
         openTabs.first { $0.conversation.id == conversationID }
     }
@@ -251,8 +251,8 @@ final class TabManager {
         selectedTab = newTab.id
     }
 
-    /// Moves tab to a new window
     // periphery:ignore - Reserved: moveTabToNewWindow(_:) instance method — reserved for future feature activation
+    /// Moves tab to a new window
     func moveTabToNewWindow(_ tabID: UUID) -> ConversationTab? {
         guard let index = openTabs.firstIndex(where: { $0.id == tabID }) else {
             return nil
@@ -273,8 +273,8 @@ final class TabManager {
         return tab
     }
 
-    /// Adds an existing tab (from another window)
     // periphery:ignore - Reserved: addTab(_:) instance method — reserved for future feature activation
+    /// Adds an existing tab (from another window)
     func addTab(_ tab: ConversationTab) {
         openTabs.append(tab)
         selectedTab = tab.id
@@ -288,15 +288,15 @@ final class TabManager {
         openTabs.count
     }
 
-    /// Checks if there are any tabs
     // periphery:ignore - Reserved: hasOpenTabs property — reserved for future feature activation
+    /// Checks if there are any tabs
     var hasOpenTabs: Bool {
         // periphery:ignore - Reserved: tabCount property reserved for future feature activation
         !openTabs.isEmpty
     }
 
-    /// Checks if a tab is selected
     // periphery:ignore - Reserved: hasOpenTabs property reserved for future feature activation
+    /// Checks if a tab is selected
     var hasSelectedTab: Bool {
         selectedTab != nil
     }

@@ -12,6 +12,7 @@ import Foundation
 
 // MARK: - Context Extractor Plugin Protocol
 
+// periphery:ignore - Reserved: ContextExtractorPlugin protocol — reserved for future feature activation
 /// Defines the contract for a foreground-app context extractor plugin.
 ///
 /// Instead of hardcoding each app's context extraction logic in
@@ -39,7 +40,6 @@ import Foundation
 ///     }
 /// }
 /// ```
-// periphery:ignore - Reserved: ContextExtractorPlugin protocol — reserved for future feature activation
 protocol ContextExtractorPlugin: Sendable {
 
     /// Unique identifier for this extractor (typically the primary bundle ID)
@@ -77,8 +77,8 @@ protocol GenericContextExtractorPlugin: Sendable {
     // periphery:ignore - Reserved: displayName static property — reserved for future feature activation
     static var displayName: String { get }
 
-    /// Extract context from an arbitrary running application.
     // periphery:ignore - Reserved: extract(app:includeSelectedText:includeWindowContent:) static method — reserved for future feature activation
+    /// Extract context from an arbitrary running application.
     static func extract(
         // periphery:ignore - Reserved: GenericContextExtractorPlugin protocol reserved for future feature activation
         app: NSRunningApplication,
@@ -89,13 +89,13 @@ protocol GenericContextExtractorPlugin: Sendable {
 
 // MARK: - Context Extractor Registry
 
+// periphery:ignore - Reserved: ContextExtractorRegistry class — reserved for future feature activation
 /// Central registry for context extractor plugins.
 ///
 /// ForegroundAppMonitor queries this registry to find the appropriate extractor
 /// for a given bundle ID. Extractors self-register at app startup.
 ///
 /// **Thread safety:** All access is MainActor-isolated (same as ForegroundAppMonitor).
-// periphery:ignore - Reserved: ContextExtractorRegistry class — reserved for future feature activation
 @MainActor
 final class ContextExtractorRegistry {
     static let shared = ContextExtractorRegistry()
@@ -179,8 +179,8 @@ final class ContextExtractorRegistry {
 
 // MARK: - Built-in Extractor Adapters
 
-/// Adapts the existing XcodeContextExtractor enum to the plugin protocol.
 // periphery:ignore - Reserved: XcodeExtractorAdapter enum — reserved for future feature activation
+/// Adapts the existing XcodeContextExtractor enum to the plugin protocol.
 private enum XcodeExtractorAdapter: ContextExtractorPlugin {
     static let pluginID = "com.apple.dt.Xcode"
     static let supportedBundleIDs = ["com.apple.dt.Xcode"]

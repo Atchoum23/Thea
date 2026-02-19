@@ -167,9 +167,9 @@ final class ChatManager: ObservableObject {
     // MARK: - Foreground App Context Injection
 
     #if os(macOS)
+    // periphery:ignore - Reserved: injectForegroundAppContext(into:) instance method reserved for future feature activation
     /// Injects foreground app context into a user message if app pairing is enabled
     /// Returns the modified message with context, or the original message if pairing disabled
-    // periphery:ignore - Reserved: injectForegroundAppContext(into:) instance method reserved for future feature activation
     func injectForegroundAppContext(into message: String) -> String {
         guard ForegroundAppMonitor.shared.isPairingEnabled else {
             return message

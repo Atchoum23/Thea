@@ -95,8 +95,8 @@ struct OCRResult: Sendable {
     }
 }
 
-/// Errors from OCR processing
 // periphery:ignore - Reserved: DocumentComplexity type reserved for future feature activation
+/// Errors from OCR processing
 enum OCRError: Error, LocalizedError {
     case imageConversionFailed
     case noTextDetected
@@ -351,8 +351,8 @@ final class AdaptiveOCREngine {
     #endif
 
     #if canImport(UIKit)
-    /// Convenience method for UIImage (iOS)
     // periphery:ignore - Reserved: extractText(from:) instance method reserved for future feature activation
+    /// Convenience method for UIImage (iOS)
     func extractText(from uiImage: UIImage) async throws -> OCRResult {
         guard let cgImage = uiImage.cgImage else {
             throw OCRError.imageConversionFailed
@@ -416,21 +416,21 @@ final class AdaptiveOCREngine {
 
     // MARK: - Configuration
 
-    /// Set preference for offline processing
     // periphery:ignore - Reserved: setPreferOffline(_:) instance method — reserved for future feature activation
+    /// Set preference for offline processing
     func setPreferOffline(_ prefer: Bool) {
         preferOffline = prefer
     }
 
-    /// Set minimum accuracy tier required
     // periphery:ignore - Reserved: setMinimumAccuracyTier(_:) instance method — reserved for future feature activation
+    /// Set minimum accuracy tier required
     func setMinimumAccuracyTier(_ tier: OCRAccuracyTier) {
         // periphery:ignore - Reserved: setPreferOffline(_:) instance method reserved for future feature activation
         minimumAccuracyTier = tier
     }
 
-    /// Register a cloud OCR provider
     // periphery:ignore - Reserved: setMinimumAccuracyTier(_:) instance method reserved for future feature activation
+    /// Register a cloud OCR provider
     func registerCloudProvider(_ provider: OCRProvider) {
         cloudProviders.append(provider)
     }
@@ -450,8 +450,8 @@ final class AdaptiveOCREngine {
         averageProcessingTime = averageProcessingTime * (n - 1) / n + result.processingTime / n
     }
 
-    /// Get available providers
     // periphery:ignore - Reserved: availableProviders property — reserved for future feature activation
+    /// Get available providers
     var availableProviders: [OCRProvider] {
         var providers: [OCRProvider] = [visionProvider]
         // periphery:ignore - Reserved: availableProviders property reserved for future feature activation
@@ -459,8 +459,8 @@ final class AdaptiveOCREngine {
         return providers
     }
 
-    /// Get supported scripts across all providers
     // periphery:ignore - Reserved: supportedScripts property — reserved for future feature activation
+    /// Get supported scripts across all providers
     var supportedScripts: Set<OCRScript> {
         // periphery:ignore - Reserved: supportedScripts property reserved for future feature activation
         var scripts = visionProvider.supportedScripts
@@ -474,8 +474,8 @@ final class AdaptiveOCREngine {
 // MARK: - Extensions
 
 extension CGImage {
-    /// Create CGImage from Data
     // periphery:ignore - Reserved: fromData(_:) static method reserved for future feature activation
+    /// Create CGImage from Data
     static func fromData(_ data: Data) -> CGImage? {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
               let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {

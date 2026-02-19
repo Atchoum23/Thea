@@ -252,8 +252,8 @@ final class PromptOptimizer {
         }
     }
 
-    /// Records user feedback to improve preference learning
     // periphery:ignore - Reserved: recordUserFeedback(category:preferenceKey:preferenceValue:positive:) instance method — reserved for future feature activation
+    /// Records user feedback to improve preference learning
     func recordUserFeedback(
         category: String,
         preferenceKey: String,
@@ -271,8 +271,8 @@ final class PromptOptimizer {
 
     // MARK: - A/B Testing
 
-    /// Selects a template variant for A/B testing
     // periphery:ignore - Reserved: selectTemplateForABTest(variants:) instance method — reserved for future feature activation
+    /// Selects a template variant for A/B testing
     func selectTemplateForABTest(
         variants: [PromptTemplate]
     ) -> PromptTemplate? {
@@ -297,8 +297,8 @@ final class PromptOptimizer {
 
     // MARK: - Template Management
 
-    /// Creates a new prompt template
     // periphery:ignore - Reserved: createTemplate(name:category:templateText:) instance method — reserved for future feature activation
+    /// Creates a new prompt template
     func createTemplate(
         name: String,
         category: String,
@@ -321,8 +321,8 @@ final class PromptOptimizer {
         }
     }
 
-    /// Updates an existing template
     // periphery:ignore - Reserved: updateTemplate(_:newText:) instance method — reserved for future feature activation
+    /// Updates an existing template
     func updateTemplate(
         _ template: PromptTemplate,
         // periphery:ignore - Reserved: updateTemplate(_:newText:) instance method reserved for future feature activation
@@ -354,8 +354,8 @@ final class PromptOptimizer {
         }
     }
 
-    /// Gets all templates for a category
     // periphery:ignore - Reserved: getTemplates(for:) instance method — reserved for future feature activation
+    /// Gets all templates for a category
     func getTemplates(for category: String) async -> [PromptTemplate] {
         // periphery:ignore - Reserved: getTemplates(for:) instance method reserved for future feature activation
         guard let context = modelContext else { return [] }

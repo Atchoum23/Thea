@@ -48,8 +48,8 @@ final class AdaptivePromptEngine {
 
     // MARK: - Prompt Analysis
 
-    /// Analyze a prompt and return enhanced interpretation
     // periphery:ignore - Reserved: analyzePrompt(_:) instance method — reserved for future feature activation
+    /// Analyze a prompt and return enhanced interpretation
     func analyzePrompt(_ prompt: String) async -> PromptAnalysis {
         isAnalyzing = true
         defer { isAnalyzing = false }
@@ -71,8 +71,8 @@ final class AdaptivePromptEngine {
         return analysis
     }
 
-    /// Predict user's intent from partial prompt (for real-time suggestions)
     // periphery:ignore - Reserved: predictIntentFromPartial(_:) instance method — reserved for future feature activation
+    /// Predict user's intent from partial prompt (for real-time suggestions)
     func predictIntentFromPartial(_ partialPrompt: String) -> [IntentPrediction] {
         guard configuration.enableIntentPrediction,
               partialPrompt.count >= 3 else { return [] }
@@ -101,8 +101,8 @@ final class AdaptivePromptEngine {
         return intentPredictions
     }
 
-    /// Get suggested completions for current prompt
     // periphery:ignore - Reserved: getSuggestedCompletions(for:) instance method — reserved for future feature activation
+    /// Get suggested completions for current prompt
     func getSuggestedCompletions(for prompt: String) -> [PromptCompletion] {
         let predictions = predictIntentFromPartial(prompt)
 
@@ -121,8 +121,8 @@ final class AdaptivePromptEngine {
         return suggestedCompletions
     }
 
-    /// Get proactive suggestions based on context and workflow
     // periphery:ignore - Reserved: getProactiveSuggestions() instance method — reserved for future feature activation
+    /// Get proactive suggestions based on context and workflow
     func getProactiveSuggestions() -> [AdaptiveSuggestion] {
         guard configuration.enablePreemptiveActions else { return [] }
 
@@ -480,8 +480,8 @@ final class AdaptivePromptEngine {
         saveProfile()
     }
 
-    /// Learn from response feedback (was response helpful?)
     // periphery:ignore - Reserved: recordFeedback(wasHelpful:forInteraction:) instance method — reserved for future feature activation
+    /// Learn from response feedback (was response helpful?)
     func recordFeedback(wasHelpful: Bool, forInteraction interaction: PromptInteraction) {
         // Adjust pattern weights based on feedback
         let adjustment = wasHelpful ? configuration.learningRate : -configuration.learningRate

@@ -481,8 +481,8 @@ struct CommandPaletteModifier: ViewModifier {
 }
 
 extension View {
-    /// Add command palette overlay support
     // periphery:ignore - Reserved: commandPalette() instance method reserved for future feature activation
+    /// Add command palette overlay support
     func commandPalette() -> some View {
         modifier(CommandPaletteModifier())
     }

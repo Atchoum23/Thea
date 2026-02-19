@@ -98,15 +98,15 @@ final class BehavioralFingerprint {
 
     // MARK: - Convenience Aliases
 
-    /// Alias for saveToDisk() — used by orchestrator
     // periphery:ignore - Reserved: save() instance method — reserved for future feature activation
+    /// Alias for saveToDisk() — used by orchestrator
     func save() { saveToDisk() }
 
     /// Alias for loadFromDisk() — used by orchestrator
     func load() { loadFromDisk() }
 
-    /// Total number of time slots with recorded data
     // periphery:ignore - Reserved: save() instance method reserved for future feature activation
+    /// Total number of time slots with recorded data
     var totalRecordedSlots: Int {
         timeSlots.flatMap { $0 }.filter { !$0.activityCounts.isEmpty }.count
     // periphery:ignore - Reserved: load() instance method reserved for future feature activation
@@ -126,8 +126,8 @@ final class BehavioralFingerprint {
         return timeSlots[day.index][hour].receptivityScore
     }
 
-    /// Find the best time for a specific activity type on a given day
     // periphery:ignore - Reserved: bestTimeFor(_:on:) instance method — reserved for future feature activation
+    /// Find the best time for a specific activity type on a given day
     func bestTimeFor(_ activity: BehavioralActivityType, on day: DayOfWeek) -> Int? {
         let daySlots = timeSlots[day.index]
         var bestHour: Int?

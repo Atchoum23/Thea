@@ -224,8 +224,8 @@ extension KnowledgeSourceManager {
         return features
     }
 
-    /// Extract tutorial features
     // periphery:ignore - Reserved: _content parameter — kept for API compatibility
+    /// Extract tutorial features
     private func extractTutorialFeatures(_ _content: String) -> [ExtractedFeature] {
         // Tutorials often contain step-by-step instructions
         [ExtractedFeature(
@@ -237,8 +237,8 @@ extension KnowledgeSourceManager {
         )]
     }
 
-    /// Extract reference features
     // periphery:ignore - Reserved: _content parameter — kept for API compatibility
+    /// Extract reference features
     private func extractReferenceFeatures(_ _content: String) -> [ExtractedFeature] {
         [ExtractedFeature(
             name: "Reference Material",
@@ -249,8 +249,8 @@ extension KnowledgeSourceManager {
         )]
     }
 
-    /// Extract generic features
     // periphery:ignore - Reserved: _content parameter — kept for API compatibility
+    /// Extract generic features
     private func extractGenericFeatures(_ _content: String) -> [ExtractedFeature] {
         [ExtractedFeature(
             // periphery:ignore - Reserved: _content parameter kept for API compatibility

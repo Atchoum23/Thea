@@ -10,6 +10,7 @@ import Foundation
 
 // MARK: - Verification Plugin Protocol
 
+// periphery:ignore - Reserved: VerificationPlugin protocol — reserved for future feature activation
 /// Defines the contract for a verification strategy plugin.
 ///
 /// The ConfidenceSystem currently hardcodes 5 verifiers (multi-model consensus,
@@ -37,7 +38,6 @@ import Foundation
 ///     }
 /// }
 /// ```
-// periphery:ignore - Reserved: VerificationPlugin protocol — reserved for future feature activation
 protocol VerificationPlugin: AnyObject, Sendable {
 
     /// Unique identifier for this verifier
@@ -67,10 +67,10 @@ protocol VerificationPlugin: AnyObject, Sendable {
 
 // MARK: - Verification Input
 
+// periphery:ignore - Reserved: VerificationInput type — reserved for future feature activation
 /// Standardized input for all verification plugins.
 /// Contains everything a verifier might need — plugins use what they need
 /// and ignore the rest.
-// periphery:ignore - Reserved: VerificationInput type — reserved for future feature activation
 struct VerificationInput: Sendable {
     /// The AI response being verified
     let response: String
@@ -101,12 +101,12 @@ struct VerificationInput: Sendable {
 
 // MARK: - Verification Output
 
+// periphery:ignore - Reserved: VerificationOutput type — reserved for future feature activation
 /// Standardized output from all verification plugins.
 /// Maps directly to what ConfidenceSystem aggregates.
-// periphery:ignore - Reserved: VerificationOutput type — reserved for future feature activation
 struct VerificationOutput: Sendable {
-    /// The confidence source with score and details
     // periphery:ignore - Reserved: VerificationOutput type reserved for future feature activation
+    /// The confidence source with score and details
     let source: ConfidenceSource
 
     /// Factors contributing to the confidence score
@@ -155,42 +155,42 @@ final class VerificationPluginRegistry {
     // periphery:ignore - Reserved: VerificationPluginRegistry type reserved for future feature activation
     static let shared = VerificationPluginRegistry()
 
-    /// Registered verification plugins, keyed by plugin ID
     // periphery:ignore - Reserved: plugins property — reserved for future feature activation
+    /// Registered verification plugins, keyed by plugin ID
     private var plugins: [String: any VerificationPlugin] = [:]
 
     private init() {}
 
     // MARK: - Registration
 
-    /// Register a verification plugin.
     // periphery:ignore - Reserved: register(_:) instance method — reserved for future feature activation
+    /// Register a verification plugin.
     func register(_ plugin: any VerificationPlugin) {
         plugins[plugin.pluginID] = plugin
     }
 
-    /// Unregister a plugin by ID.
     // periphery:ignore - Reserved: unregister(pluginID:) instance method — reserved for future feature activation
+    /// Unregister a plugin by ID.
     func unregister(pluginID: String) {
         plugins.removeValue(forKey: pluginID)
     }
 
     // MARK: - Query
 
-    /// All registered plugins.
     // periphery:ignore - Reserved: allPlugins property — reserved for future feature activation
+    /// All registered plugins.
     var allPlugins: [any VerificationPlugin] {
         Array(plugins.values)
     }
 
-    /// Only enabled plugins.
     // periphery:ignore - Reserved: enabledPlugins property — reserved for future feature activation
+    /// Only enabled plugins.
     var enabledPlugins: [any VerificationPlugin] {
         plugins.values.filter(\.isEnabled)
     }
 
-    /// Plugins that should run for the given task type and context.
     // periphery:ignore - Reserved: applicablePlugins(taskType:context:) instance method — reserved for future feature activation
+    /// Plugins that should run for the given task type and context.
     func applicablePlugins(
         taskType: TaskType,
         context: ValidationContext
@@ -198,14 +198,14 @@ final class VerificationPluginRegistry {
         enabledPlugins.filter { $0.shouldRun(taskType: taskType, context: context) }
     }
 
-    /// Get a specific plugin by ID.
     // periphery:ignore - Reserved: plugin(id:) instance method — reserved for future feature activation
+    /// Get a specific plugin by ID.
     func plugin(id: String) -> (any VerificationPlugin)? {
         plugins[id]
     }
 
-    /// Summary of all registered plugins for diagnostics.
     // periphery:ignore - Reserved: diagnosticSummary property — reserved for future feature activation
+    /// Summary of all registered plugins for diagnostics.
     var diagnosticSummary: [(id: String, name: String, enabled: Bool, weight: Double)] {
         plugins.values.map { plugin in
             (

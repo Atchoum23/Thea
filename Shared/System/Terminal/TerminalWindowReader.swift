@@ -118,8 +118,8 @@
             return result
         }
 
-        /// Read history from a specific window/tab
         // periphery:ignore - Reserved: readHistory(windowIndex:tabIndex:) instance method — reserved for future feature activation
+        /// Read history from a specific window/tab
         func readHistory(windowIndex: Int, tabIndex: Int) async throws -> String {
             let script = """
             tell application "Terminal"
@@ -166,8 +166,8 @@
             return try await runAppleScript(script) as? Bool ?? false
         }
 
-        /// Check if a specific tab is busy
         // periphery:ignore - Reserved: isBusy(windowIndex:tabIndex:) instance method — reserved for future feature activation
+        /// Check if a specific tab is busy
         func isBusy(windowIndex: Int, tabIndex: Int) async throws -> Bool {
             let script = """
             tell application "Terminal"
@@ -205,8 +205,8 @@
             return []
         }
 
-        /// Get the TTY device name for the current tab
         // periphery:ignore - Reserved: getTTY() instance method — reserved for future feature activation
+        /// Get the TTY device name for the current tab
         func getTTY() async throws -> String {
             let script = """
             // periphery:ignore - Reserved: getTTY() instance method reserved for future feature activation
@@ -222,8 +222,8 @@
             return try await runAppleScript(script) as? String ?? ""
         }
 
-        /// Get the current working directory (by reading PWD or using lsof)
         // periphery:ignore - Reserved: getCurrentDirectory() instance method — reserved for future feature activation
+        /// Get the current working directory (by reading PWD or using lsof)
         func getCurrentDirectory() async throws -> URL? {
             // periphery:ignore - Reserved: getCurrentDirectory() instance method reserved for future feature activation
             // Try to get PWD from the last prompt or use lsof

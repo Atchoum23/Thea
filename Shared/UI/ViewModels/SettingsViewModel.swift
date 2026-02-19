@@ -33,22 +33,22 @@ final class SettingsViewModel {
 
     // MARK: - Settings State (observed from managers)
 
-    /// Default AI provider ID
     // periphery:ignore - Reserved: defaultProviderId property — reserved for future feature activation
+    /// Default AI provider ID
     var defaultProviderId: String {
         get { settingsManager.defaultProvider }
         set { settingsManager.defaultProvider = newValue }
     }
 
-    /// Whether stream responses are enabled
     // periphery:ignore - Reserved: streamResponses property — reserved for future feature activation
+    /// Whether stream responses are enabled
     var streamResponses: Bool {
         get { settingsManager.streamResponses }
         set { settingsManager.streamResponses = newValue }
     }
 
-    /// Current theme
     // periphery:ignore - Reserved: theme property — reserved for future feature activation
+    /// Current theme
     var theme: String {
         get { settingsManager.theme }
         set { settingsManager.theme = newValue }
@@ -114,29 +114,29 @@ final class SettingsViewModel {
         }
     }
 
-    /// Navigate to a specific tab
     // periphery:ignore - Reserved: navigateTo(_:) instance method — reserved for future feature activation
+    /// Navigate to a specific tab
     func navigateTo(_ tab: SettingsTab) {
         selectedTab = tab
     }
 
     // MARK: - Provider Management
 
-    /// Get all available providers
     // periphery:ignore - Reserved: navigateTo(_:) instance method reserved for future feature activation
+    /// Get all available providers
     var availableProviderInfo: [ProviderRegistry.ProviderInfo] {
         providerRegistry.availableProviders
     }
 
-    /// Check if a provider has an API key configured
     // periphery:ignore - Reserved: hasAPIKey(for:) instance method — reserved for future feature activation
+    /// Check if a provider has an API key configured
     func hasAPIKey(for providerId: String) -> Bool {
         // periphery:ignore - Reserved: availableProviderInfo property reserved for future feature activation
         settingsManager.hasAPIKey(for: providerId)
     }
 
-    /// Request API key entry for a provider
     // periphery:ignore - Reserved: hasAPIKey(for:) instance method reserved for future feature activation
+    /// Request API key entry for a provider
     func requestAPIKey(for providerId: String) {
         apiKeyProvider = providerId
         showingAPIKeyEntry = true
@@ -159,8 +159,8 @@ final class SettingsViewModel {
         apiKeyProvider = nil
     }
 
-    /// Remove API key for a provider
     // periphery:ignore - Reserved: removeAPIKey(for:) instance method — reserved for future feature activation
+    /// Remove API key for a provider
     func removeAPIKey(for providerId: String) {
         settingsManager.deleteAPIKey(for: providerId)
         // periphery:ignore - Reserved: removeAPIKey(for:) instance method reserved for future feature activation
@@ -169,8 +169,8 @@ final class SettingsViewModel {
 
     // MARK: - Reset
 
-    /// Reset all settings to defaults
     // periphery:ignore - Reserved: resetToDefaults() instance method — reserved for future feature activation
+    /// Reset all settings to defaults
     func resetToDefaults() {
         // periphery:ignore - Reserved: resetToDefaults() instance method reserved for future feature activation
         isSaving = true
@@ -183,8 +183,8 @@ final class SettingsViewModel {
 
     // MARK: - Validation
 
-    /// Validate current settings
     // periphery:ignore - Reserved: validateSettings() instance method reserved for future feature activation
+    /// Validate current settings
     func validateSettings() -> [String] {
         var issues: [String] = []
 

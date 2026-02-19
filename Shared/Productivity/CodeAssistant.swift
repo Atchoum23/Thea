@@ -190,8 +190,8 @@ struct CodeProjectInfo: Codable, Identifiable, Sendable {
     }
 }
 
-/// A code file entry with metadata.
 // periphery:ignore - Reserved: CodeFileEntry type — reserved for future feature activation
+/// A code file entry with metadata.
 struct CodeFileEntry: Codable, Identifiable, Sendable {
     let id: UUID
     let relativePath: String
@@ -394,8 +394,8 @@ final class CodeAssistant: ObservableObject {
         saveState()
     }
 
-    /// List files in a project, sorted by language.
     // periphery:ignore - Reserved: listFiles(in:language:) instance method — reserved for future feature activation
+    /// List files in a project, sorted by language.
     func listFiles(in project: CodeProjectInfo, language: CodeLanguageType? = nil) throws -> [CodeFileEntry] {
         let url = URL(fileURLWithPath: project.path)
         guard FileManager.default.fileExists(atPath: project.path) else {
@@ -509,8 +509,8 @@ final class CodeAssistant: ObservableObject {
         )
     }
 
-    /// Generate an AI commit message from staged changes.
     // periphery:ignore - Reserved: generateCommitMessage(at:) instance method — reserved for future feature activation
+    /// Generate an AI commit message from staged changes.
     func generateCommitMessage(at path: String) async -> String? {
         guard let gitPath = findExecutable("git") else { return nil }
         // periphery:ignore - Reserved: generateCommitMessage(at:) instance method reserved for future feature activation
@@ -540,8 +540,8 @@ final class CodeAssistant: ObservableObject {
         return "Update code"
     }
 
-    /// Run git commit with message.
     // periphery:ignore - Reserved: commit(at:message:) instance method — reserved for future feature activation
+    /// Run git commit with message.
     func commit(at path: String, message: String) async throws {
         // periphery:ignore - Reserved: commit(at:message:) instance method reserved for future feature activation
         guard let gitPath = findExecutable("git") else {
@@ -588,8 +588,8 @@ final class CodeAssistant: ObservableObject {
 
     // MARK: - Code Operations
 
-    /// Read a file's content.
     // periphery:ignore - Reserved: readFile(path:) instance method reserved for future feature activation
+    /// Read a file's content.
     func readFile(path: String) throws -> String {
         guard FileManager.default.fileExists(atPath: path) else {
             throw CodeAssistantError.fileNotReadable(path)

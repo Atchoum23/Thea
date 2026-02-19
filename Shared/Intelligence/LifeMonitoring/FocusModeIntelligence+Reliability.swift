@@ -50,6 +50,7 @@ extension FocusModeIntelligence {
 
     // MARK: - Execution
 
+    // periphery:ignore - Reserved: executeWithVerification(actionType:action:verificationMethod:maxRetries:) instance method — reserved for future feature activation
     /// Execute an action with verification and retry logic.
     ///
     /// Attempts the action up to `maxRetries` times with exponential backoff.
@@ -62,7 +63,6 @@ extension FocusModeIntelligence {
     ///   - verificationMethod: How to verify the action succeeded. Defaults to `.pollStatus`.
     ///   - maxRetries: Maximum number of attempts. Defaults to 3.
     /// - Returns: `true` if the action succeeded and was verified, `false` if all retries failed.
-    // periphery:ignore - Reserved: executeWithVerification(actionType:action:verificationMethod:maxRetries:) instance method — reserved for future feature activation
     func executeWithVerification(
         actionType: PendingAction.ActionType,
         action: @escaping () async -> Bool,
@@ -115,11 +115,11 @@ extension FocusModeIntelligence {
 
     // MARK: - Verification
 
+    // periphery:ignore - Reserved: verifyAction(_:) instance method — reserved for future feature activation
     /// Verify that a previously executed action actually succeeded.
     ///
     /// - Parameter actionType: The type of action to verify.
     /// - Returns: `true` if the action is verified as successful.
-    // periphery:ignore - Reserved: verifyAction(_:) instance method — reserved for future feature activation
     func verifyAction(_ actionType: PendingAction.ActionType) async -> Bool {
         switch actionType {
         // periphery:ignore - Reserved: verifyAction(_:) instance method reserved for future feature activation
@@ -140,21 +140,21 @@ extension FocusModeIntelligence {
         }
     }
 
+    // periphery:ignore - Reserved: markActionVerified(_:) instance method — reserved for future feature activation
     /// Mark a pending action as verified (successfully completed).
     ///
     /// - Parameter id: The UUID of the pending action to mark.
-    // periphery:ignore - Reserved: markActionVerified(_:) instance method — reserved for future feature activation
     func markActionVerified(_ id: UUID) {
         // periphery:ignore - Reserved: markActionVerified(_:) instance method reserved for future feature activation
         markPendingActionVerified(id)
     }
 
+    // periphery:ignore - Reserved: notifyUserOfFailedAction(_:) instance method reserved for future feature activation
     /// Notify the user that an action failed after all retry attempts.
     ///
     /// Sends a local notification with the failed action type so the user can take manual action.
     ///
     /// - Parameter actionType: The type of action that failed.
-    // periphery:ignore - Reserved: notifyUserOfFailedAction(_:) instance method reserved for future feature activation
     func notifyUserOfFailedAction(_ actionType: PendingAction.ActionType) async {
         let content = UNMutableNotificationContent()
         content.title = "\u{26A0}\u{FE0F} THEA Action Failed"

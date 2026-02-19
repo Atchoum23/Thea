@@ -50,8 +50,8 @@ final class ChatViewModel {
     // periphery:ignore - Reserved: providerRegistry property reserved for future feature activation
     // MARK: - Message Handling
 
-    /// Send a message in the given conversation
     // periphery:ignore - Reserved: init(chatManager:providerRegistry:) initializer reserved for future feature activation
+    /// Send a message in the given conversation
     func sendMessage(in conversation: Conversation) async {
         guard !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return
@@ -73,16 +73,16 @@ final class ChatViewModel {
         streamingText = ""
     }
 
-    /// Cancel the current streaming operation
     // periphery:ignore - Reserved: cancelStreaming() instance method — reserved for future feature activation
+    /// Cancel the current streaming operation
     func cancelStreaming() {
         chatManager.cancelStreaming()
         isStreaming = false
         streamingText = ""
     }
 
-    /// Regenerate the last assistant message
     // periphery:ignore - Reserved: regenerateLastMessage(in:) instance method — reserved for future feature activation
+    /// Regenerate the last assistant message
     func regenerateLastMessage(in conversation: Conversation) async {
         isStreaming = true
 
@@ -101,14 +101,14 @@ final class ChatViewModel {
 
     // MARK: - Provider Selection
 
-    /// Get available provider info
     // periphery:ignore - Reserved: availableProviderInfo property — reserved for future feature activation
+    /// Get available provider info
     var availableProviderInfo: [ProviderRegistry.ProviderInfo] {
         providerRegistry.availableProviders
     }
 
-    /// Get configured providers
     // periphery:ignore - Reserved: configuredProviders property — reserved for future feature activation
+    /// Get configured providers
     var configuredProviders: [AIProvider] {
         providerRegistry.configuredProviders
     // periphery:ignore - Reserved: availableProviderInfo property reserved for future feature activation
@@ -122,8 +122,8 @@ final class ChatViewModel {
         chatManager.createConversation(title: title)
     }
 
-    /// Delete a conversation
     // periphery:ignore - Reserved: createNewConversation(title:) instance method reserved for future feature activation
+    /// Delete a conversation
     func deleteConversation(_ conversation: Conversation) {
         chatManager.deleteConversation(conversation)
     }

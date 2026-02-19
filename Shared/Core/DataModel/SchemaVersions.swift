@@ -115,16 +115,16 @@ enum TheaSchemaMigrationPlan: SchemaMigrationPlan {
 // MARK: - Migration Utilities
 
 extension TheaSchemaMigrationPlan {
-    /// Creates a backup of the database before migration
     // periphery:ignore - Reserved: backupDatabase(context:) static method — reserved for future feature activation
+    /// Creates a backup of the database before migration
     static func backupDatabase(context: ModelContext) throws {
         // periphery:ignore - Reserved: backupDatabase(context:) static method reserved for future feature activation
         // Implementation: Export to JSON, copy .sqlite file, etc.
         logger.info("📦 Creating database backup...")
     }
 
-    /// Validates migration completed successfully
     // periphery:ignore - Reserved: validateMigration(context:) static method reserved for future feature activation
+    /// Validates migration completed successfully
     static func validateMigration(context: ModelContext) throws {
         // Implementation: Run integrity checks, count records, etc.
         logger.info("✓ Validating migration integrity...")

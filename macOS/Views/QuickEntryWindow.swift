@@ -13,8 +13,8 @@
 
     // MARK: - Quick Entry Window Controller
 
-    /// Controller for the Quick Entry floating window
     // periphery:ignore - Reserved: QuickEntryWindowController type reserved for future feature activation
+    /// Controller for the Quick Entry floating window
     class QuickEntryWindowController: NSWindowController {
         static let shared = QuickEntryWindowController()
 

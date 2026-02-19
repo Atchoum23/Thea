@@ -319,11 +319,11 @@ public struct PredictiveEngineConfiguration: Codable, Sendable {
 
 // MARK: - User Preferences
 
+// periphery:ignore - Reserved: UserPredictionPreferences type reserved for future feature activation
 /// Per-user prediction preferences.
 ///
 /// Controls which prediction types are enabled, quiet hours, and
 /// minimum relevance thresholds.
-// periphery:ignore - Reserved: UserPredictionPreferences type reserved for future feature activation
 struct UserPredictionPreferences: Codable {
     /// The set of prediction types the user wants to receive.
     var enabledTypes: Set<LifePredictionType> = Set(LifePredictionType.allCases)

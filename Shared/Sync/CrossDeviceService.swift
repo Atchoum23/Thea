@@ -46,8 +46,8 @@ public actor CrossDeviceService {
 
     // MARK: - Transport
 
-    /// Active transport for direct device communication (non-CloudKit paths)
     // periphery:ignore - Reserved: activeTransport property — reserved for future feature activation
+    /// Active transport for direct device communication (non-CloudKit paths)
     private(set) var activeTransport: TheaTransport = .cloudKit
 
 // periphery:ignore - Reserved: activeTransport property reserved for future feature activation
@@ -260,8 +260,8 @@ public actor CrossDeviceService {
 
     // MARK: - Status
 
-    /// Get the current transport summary for UI display
     // periphery:ignore - Reserved: getTransportSummary() instance method reserved for future feature activation
+    /// Get the current transport summary for UI display
     func getTransportSummary() async -> [(transport: TheaTransport, available: Bool, latency: Double?, active: Bool)] {
         await SmartTransportManager.shared.transportSummary()
     }

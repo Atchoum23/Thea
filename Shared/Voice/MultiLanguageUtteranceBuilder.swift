@@ -302,8 +302,8 @@ final class MultiLanguageUtteranceBuilder {
 
 /// Extension to integrate with existing speech synthesis
 extension MultiLanguageUtteranceBuilder {
-    /// Speak text with automatic language detection
     // periphery:ignore - Reserved: speak(_:using:) instance method — reserved for future feature activation
+    /// Speak text with automatic language detection
     func speak(_ text: String, using synthesizer: AVSpeechSynthesizer) {
         // periphery:ignore - Reserved: speak(_:using:) instance method reserved for future feature activation
         let utterances = buildUtterances(from: text)
@@ -312,8 +312,8 @@ extension MultiLanguageUtteranceBuilder {
         }
     }
 
-    /// Get language display name
     // periphery:ignore - Reserved: languageDisplayName(for:) instance method reserved for future feature activation
+    /// Get language display name
     func languageDisplayName(for code: String) -> String {
         Locale.current.localizedString(forLanguageCode: code) ?? code
     }

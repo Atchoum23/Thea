@@ -64,8 +64,8 @@ extension ChatManager {
             .sorted { $0.branchIndex < $1.branchIndex }
     }
 
-    /// Switch the visible branch for a message position
     // periphery:ignore - Reserved: switchToBranch(_:for:in:) instance method — reserved for future feature activation
+    /// Switch the visible branch for a message position
     func switchToBranch(
         _ branchIndex: Int,
         // periphery:ignore - Reserved: switchToBranch(_:for:in:) instance method reserved for future feature activation
@@ -143,8 +143,8 @@ extension ChatManager {
         return isComplex || isMultiStep
     }
 
-    /// Delegate a task to the sub-agent orchestrator. Returns the session for UI tracking.
     // periphery:ignore - Reserved: taskType parameter — kept for API compatibility
+    /// Delegate a task to the sub-agent orchestrator. Returns the session for UI tracking.
     func delegateToAgent(
         text: String,
         conversationID: UUID,
@@ -223,8 +223,8 @@ extension ChatManager {
 
     // MARK: - Device Context for AI
 
-    /// Builds a device-aware context supplement for the system prompt.
     // periphery:ignore - Reserved: buildDeviceContextPrompt() instance method reserved for future feature activation
+    /// Builds a device-aware context supplement for the system prompt.
     func buildDeviceContextPrompt() -> String {
         let current = DeviceRegistry.shared.currentDevice
         let allDevices = DeviceRegistry.shared.registeredDevices

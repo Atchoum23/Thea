@@ -2,9 +2,9 @@ import Foundation
 
 // MARK: - ConversationExporter
 
+// periphery:ignore - Reserved: ConversationExporter type reserved for future feature activation
 /// Exports conversations in multiple formats: Markdown, JSON, plain text.
 /// Pure serialization layer — no SwiftData queries, no file I/O.
-// periphery:ignore - Reserved: ConversationExporter type reserved for future feature activation
 struct ConversationExporter: Sendable {
 
     enum ExportFormat: String, CaseIterable, Sendable {

@@ -167,8 +167,8 @@ final class ResponseNotificationHandler: ObservableObject {
         }
     }
 
-    /// Notify when attention is required (error, clarification needed)
     // periphery:ignore - Reserved: notifyAttentionRequired(conversationId:conversationTitle:reason:) instance method — reserved for future feature activation
+    /// Notify when attention is required (error, clarification needed)
     func notifyAttentionRequired(
         conversationId: UUID,
         conversationTitle: String,
@@ -208,8 +208,8 @@ final class ResponseNotificationHandler: ObservableObject {
         }
     }
 
-    /// Notify when background task completes
     // periphery:ignore - Reserved: notifyBackgroundTaskComplete(taskName:result:) instance method — reserved for future feature activation
+    /// Notify when background task completes
     func notifyBackgroundTaskComplete(
         taskName: String,
         result: String
@@ -283,8 +283,8 @@ final class ResponseNotificationHandler: ObservableObject {
         #endif
     }
 
-    /// Remove pending notifications for a conversation
     // periphery:ignore - Reserved: clearNotifications(for:) instance method — reserved for future feature activation
+    /// Remove pending notifications for a conversation
     func clearNotifications(for conversationId: UUID) {
         center.getDeliveredNotifications { notifications in
             // periphery:ignore - Reserved: clearNotifications(for:) instance method reserved for future feature activation
@@ -300,8 +300,8 @@ final class ResponseNotificationHandler: ObservableObject {
         }
     }
 
-    /// Clear all THEA notifications
     // periphery:ignore - Reserved: clearAllNotifications() instance method — reserved for future feature activation
+    /// Clear all THEA notifications
     func clearAllNotifications() {
         // periphery:ignore - Reserved: clearAllNotifications() instance method reserved for future feature activation
         center.removeAllDeliveredNotifications()

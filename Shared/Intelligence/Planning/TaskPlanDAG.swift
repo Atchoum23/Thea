@@ -56,8 +56,8 @@ final class TaskPlanDAG {
 
     // MARK: - Plan Execution
 
-    /// Execute a plan, running parallelizable nodes concurrently
     // periphery:ignore - Reserved: execute(_:) instance method — reserved for future feature activation
+    /// Execute a plan, running parallelizable nodes concurrently
     func execute(_ plan: TaskPlan) async throws -> TaskPlanResult {
         guard let index = activePlans.firstIndex(where: { $0.id == plan.id }) else {
             throw TaskPlanError.planNotFound

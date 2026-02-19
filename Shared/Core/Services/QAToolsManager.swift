@@ -284,8 +284,8 @@
             )
         }
 
-        /// Check if a QA tool is available on the system
         // periphery:ignore - Reserved: isToolAvailable(_:) instance method — reserved for future feature activation
+        /// Check if a QA tool is available on the system
         func isToolAvailable(_ tool: QATool) async -> Bool {
             // periphery:ignore - Reserved: isToolAvailable(_:) instance method reserved for future feature activation
             switch tool {
@@ -304,8 +304,8 @@
             }
         }
 
-        /// Get the last result for a specific tool
         // periphery:ignore - Reserved: getLastResult(for:) instance method reserved for future feature activation
+        /// Get the last result for a specific tool
         func getLastResult(for tool: QATool) -> QAToolResult? {
             lastResults[tool]
         }

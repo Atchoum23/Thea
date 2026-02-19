@@ -72,8 +72,8 @@ public final class UserModelBuilder {
         userProfile.lastUpdated = Date()
     }
 
-    /// Observe user response to AI output
     // periphery:ignore:parameters wasAccepted,responseLength - Reserved: parameter(s) kept for API compatibility
+    /// Observe user response to AI output
     public func observeResponseReaction(
         wasHelpful: Bool,
         wasAccepted: Bool,

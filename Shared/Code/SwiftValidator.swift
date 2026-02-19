@@ -23,8 +23,8 @@
 
         // MARK: - Main Validation Methods
 
-        /// Validates Swift syntax using swiftc -typecheck
         // periphery:ignore - Reserved: validateSwiftSyntax(_:) instance method — reserved for future feature activation
+        /// Validates Swift syntax using swiftc -typecheck
         func validateSwiftSyntax(_ code: String) async throws -> SwiftValidationResult {
             isValidating = true
             defer { isValidating = false }
@@ -64,8 +64,8 @@
             }
         }
 
-        /// Validates Swift code with additional context (imports, frameworks)
         // periphery:ignore - Reserved: validateWithContext(_:imports:framework:) instance method — reserved for future feature activation
+        /// Validates Swift code with additional context (imports, frameworks)
         func validateWithContext(
             _ code: String,
             imports: [String] = [],
@@ -279,8 +279,8 @@
 
         // MARK: - Quick Validation
 
-        /// Quick syntax-only validation without writing to file
         // periphery:ignore - Reserved: quickValidate(_:) instance method — reserved for future feature activation
+        /// Quick syntax-only validation without writing to file
         func quickValidate(_ code: String) -> QuickValidationResult {
             var issues: [String] = []
 
@@ -321,8 +321,8 @@
 
         // MARK: - Code Extraction
 
-        /// Extracts Swift code from markdown code blocks
         // periphery:ignore - Reserved: extractSwiftCode(from:) instance method — reserved for future feature activation
+        /// Extracts Swift code from markdown code blocks
         func extractSwiftCode(from text: String) -> String? {
             // Match ```swift ... ``` or ``` ... ``` blocks
             let pattern = #/```(?:swift)?\n(.*?)```/#
@@ -335,8 +335,8 @@
             return nil
         }
 
-        /// Extracts all Swift code blocks from text
         // periphery:ignore - Reserved: extractAllSwiftCode(from:) instance method — reserved for future feature activation
+        /// Extracts all Swift code blocks from text
         func extractAllSwiftCode(from text: String) -> [String] {
             let pattern = #/```(?:swift)?\n(.*?)```/#
             var blocks: [String] = []

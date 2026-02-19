@@ -41,8 +41,8 @@ extension APIGenerator {
         )
     }
 
-    /// Export generated API to file
     // periphery:ignore - Reserved: exportAPI(_:to:) instance method reserved for future feature activation
+    /// Export generated API to file
     func exportAPI(_ id: String, to directory: URL) async throws -> URL {
         guard let api = generatedAPIs[id] else {
             throw APIGeneratorError.apiNotFound(id)

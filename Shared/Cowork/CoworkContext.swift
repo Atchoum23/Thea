@@ -157,8 +157,8 @@
             Array(Set(accessedURLs.map(\.url)))
         }
 
-        /// Build context string for LLM prompt
         // periphery:ignore - Reserved: buildContextPrompt() instance method — reserved for future feature activation
+        /// Build context string for LLM prompt
         func buildContextPrompt() -> String {
             // periphery:ignore - Reserved: buildContextPrompt() instance method reserved for future feature activation
             var parts: [String] = []

@@ -23,8 +23,8 @@ final class SwissTaxEstimator {
 
     // MARK: - Tax Estimation
 
-    /// Estimate annual taxes for a given income in a specific canton.
     // periphery:ignore - Reserved: municipality parameter — kept for API compatibility
+    /// Estimate annual taxes for a given income in a specific canton.
     func estimateAnnualTax(
         grossIncome: Double,
         canton: SwissCanton,
@@ -148,8 +148,8 @@ final class SwissTaxEstimator {
         saveDeductions()
     }
 
-    /// Remove a deduction.
     // periphery:ignore - Reserved: removeDeduction(id:) instance method — reserved for future feature activation
+    /// Remove a deduction.
     func removeDeduction(id: UUID) {
         deductions.removeAll { $0.id == id }
         saveDeductions()

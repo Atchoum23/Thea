@@ -14,11 +14,11 @@ final class ModelContainerFactory {
 
     private init() {}
 
+    // periphery:ignore - Reserved: createContainer() instance method — reserved for future feature activation
     /// Creates a ModelContainer with the application schema and migration plan.
     /// Uses SchemaV1.models so the model list stays in sync with the versioned schema.
     /// - Returns: A configured ModelContainer
     /// - Throws: ModelContainerError if both persistent and in-memory initialization fail
-    // periphery:ignore - Reserved: createContainer() instance method — reserved for future feature activation
     func createContainer() throws -> ModelContainer {
         // Use SchemaV1.models to stay in sync with the versioned schema definition
         let schema = Schema(SchemaV1.models)
@@ -50,8 +50,8 @@ final class ModelContainerFactory {
         }
     }
 
-    /// Creates an in-memory ModelContainer as a fallback
     // periphery:ignore - Reserved: createInMemoryFallback(schema:) instance method — reserved for future feature activation
+    /// Creates an in-memory ModelContainer as a fallback
     private func createInMemoryFallback(schema: Schema) throws -> ModelContainer {
         print("🔄 Attempting in-memory fallback...")
 

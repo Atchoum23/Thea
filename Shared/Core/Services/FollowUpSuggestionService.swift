@@ -42,8 +42,8 @@ final class FollowUpSuggestionService: ObservableObject {
     // MARK: - Generation
 
     // Generate follow-up suggestions based on AI response content and task type.
-    // swiftlint:disable:next function_body_length
     // periphery:ignore - Reserved: query parameter — kept for API compatibility
+    // swiftlint:disable:next function_body_length
     func generate(
         response: String,
         query: String,
@@ -186,8 +186,8 @@ final class FollowUpSuggestionService: ObservableObject {
         saveState()
     }
 
-    /// Record that the user dismissed/ignored suggestions.
     // periphery:ignore - Reserved: recordDismissal() instance method — reserved for future feature activation
+    /// Record that the user dismissed/ignored suggestions.
     func recordDismissal() {
         totalDismissals += 1
         // periphery:ignore - Reserved: recordDismissal() instance method reserved for future feature activation
@@ -197,8 +197,8 @@ final class FollowUpSuggestionService: ObservableObject {
         saveState()
     }
 
-    /// Check if a suggestion pattern should auto-execute (user always picks it).
     // periphery:ignore - Reserved: shouldAutoPrompt(_:) instance method — reserved for future feature activation
+    /// Check if a suggestion pattern should auto-execute (user always picks it).
     func shouldAutoPrompt(_ suggestion: FollowUpSuggestion) -> Bool {
         // periphery:ignore - Reserved: shouldAutoPrompt(_:) instance method reserved for future feature activation
         guard isAutoPromptEnabled else { return false }
@@ -206,8 +206,8 @@ final class FollowUpSuggestionService: ObservableObject {
         return (consecutiveAutoAccepts[pattern] ?? 0) >= autoPromptThreshold
     }
 
-    /// Acceptance rate (0.0-1.0).
     // periphery:ignore - Reserved: acceptanceRate property reserved for future feature activation
+    /// Acceptance rate (0.0-1.0).
     var acceptanceRate: Double {
         let total = totalSelections + totalDismissals
         guard total > 0 else { return 0 }

@@ -46,8 +46,8 @@ struct IconActionButton: View {
     }
 }
 
-/// Confidence indicator dot
 // periphery:ignore - Reserved: ConfidenceDot type — reserved for future feature activation
+/// Confidence indicator dot
 struct ConfidenceDot: View {
     // periphery:ignore - Reserved: ConfidenceDot type reserved for future feature activation
     let confidence: Double

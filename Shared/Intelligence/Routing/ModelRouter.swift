@@ -467,8 +467,8 @@ extension ModelRouter {
         logger.info("Loaded performance data for \(self.modelPerformance.count) models from memory")
     }
 
-    /// Store routing outcome to MemoryManager for persistent learning
     // periphery:ignore:parameters tokens,cost - Reserved: parameter(s) kept for API compatibility
+    /// Store routing outcome to MemoryManager for persistent learning
     private func storeRoutingOutcomeToMemory(
         decision: RoutingDecision,
         success: Bool,
@@ -558,8 +558,8 @@ extension ModelRouter {
         logger.debug("Stored procedural memory for \(modelId)/\(taskType.rawValue)")
     }
 
-    /// Detect contextual patterns in routing decisions
     // periphery:ignore:parameters success - Reserved: parameter(s) kept for API compatibility
+    /// Detect contextual patterns in routing decisions
     private func detectAndStoreContextualPatterns(
         decision: RoutingDecision,
         // periphery:ignore - Reserved: success parameter kept for API compatibility

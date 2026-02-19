@@ -54,8 +54,8 @@
             return segments.isEmpty ? [ANSISegment(text: text, style: ANSIStyle())] : segments
         }
 
-        /// Strip all ANSI codes from text
         // periphery:ignore - Reserved: stripANSI(_:) static method — reserved for future feature activation
+        /// Strip all ANSI codes from text
         static func stripANSI(_ text: String) -> String {
             let pattern = "\u{001B}\\[[0-9;]*m"
             let regex: NSRegularExpression
@@ -71,8 +71,8 @@
 
         // MARK: - Structured Output Parsing
 
-        /// Detect if output is JSON
         // periphery:ignore - Reserved: isJSON(_:) static method — reserved for future feature activation
+        /// Detect if output is JSON
         static func isJSON(_ text: String) -> Bool {
             let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
             return (trimmed.hasPrefix("{") && trimmed.hasSuffix("}")) ||
@@ -80,8 +80,8 @@
                 (trimmed.hasPrefix("[") && trimmed.hasSuffix("]"))
         }
 
-        /// Parse JSON output
         // periphery:ignore - Reserved: parseJSON(_:) static method — reserved for future feature activation
+        /// Parse JSON output
         static func parseJSON(_ text: String) -> Any? {
             guard let data = text.data(using: .utf8) else { return nil }
             do {
@@ -92,8 +92,8 @@
             }
         }
 
-        /// Detect if output looks like a table (columns aligned with spaces)
         // periphery:ignore - Reserved: isJSON(_:) static method reserved for future feature activation
+        /// Detect if output looks like a table (columns aligned with spaces)
         static func isTable(_ text: String) -> Bool {
             let lines = text.components(separatedBy: .newlines).filter { !$0.isEmpty }
             guard lines.count >= 2 else { return false }

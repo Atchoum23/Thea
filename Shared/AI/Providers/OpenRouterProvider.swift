@@ -71,9 +71,9 @@ final class OpenRouterProvider: AIProvider, Sendable {
         try await chatWithOptions(messages: messages, model: model, stream: stream)
     }
 
+    // periphery:ignore - Reserved: chatAdvanced(messages:model:options:) instance method reserved for future feature activation
     /// Advanced chat with Anthropic-specific features forwarded through OpenRouter.
     /// When routing to a Claude model, forwards: system prompts, cache control, thinking, effort.
-    // periphery:ignore - Reserved: chatAdvanced(messages:model:options:) instance method reserved for future feature activation
     func chatAdvanced(
         messages: [AIMessage],
         model: String,

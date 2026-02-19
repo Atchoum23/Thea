@@ -175,6 +175,7 @@ actor CallAnalysisEngine {
 
     // MARK: - Commitments
 
+    // periphery:ignore - Reserved: call parameter kept for API compatibility
     /// Extracts commitments (promises, guarantees) from the transcript.
     ///
     /// Detects patterns like "I promise...", "I guarantee...", "consider it done".
@@ -183,7 +184,6 @@ actor CallAnalysisEngine {
     ///   - text: The full transcript text.
     ///   - call: The `CallRecord` for context.
     /// - Returns: An array of `CallAnalysis.Commitment` values.
-    // periphery:ignore - Reserved: call parameter kept for API compatibility
     private func extractCommitments(_ text: String, call: CallRecord) -> [CallAnalysis.Commitment] {
         var commitments: [CallAnalysis.Commitment] = []
 

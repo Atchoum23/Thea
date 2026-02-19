@@ -44,9 +44,9 @@ final class SmartNotificationScheduler {
 
     // MARK: - Scheduling
 
+    // periphery:ignore - Reserved: category parameter — kept for API compatibility
     /// Determine the optimal delivery time for a notification.
     /// Returns `.now` for immediate delivery, or a future `Date` for deferred delivery.
-    // periphery:ignore - Reserved: category parameter — kept for API compatibility
     func optimalDeliveryTime(
         priority: NotificationPriority,
         category: NotificationService.Category? = nil
@@ -156,8 +156,8 @@ final class SmartNotificationScheduler {
         BehavioralFingerprint.shared.recordNotificationEngagement(engaged: false) // Will be updated when user engages
     }
 
-    /// Record that the user engaged with a notification (opens, responds, etc.)
     // periphery:ignore - Reserved: recordEngagement() instance method — reserved for future feature activation
+    /// Record that the user engaged with a notification (opens, responds, etc.)
     func recordEngagement() {
         // periphery:ignore - Reserved: recordEngagement() instance method reserved for future feature activation
         BehavioralFingerprint.shared.recordNotificationEngagement(engaged: true)

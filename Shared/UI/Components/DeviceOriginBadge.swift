@@ -61,8 +61,8 @@ struct DeviceOriginBadge: View {
 
 // MARK: - Conversation Device Participants Bar
 
-/// Shows all devices that have participated in a conversation
 // periphery:ignore - Reserved: ConversationDeviceBar type reserved for future feature activation
+/// Shows all devices that have participated in a conversation
 struct ConversationDeviceBar: View {
     let messages: [Message]
 

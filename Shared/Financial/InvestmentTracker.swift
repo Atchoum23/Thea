@@ -220,8 +220,8 @@ final class InvestmentTracker {
 
     // MARK: - CSV Import
 
-    /// Import holdings from a broker CSV export.
     // periphery:ignore - Reserved: importHoldingsCSV(from:portfolioId:) instance method — reserved for future feature activation
+    /// Import holdings from a broker CSV export.
     func importHoldingsCSV(from url: URL, portfolioId: UUID) throws -> [Holding] {
         let data = try Data(contentsOf: url)
         guard let content = String(data: data, encoding: .utf8) else {

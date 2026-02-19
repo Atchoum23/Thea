@@ -144,8 +144,8 @@ public final class ActiveMemoryRetrieval {
         )
     }
 
-    /// Learn from a conversation exchange (store to memory)
     // periphery:ignore:parameters wasHelpful - Reserved: parameter(s) kept for API compatibility
+    /// Learn from a conversation exchange (store to memory)
     public func learnFromExchange(
         userMessage: String,
         assistantResponse: String,

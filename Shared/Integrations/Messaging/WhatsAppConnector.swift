@@ -95,8 +95,8 @@ actor WhatsAppConnector: MessagingPlatformConnector {
         ))
     }
 
-    /// Handle Meta webhook verification (GET request with hub.challenge).
     // periphery:ignore - Reserved: verifyWebhook(challenge:mode:token:) instance method reserved for future feature activation
+    /// Handle Meta webhook verification (GET request with hub.challenge).
     func verifyWebhook(challenge: String, mode: String, token: String) -> String? {
         guard mode == "subscribe",
               token == credentials.webhookSecret else { return nil }

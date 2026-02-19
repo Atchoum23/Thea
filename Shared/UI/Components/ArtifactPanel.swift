@@ -434,8 +434,8 @@ struct ArtifactDetailView: View {
 
 // MARK: - Artifact Extraction Utility
 
-/// Utility for extracting artifacts from message content
 // periphery:ignore - Reserved: ArtifactExtractor type reserved for future feature activation
+/// Utility for extracting artifacts from message content
 enum ArtifactExtractor {
     /// Extract code blocks from markdown content
     static func extractCodeBlocks(from content: String) -> [Artifact] {

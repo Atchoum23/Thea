@@ -101,10 +101,10 @@ public final class SemanticSearchService: ObservableObject {
         return keywordSearch(query: query, messages: conversation.messages)
     }
 
+    // periphery:ignore - Reserved: searchAllConversations(query:) instance method — reserved for future feature activation
     /// Search all conversations by semantic similarity
     /// - Parameter query: Search query text
     /// - Returns: Array of tuples containing conversation and matching messages
-    // periphery:ignore - Reserved: searchAllConversations(query:) instance method — reserved for future feature activation
     func searchAllConversations(query: String) async -> [(Conversation, [Message])] {
         guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return []
@@ -142,8 +142,8 @@ public final class SemanticSearchService: ObservableObject {
         return []
     }
 
-    /// Full search across provided conversations
     // periphery:ignore - Reserved: search(query:in:mode:limit:) instance method — reserved for future feature activation
+    /// Full search across provided conversations
     func search(
         query: String,
         in conversations: [Conversation],
@@ -186,8 +186,8 @@ public final class SemanticSearchService: ObservableObject {
 
     // MARK: - Index Management
 
-    /// Index a single message
     // periphery:ignore - Reserved: indexMessage(_:in:) instance method — reserved for future feature activation
+    /// Index a single message
     func indexMessage(_ message: Message, in conversation: Conversation) async {
         guard autoIndexEnabled else { return }
 
@@ -212,8 +212,8 @@ public final class SemanticSearchService: ObservableObject {
         }
     }
 
-    /// Index all messages in conversations (background operation)
     // periphery:ignore - Reserved: indexConversations(_:) instance method — reserved for future feature activation
+    /// Index all messages in conversations (background operation)
     func indexConversations(_ conversations: [Conversation]) async {
         guard !isIndexing else {
             searchLogger.warning("Indexing already in progress")
@@ -586,8 +586,8 @@ extension SemanticSearchService {
         return nil
     }
 
-    /// Fetch batch embeddings from OpenAI
     // periphery:ignore - Reserved: fetchBatchEmbeddings(for:) instance method — reserved for future feature activation
+    /// Fetch batch embeddings from OpenAI
     private func fetchBatchEmbeddings(for texts: [String]) async -> [[Float]]? {
         guard !texts.isEmpty else { return [] }
         // periphery:ignore - Reserved: fetchBatchEmbeddings(for:) instance method reserved for future feature activation

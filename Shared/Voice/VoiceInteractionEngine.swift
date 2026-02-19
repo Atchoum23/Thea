@@ -306,8 +306,8 @@ final class VoiceInteractionEngine {
         }
     }
 
-    /// Pause speaking
     // periphery:ignore - Reserved: pauseSpeaking() instance method — reserved for future feature activation
+    /// Pause speaking
     func pauseSpeaking() {
         if isSpeaking {
             speechSynthesizer.pauseSpeaking(at: .word)
@@ -320,8 +320,8 @@ final class VoiceInteractionEngine {
         speechSynthesizer.continueSpeaking()
     }
 
-    /// Get available voices
     // periphery:ignore - Reserved: resumeSpeaking() instance method reserved for future feature activation
+    /// Get available voices
     func getAvailableVoices() -> [VoiceInfo] {
         AVSpeechSynthesisVoice.speechVoices().map { voice in
             VoiceInfo(
@@ -334,8 +334,8 @@ final class VoiceInteractionEngine {
         }
     }
 
-    /// Get available voices for a specific language
     // periphery:ignore - Reserved: getVoices(for:) instance method — reserved for future feature activation
+    /// Get available voices for a specific language
     func getVoices(for language: String) -> [VoiceInfo] {
         getAvailableVoices().filter { $0.language.hasPrefix(language.prefix(2)) }
     }
@@ -391,8 +391,8 @@ final class VoiceInteractionEngine {
         return result
     }
 
-    /// Have a voice conversation turn
     // periphery:ignore - Reserved: conversationTurn(prompt:) instance method — reserved for future feature activation
+    /// Have a voice conversation turn
     func conversationTurn(prompt: String) async throws -> String {
         // Speak the prompt
         // periphery:ignore - Reserved: conversationTurn(prompt:) instance method reserved for future feature activation

@@ -82,8 +82,8 @@ final class OllamaAgentLoop {
 
     // MARK: - Agent Loop Execution
 
-    /// Run an agent loop with the specified model and prompt
     // periphery:ignore - Reserved: run(model:prompt:stream:) instance method — reserved for future feature activation
+    /// Run an agent loop with the specified model and prompt
     func run(
         model: String,
         prompt: String,
@@ -395,8 +395,8 @@ final class OllamaAgentLoop {
         }
     }
 
-    /// Call this from UI to approve/deny pending tool execution
     // periphery:ignore - Reserved: respondToApproval(_:) instance method — reserved for future feature activation
+    /// Call this from UI to approve/deny pending tool execution
     func respondToApproval(_ approved: Bool) {
         guard let request = pendingApproval else { return }
         request.continuation?.resume(returning: approved)

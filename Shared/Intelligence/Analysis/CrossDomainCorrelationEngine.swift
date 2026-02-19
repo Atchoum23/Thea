@@ -167,8 +167,8 @@ final class CrossDomainCorrelationEngine {
 
     // MARK: - Capture Today's Snapshot
 
-    /// Builds today's DailyLifeSnapshot by querying all data sources.
     // periphery:ignore - Reserved: captureToday() instance method — reserved for future feature activation
+    /// Builds today's DailyLifeSnapshot by querying all data sources.
     func captureToday() async {
         guard !isCaptureInProgress else {
             logger.debug("Capture already in progress, skipping")
@@ -238,8 +238,8 @@ final class CrossDomainCorrelationEngine {
 
     // MARK: - Correlation Analysis
 
-    /// Runs Pearson correlation on all metric pairs. Requires at least 7 days of data.
     // periphery:ignore - Reserved: analyzeCorrelations() instance method — reserved for future feature activation
+    /// Runs Pearson correlation on all metric pairs. Requires at least 7 days of data.
     func analyzeCorrelations() {
         guard snapshots.count >= 7 else {
             logger.info("Need at least 7 snapshots for correlation analysis (have \(self.snapshots.count))")
@@ -300,9 +300,9 @@ final class CrossDomainCorrelationEngine {
 
     // MARK: - Pearson Correlation
 
+    // periphery:ignore - Reserved: pearsonCorrelation(_:_:) instance method — reserved for future feature activation
     /// Standard Pearson product-moment correlation coefficient.
     /// Returns a value in [-1, 1], or NaN if computation fails.
-    // periphery:ignore - Reserved: pearsonCorrelation(_:_:) instance method — reserved for future feature activation
     func pearsonCorrelation(_ x: [Double], _ y: [Double]) -> Double {
         let n = Double(x.count)
         guard x.count == y.count, x.count >= 2 else { return .nan }
@@ -330,8 +330,8 @@ final class CrossDomainCorrelationEngine {
 
     // MARK: - Insight Generation
 
-    /// Produces human-readable insights from significant correlations.
     // periphery:ignore - Reserved: generateInsights() instance method — reserved for future feature activation
+    /// Produces human-readable insights from significant correlations.
     func generateInsights() -> [String] {
         discoveredCorrelations
             .sorted { abs($0.coefficient) > abs($1.coefficient) }
@@ -340,8 +340,8 @@ final class CrossDomainCorrelationEngine {
 
     // MARK: - Top Correlations
 
-    /// Returns the top N correlations sorted by absolute coefficient value.
     // periphery:ignore - Reserved: topCorrelations(limit:) instance method — reserved for future feature activation
+    /// Returns the top N correlations sorted by absolute coefficient value.
     func topCorrelations(limit: Int = 5) -> [CorrelationResult] {
         Array(
             discoveredCorrelations
@@ -353,8 +353,8 @@ final class CrossDomainCorrelationEngine {
 
     // MARK: - Metric Pair Definitions
 
-    // swiftlint:disable:next function_body_length
     // periphery:ignore - Reserved: buildMetricPairs() instance method — reserved for future feature activation
+    // swiftlint:disable:next function_body_length
     private func buildMetricPairs() -> [MetricPair] {
         [
             // periphery:ignore - Reserved: topCorrelations(limit:) instance method reserved for future feature activation
@@ -501,9 +501,9 @@ final class CrossDomainCorrelationEngine {
         ]
     }
 
+    // periphery:ignore - Reserved: analyzeOffsetPairs() instance method — reserved for future feature activation
     /// Overrides analyzeCorrelations to handle the deep sleep -> next-day productivity offset pair.
     /// Called internally within analyzeCorrelations.
-    // periphery:ignore - Reserved: analyzeOffsetPairs() instance method — reserved for future feature activation
     private func analyzeOffsetPairs() -> [CorrelationResult] {
         var results: [CorrelationResult] = []
         let calendar = Calendar.current

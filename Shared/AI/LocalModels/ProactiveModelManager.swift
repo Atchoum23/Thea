@@ -167,8 +167,8 @@ final class ProactiveModelManager {
         return analysis
     }
 
-    /// Quick pre-flight check - call this at the START of any task
     // periphery:ignore - Reserved: preflightCheck(for:) instance method — reserved for future feature activation
+    /// Quick pre-flight check - call this at the START of any task
     func preflightCheck(for taskType: TaskType) async -> PreflightResult {
         let orchestrator = UnifiedLocalModelOrchestrator.shared
         let localSelection = await orchestrator.selectModel(for: taskType)
@@ -498,8 +498,8 @@ final class ProactiveModelManager {
         }
     }
 
-    /// Legacy method - now delegates to AI-guided cleanup
     // periphery:ignore - Reserved: checkAndPerformCleanup() instance method — reserved for future feature activation
+    /// Legacy method - now delegates to AI-guided cleanup
     @available(*, deprecated, message: "Use performAIGuidedCleanup for intelligent cleanup")
     private func checkAndPerformCleanup() async {
         await performAIGuidedCleanup()
@@ -583,8 +583,8 @@ final class ProactiveModelManager {
 
     // MARK: - User Consent
 
-    /// Request user consent for autonomous model management
     // periphery:ignore - Reserved: requestAutonomousConsent() instance method — reserved for future feature activation
+    /// Request user consent for autonomous model management
     @available(*, deprecated, message: "Use AIModelGovernor for consent management")
     func requestAutonomousConsent() -> AutonomousConsentRequest {
         AutonomousConsentRequest(

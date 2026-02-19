@@ -60,8 +60,8 @@ actor MoltbookAgent {
 
     // MARK: - Lifecycle
 
-    /// Enable the Moltbook agent
     // periphery:ignore - Reserved: lastHeartbeat property reserved for future feature activation
+    /// Enable the Moltbook agent
     func enable() {
         guard !isEnabled else { return }
         isEnabled = true
@@ -170,9 +170,9 @@ actor MoltbookAgent {
 
     // MARK: - Outbound Processing
 
+    // periphery:ignore - Reserved: composeResponse(to:content:) instance method — reserved for future feature activation
     /// Compose a response to a Moltbook discussion.
     /// All content is sanitized through OutboundPrivacyGuard with MoltbookPolicy.
-    // periphery:ignore - Reserved: composeResponse(to:content:) instance method — reserved for future feature activation
     func composeResponse(to discussionID: String, content: String) async -> MoltbookPostResult {
         guard isEnabled else {
             return .rejected(reason: "Agent is disabled")
@@ -231,8 +231,8 @@ actor MoltbookAgent {
 
     // MARK: - Pending Post Management
 
-    /// Approve a pending post (user action)
     // periphery:ignore - Reserved: approvePendingPost(id:) instance method — reserved for future feature activation
+    /// Approve a pending post (user action)
     func approvePendingPost(id: UUID) async -> Bool {
         guard let index = pendingPosts.firstIndex(where: { $0.id == id }) else {
             return false
@@ -252,29 +252,29 @@ actor MoltbookAgent {
         }
     }
 
-    /// Reject a pending post (user action)
     // periphery:ignore - Reserved: rejectPendingPost(id:) instance method — reserved for future feature activation
+    /// Reject a pending post (user action)
     func rejectPendingPost(id: UUID) {
         pendingPosts.removeAll { $0.id == id }
     }
 
-    /// Clear all pending posts
     // periphery:ignore - Reserved: clearPendingPosts() instance method — reserved for future feature activation
+    /// Clear all pending posts
     func clearPendingPosts() {
         pendingPosts.removeAll()
     }
 
     // MARK: - Insights
 
-    /// Get unread development insights
     // periphery:ignore - Reserved: getUnreadInsights() instance method — reserved for future feature activation
+    /// Get unread development insights
     func getUnreadInsights() -> [DevelopmentInsight] {
         insights.filter { !$0.isRead }
     // periphery:ignore - Reserved: rejectPendingPost(id:) instance method reserved for future feature activation
     }
 
-    /// Mark insight as read
     // periphery:ignore - Reserved: markInsightRead(id:) instance method — reserved for future feature activation
+    /// Mark insight as read
     func markInsightRead(id: UUID) {
         // periphery:ignore - Reserved: clearPendingPosts() instance method reserved for future feature activation
         if let index = insights.firstIndex(where: { $0.id == id }) {

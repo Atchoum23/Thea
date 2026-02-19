@@ -22,16 +22,16 @@ protocol PrivacyPolicy: Sendable {
     /// Whether local file paths may appear in outbound content
     var allowFilePaths: Bool { get }
 
-    /// Whether code snippets may be sent
     // periphery:ignore - Reserved: allowCodeSnippets property — reserved for future feature activation
+    /// Whether code snippets may be sent
     var allowCodeSnippets: Bool { get }
 
-    /// Whether health/medical data may be sent
     // periphery:ignore - Reserved: allowHealthData property — reserved for future feature activation
+    /// Whether health/medical data may be sent
     var allowHealthData: Bool { get }
 
-    /// Whether financial data may be sent
     // periphery:ignore - Reserved: allowFinancialData property — reserved for future feature activation
+    /// Whether financial data may be sent
     var allowFinancialData: Bool { get }
 
     /// Keywords that trigger blocking (case-insensitive)
@@ -39,8 +39,8 @@ protocol PrivacyPolicy: Sendable {
 
 // periphery:ignore - Reserved: allowCodeSnippets property reserved for future feature activation
 
-    /// Topic allowlist — if non-nil, only these topics may be discussed
     // periphery:ignore - Reserved: allowHealthData property reserved for future feature activation
+    /// Topic allowlist — if non-nil, only these topics may be discussed
     var allowedTopics: Set<String>? { get }
 
     // periphery:ignore - Reserved: allowFinancialData property reserved for future feature activation

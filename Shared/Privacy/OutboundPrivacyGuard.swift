@@ -45,9 +45,9 @@ struct ChannelRegistration: Sendable {
     let registeredBy: String
 }
 
-/// Finding from a security scan (used by pre-commit hook integration)
 // periphery:ignore - Reserved: channelId property reserved for future feature activation
 // periphery:ignore - Reserved: description property reserved for future feature activation
+/// Finding from a security scan (used by pre-commit hook integration)
 struct SecurityFinding: Sendable {
     enum Severity: String, Sendable { case critical, warning, info }
     // periphery:ignore - Reserved: registeredAt property reserved for future feature activation
@@ -123,8 +123,8 @@ actor OutboundPrivacyGuard {
 
     // MARK: - Channel Registration
 
-    /// Register a channel for outbound communication
     // periphery:ignore - Reserved: registerChannel(id:description:policy:allowedDataTypes:registeredBy:) instance method — reserved for future feature activation
+    /// Register a channel for outbound communication
     func registerChannel(
         id: String,
         description: String,
@@ -577,8 +577,8 @@ actor OutboundPrivacyGuard {
 
     // MARK: - Pre-Commit Scan
 
-    /// Scan content for credentials/secrets (used by git pre-commit hook integration)
     // periphery:ignore - Reserved: preCommitScan(_:filename:) instance method — reserved for future feature activation
+    /// Scan content for credentials/secrets (used by git pre-commit hook integration)
     func preCommitScan(_ content: String, filename: String) -> [SecurityFinding] {
         // periphery:ignore - Reserved: preCommitScan(_:filename:) instance method reserved for future feature activation
         var findings: [SecurityFinding] = []

@@ -182,8 +182,8 @@ public actor LifeIntelligenceCoordinator {
 
     // MARK: - Unified Decision Making
 
-    /// Make a unified decision about how to handle incoming communication
     // periphery:ignore:parameters contactName,isCall - Reserved: parameter(s) kept for API compatibility
+    /// Make a unified decision about how to handle incoming communication
     public func decideCommunicationResponse(
         contactId: String?,
         contactName: String?,
@@ -546,8 +546,8 @@ public actor LifeIntelligenceCoordinator {
         return await taskIntelligence.addTask(task)
     }
 
-    /// Log a communication event
     // periphery:ignore - Reserved: logCommunication(contactId:contactName:direction:type:platform:) instance method reserved for future feature activation
+    /// Log a communication event
     func logCommunication(
         contactId: String,
         contactName: String,

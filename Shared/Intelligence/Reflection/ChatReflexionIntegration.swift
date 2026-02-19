@@ -26,8 +26,8 @@ final class ChatReflexionIntegration {
     /// Whether automatic reflexion is enabled
     var isEnabled = true
 
-    /// Minimum response length to trigger reflexion (skip trivial responses)
     // periphery:ignore - Reserved: shared static property reserved for future feature activation
+    /// Minimum response length to trigger reflexion (skip trivial responses)
     var minimumResponseLength = 100
 
 // periphery:ignore - Reserved: logger property reserved for future feature activation
@@ -49,9 +49,9 @@ final class ChatReflexionIntegration {
 
     // MARK: - Response Processing
 
+    // periphery:ignore - Reserved: processResponse(task:response:conversationContext:) instance method — reserved for future feature activation
     /// Evaluate an AI response and optionally improve it via reflexion.
     /// Returns the original or improved response.
-    // periphery:ignore - Reserved: processResponse(task:response:conversationContext:) instance method — reserved for future feature activation
     func processResponse(
         task: String,
         response: String,
@@ -118,8 +118,8 @@ final class ChatReflexionIntegration {
 
     // MARK: - User Feedback
 
-    /// Record user feedback on a response for learning
     // periphery:ignore - Reserved: recordFeedback(messageID:feedback:) instance method — reserved for future feature activation
+    /// Record user feedback on a response for learning
     func recordFeedback(
         messageID: UUID,
         feedback: UserResponseFeedback
@@ -186,8 +186,8 @@ final class ChatReflexionIntegration {
 
     // MARK: - Analytics
 
-    /// Average quality score over the last N data points
     // periphery:ignore - Reserved: averageQuality(last:) instance method — reserved for future feature activation
+    /// Average quality score over the last N data points
     func averageQuality(last count: Int = 50) -> Float {
         let recent = qualityTrend.suffix(count)
         guard !recent.isEmpty else { return 0 }

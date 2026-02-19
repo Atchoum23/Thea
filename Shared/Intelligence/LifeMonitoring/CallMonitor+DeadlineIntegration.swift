@@ -13,6 +13,7 @@ extension CallMonitor {
 
     // MARK: - Real-Time Segment Analysis
 
+    // periphery:ignore - Reserved: callId parameter kept for API compatibility
     /// Performs lightweight pattern matching on a single transcript segment to detect
     /// commitment language and deadline mentions in real time.
     ///
@@ -23,7 +24,6 @@ extension CallMonitor {
     /// - Parameters:
     ///   - segment: The newly transcribed segment to analyze.
     ///   - callId: The UUID of the active call the segment belongs to.
-    // periphery:ignore - Reserved: callId parameter kept for API compatibility
     func performRealTimeAnalysis(_ segment: CallTranscriptSegment, callId: UUID) async {
         // Quick check for urgent patterns
         let text = segment.text.lowercased()

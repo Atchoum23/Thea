@@ -77,10 +77,10 @@ struct AudioMonitoringSession: Identifiable, Sendable {
 
 // MARK: - System Audio Monitor
 
-/// Standalone audio monitor for system audio capture
 // periphery:ignore - Reserved: startTime property reserved for future feature activation
 // periphery:ignore - Reserved: endTime property reserved for future feature activation
 // periphery:ignore - Reserved: source property reserved for future feature activation
+/// Standalone audio monitor for system audio capture
 @MainActor
 @Observable
 final class SystemAudioMonitor {

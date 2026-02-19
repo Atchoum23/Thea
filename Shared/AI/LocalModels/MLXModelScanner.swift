@@ -44,8 +44,8 @@ actor MLXModelScanner {
         return models.sorted { $0.name < $1.name }
     }
 
-    /// Quick scan for model count (doesn't extract full metadata)
     // periphery:ignore - Reserved: quickScanCount(_:) instance method — reserved for future feature activation
+    /// Quick scan for model count (doesn't extract full metadata)
     func quickScanCount(_ url: URL) async -> Int {
         guard FileManager.default.fileExists(atPath: url.path) else {
             return 0

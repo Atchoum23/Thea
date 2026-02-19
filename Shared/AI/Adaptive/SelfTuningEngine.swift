@@ -189,8 +189,8 @@ final class SelfTuningEngine {
 
     // MARK: - Public API
 
-    /// Get current optimized parameters
     // periphery:ignore - Reserved: getParameters(for:) instance method — reserved for future feature activation
+    /// Get current optimized parameters
     func getParameters(for context: String? = nil) -> ModelParameters {
         guard configuration.enableAutoTuning else {
             return currentParameters
@@ -205,8 +205,8 @@ final class SelfTuningEngine {
         return currentParameters
     }
 
-    /// Record a trial with feedback
     // periphery:ignore - Reserved: recordTrial(parameters:feedback:contextType:responseTime:tokenCount:) instance method — reserved for future feature activation
+    /// Record a trial with feedback
     func recordTrial(
         parameters: ModelParameters? = nil,
         feedback: UserFeedback,
@@ -246,8 +246,8 @@ final class SelfTuningEngine {
         saveState()
     }
 
-    /// Record implicit feedback (e.g., conversation continued)
     // periphery:ignore - Reserved: recordImplicitFeedback(_:contextType:) instance method — reserved for future feature activation
+    /// Record implicit feedback (e.g., conversation continued)
     func recordImplicitFeedback(_ type: UserFeedback.FeedbackType, contextType: String) async {
         let value: Double
         switch type {
@@ -273,14 +273,14 @@ final class SelfTuningEngine {
         )
     }
 
-    /// Manually trigger optimization
     // periphery:ignore - Reserved: optimize() instance method — reserved for future feature activation
+    /// Manually trigger optimization
     func optimize() async {
         await runOptimization()
     }
 
-    /// Reset to default parameters
     // periphery:ignore - Reserved: resetToDefaults() instance method — reserved for future feature activation
+    /// Reset to default parameters
     func resetToDefaults() {
         currentParameters = ModelParameters()
         optimizationHistory.removeAll()

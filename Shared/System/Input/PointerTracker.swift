@@ -28,14 +28,14 @@ final class PointerTracker {
 
     // MARK: - Permission Check
 
-    /// Check if Accessibility permission is granted
     // periphery:ignore - Reserved: hasPermission property — reserved for future feature activation
+    /// Check if Accessibility permission is granted
     var hasPermission: Bool {
         AXIsProcessTrusted()
     }
 
-    /// Request Accessibility permission (opens System Settings)
     // periphery:ignore - Reserved: hasPermission property reserved for future feature activation
+    /// Request Accessibility permission (opens System Settings)
     func requestPermission() {
         // Prompt for accessibility permission
         // Use string literal to avoid concurrency warning on kAXTrustedCheckOptionPrompt global
@@ -52,8 +52,8 @@ final class PointerTracker {
 
     // MARK: - Tracking
 
-    /// Start tracking pointer position
     // periphery:ignore - Reserved: startTracking() instance method — reserved for future feature activation
+    /// Start tracking pointer position
     func startTracking() {
         guard hasPermission else {
             lastError = PointerTrackingError.permissionDenied
@@ -118,8 +118,8 @@ final class PointerTracker {
         print("[PointerTracker] Started tracking pointer")
     }
 
-    /// Stop tracking pointer position
     // periphery:ignore - Reserved: stopTracking() instance method — reserved for future feature activation
+    /// Stop tracking pointer position
     func stopTracking() {
         guard isTracking else { return }
 
@@ -140,8 +140,8 @@ final class PointerTracker {
         print("[PointerTracker] Stopped tracking pointer")
     }
 
-    /// Get current pointer position without continuous tracking
     // periphery:ignore - Reserved: getCurrentPosition() instance method — reserved for future feature activation
+    /// Get current pointer position without continuous tracking
     func getCurrentPosition() -> CGPoint {
         // periphery:ignore - Reserved: getCurrentPosition() instance method reserved for future feature activation
         if let currentEvent = CGEvent(source: nil) {

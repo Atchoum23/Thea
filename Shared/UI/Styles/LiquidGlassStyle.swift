@@ -102,8 +102,8 @@ struct SoftEdgeModifier: ViewModifier {
 // MARK: - View Extensions
 
 extension View {
-    /// Applies Liquid Glass effect with capsule shape
     // periphery:ignore - Reserved: liquidGlass(interactive:) instance method — reserved for future feature activation
+    /// Applies Liquid Glass effect with capsule shape
     func liquidGlass(interactive: Bool = false) -> some View {
         modifier(LiquidGlassModifier(isInteractive: interactive))
     }
@@ -114,14 +114,14 @@ extension View {
     // periphery:ignore - Reserved: liquidGlass(interactive:) instance method reserved for future feature activation
     }
 
-    /// Applies Liquid Glass effect with circular shape
     // periphery:ignore - Reserved: liquidGlassCircle() instance method — reserved for future feature activation
+    /// Applies Liquid Glass effect with circular shape
     func liquidGlassCircle() -> some View {
         modifier(CircularGlassModifier())
     }
 
-    /// Applies Liquid Glass to a card with concentric radius
     // periphery:ignore - Reserved: liquidGlassCard(cornerRadius:padding:) instance method — reserved for future feature activation
+    /// Applies Liquid Glass to a card with concentric radius
     func liquidGlassCard(
         // periphery:ignore - Reserved: liquidGlassCircle() instance method reserved for future feature activation
         cornerRadius: CGFloat = TheaCornerRadius.card,
@@ -131,8 +131,8 @@ extension View {
     // periphery:ignore - Reserved: liquidGlassCard(cornerRadius:padding:) instance method reserved for future feature activation
     }
 
-    /// Applies soft scroll-edge effects replacing hard dividers
     // periphery:ignore - Reserved: softEdges() instance method — reserved for future feature activation
+    /// Applies soft scroll-edge effects replacing hard dividers
     func softEdges() -> some View {
         modifier(SoftEdgeModifier())
     }

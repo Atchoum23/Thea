@@ -6,8 +6,8 @@ import SwiftUI
 /// This file provides the reduce-motion helper extension.
 
 extension View {
-    /// Applies animation only when reduce motion is not enabled
     // periphery:ignore - Reserved: theaAnimation(_:value:reduceMotion:) instance method reserved for future feature activation
+    /// Applies animation only when reduce motion is not enabled
     func theaAnimation<V: Equatable>(
         _ animation: Animation,
         value: V,

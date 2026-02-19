@@ -35,8 +35,8 @@ final class FunctionGemmaEngine {
 
     // MARK: - Model Loading
 
-    /// Load the FunctionGemma model via CoreML
     // periphery:ignore - Reserved: loadModel() instance method — reserved for future feature activation
+    /// Load the FunctionGemma model via CoreML
     func loadModel() async throws {
         guard !isModelLoaded else { return }
 
@@ -70,8 +70,8 @@ final class FunctionGemmaEngine {
 
     // MARK: - Function Call Parsing
 
-    /// Parse a natural language instruction into a structured function call
     // periphery:ignore - Reserved: parse(_:) instance method — reserved for future feature activation
+    /// Parse a natural language instruction into a structured function call
     func parse(_ instruction: String) async throws -> FunctionCall? {
         isProcessing = true
         defer { isProcessing = false }
@@ -85,8 +85,8 @@ final class FunctionGemmaEngine {
         return parseWithRules(instruction)
     }
 
-    /// Parse multiple instructions (e.g., "Create a reminder and then open Safari")
     // periphery:ignore - Reserved: parseMultiple(_:) instance method — reserved for future feature activation
+    /// Parse multiple instructions (e.g., "Create a reminder and then open Safari")
     func parseMultiple(_ instruction: String) async throws -> [FunctionCall] {
         isProcessing = true
         defer { isProcessing = false }

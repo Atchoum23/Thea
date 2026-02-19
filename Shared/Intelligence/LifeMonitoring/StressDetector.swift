@@ -105,8 +105,8 @@ final class StressDetector {
     /// Maximum snapshots retained (7 days at ~1 snapshot per 5 minutes)
     private let maxHistoryCount = 2016
 
-    /// App switch frequency threshold: >10 switches in 5 minutes
     // periphery:ignore - Reserved: appSwitchThreshold property — reserved for future feature activation
+    /// App switch frequency threshold: >10 switches in 5 minutes
     private let appSwitchThreshold = 10
     // periphery:ignore - Reserved: appSwitchWindowSeconds property — reserved for future feature activation
     private let appSwitchWindowSeconds: TimeInterval = 300
@@ -122,16 +122,16 @@ final class StressDetector {
     // periphery:ignore - Reserved: hrvDepressionFraction property — reserved for future feature activation
     private let hrvDepressionFraction: Double = 0.20
 
-    /// Negative sentiment threshold (LifeEvent sentiment range: -1 to 1)
     // periphery:ignore - Reserved: negativeSentimentThreshold property — reserved for future feature activation
+    /// Negative sentiment threshold (LifeEvent sentiment range: -1 to 1)
     private let negativeSentimentThreshold: Double = -0.3
 
-    /// Calendar density: overlapping events threshold
     // periphery:ignore - Reserved: calendarDensityThreshold property — reserved for future feature activation
+    /// Calendar density: overlapping events threshold
     private let calendarDensityThreshold = 3
 
-    /// Late-night activity cutoff hour (24h)
     // periphery:ignore - Reserved: lateNightStartHour property — reserved for future feature activation
+    /// Late-night activity cutoff hour (24h)
     private let lateNightStartHour = 23
     // periphery:ignore - Reserved: lateNightEndHour property — reserved for future feature activation
     private let lateNightEndHour = 5
@@ -174,8 +174,8 @@ final class StressDetector {
 
     // MARK: - Lifecycle
 
-    /// Subscribe to LifeMonitoringCoordinator event stream and begin processing
     // periphery:ignore - Reserved: start() instance method — reserved for future feature activation
+    /// Subscribe to LifeMonitoringCoordinator event stream and begin processing
     func start() {
         guard cancellables.isEmpty else {
             logger.info("StressDetector already running")
@@ -195,8 +195,8 @@ final class StressDetector {
     // periphery:ignore - Reserved: start() instance method reserved for future feature activation
     }
 
-    /// Stop processing events
     // periphery:ignore - Reserved: stop() instance method — reserved for future feature activation
+    /// Stop processing events
     func stop() {
         cancellables.removeAll()
         saveToDisk()
@@ -438,8 +438,8 @@ final class StressDetector {
 
     // MARK: - Querying
 
-    /// Average stress score over the last N hours
     // periphery:ignore - Reserved: averageScore(hours:) instance method — reserved for future feature activation
+    /// Average stress score over the last N hours
     func averageScore(hours: Int = 6) -> Double? {
         let cutoff = Date().addingTimeInterval(-Double(hours) * 3600)
         let recent = history.filter { $0.timestamp >= cutoff }
@@ -448,8 +448,8 @@ final class StressDetector {
         return recent.reduce(0.0) { $0 + $1.score } / Double(recent.count)
     }
 
-    /// Stress trend direction over the last N hours
     // periphery:ignore - Reserved: trend(hours:) instance method — reserved for future feature activation
+    /// Stress trend direction over the last N hours
     func trend(hours: Int = 6) -> StressTrend {
         let cutoff = Date().addingTimeInterval(-Double(hours) * 3600)
         let recent = history.filter { $0.timestamp >= cutoff }
@@ -469,8 +469,8 @@ final class StressDetector {
         return .stable
     }
 
-    /// Peak stress level in the last N hours
     // periphery:ignore - Reserved: peakLevel(hours:) instance method — reserved for future feature activation
+    /// Peak stress level in the last N hours
     func peakLevel(hours: Int = 24) -> StressLevel {
         let cutoff = Date().addingTimeInterval(-Double(hours) * 3600)
         // periphery:ignore - Reserved: peakLevel(hours:) instance method reserved for future feature activation

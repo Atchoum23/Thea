@@ -14,13 +14,13 @@ import UIKit
 
 extension VoiceProactivity {
 
+    // periphery:ignore - Reserved: platform parameter kept for API compatibility
     /// Check whether the current device can send a message directly.
     ///
     /// Returns `true` on macOS (always available) and `false` on iOS
     /// (conservative — prefers relay or voice confirmation).
     /// - Parameter platform: The target messaging platform.
     /// - Returns: `true` if direct send is available.
-    // periphery:ignore - Reserved: platform parameter kept for API compatibility
     func canSendDirectly(platform: VoiceRelayPlatform) async -> Bool {
         #if os(iOS)
         // On iOS, might need to check if unlocked

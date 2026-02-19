@@ -5,10 +5,10 @@
 import Foundation
 import os.log
 
+// periphery:ignore - Reserved: SmartTaskPrioritizer type reserved for future feature activation
 /// Analyzes codebase quality signals and dynamically prioritizes work items.
 /// Uses test coverage, lint violations, build warnings, and crash reports
 /// to determine what should be worked on next.
-// periphery:ignore - Reserved: SmartTaskPrioritizer type reserved for future feature activation
 actor SmartTaskPrioritizer {
     static let shared = SmartTaskPrioritizer()
 

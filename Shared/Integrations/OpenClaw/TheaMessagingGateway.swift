@@ -137,8 +137,8 @@ final class TheaMessagingGateway: ObservableObject {
         try await connector.send(message)
     }
 
-    /// Convenience: send a text reply to the same chat a message came from.
     // periphery:ignore - Reserved: reply(to:text:) instance method — reserved for future feature activation
+    /// Convenience: send a text reply to the same chat a message came from.
     func reply(to inbound: TheaGatewayMessage, text: String) async throws {
         // periphery:ignore - Reserved: reply(to:text:) instance method reserved for future feature activation
         let outbound = OutboundMessagingMessage(

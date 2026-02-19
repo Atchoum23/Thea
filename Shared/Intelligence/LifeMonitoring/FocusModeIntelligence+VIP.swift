@@ -55,6 +55,7 @@ extension FocusModeIntelligence {
         }
     }
 
+    // periphery:ignore - Reserved: getVIPMessage(for:language:) instance method reserved for future feature activation
     /// Retrieve the auto-reply message for a VIP contact.
     ///
     /// Returns the custom message if one is set, otherwise a localized default VIP message.
@@ -63,7 +64,6 @@ extension FocusModeIntelligence {
     ///   - contactId: The VIP contact identifier.
     ///   - language: The BCP-47 language code for the default message.
     /// - Returns: The VIP message string, or `nil` if the contact is not a VIP.
-    // periphery:ignore - Reserved: getVIPMessage(for:language:) instance method reserved for future feature activation
     func getVIPMessage(for contactId: String, language: String) -> String? {
         guard isVIPContact(contactId) else { return nil }
 

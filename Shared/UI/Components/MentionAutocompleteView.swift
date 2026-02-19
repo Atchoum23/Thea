@@ -298,9 +298,9 @@ struct MentionAutocompleteView: View {
 
     // MARK: - Keyboard navigation
 
+    // periphery:ignore - Reserved: handleKeyPress(_:) instance method reserved for future feature activation
     /// Call this from the parent's key handler.
     /// Returns `true` if the key was consumed.
-    // periphery:ignore - Reserved: handleKeyPress(_:) instance method reserved for future feature activation
     func handleKeyPress(_ key: KeyEquivalent) -> Bool {
         switch key {
         case .upArrow:

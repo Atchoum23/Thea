@@ -327,8 +327,8 @@ public final class MobileIntelligenceOrchestrator {
 
     // MARK: - Learning
 
-    /// Record outcome of an inference to improve future routing
     // periphery:ignore:parameters latency,userSatisfaction - Reserved: parameter(s) kept for API compatibility
+    /// Record outcome of an inference to improve future routing
     public func recordOutcome(
         mode: InferenceMode,
         taskType: TaskType,

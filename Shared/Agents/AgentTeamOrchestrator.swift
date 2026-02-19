@@ -120,8 +120,8 @@ final class AgentTeamOrchestrator: ObservableObject {
 
     // MARK: - Sub-Task Execution
 
-    /// Execute a single sub-task with an isolated context window.
     // periphery:ignore - Reserved: teamID parameter — kept for API compatibility
+    /// Execute a single sub-task with an isolated context window.
     private func executeSubTask(_ subTask: AgentSubTask, teamID: UUID) async -> AgentSubTaskResult {
         logger.debug("Teammate executing: \(subTask.description.prefix(60))")
 
