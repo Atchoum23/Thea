@@ -2471,6 +2471,20 @@ status is a requirement, but Phase T/U/v3 prep does NOT require CI to be complet
 
 ## PHASE T — NOTARIZATION PIPELINE SETUP (MSM3U)
 
+> ⚡ **PARALLELISM: Run Phase T-AUTO in a new tmux window while Phase U runs in main window.**
+> T-AUTO (T3+T5) needs no human input and can start immediately when Phase S closes.
+> T-MANUAL (T1+T2+T4) requires Alexis — send ntfy, skip, never block Phase U or v3.
+>
+> ```bash
+> # Open T-auto in a parallel window immediately when Phase S completes:
+> /opt/homebrew/bin/tmux new-window -n "phase-t-auto"
+> # In that window: write T3 (ExportOptions-DevID.plist) and T5 (notarize.yml skeleton)
+> # Commit both: git add Scripts/notarize.sh ExportOptions-DevID.plist .github/workflows/release-notarize.yml
+> # git commit -m "feat(T): ExportOptions plist + notarize workflow skeleton"
+> # git pushsync
+> # Done — T-auto complete. T1/T2/T4 are async (Alexis provides when convenient).
+> ```
+
 > ⚠️ **SESSION START CHECKLIST** (do before any T work):
 > ```bash
 > launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
@@ -2666,10 +2680,19 @@ echo "=== TRANSITIONING TO v3 ==="
 echo "Reading .claude/THEA_CAPABILITY_PLAN_v3.md ..."
 ```
 
-**EXECUTOR ACTION**: Read `.claude/THEA_CAPABILITY_PLAN_v3.md` and execute all phases starting
-from **Phase A3**, in order through **Phase AH3**, then stop at **Phase AD3** (Manual Gate —
-wait for Alexis). Follow the SESSION SAFETY PROTOCOL at the top of that file. Commit after
-every file edit. Push with `git pushsync`. Send ntfy notification after each wave.
+**EXECUTOR ACTION — FULLY AUTOMATED, NO HUMAN INPUT NEEDED:**
+```bash
+# This block auto-spawns all 6 v3 streams across both machines.
+# Copy-paste the AUTO-SPAWN LAUNCHER from THEA_CAPABILITY_PLAN_v3.md
+# (search for "AUTO-SPAWN LAUNCHER" in that file — the full bash script is there)
+# Run it directly in the current shell. It will:
+#   1. Launch 5 tmux windows on MSM3U (streams 1-5), each with caffeinate + claude
+#   2. SSH into MBAM2 and auto-start stream 6 there
+#   3. Send ntfy confirming all 6 streams launched
+# After running the launcher, this Phase U session's job is done.
+# Stream 5 will handle AG3+AH3+Wave6 verification autonomously.
+# AD3 (Manual Gate) will send ntfy when reached — that's when Alexis reviews.
+```
 
 ---
 

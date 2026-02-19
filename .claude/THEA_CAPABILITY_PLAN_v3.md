@@ -245,98 +245,135 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 
 ---
 
-## PHASE EXECUTION ORDER — TRUE PARALLELISM (v3.7 rewrite)
+## PHASE EXECUTION ORDER — TRUE PARALLELISM (v3.8 — fully automated, zero human gates)
 
 ```
-TRUE DEPENDENCY ANALYSIS — Why the old "sequential waves" was wrong:
-  A3 adds NEW files to Shared/Intelligence/MetaAI/ — does NOT modify existing files.
-  Therefore B3/C3/D3/E3/F3/G3/I3/J3/K3/L3/M3/N3/O3/P3/Q3/R3/S3/T3/U3/V3/W3
-  have ZERO dependency on A3. They touch different files entirely.
-  ONLY H3 (AI Dashboard) depends on A3+E3+F3+G3 — it references all those systems in UI.
-  Wave 6 (verification) depends on ALL feature phases completing.
+TRUE DEPENDENCY ANALYSIS:
+  A3 adds NEW files to Shared/Intelligence/MetaAI/ only. Does NOT touch any existing file.
+  ONLY H3 (AI Dashboard) depends on A3+E3+F3+G3. ALL other phases are fully independent.
+  project.yml uses `path: Shared` glob — new subdirs auto-included, no project.yml edits needed.
+  Wave 6 verification must run after ALL feature streams complete.
 
-LAUNCH PLAN: 5 PARALLEL STREAMS (start ALL simultaneously after v2 Phase U):
-────────────────────────────────────────────────────────────────────────────
+6 PARALLEL STREAMS — AUTO-LAUNCHED by Phase U completion script (ZERO human gates):
+  MSM3U: 5 streams (256GB RAM easily handles 5+ Claude Code sessions + parallel builds)
+  MBAM2: 1 stream (auto-spawned from MSM3U via SSH — no manual action from Alexis)
+────────────────────────────────────────────────────────────────────────────────────────
 
-  STREAM 1 — MSM3U tmux window 1 (MetaAI + Dashboard):
-    A3 → H3
-    [A3: ~4h] → [H3: ~4h after A3+stream2+stream3 done] = ~12h total (H3 waits for streams 1-3)
-    H3 GATE: wait for A3, E3, F3, G3 to all be committed before starting H3.
+STREAM 1 — MSM3U window "v3-s1" — MetaAI + Dashboard (~12h)
+  A3 (4h) → wait for S2 E3+F3+G3 committed → H3 (4h)
+  Files: Shared/Intelligence/MetaAI/** (A3), UI/Views/Intelligence/MetaAIDashboardView (H3)
 
-  STREAM 2 — MSM3U tmux window 2 (Wiring):
-    B3 → C3 → D3 → E3
-    [3h + 2h + 2h + 4h] = ~11h
-    Note: B3/C3/D3 touch ChatManager.swift — run sequentially in this stream.
+STREAM 2 — MSM3U window "v3-s2" — Core Wiring (~11h)
+  B3 (3h) → C3 (2h) → D3 (2h) → E3 (4h)
+  Files: ChatManager.swift, AnthropicProvider.swift, Intelligence/Search/, Intelligence/Verification/, Intelligence/Skills/
+  ⚠️ STREAM 2 IS THE SOLE OWNER OF ChatManager.swift — no other stream touches it.
 
-  STREAM 3 — MSM3U tmux window 3 (Agents + Heavy AI):
-    F3 → G3 → L3 → M3
-    [3h + 2h + 4h + 3h] = ~12h
-    Note: F3/G3 touch Squads/Planning (no ChatManager conflict with stream 2).
+STREAM 3 — MSM3U window "v3-s3" — Agents + Heavy AI (~12h)
+  F3 (3h) → G3 (2h) → L3 (4h) → M3 (3h)
+  Files: Intelligence/Squads/, Intelligence/Planning/, AI/ComputerUse/ (new), AI/Audio/ (MLX)
 
-  STREAM 4 — MSM3U tmux window 4 (Capabilities + Subsystems):
-    N3 → O3 → J3 → P3 → Q3 → R3 → S3 → U3
-    [3h + 4h + 3h + 2h + 2h + 2h + 2h + 4h] = ~22h
-    Split if possible: N3+O3 in window 4a, J3+P3+Q3+R3+S3+U3 in window 4b (~14h).
+STREAM 4 — MSM3U window "v3-s4" — Capabilities + Features (~14h)
+  N3 (3h) → O3 (4h) → J3 (3h) → P3 (2h) → Q3 (2h)
+  Files: Shared/Artifacts/ (new), Integrations/MCP/ (new), UI/Views/LifeTracking/, Memory/PersonalKG, Intelligence/Scheduling/
 
-  STREAM 5 — MBAM2 (pure SwiftUI + integrations, no ML):
-    I3 → K3 → T3 → V3 → W3
-    [2h + 3h + 3h + 3h + 3h] = ~14h
-    MBAM2 starts IMMEDIATELY after v2 Phase U pushsync (no need to wait for MSM3U).
-    pushsync after EACH phase so MSM3U can include changes in Wave 6 verification.
+STREAM 5 — MSM3U window "v3-s5" — Remaining + Subsystems (~14h)
+  R3 (2h) → S3 (2h) → U3 (4h) → AG3 (6h) → AH3 (5h)
+  Files: SelfEvolution/, UI/Views/MCPServerGenerator/ (new), AI subsystems audit
+  Note: AG3+AH3 run in this stream AFTER all other streams complete (stream 5 waits for streams 1-4 + MBAM2)
 
-BOTTLENECK ANALYSIS:
-  Stream 1: ~12h (H3 waits for A3 + streams 2+3 E3/F3/G3)
-  Stream 2: ~11h
-  Stream 3: ~12h
-  Stream 4a: ~7h / Stream 4b: ~14h (4b is bottleneck in stream 4)
-  Stream 5: ~14h
-  TRUE BOTTLENECK: ~14h (streams 4b and 5 are longest)
+STREAM 6 — MBAM2 window "v3-s6" — UI + Integrations (~14h, auto-spawned via SSH)
+  I3 (2h) → K3 (3h) → T3 (3h) → V3 (3h) → W3 (3h)
+  Files: UI/Views/Components/ (excluded comps), Settings/ (config UI), Integrations/Backends/, UI/Views/Transparency/, UI/Views/Chat/ (enhancements)
+  pushsync after EVERY phase — MSM3U Wave 6 pulls MBAM2's changes before verification.
 
-Wave F (FINAL SYNC — after all 5 streams complete):
-  H3 — AI System UIs Dashboard  [MSM3U, ~4h — waits for all streams, then builds master dashboard]
+BOTTLENECK: ~14h (streams 4, 5, 6 are longest)
+  All feature work done: ~13:00 CET Fri Feb 20 (starting from ~23:00 CET Feb 19)
+  H3 done: ~17:00 CET Fri Feb 20
+  Wave 6 (sequential): ~03:00 CET Sat Feb 21
+  AG3+AH3: already done in stream 5 → AD3 gate: Sat Feb 21 morning
 
-Wave 6 — VERIFICATION (sequential, after H3 + all feature phases):
-  X3 → Y3 → Z3 → AA3 → AB3 → AC3  [MSM3U, ~10h sequential]
-  AG3 — Full QA Plan execution        [MSM3U, ~6h]
-  AH3 — 8-Hat audit + implement all   [MSM3U, ~5h]
-  AD3 — COMBINED FINAL GATE           [Alexis review — manual]
+FILE OWNERSHIP — ABSOLUTE RULES (prevents merge conflicts):
+  ChatManager.swift     → STREAM 2 ONLY
+  MetaAI/**             → STREAM 1 ONLY
+  Squads/Planning/**    → STREAM 3 ONLY
+  Artifacts/MCP/**      → STREAM 4 ONLY
+  SelfEvolution/**      → STREAM 5 ONLY
+  Settings/** (config)  → STREAM 6 ONLY
+  AI/Audio/**           → STREAM 3 ONLY
+  project.yml           → NO STREAM edits it (glob sources auto-pick new files)
+  If any stream needs to touch a file owned by another: STOP, send ntfy, coordinate.
 
-REVISED TIMELINE (starting from v2 Phase U complete ~23:00 CET Feb 19):
-  +14h → all 5 streams done → ~13:00 CET Fri Feb 20
-  +4h  → H3 done             → ~17:00 CET Fri Feb 20
-  +10h → Wave 6 done          → ~03:00 CET Sat Feb 21
-  +11h → AG3+AH3 done         → ~14:00 CET Sat Feb 21
-  AD3  → Alexis reviews        → Sat Feb 21 afternoon
+AUTO-SPAWN LAUNCHER (Phase U completion script runs this — fully automated):
+```bash
+#!/usr/bin/env bash
+# Spawns all 6 v3 streams automatically. Called at end of Phase U.
+PLAN="/Users/alexis/Documents/IT & Tech/MyApps/Thea/.claude/THEA_CAPABILITY_PLAN_v3.md"
+THEA="/Users/alexis/Documents/IT & Tech/MyApps/Thea"
 
-CRITICAL RULES FOR PARALLEL EXECUTION:
-  1. Each stream = separate tmux window with its own Claude Code session.
-  2. NEVER have two streams edit the same file simultaneously:
-     - ChatManager.swift: STREAM 2 only (B3→C3→D3→E3)
-     - Shared/Intelligence/MetaAI/: STREAM 1 only (A3)
-     - Squads/Planning: STREAM 3 only (F3→G3)
-     - UI files: STREAM 4 (J3/S3) and STREAM 5 (I3/K3/V3/W3) — check for overlap
-  3. Each stream commits with: git add <SPECIFIC FILES ONLY> (never git add -A)
-  4. Each stream does git pushsync after EACH phase (not at stream end)
-  5. Each stream pulls at start of each phase: git pull --ff-only
-  6. STREAM 5 (MBAM2) must pushsync after each phase for MSM3U to see changes.
-  7. H3 must git pull after all other streams complete before starting.
-  8. thea-sync MUST be suspended on BOTH machines for entire v3 execution.
+cd "$THEA" && git pull && echo "=== Launching v3 — 6 parallel streams ==="
 
-HOW TO LAUNCH ALL 5 STREAMS (execute after v2 Phase U completes):
-  # On MSM3U — launch 4 Claude Code sessions in separate tmux windows:
-  tmux new-window -n "v3-s1" && claude  # Stream 1: A3 → H3
-  tmux new-window -n "v3-s2" && claude  # Stream 2: B3 → C3 → D3 → E3
-  tmux new-window -n "v3-s3" && claude  # Stream 3: F3 → G3 → L3 → M3
-  tmux new-window -n "v3-s4a" && claude # Stream 4a: N3 → O3
-  tmux new-window -n "v3-s4b" && claude # Stream 4b: J3 → P3 → Q3 → R3 → S3 → U3
-  # On MBAM2 — Alexis launches one Claude Code session for Stream 5:
-  claude  # Stream 5: I3 → K3 → T3 → V3 → W3
-  # Each session reads this plan and is told which STREAM to execute.
+# Suspend thea-sync on MSM3U
+launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
 
-MACHINE ASSIGNMENTS (v3.7):
-  MSM3U streams 1-4: A3 B3 C3 D3 E3 F3 G3 H3 J3 L3 M3 N3 O3 P3 Q3 R3 S3 U3 + Wave6/AG3/AH3
-  MBAM2 stream 5:    I3 K3 T3 V3 W3
-  CPU temp monitoring: mandatory on MSM3U for streams 3+4 (L3/M3/N3/O3 are ML-heavy)
+# MSM3U streams 1-5 (separate tmux windows, each gets its own Claude Code session)
+for S in s1 s2 s3 s4 s5; do
+  /opt/homebrew/bin/tmux new-window -n "v3-$S"
+  sleep 1
+  case $S in
+    s1) PROMPT="Read '$PLAN'. You are STREAM 1. Execute A3 then wait for streams 2+3 to commit E3+F3+G3 (check git log every 30min), then execute H3. File ownership: Shared/Intelligence/MetaAI/** and MetaAIDashboardView only." ;;
+    s2) PROMPT="Read '$PLAN'. You are STREAM 2. Execute B3→C3→D3→E3 sequentially. You are SOLE OWNER of ChatManager.swift — never let another stream touch it. swift test locally after each phase." ;;
+    s3) PROMPT="Read '$PLAN'. You are STREAM 3. Execute F3→G3→L3→M3 sequentially. File ownership: Intelligence/Squads/, Intelligence/Planning/, AI/ComputerUse/, AI/Audio/." ;;
+    s4) PROMPT="Read '$PLAN'. You are STREAM 4. Execute N3→O3→J3→P3→Q3 sequentially. File ownership: Shared/Artifacts/, Integrations/MCP/, UI/Views/LifeTracking/, Memory/PersonalKG, Intelligence/Scheduling/." ;;
+    s5) PROMPT="Read '$PLAN'. You are STREAM 5. Execute R3→S3→U3 first. Then WAIT until streams 1-4 and MBAM2 all push their final phases (poll git log every 30min for 'Stream N complete' commits). Then execute AG3→AH3." ;;
+  esac
+  /opt/homebrew/bin/tmux send-keys -t "v3-$S" \
+    "cd '$THEA' && launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null && caffeinate -i claude --dangerously-skip-permissions" Enter
+  sleep 3
+  /opt/homebrew/bin/tmux send-keys -t "v3-$S" "$PROMPT" Enter
+done
+
+# MBAM2 stream 6 — auto-spawned via SSH (no manual action from Alexis needed)
+ssh mbam2.local "
+  launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+  /opt/homebrew/bin/tmux new-session -d -s v3-s6 -x 220 -y 50 2>/dev/null || true
+  /opt/homebrew/bin/tmux send-keys -t v3-s6 \
+    \"cd '/Users/alexis/Documents/IT & Tech/MyApps/Thea' && git pull && caffeinate -i claude --dangerously-skip-permissions\" Enter
+" 2>/dev/null
+sleep 5
+ssh mbam2.local "/opt/homebrew/bin/tmux send-keys -t v3-s6 \
+  \"Read '.claude/THEA_CAPABILITY_PLAN_v3.md'. You are STREAM 6 on MBAM2. Execute I3→K3→T3→V3→W3. File ownership: UI/Views/Components/, Settings/ config views, Integrations/Backends/, UI/Views/Transparency/, ChatView additions. git add <specific files only>. git pushsync after each phase. swift test locally. Send ntfy to thea-msm3u with 'STREAM 6 complete' when W3 done.\" Enter" 2>/dev/null
+
+curl -s -X POST "https://ntfy.sh/thea-msm3u" \
+  -H "Title: 🚀 v3 LAUNCHED — 6 parallel streams" \
+  -d "MSM3U: 5 streams (S1-S5). MBAM2: 1 stream (S6 via SSH). Bottleneck ~14h. All features done ~13:00 CET Fri Feb 20." || true
+
+echo "=== All 6 v3 streams launched. Monitor: tmux ls ==="
+```
+
+STREAM 5 GATE (before AG3/AH3):
+  Stream 5 must verify all streams committed before starting AG3:
+```bash
+# Poll every 30 min until all streams done:
+while true; do
+  COMMITS=$(git log --oneline --since="2 hours ago" | grep -c "Stream.*complete\|Auto-save.*v3\|feat.*A3\|feat.*B3\|feat.*C3\|feat.*D3\|feat.*E3\|feat.*F3\|feat.*G3\|feat.*H3\|feat.*N3\|feat.*O3\|feat.*J3\|feat.*P3\|feat.*Q3\|feat.*I3\|feat.*K3\|feat.*T3\|feat.*V3\|feat.*W3\|feat.*R3\|feat.*S3\|feat.*U3" || true)
+  echo "$(date): $COMMITS stream commits detected"
+  [ "$COMMITS" -ge 22 ] && break  # 22 = one commit per phase across all streams
+  sleep 1800
+done
+git pull && echo "All streams complete — starting AG3"
+```
+
+TIMING (from v2 Phase U complete, estimated 23:00 CET Feb 19):
+  +14h → streams 1-6 all done (bottleneck ~14h) → ~13:00 CET Fri Feb 20
+  +4h  → H3 done (Stream 1 was waiting)          → ~17:00 CET Fri Feb 20
+  Stream 5 picks up AG3+AH3:                      → ~17:00 CET Fri Feb 20 + 11h = ~04:00 CET Sat Feb 21
+  Wave 6 (X3→Y3→Z3→AA3→AB3→AC3) on MSM3U:        → ~04:00 + 10h = ~14:00 CET Sat Feb 21
+  AD3 — Alexis reviews:                           → Sat Feb 21 afternoon
+
+MACHINE LOAD:
+  MSM3U: 5× Claude Code (each ~4GB) + 5× swift build/test = ~40GB RAM used, 256GB available ✅
+  MBAM2: 1× Claude Code + swift build/test = ~8GB RAM used, 24GB available ✅
+  Both machines: thea-sync suspended. CPU temp monitored on MSM3U (pause >90°C).
 
 CURRENT STATUS:
   v2: 🔄 IN PROGRESS — Phase S monitoring CI (Unit Tests ~80min on GH Actions), T+U pending
