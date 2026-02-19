@@ -2515,7 +2515,7 @@ COMMUNITY RISK WARNINGS (incorporate into OpenClaw setup):
    - `openclaw doctor --fix` auto-remediates most common config issues
 
 PDF SECURITY KIT FINDINGS (Kit Sécurité OpenClaw, from ~/Downloads):
-The PDF identified 5 critical risks that must be addressed in O_PRE config:
+The PDF identified 5 critical risks — incorporated into Thea gateway design:
   Risk 1: Public gateway exposure → Fix: bind to loopback (127.0.0.1) only — NEVER 0.0.0.0
   Risk 2: Anyone can DM the bot → Fix: dmPolicy: "pairing" + dmScope: "per-channel-peer"
   Risk 3: Credentials in plain text → Fix: use keychain/environment vars; encrypt openclaw.json
@@ -2526,7 +2526,7 @@ The PDF identified 5 critical risks that must be addressed in O_PRE config:
 - OpenClaw iOS app is in "internal preview" as of Feb 2026 — iOS node code should be ready but
   pairing cannot be fully tested until app is publicly available. Code must still be written.
 - Canvas serves at `/__openclaw__/canvas/` (port 18793), A2UI at `/__openclaw__/a2ui/`
-- dmScope: "per-channel-peer" is CRITICAL for any multi-sender scenario — enforce in O_PRE config
+- Session isolation: "{platform}:{chatId}:{senderId}" key is CRITICAL — implemented in MessagingSessionManager
 - openclaw.json uses JSON5 format (comments + trailing commas OK) — not strict JSON
 - Claude Opus 4.6 (Feb 5) + Sonnet 4.6 (Feb 17) are now live — update model catalog in P13
 - Opus 4.6 outperforms GPT-5.2 by 144 ELO on GDPval-AA benchmark
