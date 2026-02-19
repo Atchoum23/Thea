@@ -1,12 +1,15 @@
-# THEA CAPABILITY MAXIMIZATION PLAN v3.6
+# THEA CAPABILITY MAXIMIZATION PLAN v3.8
 # ══════════════════════════════════════════════════════════════════════════════
 # ⚠️  ABSOLUTE NON-NEGOTIABLE RULE — NEVER REMOVE ANYTHING. ONLY ADD AND FIX.
 # ══════════════════════════════════════════════════════════════════════════════
 #
-# Created: 2026-02-19 | Updated: 2026-02-19 16:05 CET → v3.6
+# Created: 2026-02-19 | Updated: 2026-02-19 19:40 CET → v3.8
 # v3.1 (13:47): initial | v3.2: MetaAI audit | v3.3: snippets | v3.4: behavioral protocols
 # v3.5 (15:37): 1113-file codebase audit; AE3 (platform observers) + AF3 (settings nav)
-# v3.6 (16:05): AG3 (Comprehensive QA + stub activation + CI green loop) + AH3 (8-hat audit → implement all)
+# v3.6 (16:05): AG3 (Comprehensive QA) + AH3 (8-hat audit → implement all)
+# v3.7 (18:xx): TRUE parallelism — 5 simultaneous streams; A3 only blocks H3; all other phases independent
+# v3.8 (19:40): Full automation — 6 parallel streams auto-spawned (5 MSM3U + MBAM2 via SSH); zero human gates;
+#              Phase T parallelised with U; LOCAL-FIRST Rule 9; AE3→stream 5, AF3→stream 6; ci.yml .claude/** ignore
 # v2→v3 auto-transition: executor starts A3 after v2 Phase U; v2 Phase V merged into AD3
 # Owner: Autonomous agent system (MSM3U primary + MBAM2 secondary)
 # Scope: All platforms — macOS, iOS, watchOS, tvOS, Tizen, TheaWeb
@@ -27,10 +30,10 @@
 #   - Squads: defined but never integrated
 #   - MLXAudioEngine: temporarily excluded (Release build issue)
 #
-# v3 MISSION: Autonomously make Thea as reliable, omnipotent, omniscient, omnipresent,
-# and omnificent as possible — ship-ready across all platforms per industry's highest standards.
-# Close every gap. Wire everything. Activate everything.
-# Transform Thea from 30% to 100% realized capability.
+# v3 MISSION: Autonomously and as quickly as possible make Thea as reliable, omnipotent,
+# omniscient, omnipresent, and omnificent as possible — ship-ready across all platforms
+# per industry's latest and highest standards. Close every gap. Wire everything. Activate
+# everything. Transform Thea from 30% to 100% realized capability.
 #
 # v3 ADDITIONS OVER v2:
 #   1. Meta-AI Full Activation — cherry-pick ~71 files (all 77 individually audited; skip 6 superseded), MetaAIDashboard UI, MetaAICoordinator, multi-agent/reasoning/autonomy/workflow/plugin suites all activated
@@ -139,9 +142,13 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AB3: Notarization    | ⏳ PENDING      | Blocked by AA3 |
 | Phase AC3: Final Report    | ⏳ PENDING      | Blocked by AB3 |
 | Phase AD3: Manual Gate     | ⏳ MANUAL       | Alexis only — last step |
-| **Overall v3 %**          | **0%**          | v2 Phase U in progress (W running) — v3 starts after U |
+| Phase AE3: Platform Obs.   | ⏳ PENDING      | STREAM 5 tail — startup wiring for PlatformFeaturesHub, TheaIntelligenceOrchestrator, ApprovalManager |
+| Phase AF3: Settings Nav    | ⏳ PENDING      | STREAM 6 (MBAM2) — MacSettingsView sidebar + iOS tab nav completion; pure SwiftUI, no ML |
+| Phase AG3: Comp. QA        | ⏳ PENDING      | STREAM 5 final — after all streams complete; stub activation + CI green loop |
+| Phase AH3: 8-Hat Audit     | ⏳ PENDING      | STREAM 5 final — after AG3; implement all audit findings |
+| **Overall v3 %**          | **0%**          | v2 Phase S active (CI run 22193316888, macOS Tests in_progress) — v3 auto-starts after Phase U |
 
-*Last updated: 2026-02-19 13:47 CET v3.1 — added 4 new feature phases (T3-W3), renamed verification to X3-AD3, v2→v3 auto-transition after Phase U, Phase V merged into AD3, resilience mechanisms added.*
+*Last updated: 2026-02-19 19:40 CET v3.8 — header/mission updated; AE3+AF3+AG3+AH3 added to status table; AE3→stream 5, AF3→stream 6; ci.yml .claude/** paths-ignore added (prevents plan-file CI cancellation); 6-stream auto-spawn launcher in plan.*
 
 ---
 
@@ -276,21 +283,24 @@ STREAM 4 — MSM3U window "v3-s4" — Capabilities + Features (~14h)
   N3 (3h) → O3 (4h) → J3 (3h) → P3 (2h) → Q3 (2h)
   Files: Shared/Artifacts/ (new), Integrations/MCP/ (new), UI/Views/LifeTracking/, Memory/PersonalKG, Intelligence/Scheduling/
 
-STREAM 5 — MSM3U window "v3-s5" — Remaining + Subsystems (~14h)
-  R3 (2h) → S3 (2h) → U3 (4h) → AG3 (6h) → AH3 (5h)
-  Files: SelfEvolution/, UI/Views/MCPServerGenerator/ (new), AI subsystems audit
-  Note: AG3+AH3 run in this stream AFTER all other streams complete (stream 5 waits for streams 1-4 + MBAM2)
+STREAM 5 — MSM3U window "v3-s5" — Remaining + Subsystems (~16h)
+  R3 (2h) → S3 (2h) → U3 (4h) → AE3 (2h) → AG3 (6h) → AH3 (5h)
+  Files: SelfEvolution/, UI/Views/MCPServerGenerator/ (new), AI subsystems, PlatformFeaturesHub startup, TheaIntelligenceOrchestrator, ApprovalManager
+  Note: AE3 (platform observers wiring) done before AG3+AH3. AG3+AH3 run AFTER all other streams complete (stream 5 waits for streams 1-4 + MBAM2).
 
-STREAM 6 — MBAM2 window "v3-s6" — UI + Integrations (~14h, auto-spawned via SSH)
-  I3 (2h) → K3 (3h) → T3 (3h) → V3 (3h) → W3 (3h)
-  Files: UI/Views/Components/ (excluded comps), Settings/ (config UI), Integrations/Backends/, UI/Views/Transparency/, UI/Views/Chat/ (enhancements)
+STREAM 6 — MBAM2 window "v3-s6" — UI + Integrations (~16h, auto-spawned via SSH)
+  I3 (2h) → K3 (3h) → T3 (3h) → V3 (3h) → W3 (3h) → AF3 (2h)
+  Files: UI/Views/Components/ (excluded comps), Settings/ (config UI), Integrations/Backends/, UI/Views/Transparency/, UI/Views/Chat/ (enhancements), MacSettingsView sidebar + iOS tab nav (AF3)
   pushsync after EVERY phase — MSM3U Wave 6 pulls MBAM2's changes before verification.
 
-BOTTLENECK: ~14h (streams 4, 5, 6 are longest)
-  All feature work done: ~13:00 CET Fri Feb 20 (starting from ~23:00 CET Feb 19)
-  H3 done: ~17:00 CET Fri Feb 20
-  Wave 6 (sequential): ~03:00 CET Sat Feb 21
-  AG3+AH3: already done in stream 5 → AD3 gate: Sat Feb 21 morning
+BOTTLENECK: ~16h (streams 5, 6 are longest: AE3+AF3 each add ~2h)
+  All feature work done: ~15:00 CET Fri Feb 20 (starting from ~23:00 CET Feb 19)
+  H3 done: ~17:00 CET Fri Feb 20 (stream 1 waits for E3/F3/G3 from s2+s3)
+  AE3 done (stream 5): ~17:00 CET Fri Feb 20 → AG3+AH3 start
+  AF3 done (stream 6): ~17:00 CET Fri Feb 20
+  Wave 6 starts (sequential verification): ~17:00 CET Fri Feb 20 (H3 done + all streams done)
+  Wave 6 (sequential, ~10h): ~03:00 CET Sat Feb 21
+  AG3+AH3 (stream 5, ~11h): done before Wave 6 → AD3 gate: Sat Feb 21 morning
 
 FILE OWNERSHIP — ABSOLUTE RULES (prevents merge conflicts):
   ChatManager.swift     → STREAM 2 ONLY
@@ -324,7 +334,7 @@ for S in s1 s2 s3 s4 s5; do
     s2) PROMPT="Read '$PLAN'. You are STREAM 2. Execute B3→C3→D3→E3 sequentially. You are SOLE OWNER of ChatManager.swift — never let another stream touch it. swift test locally after each phase." ;;
     s3) PROMPT="Read '$PLAN'. You are STREAM 3. Execute F3→G3→L3→M3 sequentially. File ownership: Intelligence/Squads/, Intelligence/Planning/, AI/ComputerUse/, AI/Audio/." ;;
     s4) PROMPT="Read '$PLAN'. You are STREAM 4. Execute N3→O3→J3→P3→Q3 sequentially. File ownership: Shared/Artifacts/, Integrations/MCP/, UI/Views/LifeTracking/, Memory/PersonalKG, Intelligence/Scheduling/." ;;
-    s5) PROMPT="Read '$PLAN'. You are STREAM 5. Execute R3→S3→U3 first. Then WAIT until streams 1-4 and MBAM2 all push their final phases (poll git log every 30min for 'Stream N complete' commits). Then execute AG3→AH3." ;;
+    s5) PROMPT="Read '$PLAN'. You are STREAM 5. Execute R3→S3→U3→AE3 first (AE3=platform observers wiring). Then WAIT until streams 1-4 and MBAM2 all push their final phases (poll git log every 30min for 'Stream N complete' commits). Then execute AG3→AH3." ;;
   esac
   /opt/homebrew/bin/tmux send-keys -t "v3-$S" \
     "cd '$THEA' && launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null && caffeinate -i claude --dangerously-skip-permissions" Enter
@@ -341,7 +351,7 @@ ssh mbam2.local "
 " 2>/dev/null
 sleep 5
 ssh mbam2.local "/opt/homebrew/bin/tmux send-keys -t v3-s6 \
-  \"Read '.claude/THEA_CAPABILITY_PLAN_v3.md'. You are STREAM 6 on MBAM2. Execute I3→K3→T3→V3→W3. File ownership: UI/Views/Components/, Settings/ config views, Integrations/Backends/, UI/Views/Transparency/, ChatView additions. git add <specific files only>. git pushsync after each phase. swift test locally. Send ntfy to thea-msm3u with 'STREAM 6 complete' when W3 done.\" Enter" 2>/dev/null
+  \"Read '.claude/THEA_CAPABILITY_PLAN_v3.md'. You are STREAM 6 on MBAM2. Execute I3→K3→T3→V3→W3→AF3 sequentially. File ownership: UI/Views/Components/, Settings/ config views, Integrations/Backends/, UI/Views/Transparency/, ChatView additions, MacSettingsView sidebar + iOS tab nav (AF3). git add <specific files only>. git pushsync after each phase. swift test locally. Send ntfy to thea-msm3u with 'STREAM 6 complete' when AF3 done.\" Enter" 2>/dev/null
 
 curl -s -X POST "https://ntfy.sh/thea-msm3u" \
   -H "Title: 🚀 v3 LAUNCHED — 6 parallel streams" \

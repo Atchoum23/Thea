@@ -3,9 +3,13 @@
 # ⚠️  ABSOLUTE NON-NEGOTIABLE RULE — NEVER REMOVE ANYTHING. ONLY ADD AND FIX.
 # ══════════════════════════════════════════════════════════════════════════════
 #
-# Created: 2026-02-19 | Supersedes: THEA_SHIP_READY_PLAN_v1.md
+# Created: 2026-02-19 | Supersedes: THEA_SHIP_READY_PLAN_v1.md | Updated: 2026-02-19 19:40 CET
 # Owner: Autonomous agent system (MSM3U primary + MBAM2 secondary)
 # Scope: All platforms — macOS, iOS, watchOS, tvOS, Tizen, TheaWeb
+#
+# MISSION: Autonomously and as quickly as possible make Thea as reliable, omnipotent,
+# omniscient, omnipresent, and omnificent as possible — ship-ready across all platforms
+# per industry's latest and highest standards. Close every gap. Wire everything. Ship it.
 #
 # v2 ADDITIONS OVER v1:
 #   1. GitHub Workflows: complete overhaul of all 6 workflows (N1–N8)
