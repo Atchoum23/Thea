@@ -47,7 +47,7 @@ phase and run all steps fully and autonomously, committing after each step."
 |---------------------------|-----------------|-------|
 | v1 phases (A–L)           | ✅ ALL DONE     | See Progress Tracking section |
 | Phase N: Workflows        | ✅ DONE         | All 6 YAML files written + committed (2026-02-19) |
-| Phase O: Messaging Gateway| ⏳ PENDING      | Native platform connectors (Telegram/Discord/Slack/…) |
+| Phase O: Messaging Gateway| 🔶 IN PROGRESS  | O_PRE✅ OpenClaw installed(stopped). O0/O1✅ Types done. O2–O10 pending |
 | Phase P: Components       | ⏳ PENDING      | 16 subsystem analyses + AI 2026 upgrades |
 | Phase Q: Tests ≥80%       | ⏳ PENDING      | Baseline measurement first |
 | Phase R: Periphery        | ⏳ PARTIAL      | ~2,667 items remain from v1 D3 |
@@ -56,7 +56,7 @@ phase and run all steps fully and autonomously, committing after each step."
 | Phase W: V1 Re-verify     | ⏳ PENDING      | Run after O + P complete |
 | Phase U: Final Report     | ⏳ PENDING      | Blocked by all above |
 | Phase V: Manual Gate      | ⏳ MANUAL       | Alexis only — last step |
-| **Overall ship-ready %**  | **~45%**        | N done; O/P/Q/R/W/S/T/U all pending |
+| **Overall ship-ready %**  | **~47%**        | N done; O in progress (O_PRE+O0/O1 done); P–U pending |
 
 *Last updated: 2026-02-19*
 
@@ -151,8 +151,10 @@ phase and run all steps fully and autonomously, committing after each step."
 ## PHASE EXECUTION ORDER (optimized for parallelism + dependencies)
 
 ```
-Wave 0 — PREREQUISITE (do first, unblocks everything):
-  ntfy-setup — Subscribe to ntfy.sh/thea-msm3u on your iPhone (see NTFY SETUP below)
+Wave 0 — PREREQUISITE (DONE):
+  ntfy-setup ✅ — Subscribe to ntfy.sh/thea-msm3u on your iPhone (see NTFY SETUP below)
+  O_PRE ✅     — OpenClaw v2026.2.17 installed on MSM3U (gateway daemon stopped by user)
+  O0/O1 ✅    — OpenClawTypes.swift rewritten (wire types, platforms, sessions, agents)
 
 Wave 1 — PARALLEL (no dependencies between O, P):
   ✅ N — GitHub Workflows Overhaul   [DONE 2026-02-19 — all 6 YAML files written + committed]
@@ -2501,7 +2503,7 @@ Update this section after each phase completes:
 | Phase | Description                                  | Status      | Agent    | Completed |
 |-------|----------------------------------------------|-------------|----------|-----------|
 | N     | GitHub Workflows Overhaul (6 files)          | ⏳ PENDING  | —        | —         |
-| O     | Thea Native Messaging Gateway                | ⏳ PENDING  | —        | —         |
+| O     | Thea Native Messaging Gateway                | 🔶 PARTIAL  | 2026-02-19| O_PRE+O0/O1 done; O2–O10 pending |
 | P     | Component Analysis + Individual Fixes        | ⏳ PENDING  | —        | —         |
 | Q     | Test Coverage to 80%+                        | ⏳ PENDING  | —        | —         |
 | R     | Periphery Full Resolution                    | ✅ PARTIAL  | afc0c7b  | 2026-02-18|
