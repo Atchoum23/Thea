@@ -258,9 +258,6 @@ private struct FlowLayoutView<Data: RandomAccessCollection, Content: View>: View
     let content: (Data.Element) -> Content
 
     var body: some View {
-        var width: CGFloat = 0
-        var rows: [[Data.Element]] = [[]]
-
         // Simple horizontal wrapping
         HStack(alignment: .top, spacing: 4) {
             ForEach(Array(items.enumerated()), id: \.element) { _, item in

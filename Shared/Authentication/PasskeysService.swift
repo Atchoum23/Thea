@@ -328,12 +328,12 @@ extension PasskeysService: ASAuthorizationControllerPresentationContextProviding
                 if let scene = scenes.first {
                     return UIWindow(windowScene: scene)
                 }
-                // Last resort — create from any available scene (always exists on modern iOS)
-                if let anyScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                    return UIWindow(windowScene: anyScene)
-                }
-                // Fallback — create a bare UIWindow (satisfies protocol, won't be visible)
-                return UIWindow(frame: .zero)
+                // Last resort — on iOS 26+ deployment target a UIWindowScene always exists.
+                // compactMap to find ANY UIWindowScene in connected scenes.
+                // Force unwrap is safe: the OS guarantees at least one UIWindowScene on iOS 13+.
+                // swiftlint:disable:next force_unwrap
+                return UIWindow(windowScene: UIApplication.shared.connectedScenes
+                    .compactMap { $0 as? UIWindowScene }.first!)
             #elseif os(macOS)
                 return NSApplication.shared.keyWindow ?? NSWindow()
             #else
@@ -490,12 +490,11 @@ public struct SignInWithAppleButton: View {
                 if let scene = scenes.first {
                     return UIWindow(windowScene: scene)
                 }
-                // Last resort — create from any available scene (always exists on modern iOS)
-                if let anyScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                    return UIWindow(windowScene: anyScene)
-                }
-                // Fallback — create a bare UIWindow (satisfies protocol, won't be visible)
-                return UIWindow(frame: .zero)
+                // Last resort — on iOS 26+ deployment target a UIWindowScene always exists.
+                // Force unwrap is safe: the OS guarantees at least one UIWindowScene on iOS 13+.
+                // swiftlint:disable:next force_unwrap
+                return UIWindow(windowScene: UIApplication.shared.connectedScenes
+                    .compactMap { $0 as? UIWindowScene }.first!)
             }
 
             func authorizationController(controller _: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
