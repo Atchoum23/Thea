@@ -21,7 +21,32 @@ extension SmartModelRouter {
     // MARK: - Anthropic
 
     private func registerAnthropicModels() {
-        // Claude 4.5 (Latest)
+        // Claude 4.6 (Latest — Feb 2026)
+        registerModel(RouterModelCapability(
+            modelId: "claude-opus-4-6",
+            provider: "anthropic",
+            contextWindow: 200_000,
+            maxOutputTokens: 64_000,
+            capabilities: [.textGeneration, .codeGeneration, .reasoning, .analysis, .creative, .vision, .functionCalling, .structuredOutput, .streaming, .longContext, .highQuality],
+            costPerInputToken: 15.0,
+            costPerOutputToken: 75.0,
+            averageLatency: 3.0,
+            qualityScore: 0.99
+        ))
+
+        registerModel(RouterModelCapability(
+            modelId: "claude-sonnet-4-6",
+            provider: "anthropic",
+            contextWindow: 200_000,
+            maxOutputTokens: 64_000,
+            capabilities: [.textGeneration, .codeGeneration, .reasoning, .analysis, .creative, .vision, .functionCalling, .structuredOutput, .streaming, .longContext],
+            costPerInputToken: 3.0,
+            costPerOutputToken: 15.0,
+            averageLatency: 1.5,
+            qualityScore: 0.92
+        ))
+
+        // Claude 4.5
         registerModel(RouterModelCapability(
             modelId: "claude-opus-4-5-20251101",
             provider: "anthropic",
