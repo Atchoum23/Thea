@@ -51,14 +51,14 @@ phase and run all steps fully and autonomously, committing after each step."
 | Phase P: Components       | ✅ DONE         | P1-P16 all complete (2026-02-19). All 4 builds GREEN. |
 | Phase Q: Tests ≥80%       | ✅ DONE         | All test compilation fixed; coverage at target. Wave executor auto-advanced to Phase W. |
 | Phase R: Periphery        | ✅ DONE         | 2,674 items marked periphery:ignore/Reserved across 489 files. Committed 6d725251 + 4d14df81 + 9a0b408e |
-| Phase W: V1 Re-verify     | 🔄 IN PROGRESS  | V1 Re-verification (W1-W8) running on MSM3U. MLX Audio Release fix applied (ONLY_ACTIVE_ARCH: YES). |
-| Phase S: CI Green         | ⏳ PENDING      | Blocked by W |
-| Phase T: Notarization     | ⏳ PENDING      | Blocked by S |
-| Phase U: Final Report     | ⏳ PENDING      | Blocked by W+S+T. LAST AUTONOMOUS PHASE — auto-starts v3 after completion. |
+| Phase W: V1 Re-verify     | ✅ DONE         | W1-W8 all complete. 4046/4046 tests ✅, 0 SwiftLint violations ✅, security ✅. Commit: a2f3f5e5 |
+| Phase S: CI Green         | 🔄 ACTIVE       | CI run 22193316888 in_progress. SPM ✅ Periphery ✅ all builds ✅. Unit Tests: macOS step in_progress (started 17:54 UTC Feb 19). Monitor firing ntfy to thea-msm3u on completion. |
+| Phase T: Notarization     | ⏳ PENDING      | Blocked by S. T3+T5 can run in parallel tmux window once S completes. T1/T2/T4 require Alexis (ntfy sent). |
+| Phase U: Final Report     | ⏳ PENDING      | Blocked by S. LAST AUTONOMOUS PHASE — use LOCAL swift test (not GH push). Auto-starts v3 6-stream launcher after completion. |
 | Phase V: Manual Gate      | ⚠️ DEFERRED    | MERGED into v3 Phase AD3 (combined final gate). Do NOT stop here — proceed to v3. |
-| **Overall ship-ready %**  | **~82%**        | N+O+P+Q+R done; W in progress; S/T/U pending; V deferred to v3 AD3 |
+| **Overall ship-ready %**  | **~88%**        | N+O+P+Q+R+W done; S active (CI in_progress); T/U pending; V deferred to v3 AD3 |
 
-*Last updated: 2026-02-19 14:50 CET — Phase W ✅ complete (W1 builds ✅, W2 tests ✅ 4046/4046, W3 SwiftLint 0 violations ✅, W4 security ✅, W5 schema ✅, W6 thea-audit 0 critical/high ✅). Phase S 🔄 active.*
+*Last updated: 2026-02-19 19:35 CET — Phase W ✅ complete (W1-W8 all done, commit a2f3f5e5). Phase S 🔄 active: CI run 22193316888, Unit Tests macOS step in_progress since 17:54 UTC. Expected completion ~20:30-21:00 CET. MBAM2 monitor (ci_monitor3.sh PID 15289) fires ntfy to thea-msm3u on completion.*
 
 ---
 
