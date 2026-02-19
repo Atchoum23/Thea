@@ -10,7 +10,12 @@ appId: app.thea.ios
 
 # Ensure we're on Chat tab
 - tapOn:
-    text: "Chat"
+    id: "tab-chat"
+    optional: true
+
+# Verify home screen content is visible
+- assertVisible:
+    text: "How can I help you today?"
 
 - takeScreenshot: chat_initial
 

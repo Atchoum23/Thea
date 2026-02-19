@@ -51,6 +51,7 @@ struct iOSHomeView: View {
                         .toolbar { ToolbarItem(placement: .topBarTrailing) { toolbarButtonForTab(.chat) } }
                 }
             }
+            .accessibilityIdentifier("tab-chat")
             Tab("Projects", systemImage: AppTab.projects.icon, value: AppTab.projects) {
                 NavigationStack {
                     viewForTab(.projects)
@@ -58,12 +59,14 @@ struct iOSHomeView: View {
                         .toolbar { ToolbarItem(placement: .topBarTrailing) { toolbarButtonForTab(.projects) } }
                 }
             }
+            .accessibilityIdentifier("tab-projects")
             Tab("Health", systemImage: AppTab.health.icon, value: AppTab.health) {
                 NavigationStack {
                     viewForTab(.health)
                         .navigationTitle("Health")
                 }
             }
+            .accessibilityIdentifier("tab-health")
             Tab("Knowledge", systemImage: AppTab.knowledge.icon, value: AppTab.knowledge) {
                 NavigationStack {
                     viewForTab(.knowledge)
@@ -71,24 +74,28 @@ struct iOSHomeView: View {
                         .toolbar { ToolbarItem(placement: .topBarTrailing) { toolbarButtonForTab(.knowledge) } }
                 }
             }
+            .accessibilityIdentifier("tab-knowledge")
             Tab("Translate", systemImage: AppTab.translation.icon, value: AppTab.translation) {
                 NavigationStack {
                     viewForTab(.translation)
                         .navigationTitle("Translate")
                 }
             }
+            .accessibilityIdentifier("tab-translate")
             Tab("Financial", systemImage: AppTab.financial.icon, value: AppTab.financial) {
                 NavigationStack {
                     viewForTab(.financial)
                         .navigationTitle("Financial")
                 }
             }
+            .accessibilityIdentifier("tab-financial")
             Tab("Settings", systemImage: AppTab.settings.icon, value: AppTab.settings) {
                 NavigationStack {
                     viewForTab(.settings)
                         .navigationTitle("Settings")
                 }
             }
+            .accessibilityIdentifier("tab-settings")
         }
         .sheet(isPresented: $showingNewConversation) {
             iOSNewConversationView()

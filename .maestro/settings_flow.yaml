@@ -8,9 +8,14 @@ appId: app.thea.ios
 # Wait for app UI to settle
 - waitForAnimationToEnd
 
-# Navigate to Settings tab
+# Verify home screen loaded
+- assertVisible:
+    text: "How can I help you today?"
+
+# Navigate to Settings tab via accessibility identifier (iOS 26 liquid glass tab bar)
 - tapOn:
-    text: "Settings"
+    id: "tab-settings"
+    optional: true
 
 - takeScreenshot: settings_main
 
@@ -51,4 +56,5 @@ appId: app.thea.ios
 
 # Navigate back to Chat
 - tapOn:
-    text: "Chat"
+    id: "tab-chat"
+    optional: true

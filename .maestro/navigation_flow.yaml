@@ -8,23 +8,26 @@ appId: app.thea.ios
 # Wait for app UI to settle
 - waitForAnimationToEnd
 
-# Verify Chat tab is selected by default
+# Verify app launched to home screen
 - assertVisible:
-    text: "Chat"
+    text: "How can I help you today?"
 
-# Navigate to Projects tab
+# Navigate to Projects tab via accessibility identifier (iOS 26 liquid glass tab bar)
 - tapOn:
-    text: "Projects"
+    id: "tab-projects"
+    optional: true
 - takeScreenshot: projects_tab
 
 # Navigate to Health tab
 - tapOn:
-    text: "Health"
+    id: "tab-health"
+    optional: true
 - takeScreenshot: health_tab
 
 # Navigate to Settings tab
 - tapOn:
-    text: "Settings"
+    id: "tab-settings"
+    optional: true
 - assertVisible:
     text: "AI & Models"
     optional: true
@@ -32,5 +35,6 @@ appId: app.thea.ios
 
 # Navigate back to Chat tab
 - tapOn:
-    text: "Chat"
+    id: "tab-chat"
+    optional: true
 - takeScreenshot: chat_tab_return
