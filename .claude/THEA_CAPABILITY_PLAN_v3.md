@@ -258,27 +258,27 @@ Wave 2 — AGENTS & SKILLS (after A3):
   F3 — Squads Unified                  [MSM3U, ~3h — wire SquadOrchestrator, add UI]
   G3 — TaskPlanDAG Enhancement         [MSM3U, ~2h — caching, quality, approval gate]
 
-Wave 3 — UI WAVE (after A3+B3; E3/F3/G3 can run in parallel):
+Wave 3 — UI WAVE (after A3+B3; H3+J3 on MSM3U, I3+K3 on MBAM2 in parallel):
   H3 — AI System UIs Dashboard         [MSM3U, ~4h — master transparency dashboard]
-  I3 — Excluded UI Components          [MSM3U, ~2h — StreamingTextView, MemoryContext, etc.]
+  I3 — Excluded UI Components          [MBAM2, ~2h — StreamingTextView, MemoryContext, etc. — pure SwiftUI]
   J3 — Life Tracking Visualization     [MSM3U, ~3h — heatmap, patterns, recommendations]
-  K3 — Config UI Completion            [MSM3U, ~3h — sliders, weights, thresholds]
+  K3 — Config UI Completion            [MBAM2, ~3h — sliders, weights, thresholds — pure SwiftUI]
 
 Wave 4 — ADVANCED CAPABILITIES (after Wave 2+3):
   L3 — Computer Use                    [MSM3U, ~4h — computer_use API integration]
-  M3 — MLX Audio Re-enable             [MSM3U, ~3h — fix Release build issue]
+  M3 — MLX Audio Re-enable             [MSM3U, ~3h — fix Release build issue — requires local MLX]
   N3 — Artifact System                 [MSM3U, ~3h — store, browser, persistence]
   O3 — MCP Client                      [MSM3U, ~4h — GenericMCPClient + browser UI]
 
-Wave 5 — REMAINING FEATURES (after Waves 3+4):
+Wave 5 — REMAINING FEATURES (after Waves 3+4; T3/V3/W3 can run on MBAM2 in parallel):
   P3 — KG Enhancement                  [MSM3U, ~2h — pruning, dedup, consolidation]
   Q3 — Proactive Intelligence          [MSM3U, ~2h — insight history, feedback, summaries]
   R3 — SelfEvolution Wiring           [MSM3U, ~2h — artifact-based code change requests]
   S3 — MCPServerGenerator UI           [MSM3U, ~2h — point-and-click MCP server creation]
-  T3 — Integration Backends           [MSM3U, ~3h — Safari/Calendar/Shortcuts/Reminders/Notes/Finder/Mail]
-  U3 — AI Subsystem Re-evaluation     [MSM3U, ~4h — Context/Adaptive/Proactive/PatternLearning/etc.]
-  V3 — Transparency & Analytics UIs   [MSM3U, ~3h — BehavioralFingerprint heatmap, Privacy, Messaging]
-  W3 — Chat Enhancement Features      [MSM3U, ~3h — FilesAPI UI, TokenCounter, MultiModelConsensus UI]
+  T3 — Integration Backends           [MBAM2, ~3h — Safari/Calendar/Shortcuts/Reminders/Notes/Finder/Mail — pure Swift]
+  U3 — AI Subsystem Re-evaluation     [MSM3U, ~4h — Context/Adaptive/Proactive/PatternLearning/etc. — heavy audit]
+  V3 — Transparency & Analytics UIs   [MBAM2, ~3h — BehavioralFingerprint heatmap, Privacy, Messaging — pure SwiftUI]
+  W3 — Chat Enhancement Features      [MBAM2, ~3h — FilesAPI UI, TokenCounter, MultiModelConsensus UI — pure SwiftUI]
 
 Wave 6 — VERIFICATION (after ALL feature phases complete — sequential):
   X3 — Test Coverage ≥80%             [MSM3U, ~4–8h — ALL code A3–W3 included]
@@ -292,12 +292,18 @@ Wave 6 — VERIFICATION (after ALL feature phases complete — sequential):
 ─────────────────────────────────────────────────
 PARALLEL SESSION RULES (same as v2)
 ─────────────────────────────────────────────────
-Wave 2 (E3/F3/G3) can run in parallel with each other after A3 completes.
-Wave 3 (H3/I3/J3/K3) can run as 2 parallel sessions (H3+I3 together, J3+K3 together).
-Wave 4 (L3/M3/N3/O3) can run as 2 parallel sessions (L3+M3, N3+O3).
-Wave 5 (P3/Q3/R3/S3/T3/U3/V3/W3) can run as 4 parallel sessions: (P3+Q3), (R3+S3), (T3+U3), (V3+W3).
-Wave 6 is SEQUENTIAL — X3→Y3→Z3→AA3→AB3→AC3→AD3 (each depends on previous).
+Wave 2 (E3/F3/G3) can run in parallel with each other on MSM3U after A3 completes.
+Wave 3: MSM3U runs H3+J3; MBAM2 runs I3+K3 simultaneously (no conflict — non-overlapping files).
+Wave 4 (L3/M3/N3/O3) can run as 2 parallel sessions on MSM3U (L3+M3, N3+O3).
+Wave 5: MSM3U runs P3+Q3 and R3+S3+U3; MBAM2 runs T3, V3, W3 in parallel with MSM3U.
+  MBAM2 phases must pushsync after each phase so MSM3U picks up changes before Wave 6.
+Wave 6 is SEQUENTIAL on MSM3U — X3→Y3→Z3→AA3→AB3→AC3→AD3 (each depends on previous).
 Note: AD3 is the COMBINED final gate (includes v2 Phase V items + v3 sign-off).
+
+MACHINE ASSIGNMENTS SUMMARY:
+  MSM3U (primary): A3 B3 C3 D3 E3 F3 G3 H3 J3 L3 M3 N3 O3 P3 Q3 R3 S3 U3 + all Wave 6
+  MBAM2 (secondary): I3 K3 T3 V3 W3 (lightweight pure-SwiftUI, no ML dependency)
+  CPU temp monitoring: mandatory on MSM3U for all Wave 4+ phases (powermetrics, pause >90°C)
 
 CURRENT STATUS:
   v2: 🔄 IN PROGRESS — Phase W running (V1 re-verify), Wave 3+4 executor active
