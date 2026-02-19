@@ -161,6 +161,12 @@ public struct CloudKnowledgeItem: Identifiable, Sendable {
     public var source: String
     public var createdAt: Date
 
+    public init(id: UUID = UUID(), title: String, content: String, category: String = "",
+                tags: [String] = [], source: String = "", createdAt: Date = Date()) {
+        self.id = id; self.title = title; self.content = content; self.category = category
+        self.tags = tags; self.source = source; self.createdAt = createdAt
+    }
+
     init(from record: CKRecord) {
         id = UUID(uuidString: record.recordID.recordName.replacingOccurrences(of: "knowledge-", with: "")) ?? UUID()
         title = record["title"] as? String ?? ""
@@ -191,6 +197,12 @@ public struct CloudProject: Identifiable, Sendable {
     public var path: String
     public var tags: [String]
     public var lastModified: Date
+
+    public init(id: UUID = UUID(), name: String, description: String = "",
+                path: String = "", tags: [String] = [], lastModified: Date = Date()) {
+        self.id = id; self.name = name; self.description = description
+        self.path = path; self.tags = tags; self.lastModified = lastModified
+    }
 
     init(from record: CKRecord) {
         id = UUID(uuidString: record.recordID.recordName.replacingOccurrences(of: "project-", with: "")) ?? UUID()
