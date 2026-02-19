@@ -158,29 +158,50 @@ Wave 0 — PREREQUISITE (ALL DONE ✅):
   Types ✅    — OpenClawTypes.swift rewritten with wire protocol types (commits cb56f4c1, dcea2272)
 
 Wave 1 — PARALLEL (no dependencies between O, P):
-  ✅ N — GitHub Workflows Overhaul   [DONE 2026-02-19 — all 6 YAML files written + committed]
-  ✅ O — Thea Native Messaging Gateway [DONE 2026-02-19 — O0–O10, O_Tests, O_Wire, iOS+macOS wired]
-  P — Component Analysis + Fixes       [MSM3U, ~4h, P1–P16 including AI 2026 upgrades]
+  ✅ N — GitHub Workflows Overhaul    [DONE 2026-02-19]
+  ✅ O — Thea Native Messaging Gateway [DONE 2026-02-19 — O0–O10, O_Tests, O_Wire, iOS+macOS]
+  P — Component Analysis + Fixes       [MSM3U, ~4–6h, P1–P16 + AI 2026 upgrades] ← NEXT
 
-Wave 2 — AFTER WAVE 1 (parallel with each other):
-  Q — Test Coverage to 80%+            [MSM3U, ~3h, after O complete for OpenClaw tests]
-  R — Periphery Full Resolution        [MSM3U, ~4h, independent, can overlap with Q]
+Wave 2 — PARALLEL (both after Wave 1 completes):
+  Q — Test Coverage to 80%+            [MSM3U Session 1, ~3–4h]
+  R — Periphery Full Resolution        [MSM3U Session 2, ~4–6h, independent of Q]
 
-Wave 3 — AFTER WAVE 2:
-  W — V1 Re-verification               [MSM3U, ~1h, verify O+P changes didn't break v1 state]
-  S — CI/CD Green Verification         [MSM3U, ~2h, after W passes]
-  T — Notarization Pipeline Setup      [MSM3U, ~1h, after S green]
+Wave 3 — SEQUENTIAL (W must pass before S):
+  W — V1 Re-verification               [MSM3U, ~1h — verify O+P didn't break v1]
+  S — CI/CD Green Verification         [MSM3U, ~2–4h — after W green]
+  T — Notarization Pipeline Setup      [MSM3U, ~1–2h — after S green]
 
 Wave 4 — FINAL:
-  U — Final Verification Report        [MSM3U, ~30min, after all above]
-  V — Manual Ship Gate                 [Alexis only, last step]
+  U — Final Verification Report        [MSM3U, ~30min]
+  V — Manual Ship Gate                 [Alexis only — last step]
 
-Agent parallelism within waves:
-  Wave 1: Spawn 2 Claude Code sessions simultaneously on MSM3U (N is already done):
-    Session 1: "Execute Phase O — Thea Native Messaging Gateway"
-    Session 2: "Execute Phase P — Component Analysis + Fixes (P1–P16)"
-  Each session sends ntfy progress notifications on phase start/complete/failure.
-  Monitor both and merge results via git pushsync when each session commits.
+─────────────────────────────────────────────────
+PARALLEL SESSION RULES (when safe and optimal)
+─────────────────────────────────────────────────
+Parallel sessions are SAFE when phases touch non-overlapping files.
+Parallel sessions are UNSAFE when both sessions might write the same file.
+
+SAFE to parallelise:
+  Wave 2: Q (new test files in Tests/) + R (Periphery warnings in Shared/) — no overlap
+  Wave 1 was safe: O (Shared/Integrations/Messaging/) + P (analysis + individual components)
+
+UNSAFE — run sequentially:
+  Any two sessions touching the same Swift file simultaneously
+  W + S (W must confirm results before S runs CI)
+  S + T (T depends on S green)
+
+HOW TO LAUNCH TWO PARALLEL SESSIONS SAFELY:
+  Terminal 1 and Terminal 2 on MSM3U, each with claude started separately.
+  Each session MUST suspend thea-sync at start (Rule 1 of Session Safety Protocol).
+  If both suspend thea-sync, that's fine — both load/unload are idempotent.
+  Sessions commit to different files → no git conflicts.
+  When Session 1 finishes: git pushsync → Session 2 does git pull before its final pushsync.
+  Do NOT both pushsync at the same moment — stagger by 30+ seconds.
+
+CURRENT WAVE STATUS:
+  Wave 1: O done ✅, P pending → Launch 1 session for P
+  Wave 2: Launch after P complete → 2 sessions (Q + R simultaneously)
+  Waves 3–4: Sequential — 1 session each
 ```
 
 ---
