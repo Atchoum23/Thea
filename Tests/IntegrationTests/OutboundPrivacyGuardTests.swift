@@ -633,8 +633,12 @@ final class OutboundPrivacyGuardTests: XCTestCase {
         // MoltbookPolicy.strictnessLevel = .paranoid > .strict → should block
         let content = "My salary is 100k per year"
         let result = await guard_.sanitize(content, channel: "moltbook")
+        // Content is blocked either by keyword check or topic allowlist (whichever runs first)
         if case let .blocked(reason) = result {
-            XCTAssertTrue(reason.contains("salary") || reason.contains("keyword"))
+            XCTAssertTrue(
+                reason.contains("salary") || reason.contains("keyword") || reason.contains("topic"),
+                "Unexpected block reason: \(reason)"
+            )
         }
     }
 
