@@ -212,7 +212,11 @@ settings:
     # ===========================================
     Release:
       # Optimization
-      ONLY_ACTIVE_ARCH: NO
+      # ONLY_ACTIVE_ARCH must be YES for Release too: Thea uses MLX which requires Apple
+      # Silicon (arm64). SPM packages (mlx-audio-swift) use Float16 which is conditionally
+      # defined by mlx-swift only for !arch(x86_64). Setting NO causes SPM packages to
+      # compile for x86_64 too, breaking Float16:HasDType. Active arch on MSM3U = arm64.
+      ONLY_ACTIVE_ARCH: YES
       SWIFT_OPTIMIZATION_LEVEL: "-O"
       SWIFT_COMPILATION_MODE: wholemodule
       GCC_OPTIMIZATION_LEVEL: "s"
