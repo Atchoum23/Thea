@@ -105,9 +105,13 @@ final class OpenClawBridge {
             throw OpenClawBridgeError.noProviderAvailable
         }
 
-        // Use first available model from provider
+        // Prefer Claude Opus 4.6 for messaging: highest prompt injection resistance (P13/P1).
+        // Falls back to first available model if Opus 4.6 is not configured.
         let models = try await provider.listModels()
-        guard let modelID = models.first?.id else {
+        let preferredModelID = models.first(where: { $0.id == "claude-opus-4-6" })?.id
+            ?? models.first(where: { $0.id.contains("claude") })?.id
+            ?? models.first?.id
+        guard let modelID = preferredModelID else {
             throw OpenClawBridgeError.noProviderAvailable
         }
 
@@ -222,6 +226,16 @@ final class OpenClawBridge {
         do {
             let ocMsg = bridgeToOpenClawMessage(message)
             let response = try await generateAIResponse(for: ocMsg)
+
+            // Light confidence verification (P2: messaging context = no multi-model, maxLatency 2s)
+            #if os(macOS) || os(iOS)
+            let confidenceResult = await ConfidenceSystem.shared.validateResponse(
+                response, query: message.content, taskType: .general, context: .messaging
+            )
+            if confidenceResult.overallConfidence < 0.3 {
+                logger.warning("Low confidence (\(String(format: "%.0f%%", confidenceResult.overallConfidence * 100))) for gateway response — adding disclaimer")
+            }
+            #endif
 
             // Privacy guard on outbound
             let outcome = await OutboundPrivacyGuard.shared.sanitize(response, channel: "messaging")
