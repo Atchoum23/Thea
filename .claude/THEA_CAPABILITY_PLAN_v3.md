@@ -30,7 +30,7 @@
 # Transform Thea from 30% to 100% realized capability.
 #
 # v3 ADDITIONS OVER v2:
-#   1. Meta-AI Full Activation — cherry-pick ~45 unique files (skip 15 superseded), MetaAIDashboard UI, MetaAICoordinator, multi-agent/reasoning/autonomy/workflow/plugin suites all activated
+#   1. Meta-AI Full Activation — cherry-pick ~71 files (all 77 individually audited; skip 6 superseded), MetaAIDashboard UI, MetaAICoordinator, multi-agent/reasoning/autonomy/workflow/plugin suites all activated
 #   2. AnthropicToolCatalog Execution — wire 50+ tools to actually execute
 #   3. SemanticSearchService RAG — integrate into every request
 #   4. ConfidenceSystem Feedback Loop — self-improving model selection
@@ -149,7 +149,7 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 ### Meta-AI (Intelligence Layer UI)
 - [ ] "Meta-AI" brand visible in MacSettingsView sidebar and iOS tab
 - [ ] MetaAIDashboardView shows real-time decisions from all intelligence subsystems
-- [ ] ~57 cherry-picked MetaAI files active across 4 tiers: TIER 0 (11 SelfExecution files), TIER 1 (18 Multi-Agent/Reasoning/Autonomy/Resilience), TIER 2 (23 Error AI/Workflow/Plugins/Tools/Benchmarks), TIER 3 (11 MCP/UI/Utility)
+- [ ] ~71 cherry-picked MetaAI files active (all 77 archive files audited; 6 skipped as superseded): TIER 0 (11 SelfExecution), TIER 1 (22 Multi-Agent/Reasoning/Autonomy/Resilience), TIER 2 (24 Error AI/Workflow/Plugins/Tools/Benchmarks), TIER 3 (14 MCP/UI/Utility)
 - [ ] Zero type conflicts — cherry-picked files use canonical Intelligence/ types where overlap exists
 - [ ] Model benchmarking UI active and accessible under "Meta-AI" section
 
@@ -484,11 +484,12 @@ xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
 
 **Status: ⏳ PENDING (starts after v2 Phase U auto-transition)**
 
-**Goal**: Activate ALL ~57 MetaAI files with genuinely unique capabilities (including the
-SelfExecution/ subdirectory — 11 files — which powers Thea's autonomous plan execution).
-Create `MetaAIDashboardView` as the branded UI face. Skip only the ~15 files superseded by
-canonical Intelligence/. This unlocks Thea's full multi-agent, reasoning, autonomous-build,
-self-execution, workflow, and plugin capabilities — all previously silenced by blanket exclusion.
+**Goal**: Activate ALL ~71 MetaAI files with genuinely unique capabilities (all 77 archive
+files individually audited at snippet level; 6 skipped as superseded; 71 cherry-picked).
+Includes SelfExecution/ subdirectory — 11 files — which powers Thea's autonomous plan execution.
+Create `MetaAIDashboardView` as the branded UI face. This unlocks Thea's full multi-agent,
+reasoning, autonomous-build, self-execution, workflow, plugin, and resilience capabilities
+— all previously silenced by a blanket exclusion that also trapped genuinely unique systems.
 
 ⚠️ SelfExecution/ is the HIGHEST PRIORITY subsystem: it makes Thea capable of executing
 its own plans (v3 plan itself) autonomously — PhaseOrchestrator, CodeGenerator, ApprovalGate,
@@ -496,20 +497,22 @@ SelfExecutionService, ProgressTracker, SpecParser, SleepPrevention, TaskDecompos
 
 **Run after**: v2 Phase U complete (executor auto-transitions to v3)
 
-**Audited file classification (all 73 files reviewed 2026-02-19):**
+**Audited file classification (ALL 77 files individually reviewed 2026-02-19 at snippet level):**
+Archive total: 62 Swift in .v1-archive/Shared/AI/MetaAI/ + 11 in SelfExecution/ + 4 UI views = 77 files
 
-SKIP — superseded by canonical Intelligence/ or non-code (17 items):
-- `MetaAIModelRouter.swift` → SmartModelRouter supersedes (file header explicitly says so)
-- `MetaAITaskClassifier.swift` → TaskClassifier supersedes (file header explicitly says so)
-- `KnowledgeGraph.swift` → PersonalKnowledgeGraph supersedes; KnowledgeGraphViewer uses
-  `KnowledgeGraph.shared` — wire viewer to PersonalKnowledgeGraph instead
-- `MemorySystem.swift` → Intelligence/Memory/ supersedes; MemoryInspectorView uses
-  `MemorySystem.shared` — adapt viewer to LongTermMemorySystem instead
-- `TaskTypes.swift` → CONFLICT: `Shared/Intelligence/Classification/TaskContext.swift` already
-  defines `TaskContext`. Rename MetaAI uses to `MetaAITaskContext` where needed.
-- Build docs: `BUILD_ISSUES_RESOLUTION.md`, `SESSION_SUMMARY.md`, `PHASE_*.md`, `verify-*.sh`
+SKIP — superseded by canonical Intelligence/ (6 Swift files + non-Swift docs):
+- `MetaAIModelRouter.swift` → superseded by SmartModelRouter (file header says so explicitly)
+- `MetaAITaskClassifier.swift` → superseded by TaskClassifier (file header says so explicitly)
+- `KnowledgeGraph.swift` → superseded by PersonalKnowledgeGraph; adapt KnowledgeGraphViewer
+  to use `PersonalKnowledgeGraph.shared` instead
+- `MemorySystem.swift` → superseded by Intelligence/Memory/LongTermMemorySystem; adapt
+  MemoryInspectorView to use `LongTermMemorySystem.shared` instead
+- `TaskTypes.swift` → CONFLICT: defines `TaskContext` which exists in canonical Classification/
+- `ConnectivityMonitor.swift` → superseded by canonical `Intelligence/Mobile/NetworkConditionMonitor.swift`
+  (same NWPathMonitor pattern, same purpose — no unique value to add)
+- Non-Swift: any .md/.sh build docs in archive → skip entirely
 
-CHERRY-PICK — ~57 files with unique capabilities (grouped by category):
+CHERRY-PICK — ~71 files with unique capabilities (verified count: 77 - 6 = 71):
 
 TIER 0 — CRITICAL (SelfExecution/ subdirectory — 11 files — Thea executing its own plans):
   SelfExecution/SelfExecutionService.swift     — main entry: automatic/supervised/dryRun modes
@@ -519,17 +522,21 @@ TIER 0 — CRITICAL (SelfExecution/ subdirectory — 11 files — Thea executing
   SelfExecution/ApprovalGate.swift            — approval gate per level (phase/file/build/dmg)
   SelfExecution/PhaseDefinition.swift         — phase definition with deliverables/verifications
   SelfExecution/ProgressTracker.swift         — phase progress tracking
-  SelfExecution/SpecParser.swift              — parses THEA_MASTER_SPEC.md for requirements
+  SelfExecution/SpecParser.swift              — parses THEA_MASTER_SPEC.md → redirect to v3 plan
   SelfExecution/SleepPrevention.swift         — IOPMAssertion keeps system awake during execution
-  SelfExecution/TaskDecomposer.swift          — decomposes phases into typed tasks
+  SelfExecution/TaskDecomposer.swift          — decomposes phases into typed tasks (→ SelfExecTaskDecomposer)
   SelfExecution/SelfExecutionConfiguration.swift — provider priority, preferred models per AI
 
 TIER 1 — HIGHEST VALUE (wire into IntelligenceOrchestrator + ChatManager):
-  Learning:    AIIntelligence (taskClassificationLearnings, codeAnalysisLearnings, modelPerformanceData)
+  Learning:    AIIntelligence (taskClassificationLearnings, codeAnalysisLearnings, modelPerformanceData,
+               workflowOptimizations — unique 4-store learning not in canonical)
   Multi-Agent: MultiAgentOrchestrator, SubAgentOrchestrator, AgentSwarm, AgentRegistry,
                AgentCommunication, AgentCommunicationHub, DeepAgentEngine
+               ⚠️ AgentCommunication + AgentCommunicationHub overlap with canonical AgentCommunicationBus —
+               see CONCEPTUAL OVERLAPS below
   Reasoning:   ReActExecutor, ReasoningEngine, ChainOfThought, LogicalInference,
                HypothesisTesting, ReflectionEngine
+               ⚠️ ReflectionEngine overlaps with canonical ReflexionEngine — see CONCEPTUAL OVERLAPS
   Autonomy:    AutonomousBuildLoop, AICodeFixGenerator, CodeFixer, CodeSandbox, SwiftCodeAnalyzer
   Resilience:  ResilienceManager (circuit breakers + exponential backoff — wire into all providers)
 
@@ -538,20 +545,58 @@ TIER 2 — HIGH VALUE (add to builds, wire into dashboard):
   Workflow:    WorkflowBuilder, WorkflowPersistence, WorkflowTemplates
   Plugins:     PluginSystem
   Parallel:    ParallelQueryExecutor, QueryDecomposer, ResultAggregator
-  Tools:       ToolCall (SwiftData model), ToolCallView, ToolFramework, SystemToolBridge
-  Benchmarks:  ModelBenchmarkService, ModelCapabilityDatabase, ModelCapabilityView(*), PerformanceMetrics
+  Orchestration: TaskDecomposition (dependency graph builder → OrchestrationTaskBreakdown)
+               ⚠️ Overlaps with canonical TaskPlanDAG — see CONCEPTUAL OVERLAPS
+  Tools:       ToolCall (SwiftData model → rename MetaAIToolCall), ToolCallView, ToolFramework,
+               SystemToolBridge
+               ⚠️ ToolFramework overlaps with canonical ToolComposition — see CONCEPTUAL OVERLAPS
+  Benchmarks:  ModelBenchmarkService (replace stub), ModelCapabilityDatabase, ModelCapabilityView(*),
+               MetaAIPerformanceMetrics (renamed)
   Self-Model:  THEASelfAwareness
   Directives:  UserDirectivesConfiguration, UserDirectivesView
-  Coordinator: THEAOrchestrator → RENAME class to `MetaAICoordinator` in copy (name conflict)
-  Training:    ModelTraining (fine-tuning, few-shot learning, continual learning)
+  Coordinator: THEAOrchestrator → RENAME class to `MetaAICoordinator` in copy
+  Training:    ModelTraining (fine-tuning, few-shot, continual learning — no canonical equivalent)
 
 TIER 3 — ADD TO BUILDS (wire in Phase B3/later):
   MCP:         MCPBrowserView, MCPServerLifecycleManager, MCPToolBridge, MCPToolList, MCPServerRow
-  UI Views:    PluginManagerView, WorkflowBuilderView (KnowledgeGraphViewer/MemoryInspectorView adapted)
-  Utility:     FileOperations, ExecutionPipeline, InteractionAnalyzer, MultiModalAI
-               APIIntegrator, ConnectivityMonitor, AsyncTimeout
+  UI Views:    PluginManagerView, WorkflowBuilderView
+               (KnowledgeGraphViewer → adapted to PersonalKnowledgeGraph; MemoryInspectorView → adapted)
+  Utility:     FileOperations, ExecutionPipeline, InteractionAnalyzer, MultiModalAI,
+               APIIntegrator, AsyncTimeout
+               ⚠️ ExecutionPipeline overlaps with AgentMode — see CONCEPTUAL OVERLAPS
 
 (*) ModelCapabilityView.swift has a typo: `ModelCapabilityRecordRecord` — fix to `ModelCapabilityRecord`
+
+CONCEPTUAL OVERLAPS — READ BOTH FILES BEFORE WIRING (not type conflicts, but functional overlap):
+1. MetaAI `AgentCommunication` + `AgentCommunicationHub` vs canonical `AgentCommunicationBus`:
+   - MetaAI version: @Observable, message queue (1000 cap, 1hr retention), shared context, subscriptions
+   - Canonical: actor-based bus; exact implementation TBD (read before wiring)
+   - Strategy: if canonical is skeleton, REPLACE with MetaAI implementation; if both have value, MERGE
+     by keeping canonical AgentCommunicationBus and wiring MetaAI AgentCommunicationHub ON TOP
+
+2. MetaAI `ReflectionEngine` vs canonical `ReflexionEngine` (different spelling, similar purpose):
+   - MetaAI: reflectionHistory/improvements/learnings; analyzes AI outputs for self-improvement
+   - Canonical: ReflexionEngine (reflexion loops, self-correction); has ChatReflexionIntegration
+   - Strategy: KEEP BOTH — ReflexionEngine handles post-response self-correction;
+     ReflectionEngine handles broader learning from interaction patterns. Wire both into ChatManager.
+
+3. MetaAI `TaskDecomposition` vs canonical `TaskPlanDAG`:
+   - MetaAI: builds dependency graphs, `OrchestrationTaskBreakdown`, execution order
+   - Canonical: DAG-based decomposition with parallel execution via TaskGroup
+   - Strategy: KEEP BOTH — TaskPlanDAG is the execution engine; TaskDecomposition feeds it input.
+     Wire: TaskDecomposition.decompose() → result feeds into TaskPlanDAG.addTask()
+
+4. MetaAI `ToolFramework` vs canonical `ToolComposition`:
+   - MetaAI: dynamic tool registry + MCPToolRegistry init; ToolFramework.shared
+   - Canonical: tool composition and chaining (ToolComposition + Engine)
+   - Strategy: KEEP BOTH — ToolFramework is the registry; ToolComposition handles multi-tool chains.
+     Wire: ToolFramework.register() populates tools; ToolComposition.chain() uses them.
+
+5. MetaAI `ExecutionPipeline` vs canonical `AgentMode`:
+   - MetaAI: multi-step execution with retry, checkpointing, history (last 50)
+   - Canonical: AgentMode phases (gatherContext → takeAction → verifyResults → done)
+   - Strategy: KEEP BOTH — AgentMode handles AI reasoning phases; ExecutionPipeline handles
+     multi-step task retry/checkpoint at orchestration level. ExecutionPipeline wraps AgentMode steps.
 
 KNOWN CONFLICTS TO RESOLVE (all confirmed by grep on 2026-02-19):
 - `TaskContext` → canonical: Shared/Intelligence/Classification/TaskContext.swift.
@@ -663,27 +708,36 @@ Build after Tier 1 copy. Fix any type conflicts before proceeding to Tier 2.
 ### A3-2: Copy Tier 2 + Tier 3 Files
 
 ```bash
-# Tier 2
+# Tier 2 (23 files) — delete stubs before copying real versions:
+for STUB in ModelBenchmarkService WorkflowTemplates; do
+  find Shared/ -name "${STUB}.swift" -not -path "*/.v1-archive/*" -delete 2>/dev/null
+done
+
 for f in ErrorKnowledgeBase ErrorParser KnownFixes ImprovementSuggestions \
           WorkflowBuilder WorkflowPersistence WorkflowTemplates PluginSystem \
-          ParallelQueryExecutor QueryDecomposer ResultAggregator \
+          ParallelQueryExecutor QueryDecomposer ResultAggregator TaskDecomposition \
           ToolCall ToolCallView ToolFramework SystemToolBridge \
           ModelBenchmarkService ModelCapabilityDatabase ModelCapabilityView PerformanceMetrics \
           THEASelfAwareness UserDirectivesConfiguration UserDirectivesView; do
   cp ".v1-archive/Shared/AI/MetaAI/${f}.swift" Shared/Intelligence/MetaAI/
 done
 
-# Tier 3
-for f in MCPBrowserView MCPServerLifecycleManager MCPToolBridge MCPToolList \
-          FileOperations ExecutionPipeline InteractionAnalyzer MultiModalAI ModelTraining; do
+# Tier 3 (14 files: 5 MCP + 6 Utility + ModelTraining/MultiModalAI)
+for f in MCPBrowserView MCPServerLifecycleManager MCPToolBridge MCPToolList MCPServerRow \
+          FileOperations ExecutionPipeline InteractionAnalyzer MultiModalAI \
+          APIIntegrator AsyncTimeout ModelTraining; do
   cp ".v1-archive/Shared/AI/MetaAI/${f}.swift" Shared/Intelligence/MetaAI/
 done
 
-# UI Views (separate folder)
+# UI Views (separate folder — 4 files: 2 adapted, 2 direct copy)
 mkdir -p Shared/UI/Views/MetaAI
 for f in KnowledgeGraphViewer MemoryInspectorView PluginManagerView WorkflowBuilderView; do
   cp ".v1-archive/Shared/UI/Views/MetaAI/${f}.swift" Shared/UI/Views/MetaAI/
 done
+# Adapt KnowledgeGraphViewer (uses KnowledgeGraph.shared → PersonalKnowledgeGraph.shared):
+sed -i '' 's/KnowledgeGraph\.shared/PersonalKnowledgeGraph.shared/g; s/\bKnowledgeGraph\b/PersonalKnowledgeGraph/g' \
+  Shared/UI/Views/MetaAI/KnowledgeGraphViewer.swift
+# Note: KnowledgeGraph types (KnowledgeNode, NodeType) used in viewer must map to PKG equivalents
 ```
 
 After Tier 0+1 copy: apply ALL conflict resolutions:
@@ -798,6 +852,75 @@ struct MetaAIDashboardView: View {
 
 Each panel reads LIVE data — no mocked data. See individual panel files for implementations.
 
+### A3-4b: TIER 0 Snippet-Level Wiring (SelfExecution — CRITICAL)
+
+SelfExecution makes Thea execute its own v3 plan. These exact wiring steps are required:
+
+**1. Configure project path (all SelfExecution actors use this)**:
+```swift
+// In TheaMacOSApp or AppDelegate on launch:
+let projectRoot = URL(fileURLWithPath: "/Users/alexis/Documents/IT & Tech/MyApps/Thea")
+await SelfExecutionService.shared.configure(projectPath: projectRoot)
+await CodeGenerator.shared.setProjectPath(projectRoot)
+await FileCreator.shared.setProjectPath(projectRoot)
+await ProgressTracker.shared.setProjectPath(projectRoot)
+```
+
+**2. Redirect SpecParser to v3 plan** (not THEA_MASTER_SPEC.md which doesn't exist):
+```swift
+// SpecParser.swift — after copying, check if it has a configurable spec path.
+// If it looks for THEA_MASTER_SPEC.md by name, add an overload:
+extension SpecParser {
+    func parseV3Plan() async -> [PhaseDefinition] {
+        let specPath = projectPath.appendingPathComponent(".claude/THEA_CAPABILITY_PLAN_v3.md")
+        return await parseSpec(at: specPath)
+    }
+}
+```
+
+**3. Wire ApprovalGate → AutonomyController** (human-in-the-loop consistency):
+```swift
+// ApprovalGate.requestApproval() — after copying, wire its callback to AutonomyController:
+// This ensures SelfExecution approval uses the same risk-level system as AgentMode.
+extension ApprovalGate {
+    func requestWithAutonomy(_ request: ApprovalRequest) async -> Bool {
+        // Map ApprovalGate levels to AutonomyController risk levels:
+        let risk: ActionRiskLevel = switch request.level {
+        case .phaseStart: .medium
+        case .fileCreation: .low
+        case .buildFix: .medium
+        case .phaseComplete: .medium
+        case .dmgCreation: .high
+        }
+        return await AutonomyController.shared.requestApproval(
+            action: request.description, riskLevel: risk)
+    }
+}
+```
+
+**4. SleepPrevention — verify IOKit entitlement**:
+```bash
+# Check macOS entitlements include IOKit access:
+grep -A5 "com.apple.security" macOS/Thea.entitlements
+# IOPMAssertionCreateWithName requires no special sandbox exception for macOS dev builds
+# but verify for Release/notarized builds
+```
+
+**5. Wire SelfExecutionService into MetaAIDashboardView** (add "Self-Execution" tab):
+```swift
+// In MetaAIDashboardView, add:
+case selfExecution = "Self-Execution"
+// Panel: SelfExecutionStatusPanel showing current phase, progress, approval queue
+```
+
+**6. SECURITY: fullAuto mode MUST remain removed** (was removed as FINDING-014):
+After copying SelfExecutionService.swift, verify `fullAuto` case is absent:
+```bash
+grep -n "fullAuto\|full.*auto\|bypass.*approval" \
+  Shared/Intelligence/MetaAI/SelfExecution/SelfExecutionService.swift
+# Must return 0 matches — fullAuto bypassed all approval gates
+```
+
 ### A3-5: Wire MetaAICoordinator into IntelligenceOrchestrator
 
 ```swift
@@ -811,12 +934,47 @@ extension IntelligenceOrchestrator {
 }
 ```
 
-Wire ResilienceManager into AnthropicProvider:
+Wire ResilienceManager into ALL providers (AnthropicProvider, OpenAIProvider, etc.):
 ```swift
-// Wrap API calls with circuit breaker:
-let result = try await ResilienceManager.shared.execute(provider: "anthropic") {
-    try await self.callAPI(...)
+// In each provider's API call method — wrap with circuit breaker + exponential backoff:
+// ResilienceManager.execute(provider:timeout:operation:) handles:
+//   - circuit breaker (opens after N consecutive failures)
+//   - exponential backoff with jitter on retry
+//   - health monitoring per provider ID
+//   - fallback chain: if "anthropic" circuit open → try next provider in chain
+let result = try await ResilienceManager.shared.execute(
+    provider: "anthropic",
+    timeout: 60.0
+) {
+    try await self.callAnthropicAPI(messages: messages, model: model)
 }
+// Wire into SmartModelRouter: check ResilienceManager.isHealthy(provider:) before routing
+```
+
+Wire ReActExecutor for tool-use reasoning loop (snippet-level):
+```swift
+// ReActExecutor: thought → action → observation loop
+// Wire: after task classification, if .requiresToolUse, route through ReActExecutor
+// ReActExecutor.execute(task:tools:maxSteps:) → ReActActionResult
+// Feed ReActActionResult back into ChatManager response
+let reactResult = try await ReActExecutor.shared.execute(
+    task: userMessage,
+    tools: AnthropicToolCatalog.allTools,
+    maxSteps: 10  // step budget prevents infinite loops
+)
+```
+
+Wire AIIntelligence learning stores (snippet-level):
+```swift
+// AIIntelligence has 4 learning stores: taskClassification, codeAnalysis, modelPerformance, workflows
+// Wire: after each successful task, update the relevant store:
+await AIIntelligence.shared.recordTaskClassification(
+    query: userMessage,
+    classifiedAs: taskType,
+    modelUsed: selectedModel,
+    success: true
+)
+// This creates a feedback loop: future classifications improve based on outcomes
 ```
 
 ### A3-6: Wire into MacSettingsView + iOS Navigation
