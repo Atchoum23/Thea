@@ -775,15 +775,18 @@ struct DocumentCameraScannerView: UIViewControllerRepresentable {
                 }
             }
             onCapture(images)
-            Task { @MainActor in controller.dismiss(animated: true) }
+            // VNDocumentCameraViewControllerDelegate is always called on the main thread.
+            MainActor.assumeIsolated { controller.dismiss(animated: true) }
         }
 
         func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
-            Task { @MainActor in controller.dismiss(animated: true) }
+            // VNDocumentCameraViewControllerDelegate is always called on the main thread.
+            MainActor.assumeIsolated { controller.dismiss(animated: true) }
         }
 
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
-            Task { @MainActor in controller.dismiss(animated: true) }
+            // VNDocumentCameraViewControllerDelegate is always called on the main thread.
+            MainActor.assumeIsolated { controller.dismiss(animated: true) }
         }
     }
 }
