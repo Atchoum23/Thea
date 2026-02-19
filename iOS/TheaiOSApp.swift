@@ -71,5 +71,12 @@ struct TheaiOSApp: App {
             try? await Task.sleep(for: .seconds(1))
             _ = VoiceFirstModeManager.shared
         }
+
+        // Messaging Gateway — deferred startup (connects enabled platform connectors)
+        Task {
+            try? await Task.sleep(for: .seconds(2))
+            OpenClawBridge.shared.setup()
+            await TheaMessagingGateway.shared.start()
+        }
     }
 }
