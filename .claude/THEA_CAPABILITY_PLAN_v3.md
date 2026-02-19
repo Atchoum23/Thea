@@ -311,8 +311,24 @@ MACHINE ASSIGNMENTS SUMMARY:
   CPU temp monitoring: mandatory on MSM3U for all Wave 4+ phases (powermetrics, pause >90°C)
 
 CURRENT STATUS:
-  v2: 🔄 IN PROGRESS — Phase W running (V1 re-verify), Wave 3+4 executor active
+  v2: 🔄 IN PROGRESS — Phase S monitoring CI (Unit Tests ~80min on GH Actions), T+U pending
   v3: ⏳ PENDING — auto-starts after v2 Phase U completes
+
+PARALLELISM IMPLEMENTATION RULES — MANDATORY:
+  1. NEVER idle-sleep during long CI waits. Use that time for the next phase's prep.
+  2. Within a wave, launch SEPARATE tmux windows (not panes) for parallel phases.
+  3. Between waves, do git pushsync + git pull to sync state before the next wave.
+  4. MSM3U primary executor MUST notify MBAM2 when a wave completes (ntfy.sh/thea-msm3u).
+  5. MBAM2 secondary (phases I3/K3/T3/V3/W3) runs ONLY pure-SwiftUI phases — no ML, no builds.
+  6. Each parallel session commits its own files; NEVER both sessions edit the same file.
+  7. Do NOT wait for GH Actions CI to validate local work — run swift test locally for fast loop.
+     GH Actions is the "official" gate but local tests give 3-4x faster feedback for dev iterations.
+
+IMMEDIATE PARALLEL OPPORTUNITIES (before v3 Phase A3 starts):
+  While v2 Phase S monitors Unit Tests on GH Actions (~60-80min remaining):
+  → MSM3U pane 2: Write Phase T artifacts (T3 ExportOptions.plist + T5 notarize.yml skeleton)
+  → MSM3U pane 3: Run local swift test as parallel verification (independent of GH Actions)
+  → MBAM2: Prepare v3 Phase A3 — read MetaAI archive file list, validate directory structure
 ```
 
 ---

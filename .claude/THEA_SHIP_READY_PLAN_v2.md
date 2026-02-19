@@ -2433,6 +2433,40 @@ cd ../..
 ls .gitleaks.toml && echo "Gitleaks config OK"
 ```
 
+### ⚡ PHASE S — PARALLEL WORK WHILE WAITING FOR CI (DO NOT JUST SLEEP)
+
+When CI jobs are `in_progress` and require 30-60+ min (especially Unit Tests on GH Actions macOS
+runners), **do NOT just sleep**. Use that time productively:
+
+**Option A — Start Phase T prep in a new tmux pane (RECOMMENDED):**
+```bash
+# Open a second pane and begin Phase T (T3 + T5 can be written without CI being done):
+tmux new-window -t phase-s -n phase-t-prep
+# In the new pane: write ExportOptions-DevID.plist + draft the notarize.yml workflow
+# Phase T1/T2 require Alexis's manual action (certs + app-specific password) — skip those for now
+# T3 (plist) + T5 (CI workflow skeleton) can be committed immediately
+```
+
+**Option B — Run local verification in parallel:**
+```bash
+# Local swift test on MSM3U takes ~55 min — same info as GH Actions Unit Tests, 3x faster:
+swift test 2>&1 | tee /tmp/local-unit-tests.log &
+# Continue monitoring GH Actions in foreground; local tests provide faster feedback
+```
+
+**Option C — Prep v3 Phase A3 (MetaAI file list + initial structure):**
+```bash
+# Pull the v3 plan and begin identifying which MetaAI files need to move:
+git pull
+wc -l .claude/THEA_CAPABILITY_PLAN_v3.md
+# Create Shared/Intelligence/MetaAI/ directory structure (no-op if already exists)
+# Read the v3 plan's Phase A3 section and prepare the file list
+```
+
+**Why**: GH Actions macOS runners run at 3-4× slower than MSM3U. Unit Tests take 80-90 min on
+GH Actions vs. ~55 min locally. Every minute the executor sleeps is wasted capacity. The CI green
+status is a requirement, but Phase T/U/v3 prep does NOT require CI to be complete first.
+
 ---
 
 ## PHASE T — NOTARIZATION PIPELINE SETUP (MSM3U)
