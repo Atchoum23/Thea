@@ -1,7 +1,13 @@
 # Thea Security Audit Workflow (PR)
-# Version: 2.3.0 - Added fork PR safety (write permissions gated to non-forks),
-#                  ntfy progress notifications
+# Version: 2.4.0 - Added workflow_dispatch with base_ref input (allows manual full-codebase
+#                  delta scan from GitHub UI, and testing without an open PR)
 # Last Updated: February 19, 2026
+#
+# TRIGGER MODES:
+#   pull_request — automatic delta audit on every PR touching source code
+#   workflow_dispatch — manual delta audit comparing HEAD against any base branch
+#     Use case: scan current main against a previous release, test the audit pipeline,
+#               or run a delta scan between feature branches without creating a PR
 
 name: Thea Security Audit (PR)
 
@@ -19,11 +25,25 @@ on:
       - 'tvOS/**'
       - '.github/workflows/**'
       - 'Package.swift'
+  workflow_dispatch:
+    inputs:
+      base_ref:
+        description: 'Base branch to compare against (delta audit)'
+        required: false
+        default: 'main'
+        type: string
+      severity:
+        description: 'Minimum severity to report'
+        required: false
+        default: 'low'
+        type: choice
+        options: [critical, high, medium, low]
 
 permissions: read-all
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  # For PRs: group by PR number. For manual dispatches: group by run_id (no cancellation conflict)
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 
 jobs:
@@ -36,12 +56,27 @@ jobs:
       contents: read
 
     steps:
-      - name: Fork Safety Check
+      - name: Resolve Context
         run: |
-          # Restrict PR comment writes to non-fork PRs only.
+          # Determine effective base ref and whether this is a PR or manual dispatch.
+          # PR context:       use github.base_ref (branch name) and PR SHAs for diff
+          # Manual dispatch:  use inputs.base_ref (default: main) and compare HEAD vs remote
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "EFFECTIVE_BASE_REF=${{ github.base_ref }}" >> $GITHUB_ENV
+            echo "IS_PR=true" >> $GITHUB_ENV
+            echo "MODE=PR #${{ github.event.pull_request.number }}"
+          else
+            BASE="${{ inputs.base_ref || 'main' }}"
+            echo "EFFECTIVE_BASE_REF=$BASE" >> $GITHUB_ENV
+            echo "IS_PR=false" >> $GITHUB_ENV
+            echo "MODE=manual dispatch against origin/$BASE"
+          fi
+
+          # Fork safety: restrict PR comment writes to non-fork PRs only.
           # Fork PRs get read-only GITHUB_TOKEN — they cannot write PR comments.
           # The audit still runs and results are uploaded as artifacts.
-          if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+          if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ] \
+             && [ "${{ github.event.pull_request.head.repo.full_name }}" != "" ]; then
             echo "::notice::Fork PR detected — PR comment writing will be skipped (read-only token)"
             echo "IS_FORK=true" >> $GITHUB_ENV
           else
@@ -76,13 +111,23 @@ jobs:
       - name: Get Changed Files
         id: changed-files
         run: |
-          BASE_SHA=${{ github.event.pull_request.base.sha }}
-          HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          # Fetch the base branch so git diff can compare against it
+          git fetch origin "$EFFECTIVE_BASE_REF" --depth=100 2>/dev/null || true
 
-          CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '\.(swift|ts|tsx|yml|yaml|sh)$' || true)
+          if [ "$IS_PR" = "true" ]; then
+            # PR mode: compare PR base SHA vs PR head SHA (exact diff of this PR)
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            CHANGED_FILES=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
+              | grep -E '\.(swift|ts|tsx|yml|yaml|sh)$' || true)
+          else
+            # Manual dispatch mode: compare HEAD vs remote base branch
+            CHANGED_FILES=$(git diff --name-only "origin/$EFFECTIVE_BASE_REF" HEAD \
+              | grep -E '\.(swift|ts|tsx|yml|yaml|sh)$' || true)
+          fi
 
           if [ -z "$CHANGED_FILES" ]; then
-            echo "No relevant files changed"
+            echo "No relevant files changed vs origin/$EFFECTIVE_BASE_REF"
             echo "has_changes=false" >> $GITHUB_OUTPUT
           else
             echo "Changed files:"
@@ -99,7 +144,7 @@ jobs:
           $THEA_AUDIT scan \
             --path . \
             --delta \
-            --base-branch origin/${{ github.base_ref }} \
+            --base-branch "origin/$EFFECTIVE_BASE_REF" \
             --format yaml \
             --output audit-results.yaml \
             --policy thea-policy.json \
@@ -111,7 +156,7 @@ jobs:
           $THEA_AUDIT scan \
             --path . \
             --delta \
-            --base-branch origin/${{ github.base_ref }} \
+            --base-branch "origin/$EFFECTIVE_BASE_REF" \
             --format markdown \
             --output audit-summary.md \
             --policy thea-policy.json || true
@@ -120,7 +165,7 @@ jobs:
           $THEA_AUDIT scan \
             --path . \
             --delta \
-            --base-branch origin/${{ github.base_ref }} \
+            --base-branch "origin/$EFFECTIVE_BASE_REF" \
             --format json \
             --output audit-results.json \
             --policy thea-policy.json || true
@@ -151,7 +196,7 @@ jobs:
         if: steps.changed-files.outputs.has_changes == 'true'
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
-          name: thea-audit-pr-${{ github.event.pull_request.number }}
+          name: thea-audit-pr-${{ github.event.pull_request.number || github.run_id }}
           path: |
             audit-results.yaml
             audit-results.json
@@ -159,7 +204,8 @@ jobs:
           retention-days: 30
 
       - name: Comment on PR
-        if: steps.changed-files.outputs.has_changes == 'true' && env.IS_FORK != 'true'
+        # Only comment when triggered by a real PR (not manual dispatch) and not a fork
+        if: steps.changed-files.outputs.has_changes == 'true' && env.IS_FORK != 'true' && env.IS_PR == 'true'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
@@ -261,10 +307,19 @@ jobs:
             STATUS="Clean"
           fi
 
+          # Determine click URL: PR page for PR events, Actions run for dispatches
+          if [ "$IS_PR" = "true" ] && [ -n "$PR_NUM" ]; then
+            CLICK_URL="https://github.com/${{ github.repository }}/pull/${PR_NUM}"
+            CONTEXT="PR #${PR_NUM}: ${PR_TITLE}"
+          else
+            CLICK_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            CONTEXT="Manual dispatch vs origin/$EFFECTIVE_BASE_REF"
+          fi
+
           curl -s -o /dev/null \
-            -H "Title: PR #${PR_NUM} Audit - $STATUS" \
+            -H "Title: Thea Audit (Delta) - $STATUS" \
             -H "Priority: $PRIORITY" \
             -H "Tags: $TAG" \
-            -H "Click: https://github.com/${{ github.repository }}/pull/${PR_NUM}" \
-            -d "Critical: ${CRITICAL:-0} | High: ${HIGH:-0} | PR: ${PR_TITLE}" \
+            -H "Click: $CLICK_URL" \
+            -d "Critical: ${CRITICAL:-0} | High: ${HIGH:-0} | ${CONTEXT}" \
             "https://ntfy.sh/$NTFY_TOPIC" || true
