@@ -217,6 +217,68 @@ actor PersonalKnowledgeGraph {
         }
     }
 
+    // MARK: - Entity Deduplication
+
+    /// Find an existing entity that is sufficiently similar to avoid duplicates.
+    /// Returns the existing entity's ID if found, otherwise nil.
+    func findSimilarEntity(name: String, type: KGEntityType) -> KGEntity? {
+        let normalizedNew = name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        return entities.values.first { existing in
+            guard existing.type == type else { return false }
+            let normalizedExisting = existing.name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            // Exact match after normalization
+            if normalizedExisting == normalizedNew { return true }
+            // Substring match for longer names (handles "John" vs "John Smith")
+            if normalizedNew.count > 3 && normalizedExisting.hasPrefix(normalizedNew) { return true }
+            if normalizedExisting.count > 3 && normalizedNew.hasPrefix(normalizedExisting) { return true }
+            return false
+        }
+    }
+
+    /// Add entity with deduplication: if a similar entity exists, update it instead of creating duplicate.
+    /// Returns the entity ID (existing or new).
+    @discardableResult
+    func addOrMergeEntity(_ entity: KGEntity) -> String {
+        if let existing = findSimilarEntity(name: entity.name, type: entity.type) {
+            // Merge: update lastUpdated and increment referenceCount
+            var merged = existing
+            merged.lastUpdatedAt = Date()
+            merged.referenceCount += 1
+            for (key, value) in entity.attributes {
+                merged.attributes[key] = value
+            }
+            entities[merged.id] = merged
+            isDirty = true
+            return merged.id
+        } else {
+            addEntity(entity)
+            return entity.id
+        }
+    }
+
+    // MARK: - Importance Decay (P3)
+
+    /// Decay importance of entities older than 90 days with no recent activity.
+    /// Entities with referenceCount < 2 and lastUpdated > 90 days are pruned.
+    func decayStaleEntities(daysThreshold: Int = 90, minimumReferenceCount: Int = 2) {
+        let cutoffDate = Date().addingTimeInterval(-Double(daysThreshold) * 86400)
+        var removedIDs: Set<String> = []
+
+        for (id, entity) in entities {
+            if entity.lastUpdatedAt < cutoffDate && entity.referenceCount < minimumReferenceCount {
+                removedIDs.insert(id)
+                logger.debug("Decaying stale entity: \(entity.name) (last updated: \(entity.lastUpdatedAt))")
+            }
+        }
+
+        if !removedIDs.isEmpty {
+            removedIDs.forEach { entities.removeValue(forKey: $0) }
+            edges.removeAll { removedIDs.contains($0.sourceID) || removedIDs.contains($0.targetID) }
+            isDirty = true
+            logger.info("Decayed \(removedIDs.count) stale entities (inactive >\(daysThreshold) days, <\(minimumReferenceCount) references)")
+        }
+    }
+
     // MARK: - Statistics
 
     var entityCount: Int { entities.count }
