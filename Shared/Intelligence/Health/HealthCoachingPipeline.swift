@@ -38,6 +38,14 @@ final class HealthCoachingPipeline {
     /// Whether to use smart notification scheduling for insight delivery
     var useSmartScheduling = true
 
+    /// Optional messaging gateway channel for daily health summaries (P6).
+    /// When set, delivers coaching insights to this channel via TheaMessagingGateway.
+    /// Format: "platform:chatId" e.g. "telegram:123456789"
+    var gatewayDeliveryChannel: String?
+
+    /// Whether to also deliver insights via the messaging gateway (in addition to local notifications).
+    var useGatewayDelivery = false
+
     private init() {}
 
     // MARK: - Analysis Pipeline
@@ -404,6 +412,46 @@ final class HealthCoachingPipeline {
             } catch {
                 logger.warning("Failed to schedule health insight notification: \(error.localizedDescription)")
             }
+        }
+
+        // P6: Also deliver via TheaMessagingGateway if configured
+        await deliverViaGatewayIfEnabled(insight)
+    }
+
+    /// Deliver a health coaching insight to the configured messaging gateway channel.
+    /// Formats the message with emoji for readability in messaging apps.
+    private func deliverViaGatewayIfEnabled(_ insight: CoachingInsight) async {
+        guard useGatewayDelivery,
+              let channelSpec = gatewayDeliveryChannel,
+              !channelSpec.isEmpty else { return }
+
+        let parts = channelSpec.split(separator: ":", maxSplits: 1)
+        guard parts.count == 2 else {
+            logger.warning("Invalid gatewayDeliveryChannel format — expected 'platform:chatId'")
+            return
+        }
+        let platformRaw = String(parts[0])
+        let chatId = String(parts[1])
+
+        let emoji: String = switch insight.severity {
+        case .critical: "🚨"
+        case .warning: "⚠️"
+        case .info: "ℹ️"
+        case .positive: "✅"
+        }
+        let formattedMessage = "\(emoji) **Health Insight**: \(insight.title)\n\(insight.message)"
+
+        guard let platform = MessagingPlatform(rawValue: platformRaw) else {
+            logger.warning("Unknown platform '\(platformRaw)' for gateway health delivery")
+            return
+        }
+
+        let outbound = OutboundMessagingMessage(chatId: chatId, content: formattedMessage, replyToId: nil)
+        do {
+            try await TheaMessagingGateway.shared.send(outbound, via: platform)
+            logger.info("Health insight delivered via \(platformRaw)/\(chatId)")
+        } catch {
+            logger.warning("Failed to deliver health insight via gateway: \(error.localizedDescription)")
         }
     }
 
