@@ -78,6 +78,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case mediaServer = "Media Server"
     case notifications = "Notifications"
     case messaging = "Messaging Hub"
+    case messagingGateway = "Messaging Gateway"
     case travel = "Travel"
     case vehicles = "Vehicles"
     case extSubscriptions = "Subscriptions"
@@ -134,6 +135,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .mediaServer: "network"
         case .notifications: "bell.badge"
         case .messaging: "bubble.left.and.text.bubble.right.fill"
+        case .messagingGateway: "antenna.radiowaves.left.and.right"
         case .travel: "airplane"
         case .vehicles: "car"
         case .extSubscriptions: "creditcard.circle"
@@ -159,7 +161,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         switch self {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge, .liveGuidance: 1
-        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home: 2
+        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .messagingGateway, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home: 2
         case .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
         case .subscription, .about: 5
@@ -314,6 +316,8 @@ struct MacSettingsView: View {
             NotificationIntelligenceSettingsView()
         case .messaging:
             MessagingHubView()
+        case .messagingGateway:
+            TheaMessagingSettingsView()
         case .travel:
             TravelPlanningView()
         case .vehicles:
