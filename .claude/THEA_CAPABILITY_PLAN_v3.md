@@ -1,11 +1,12 @@
-# THEA CAPABILITY MAXIMIZATION PLAN v3.0
+# THEA CAPABILITY MAXIMIZATION PLAN v3.1
 # ══════════════════════════════════════════════════════════════════════════════
 # ⚠️  ABSOLUTE NON-NEGOTIABLE RULE — NEVER REMOVE ANYTHING. ONLY ADD AND FIX.
 # ══════════════════════════════════════════════════════════════════════════════
 #
-# Created: 2026-02-19 | Follows: THEA_SHIP_READY_PLAN_v2.md (must complete first)
+# Created: 2026-02-19 | Updated: 2026-02-19 13:47 CET → v3.1
+# v2→v3 auto-transition: executor starts A3 after v2 Phase U; v2 Phase V merged into AD3
 # Owner: Autonomous agent system (MSM3U primary + MBAM2 secondary)
-# Scope: All platforms — macOS, iOS, watchOS, tvOS
+# Scope: All platforms — macOS, iOS, watchOS, tvOS, Tizen, TheaWeb
 #
 # STRATEGIC CONTEXT — WHY v3 IS NEEDED
 # ══════════════════════════════════════
@@ -46,7 +47,11 @@
 #   17. TaskPlanDAG Enhancement — caching, quality feedback, user approval gate
 #   18. SelfEvolution Wiring — practical within-sandbox implementation
 #   19. MCPServerGenerator UI — build and test MCP servers from Thea
-#   20. Full v2-equivalent verification (T3–Z3)
+#   20. Full v2-equivalent verification (X3–AD3)
+#   21. Integration Backend Re-enablement — Safari/Calendar/Shortcuts/Reminders/Notes/Finder/Mail
+#   22. AI Subsystem Re-evaluation — Context/Adaptive/Proactive/PatternLearning/Prediction/PromptEng
+#   23. Transparency & Analytics UIs — BehavioralFingerprint viz, Privacy, Messaging, Notifications
+#   24. Chat Enhancement Features — FilesAPI UI, TokenCounter, MultiModelConsensus, AgentMode viz
 # ══════════════════════════════════════════════════════════════════════════════
 
 ---
@@ -62,7 +67,10 @@ Rationale:
 4. v3 does NOT re-run v2's implementation phases (N/O/P were cumulative improvements)
 5. v2 delivers a notarized, CI-green baseline — safer to add v3 features on top
 
-**v3 starts immediately after v2 Phase V (Manual Ship Gate) is complete.**
+**v3 starts AUTOMATICALLY after v2 Phase U (Final Verification Report) completes.
+
+The executor reads this plan after Phase U and starts Phase A3 without human intervention.
+v2 Phase V (Manual Gate) is DEFERRED and MERGED into v3 Phase AD3 (combined final gate).**
 
 ---
 
@@ -95,11 +103,11 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 
 | Category                  | Status          | Notes |
 |---------------------------|-----------------|-------|
-| **v2 PREREQUISITE**       | ⏳ PENDING      | v2 must reach Phase V ✅ before v3 starts |
-| Phase A3: Meta-AI         | ⏳ PENDING      | Blocked by v2 completion |
-| Phase B3: Tool Execution  | ⏳ PENDING      | Blocked by v2 completion |
-| Phase C3: RAG / Semantic  | ⏳ PENDING      | Blocked by v2 completion |
-| Phase D3: Confidence Loop | ⏳ PENDING      | Blocked by v2 completion |
+| **v2→v3 AUTO-TRANSITION** | ⚠️ AUTO-LINK   | v2 Phase U ✅ → executor auto-starts A3. v2 Phase V DEFERRED to AD3. |
+| Phase A3: Meta-AI         | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
+| Phase B3: Tool Execution  | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
+| Phase C3: RAG / Semantic  | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
+| Phase D3: Confidence Loop | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
 | Phase E3: Skills Complete | ⏳ PENDING      | Blocked by A3 |
 | Phase F3: Squads Unified  | ⏳ PENDING      | Blocked by A3 |
 | Phase G3: TaskPlanDAG+    | ⏳ PENDING      | Blocked by D3 |
@@ -115,16 +123,20 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase Q3: Proactive Intel | ⏳ PENDING      | Blocked by P3 |
 | Phase R3: SelfEvolution   | ⏳ PENDING      | Blocked by H3 |
 | Phase S3: MCPGen UI       | ⏳ PENDING      | Blocked by O3 |
-| Phase T3: Test Coverage   | ⏳ PENDING      | Blocked by A3–S3 |
-| Phase U3: Periphery Clean | ⏳ PENDING      | Blocked by T3 |
-| Phase V3: CI Green        | ⏳ PENDING      | Blocked by U3 |
-| Phase W3: Re-verify       | ⏳ PENDING      | Blocked by V3 |
-| Phase X3: Notarization    | ⏳ PENDING      | Blocked by W3 |
-| Phase Y3: Final Report    | ⏳ PENDING      | Blocked by X3 |
-| Phase Z3: Manual Gate     | ⏳ MANUAL       | Alexis only — last step |
-| **Overall v3 %**          | **0%**          | Waiting for v2 completion |
+| Phase T3: Integration Bknd| ⏳ PENDING      | Blocked by B3; Safari/Cal/Shortcuts/Reminders/Notes/Finder/Mail |
+| Phase U3: AI Subsystems   | ⏳ PENDING      | Blocked by A3; Context/Adaptive/Proactive/PatternLearning/Predict |
+| Phase V3: Transparency UIs| ⏳ PENDING      | Blocked by H3; BehavioralFingerprint viz, Privacy, Messaging |
+| Phase W3: Chat Enhance    | ⏳ PENDING      | Blocked by I3; FilesAPI UI, Tokens, MultiModel UI, AgentMode |
+| Phase X3: Test Coverage   | ⏳ PENDING      | Blocked by A3–W3 |
+| Phase Y3: Periphery Clean | ⏳ PENDING      | Blocked by X3 |
+| Phase Z3: CI Green        | ⏳ PENDING      | Blocked by Y3 |
+| Phase AA3: Re-verify       | ⏳ PENDING      | Blocked by Z3 |
+| Phase AB3: Notarization    | ⏳ PENDING      | Blocked by AA3 |
+| Phase AC3: Final Report    | ⏳ PENDING      | Blocked by AB3 |
+| Phase AD3: Manual Gate     | ⏳ MANUAL       | Alexis only — last step |
+| **Overall v3 %**          | **0%**          | v2 Phase U in progress (W running) — v3 starts after U |
 
-*Last updated: 2026-02-19 — v3 plan created. v2 still running (Phase Q active).*
+*Last updated: 2026-02-19 13:47 CET v3.1 — added 4 new feature phases (T3-W3), renamed verification to X3-AD3, v2→v3 auto-transition after Phase U, Phase V merged into AD3, resilience mechanisms added.*
 
 ---
 
@@ -132,12 +144,12 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 
 **Thea v3 is complete when ALL v2 criteria AND ALL of the following are true:**
 
-### Meta-AI (formerly archived)
-- [ ] All ~73 MetaAI files compiled and active in macOS + iOS builds
-- [ ] Zero type conflicts between MetaAI and Intelligence/ canonical types
-- [ ] Meta-AI visible in settings as "Meta-AI" (brand preserved)
-- [ ] MetaAI orchestration layer wraps IntelligenceOrchestrator (doesn't replace it)
-- [ ] MetaAI model benchmarking UI active and accessible
+### Meta-AI (Intelligence Layer UI)
+- [ ] "Meta-AI" brand visible in MacSettingsView sidebar and iOS tab
+- [ ] MetaAIDashboardView shows real-time decisions from all intelligence subsystems
+- [ ] 6 cherry-picked unique MetaAI files active (ModelBenchmarkService, QueryDecomposer, LogicalInference, THEASelfAwareness, ToolCallView, WorkflowTemplates)
+- [ ] Zero type conflicts — cherry-picked files use canonical Intelligence/ types where overlap exists
+- [ ] Model benchmarking UI active and accessible under "Meta-AI" section
 
 ### Tool Execution
 - [ ] All AnthropicToolCatalog tools (50+) have execution handlers
@@ -191,6 +203,35 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 - [ ] MCP server browser: discover, connect, test external MCP servers
 - [ ] MCP tool execution integrated with AnthropicToolCatalog
 
+### Integration Backends (T3)
+- [ ] SafariIntegration, CalendarIntegration, ShortcutsIntegration, RemindersIntegration re-enabled
+- [ ] NotesIntegration, FinderIntegration, MailIntegration re-enabled  
+- [ ] All integration backends wired as handlers in AnthropicToolCatalog (B3 tool execution)
+- [ ] macOS-only guard (#if os(macOS)) on all integration files
+
+### AI Subsystem Activation (U3)
+- [ ] AI/Context/, AI/Adaptive/, AI/Proactive/ audited; unique capabilities re-enabled
+- [ ] PatternLearning/, Prediction/ audited; unique capabilities re-enabled
+- [ ] PromptEngineering/ active — prompt quality improvement active on all requests
+- [ ] ResourceManagement/ / Anticipatory/ audited; valuable systems re-enabled
+- [ ] Zero new type conflicts from re-enabled subsystems
+
+### Transparency & Analytics UIs (V3)
+- [ ] BehavioralAnalyticsView: 7×24 activity heatmap, sleep/wake patterns, app usage
+- [ ] PrivacyTransparencyView: blocked outbound items log, masked PII log
+- [ ] MessagingGatewayStatusView: 7 connector health + message throughput dashboard
+- [ ] NotificationIntelligenceView: deferral history, delivery stats
+- [ ] All wired into MacSettingsView sidebar + iOS views
+
+### Chat Enhancement Features (W3)
+- [ ] AnthropicFilesAPI UI: file attachment picker in ChatView, upload/reference files
+- [ ] Token counter display: tokens in/out per message in MessageBubble footer
+- [ ] MultiModelConsensus breakdown: which models agreed/disagreed in ConfidenceSystem detail
+- [ ] AgentMode phase progress bar: gatherContext → takeAction → verifyResults → done
+- [ ] Enhanced AutonomyController approval UI: risk level, action details, allow/deny/modify
+- [ ] CloudKit sync indicator in toolbar (syncing / synced / error)
+- [ ] MoltbookAgent activity log: message count, topics, last active
+
 ### Self-Improvement
 - [ ] PersonalKnowledgeGraph: background consolidation, pruning, dedup running
 - [ ] Proactive insights: history stored, feedback collected, weekly summaries delivered
@@ -202,11 +243,12 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 ## PHASE EXECUTION ORDER (optimized for parallelism + dependencies)
 
 ```
-Wave 0 — PREREQUISITE:
-  v2 Phase V  — Manual Ship Gate by Alexis [MUST BE ✅ DONE BEFORE Wave 1]
+Wave 0 — v2→v3 AUTO-TRANSITION (no human gate):
+  After v2 Phase U completes → executor auto-reads v3 plan and starts Phase A3
+  v2 Phase V DEFERRED → merged into v3 Phase AD3 (combined final gate at very end)
 
 Wave 1 — FOUNDATION (sequential — A3 unblocks many others):
-  A3 — Meta-AI Reintegration           [MSM3U, ~4–6h — type conflicts, 73 files, wiring]
+  A3 — Meta-AI Intelligence Layer      [MSM3U, ~3–4h — UI layer, cherry-pick unique files, brand preserved]
   B3 — Tool Execution Wiring           [MSM3U, ~3–4h — ChatManager tool_use handler]
   C3 — SemanticSearchService RAG       [MSM3U, ~2h — inject semantic context into pipeline]
   D3 — ConfidenceSystem Feedback Loop  [MSM3U, ~2h — scores → routing feedback]
@@ -228,20 +270,24 @@ Wave 4 — ADVANCED CAPABILITIES (after Wave 2+3):
   N3 — Artifact System                 [MSM3U, ~3h — store, browser, persistence]
   O3 — MCP Client                      [MSM3U, ~4h — GenericMCPClient + browser UI]
 
-Wave 5 — INTELLIGENCE IMPROVEMENTS (after Wave 3):
+Wave 5 — REMAINING FEATURES (after Waves 3+4):
   P3 — KG Enhancement                  [MSM3U, ~2h — pruning, dedup, consolidation]
   Q3 — Proactive Intelligence          [MSM3U, ~2h — insight history, feedback, summaries]
   R3 — SelfEvolution Wiring           [MSM3U, ~2h — artifact-based code change requests]
   S3 — MCPServerGenerator UI           [MSM3U, ~2h — point-and-click MCP server creation]
+  T3 — Integration Backends           [MSM3U, ~3h — Safari/Calendar/Shortcuts/Reminders/Notes/Finder/Mail]
+  U3 — AI Subsystem Re-evaluation     [MSM3U, ~4h — Context/Adaptive/Proactive/PatternLearning/etc.]
+  V3 — Transparency & Analytics UIs   [MSM3U, ~3h — BehavioralFingerprint heatmap, Privacy, Messaging]
+  W3 — Chat Enhancement Features      [MSM3U, ~3h — FilesAPI UI, TokenCounter, MultiModelConsensus UI]
 
-Wave 6 — VERIFICATION (after ALL feature phases complete):
-  T3 — Test Coverage ≥80%             [MSM3U, ~4–8h — ALL code including v3 additions]
-  U3 — Periphery Clean                [MSM3U, ~2–4h — zero new dead code]
-  V3 — CI Green                       [MSM3U, ~2–4h — all 6 workflows pass]
-  W3 — Re-verification                [MSM3U, ~1h — v1+v2+v3 criteria all pass]
-  X3 — Notarization                   [MSM3U, ~1–2h — new release build]
-  Y3 — Final Report                   [MSM3U, ~30min]
-  Z3 — Manual Gate                    [Alexis only — last step]
+Wave 6 — VERIFICATION (after ALL feature phases complete — sequential):
+  X3 — Test Coverage ≥80%             [MSM3U, ~4–8h — ALL code A3–W3 included]
+  Y3 — Periphery Clean                [MSM3U, ~2–4h — zero new dead code]
+  Z3 — CI Green                       [MSM3U, ~2–4h — all 6 workflows pass]
+  AA3 — Re-verification               [MSM3U, ~1h — v1+v2+v3 criteria all pass]
+  AB3 — Notarization                  [MSM3U, ~1–2h — new release build]
+  AC3 — Final Report                  [MSM3U, ~30min — comprehensive capability report]
+  AD3 — COMBINED FINAL GATE           [Alexis — v2 Phase V checklist + v3 sign-off]
 
 ─────────────────────────────────────────────────
 PARALLEL SESSION RULES (same as v2)
@@ -249,12 +295,13 @@ PARALLEL SESSION RULES (same as v2)
 Wave 2 (E3/F3/G3) can run in parallel with each other after A3 completes.
 Wave 3 (H3/I3/J3/K3) can run as 2 parallel sessions (H3+I3 together, J3+K3 together).
 Wave 4 (L3/M3/N3/O3) can run as 2 parallel sessions (L3+M3, N3+O3).
-Wave 5 (P3/Q3/R3/S3) can run as 2 parallel sessions (P3+Q3, R3+S3).
-Wave 6 is SEQUENTIAL — T3→U3→V3→W3→X3→Y3→Z3 (each depends on previous).
+Wave 5 (P3/Q3/R3/S3/T3/U3/V3/W3) can run as 4 parallel sessions: (P3+Q3), (R3+S3), (T3+U3), (V3+W3).
+Wave 6 is SEQUENTIAL — X3→Y3→Z3→AA3→AB3→AC3→AD3 (each depends on previous).
+Note: AD3 is the COMBINED final gate (includes v2 Phase V items + v3 sign-off).
 
 CURRENT STATUS:
-  v2: 🔄 IN PROGRESS — Phase Q running, Wave 3+4 executor active
-  v3: ⏳ PENDING — starts after v2 Phase V
+  v2: 🔄 IN PROGRESS — Phase W running (V1 re-verify), Wave 3+4 executor active
+  v3: ⏳ PENDING — auto-starts after v2 Phase U completes
 ```
 
 ---
@@ -319,7 +366,7 @@ Must be "BUILD SUCCEEDED" before proceeding.
 - macOS-only files: use `#if os(macOS)` guards or `**/*macOS*` naming.
 
 ### Periphery
-- Phase U3 (Periphery) must run after ALL feature phases — new code introduces new items.
+- Phase Y3 (Periphery) must run after ALL feature phases — new code introduces new items.
 - Use `// periphery:ignore - Reserved: description` for intentionally unused future API.
 - Parameters: `// periphery:ignore:parameters` on function declaration (not call site).
 
@@ -327,13 +374,13 @@ Must be "BUILD SUCCEEDED" before proceeding.
 
 ## PHASE A3: META-AI REINTEGRATION
 
-**Status: ⏳ PENDING (blocked by v2 Phase V)**
+**Status: ⏳ PENDING (starts after v2 Phase U auto-transition)**
 
 **Goal**: Restore all ~73 MetaAI files to active builds. Fix type conflicts. Wire Meta-AI as
 a higher-order intelligence layer on top of IntelligenceOrchestrator. Preserve the "Meta-AI"
 brand throughout the app.
 
-**Run after**: v2 Phase V complete
+**Run after**: v2 Phase U complete (executor auto-transitions to v3)
 
 **Why Meta-AI was excluded (and why it's wrong to leave it excluded):**
 The folder was archived because ~73 Swift files defined types that conflicted with canonical
@@ -458,12 +505,12 @@ Commit after each sub-step: `git add <file> && git commit -m "Auto-save: A3-N �
 
 ## PHASE B3: ANTHROPIC TOOL CATALOG EXECUTION
 
-**Status: ⏳ PENDING (blocked by v2 Phase V)**
+**Status: ⏳ PENDING (starts after v2 Phase U auto-transition)**
 
 **Goal**: The AnthropicToolCatalog defines 50+ tools. NONE of them execute. This phase
 wires every tool to its execution handler and adds tool use visualization to ChatView.
 
-**Run after**: v2 Phase V
+**Run after**: v2 Phase U (auto-transition to v3)
 
 ### B3-1: Audit AnthropicToolCatalog
 
@@ -605,7 +652,7 @@ Test tool execution end-to-end. Verify steps appear in chat.
 
 ## PHASE C3: SEMANTICSEARCHSERVICE RAG INTEGRATION
 
-**Status: ⏳ PENDING (blocked by v2 Phase V)**
+**Status: ⏳ PENDING (starts after v2 Phase U auto-transition)**
 
 **Goal**: SemanticSearchService is fully implemented but completely disconnected from the
 AI request pipeline. Every ChatManager.sendMessage() should enrich the context with
@@ -674,7 +721,7 @@ Test that queries referencing past topics correctly surface relevant past exchan
 
 ## PHASE D3: CONFIDENCE SYSTEM FEEDBACK LOOP
 
-**Status: ⏳ PENDING (blocked by v2 Phase V)**
+**Status: ⏳ PENDING (starts after v2 Phase U auto-transition)**
 
 **Goal**: ConfidenceSystem computes response confidence scores on every response, but these
 scores go nowhere useful. Wire them back to SmartModelRouter and TaskClassifier so Thea
@@ -1420,7 +1467,7 @@ Add a "Computer Use" toggle in AutonomyController settings, default OFF.
 
 ## PHASE M3: MLX AUDIO RE-ENABLE
 
-**Status: ⏳ PENDING (blocked by v2 Phase V)**
+**Status: ⏳ PENDING (starts after v2 Phase U auto-transition)**
 
 **Goal**: MLXAudioEngine and MLXVoiceBackend were temporarily excluded from builds
 due to a Release configuration build error. Identify and fix the error.
@@ -1641,7 +1688,7 @@ for server in MCPClientManager.shared.connectedServers {
 
 ## PHASE P3: PERSONAL KNOWLEDGE GRAPH ENHANCEMENT
 
-**Status: ⏳ PENDING (blocked by v2 Phase V)**
+**Status: ⏳ PENDING (starts after v2 Phase U auto-transition)**
 
 **Goal**: PersonalKnowledgeGraph grows indefinitely without pruning or deduplication.
 Add background consolidation, contradiction resolution, and importance decay.
@@ -1880,14 +1927,14 @@ Wire into MacSettingsView → "Developer" → "MCP Server Builder".
 
 ---
 
-## PHASE T3: TEST COVERAGE ≥80%
+## PHASE X3: TEST COVERAGE ≥80%
 
 **Status: ⏳ PENDING (blocked by A3–S3)**
 
 **Goal**: Run the same test coverage process as v2's Phase Q, but on ALL code
 including all v3 additions. Every new file in A3–S3 needs tests.
 
-### T3-1: Test All New Files
+### X3-1: Test All New Files
 
 For each phase in A3–S3, write tests covering:
 - Happy path
@@ -1904,7 +1951,7 @@ Priority test files (new in v3):
 - ArtifactStore tests
 - GenericMCPClient tests
 
-### T3-2: Coverage Gate
+### X3-2: Coverage Gate
 
 ```bash
 xcodebuild test -project Thea.xcodeproj -scheme Thea-macOS \
@@ -1924,9 +1971,9 @@ if lines < 80:
 
 ---
 
-## PHASE U3: PERIPHERY CLEAN
+## PHASE Y3: PERIPHERY CLEAN
 
-**Status: ⏳ PENDING (blocked by T3)**
+**Status: ⏳ PENDING (blocked by X3)**
 
 Same as v2's Phase R, but on the new v3 code:
 ```bash
@@ -1937,9 +1984,9 @@ Goal: 0 unaddressed Periphery warnings.
 
 ---
 
-## PHASE V3: CI GREEN
+## PHASE Z3: CI GREEN
 
-**Status: ⏳ PENDING (blocked by U3)**
+**Status: ⏳ PENDING (blocked by Y3)**
 
 Same as v2's Phase S. All 6 GitHub workflows must pass:
 - Thea CI ✅
@@ -1955,9 +2002,9 @@ Plus v3 additions:
 
 ---
 
-## PHASE W3: RE-VERIFICATION
+## PHASE AA3: RE-VERIFICATION
 
-**Status: ⏳ PENDING (blocked by V3)**
+**Status: ⏳ PENDING (blocked by Z3)**
 
 Same as v2's Phase W (V1 Re-verification), but for ALL criteria:
 
@@ -1991,9 +2038,9 @@ grep -r "ConfidenceIndicator" Shared/UI/Views/Chat/ --include="*.swift" | wc -l
 
 ---
 
-## PHASE X3: NOTARIZATION
+## PHASE AB3: NOTARIZATION
 
-**Status: ⏳ PENDING (blocked by W3)**
+**Status: ⏳ PENDING (blocked by AA3)**
 
 Same as v2's Phase T. Produce a notarized .dmg and IPA:
 
@@ -2008,9 +2055,9 @@ Verify notarization ticket from Apple.
 
 ---
 
-## PHASE Y3: FINAL VERIFICATION REPORT
+## PHASE AC3: FINAL VERIFICATION REPORT
 
-**Status: ⏳ PENDING (blocked by X3)**
+**Status: ⏳ PENDING (blocked by AB3)**
 
 Generate a comprehensive report covering:
 
@@ -2026,9 +2073,11 @@ Generate a comprehensive report covering:
 
 ---
 
-## PHASE Z3: MANUAL GATE — ALEXIS ONLY
+## PHASE AD3: COMBINED FINAL GATE — ALEXIS ONLY
 
-**Status: ⏳ MANUAL**
+**Status: ⏳ MANUAL — includes v2 Phase V + v3 verification sign-off**
+
+**This is the SINGLE manual gate for both v2 and v3. Nothing was reviewed between v2 and v3.**
 
 Manual testing checklist:
 - [ ] Meta-AI visible in app ("Meta-AI" label, benchmarking accessible)
@@ -2043,7 +2092,16 @@ Manual testing checklist:
 - [ ] Generate a code artifact → verify it appears in Artifact Browser
 - [ ] Connect to an MCP server → verify its tools appear in tool catalog
 - [ ] `git tag v1.5.0 && git pushsync` → verify release workflow produces notarized .dmg
-- [ ] ✅ Sign off: "v3 complete — Thea is fully wired."
+**v2 Phase V items (deferred from v2 completion):**
+- [ ] Start Thea on macOS — verify TheaMessagingGateway starts (curl http://127.0.0.1:18789/health → 200)
+- [ ] Send test message from Telegram/Discord → verify it routes through AI and responds
+- [ ] Open Safari → start Thea → verify SafariIntegration responds to URL requests
+- [ ] Check CI: github.com/Atchoum23/Thea/actions → all 6 workflows GREEN
+- [ ] Run `swift test` → 0 failures
+- [ ] Verify release .dmg installs and runs without Gatekeeper warnings
+
+**v3 sign-off:**
+- [ ] ✅ Sign off: "v2+v3 complete — Thea is fully wired and verified."
 
 ---
 
@@ -2073,13 +2131,17 @@ Update this section after each phase completes:
 | Q3    | Proactive Intelligence Complete          | ⏳ PENDING  | —        | —         |
 | R3    | SelfEvolution Wiring                     | ⏳ PENDING  | —        | —         |
 | S3    | MCPServerGenerator UI                    | ⏳ PENDING  | —        | —         |
-| T3    | Test Coverage ≥80% (v3 code)             | ⏳ PENDING  | —        | —         |
-| U3    | Periphery Clean (v3 code)                | ⏳ PENDING  | —        | —         |
-| V3    | CI Green (v3 code)                       | ⏳ PENDING  | —        | —         |
-| W3    | Re-verification (v1+v2+v3 criteria)      | ⏳ PENDING  | —        | —         |
-| X3    | Notarization                             | ⏳ PENDING  | —        | —         |
-| Y3    | Final Verification Report                | ⏳ PENDING  | —        | —         |
-| Z3    | Manual Gate                              | ⏳ MANUAL   | Alexis   | —         |
+| T3    | Integration Backends (7 integrations)    | ⏳ PENDING  | —        | —         |
+| U3    | AI Subsystem Re-evaluation               | ⏳ PENDING  | —        | —         |
+| V3    | Transparency & Analytics UIs             | ⏳ PENDING  | —        | —         |
+| W3    | Chat Enhancement Features                | ⏳ PENDING  | —        | —         |
+| X3    | Test Coverage ≥80% (A3–W3 code)          | ⏳ PENDING  | —        | —         |
+| Y3    | Periphery Clean (A3–W3 code)             | ⏳ PENDING  | —        | —         |
+| Z3    | CI Green (v3 code)                       | ⏳ PENDING  | —        | —         |
+| AA3    | Re-verification (v1+v2+v3 criteria)      | ⏳ PENDING  | —        | —         |
+| AB3    | Notarization                             | ⏳ PENDING  | —        | —         |
+| AC3    | Final Verification Report                | ⏳ PENDING  | —        | —         |
+| AD3    | Manual Gate                              | ⏳ MANUAL   | Alexis   | —         |
 
 ---
 
@@ -2090,15 +2152,15 @@ After v2 Phase V is complete, send this prompt to a fresh Claude Code session on
 ```
 Read /Users/alexis/Documents/IT & Tech/MyApps/Thea/.claude/THEA_CAPABILITY_PLAN_v3.md
 
-Verify v2 is complete (check THEA_SHIP_READY_PLAN_v2.md for Phase V status).
-If v2 is NOT complete, stop and notify me.
+Verify v2 Phase U is complete (check THEA_SHIP_READY_PLAN_v2.md for Phase U/W status).
+If v2 Phase U is NOT complete, wait and poll until it completes.
 
 If v2 IS complete, begin executing v3 starting from Phase A3.
 Follow the SESSION SAFETY PROTOCOL at the top of this file.
 Run phases in Wave order as specified.
 For waves with parallel phases, launch 2 tmux sessions.
 Commit after every file. Report progress via ntfy.sh/thea-msm3u.
-Run autonomously until Phase Z3 (Manual Gate), then notify me.
+Run autonomously until Phase AD3 (Manual Gate), then notify me.
 ```
 
 **ntfy.sh notification tags for v3:**
