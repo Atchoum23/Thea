@@ -759,7 +759,6 @@ struct DocumentCameraScannerView: UIViewControllerRepresentable {
         Coordinator(onCapture: onCapture)
     }
 
-    @MainActor
     class Coordinator: NSObject, VNDocumentCameraViewControllerDelegate {
         let onCapture: ([Data]) -> Void
 
@@ -776,15 +775,15 @@ struct DocumentCameraScannerView: UIViewControllerRepresentable {
                 }
             }
             onCapture(images)
-            controller.dismiss(animated: true)
+            Task { @MainActor in controller.dismiss(animated: true) }
         }
 
         func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
-            controller.dismiss(animated: true)
+            Task { @MainActor in controller.dismiss(animated: true) }
         }
 
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
-            controller.dismiss(animated: true)
+            Task { @MainActor in controller.dismiss(animated: true) }
         }
     }
 }
