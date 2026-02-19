@@ -386,13 +386,10 @@ struct TaskModelTests {
 
     @Test("isDueThisWeek detects current week tasks")
     func isDueThisWeek() {
-        // Anchor to noon Wednesday of this week — avoids week-boundary flake regardless of locale
-        let cal = Calendar.current
-        let weekday = cal.component(.weekday, from: Date())
-        let daysToWed = (4 - weekday + 7) % 7  // 4 = Wednesday in 1-based Gregorian
-        let wednesday = cal.date(byAdding: .day, value: daysToWed == 0 ? 0 : daysToWed, to: Date())!
-        let noonWed = cal.date(bySettingHour: 12, minute: 0, second: 0, of: wednesday)!
-        let task = TestTask(title: "Test", dueDate: noonWed)
+        // Use noon today: today is always in the current week, no arithmetic needed.
+        // Previous approach computed daysToWed which pointed to NEXT week when run Thu–Sat.
+        let noonToday = Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: Date())!
+        let task = TestTask(title: "Test", dueDate: noonToday)
         #expect(task.isDueThisWeek)
     }
 
