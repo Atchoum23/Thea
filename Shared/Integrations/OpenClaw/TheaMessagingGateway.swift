@@ -57,7 +57,7 @@ final class TheaMessagingGateway: ObservableObject {
         }
         connectors.removeAll()
         connectedPlatforms.removeAll()
-        wsServer?.stop()
+        await wsServer?.stop()
         wsServer = nil
         isRunning = false
     }

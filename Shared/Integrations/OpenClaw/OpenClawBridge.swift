@@ -183,7 +183,6 @@ final class OpenClawBridge {
 
         return result
     }
-}
 
     // MARK: - Multi-Platform Router (Phase O — TheaMessagingGateway integration)
 
@@ -257,6 +256,7 @@ final class OpenClawBridge {
             isFromBot: false
         )
     }
+}
 
 // MARK: - Errors
 
