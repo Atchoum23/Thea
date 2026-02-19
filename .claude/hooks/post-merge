@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# post-merge git hook — Installed via: git config core.hooksPath .claude/hooks
+#
+# PURPOSE: Force git's .claude/ version after every pull/merge.
+# PROBLEM: ~/Documents/ is iCloud-synced. When both Macs edit .claude/ plan files
+#          through separate channels, iCloud creates conflict copies ("file 2.md").
+#          This hook ensures git always wins over iCloud after any merge.
+#
+# Fires after: git pull, git merge
+# Does NOT fire recursively (post-merge ≠ post-checkout).
+
+TOPLEVEL=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+
+# Force git's .claude/ tree to exactly match HEAD
+git -C "$TOPLEVEL" checkout HEAD -- ".claude/" 2>/dev/null || true
+
+# Remove any iCloud conflict artifacts from .claude/
+# iCloud names conflicts: "file 2.md", "file (from MacName).md", "file-conflict-*.md"
+find "$TOPLEVEL/.claude" -maxdepth 1 \( \
+    -name "* 2.md" -o \
+    -name "* 2.txt" -o \
+    -name "*-conflict-*.md" -o \
+    -name "*-conflict-*.txt" \
+    \) -type f -print -delete 2>/dev/null || true

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# post-checkout git hook — Installed via: git config core.hooksPath .claude/hooks
+#
+# PURPOSE: Force git's .claude/ version after branch switches.
+# Same iCloud conflict prevention as post-merge, but for checkout operations.
+#
+# Args: $1=prev-HEAD $2=new-HEAD $3=1(branch-switch) or 0(file-checkout)
+# Guard: only run on branch switches to avoid infinite recursion.
+
+[ "$3" = "1" ] || exit 0  # Skip file-level checkouts
+
+TOPLEVEL=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+
+# Force git's .claude/ tree to exactly match new HEAD
+git -C "$TOPLEVEL" checkout HEAD -- ".claude/" 2>/dev/null || true
+
+# Remove any iCloud conflict artifacts from .claude/
+find "$TOPLEVEL/.claude" -maxdepth 1 \( \
+    -name "* 2.md" -o \
+    -name "* 2.txt" -o \
+    -name "*-conflict-*.md" -o \
+    -name "*-conflict-*.txt" \
+    \) -type f -print -delete 2>/dev/null || true
