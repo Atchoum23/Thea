@@ -452,6 +452,32 @@ The MetaAI folder was excluded because it had duplicate type definitions conflic
 - Use `ChatSession` for multi-turn conversations (has KV cache)
 - IMPORTANT: Never use raw prompts - always apply chat templates via ChatSession
 
+## ⚠️ MANDATORY: LOCAL-FIRST TESTING PROTOCOL (Zero Quality Loss)
+
+GH Actions macOS runners are 3-4× slower than MSM3U (80-120 min Unit Tests vs 55 min locally).
+**NEVER push to GH Actions between each phase. Use this protocol instead:**
+
+**Per-phase development loop (iterate locally until clean):**
+```bash
+# Build check (fast):
+swift build 2>&1 | grep "error:" | head -20
+
+# Full test suite (55 min on MSM3U — same quality as GH Actions):
+swift test 2>&1 | grep -E "(PASSED|FAILED|error:)" | tail -20
+
+# Fix locally → re-run → repeat until clean → then commit
+```
+
+**Per-wave GH Actions gate (once per wave, NOT per phase):**
+```bash
+# After all phases in the wave pass swift test locally:
+git pushsync  # One push → wait for GH Actions green → fix if needed → done
+```
+
+**Quality guarantee**: `swift test` locally = identical test coverage to GH Actions "Run SPM Tests".
+GH Actions additionally verifies clean-environment behavior — still done at every wave gate.
+The final v3 Wave 6 gate requires ALL 6 GH Actions workflows green before AD3.
+
 ## Gotchas
 
 - IMPORTANT: Run `xcodegen generate` after ANY change to `project.yml`
