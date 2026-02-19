@@ -58,7 +58,7 @@ phase and run all steps fully and autonomously, committing after each step."
 | Phase V: Manual Gate      | ⏳ MANUAL       | Alexis only — last step |
 | **Overall ship-ready %**  | **~55%**        | N+O done; P in progress; Q/R/W/S/T/U pending |
 
-*Last updated: 2026-02-19 — Phase O complete, Session Safety Protocol added*
+*Last updated: 2026-02-19 — Phase O ✅ complete, Session Safety Protocol added, build gates added, CLAUDE.md updated, Phase P ready*
 
 ---
 
@@ -280,6 +280,52 @@ If index corruption occurs (false deletions in git diff):
 ```bash
 rm -f .git/index && git read-tree HEAD  # rebuild index from HEAD
 ```
+
+---
+
+## BUILD VERIFICATION GATES — MANDATORY BETWEEN PHASES
+
+Every autonomous session must verify builds are clean BEFORE starting work and AFTER finishing.
+A phase that leaves build errors is not done. Do not proceed to the next phase with broken builds.
+
+### Gate Template (run at session START and END)
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+
+echo "=== macOS ===" && xcodebuild -project Thea.xcodeproj -scheme Thea-macOS \
+  -configuration Debug -destination 'platform=macOS' build \
+  -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO 2>&1 \
+  | grep -E "^.*(error:|BUILD SUCCEEDED|BUILD FAILED)" | tail -5
+
+echo "=== iOS ===" && xcodebuild -project Thea.xcodeproj -scheme Thea-iOS \
+  -configuration Debug -destination 'generic/platform=iOS' build \
+  -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO 2>&1 \
+  | grep -E "^.*(error:|BUILD SUCCEEDED|BUILD FAILED)" | tail -5
+
+echo "=== watchOS ===" && xcodebuild -project Thea.xcodeproj -scheme Thea-watchOS \
+  -configuration Debug -destination 'generic/platform=watchOS' build \
+  -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO 2>&1 \
+  | grep -E "^.*(error:|BUILD SUCCEEDED|BUILD FAILED)" | tail -5
+
+echo "=== tvOS ===" && xcodebuild -project Thea.xcodeproj -scheme Thea-tvOS \
+  -configuration Debug -destination 'generic/platform=tvOS' build \
+  -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO 2>&1 \
+  | grep -E "^.*(error:|BUILD SUCCEEDED|BUILD FAILED)" | tail -5
+```
+
+**Required result**: `BUILD SUCCEEDED` on all 4 platforms, zero `error:` lines.
+If any platform fails, fix all errors before proceeding. Do not mark a phase done until all 4 pass.
+
+### ntfy on gate result
+```bash
+# Pass:
+curl -s -H "Title: Thea Build Gate - PASS" -H "Priority: 3" -H "Tags: white_check_mark" \
+     -d "All 4 platforms green. Proceeding to [PHASE]." https://ntfy.sh/thea-msm3u
+# Fail:
+curl -s -H "Title: Thea Build Gate - FAIL" -H "Priority: 5" -H "Tags: rotating_light" \
+     -d "Build errors found. Fixing before [PHASE]." https://ntfy.sh/thea-msm3u
+```
+
 
 ---
 
@@ -1906,6 +1952,15 @@ struct TheaMessagingChatView: View {
 
 ## PHASE P — COMPONENT ANALYSIS + INDIVIDUAL IMPROVEMENTS (MSM3U)
 
+> ⚠️ **SESSION START CHECKLIST** (do before any P work):
+> ```bash
+> launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+> git pull && git log --oneline -5 && git status --short && git stash list
+> # Run Build Verification Gate — must be 4x BUILD SUCCEEDED before touching any code
+> ```
+> **Build baseline known issue**: Phase O ended with 7 fix commits. Verify clean before P.
+> If build errors exist, fix them first — they are P0, not optional.
+
 **Goal**: Analyze every major component individually and collectively. Identify and fix gaps,
          improve interactions, strengthen resilience, remove dead code, add missing tests.
 
@@ -1926,22 +1981,23 @@ cat "$(find Shared -name 'ChatManager.swift' -not -path '*/.build/*' | head -1)"
 - AutonomyController (risk evaluation post-response)
 - MoltbookAgent (message routing)
 - ConversationLanguageService (system prompt injection)
-- OpenClawBridge (incoming message routing)
+- OpenClawBridge / TheaMessagingGateway (incoming message routing)
 - PersonalKnowledgeGraph (context retrieval)
 
 **Improvements to investigate**:
-- [ ] Does ChatManager stream responses to OpenClaw channels? If not, add streaming support
-- [ ] Does ConfidenceSystem run on OpenClaw-sourced messages? Should it?
-- [ ] Is there a unified conversation history for cross-channel sessions?
-- [ ] Does BehavioralFingerprint track OpenClaw interactions?
+- [ ] Does ChatManager stream responses to Thea Messaging Gateway channels? If not, add streaming support
+- [ ] Does ConfidenceSystem run on TheaMessagingGateway-sourced messages? Should it?
+- [ ] Is there a unified conversation history for cross-platform sessions?
+- [ ] Does BehavioralFingerprint track TheaMessagingGateway interactions?
 - [ ] Add conversation context from PersonalKnowledgeGraph before sending to AI
+- [ ] Verify TheaMessagingGateway routes all platforms through OpenClawSecurityGuard before ChatManager
 
 ### P2: ConfidenceSystem — Response Verification
 **Analyze**: `Shared/Intelligence/Verification/ConfidenceSystem.swift`
 **Current**: Runs async after every AI response, stores confidence in MessageMetadata.confidence
 **Improvements**:
-- [ ] Surface confidence score in OpenClaw responses (append low-confidence warning)
-- [ ] Skip confidence verification for OpenClaw if latency > 2s (messaging users don't wait)
+- [ ] Surface confidence score in TheaMessagingGateway responses (append low-confidence warning)
+- [ ] Skip confidence verification for TheaMessagingGateway if latency > 2s (messaging users don't wait)
 - [ ] Add confidence trend tracking (declining confidence = model quality regression)
 - [ ] Test: confidence score between 0.0-1.0 for normal responses
 - [ ] Test: low confidence detected for hallucinations/uncertain content
@@ -2128,7 +2184,32 @@ This capability is available via the Claude API and maps directly to Thea's Task
 
 ---
 
+### P_EXIT: Phase P Clean-Exit Protocol
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+# 1. Final build gate — all 4 platforms must be green
+# 2. Commit anything uncommitted
+git add -A && git status && git commit -m "Auto-save: Phase P complete" || true
+# 3. Restore thea-sync
+launchctl load ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+# 4. Pushsync
+git pushsync
+# 5. ntfy
+curl -s -H "Title: Thea Phase P - COMPLETE" -H "Priority: 4" -H "Tags: white_check_mark" \
+     -d "Phase P done. All 16 sub-phases complete. Build gates green. Ready for Wave 2." \
+     https://ntfy.sh/thea-msm3u
+```
+
+---
+
 ## PHASE Q — TEST COVERAGE TO 80%+ (MSM3U)
+
+> ⚠️ **SESSION START CHECKLIST** (do before any Q work):
+> ```bash
+> launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+> git pull && git log --oneline -5 && git status --short && git stash list
+> # Run Build Verification Gate — must be 4x BUILD SUCCEEDED before touching code
+> ```
 
 **Goal**: Overall line coverage ≥80%, 100% critical classes, 100% branch on security files.
 
@@ -2215,6 +2296,13 @@ xcrun xccov view --file Shared/Privacy/OutboundPrivacyGuard.swift \
 
 ## PHASE R — PERIPHERY FULL RESOLUTION (MSM3U)
 
+> ⚠️ **SESSION START CHECKLIST** (do before any R work):
+> ```bash
+> launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+> git pull && git log --oneline -5 && git status --short && git stash list
+> # Run Build Verification Gate — must be 4x BUILD SUCCEEDED before touching code
+> ```
+
 **Goal**: Zero unaddressed Periphery items (all wired or marked Reserved).
 **Note**: 2,667 warnings from v1 phase D3 — many already documented. Resume from there.
 
@@ -2245,6 +2333,13 @@ NEVER delete.
 ---
 
 ## PHASE S — CI/CD GREEN VERIFICATION (MSM3U)
+
+> ⚠️ **SESSION START CHECKLIST** (do before any S work):
+> ```bash
+> launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+> git pull && git log --oneline -5 && git status --short && git stash list
+> # Run Build Verification Gate — must be 4x BUILD SUCCEEDED before touching code
+> ```
 
 **Goal**: All 6 GitHub Actions workflows showing green on github.com/Atchoum23/Thea/actions.
 
@@ -2319,6 +2414,13 @@ ls .gitleaks.toml && echo "Gitleaks config OK"
 
 ## PHASE T — NOTARIZATION PIPELINE SETUP (MSM3U)
 
+> ⚠️ **SESSION START CHECKLIST** (do before any T work):
+> ```bash
+> launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+> git pull && git log --oneline -5 && git status --short && git stash list
+> # Run Build Verification Gate — must be 4x BUILD SUCCEEDED before touching code
+> ```
+
 **Goal**: Automate notarization so `git tag v1.0.0 && git pushsync` produces a notarized .dmg.
 
 ### T1: Verify/Export Developer ID Certificate
@@ -2392,6 +2494,13 @@ echo "Notarization verified"
 ---
 
 ## PHASE U — FINAL VERIFICATION REPORT (MSM3U)
+
+> ⚠️ **SESSION START CHECKLIST** (do before any U work):
+> ```bash
+> launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+> git pull && git log --oneline -5 && git status --short && git stash list
+> # Run Build Verification Gate — must be 4x BUILD SUCCEEDED before touching code
+> ```
 
 **Goal**: Confirm ALL ship-ready criteria met. Generate comprehensive report.
 
