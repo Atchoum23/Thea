@@ -44,6 +44,7 @@ public class CloudKitService: ObservableObject {
         case knowledge = "Knowledge"
         case project = "Project"
         case userProfile = "UserProfile"
+        case messagingSettings = "MessagingSettings"  // P12: gateway channel config (no credentials)
     }
 
     // MARK: - Subscriptions
@@ -87,6 +88,9 @@ public class CloudKitService: ObservableObject {
 
             await self.checkiCloudStatus()
             await self.setupSubscriptions()
+
+            // P12: Pull messaging settings on startup so preferences sync across devices
+            await self.pullMessagingSettings()
         }
     }
 
@@ -165,6 +169,121 @@ public class CloudKitService: ObservableObject {
             iCloudAvailable = status == .available
         } catch {
             iCloudAvailable = false
+        }
+    }
+
+    // MARK: - P12: Messaging Gateway Settings Sync
+
+    /// Unique CKRecord ID for the messaging settings record (one per iCloud account).
+    private let messagingSettingsRecordID = CKRecord.ID(
+        recordName: "thea-messaging-settings",
+        zoneID: .default
+    )
+
+    /// Push non-sensitive messaging gateway settings to CloudKit.
+    ///
+    /// **Privacy guarantee**: Credentials (botToken, apiKey, webhookSecret, serverUrl) are NEVER
+    /// written to CloudKit. Only the enabled/disabled state per platform and auto-respond
+    /// configuration are synced. Sensitive credentials remain in Keychain only.
+    @discardableResult
+    func pushMessagingSettings() async -> Bool {
+        guard syncEnabled, iCloudAvailable, let db = privateDatabase else {
+            logger.debug("P12: Skipping messaging settings push (sync disabled or iCloud unavailable)")
+            return false
+        }
+
+        // Collect which platforms are enabled (isEnabled flag only — no tokens)
+        let enabledPlatforms = MessagingPlatform.allCases
+            .filter { MessagingCredentialsStore.load(for: $0).isEnabled }
+            .map(\.rawValue)
+
+        // Collect auto-respond settings from OpenClawBridge
+        let bridge = OpenClawBridge.shared
+        let autoRespondEnabled = bridge.autoRespondEnabled
+        let autoRespondChannels = Array(bridge.autoRespondChannels)
+        let allowedSenders = Array(bridge.allowedSenders)
+
+        do {
+            // Fetch existing record if it exists (for proper save to avoid conflicts)
+            let record: CKRecord
+            do {
+                record = try await db.record(for: messagingSettingsRecordID)
+            } catch {
+                record = CKRecord(recordType: RecordType.messagingSettings.rawValue,
+                                  recordID: messagingSettingsRecordID)
+            }
+
+            record["enabledPlatforms"] = enabledPlatforms as CKRecordValue
+            record["autoRespondEnabled"] = autoRespondEnabled as CKRecordValue
+            record["autoRespondChannels"] = autoRespondChannels as CKRecordValue
+            record["allowedSenders"] = allowedSenders as CKRecordValue
+            record["lastUpdated"] = Date() as CKRecordValue
+            // Explicitly NOT saving: botToken, apiKey, webhookSecret, serverUrl
+
+            try await db.save(record)
+            logger.info("P12: Pushed messaging settings — \(enabledPlatforms.count) platforms enabled")
+            return true
+        } catch {
+            logger.error("P12: Failed to push messaging settings: \(error.localizedDescription)")
+            return false
+        }
+    }
+
+    /// Pull messaging gateway settings from CloudKit and apply if newer than local state.
+    ///
+    /// Conflict resolution: CloudKit record's `lastUpdated` vs local `UserDefaults` timestamp.
+    /// If CloudKit is newer, settings are applied. Credentials in Keychain are never touched.
+    @discardableResult
+    func pullMessagingSettings() async -> Bool {
+        guard syncEnabled, iCloudAvailable, let db = privateDatabase else {
+            logger.debug("P12: Skipping messaging settings pull (sync disabled or iCloud unavailable)")
+            return false
+        }
+
+        do {
+            let record = try await db.record(for: messagingSettingsRecordID)
+
+            // Conflict resolution: only apply if CloudKit is newer
+            let cloudUpdated = record["lastUpdated"] as? Date ?? .distantPast
+            let localUpdated = UserDefaults.standard.object(forKey: "messagingSettingsLastPushed") as? Date ?? .distantPast
+            guard cloudUpdated > localUpdated else {
+                logger.debug("P12: Local messaging settings are up to date (cloud: \(cloudUpdated), local: \(localUpdated))")
+                return false
+            }
+
+            // Apply non-sensitive settings
+            let enabledPlatforms = Set((record["enabledPlatforms"] as? [String]) ?? [])
+            let autoRespondEnabled = (record["autoRespondEnabled"] as? Bool) ?? false
+            let autoRespondChannels = Set((record["autoRespondChannels"] as? [String]) ?? [])
+            let allowedSenders = Set((record["allowedSenders"] as? [String]) ?? [])
+
+            // Apply platform enabled states (only enable/disable — never touch credentials)
+            for platform in MessagingPlatform.allCases {
+                var creds = MessagingCredentialsStore.load(for: platform)
+                let shouldBeEnabled = enabledPlatforms.contains(platform.rawValue)
+                if creds.isEnabled != shouldBeEnabled {
+                    creds.isEnabled = shouldBeEnabled
+                    MessagingCredentialsStore.save(creds, for: platform)
+                }
+            }
+
+            // Apply OpenClawBridge settings
+            let bridge = OpenClawBridge.shared
+            bridge.autoRespondEnabled = autoRespondEnabled
+            bridge.autoRespondChannels = autoRespondChannels
+            bridge.allowedSenders = allowedSenders
+
+            // Record local timestamp to avoid re-applying same data
+            UserDefaults.standard.set(cloudUpdated, forKey: "messagingSettingsLastPushed")
+
+            logger.info("P12: Applied messaging settings from CloudKit — \(enabledPlatforms.count) platforms, autoRespond=\(autoRespondEnabled)")
+            return true
+        } catch let error as CKError where error.code == .unknownItem {
+            logger.debug("P12: No messaging settings record in CloudKit yet")
+            return false
+        } catch {
+            logger.error("P12: Failed to pull messaging settings: \(error.localizedDescription)")
+            return false
         }
     }
 }
