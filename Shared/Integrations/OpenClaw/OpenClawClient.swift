@@ -233,27 +233,4 @@ actor OpenClawClient {
     }
 }
 
-// MARK: - Errors
-
-enum OpenClawError: Error, LocalizedError {
-    case notConnected
-    case encodingFailed
-    case gatewayNotRunning
-    case authenticationFailed
-    case channelNotFound(String)
-
-    var errorDescription: String? {
-        switch self {
-        case .notConnected:
-            "Not connected to OpenClaw Gateway"
-        case .encodingFailed:
-            "Failed to encode message"
-        case .gatewayNotRunning:
-            "OpenClaw Gateway is not running. Start it with: openclaw gateway start"
-        case .authenticationFailed:
-            "OpenClaw authentication failed"
-        case let .channelNotFound(id):
-            "Channel not found: \(id)"
-        }
-    }
-}
+// OpenClawError is defined in OpenClawTypes.swift (canonical location with full case list)

@@ -26,7 +26,11 @@ final class DiscordConnectorTests: XCTestCase {
 
     func testConnectWithNoTokenFails() async {
         let connector = DiscordConnector()
-        await connector.connect(credentials: MessagingCredentials(isEnabled: true))
+        do {
+            try await connector.connect()
+        } catch {
+            // Expected: no bot token in test environment
+        }
         let isConn = await connector.isConnected
         XCTAssertFalse(isConn)
     }

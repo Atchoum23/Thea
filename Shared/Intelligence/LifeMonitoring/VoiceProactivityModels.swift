@@ -221,8 +221,8 @@ public struct VoiceResponse: Sendable {
 
 // MARK: - Messaging Relay
 
-/// Platform for sending messages through voice commands.
-public enum MessagingPlatform: String, Sendable, CaseIterable {
+/// Platform for sending messages through voice commands (voice relay only — separate from TheaMessagingPlatform/gateway).
+public enum VoiceRelayPlatform: String, Sendable, CaseIterable {
     case iMessage = "imessage"
     case whatsApp = "whatsapp"
     case telegram
@@ -258,7 +258,7 @@ public enum MessagingPlatform: String, Sendable, CaseIterable {
 /// A message to relay through a messaging platform.
 public struct MessageRelay: Sendable {
     /// The target messaging platform.
-    public let platform: MessagingPlatform
+    public let platform: VoiceRelayPlatform
     /// The recipient's identifier (phone number, username, etc.).
     public let recipient: String
     /// Optional display name for the recipient.
@@ -279,7 +279,7 @@ public struct MessageRelay: Sendable {
     ///   - attachments: Optional file path attachments.
     ///   - replyToMessageId: Optional reply-to message ID.
     public init(
-        platform: MessagingPlatform,
+        platform: VoiceRelayPlatform,
         recipient: String,
         recipientName: String? = nil,
         message: String,
@@ -300,7 +300,7 @@ public struct MessageRelay: Sendable {
 /// Commands that can be relayed between devices (e.g., iPhone to Mac).
 public enum DeviceRelayCommand: Sendable {
     case sendMessage(MessageRelay)
-    case makeCall(to: String, platform: MessagingPlatform)
+    case makeCall(to: String, platform: VoiceRelayPlatform)
     case readNotifications
     case playMedia(String)
     case pauseMedia

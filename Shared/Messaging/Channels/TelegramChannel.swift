@@ -209,7 +209,7 @@ final class TelegramChannel: ObservableObject {
         guard isConnected else { return [] }
         do {
             let client = OpenClawClient()
-            try await client.send(command: .getHistory(channelID: chatID, limit: limit))
+            try await client.send(command: .getHistory(sessionKey: chatID, limit: limit, before: nil))
             do { try await Task.sleep(for: .milliseconds(500)) } catch { return [] }
             return Array((conversationCache[chatID] ?? []).suffix(limit))
         } catch {

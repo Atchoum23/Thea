@@ -126,32 +126,35 @@ struct TheaMessagingChatView: View {
     }
 
     private func conversationView(session: MessagingSession) -> some View {
-        VStack(spacing: 0) {
-            // Message history
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 8) {
-                        ForEach(session.decodedHistory()) { entry in
-                            MessageBubble(entry: entry, senderName: session.senderName)
-                                .id(entry.id)
-                        }
-                    }
-                    .padding()
-                }
-                .onChange(of: session.decodedHistory().count) { _, _ in
-                    if let last = session.decodedHistory().last {
-                        withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
-                    }
-                }
-            }
-
+        let platformName = MessagingPlatform(rawValue: session.platform)?.displayName ?? session.platform
+        return VStack(spacing: 0) {
+            historyScrollView(session: session)
             Divider()
-
-            // Reply composer
             replyComposer(session: session)
         }
         .navigationTitle(session.senderName)
-        .navigationSubtitle(MessagingPlatform(rawValue: session.platform)?.displayName ?? session.platform)
+        .navigationSubtitle(platformName)
+    }
+
+    @ViewBuilder
+    private func historyScrollView(session: MessagingSession) -> some View {
+        let history = session.decodedHistory()
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 8) {
+                    ForEach(history) { entry in
+                        GatewayMessageBubble(entry: entry, senderName: session.senderName)
+                            .id(entry.id)
+                    }
+                }
+                .padding()
+            }
+            .onChange(of: history.count) { _, _ in
+                if let last = session.decodedHistory().last {
+                    withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
+                }
+            }
+        }
     }
 
     private func replyComposer(session: MessagingSession) -> some View {
@@ -169,7 +172,7 @@ struct TheaMessagingChatView: View {
             } label: {
                 Image(systemName: "arrow.up.circle.fill")
                     .font(.title2)
-                    .foregroundStyle(replyText.isEmpty ? .secondary : .blue)
+                    .foregroundStyle(replyText.isEmpty ? Color.gray : Color.blue)
             }
             .disabled(replyText.isEmpty)
             .buttonStyle(.plain)
@@ -200,7 +203,7 @@ struct TheaMessagingChatView: View {
 
 // MARK: - Message Bubble
 
-private struct MessageBubble: View {
+private struct GatewayMessageBubble: View {
     let entry: SessionMessageEntry
     let senderName: String
 

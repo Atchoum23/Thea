@@ -306,21 +306,18 @@ struct MessagingCredentialsStore {
     }
 }
 
-// MARK: - MessagingCredentials Codable
-
-extension MessagingCredentials: Codable {
-    enum CodingKeys: String, CodingKey {
-        case botToken, apiKey, serverUrl, webhookSecret, isEnabled
-    }
-}
-
 // MARK: - PersonalKnowledgeGraph Extension
 
 extension PersonalKnowledgeGraph {
-    /// Returns high-importance entities for messaging context injection.
+    /// Returns frequently-referenced entities for messaging context injection.
     func contextForMessaging() -> [String] {
-        getAllEntities()
-            .filter { $0.importance > 0.7 }
-            .map { "[\($0.type.rawValue)] \($0.name): \($0.description)" }
+        recentEntities(limit: 20)
+            .filter { $0.referenceCount > 2 }
+            .map { entity in
+                let attrs = entity.attributes.isEmpty
+                    ? ""
+                    : " (\(entity.attributes.values.prefix(3).joined(separator: ", ")))"
+                return "[\(entity.type.rawValue)] \(entity.name)\(attrs)"
+            }
     }
 }

@@ -34,7 +34,7 @@ final class TheaMessagingGateway: ObservableObject {
         // Start the built-in WebSocket server (OpenClawClient.swift connects here)
         wsServer = TheaGatewayWSServer(port: 18789, gateway: self)
         do {
-            try wsServer?.startListening()
+            try await wsServer?.startListening()
             logger.info("WebSocket server listening on port 18789")
         } catch {
             logger.error("Failed to start WS server: \(error)")
@@ -57,7 +57,7 @@ final class TheaMessagingGateway: ObservableObject {
         }
         connectors.removeAll()
         connectedPlatforms.removeAll()
-        wsServer?.stop()
+        await wsServer?.stop()
         wsServer = nil
         isRunning = false
     }
