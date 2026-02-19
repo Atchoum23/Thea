@@ -406,12 +406,12 @@ curl -s -o /dev/null \
 
 ---
 
-## PHASE W — V1 RE-VERIFICATION (Run after O+P complete)
+## PHASE W — V1 RE-VERIFICATION (Run after Q+R complete — Wave 3)
 
 **Goal**: Verify that all v1 ship-ready criteria still hold after Phase O and Phase P code changes.
 **Why needed**: New code from O (Thea Messaging Gateway) and P (component upgrades) may inadvertently break v1 achievements — builds, tests, security files, schema migration, Liquid Glass.
 **Estimated time**: ~1 hour
-**Run after**: Phase O AND Phase P both complete
+**Run after**: Phase Q AND Phase R both complete (Wave 2 must finish before Wave 3)
 
 ### W1: Re-run All 16 Builds
 ```bash
