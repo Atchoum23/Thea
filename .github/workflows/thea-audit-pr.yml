@@ -1,6 +1,7 @@
 # Thea Security Audit Workflow (PR)
-# Version: 2.2.0 - Phase E: remove workflow_dispatch, permissions:read-all, bot comment fix
-# Last Updated: February 18, 2026
+# Version: 2.3.0 - Added fork PR safety (write permissions gated to non-forks),
+#                  ntfy progress notifications
+# Last Updated: February 19, 2026
 
 name: Thea Security Audit (PR)
 
@@ -35,6 +36,18 @@ jobs:
       contents: read
 
     steps:
+      - name: Fork Safety Check
+        run: |
+          # Restrict PR comment writes to non-fork PRs only.
+          # Fork PRs get read-only GITHUB_TOKEN — they cannot write PR comments.
+          # The audit still runs and results are uploaded as artifacts.
+          if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "::notice::Fork PR detected — PR comment writing will be skipped (read-only token)"
+            echo "IS_FORK=true" >> $GITHUB_ENV
+          else
+            echo "IS_FORK=false" >> $GITHUB_ENV
+          fi
+
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -146,7 +159,7 @@ jobs:
           retention-days: 30
 
       - name: Comment on PR
-        if: steps.changed-files.outputs.has_changes == 'true'
+        if: steps.changed-files.outputs.has_changes == 'true' && env.IS_FORK != 'true'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
@@ -227,3 +240,31 @@ jobs:
         if: steps.changed-files.outputs.has_changes != 'true'
         run: |
           echo "No relevant files changed - skipping security audit"
+
+      - name: Notify (ntfy)
+        if: always() && steps.changed-files.outputs.has_changes == 'true'
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then exit 0; fi
+
+          CRITICAL="${{ steps.audit.outputs.critical_count || 0 }}"
+          HIGH="${{ steps.audit.outputs.high_count || 0 }}"
+          PR_NUM="${{ github.event.pull_request.number }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+
+          if [ "${CRITICAL:-0}" -gt 0 ] || [ "${HIGH:-0}" -gt 0 ]; then
+            PRIORITY=5; TAG="rotating_light"
+            STATUS="Issues Found"
+          else
+            PRIORITY=2; TAG="white_check_mark"
+            STATUS="Clean"
+          fi
+
+          curl -s -o /dev/null \
+            -H "Title: PR #${PR_NUM} Audit - $STATUS" \
+            -H "Priority: $PRIORITY" \
+            -H "Tags: $TAG" \
+            -H "Click: https://github.com/${{ github.repository }}/pull/${PR_NUM}" \
+            -d "Critical: ${CRITICAL:-0} | High: ${HIGH:-0} | PR: ${PR_TITLE}" \
+            "https://ntfy.sh/$NTFY_TOPIC" || true

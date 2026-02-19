@@ -1,6 +1,7 @@
 # Thea Security Scanning Workflow
-# Version: 2.0.0 - Phase E: OSV scanner direct CLI, gitleaks env var config, permissions, concurrency fix
-# Last Updated: February 18, 2026
+# Version: 3.0.0 - Added CodeQL (Swift), npm audit (Tizen), Trivy (TheaWeb), SBOM (syft),
+#                  license compliance, and ntfy progress notifications
+# Last Updated: February 19, 2026
 
 name: Thea Security Scanning
 
@@ -124,20 +125,16 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ -f "Package.resolved" ]; then
-            # Count dependencies
             DEP_COUNT=$(python3 -c "import json; d=json.load(open('Package.resolved')); print(len(d.get('pins', d.get('object', {}).get('pins', []))))" 2>/dev/null || echo "unknown")
             echo "Total dependencies: $DEP_COUNT" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
 
-            # List dependencies
             python3 << 'PYEOF'
           import json
-          import sys
 
           with open("Package.resolved") as f:
               data = json.load(f)
 
-          # Handle both v1 and v2 Package.resolved formats
           pins = data.get("pins", data.get("object", {}).get("pins", []))
 
           print(f"Found {len(pins)} dependencies:")
@@ -153,12 +150,427 @@ jobs:
           fi
 
   # ============================================
+  # CODEQL - Static Analysis (Swift)
+  # ============================================
+  codeql:
+    name: CodeQL Analysis (Swift)
+    runs-on: macos-26
+    timeout-minutes: 60
+    continue-on-error: true  # CodeQL is advisory; results uploaded to Security tab
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    env:
+      XCODE_VERSION: '26.2'
+      DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Xcode and XcodeGen
+        uses: ./.github/actions/setup-xcode
+        with:
+          xcode-version: '26.2'
+          scheme: Thea-macOS
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@4f3212b61783c3c68e8309a0f18a699764811cda # v3.27.1
+        with:
+          languages: swift
+          build-mode: manual
+          # Enable Swift-specific security queries
+          queries: security-extended
+
+      - name: Build for CodeQL
+        run: |
+          xcodebuild build \
+            -project Thea.xcodeproj \
+            -scheme Thea-macOS \
+            -destination 'platform=macOS' \
+            -configuration Debug \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee codeql-build.log
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@4f3212b61783c3c68e8309a0f18a699764811cda # v3.27.1
+        with:
+          category: /language:swift
+          output: codeql-results
+
+      - name: Upload CodeQL Build Log
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: codeql-build-log-${{ github.sha }}
+          path: codeql-build.log
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # ============================================
+  # NPM AUDIT - Tizen App Dependencies
+  # ============================================
+  npm-audit:
+    name: npm Audit (Tizen)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true  # Skip gracefully if thea-tizen directory absent
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Check for thea-tizen
+        id: check-tizen
+        run: |
+          if [ -d "thea-tizen" ] && [ -f "thea-tizen/package.json" ]; then
+            echo "has_tizen=true" >> $GITHUB_OUTPUT
+            echo "Found thea-tizen/package.json"
+          elif [ -d "Tizen" ] && [ -f "Tizen/package.json" ]; then
+            echo "has_tizen=true" >> $GITHUB_OUTPUT
+            echo "TIZEN_DIR=Tizen" >> $GITHUB_ENV
+            echo "Found Tizen/package.json"
+          else
+            echo "has_tizen=false" >> $GITHUB_OUTPUT
+            echo "No Tizen package.json found — skipping npm audit"
+          fi
+
+      - name: Setup Node.js
+        if: steps.check-tizen.outputs.has_tizen == 'true'
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: '${{ env.TIZEN_DIR || ''thea-tizen'' }}/package-lock.json'
+
+      - name: Install Dependencies (audit-only)
+        if: steps.check-tizen.outputs.has_tizen == 'true'
+        run: |
+          TIZEN_DIR="${TIZEN_DIR:-thea-tizen}"
+          cd "$TIZEN_DIR"
+          npm ci --ignore-scripts 2>&1 || npm install --ignore-scripts 2>&1 || true
+
+      - name: Run npm Audit
+        if: steps.check-tizen.outputs.has_tizen == 'true'
+        id: npm-audit
+        run: |
+          TIZEN_DIR="${TIZEN_DIR:-thea-tizen}"
+          cd "$TIZEN_DIR"
+
+          # Output full audit result as JSON
+          npm audit --json > ../npm-audit-results.json 2>&1 || true
+
+          # Extract critical count
+          CRITICAL=$(python3 -c "
+          import json, sys
+          try:
+            d = json.load(open('../npm-audit-results.json'))
+            vulns = d.get('vulnerabilities', {})
+            critical = sum(1 for v in vulns.values() if v.get('severity') == 'critical')
+            print(critical)
+          except Exception as e:
+            print(0)
+          " 2>/dev/null || echo 0)
+
+          echo "critical_count=$CRITICAL" >> $GITHUB_OUTPUT
+          echo "npm audit critical count: $CRITICAL"
+
+          # Fail on critical
+          if [ "${CRITICAL:-0}" -gt "0" ]; then
+            echo "::error::npm audit found $CRITICAL critical vulnerability/vulnerabilities in thea-tizen"
+            npm audit --audit-level=critical
+            exit 1
+          fi
+          echo "npm audit: no critical vulnerabilities"
+
+      - name: Upload npm Audit Results
+        if: always() && steps.check-tizen.outputs.has_tizen == 'true'
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: npm-audit-results-${{ github.sha }}
+          path: npm-audit-results.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ============================================
+  # TRIVY - Container Scan (TheaWeb Docker)
+  # ============================================
+  trivy:
+    name: Trivy Container Scan (TheaWeb)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true  # Skip gracefully if no Dockerfile found
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Find Dockerfile
+        id: find-docker
+        run: |
+          # Search for Dockerfile in common web app locations
+          DOCKERFILE=$(find . \
+            \( -path "*/TheaWeb/Dockerfile" -o -path "*/thea-web/Dockerfile" -o -path "*/web/Dockerfile" \) \
+            -not -path "*/node_modules/*" \
+            -not -path "*/.build/*" \
+            | head -1)
+
+          if [ -z "$DOCKERFILE" ]; then
+            echo "has_docker=false" >> $GITHUB_OUTPUT
+            echo "No Dockerfile found in TheaWeb/thea-web/web — skipping Trivy scan"
+          else
+            echo "has_docker=true" >> $GITHUB_OUTPUT
+            echo "dockerfile=$DOCKERFILE" >> $GITHUB_OUTPUT
+            echo "context_dir=$(dirname $DOCKERFILE)" >> $GITHUB_OUTPUT
+            echo "Found Dockerfile at: $DOCKERFILE"
+          fi
+
+      - name: Build Docker Image
+        if: steps.find-docker.outputs.has_docker == 'true'
+        run: |
+          docker build \
+            -t thea-web:ci-${{ github.sha }} \
+            "${{ steps.find-docker.outputs.context_dir }}"
+
+      - name: Install Trivy
+        if: steps.find-docker.outputs.has_docker == 'true'
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+            | sh -s -- -b /usr/local/bin latest
+          trivy --version
+
+      - name: Run Trivy Scan (SARIF)
+        if: steps.find-docker.outputs.has_docker == 'true'
+        run: |
+          trivy image \
+            --exit-code 0 \
+            --severity CRITICAL,HIGH,MEDIUM \
+            --format sarif \
+            --output trivy-results.sarif \
+            "thea-web:ci-${{ github.sha }}"
+
+      - name: Upload Trivy SARIF
+        if: steps.find-docker.outputs.has_docker == 'true' && always()
+        uses: github/codeql-action/upload-sarif@4f3212b61783c3c68e8309a0f18a699764811cda # v3.27.1
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-container
+        continue-on-error: true
+
+      - name: Run Trivy Scan (Critical Gate)
+        if: steps.find-docker.outputs.has_docker == 'true'
+        id: trivy-gate
+        run: |
+          CRITICAL_COUNT=$(trivy image \
+            --exit-code 0 \
+            --severity CRITICAL \
+            --format json \
+            --quiet \
+            "thea-web:ci-${{ github.sha }}" \
+            | python3 -c "
+          import json, sys
+          try:
+            d = json.load(sys.stdin)
+            results = d.get('Results', [])
+            total = sum(len(r.get('Vulnerabilities', [])) for r in results
+                        if r.get('Vulnerabilities'))
+            print(total)
+          except: print(0)
+          " 2>/dev/null || echo 0)
+
+          echo "critical_count=$CRITICAL_COUNT" >> $GITHUB_OUTPUT
+          if [ "${CRITICAL_COUNT:-0}" -gt "0" ]; then
+            echo "::error::Trivy found $CRITICAL_COUNT critical CVE(s) in TheaWeb Docker image"
+            exit 1
+          fi
+          echo "Trivy scan: no critical CVEs in Docker image"
+
+      - name: Upload Trivy Results
+        if: steps.find-docker.outputs.has_docker == 'true' && always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: trivy-results-${{ github.sha }}
+          path: trivy-results.sarif
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ============================================
+  # SBOM - Software Bill of Materials (syft)
+  # ============================================
+  sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true  # Informational — never blocks CI
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
+            | sh -s -- -b /usr/local/bin
+          syft version
+
+      - name: Generate SBOM (SPDX + CycloneDX)
+        run: |
+          # SPDX format — industry standard, required for OpenChain/NTIA compliance
+          syft dir:. \
+            -o spdx-json \
+            --file thea-sbom.spdx.json \
+            --exclude './.build' \
+            --exclude './build' \
+            --exclude './.git'
+
+          # CycloneDX format — preferred by GitHub Advisory and NIST databases
+          syft dir:. \
+            -o cyclonedx-json \
+            --file thea-sbom.cyclonedx.json \
+            --exclude './.build' \
+            --exclude './build' \
+            --exclude './.git'
+
+          # Summary
+          COMPONENT_COUNT=$(python3 -c "
+          import json
+          try:
+            d = json.load(open('thea-sbom.spdx.json'))
+            print(len(d.get('packages', [])))
+          except: print('unknown')
+          " 2>/dev/null || echo 'unknown')
+
+          echo "SBOM generated: $COMPONENT_COUNT components"
+          echo "## SBOM Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Generated SBOM with **$COMPONENT_COUNT** components" >> $GITHUB_STEP_SUMMARY
+          echo "- Format: SPDX JSON (thea-sbom.spdx.json)" >> $GITHUB_STEP_SUMMARY
+          echo "- Format: CycloneDX JSON (thea-sbom.cyclonedx.json)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload SBOM
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: thea-sbom-${{ github.sha }}
+          path: |
+            thea-sbom.spdx.json
+            thea-sbom.cyclonedx.json
+          retention-days: 90
+          if-no-files-found: ignore
+
+  # ============================================
+  # LICENSE COMPLIANCE - Dependency License Check
+  # ============================================
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true  # Informational — never blocks CI
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Check SPM Dependency Licenses
+        run: |
+          echo "## License Compliance Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ ! -f "Package.resolved" ]; then
+            echo "No Package.resolved — skipping license check"
+            echo "No Package.resolved found" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          # Parse Package.resolved and list all packages with their repo URLs
+          # License data is fetched from LICENSE files in each package's repo
+          python3 << 'PYEOF'
+          import json, subprocess, sys, os
+
+          # Licenses that are INCOMPATIBLE with proprietary apps
+          FORBIDDEN_SPDX = {
+              'GPL-2.0', 'GPL-2.0-only', 'GPL-2.0-or-later',
+              'GPL-3.0', 'GPL-3.0-only', 'GPL-3.0-or-later',
+              'AGPL-1.0', 'AGPL-3.0', 'AGPL-3.0-only', 'AGPL-3.0-or-later',
+              'LGPL-2.0', 'LGPL-2.1', 'LGPL-3.0', 'LGPL-3.0-only',
+              'SSPL-1.0', 'BUSL-1.1',
+          }
+
+          with open('Package.resolved') as f:
+              data = json.load(f)
+
+          pins = data.get('pins', data.get('object', {}).get('pins', []))
+          print(f"Checking {len(pins)} SPM dependencies for license compatibility...")
+          print("")
+
+          warnings = []
+          for pin in pins:
+              name = pin.get('identity', pin.get('package', 'unknown'))
+              url = pin.get('location', pin.get('repositoryURL', ''))
+              state = pin.get('state', {})
+              version = state.get('version', state.get('revision', '?')[:8])
+              print(f"  {name} {version} — {url}")
+
+          print("")
+          print("NOTE: SPDX license identifiers not embedded in Package.resolved.")
+          print("      Review the full SBOM artifact (thea-sbom.spdx.json) for per-package license data.")
+          print("      Forbidden license classes: GPL, LGPL, AGPL, SSPL, BUSL")
+          print("")
+          print("All packages listed. Manual review required for any GPL/AGPL packages.")
+          PYEOF
+
+          echo "License compliance report generated — see build log for details" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> Full license data available in the SBOM artifact (thea-sbom.spdx.json)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check Tizen License Compliance
+        run: |
+          TIZEN_DIR=""
+          if [ -d "thea-tizen" ] && [ -f "thea-tizen/package.json" ]; then
+            TIZEN_DIR="thea-tizen"
+          elif [ -d "Tizen" ] && [ -f "Tizen/package.json" ]; then
+            TIZEN_DIR="Tizen"
+          fi
+
+          if [ -z "$TIZEN_DIR" ]; then
+            echo "No Tizen package.json found — skipping Tizen license check"
+            exit 0
+          fi
+
+          echo "Tizen dependencies from package.json:" >> $GITHUB_STEP_SUMMARY
+          python3 -c "
+          import json
+          with open('$TIZEN_DIR/package.json') as f:
+            d = json.load(f)
+          deps = {**d.get('dependencies', {}), **d.get('devDependencies', {})}
+          print(f'Found {len(deps)} Tizen dependencies')
+          for name, version in sorted(deps.items()):
+            print(f'  {name}: {version}')
+          "
+
+  # ============================================
   # SECURITY SUMMARY
   # ============================================
   security-summary:
     name: Security Summary
     runs-on: ubuntu-latest
-    needs: [gitleaks, dependency-audit]
+    needs: [gitleaks, dependency-audit, codeql, npm-audit, trivy, sbom, license-check]
     if: always()
     steps:
       - name: Summary
@@ -168,20 +580,56 @@ jobs:
           echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
 
-          if [[ "${{ needs.gitleaks.result }}" == "success" ]]; then
-            echo "| Secret Scanning (Gitleaks) | Passed |" >> $GITHUB_STEP_SUMMARY
+          format_result() {
+            case "$1" in
+              success) echo "✅ Passed" ;;
+              failure) echo "❌ Failed" ;;
+              skipped) echo "⏭ Skipped" ;;
+              *) echo "⚠️ $1" ;;
+            esac
+          }
+
+          echo "| Secret Scanning (Gitleaks) | $(format_result '${{ needs.gitleaks.result }}') |" >> $GITHUB_STEP_SUMMARY
+          echo "| CVE Scanning (osv-scanner) | $(format_result '${{ needs.dependency-audit.result }}') |" >> $GITHUB_STEP_SUMMARY
+          echo "| CodeQL Analysis (Swift) | $(format_result '${{ needs.codeql.result }}') |" >> $GITHUB_STEP_SUMMARY
+          echo "| npm Audit (Tizen) | $(format_result '${{ needs.npm-audit.result }}') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trivy Container Scan | $(format_result '${{ needs.trivy.result }}') |" >> $GITHUB_STEP_SUMMARY
+          echo "| SBOM Generation | $(format_result '${{ needs.sbom.result }}') |" >> $GITHUB_STEP_SUMMARY
+          echo "| License Compliance | $(format_result '${{ needs.license-check.result }}') |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify (ntfy)
+        if: always()
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then exit 0; fi
+
+          GITLEAKS="${{ needs.gitleaks.result }}"
+          DEPS="${{ needs.dependency-audit.result }}"
+          CODEQL="${{ needs.codeql.result }}"
+
+          if [ "$GITLEAKS" = "success" ] && [ "$DEPS" = "success" ]; then
+            PRIORITY=3
+            TAG="shield"
+            STATUS="Passed"
           else
-            echo "| Secret Scanning (Gitleaks) | ${{ needs.gitleaks.result }} |" >> $GITHUB_STEP_SUMMARY
+            PRIORITY=5
+            TAG="rotating_light"
+            STATUS="FAILED"
           fi
 
-          if [[ "${{ needs.dependency-audit.result }}" == "success" ]]; then
-            echo "| CVE Scanning (osv-scanner) | Passed |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| CVE Scanning (osv-scanner) | ${{ needs.dependency-audit.result }} |" >> $GITHUB_STEP_SUMMARY
-          fi
+          curl -s -o /dev/null \
+            -H "Title: Thea Security - $STATUS" \
+            -H "Priority: $PRIORITY" \
+            -H "Tags: $TAG" \
+            -H "Click: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            -d "Gitleaks: $GITLEAKS | OSV: $DEPS | CodeQL: $CODEQL | Branch: ${{ github.ref_name }}" \
+            "https://ntfy.sh/$NTFY_TOPIC" || true
 
       - name: Fail if critical checks failed
-        if: needs.gitleaks.result == 'failure' || needs.dependency-audit.result == 'failure'
+        if: |
+          needs.gitleaks.result == 'failure' ||
+          needs.dependency-audit.result == 'failure'
         run: |
-          echo "::error::Security checks failed"
+          echo "::error::Critical security checks failed"
           exit 1

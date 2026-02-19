@@ -1,6 +1,14 @@
 # Thea Release Workflow
-# Version: 2.4.0 - Phase E: CI gate, version validation, code signing docs, auto-release notes, permissions
-# Last Updated: February 18, 2026
+# Version: 2.5.0 - Added notarization (xcrun notarytool + stapler), dSYM preservation,
+#                  improved DMG with /Applications symlink, ntfy progress notifications
+# Last Updated: February 19, 2026
+#
+# ⚠️ NOTARIZATION NOTE:
+# For macOS notarization, add these additional GitHub Secrets:
+#   APPLE_NOTARIZATION_APPLE_ID   - Apple ID email (e.g. alexis@example.com)
+#   APPLE_NOTARIZATION_PASSWORD   - App-specific password (NOT your Apple ID password)
+#   APPLE_TEAM_ID                 - Apple Developer Team ID (already used for signing)
+# Until configured, the notarization step is skipped (continue-on-error: true).
 #
 # ⚠️ CODE SIGNING NOTE:
 # For real distribution, the following GitHub Secrets must be configured:
@@ -180,6 +188,62 @@ jobs:
           fi
           echo "Build successful: ${{ matrix.artifact_path }}"
 
+      - name: Notarize App (macOS only)
+        if: matrix.platform == 'macOS'
+        continue-on-error: true  # Skip if notarization secrets not configured
+        env:
+          APPLE_NOTARIZATION_APPLE_ID: ${{ secrets.APPLE_NOTARIZATION_APPLE_ID }}
+          APPLE_NOTARIZATION_PASSWORD: ${{ secrets.APPLE_NOTARIZATION_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -z "$APPLE_NOTARIZATION_APPLE_ID" ] || [ -z "$APPLE_NOTARIZATION_PASSWORD" ] || [ -z "$APPLE_TEAM_ID" ]; then
+            echo "Notarization credentials not configured — skipping notarization"
+            echo "Add APPLE_NOTARIZATION_APPLE_ID, APPLE_NOTARIZATION_PASSWORD, APPLE_TEAM_ID secrets to enable"
+            exit 0
+          fi
+
+          APP_PATH="${{ matrix.artifact_path }}"
+          echo "Notarizing: $APP_PATH"
+
+          # Create zip for notarytool submission
+          NOTARIZE_ZIP="/tmp/Thea-notarize-${{ steps.version.outputs.version }}.zip"
+          ditto -c -k --keepParent "$APP_PATH" "$NOTARIZE_ZIP"
+
+          # Submit to Apple notary service and wait for result (timeout 20 minutes)
+          xcrun notarytool submit "$NOTARIZE_ZIP" \
+            --apple-id "$APPLE_NOTARIZATION_APPLE_ID" \
+            --password "$APPLE_NOTARIZATION_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait \
+            --timeout 20m \
+            2>&1 | tee notarization.log
+
+          # Staple the notarization ticket to the app bundle
+          xcrun stapler staple "$APP_PATH"
+          echo "Notarization and stapling complete for $APP_PATH"
+
+      - name: Preserve dSYMs
+        if: always()
+        run: |
+          DSYM_PATH="build/Build/Products/Release${{ matrix.platform == 'iOS' && '-iphoneos' || matrix.platform == 'watchOS' && '-watchos' || matrix.platform == 'tvOS' && '-appletvos' || '' }}"
+          DSYM_COUNT=$(find "$DSYM_PATH" -name "*.dSYM" -type d 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$DSYM_COUNT" -gt 0 ]; then
+            mkdir -p dsyms
+            find "$DSYM_PATH" -name "*.dSYM" -type d -exec cp -R {} dsyms/ \;
+            echo "Preserved $DSYM_COUNT dSYM(s)"
+          else
+            echo "No dSYMs found (unsigned builds may omit them)"
+          fi
+
+      - name: Upload dSYMs
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: dsyms-${{ matrix.platform }}-${{ steps.version.outputs.version }}
+          path: dsyms/
+          retention-days: 365
+          if-no-files-found: ignore
+
       - name: Create Archive
         run: |
           mkdir -p release
@@ -306,6 +370,9 @@ jobs:
           # Unzip the app
           unzip -o "Thea-${VERSION}-macOS.zip" -d dmg-staging
 
+          # Add /Applications symlink for drag-to-install UX
+          ln -sf /Applications dmg-staging/Applications
+
           # Create DMG with background and layout
           hdiutil create \
             -volname "Thea ${VERSION}" \
@@ -362,3 +429,33 @@ jobs:
           else
             echo "| DMG Installer | Failed |" >> $GITHUB_STEP_SUMMARY
           fi
+
+      - name: Notify (ntfy)
+        if: always()
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then exit 0; fi
+
+          BUILD="${{ needs.build-release.result }}"
+          RELEASE="${{ needs.create-release.result }}"
+          DMG="${{ needs.create-dmg.result }}"
+          VERSION="${{ needs.build-release.outputs.version }}"
+
+          if [ "$BUILD" = "success" ] && [ "$RELEASE" = "success" ]; then
+            PRIORITY=4
+            TAG="rocket"
+            STATUS="Released"
+          else
+            PRIORITY=5
+            TAG="rotating_light"
+            STATUS="FAILED"
+          fi
+
+          curl -s -o /dev/null \
+            -H "Title: Thea Release v${VERSION} - $STATUS" \
+            -H "Priority: $PRIORITY" \
+            -H "Tags: $TAG" \
+            -H "Click: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            -d "Build: $BUILD | Release: $RELEASE | DMG: $DMG" \
+            "https://ntfy.sh/$NTFY_TOPIC" || true

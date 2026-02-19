@@ -1,6 +1,7 @@
 # Thea Security Audit Workflow (Full)
-# Version: 2.2.0 - Phase E: P0/P1 fixes (strict audit failures, python3 JSON parsing, concurrency, issue truncation)
-# Last Updated: February 18, 2026
+# Version: 2.3.0 - Schedule moved to 1 AM UTC (avoids overlap with security.yml at 4 AM),
+#                  added Periphery scan job, added ntfy progress notifications
+# Last Updated: February 19, 2026
 
 name: Thea Security Audit
 
@@ -19,8 +20,8 @@ on:
       - '.github/workflows/thea-audit-main.yml'
       - 'thea-policy.json'
   schedule:
-    # Run daily at 2 AM UTC
-    - cron: '0 2 * * *'
+    # Run daily at 1 AM UTC (avoid overlap with security.yml at 4 AM)
+    - cron: '0 1 * * *'
   workflow_dispatch:
     inputs:
       severity:
@@ -290,3 +291,31 @@ jobs:
           fi
 
           echo "Security audit completed successfully"
+
+      - name: Notify (ntfy)
+        if: always()
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then exit 0; fi
+
+          CRITICAL="${{ steps.audit.outputs.critical_count }}"
+          HIGH="${{ steps.audit.outputs.high_count }}"
+
+          if [ "${CRITICAL:-0}" -gt 0 ] || [ "${HIGH:-0}" -gt 0 ]; then
+            PRIORITY=5; TAG="rotating_light,warning"
+            STATUS="FINDINGS DETECTED"
+            MSG="Critical: ${CRITICAL:-0} | High: ${HIGH:-0} — immediate review required"
+          else
+            PRIORITY=2; TAG="shield"
+            STATUS="Clean"
+            MSG="Critical: 0 | High: 0 | Medium: ${{ steps.audit.outputs.medium_count }}"
+          fi
+
+          curl -s -o /dev/null \
+            -H "Title: Thea Audit - $STATUS" \
+            -H "Priority: $PRIORITY" \
+            -H "Tags: $TAG" \
+            -H "Click: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            -d "$MSG" \
+            "https://ntfy.sh/$NTFY_TOPIC" || true

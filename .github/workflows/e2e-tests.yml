@@ -1,5 +1,6 @@
 # Thea E2E Tests Workflow
-# Version: 3.0.0 - Fixed 9 issues (P0: Maestro pipe, version pinning; P1: concurrency, caching, simulator, artifacts, label gate; P2: timeout, debug dylib comment)
+# Version: 4.0.0 - Added .maestro/ existence check, screenshot-on-failure, fixed artifact name
+#                  inconsistency (maestro-results.log → maestro-output.log), ntfy notifications
 # Root cause of previous failure: Xcode 26.2 debug dylib build system strips
 # the main executable when packaging as artifact then unzipping. Fixed by
 # building and testing on the same runner — no artifact transfer needed.
@@ -208,11 +209,34 @@ jobs:
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
           "$HOME/.maestro/bin/maestro" --version
 
+      - name: Check Maestro Flows Exist
+        id: check-flows
+        run: |
+          if [ ! -d ".maestro" ]; then
+            echo "::warning::No .maestro/ directory found — E2E test flows are missing"
+            echo "has_flows=false" >> "$GITHUB_OUTPUT"
+          else
+            FLOW_COUNT=$(find .maestro -maxdepth 2 \( -name "*.yaml" -o -name "*.yml" \) | wc -l | tr -d ' ')
+            if [ "$FLOW_COUNT" -eq 0 ]; then
+              echo "::warning::No Maestro .yaml/.yml flow files found in .maestro/"
+              echo "has_flows=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "Found $FLOW_COUNT Maestro flow file(s)"
+              echo "has_flows=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
       - name: Run Maestro E2E Tests
         id: maestro
         run: |
           export PATH="$HOME/.maestro/bin:$PATH"
           mkdir -p maestro-results
+
+          if [ "${{ steps.check-flows.outputs.has_flows }}" != "true" ]; then
+            echo "No Maestro flows found — skipping test run"
+            echo "exit_code=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
           maestro test .maestro/ \
             --format junit \
@@ -222,6 +246,16 @@ jobs:
           MAESTRO_EXIT=${PIPESTATUS[0]}
           echo "exit_code=$MAESTRO_EXIT" >> "$GITHUB_OUTPUT"
 
+      - name: Capture Simulator Screenshot on Failure
+        if: failure()
+        run: |
+          DEVICE_ID="${{ steps.simulator.outputs.device_id }}"
+          if [ -n "$DEVICE_ID" ]; then
+            mkdir -p maestro-results
+            xcrun simctl io "$DEVICE_ID" screenshot maestro-results/failure-screenshot.png 2>/dev/null || true
+            echo "Failure screenshot captured"
+          fi
+
       - name: Upload Maestro Artifacts on Failure
         if: failure()
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
@@ -229,7 +263,8 @@ jobs:
           name: maestro-failure-${{ github.sha }}
           path: |
             ~/.maestro/tests/
-            maestro-results.log
+            maestro-output.log
+            maestro-results/failure-screenshot.png
           retention-days: 14
           if-no-files-found: ignore
 
@@ -270,3 +305,25 @@ jobs:
             exit 1
           fi
           echo "All Maestro E2E tests passed"
+
+      - name: Notify (ntfy)
+        if: always()
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then exit 0; fi
+
+          EXIT="${{ steps.maestro.outputs.exit_code }}"
+          if [ "$EXIT" = "0" ]; then
+            PRIORITY=3; TAG="white_check_mark"; STATUS="Passed"
+          else
+            PRIORITY=5; TAG="rotating_light"; STATUS="FAILED"
+          fi
+
+          curl -s -o /dev/null \
+            -H "Title: Thea E2E - $STATUS" \
+            -H "Priority: $PRIORITY" \
+            -H "Tags: $TAG" \
+            -H "Click: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            -d "Maestro E2E $STATUS on ${{ github.ref_name }} (simulator: ${{ steps.simulator.outputs.device_name }})" \
+            "https://ntfy.sh/$NTFY_TOPIC" || true
