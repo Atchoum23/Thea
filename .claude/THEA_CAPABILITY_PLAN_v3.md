@@ -2701,6 +2701,130 @@ Commit: `git add -p && git commit -m "Auto-save: U3 — all wrongfully disconnec
 
 ---
 
+### U3-4: Deep Codebase Audit Findings (2026-02-19) — Additional Unwired Systems
+
+**Source**: Full 1,113-Swift-file automated codebase audit run on 2026-02-19.
+These systems are IN ADDITION to the 29 listed in Category B above — all discovered to have zero external callers.
+
+**⚠️ CRITICAL: This table nearly doubles the scope of Phase U3. All items below MUST be wired.**
+
+#### Platform Observers — Startup Wiring (macOS)
+These form the entire ambient intelligence foundation for macOS. `PlatformFeaturesHub.shared` starts them all — it is itself never called at launch.
+
+| System | File | Wire Into | Priority |
+|--------|------|-----------|----------|
+| `PlatformFeaturesHub` | `Shared/Platforms/PlatformFeaturesHub.swift` | TheamacOSApp lifecycle (start after CloudKit init) | 🔴 CRITICAL |
+| `MacSystemObserver` | `Shared/Platforms/macOS/MacSystemObserver.swift` | `PlatformFeaturesHub.start()` | 🔴 CRITICAL |
+| `EndpointSecurityObserver` | `Shared/Platforms/macOS/EndpointSecurityObserver.swift` | `MacSystemObserver` or `PlatformFeaturesHub` | 🟠 HIGH |
+| `ProcessObserver` | `Shared/Platforms/macOS/ProcessObserver.swift` | `MacSystemObserver` | 🟠 HIGH |
+| `FileSystemObserver` | `Shared/Platforms/macOS/FileSystemObserver.swift` | `MacSystemObserver` | 🟠 HIGH |
+| `ServicesHandler` | `Shared/Platforms/macOS/ServicesHandler.swift` | `PlatformFeaturesHub` | 🟡 MEDIUM |
+| `MediaObserver` | `Shared/Platforms/macOS/MediaObserver.swift` | `MacSystemObserver` | 🟡 MEDIUM |
+| `TouchBarManager` | `Shared/Platforms/macOS/TouchBarSupport.swift` | `PlatformFeaturesHub` (macOS) | 🟡 MEDIUM |
+| `SystemAutomationEngine` | `Shared/Platforms/macOS/SystemAutomationEngine.swift` | `PlatformFeaturesHub` | 🟠 HIGH |
+| `MenuBarManager` | `Shared/Platforms/macOS/macOSFeatures.swift` | `TheamacOSApp` lifecycle | 🟠 HIGH |
+
+#### Platform Providers — Startup Wiring (iOS/watchOS/tvOS)
+| System | File | Wire Into | Priority |
+|--------|------|-----------|----------|
+| `HealthKitProvider` | `Shared/Platforms/iOS/HealthKitProvider.swift` | iOS app lifecycle; replace/consolidate with `HealthContextProvider` | 🟠 HIGH |
+| `MotionContextProvider` | `Shared/Platforms/iOS/MotionContextProvider.swift` | iOS app lifecycle | 🟠 HIGH |
+| `ScreenTimeObserver` | `Shared/Platforms/iOS/ScreenTimeObserver.swift` | iOS app lifecycle | 🟠 HIGH |
+| `PhotoIntelligenceProvider` | `Shared/Platforms/iOS/PhotoIntelligenceProvider.swift` | iOS app lifecycle | 🟡 MEDIUM |
+| `ActionButtonHandler` | `Shared/Platforms/iOS/ActionButtonHandler.swift` | iOS app lifecycle | 🟡 MEDIUM |
+| `AssistantIntegration` | `Shared/Platforms/iOS/AssistantIntegration.swift` | iOS app lifecycle | 🟡 MEDIUM |
+| `NotificationObserver` | `Shared/Platforms/iOS/NotificationObserver.swift` | iOS app lifecycle | 🟡 MEDIUM |
+| `AdaptiveModelRouter` | `Shared/Intelligence/Mobile/AdaptiveModelRouter.swift` | iOS ChatManager model routing | 🟠 HIGH |
+| `RemoteMacBridge` | `Shared/Intelligence/Mobile/RemoteMacBridge.swift` | iOS app lifecycle (Tailscale bridge) | 🟡 MEDIUM |
+| `MobileIntelligenceOrchestrator` | `Shared/Intelligence/Mobile/` | iOS app lifecycle | 🟠 HIGH |
+| `WatchSessionManager` | `Shared/Platforms/watchOS/watchOSFeatures.swift` | watchOS app lifecycle | 🟡 MEDIUM |
+| `SpatialComputingManager` | `Shared/Platforms/visionOS/visionOSFeatures.swift` | visionOS app lifecycle | 🟡 MEDIUM |
+| `TopShelfManager` | `Shared/Platforms/tvOS/tvOSFeatures.swift` | tvOS app lifecycle | 🟡 MEDIUM |
+
+**⚠️ Parallel HealthKit stacks**: `HealthKitProvider` (new, unwired) and `HealthContextProvider` (via LifeMonitoringCoordinator) both exist. Consolidate: `HealthKitProvider` should be the single source; `HealthContextProvider` wraps or delegates to it.
+
+#### Intelligence Orchestration — TOP LEVEL GAP
+| System | File | Wire Into | Priority |
+|--------|------|-----------|----------|
+| `TheaIntelligenceOrchestrator` | `Shared/Intelligence/TheaIntelligenceOrchestrator.swift` | TheamacOSApp lifecycle (start after model router) | 🔴 CRITICAL — top-level intelligence coordinator |
+| `IntelligenceOrchestrator` | `Shared/Intelligence/Orchestration/IntelligenceOrchestrator.swift` | Verify relationship to TheaIntelligenceOrchestrator; wire correctly | 🔴 CRITICAL |
+| `InsightEngine` | `Shared/Context/Analysis/InsightEngine.swift` | `TheaIntelligenceOrchestrator` or `LifeMonitoringCoordinator` | 🟠 HIGH |
+| `PredictiveEngine` | `Shared/Context/Analysis/PredictiveEngine.swift` | `TheaIntelligenceOrchestrator` | 🟠 HIGH |
+| `PatternDetector` | `Shared/Context/Analysis/PatternDetector.swift` | `TheaIntelligenceOrchestrator` | 🟠 HIGH |
+
+#### Core Services — Zero Callers
+| System | File | Wire Into | Priority |
+|--------|------|-----------|----------|
+| `ApprovalManager` | `Shared/Core/Managers/ApprovalManager.swift` | `AutonomyController` escalation path | 🔴 CRITICAL — autonomy approval queue non-functional |
+| `SpotlightService` | `Shared/Core/Services/SpotlightService.swift` | App lifecycle (macOS) on launch | 🟠 HIGH |
+| `DeviceCapabilityRouter` | `Shared/Core/DeviceCapabilityRouter.swift` | `SystemCapabilityService` or app launch | 🟡 MEDIUM |
+| `UniversalNotificationService` | `Shared/Core/UniversalNotificationService.swift` | App lifecycle (replace platform-specific calls) | 🟠 HIGH |
+| `DistributedTaskExecutor` | `Shared/Core/DistributedTaskExecutor.swift` | `AgentTeamOrchestrator` for distributed task runs | 🟡 MEDIUM |
+| `EventStore` | `Shared/Core/EventBus/EventStore.swift` | EventBus or app lifecycle | 🟡 MEDIUM |
+| `ContextManager` | `Shared/Core/Configuration/ContextManager.swift` | ChatManager context pipeline | 🟡 MEDIUM |
+| `ResponseNotificationHandler` | `Shared/Core/Managers/ResponseNotificationHandler.swift` | ChatManager on response complete | 🟡 MEDIUM |
+| `OfflineQueueService` | `Shared/Core/` | ChatManager — drain queue on connectivity restore | 🟡 MEDIUM |
+| `ShortcutsManager` | `Shared/Core/Managers/ShortcutsManager.swift` | `PlatformFeaturesHub` on macOS | 🟡 MEDIUM |
+
+**Note on WindowManager**: Explicitly commented out in `TheamacOSApp.swift:213` with "TODO: Restore after implementation". Wire in Phase K3 after UI implementation.
+
+#### App Integration Layer — Unwired
+| System | File | Wire Into | Priority |
+|--------|------|-----------|----------|
+| `AppIntegrationFramework` | `Shared/AppIntegration/AppIntegrationFramework.swift` | App lifecycle (macOS) | 🟠 HIGH |
+| `WorkWithAppsService` | `Shared/AppIntegration/WorkWithAppsService.swift` | `AppIntegrationFramework` | 🟠 HIGH |
+| `UIElementInspector` | `Shared/AppIntegration/UIElementInspector.swift` | `AppIntegrationFramework` or computer use (Phase L3) | 🟡 MEDIUM |
+
+#### Memory System — Partially Unwired
+| System | File | Wire Into | Priority |
+|--------|------|-----------|----------|
+| `MemoryAugmentedChat` | `Shared/Memory/MemoryAugmentedChat.swift` | ChatManager — augment messages with memory context | 🟠 HIGH |
+| `ConversationMemoryExtractor` | `Shared/Memory/ConversationMemoryExtractor.swift` | ChatManager post-response | 🟠 HIGH |
+| `ConversationMemory` | `Shared/Memory/ConversationMemory.swift` | `ConversationMemoryExtractor` or MemorySystem | 🟡 MEDIUM |
+
+#### Collaboration / Remote / Other
+| System | File | Wire Into | Priority |
+|--------|------|-----------|----------|
+| `TeamKnowledgeBase` | `Shared/Collaboration/TeamKnowledgeBase.swift` | `PersonalKnowledgeGraph` or Phase F3 Squads | 🟡 MEDIUM |
+| `TheaRemoteServer` | `Shared/RemoteServer/TheaRemoteServer.swift` | App lifecycle (macOS) — start for remote access | 🟡 MEDIUM |
+| `RemoteCommandService` | `Shared/RemoteServer/RemoteCommandService.swift` | `TheaRemoteServer` | 🟡 MEDIUM |
+| `TheaSharePlay` | `Shared/SharePlay/TheaSharePlay.swift` | iOS/macOS app lifecycle (GroupActivities) | 🟡 MEDIUM |
+| `SyncConflictResolutionView` | `Shared/UI/Views/Components/SyncConflictResolutionView.swift` | CloudKit conflict handler → present view | 🟡 MEDIUM |
+
+---
+
+### U3-5: TODO Stubs in Active Files (from 2026-02-19 Audit)
+
+These TODOs are in ACTIVE (non-excluded) files and must be implemented:
+
+| File | Line | TODO | Resolution Phase |
+|------|------|------|-----------------|
+| `macOS/TheamacOSApp.swift` | 209 | Restore PromptOptimizer.shared (commented out) | Phase K3 (Config UI) |
+| `macOS/TheamacOSApp.swift` | 213 | Restore WindowManager.shared (commented out) | Phase K3 |
+| `Shared/Intelligence/Memory/LongTermMemorySystem+Consolidation.swift` | 249 | Embedding-based similarity merging | Phase P3 (PersonalKnowledgeGraph) or U3 |
+| `Shared/Intelligence/LifeMonitoring/LifeMonitoringCoordinator.swift` | 42 | Create BrowserActivityMonitor | Phase J3 (Life Tracking) |
+| `Shared/SelfEvolution/SelfEvolutionEngine.swift` | 494 | Feature logic stub | Phase R3 (SelfEvolution) |
+| `Shared/Integrations/ContextExtractors/XcodeContextExtractor.swift` | 232 | AX hierarchy navigation | Phase T3 (Integrations) |
+| `Shared/UI/Views/Settings/LiveGuidanceSettingsView.swift` | 267 | Region selection UI | Phase K3 |
+| `Shared/AI/Autonomy/AutonomousMaintenanceService.swift` | 134 | No-op stub | Phase Q3 (Proactive Intelligence) |
+| `Shared/APIBuilder/MCPServerGenerator.swift` | 239,260,277 | Three tool/resource/prompt stubs | Phase S3 (MCPServerGenerator) |
+
+---
+
+### U3-6: CLAUDE.md Discrepancies Found by Audit (Fix Immediately)
+
+**⚠️ CLAUDE.md makes false "WIRED" claims. These must be corrected.**
+
+1. **`TheaMessagingChatView`**: CLAUDE.md says "Wired into MacSettingsView sidebar" — grep finds ZERO callers in navigation.
+   → Must be wired in Phase W3. Note: `TheaMessagingSettingsView` may be wired; `TheaMessagingChatView` (the conversation view) is not.
+
+2. **`ConversationLanguagePickerView`**: CLAUDE.md says "WIRED into ChatView toolbar" — grep finds ZERO instantiation calls.
+   → Must be wired in Phase W3.
+
+**Fix these in the CLAUDE.md before or during Phase W3.**
+
+---
+
 ## PHASE V3: TRANSPARENCY & ANALYTICS UIs
 
 **Status: ⏳ PENDING (blocked by H3; MBAM2 assignment — pure SwiftUI, no ML dependency)**
@@ -3100,6 +3224,138 @@ Goal: 0 unaddressed Periphery warnings.
 
 ---
 
+## PHASE AE3: PLATFORM OBSERVERS STARTUP
+
+**Status: ⏳ PENDING (blocked by U3; MSM3U + MBAM2 parallel assignment)**
+
+**Goal**: Wire `PlatformFeaturesHub.shared` startup into all app lifecycles, activating the entire ambient intelligence foundation. Without this, MacSystemObserver, all iOS platform providers, and remote access are dead.
+
+**Priority: 🔴 CRITICAL** — this is the single biggest gap found by the Feb 2026 audit. Nearly all ambient intelligence (accessibility monitoring, network observation, power management, HealthKit, motion, screen time, etc.) depends on this wiring.
+
+### AE3-1: macOS — Start PlatformFeaturesHub
+
+In `TheamacOSApp.swift`, after CloudKit/ChatManager init:
+```swift
+Task {
+    await PlatformFeaturesHub.shared.start()
+}
+```
+
+Verify `PlatformFeaturesHub.start()` internally calls:
+- `MacSystemObserver.shared.start()` → starts AccessibilityObserver, NetworkObserver, PowerObserver, DisplayObserver
+- `MenuBarManager.shared.setup()`
+- `ServicesHandler.shared.register()`
+- `SystemAutomationEngine.shared.activate()`
+- `SpotlightService.shared.start()`
+- `TheaRemoteServer.shared.start()`
+
+If PlatformFeaturesHub doesn't call these, add them to its `start()` method.
+
+### AE3-2: iOS — Start Platform Providers
+
+In iOS app lifecycle, after permission grants:
+```swift
+Task {
+    await HealthKitProvider.shared.start()      // consolidate with HealthContextProvider
+    await MotionContextProvider.shared.start()
+    await ScreenTimeObserver.shared.start()
+    await PhotoIntelligenceProvider.shared.start()
+    await AdaptiveModelRouter.shared.configure()
+    await RemoteMacBridge.shared.connect()
+    await MobileIntelligenceOrchestrator.shared.start()
+}
+```
+
+**HealthKit consolidation**: `HealthKitProvider` (new, unwired) and `HealthContextProvider` (wired via LifeMonitoringCoordinator) are duplicate stacks. `HealthKitProvider` becomes the single authorization source; `HealthContextProvider` delegates to it.
+
+### AE3-3: TheaIntelligenceOrchestrator Startup
+
+**Critical gap**: `TheaIntelligenceOrchestrator` is the top-level intelligence coordinator and is NEVER started. Wire into macOS + iOS app lifecycle after platform features init:
+```swift
+Task {
+    await TheaIntelligenceOrchestrator.shared.start()
+    // Must cascade-start: IntelligenceOrchestrator, InsightEngine, PredictiveEngine,
+    // PatternDetector, TheaContextMonitor, CrossDomainCorrelationEngine
+}
+```
+
+### AE3-4: ApprovalManager Wiring
+
+`ApprovalManager` has zero callers — autonomy approval queue is non-functional. Wire into `AutonomyController`:
+```swift
+// In AutonomyController.queueForApproval():
+await ApprovalManager.shared.queueRequest(action, risk: riskLevel, context: context)
+```
+
+### AE3-5: Verify
+
+```bash
+for SVC in PlatformFeaturesHub TheaIntelligenceOrchestrator ApprovalManager \
+           HealthKitProvider AdaptiveModelRouter MobileIntelligenceOrchestrator; do
+  COUNT=$(grep -r "${SVC}" macOS/ iOS/ --include="*.swift" | grep -v "class ${SVC}" | wc -l | tr -d ' ')
+  echo "${SVC}: ${COUNT} launch refs"
+done
+# Each must be ≥1
+```
+
+Commit: `git commit -m "Auto-save: AE3 — platform observers + intelligence orchestrator startup wired"`
+
+---
+
+## PHASE AF3: SETTINGS SIDEBAR + UI NAVIGATION COMPLETION
+
+**Status: ⏳ PENDING (blocked by AE3; MBAM2 assignment — pure SwiftUI, no ML)**
+
+**Goal**: Wire the 88 unreachable settings views into MacSettingsView sidebar, and resolve the 57 orphaned SwiftUI views with no navigation reference.
+
+**Source**: Feb 2026 full codebase audit.
+
+### AF3-1: MacSettingsView Sidebar (Priority Order)
+
+**Priority 1 — Core intelligence settings:**
+- `BehavioralPatternsView` — BehavioralFingerprint 7×24 heatmap
+- `NotificationScheduleView` — SmartNotificationScheduler preferences
+- `LifeTrackingSettingsView` — life monitoring toggle UI
+- `ResponseStylesSettingsView` — customResponseStyles editor
+- `KnowledgeGraphExplorerView` — PersonalKnowledgeGraph explorer
+- `ConversationSettingsView`, `PersonalizationSettingsView`, `AIFeaturesSettingsView`
+
+**Priority 2 — App capabilities:**
+- `PromptEngineeringSettingsView`, `AutonomousTaskSettingsView`, `WorkflowSettingsView`
+- `AppPairingSettingsView`, `LocalModelsSettingsView`, `RemoteAccessSettingsView`
+- `ShortcutsSettingsView`, `SystemPromptSettingsView`, `WakeWordSettingsView`
+
+**Priority 3 — Health and monitoring:**
+- `HealthInsightsView`, `MonitoringSettingsView`, `LiveGuidanceSettingsView`
+
+**All remaining ~60 views** — add in logical sidebar groups (Advanced, Developer, etc.)
+
+### AF3-2: Critical Orphaned View Fixes
+
+- `OnboardingView` (iOS) — show to new users (check `hasCompletedOnboarding` flag)
+- `WelcomeView` — show on first launch
+- `TheaMessagingChatView` — wire to MacSettingsView sidebar (**⚠️ CLAUDE.md falsely claims wired**)
+- `ConversationLanguagePickerView` — wire into ChatView toolbar (**⚠️ CLAUDE.md falsely claims wired**)
+- `TheaAgentSidebarView` — insert into NavigationSplitView
+- `APIBuilderView`, `UnifiedDashboardView`, `PrivacyControlsView`, `CoworkView`
+- `LocalModelsView`, `DeviceSwitcherView`, `QuickEntryView` (keyboard shortcut)
+
+### AF3-3: Fix CLAUDE.md Discrepancies Post-Wiring
+
+After wiring `TheaMessagingChatView` and `ConversationLanguagePickerView`:
+- Update `Thea/.claude/CLAUDE.md` to change placeholder notes to WIRED status
+
+### AF3-4: Verify
+
+```bash
+grep -r "TheaMessagingChatView()" macOS/ iOS/ Shared/ --include="*.swift" | wc -l   # ≥1
+grep -r "ConversationLanguagePickerView" Shared/UI/Views/Chat/ --include="*.swift" | wc -l  # ≥1
+```
+
+Commit: `git commit -m "Auto-save: AF3 — 88 settings views + 57 orphaned views wired to navigation"`
+
+---
+
 ## PHASE Z3: CI GREEN
 
 **Status: ⏳ PENDING (blocked by Y3)**
@@ -3290,6 +3546,42 @@ check "SelfExecutionService" \
 check "PhaseOrchestrator" \
   "$(grep -r "PhaseOrchestrator" Shared/ --include="*.swift" | grep -v "PhaseOrchestrator.swift" | wc -l | tr -d ' ')"
 
+# ── Phase AE3 systems (platform observers + intelligence startup) ─────────────
+
+# 30. PlatformFeaturesHub started at launch
+check "PlatformFeaturesHub startup" \
+  "$(grep -r "PlatformFeaturesHub" macOS/ iOS/ --include="*.swift" | grep -v "class PlatformFeaturesHub" | wc -l | tr -d ' ')"
+
+# 31. TheaIntelligenceOrchestrator started
+check "TheaIntelligenceOrchestrator startup" \
+  "$(grep -r "TheaIntelligenceOrchestrator" macOS/ iOS/ --include="*.swift" | grep -v "class TheaIntelligenceOrchestrator" | wc -l | tr -d ' ')"
+
+# 32. ApprovalManager wired to AutonomyController
+check "ApprovalManager wired" \
+  "$(grep -r "ApprovalManager" Shared/ --include="*.swift" | grep -v "ApprovalManager.swift" | wc -l | tr -d ' ')"
+
+# 33. MemoryAugmentedChat wired to ChatManager
+check "MemoryAugmentedChat wired" \
+  "$(grep -r "MemoryAugmentedChat" Shared/ --include="*.swift" | grep -v "MemoryAugmentedChat.swift" | wc -l | tr -d ' ')"
+
+# 34. AppIntegrationFramework started
+check "AppIntegrationFramework started" \
+  "$(grep -r "AppIntegrationFramework" macOS/ iOS/ Shared/ --include="*.swift" | grep -v "AppIntegrationFramework.swift" | wc -l | tr -d ' ')"
+
+# ── Phase AF3 systems (navigation wiring) ────────────────────────────────────
+
+# 35. TheaMessagingChatView wired to navigation
+check "TheaMessagingChatView in nav" \
+  "$(grep -r "TheaMessagingChatView()" macOS/ iOS/ Shared/ --include="*.swift" | wc -l | tr -d ' ')"
+
+# 36. ConversationLanguagePickerView wired to ChatView toolbar
+check "ConversationLanguagePickerView wired" \
+  "$(grep -r "ConversationLanguagePickerView" Shared/UI/Views/Chat/ --include="*.swift" | wc -l | tr -d ' ')"
+
+# 37. OnboardingView (iOS) shown to new users
+check "OnboardingView shown" \
+  "$(grep -r "OnboardingView" iOS/ --include="*.swift" | grep -v "OnboardingView.swift" | wc -l | tr -d ' ')"
+
 # ── UI wiring: views accessible via navigation ───────────────────────────────
 
 # Life Tracking views reachable
@@ -3409,16 +3701,18 @@ Update this section after each phase completes:
 | R3    | SelfEvolution Wiring                     | ⏳ PENDING  | —        | —         |
 | S3    | MCPServerGenerator UI                    | ⏳ PENDING  | —        | —         |
 | T3    | Integration Backends (7 integrations)    | ⏳ PENDING  | —        | —         |
-| U3    | AI Subsystem Re-evaluation               | ⏳ PENDING  | —        | —         |
+| U3    | AI Subsystem Re-evaluation (+audit 02-19) | ⏳ PENDING  | —        | —         |
 | V3    | Transparency & Analytics UIs             | ⏳ PENDING  | —        | —         |
 | W3    | Chat Enhancement Features                | ⏳ PENDING  | —        | —         |
 | X3    | Test Coverage ≥80% (A3–W3 code)          | ⏳ PENDING  | —        | —         |
 | Y3    | Periphery Clean (A3–W3 code)             | ⏳ PENDING  | —        | —         |
 | Z3    | CI Green (v3 code)                       | ⏳ PENDING  | —        | —         |
-| AA3    | Re-verification (v1+v2+v3 criteria)      | ⏳ PENDING  | —        | —         |
-| AB3    | Notarization                             | ⏳ PENDING  | —        | —         |
-| AC3    | Final Verification Report                | ⏳ PENDING  | —        | —         |
-| AD3    | Manual Gate                              | ⏳ MANUAL   | Alexis   | —         |
+| AE3   | Platform Observers Startup (🔴 CRITICAL) | ⏳ PENDING  | MSM3U    | —         |
+| AF3   | Settings Sidebar + UI Navigation (88+57) | ⏳ PENDING  | MBAM2    | —         |
+| AA3   | Re-verification (v1+v2+v3 criteria)      | ⏳ PENDING  | —        | —         |
+| AB3   | Notarization                             | ⏳ PENDING  | —        | —         |
+| AC3   | Final Verification Report                | ⏳ PENDING  | —        | —         |
+| AD3   | Manual Gate                              | ⏳ MANUAL   | Alexis   | —         |
 
 ---
 

@@ -376,7 +376,7 @@ Thea replaced OpenClaw entirely. No external daemon. Thea owns port 18789 native
 - **OpenClawBridge** (`Integrations/OpenClaw/OpenClawBridge.swift`): REPURPOSED — multi-platform message router. Routes all inbound (Telegram/Discord/Slack/etc.) to correct AI agent. Keeps ALL injection mitigation. Routes Moltbook messages to MoltbookAgent.
 - **OpenClawSecurityGuard** (`Integrations/OpenClaw/OpenClawSecurityGuard.swift`): UNCHANGED — 22-pattern prompt injection detection, Unicode NFD normalization, invisible character stripping. Applied to ALL inbound from ALL platforms.
 - **TheaMessagingSettingsView** (`UI/Views/Settings/TheaMessagingSettingsView.swift`): Credentials UI for all 7 platforms. Wired into MacSettingsView sidebar → "Messaging Gateway".
-- **TheaMessagingChatView** (`UI/Views/OpenClaw/TheaMessagingChatView.swift`): Platform selector + conversation thread. Wired into MacSettingsView sidebar.
+- **TheaMessagingChatView** (`UI/Views/OpenClaw/TheaMessagingChatView.swift`): Platform selector + conversation thread. **⚠️ NOT YET WIRED** — Phase AF3 will wire into MacSettingsView sidebar.
 
 ⚠️ NEVER: delete any OpenClaw*.swift file. NEVER install the OpenClaw npm package. NEVER start the openclaw gateway daemon (it's uninstalled). Thea IS the gateway.
 
@@ -398,7 +398,7 @@ Thea replaced OpenClaw entirely. No external daemon. Thea owns port 18789 native
 
 ### Multilingual Conversations (ACTIVE all platforms)
 - **ConversationLanguageService** (`Localization/ConversationLanguageService.swift`): Per-conversation language management (27 languages, BCP-47)
-- **ConversationLanguagePickerView** (`UI/Views/Components/ConversationLanguagePickerView.swift`): Toolbar globe menu. **WIRED** into ChatView toolbar
+- **ConversationLanguagePickerView** (`UI/Views/Components/ConversationLanguagePickerView.swift`): Toolbar globe menu. **⚠️ NOT YET WIRED** — Phase AF3 will wire into ChatView toolbar
 - **ChatManager**: Injects language instruction into system prompt (validated against injection)
 
 ### Intelligence Integration Layers (ACTIVE all platforms)
