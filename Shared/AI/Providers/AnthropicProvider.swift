@@ -211,7 +211,30 @@ final class AnthropicProvider: AIProvider, Sendable {
 
     func listModels() async throws -> [ProviderAIModel] {
         [
-            // Claude 4.5 models (latest generation)
+            // Claude 4.6 models (Feb 2026 — latest generation)
+            ProviderAIModel(
+                id: "claude-opus-4-6",
+                name: "Claude Opus 4.6",
+                description: "Best agent/planning model (Feb 2026). 72.5% OSWorld. Highest injection resistance.",
+                contextWindow: 200_000,
+                maxOutputTokens: 64_000,
+                inputPricePerMillion: 15.00,
+                outputPricePerMillion: 75.00,
+                supportsVision: true,
+                supportsFunctionCalling: true
+            ),
+            ProviderAIModel(
+                id: "claude-sonnet-4-6",
+                name: "Claude Sonnet 4.6",
+                description: "Near-flagship intelligence at Sonnet pricing (Feb 2026). Adaptive reasoning.",
+                contextWindow: 200_000,
+                maxOutputTokens: 64_000,
+                inputPricePerMillion: 3.00,
+                outputPricePerMillion: 15.00,
+                supportsVision: true,
+                supportsFunctionCalling: true
+            ),
+            // Claude 4.5 models
             ProviderAIModel(
                 id: "claude-opus-4-5-20251101",
                 name: "Claude Opus 4.5",
