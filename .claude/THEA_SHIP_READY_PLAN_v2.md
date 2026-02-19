@@ -158,22 +158,22 @@ Wave 0 — PREREQUISITE (ALL DONE ✅):
   Types ✅    — OpenClawTypes.swift rewritten with wire protocol types (commits cb56f4c1, dcea2272)
 
 Wave 1 — PARALLEL (no dependencies between O, P):
-  ✅ N — GitHub Workflows Overhaul    [DONE 2026-02-19]
+  ✅ N — GitHub Workflows Overhaul     [DONE 2026-02-19]
   ✅ O — Thea Native Messaging Gateway [DONE 2026-02-19 — O0–O10, O_Tests, O_Wire, iOS+macOS]
-  P — Component Analysis + Fixes       [MSM3U, ~4–6h, P1–P16 + AI 2026 upgrades] ← NEXT
+  ✅ P — Component Analysis + Fixes    [DONE 2026-02-19 — P1–P16: Claude 4.6, AgentTeamOrchestrator, STT, MLX vision, privacy, CloudKit]
 
 Wave 2 — PARALLEL (both after Wave 1 completes):
-  Q — Test Coverage to 80%+            [MSM3U Session 1, ~3–4h]
-  R — Periphery Full Resolution        [MSM3U Session 2, ~4–6h, independent of Q]
+  🔄 Q — Test Coverage to 80%+        [IN PROGRESS — MSM3U tmux phase-p — 11+ test files added, compilation fixes committed]
+  ✅ R — Periphery Full Resolution     [DONE 2026-02-19 — 2,674 items across 489 files — commits 6d725251+4d14df81+9a0b408e+1c94c0b1]
 
 Wave 3 — SEQUENTIAL (W must pass before S):
-  W — V1 Re-verification               [MSM3U, ~1h — verify O+P didn't break v1]
-  S — CI/CD Green Verification         [MSM3U, ~2–4h — after W green]
-  T — Notarization Pipeline Setup      [MSM3U, ~1–2h — after S green]
+  ⏳ W — V1 Re-verification            [PENDING — Wave 3+4 executor polling in user terminal, auto-starts after Q exits]
+  ⏳ S — CI/CD Green Verification      [PENDING — after W green; SwiftLint already fixed in f13e2678]
+  ⏳ T — Notarization Pipeline Setup   [PENDING — after S green]
 
 Wave 4 — FINAL:
-  U — Final Verification Report        [MSM3U, ~30min]
-  V — Manual Ship Gate                 [Alexis only — last step]
+  ⏳ U — Final Verification Report     [PENDING — after T]
+  ⏳ V — Manual Ship Gate              [Alexis only — last step]
 
 ─────────────────────────────────────────────────
 PARALLEL SESSION RULES (when safe and optimal)
@@ -198,10 +198,11 @@ HOW TO LAUNCH TWO PARALLEL SESSIONS SAFELY:
   When Session 1 finishes: git pushsync → Session 2 does git pull before its final pushsync.
   Do NOT both pushsync at the same moment — stagger by 30+ seconds.
 
-CURRENT WAVE STATUS:
-  Wave 1: O done ✅, P pending → Launch 1 session for P
-  Wave 2: Launch after P complete → 2 sessions (Q + R simultaneously)
-  Waves 3–4: Sequential — 1 session each
+CURRENT WAVE STATUS (2026-02-19 ~13:30 CET):
+  Wave 1: ✅ ALL DONE — N+O+P complete
+  Wave 2: Q 🔄 running (tmux phase-p), R ✅ done — executor polls every 60s, auto-starts W
+  Wave 3: ⏳ pending Q — executor queued W→S→T
+  Wave 4: ⏳ pending Wave 3
 ```
 
 ---

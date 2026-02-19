@@ -90,7 +90,7 @@ final class ConfidenceSystemTests: XCTestCase {
 
     func testSourceWeightsCanBeUpdated() {
         ConfidenceSystem.shared.sourceWeights[.modelConsensus] = 0.50
-        XCTAssertEqual(ConfidenceSystem.shared.sourceWeights[.modelConsensus] ?? 0, 0.50, accuracy: 0.001)
+        XCTAssertEqual(ConfidenceSystem.shared.sourceWeights[.modelConsensus], 0.50, accuracy: 0.001)
     }
 
     func testSourceWeightsAllTypesHaveDefaultValues() {
@@ -112,7 +112,7 @@ final class ConfidenceSystemTests: XCTestCase {
 
     func testSourceWeightsCanBeSetToZero() {
         ConfidenceSystem.shared.sourceWeights[.patternMatch] = 0.0
-        XCTAssertEqual(ConfidenceSystem.shared.sourceWeights[.patternMatch] ?? -1, 0.0, accuracy: 0.001)
+        XCTAssertEqual(ConfidenceSystem.shared.sourceWeights[.patternMatch], 0.0, accuracy: 0.001)
     }
 
     // MARK: - validateResponse: fast context (all sub-systems disabled)
