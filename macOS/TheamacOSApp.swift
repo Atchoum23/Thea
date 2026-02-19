@@ -252,13 +252,14 @@ struct TheamacOSApp: App {
                 await agent.enable()
                 logger.info("MoltbookAgent enabled (preview: \(settings.moltbookPreviewMode, privacy: .public))")
             }
-            // Wire OpenClaw message routing
+            // Wire OpenClaw message routing (legacy handler for OpenClawIntegration compatibility)
             OpenClawBridge.shared.setup()
 
-            // Connect messaging channels (WhatsApp + Telegram via OpenClaw)
-            await WhatsAppChannel.shared.connect()
-            await TelegramChannel.shared.connect()
-            logger.info("Messaging channels initialized")
+            // Start Thea's native messaging gateway (TheaMessagingGateway hosts
+            // port 18789 and connects to Telegram, Discord, Slack, iMessage,
+            // WhatsApp, Signal, and Matrix via platform-native connectors).
+            await TheaMessagingGateway.shared.start()
+            logger.info("TheaMessagingGateway started — native platform connectors active")
         }
 
         // Background service health monitoring — deferred startup
