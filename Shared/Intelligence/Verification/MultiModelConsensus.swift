@@ -22,10 +22,10 @@ public final class MultiModelConsensus {
 
     // Model preferences by task type
     private let modelPreferences: [TaskType: [String]] = [
-        .codeGeneration: ["anthropic/claude-sonnet-4", "openai/gpt-4o", "google/gemini-pro"],
-        .debugging: ["anthropic/claude-sonnet-4", "openai/gpt-4o", "openai/o1"],
-        .analysis: ["anthropic/claude-opus-4", "openai/o1", "google/gemini-pro"],
-        .factual: ["openai/gpt-4o", "anthropic/claude-sonnet-4", "perplexity/sonar"],
+        .codeGeneration: ["anthropic/claude-sonnet-4-6", "openai/gpt-4o", "google/gemini-pro"],
+        .debugging: ["anthropic/claude-sonnet-4-6", "openai/gpt-4o", "openai/o1"],
+        .analysis: ["anthropic/claude-opus-4-6", "openai/o1", "google/gemini-pro"],
+        .factual: ["openai/gpt-4o", "anthropic/claude-sonnet-4-6", "perplexity/sonar"],
         .conversation: ["openai/gpt-4o-mini", "anthropic/claude-haiku", "google/gemini-flash"]
     ]
 
@@ -73,7 +73,7 @@ public final class MultiModelConsensus {
 
     private func selectModels(for taskType: TaskType) -> [String] {
         // Get preferred models for this task type
-        var models = modelPreferences[taskType] ?? ["anthropic/claude-sonnet-4", "openai/gpt-4o"]
+        var models = modelPreferences[taskType] ?? ["anthropic/claude-sonnet-4-6", "openai/gpt-4o"]
 
         // Filter to only available models
         let availableProviders = ProviderRegistry.shared.availableProviders.filter { $0.isConfigured }

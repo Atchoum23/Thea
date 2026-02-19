@@ -174,11 +174,11 @@ public enum SpecializedAgentType: String, Codable, Sendable, CaseIterable {
     public var preferredModel: String {
         switch self {
         case .plan, .security, .review:
-            return "claude-opus-4"  // Needs deep reasoning
+            return "claude-opus-4-6"  // Needs deep reasoning (Feb 2026)
         case .explore, .bash, .debug:
             return "claude-haiku-3.5"  // Fast, simple tasks
         default:
-            return "claude-sonnet-4"  // Balanced
+            return "claude-sonnet-4-6"  // Balanced (Feb 2026)
         }
     }
 }
