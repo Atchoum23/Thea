@@ -393,8 +393,8 @@ actor SystemSecurityScanner {
             ssLogger.info("TCC database found — permission audit available via System Settings")
         }
 
-        // Check for apps that have accessibility permission
-        let accessibilityPlist = "/Library/Application Support/com.apple.TCC/TCC.db"
+        // Check for apps that have accessibility permission (TCC database)
+        _ = "/Library/Application Support/com.apple.TCC/TCC.db"
         filesChecked += 1
 
         // Check for tracking-related files
