@@ -202,10 +202,9 @@ public actor MCPServerGenerator {
         """
     }
 
-    private func generateServerInitializeHandler(for spec: MCPServerSpec) -> String {
+    // periphery:ignore - Reserved: spec parameter kept for API compatibility
+    private func generateServerInitializeHandler(for _: MCPServerSpec) -> String {
         """
-
-// periphery:ignore - Reserved: spec parameter kept for API compatibility
 
             // MARK: - Initialize Handler
 
