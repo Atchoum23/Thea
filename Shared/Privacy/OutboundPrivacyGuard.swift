@@ -394,7 +394,18 @@ actor OutboundPrivacyGuard {
             // Firebase keys
             ("AIzaSy[a-zA-Z0-9_-]{33}", "Firebase API key"),
             // Generic secret patterns
-            ("(?i)(?:secret|password|passwd|pwd)\\s*[:=]\\s*[\"']?[^\\s\"']{8,}", "Secret value")
+            ("(?i)(?:secret|password|passwd|pwd)\\s*[:=]\\s*[\"']?[^\\s\"']{8,}", "Secret value"),
+            // Thea Messaging Gateway — must never leave device
+            ("(?i)theagateway[_-]?token\\s*[:=]\\s*[\"']?[a-zA-Z0-9_+/=-]{16,}", "Thea Gateway token"),
+            ("(?i)thea[_-]?device[_-]?token\\s*[:=]\\s*[\"']?[a-zA-Z0-9_+/=-]{16,}", "Thea device token"),
+            // Telegram bot tokens
+            ("\\d{8,10}:[A-Za-z0-9_-]{35}", "Telegram bot token"),
+            // Discord bot tokens
+            ("[A-Za-z0-9_-]{24}\\.[A-Za-z0-9_-]{6}\\.[A-Za-z0-9_-]{38}", "Discord bot token"),
+            // Slack webhook URLs (already filtered at domain level, but catch the token component)
+            ("xoxs-[a-zA-Z0-9-]+", "Slack session token"),
+            // Signal group/session keys
+            ("(?i)signal[_-]?key\\s*[:=]\\s*[\"']?[a-zA-Z0-9+/=]{40,}", "Signal key")
         ]
 
         for (pattern, description) in patterns {
