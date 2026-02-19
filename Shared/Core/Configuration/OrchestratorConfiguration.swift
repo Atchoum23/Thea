@@ -50,29 +50,29 @@ public struct OrchestratorConfiguration: Codable, Sendable, Equatable {
         "summarization": ["local-any", "openai/gpt-4o-mini", "anthropic/claude-3-haiku"],
 
         // Code tasks - prefer powerful models
-        "codeGeneration": ["anthropic/claude-sonnet-4", "openai/gpt-4o", "local-large"],
-        "debugging": ["anthropic/claude-sonnet-4", "openai/gpt-4o", "local-large"],
+        "codeGeneration": ["anthropic/claude-sonnet-4-6", "openai/gpt-4o", "local-large"],
+        "debugging": ["anthropic/claude-sonnet-4-6", "openai/gpt-4o", "local-large"],
 
         // Complex reasoning - use most capable models
-        "complexReasoning": ["anthropic/claude-opus-4", "openai/o1", "openai/gpt-4o"],
-        "analysis": ["anthropic/claude-opus-4", "openai/gpt-4o", "local-large"],
-        "planning": ["anthropic/claude-sonnet-4", "openai/gpt-4o", "local-large"],
+        "complexReasoning": ["anthropic/claude-opus-4-6", "openai/o1", "openai/gpt-4o"],
+        "analysis": ["anthropic/claude-opus-4-6", "openai/gpt-4o", "local-large"],
+        "planning": ["anthropic/claude-sonnet-4-6", "openai/gpt-4o", "local-large"],
 
         // Math and logic - specialized models
-        "mathLogic": ["openai/o1", "anthropic/claude-opus-4", "local-large"],
+        "mathLogic": ["openai/o1", "anthropic/claude-opus-4-6", "local-large"],
 
         // Creative tasks - balanced approach
-        "creativeWriting": ["anthropic/claude-sonnet-4", "openai/gpt-4o", "local-any"],
+        "creativeWriting": ["anthropic/claude-sonnet-4-6", "openai/gpt-4o", "local-any"],
 
         // Research tasks
-        "research": ["anthropic/claude-opus-4", "openai/gpt-4o", "perplexity/llama-3.1-sonar-large-128k-online"],
+        "research": ["anthropic/claude-opus-4-6", "openai/gpt-4o", "perplexity/llama-3.1-sonar-large-128k-online"],
         "informationRetrieval": ["local-any", "openai/gpt-4o-mini", "perplexity/llama-3.1-sonar-small-128k-online"],
 
         // Content creation
-        "contentCreation": ["anthropic/claude-sonnet-4", "openai/gpt-4o", "local-large"],
+        "contentCreation": ["anthropic/claude-sonnet-4-6", "openai/gpt-4o", "local-large"],
 
         // General/default - balanced
-        "general": ["local-any", "anthropic/claude-sonnet-4", "openai/gpt-4o-mini"]
+        "general": ["local-any", "anthropic/claude-sonnet-4-6", "openai/gpt-4o-mini"]
     ]
 
     /// Get preferred models for a task type

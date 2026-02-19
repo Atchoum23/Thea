@@ -9,7 +9,7 @@ import Foundation
 
 public struct AIConfiguration: Codable, Sendable {
     public var defaultProvider: String = "openrouter"
-    public var defaultModel: String = "anthropic/claude-sonnet-4"
+    public var defaultModel: String = "anthropic/claude-sonnet-4-6"
     public var temperature: Double = 0.7
     public var maxTokens: Int = 8192
     public var streamingEnabled: Bool = true

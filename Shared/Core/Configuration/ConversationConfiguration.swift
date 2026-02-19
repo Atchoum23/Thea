@@ -16,6 +16,8 @@ public struct ConversationConfiguration: Codable, Sendable, Equatable {
 
     /// Context sizes by provider (for reference)
     public static let providerContextSizes: [String: Int] = [
+        "anthropic/claude-opus-4-6": 200_000,
+        "anthropic/claude-sonnet-4-6": 200_000,
         "anthropic/claude-sonnet-4": 200_000,
         "anthropic/claude-opus-4": 200_000,
         "openai/gpt-4o": 128_000,

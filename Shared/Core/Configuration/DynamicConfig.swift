@@ -172,7 +172,7 @@ public final class DynamicConfig {
         case .codeGeneration, .codeReview, .bugFix:
             // Need high capability
             if providers.contains(where: { $0.id.contains("anthropic") }) {
-                return "claude-sonnet-4-20250514"
+                return "claude-sonnet-4-6"
             }
             return "gpt-4o"
 
@@ -183,7 +183,7 @@ public final class DynamicConfig {
         case .creative, .brainstorming:
             // Benefit from larger models
             if providers.contains(where: { $0.id.contains("anthropic") }) {
-                return "claude-sonnet-4-20250514"
+                return "claude-sonnet-4-6"
             }
             return "gpt-4o"
 

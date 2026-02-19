@@ -9,6 +9,40 @@ import Foundation
 // MARK: - Known Models
 
 public extension AIModel {
+    // MARK: - Anthropic Models (Claude 4.6 - Latest, Feb 2026)
+
+    /// Claude Opus 4.6 — Best agent/planning model, 72.5% OSWorld, highest prompt injection resistance.
+    /// Recommended for: TheaMessagingGateway auto-response, AgentMode, AutonomyController.
+    static let claude46Opus = AIModel(
+        id: "claude-opus-4-6",
+        name: "Claude Opus 4.6",
+        provider: "anthropic",
+        description: "Most capable agent model (Feb 2026). Best for agentic tasks, complex reasoning, computer use.",
+        contextWindow: 200_000,
+        maxOutputTokens: 64_000,
+        capabilities: [.chat, .vision, .codeGeneration, .reasoning, .functionCalling],
+        inputCostPer1K: Decimal(string: "0.015"),
+        outputCostPer1K: Decimal(string: "0.075"),
+        supportsVision: true,
+        supportsFunctionCalling: true
+    )
+
+    /// Claude Sonnet 4.6 — Near-flagship at Sonnet 4.5 pricing, adaptive reasoning.
+    /// Recommended for: daily chat, light tasks, iOS (cost-sensitive), messaging fallback.
+    static let claude46Sonnet = AIModel(
+        id: "claude-sonnet-4-6",
+        name: "Claude Sonnet 4.6",
+        provider: "anthropic",
+        description: "Near-flagship intelligence at Sonnet pricing (Feb 2026). Adaptive reasoning for all tasks.",
+        contextWindow: 200_000,
+        maxOutputTokens: 64_000,
+        capabilities: [.chat, .vision, .codeGeneration, .reasoning, .functionCalling],
+        inputCostPer1K: Decimal(string: "0.003"),
+        outputCostPer1K: Decimal(string: "0.015"),
+        supportsVision: true,
+        supportsFunctionCalling: true
+    )
+
     // MARK: - Anthropic Models (Claude 4.5 - Latest)
 
     static let claude45Opus = AIModel(
@@ -352,6 +386,34 @@ public extension AIModel {
 
     // MARK: - OpenRouter Models
 
+    static let orClaude46Opus = AIModel(
+        id: "anthropic/claude-opus-4-6",
+        name: "Claude Opus 4.6 (OpenRouter)",
+        provider: "openrouter",
+        description: "Claude Opus 4.6 via OpenRouter — best agent/planning model (Feb 2026)",
+        contextWindow: 200_000,
+        maxOutputTokens: 64_000,
+        capabilities: [.chat, .vision, .codeGeneration, .reasoning, .functionCalling],
+        inputCostPer1K: Decimal(string: "0.015"),
+        outputCostPer1K: Decimal(string: "0.075"),
+        supportsVision: true,
+        supportsFunctionCalling: true
+    )
+
+    static let orClaude46Sonnet = AIModel(
+        id: "anthropic/claude-sonnet-4-6",
+        name: "Claude Sonnet 4.6 (OpenRouter)",
+        provider: "openrouter",
+        description: "Claude Sonnet 4.6 via OpenRouter — adaptive reasoning at Sonnet price (Feb 2026)",
+        contextWindow: 200_000,
+        maxOutputTokens: 64_000,
+        capabilities: [.chat, .vision, .codeGeneration, .reasoning, .functionCalling],
+        inputCostPer1K: Decimal(string: "0.003"),
+        outputCostPer1K: Decimal(string: "0.015"),
+        supportsVision: true,
+        supportsFunctionCalling: true
+    )
+
     static let orClaude45Sonnet = AIModel(
         id: "anthropic/claude-sonnet-4-5-20250929",
         name: "Claude Sonnet 4.5 (OpenRouter)",
@@ -483,7 +545,7 @@ public extension AIModel {
     // MARK: - Common Model Lists
 
     static var anthropicModels: [AIModel] {
-        [claude45Opus, claude45Sonnet, claude45Haiku, claude4Opus, claude4Sonnet, claude35Haiku]
+        [claude46Opus, claude46Sonnet, claude45Opus, claude45Sonnet, claude45Haiku, claude4Opus, claude4Sonnet, claude35Haiku]
     }
 
     static var openaiModels: [AIModel] {
@@ -507,7 +569,7 @@ public extension AIModel {
     }
 
     static var openRouterModels: [AIModel] {
-        [orClaude45Sonnet, orGpt4o, orGemini25Pro, orDeepseekChat, orLlama370b]
+        [orClaude46Opus, orClaude46Sonnet, orClaude45Sonnet, orGpt4o, orGemini25Pro, orDeepseekChat, orLlama370b]
     }
 
     static var localModels: [AIModel] {
