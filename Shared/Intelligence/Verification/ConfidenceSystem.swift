@@ -429,6 +429,16 @@ public struct ValidationContext: Sendable {
         maxLatency: 1.0
     )
 
+    /// Messaging context: skip heavy verification (multi-model, web search) to keep latency < 2s.
+    /// Applied when response is delivered via TheaMessagingGateway channels (Telegram, Discord, etc.).
+    public static let messaging = ValidationContext(
+        allowMultiModel: false,
+        allowWebSearch: false,
+        allowCodeExecution: false,
+        language: .unknown,
+        maxLatency: 2.0
+    )
+
 /// Programming language of the code being validated by the confidence system.
     public enum CodeLanguage: String, Sendable {
         case swift, javascript, python, unknown
