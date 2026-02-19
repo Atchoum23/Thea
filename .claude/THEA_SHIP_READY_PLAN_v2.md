@@ -153,12 +153,13 @@ phase and run all steps fully and autonomously, committing after each step."
 ```
 Wave 0 — PREREQUISITE (DONE):
   ntfy-setup ✅ — Subscribe to ntfy.sh/thea-msm3u on your iPhone (see NTFY SETUP below)
-  O_PRE ✅     — OpenClaw v2026.2.17 installed on MSM3U (gateway daemon stopped by user)
+  O_PRE ✅     — OpenClaw v2026.2.17 was installed (prior session). Gateway stopped by user.
   O0/O1 ✅    — OpenClawTypes.swift rewritten (wire types, platforms, sessions, agents)
+  O_CLEAN ⏳  — Uninstall OpenClaw entirely (first step of Phase O, see O_CLEAN section)
 
 Wave 1 — PARALLEL (no dependencies between O, P):
   ✅ N — GitHub Workflows Overhaul   [DONE 2026-02-19 — all 6 YAML files written + committed]
-  O — Thea Native Messaging Gateway    [MSM3U, ~6h, largest new feature, no prerequisites]
+  O — Thea Native Messaging Gateway    [MSM3U, ~6h, start with O_CLEAN then O0–O10]
   P — Component Analysis + Fixes       [MSM3U, ~4h, P1–P16 including AI 2026 upgrades]
 
 Wave 2 — AFTER WAVE 1 (parallel with each other):
@@ -856,6 +857,43 @@ done
 - `Shared/Integrations/Messaging/MatrixConnector.swift`
 - `Shared/UI/Views/OpenClaw/TheaMessagingChatView.swift`
 - `Shared/UI/Views/Settings/TheaMessagingSettingsView.swift`
+
+---
+
+### O_CLEAN: Uninstall OpenClaw (do this FIRST)
+
+OpenClaw v2026.2.17 was installed by a prior session (against the intended architecture).
+Thea replaces it entirely. Remove all traces before building the native gateway.
+
+```bash
+# 1. Ensure gateway daemon is stopped + remove launchd registration
+openclaw gateway stop 2>/dev/null || true
+launchctl bootout "gui/$(id -u)/ai.openclaw.gateway" 2>/dev/null || true
+rm -f ~/Library/LaunchAgents/ai.openclaw.gateway.plist
+
+# 2. Uninstall via openclaw CLI (cleanly removes its own files if supported)
+openclaw uninstall --yes 2>/dev/null || true
+
+# 3. Remove config + data dirs
+rm -rf ~/.openclaw
+
+# 4. Remove npm global package
+npm uninstall -g openclaw 2>/dev/null || true
+
+# 5. Remove any leftover binary
+OCBIN="$(which openclaw 2>/dev/null)" && [ -n "$OCBIN" ] && sudo rm -f "$OCBIN" || true
+
+# 6. Verify clean
+which openclaw 2>/dev/null && echo "⚠️  openclaw still on PATH" || echo "✅ OpenClaw fully removed"
+lsof -i :18789 | grep -q LISTEN && echo "⚠️  port 18789 still in use" || echo "✅ Port 18789 free"
+```
+
+**Send ntfy after O_CLEAN**:
+```bash
+curl -s -H "Title: Thea O_CLEAN - Done" -H "Priority: 3" -H "Tags: broom" \
+     -d "OpenClaw uninstalled. Port 18789 free. Ready to build native gateway." \
+     https://ntfy.sh/thea-msm3u
+```
 
 ---
 
