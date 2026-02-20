@@ -6,6 +6,10 @@
 //  Surfaces curated life moments (photos, workouts, podcasts, music, locations)
 //  without requiring individual HealthKit / Photos permissions — Apple curates them.
 //
+//  NOTE: JournalingSuggestions programmatic background access is not available.
+//  Suggestions are surfaced via JournalingSuggestionsPicker (SwiftUI view).
+//  This service manages state from picker callbacks and provides AI context.
+//
 //  Available on iOS only. macOS does not have the JournalingSuggestions framework.
 //
 
@@ -22,7 +26,6 @@ final class JournalingSuggestionsService: ObservableObject {
     // MARK: - Published State
 
     @Published var recentSuggestions: [JournalingSuggestion] = []
-    @Published var isAuthorized: Bool = false
     @Published var lastFetchDate: Date?
 
     // MARK: - Private
@@ -33,25 +36,18 @@ final class JournalingSuggestionsService: ObservableObject {
         logger.info("JournalingSuggestionsService initialized")
     }
 
-    // MARK: - Fetch
+    // MARK: - Picker Callback
 
-    /// Fetches curated life-moment suggestions from the JournalingSuggestions framework.
-    /// Combines recent suggestions across all asset types.
-    func fetchSuggestions() async {
-        do {
-            var collected: [JournalingSuggestion] = []
-            let fetcher = JournalingSuggestionsFetcher()
-            for await suggestion in fetcher.suggestions {
-                collected.append(suggestion)
-                if collected.count >= 20 { break }
-            }
-            recentSuggestions = collected
-            lastFetchDate = Date()
-            isAuthorized = true
-            logger.info("Fetched \(collected.count) journaling suggestions")
-        } catch {
-            logger.error("Failed to fetch journaling suggestions: \(error.localizedDescription)")
+    /// Called when the user selects a suggestion from JournalingSuggestionsPicker.
+    /// Add a `JournalingSuggestionsPicker { suggestion in self.addSuggestion(suggestion) }` to your view.
+    func addSuggestion(_ suggestion: JournalingSuggestion) {
+        // Prepend so most recent is first
+        if !recentSuggestions.contains(where: { $0.id == suggestion.id }) {
+            recentSuggestions.insert(suggestion, at: 0)
+            if recentSuggestions.count > 20 { recentSuggestions.removeLast() }
         }
+        lastFetchDate = Date()
+        logger.info("Added journaling suggestion — total: \(self.recentSuggestions.count)")
     }
 
     // MARK: - Context Summary
@@ -65,7 +61,7 @@ final class JournalingSuggestionsService: ObservableObject {
         let dateStr = lastFetchDate.map {
             DateFormatter.localizedString(from: $0, dateStyle: .short, timeStyle: .short)
         } ?? "unknown"
-        return "You have \(count) recent life moments available for reflection (fetched \(dateStr))."
+        return "You have \(count) recent life moments available for reflection (last updated \(dateStr))."
     }
 
     // MARK: - Suggested Prompt
@@ -73,31 +69,10 @@ final class JournalingSuggestionsService: ObservableObject {
     /// Generates a reflective AI prompt based on the most recent suggestion.
     func suggestedReflectionPrompt() -> String? {
         guard let first = recentSuggestions.first else { return nil }
-        let dateStr = DateFormatter.localizedString(from: first.date, dateStyle: .medium, timeStyle: .none)
+        // JournalingSuggestion.date is DateInterval? — use start date if available
+        let date = first.date?.start ?? Date()
+        let dateStr = DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .none)
         return "I had a notable moment on \(dateStr). Help me reflect on it and what it might mean for my goals."
-    }
-}
-
-// MARK: - JournalingSuggestionsFetcher
-
-/// Lightweight async fetcher that iterates the JournalingSuggestions API.
-@available(iOS 17.2, *)
-private struct JournalingSuggestionsFetcher {
-    /// AsyncSequence of suggestions — collects at most the requested count.
-    var suggestions: AsyncThrowingStream<JournalingSuggestion, Error> {
-        AsyncThrowingStream { continuation in
-            Task {
-                do {
-                    // JournalingSuggestions.Suggestion is the public API type
-                    for try await item in JournalingSuggestion.suggestions {
-                        continuation.yield(item)
-                    }
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
-                }
-            }
-        }
     }
 }
 #endif
