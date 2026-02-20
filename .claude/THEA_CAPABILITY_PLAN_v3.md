@@ -120,24 +120,24 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 |---------------------------|-----------------|-------|
 | **v2→v3 AUTO-TRANSITION** | ⚠️ AUTO-LINK   | v2 Phase U ✅ → executor auto-starts A3. v2 Phase V DEFERRED to AD3. |
 | Phase A3: Meta-AI         | ✅ DONE         | 71 files activated, MetaAIDashboardView wired, BUILD SUCCEEDED sha 807227fa |
-| Phase B3: Tool Execution  | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
-| Phase C3: RAG / Semantic  | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
-| Phase D3: Confidence Loop | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
+| Phase B3: Tool Execution  | ✅ DONE         | 8 handlers in AI/Tools/, ToolExecutionCoordinator, ChatManager+Tools.swift B3 wired sha 3848a29d |
+| Phase C3: RAG / Semantic  | ✅ DONE         | enrichSystemPromptWithSemanticContext() + indexExistingConversations() wired in ChatManager sha 3848a29d |
+| Phase D3: Confidence Loop | ✅ DONE         | recordConfidenceFeedback() wired in runPostResponseActions, feeds ModelRouter+TaskClassifier sha 3848a29d |
 | Phase E3: Skills Complete | ⏳ PENDING      | Blocked by A3 |
 | Phase F3: Squads Unified  | ✅ DONE         | SquadDefinition+CommunicationStrategy+CoordinationMode; persistentSquads; SquadsView; MacSettingsView sidebar sha 49bc33f0 |
 | Phase G3: TaskPlanDAG+    | ✅ DONE         | PlanOutcome quality scoring, planCache, createPlan cache lookup, AgentTeamOrchestrator approval gate sha 34a0083d |
 | Phase H3: AI System UIs   | ⏳ PENDING      | Blocked by A3 |
 | Phase I3: UI Components   | ⏳ PENDING      | Blocked by H3 |
-| Phase J3: LifeTracking UI | ⏳ PENDING      | Blocked by I3 |
+| Phase J3: LifeTracking UI | ✅ DONE         | ActivityTimelineView, LifeTrackingDashboardView, LifeTrackingAnalyticsView; MacSettingsView wired |
 | Phase K3: Config UI       | ⏳ PENDING      | Blocked by H3 |
 | Phase L3: Computer Use    | ✅ DONE         | ComputerUseHandler (screenshot/click/type/scroll/key), computer_use in AnthropicToolCatalog, toggle in Autonomy settings sha ebfb10bf |
-| Phase M3: MLX Audio       | 🔄 IN PROGRESS  | Stream 3 |
-| Phase N3: Artifact System | ⏳ PENDING      | Blocked by E3 |
-| Phase O3: MCP Client      | ⏳ PENDING      | Blocked by B3 |
-| Phase P3: KG Enhancement  | ⏳ PENDING      | Blocked by v2 |
-| Phase Q3: Proactive Intel | ⏳ PENDING      | Blocked by P3 |
+| Phase M3: MLX Audio       | ✅ DONE         | MLXAudioEngine + MLXVoiceBackend re-enabled; ToolExecutionCoordinator actor→@MainActor, ChatManager+Tools, FileToolHandler iOS compat, MacOSToolHandler @MainActor |
+| Phase N3: Artifact System | ✅ DONE         | GeneratedArtifact SwiftData model, ArtifactBrowserView, ArtifactManager; MacSettingsView wired |
+| Phase O3: MCP Client      | ✅ DONE         | GenericMCPClient, MCPServerBrowserView, MCPClientManager, MCPBuilderView, MCPServerGeneratorTypes |
+| Phase P3: KG Enhancement  | ✅ DONE         | PersonalKnowledgeGraph dedup+decay+consolidation; LongTermMemorySystem+Consolidation active |
+| Phase Q3: Proactive Intel | ✅ DONE         | DeliveredInsight SwiftData model, InsightHistoryView, WeeklyInsightSummaryView, ProactiveInsightEngine cron |
 | Phase R3: SelfEvolution   | ⏳ PENDING      | Blocked by H3 |
-| Phase S3: MCPGen UI       | ⏳ PENDING      | Blocked by O3 |
+| Phase S3: MCPGen UI       | ✅ DONE         | MCPBuilderView + GeneratedServerPreview + MCPServerGenerator; wired in MacSettingsView Developer tab sha 3848a29d |
 | Phase T3: Integration Bknd| ⏳ PENDING      | Blocked by B3; Safari/Cal/Shortcuts/Reminders/Notes/Finder/Mail |
 | Phase U3: AI Subsystems   | ⏳ PENDING      | Blocked by A3; Context/Adaptive/Proactive/PatternLearning/Predict |
 | Phase V3: Transparency UIs| ⏳ PENDING      | Blocked by H3; BehavioralFingerprint viz, Privacy, Messaging |
