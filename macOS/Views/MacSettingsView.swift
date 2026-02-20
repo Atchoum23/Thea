@@ -101,6 +101,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     // Group 4: Customization
     case theme = "Theme"
     case advanced = "Advanced"
+    case mcpBuilder = "MCP Builder"
 
     // Group 5: Account & Info
     case subscription = "Subscription"
@@ -156,6 +157,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .privacy: "lock.shield"
         case .theme: "paintpalette"
         case .advanced: "slider.horizontal.3"
+        case .mcpBuilder: "network.badge.shield.half.filled"
         case .subscription: "creditcard"
         case .about: "info.circle"
         }
@@ -167,7 +169,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .providers, .memory, .agent, .moltbook, .knowledge, .liveGuidance, .metaAI, .squads: 1
         case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .messagingGateway, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home: 2
         case .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
-        case .theme, .advanced: 4
+        case .theme, .advanced, .mcpBuilder: 4
         case .subscription, .about: 5
         }
     }
@@ -358,6 +360,8 @@ struct MacSettingsView: View {
             ThemeConfigurationView()
         case .advanced:
             advancedSettings
+        case .mcpBuilder:
+            MCPBuilderView()
         case .subscription:
             SubscriptionSettingsView()
         case .about:
