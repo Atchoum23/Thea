@@ -340,6 +340,13 @@ struct TheamacOSApp: App {
             logger.info("AP3: ServerHealthMonitor started — polling MSM3U:18789")
         }
 
+        // AQ3: AutonomousSessionManager — stale-session watchdog (dev + user-task modes)
+        Task {
+            try? await Task.sleep(for: .seconds(14))
+            await AutonomousSessionManager.shared.startSession()
+            logger.info("AQ3: AutonomousSessionManager started — stale watchdog active")
+        }
+
         // P3: PersonalKnowledgeGraph weekly background consolidation
         // Deduplicates entities, decays stale entries, resolves contradictions.
         Task.detached(priority: .background) {
