@@ -63,6 +63,7 @@ final class FinancialTransaction {
     var isPending: Bool
     var importedAt: Date
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     init(
         id: UUID = UUID(),
         providerTransactionID: String,
@@ -99,7 +100,7 @@ enum FinancialAPIProvider: String, CaseIterable, Sendable {
     case ynab
     case plaid
 
-    var displayName: String {
+    var displayName: String { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         switch self {
         case .kraken:   return "Kraken"
         case .coinbase: return "Coinbase"
@@ -109,5 +110,5 @@ enum FinancialAPIProvider: String, CaseIterable, Sendable {
     }
 
     /// Keychain identifier used by FinancialCredentialStore
-    var keychainKey: String { "thea.financial.\(rawValue)" }
+    var keychainKey: String { "thea.financial.\(rawValue)" } // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 }
