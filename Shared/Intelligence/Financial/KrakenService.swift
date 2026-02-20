@@ -36,7 +36,7 @@ struct KrakenTrade: Sendable {
 actor KrakenService {
     static let shared = KrakenService()
 
-    private let logger = Logger(subsystem: "com.thea.app", category: "KrakenService")
+    private let logger = Logger(subsystem: "com.thea.app", category: "KrakenService") // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     private let baseURL = "https://api.kraken.com"
     private let apiVersion = "0"
 
