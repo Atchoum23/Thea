@@ -88,7 +88,7 @@ public final class HumanReadinessEngine: ObservableObject {
         recompute()
     }
 
-    /// Called by InterruptBudgetManager and macOSBehavioralSignalExtractor
+    /// Called by InterruptBudgetManager and MacOSBehavioralSignalExtractor
     /// when a behavioral signal is detected (idle end, app switch, typing burst, etc.)
     public func recordBehavioralSignal() {
         behavioralSignalCount += 1

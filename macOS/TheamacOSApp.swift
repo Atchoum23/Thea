@@ -297,7 +297,7 @@ struct TheamacOSApp: App {
             _ = InterruptBudgetManager.shared      // Starts daily budget tracking
             _ = DataFreshnessOrchestrator.shared   // Starts 60s staleness checks
             #if os(macOS)
-            macOSBehavioralSignalExtractor.shared.start()  // Idle + app-switch signals
+            MacOSBehavioralSignalExtractor.shared.start()  // Idle + app-switch signals
             #endif
             logger.info("AN3: Wave 7 resource system initialized (PersonalParameters + readiness + orchestrator + budget + freshness)")
         }

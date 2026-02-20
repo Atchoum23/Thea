@@ -21,8 +21,8 @@ import IOKit
 // MARK: - macOSBehavioralSignalExtractor
 
 @MainActor
-public final class macOSBehavioralSignalExtractor {
-    public static let shared = macOSBehavioralSignalExtractor()
+public final class MacOSBehavioralSignalExtractor {
+    public static let shared = MacOSBehavioralSignalExtractor()
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "BehavioralSignalExtractor")
     private let params = PersonalParameters.shared
@@ -30,6 +30,7 @@ public final class macOSBehavioralSignalExtractor {
     // MARK: - State
 
     private var idleObserverTimer: Timer?
+    private var appSwitchObserver: NSObjectProtocol?
     private var appSwitchCount: Int = 0
     private var lastAppSwitchTime: Date = .distantPast
     private var wasIdle: Bool = false
@@ -50,7 +51,10 @@ public final class macOSBehavioralSignalExtractor {
     public func stop() {
         idleObserverTimer?.invalidate()
         idleObserverTimer = nil
-        NotificationCenter.default.removeObserver(self)
+        if let observer = appSwitchObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+            appSwitchObserver = nil
+        }
         logger.info("macOSBehavioralSignalExtractor stopped")
     }
 
@@ -108,7 +112,7 @@ public final class macOSBehavioralSignalExtractor {
     // MARK: - App Switch Tracking
 
     private func setupAppSwitchObserver() {
-        NSWorkspace.shared.notificationCenter.addObserver(
+        appSwitchObserver = NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didActivateApplicationNotification,
             object: nil,
             queue: .main

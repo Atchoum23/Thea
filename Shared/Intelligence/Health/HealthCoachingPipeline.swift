@@ -103,6 +103,7 @@ final class HealthCoachingPipeline {
 
     // MARK: - Data Gathering
 
+    // swiftlint:disable:next function_body_length
     private func gatherHealthData() async -> [HealthDataPoint] {
         var dataPoints: [HealthDataPoint] = []
         let calendar = Calendar.current

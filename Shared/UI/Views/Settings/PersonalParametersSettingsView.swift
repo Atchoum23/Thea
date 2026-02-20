@@ -133,18 +133,90 @@ struct PersonalParametersSettingsView: View {
                 Text("Weights must sum to 1.0 — SelfTuning adjusts based on predictive accuracy.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                parameterRow(label: "HRV Weight",   description: "HRV contribution (research: 40%).",   value: $params.morningWeightHRV,         range: 0.1...0.6, step: 0.05, format: "%.0f%%", displayMultiplier: 100, defaultValue: 0.40)
-                parameterRow(label: "Sleep Weight",  description: "Sleep quality (research: 25%).",       value: $params.morningWeightSleep,       range: 0.1...0.5, step: 0.05, format: "%.0f%%", displayMultiplier: 100, defaultValue: 0.25)
-                parameterRow(label: "Deep Weight",   description: "Deep sleep % (research: 15%).",        value: $params.morningWeightDeep,        range: 0.05...0.4, step: 0.05, format: "%.0f%%", displayMultiplier: 100, defaultValue: 0.15)
-                parameterRow(label: "Temp Weight",   description: "Wrist temp proxy (research: 10%).",    value: $params.morningWeightTemperature, range: 0.05...0.3, step: 0.05, format: "%.0f%%", displayMultiplier: 100, defaultValue: 0.10)
-                parameterRow(label: "REM Weight",    description: "REM sleep % (research: 10%).",         value: $params.morningWeightREM,         range: 0.05...0.3, step: 0.05, format: "%.0f%%", displayMultiplier: 100, defaultValue: 0.10)
+                parameterRow(
+                    label: "HRV Weight",
+                    description: "HRV contribution (research: 40%).",
+                    value: $params.morningWeightHRV,
+                    range: 0.1...0.6,
+                    step: 0.05,
+                    format: "%.0f%%",
+                    displayMultiplier: 100,
+                    defaultValue: 0.40
+                )
+                parameterRow(
+                    label: "Sleep Weight",
+                    description: "Sleep quality (research: 25%).",
+                    value: $params.morningWeightSleep,
+                    range: 0.1...0.5,
+                    step: 0.05,
+                    format: "%.0f%%",
+                    displayMultiplier: 100,
+                    defaultValue: 0.25
+                )
+                parameterRow(
+                    label: "Deep Weight",
+                    description: "Deep sleep % (research: 15%).",
+                    value: $params.morningWeightDeep,
+                    range: 0.05...0.4,
+                    step: 0.05,
+                    format: "%.0f%%",
+                    displayMultiplier: 100,
+                    defaultValue: 0.15
+                )
+                parameterRow(
+                    label: "Temp Weight",
+                    description: "Wrist temp proxy (research: 10%).",
+                    value: $params.morningWeightTemperature,
+                    range: 0.05...0.3,
+                    step: 0.05,
+                    format: "%.0f%%",
+                    displayMultiplier: 100,
+                    defaultValue: 0.10
+                )
+                parameterRow(
+                    label: "REM Weight",
+                    description: "REM sleep % (research: 10%).",
+                    value: $params.morningWeightREM,
+                    range: 0.05...0.3,
+                    step: 0.05,
+                    format: "%.0f%%",
+                    displayMultiplier: 100,
+                    defaultValue: 0.10
+                )
             }
 
             // MARK: Readiness Thresholds
             Section("Readiness State Thresholds") {
-                parameterRow(label: "Active Threshold",  description: "Min readiness → ACTIVE state (research: 65%).", value: $params.stateActiveThreshold, range: 0.4...0.8, step: 0.05, format: "%.0f%%", displayMultiplier: 100, defaultValue: 0.65)
-                parameterRow(label: "High Threshold",    description: "Min readiness → HIGH state (research: 90%).",   value: $params.stateHighThreshold,   range: 0.7...1.0, step: 0.05, format: "%.0f%%", displayMultiplier: 100, defaultValue: 0.90)
-                parameterRow(label: "Satisfice Target",  description: "Below this → satisfice not optimize (research: 70%).", value: $params.satisficeTarget, range: 0.3...0.8, step: 0.05, format: "%.0f%%", displayMultiplier: 100, defaultValue: 0.70)
+                parameterRow(
+                    label: "Active Threshold",
+                    description: "Min readiness → ACTIVE state (research: 65%).",
+                    value: $params.stateActiveThreshold,
+                    range: 0.4...0.8,
+                    step: 0.05,
+                    format: "%.0f%%",
+                    displayMultiplier: 100,
+                    defaultValue: 0.65
+                )
+                parameterRow(
+                    label: "High Threshold",
+                    description: "Min readiness → HIGH state (research: 90%).",
+                    value: $params.stateHighThreshold,
+                    range: 0.7...1.0,
+                    step: 0.05,
+                    format: "%.0f%%",
+                    displayMultiplier: 100,
+                    defaultValue: 0.90
+                )
+                parameterRow(
+                    label: "Satisfice Target",
+                    description: "Below this → satisfice not optimize (research: 70%).",
+                    value: $params.satisficeTarget,
+                    range: 0.3...0.8,
+                    step: 0.05,
+                    format: "%.0f%%",
+                    displayMultiplier: 100,
+                    defaultValue: 0.70
+                )
             }
 
             // MARK: Claude Session
