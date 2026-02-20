@@ -12,12 +12,6 @@ import os.log
 
 private let coordLogger = Logger(subsystem: "ai.thea.app", category: "ToolExecutionCoordinator")
 
-// Sendable box for crossing to @MainActor Task closures from nonisolated context
-private struct _SendableDict: @unchecked Sendable {
-    let dict: [String: Any]
-    init(_ dict: [String: Any]) { self.dict = dict }
-}
-
 // MARK: - Coordinator
 
 // Changed from `actor` to `@MainActor final class`: the coordinator has no mutable stored state,
@@ -143,7 +137,7 @@ final class ToolExecutionCoordinator {
 
                 var toolStep = ToolUseStep(call: AnthropicToolCall(id: toolId, name: toolName, input: rawInput))
                 // Create input as a fresh region (not derived from rawInput which is captured by onToolStep)
-                var input = (block["input"] as? [String: Any]) ?? [:]
+                var inputDict = (block["input"] as? [String: Any]) ?? [:] 
                 input["_tool_use_id"] = toolId
                 coordLogger.debug("Executing tool: \(toolName)")
                 await onToolStep(toolStep)
@@ -173,8 +167,9 @@ final class ToolExecutionCoordinator {
 
     // MARK: - Tool Dispatcher
 
-    nonisolated private func executeToolCall(name: String, input: sending [String: Any]) async -> AnthropicToolResult {
-        let si = _SendableDict(input)
+    // Class is @MainActor so no `nonisolated`/`sending` needed — all runs on MainActor.
+    // @MainActor handler methods (SystemToolHandler, MacOSToolHandler) are called directly.
+    private func executeToolCall(name: String, input: [String: Any]) async -> AnthropicToolResult {
         switch name {
         // Memory tools
         case "search_memory", "search_knowledge_graph":
@@ -213,17 +208,17 @@ final class ToolExecutionCoordinator {
             return SystemToolHandler.getSystemInfo(input)
 
         #if os(macOS)
-        // System tools (macOS)
+        // System tools (macOS) — called directly; class is @MainActor
         case "system_notification":
-            return await Task { @MainActor in await SystemToolHandler.sendNotification(si.dict) }.value
+            return await SystemToolHandler.sendNotification(input)
         case "system_clipboard_get":
-            return await Task { @MainActor in SystemToolHandler.getClipboard(si.dict) }.value
+            return SystemToolHandler.getClipboard(input)
         case "system_clipboard_set":
-            return await Task { @MainActor in SystemToolHandler.setClipboard(si.dict) }.value
+            return SystemToolHandler.setClipboard(input)
         case "run_command", "terminal_execute":
             return await SystemToolHandler.runCommand(input)
         case "open_application":
-            return await Task { @MainActor in SystemToolHandler.openApplication(si.dict) }.value
+            return SystemToolHandler.openApplication(input)
 
         // macOS integration tools
         case "calendar_list_events":
@@ -239,11 +234,11 @@ final class ToolExecutionCoordinator {
         case "mail_check_unread":
             return await MacOSToolHandler.mailCheckUnread(input)
         case "finder_reveal":
-            return await Task { @MainActor in MacOSToolHandler.finderReveal(si.dict) }.value
+            return MacOSToolHandler.finderReveal(input)
         case "finder_search":
             return MacOSToolHandler.finderSearch(input)
         case "safari_open_url":
-            return await Task { @MainActor in MacOSToolHandler.safariOpenURL(si.dict) }.value
+            return MacOSToolHandler.safariOpenURL(input)
         case "safari_get_current_url":
             return await MacOSToolHandler.safariGetCurrentURL(input)
         case "music_play":
