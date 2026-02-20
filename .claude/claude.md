@@ -23,9 +23,35 @@
    ```
    **IMPORTANT**: Always use `git pushsync` instead of `git push`. This pushes to origin AND triggers a sync build + install on the other Mac. A Claude Code hook enforces this — plain `git push` will be blocked.
 
+### ⚠️ THEA-SYNC + CLAUDE-SESSION-SYNC INTERFERENCE — CRITICAL (ALL MACHINES)
+
+**Two background agents silently revert file edits. Know them. Suspend them.**
+
+**`com.alexis.thea-sync`** — runs every 5 min on both Macs. Does `git stash → git pull → git stash pop`. Uncommitted edits get stashed, the remote version pulls over them, the old stash is popped on top. Result: working tree diverges from HEAD, blocking `git pull`.
+
+**`com.alexis.claude-session-sync`** — fswatch-triggered, ~5s latency. Rsyncs `~/.claude/` bidirectionally between MSM3U and MBAM2. Edits to `.claude/` files are overwritten by the other Mac within seconds.
+
+**What Claude Code calls "linter"**: When Claude Code detects a file it wrote was externally modified, it shows: *"Note: file was modified, either by the user or by a linter."* In this project, "linter" = thea-sync or claude-session-sync.
+
+**At session start on ANY machine — suspend both:**
+```bash
+launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+launchctl unload ~/Library/LaunchAgents/com.alexis.claude-session-sync.plist 2>/dev/null
+```
+**At session end — re-enable both:**
+```bash
+launchctl load ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
+launchctl load ~/Library/LaunchAgents/com.alexis.claude-session-sync.plist 2>/dev/null
+```
+**Prevention**: Commit each file IMMEDIATELY after writing — never batch-commit 2+ files. Both agents can fire within 5 seconds of a write.
+- Files reverted mid-session → `git checkout HEAD -- <file>`
+- git pull blocked by unstaged changes → `git stash && git pull && git stash drop`
+
+---
+
 ### ⚠️ AUTONOMOUS SESSION START — MANDATORY FIRST STEPS
 
-Every autonomous Claude Code session on MSM3U MUST begin with:
+Every autonomous Claude Code session on MSM3U or MBAM2 MUST begin with:
 ```bash
 # 1. Suspend thea-sync (runs git stash every 5min — will silently revert your work)
 launchctl unload ~/Library/LaunchAgents/com.alexis.thea-sync.plist 2>/dev/null
