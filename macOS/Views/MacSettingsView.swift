@@ -88,7 +88,11 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case learning = "Learning"
     case home = "Home"
 
-    // Group 3: System
+    // Group 3: System & Analytics
+    case behavioralAnalytics = "Behavioral Analytics"
+    case privacyTransparency = "Privacy Transparency"
+    case gatewayStatus = "Gateway Status"
+    case notificationIntel = "Notification Intel"
     case systemMonitor = "System Monitor"
     case systemCleaner = "System Cleaner"
     case battery = "Battery"
@@ -147,6 +151,10 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .passwords: "lock.shield"
         case .learning: "graduationcap"
         case .home: "house.fill"
+        case .behavioralAnalytics: "chart.bar.xaxis"
+        case .privacyTransparency: "eye.slash.fill"
+        case .gatewayStatus: "antenna.radiowaves.left.and.right"
+        case .notificationIntel: "bell.badge.fill"
         case .systemMonitor: "gauge.with.dots.needle.33percent"
         case .systemCleaner: "trash.circle"
         case .battery: "battery.75"
@@ -168,7 +176,8 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .general, .aiModels: 0
         case .providers, .memory, .agent, .moltbook, .knowledge, .liveGuidance, .metaAI, .squads: 1
         case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .messagingGateway, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home: 2
-        case .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
+        case .behavioralAnalytics, .privacyTransparency, .gatewayStatus, .notificationIntel,
+             .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
         case .theme, .advanced, .mcpBuilder: 4
         case .subscription, .about: 5
         }
@@ -340,6 +349,14 @@ struct MacSettingsView: View {
             LearningDashboardView()
         case .home:
             HomeIntelligenceView()
+        case .behavioralAnalytics:
+            BehavioralAnalyticsView()
+        case .privacyTransparency:
+            PrivacyTransparencyView()
+        case .gatewayStatus:
+            MessagingGatewayStatusView()
+        case .notificationIntel:
+            NotificationIntelligenceView()
         case .systemMonitor:
             SystemMonitorView()
         case .systemCleaner:
