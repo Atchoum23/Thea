@@ -53,7 +53,7 @@ extension ChatManager {
         let tools = AnthropicToolCatalog.shared.buildToolsForAPI()
         toolsLogger.debug("B3: executing with \(tools.count) tools")
 
-        let stream = await ToolExecutionCoordinator.shared.executeWithTools(
+        let stream = ToolExecutionCoordinator.shared.executeWithTools(
             messages: messages,
             model: model,
             apiKey: apiKey,

@@ -14,7 +14,11 @@ private let coordLogger = Logger(subsystem: "ai.thea.app", category: "ToolExecut
 
 // MARK: - Coordinator
 
-actor ToolExecutionCoordinator {
+// Changed from `actor` to `@MainActor final class`: the coordinator has no mutable stored state,
+// so actor isolation adds no safety benefit. `@MainActor` lets handler calls avoid
+// actor-boundary `sending` checks on `[String: Any]` tool input dictionaries.
+@MainActor
+final class ToolExecutionCoordinator {
     static let shared = ToolExecutionCoordinator()
 
     private let maxSteps = 10  // Prevent infinite loops
