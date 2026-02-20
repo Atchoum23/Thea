@@ -335,7 +335,21 @@ final class AnthropicProvider: AIProvider, Sendable {
         model: String,
         options: AnthropicChatOptions
     ) async throws -> AsyncThrowingStream<ChatResponse, Error> {
-        let requestBody = buildAdvancedRequestBody(messages: messages, model: model, options: options)
+        var requestBody = buildAdvancedRequestBody(messages: messages, model: model, options: options)
+
+        // AR3: Validate conversation via AnthropicConversationManager before every send.
+        // If tool_use/tool_result pairing is broken, recover to the last clean boundary.
+        if let anthropicMessages = requestBody["messages"] as? [[String: Any]] {
+            let manager = AnthropicConversationManager(messages: anthropicMessages)
+            do {
+                try await manager.validate()
+            } catch {
+                logger.warning("AnthropicProvider: conversation validation failed (\(error.localizedDescription)) — recovering")
+                await manager.recoverFromToolMismatch()
+                requestBody["messages"] = await manager.messages
+            }
+        }
+
         let request = try buildAdvancedRequest(body: requestBody, model: model, options: options)
 
         if options.stream {
