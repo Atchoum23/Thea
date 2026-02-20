@@ -20,7 +20,9 @@ public final class QueryDecomposer {
     /// Decompose a query into executable sub-queries
     public func decompose(_ query: String) async throws -> QueryDecomposition {
         // 1. Assess complexity
-        let complexity = classifier.assessComplexity(query)
+        // Assess complexity via word count heuristic (TaskClassifier has no assessComplexity method)
+        let wordCount = query.split(separator: " ").count
+        let complexity: QueryComplexity = wordCount < 10 ? .simple : wordCount < 40 ? .moderate : .complex
 
         if complexity == .simple {
             // Simple queries don't need decomposition

@@ -14,7 +14,7 @@ import os.log
 /// Every user interaction MUST go through this orchestrator
 @MainActor
 public final class MetaAICoordinator: ObservableObject {
-    public static let shared = THEAOrchestrator()
+    public static let shared = MetaAICoordinator()
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "Orchestrator")
 
@@ -93,16 +93,14 @@ public final class MetaAICoordinator: ObservableObject {
             id: UUID(),
             content: executionResult.content,
             decision: decision,
-            metadata: ResponseMetadata(
+            metadata: THEAResponseMetadata(
                 startTime: startTime,
                 endTime: Date(),
                 tokenCount: executionResult.tokenCount,
                 modelUsed: decision.selectedModel,
                 providerUsed: decision.selectedProvider
             ),
-            suggestions: suggestions,
-            learnings: learnings,
-            relatedMemories: memories.prefix(3).map { $0 }
+            suggestions: suggestions
         )
 
         lastResponse = response
@@ -151,9 +149,9 @@ public final class MetaAICoordinator: ObservableObject {
                     if decision.strategy == .planMode {
                         let decomposition = try await QueryDecomposer.shared.decompose(input.text)
 
-                        let plan = await PlanManager.shared.createPlan(
-                            from: decomposition,
+                        let plan = PlanManager.shared.createSimplePlan(
                             title: self.generatePlanTitle(input.text),
+                            steps: decomposition.subQueries.map { $0.query },
                             conversationId: input.conversationId
                         )
 
@@ -201,16 +199,14 @@ public final class MetaAICoordinator: ObservableObject {
                             id: UUID(),
                             content: fullContent.trimmingCharacters(in: .whitespacesAndNewlines),
                             decision: decision,
-                            metadata: ResponseMetadata(
+                            metadata: THEAResponseMetadata(
                                 startTime: startTime,
                                 endTime: Date(),
                                 tokenCount: tokenCount,
                                 modelUsed: decision.selectedModel,
                                 providerUsed: decision.selectedProvider
                             ),
-                            suggestions: [],
-                            learnings: [],
-                            relatedMemories: Array(memories.prefix(3))
+                            suggestions: []
                         )
 
                         continuation.yield(.complete(response))
@@ -253,16 +249,14 @@ public final class MetaAICoordinator: ObservableObject {
                         id: UUID(),
                         content: fullContent,
                         decision: decision,
-                        metadata: ResponseMetadata(
+                        metadata: THEAResponseMetadata(
                             startTime: startTime,
                             endTime: Date(),
                             tokenCount: tokenCount,
                             modelUsed: decision.selectedModel,
                             providerUsed: decision.selectedProvider
                         ),
-                        suggestions: suggestions,
-                        learnings: learnings,
-                        relatedMemories: Array(memories.prefix(3))
+                        suggestions: suggestions
                     )
 
                     continuation.yield(.complete(response))
@@ -474,7 +468,8 @@ public final class MetaAICoordinator: ObservableObject {
             return .localFallback
         }
 
-        let complexity = TaskClassifier.shared.assessComplexity(input.text)
+        let _wordCount = input.text.split(separator: " ").count
+        let complexity: QueryComplexity = _wordCount < 10 ? .simple : _wordCount < 40 ? .moderate : .complex
 
         // Plan mode: planning-type tasks with moderate+ complexity
         if classification.taskType == .planning && complexity != .simple {
@@ -577,20 +572,20 @@ public final class MetaAICoordinator: ObservableObject {
         )
 
         let messages = [
-            ChatMessage(role: "system", text: systemPrompt),
-            ChatMessage(role: "user", text: input.text)
+            AIMessage(id: UUID(), conversationID: UUID(), role: .system, content: .text(systemPrompt), timestamp: Date(), model: ""),
+            AIMessage(id: UUID(), conversationID: UUID(), role: .user, content: .text(input.text), timestamp: Date(), model: "")
         ]
 
         // Execute
-        let response = try await provider.chatSync(
-            messages: messages,
-            model: decision.selectedModel,
-            options: ChatOptions(stream: false)
-        )
+        var collectedText = ""
+        let chatStream1 = try await provider.chat(messages: messages, model: decision.selectedModel, stream: false)
+        for try await chunk in chatStream1 {
+            if case let .delta(text) = chunk.type { collectedText += text }
+        }
 
         return THEAExecutionResult(
-            content: response.content,
-            tokenCount: response.usage?.totalTokens ?? 0
+            content: collectedText,
+            tokenCount: 0
         )
     }
 
@@ -604,24 +599,24 @@ public final class MetaAICoordinator: ObservableObject {
         )
 
         let messages = [
-            ChatMessage(role: "system", text: systemPrompt),
-            ChatMessage(role: "user", text: input.text)
+            AIMessage(id: UUID(), conversationID: UUID(), role: .system, content: .text(systemPrompt), timestamp: Date(), model: ""),
+            AIMessage(id: UUID(), conversationID: UUID(), role: .user, content: .text(input.text), timestamp: Date(), model: "")
         ]
 
         let stream = try await provider.chat(
             messages: messages,
             model: decision.selectedModel,
-            options: ChatOptions(stream: true)
+            stream: true
         )
 
         return AsyncThrowingStream { continuation in
             Task {
                 do {
                     for try await chunk in stream {
-                        switch chunk {
-                        case .content(let text):
+                        switch chunk.type {
+                        case .delta(let text):
                             continuation.yield(THEAModelStreamChunk(text: text, tokens: 1))
-                        case .done:
+                        case .complete:
                             continuation.finish()
                         case .error(let error):
                             continuation.finish(throwing: error)
@@ -768,19 +763,19 @@ public final class MetaAICoordinator: ObservableObject {
         let systemPrompt = THEASelfAwareness.shared.generateSystemPrompt(for: subQuery.taskType)
 
         let messages = [
-            ChatMessage(role: "system", text: systemPrompt),
-            ChatMessage(role: "user", text: subQuery.query)
+            AIMessage(id: UUID(), conversationID: UUID(), role: .system, content: .text(systemPrompt), timestamp: Date(), model: ""),
+            AIMessage(id: UUID(), conversationID: UUID(), role: .user, content: .text(subQuery.query), timestamp: Date(), model: "")
         ]
 
-        let response = try await provider.chatSync(
-            messages: messages,
-            model: decision.selectedModel,
-            options: ChatOptions(stream: false)
-        )
+        var collectedText = ""
+        let chatStream1 = try await provider.chat(messages: messages, model: decision.selectedModel, stream: false)
+        for try await chunk in chatStream1 {
+            if case let .delta(text) = chunk.type { collectedText += text }
+        }
 
         return THEAExecutionResult(
-            content: response.content,
-            tokenCount: response.usage?.totalTokens ?? 0
+            content: collectedText,
+            tokenCount: 0
         )
     }
 
@@ -854,100 +849,6 @@ public struct THEAAttachment: Sendable {
         case image
         case file
         case code
-    }
-}
-
-public struct THEAResponse: Identifiable, Sendable {
-    public let id: UUID
-    public let content: String
-    public let decision: THEADecision
-    public let metadata: ResponseMetadata
-    public let suggestions: [THEASuggestion]
-    public let learnings: [THEALearning]
-    public let relatedMemories: [OmniMemoryRecord]
-}
-
-public struct THEADecision: Identifiable, Sendable {
-    public let id: UUID
-    public let reasoning: THEAReasoning
-    public let selectedModel: String
-    public let selectedProvider: String
-    public let strategy: THEAExecutionStrategy
-    public let confidenceScore: Double
-    public let contextFactors: [ContextFactor]
-    public let timestamp: Date
-}
-
-public struct THEAReasoning: Sendable {
-    public let taskType: TaskType
-    public let taskTypeDescription: String
-    public let taskConfidence: Double
-    public let whyThisModel: String
-    public let whyThisStrategy: String
-    public let alternativesConsidered: [(model: String, reason: String)]
-    public let classificationMethod: ClassificationMethodType
-}
-
-public enum THEAExecutionStrategy: String, Sendable {
-    case direct        // Single model, direct execution
-    case decomposed    // Break into sub-tasks
-    case multiModel    // Use multiple models
-    case localFallback // Use local model
-    case planMode      // Visible plan with tracked steps
-}
-
-public struct ContextFactor: Identifiable, Sendable {
-    public let id = UUID()
-    public let name: String
-    public let value: String
-    public let influence: InfluenceLevel
-    public let description: String
-
-    public enum InfluenceLevel: String, Sendable {
-        case critical
-        case high
-        case medium
-        case low
-    }
-}
-
-public struct ResponseMetadata: Sendable {
-    public let startTime: Date
-    public let endTime: Date
-    public let tokenCount: Int
-    public let modelUsed: String
-    public let providerUsed: String
-
-    public var latency: TimeInterval {
-        endTime.timeIntervalSince(startTime)
-    }
-}
-
-public struct THEASuggestion: Identifiable, Sendable {
-    public let id = UUID()
-    public let type: SuggestionType
-    public let title: String
-    public let description: String
-    public let action: String
-
-    public enum SuggestionType: String, Sendable {
-        case action      // Something THEA can do
-        case followUp    // Follow-up question
-        case info        // Additional information
-    }
-}
-
-public struct THEALearning: Identifiable, Sendable {
-    public let id = UUID()
-    public let type: LearningType
-    public let description: String
-    public let confidence: Double
-
-    public enum LearningType: String, Sendable {
-        case taskPattern
-        case modelPerformance
-        case userPreference
-        case contextPattern
     }
 }
 

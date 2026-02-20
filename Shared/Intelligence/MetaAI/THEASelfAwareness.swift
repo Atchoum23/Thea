@@ -279,12 +279,12 @@ public final class THEASelfAwareness: ObservableObject {
             #endif
 
             // Safely access ProviderRegistry
-            let cloudProviders = ProviderRegistry.shared.configuredProviders.filter { $0.id != "local" }
-            self.cloudProvidersConfigured = cloudProviders.map(\.name)
+            let cloudProviders = ProviderRegistry.shared.configuredProviders.filter { $0.metadata.name.lowercased() != "local" }
+            self.cloudProvidersConfigured = cloudProviders.map { $0.metadata.name }
 
             self.defaultProvider = SettingsManager.shared.defaultProvider
-            self.defaultModel = SettingsManager.shared.defaultModel
-            self.totalModelsAvailable = ProviderRegistry.shared.allModels.count
+            self.defaultModel = SettingsManager.shared.defaultProvider
+            self.totalModelsAvailable = ProviderRegistry.shared.configuredProviders.count
             self.orchestratorEnabled = AppConfiguration.shared.orchestratorConfig.orchestratorEnabled
             self.preferLocalModels = SettingsManager.shared.preferLocalModels
         }

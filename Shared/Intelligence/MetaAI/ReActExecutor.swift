@@ -245,26 +245,26 @@ public final class ReActExecutor {
         previousSteps: [ReActStep]
     ) async throws -> ReActThought {
         // Get a configured provider
-        guard let provider = providerRegistry.defaultProvider ?? providerRegistry.configuredProviders.first else {
+        guard let provider = providerRegistry.getDefaultProvider() ?? providerRegistry.configuredProviders.first else {
             throw ReActError.providerNotAvailable
         }
 
         let prompt = buildThoughtPrompt(task: task, context: context, previousSteps: previousSteps)
 
-        let message = ChatMessage(role: "user", text: prompt)
+        let message = AIMessage(id: UUID(), conversationID: UUID(), role: .user, content: .text(prompt), timestamp: Date(), model: "")
 
         var response = ""
         let stream = try await provider.chat(
             messages: [message],
             model: config.reasoningModel,
-            options: ChatOptions(stream: false)
+            stream: false
         )
 
         for try await chunk in stream {
-            switch chunk {
-            case let .content(text):
+            switch chunk.type {
+            case let .delta(text):
                 response += text
-            case .done:
+            case .complete:
                 break
             case let .error(error):
                 throw error
@@ -538,7 +538,7 @@ public final class ReActExecutor {
         steps: [ReActStep]
     ) async throws -> String {
         // Get a configured provider
-        guard let provider = providerRegistry.defaultProvider ?? providerRegistry.configuredProviders.first else {
+        guard let provider = providerRegistry.getDefaultProvider() ?? providerRegistry.configuredProviders.first else {
             throw ReActError.providerNotAvailable
         }
 
@@ -563,20 +563,20 @@ public final class ReActExecutor {
         Provide a comprehensive final answer:
         """
 
-        let message = ChatMessage(role: "user", text: prompt)
+        let message = AIMessage(id: UUID(), conversationID: UUID(), role: .user, content: .text(prompt), timestamp: Date(), model: "")
 
         var response = ""
         let stream = try await provider.chat(
             messages: [message],
             model: config.reasoningModel,
-            options: ChatOptions(stream: false)
+            stream: false
         )
 
         for try await chunk in stream {
-            switch chunk {
-            case let .content(text):
+            switch chunk.type {
+            case let .delta(text):
                 response += text
-            case .done:
+            case .complete:
                 break
             case let .error(error):
                 throw error

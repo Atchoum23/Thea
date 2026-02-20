@@ -921,7 +921,7 @@ struct MetaAIAgentsPanel: View {
                     if !orchestrator.completedResults.isEmpty {
                         Divider()
                         Text("Recent Results (last 5)").font(.headline)
-                        ForEach(orchestrator.completedResults.suffix(5)) { result in
+                        ForEach(Array(orchestrator.completedResults.suffix(5)), id: \.taskId) { result in
                             ResultRowView(result: result)
                         }
                     }
@@ -1015,7 +1015,7 @@ struct MetaAIWorkflowsPanel: View {
                     )
                 } else {
                     List(builder.workflows, id: \.id, selection: $selectedId) { wf in
-                        WorkflowRowView(workflow: wf).tag(wf.id)
+                        MetaAIDashWorkflowRow(workflow: wf).tag(wf.id)
                     }
                     .listStyle(.plain)
                 }
@@ -1025,7 +1025,7 @@ struct MetaAIWorkflowsPanel: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     if let wf = selected {
-                        WorkflowDetailView(workflow: wf)
+                        MetaAIDashWorkflowDetail(workflow: wf)
                     } else {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Active Executions").font(.headline)
@@ -1047,7 +1047,7 @@ struct MetaAIWorkflowsPanel: View {
     }
 }
 
-private struct WorkflowRowView: View {
+private struct MetaAIDashWorkflowRow: View {
     let workflow: Workflow
     var body: some View {
         HStack {
@@ -1065,7 +1065,7 @@ private struct WorkflowRowView: View {
     }
 }
 
-private struct WorkflowDetailView: View {
+private struct MetaAIDashWorkflowDetail: View {
     let workflow: Workflow
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -1136,7 +1136,7 @@ struct MetaAIPluginsPanel: View {
                     )
                 } else {
                     List(system.installedPlugins, id: \.id) { plugin in
-                        PluginRowView(
+                        MetaAIDashPluginRow(
                             plugin: plugin,
                             isActive: system.activePlugins.contains { $0.id == plugin.id }
                         )
@@ -1172,7 +1172,7 @@ struct MetaAIPluginsPanel: View {
     }
 }
 
-private struct PluginRowView: View {
+private struct MetaAIDashPluginRow: View {
     let plugin: Plugin
     let isActive: Bool
     var body: some View {
@@ -1333,7 +1333,7 @@ struct MetaAISelfExecutionPanel: View {
     @State private var lastSummary: SelfExecutionService.ExecutionSummary?
     @State private var errorMessage: String?
     @State private var isCheckingReadiness = false
-    @State private var readinessResult: (ready: Bool, missing: [String])?
+    @State private var readinessResult: (ready: Bool, missingRequirements: [String])?
 
     var body: some View {
         ScrollView {
@@ -1388,7 +1388,7 @@ struct MetaAISelfExecutionPanel: View {
                         Text(readiness.ready ? "Ready to execute" : "Requirements not met")
                             .font(.caption.bold())
                     }
-                    ForEach(readiness.missing, id: \.self) { req in
+                    ForEach(readiness.missingRequirements, id: \.self) { req in
                         HStack {
                             Image(systemName: "xmark.circle").foregroundColor(.red).font(.caption)
                             Text(req).font(.caption)

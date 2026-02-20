@@ -35,7 +35,7 @@ public final class ResilienceManager {
 
     /// Execute a chat request with full resilience: circuit breaker, retries, fallbacks
     func executeChat(
-        messages: [ChatMessage],
+        messages: [AIMessage],
         model: String,
         primaryProvider: String,
         fallbackProviders: [String] = [],
@@ -91,7 +91,7 @@ public final class ResilienceManager {
     // MARK: - Retry Logic
 
     private func executeChatWithRetry(
-        messages: [ChatMessage],
+        messages: [AIMessage],
         model: String,
         providerId: String,
         stream: Bool
@@ -114,12 +114,12 @@ public final class ResilienceManager {
 
                 // Execute the chat request with timeout (V2 API)
                 var response = ""
-                let chatStream = try await provider.chat(messages: messages, model: model, options: ChatOptions(stream: stream))
+                let chatStream = try await provider.chat(messages: messages, model: model, stream: stream)
                 for try await chunk in chatStream {
-                    switch chunk {
-                    case let .content(text):
+                    switch chunk.type {
+                    case let .delta(text):
                         response += text
-                    case .done:
+                    case .complete:
                         break
                     case let .error(error):
                         throw error
@@ -270,11 +270,11 @@ public final class ResilienceManager {
 
         // Get local models from providers that are local (MLX, Ollama, etc.)
         let localProviders = registry.configuredProviders.filter {
-            $0.name.lowercased().contains("local") ||
-            $0.name.lowercased().contains("mlx") ||
-            $0.name.lowercased().contains("ollama")
+            $0.metadata.name.lowercased().contains("local") ||
+            $0.metadata.name.lowercased().contains("mlx") ||
+            $0.metadata.name.lowercased().contains("ollama")
         }
-        let localModels = localProviders.flatMap { $0.supportedModels.map { "local:\($0.id)" } }
+        let localModels = localProviders.map { "local:\($0.metadata.name)" }
 
         // Based on preference, order providers
         switch preference {

@@ -245,7 +245,7 @@ final class SubAgentOrchestrator {
 
     // MARK: - Planning
 
-    private func planTask(_ task: String, context: [String: Any]) async throws -> TaskPlan {
+    private func planTask(_ task: String, context: [String: Any]) async throws -> SubAgentTaskPlan {
         let planner = getAgent(type: .planner)
         activeAgents.append(planner)
 
@@ -277,7 +277,7 @@ final class SubAgentOrchestrator {
         let planText = try await streamProviderResponse(provider: provider, prompt: prompt, model: modelToUse)
 
         // Parse plan (simplified - should use proper JSON parsing)
-        return TaskPlan(
+        return SubAgentTaskPlan(
             originalTask: task,
             complexity: .complex,
             requiredAgents: [.researcher, .coder, .analyst, .integrator, .validator],
@@ -287,7 +287,7 @@ final class SubAgentOrchestrator {
         )
     }
 
-    private func decomposePlan(_ plan: TaskPlan) async throws -> [SubTask] {
+    private func decomposePlan(_ plan: SubAgentTaskPlan) async throws -> [SubTask] {
         plan.steps.enumerated().map { index, step in
             SubTask(
                 id: UUID(),
@@ -686,7 +686,7 @@ struct SubAgent: Identifiable, Equatable {
     }
 }
 
-struct TaskPlan {
+struct SubAgentTaskPlan {
     let originalTask: String
     let complexity: TaskComplexity
     let requiredAgents: [SubAgentOrchestrator.AgentType]
@@ -722,7 +722,7 @@ struct SubTaskResult {
 
 struct OrchestrationResult {
     let task: String
-    let plan: TaskPlan
+    let plan: SubAgentTaskPlan
     let subTaskResults: [SubTaskResult]
     let finalResult: String
     let agentsUsed: [SubAgentOrchestrator.AgentType]

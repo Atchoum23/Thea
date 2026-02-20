@@ -286,17 +286,17 @@ public final class ParallelQueryExecutor {
         }
 
         // Execute the query using V2 API
-        let message = ChatMessage(role: "user", text: subQuery.query)
+        let message = AIMessage(id: UUID(), conversationID: UUID(), role: .user, content: .text(subQuery.query), timestamp: Date(), model: "")
 
         var response = ""
         let stream = try await provider.chat(
             messages: [message],
             model: modelSelection.modelID,
-            options: ChatOptions(stream: false)
+            stream: false
         )
 
         for try await chunk in stream {
-            if case let .content(text) = chunk {
+            if case let .delta(text) = chunk.type {
                 response += text
             }
         }

@@ -32,7 +32,7 @@ public struct AnalyzedInteraction: Sendable, Codable, Identifiable {
 
 /// Detailed analysis of an interaction
 public struct InteractionAnalysis: Sendable, Codable {
-    public let intent: UserIntent
+    public let intent: AnalyzerUserIntent
     public let sentiment: Sentiment
     public let complexity: InteractionComplexity
     public let topics: [String]
@@ -40,7 +40,7 @@ public struct InteractionAnalysis: Sendable, Codable {
     public let suggestions: [String]
 
     public init(
-        intent: UserIntent,
+        intent: AnalyzerUserIntent,
         sentiment: Sentiment,
         complexity: InteractionComplexity,
         topics: [String],
@@ -57,7 +57,7 @@ public struct InteractionAnalysis: Sendable, Codable {
 }
 
 /// User's intent category
-public enum UserIntent: String, Codable, Sendable, CaseIterable {
+public enum AnalyzerUserIntent: String, Codable, Sendable, CaseIterable {
     case question // Seeking information
     case instruction // Requesting action
     case clarification // Asking for explanation
@@ -230,7 +230,7 @@ public final class InteractionAnalyzer {
 
     // MARK: - Intent Detection
 
-    private func detectIntent(_ message: String) -> UserIntent {
+    private func detectIntent(_ message: String) -> AnalyzerUserIntent {
         let lower = message.lowercased()
 
         if lower.contains("?") || lower.hasPrefix("what") || lower.hasPrefix("how") ||
@@ -400,7 +400,7 @@ public final class InteractionAnalyzer {
     // MARK: - Suggestion Generation
 
     private func generateSuggestions(
-        intent: UserIntent,
+        intent: AnalyzerUserIntent,
         sentiment: Sentiment,
         quality: ResponseQuality
     ) -> [String] {
