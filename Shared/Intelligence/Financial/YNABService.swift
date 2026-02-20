@@ -12,17 +12,18 @@ import OSLog
 // MARK: - YNAB Budget Summary Model
 
 struct YNABBudgetSummary: Sendable {
-    let id: String
+    let id: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     let name: String
-    let lastModifiedOn: String?
-    let firstMonth: String?
-    let lastMonth: String?
+    let lastModifiedOn: String? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let firstMonth: String? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let lastMonth: String? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 }
 
 // MARK: - YNAB Transaction
 
+// periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 struct YNABTransaction: Sendable {
-    let id: String
+    let id: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     let date: String            // ISO date e.g. "2024-03-15"
     let amount: Int             // Milliunits (divide by 1000 for real value)
     let memo: String?
@@ -39,7 +40,7 @@ struct YNABTransaction: Sendable {
 actor YNABService {
     static let shared = YNABService()
 
-    private let logger = Logger(subsystem: "com.thea.app", category: "YNABService")
+    private let logger = Logger(subsystem: "com.thea.app", category: "YNABService") // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     private let baseURL = URL(string: "https://api.youneedabudget.com/v1")!
 
     /// Server knowledge per budget for delta sync. Key: budgetID, Value: Int knowledge
