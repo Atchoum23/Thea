@@ -31,6 +31,7 @@ import SwiftUI
         // MARK: - CarPlay Interface
 
         private var interfaceController: CPInterfaceController?
+        // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         private var carWindow: CPWindow?
 
         // MARK: - Initialization

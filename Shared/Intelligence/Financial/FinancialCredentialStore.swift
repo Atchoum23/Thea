@@ -78,9 +78,9 @@ enum FinancialCredentialStore {
 
     // MARK: - Delete
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Remove stored credentials for a provider.
     @discardableResult
-    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     static func delete(for provider: String) -> Bool {
         let query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
@@ -112,9 +112,9 @@ enum FinancialCredentialStore {
         load(for: "\(provider).\(suffix)")
     }
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Delete a credential by provider + suffix.
     @discardableResult
-    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     static func delete(for provider: String, suffix: String) -> Bool {
         delete(for: "\(provider).\(suffix)")
     }
