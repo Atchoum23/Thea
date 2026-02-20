@@ -184,7 +184,7 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase ABD3: Periphery v2  | ✅ DONE         | 112 declarations annotated across 20 Wave 10 files — commits f82b1fb1 + bd4c13ba + 36fa13b8 |
 | Phase ABE3: CI Green v2   | ✅ DONE         | All 4 workflows green on bd4c13ba: Security Audit ✅ Security Scanning ✅ Thea CI ✅ E2E Tests ✅ — ABE3 2026-02-20 17:38 |
 | Phase ABF3: Wiring v2     | ✅ DONE         | 54/55 systems wired (≥55 target met), JournalingSuggestionsService gap fixed — sha 5a136a4f |
-| Phase ABG3: Notarize v2   | ⏳ PENDING (ABE3) | Release notes drafted sha 9ce4a473, v1.6.0 tag pending CI green |
+| Phase ABG3: Notarize v2   | ⚙️ IN PROGRESS  | CI green ✅ — v1.6.0 tag in progress (release notes sha 9ce4a473) |
 | Phase ABH3: Report v2     | ⚙️ IN PROGRESS  | Draft committed sha 4274ed77, s10f completing WAVE_11_VERIFICATION_REPORT.md |
 | **Overall v3 %**          | **99% autonomous done** | A3–W3 + AE3–AI3 + Wave 9 + Wave 10 + ABA3–ABF3 + ABE3 ✅ DONE; ABG3/ABH3 in_progress; AZ3+AD3 pending. |
 
@@ -6867,7 +6867,7 @@ Update this section after each phase completes:
 | ABB3  | Security Audit v2                        | ✅ DONE     | MSM3U    | 2026-02-20|
 | ABC3  | Test Coverage v2                         | ✅ DONE     | MSM3U    | 2026-02-20|
 | ABD3  | Periphery Clean v2                       | ✅ DONE     | MSM3U    | 2026-02-20|
-| ABE3  | CI Green v2                              | ⚙️ IN PROG  | MSM3U    | 2026-02-20|
+| ABE3  | CI Green v2                              | ✅ DONE     | MSM3U    | 2026-02-20|
 | ABF3  | Wiring Verification v2 (≥55 systems)     | ✅ DONE     | MSM3U    | 2026-02-20|
 | ABG3  | Notarization v2 (v1.6.0)                 | ⏳ PENDING  | —        | —         |
 | ABH3  | Final Report v2                          | ⏳ PENDING  | —        | —         |
