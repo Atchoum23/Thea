@@ -79,7 +79,7 @@ enum FinancialCredentialStore {
 
     /// Remove stored credentials for a provider.
     @discardableResult
-    static func delete(for provider: String) -> Bool {
+    static func delete(for provider: String) -> Bool { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         let query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
             kSecAttrAccount: accountKey(for: provider)
@@ -100,7 +100,7 @@ enum FinancialCredentialStore {
     /// Save multiple credentials for a provider (e.g. apiKey + secret pair).
     /// Uses composite key: "thea.financial.{provider}.{suffix}"
     @discardableResult
-    static func save(token: String, for provider: String, suffix: String) -> Bool {
+    static func save(token: String, for provider: String, suffix: String) -> Bool { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         save(token: token, for: "\(provider).\(suffix)")
     }
 
@@ -111,7 +111,7 @@ enum FinancialCredentialStore {
 
     /// Delete a credential by provider + suffix.
     @discardableResult
-    static func delete(for provider: String, suffix: String) -> Bool {
+    static func delete(for provider: String, suffix: String) -> Bool { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         delete(for: "\(provider).\(suffix)")
     }
 
@@ -119,7 +119,7 @@ enum FinancialCredentialStore {
 
     /// Save using a typed `FinancialAPIProvider`.
     @discardableResult
-    static func save(token: String, provider: FinancialAPIProvider) -> Bool {
+    static func save(token: String, provider: FinancialAPIProvider) -> Bool { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         save(token: token, for: provider.rawValue)
     }
 
