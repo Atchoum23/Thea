@@ -12,6 +12,12 @@ import os.log
 
 private let coordLogger = Logger(subsystem: "ai.thea.app", category: "ToolExecutionCoordinator")
 
+// Sendable box for crossing to @MainActor Task closures from nonisolated context
+private struct _SendableDict: @unchecked Sendable {
+    let dict: [String: Any]
+    init(_ dict: [String: Any]) { self.dict = dict }
+}
+
 // MARK: - Coordinator
 
 // Changed from `actor` to `@MainActor final class`: the coordinator has no mutable stored state,
@@ -167,7 +173,8 @@ final class ToolExecutionCoordinator {
 
     // MARK: - Tool Dispatcher
 
-    private func executeToolCall(name: String, input: [String: Any]) async -> AnthropicToolResult {
+    nonisolated private func executeToolCall(name: String, input: sending [String: Any]) async -> AnthropicToolResult {
+        let si = _SendableDict(input)
         switch name {
         // Memory tools
         case "search_memory", "search_knowledge_graph":
@@ -208,15 +215,15 @@ final class ToolExecutionCoordinator {
         #if os(macOS)
         // System tools (macOS)
         case "system_notification":
-            return await Task { @MainActor in await SystemToolHandler.sendNotification(input) }.value
+            return await Task { @MainActor in await SystemToolHandler.sendNotification(si.dict) }.value
         case "system_clipboard_get":
-            return await Task { @MainActor in SystemToolHandler.getClipboard(input) }.value
+            return await Task { @MainActor in SystemToolHandler.getClipboard(si.dict) }.value
         case "system_clipboard_set":
-            return await Task { @MainActor in SystemToolHandler.setClipboard(input) }.value
+            return await Task { @MainActor in SystemToolHandler.setClipboard(si.dict) }.value
         case "run_command", "terminal_execute":
             return await SystemToolHandler.runCommand(input)
         case "open_application":
-            return await Task { @MainActor in SystemToolHandler.openApplication(input) }.value
+            return await Task { @MainActor in SystemToolHandler.openApplication(si.dict) }.value
 
         // macOS integration tools
         case "calendar_list_events":
