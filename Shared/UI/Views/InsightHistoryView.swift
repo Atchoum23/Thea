@@ -78,7 +78,7 @@ struct InsightHistoryView: View {
                     } label: {
                         HStack {
                             Label(cat.rawValue, systemImage: cat.symbolName)
-                                .foregroundStyle(selectedCategory == cat ? .accentColor : .primary)
+                                .foregroundStyle(selectedCategory == cat ? Color.accentColor : Color.primary)
                             Spacer()
                             Text("\(insights.filter { $0.category == cat }.count)")
                                 .foregroundStyle(.secondary).font(.caption)
