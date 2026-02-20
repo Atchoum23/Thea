@@ -446,12 +446,11 @@ struct ChatView: View {
                 if inputText.count > 3 {
                     QuerySuggestionOverlay(
                         conversationId: conversation.id,
-                        isVisible: $showQuerySuggestions,
-                        onSuggestionSelected: { suggestion in
-                            inputText = suggestion
-                            showQuerySuggestions = false
-                        }
-                    )
+                        isVisible: $showQuerySuggestions
+                    ) { suggestion in
+                        inputText = suggestion
+                        showQuerySuggestions = false
+                    }
                     .padding(.horizontal, TheaSpacing.lg)
                     .padding(.bottom, TheaSpacing.xs)
                 }
