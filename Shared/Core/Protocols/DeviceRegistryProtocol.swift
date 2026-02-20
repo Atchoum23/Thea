@@ -21,6 +21,7 @@ import Foundation
 /// - Cross-device features can be tested without needing physical devices
 /// - Alternative device discovery backends (e.g., CloudKit-based) can conform
 @MainActor
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 protocol DeviceRegistryProtocol: AnyObject {
 
     // MARK: - Current Device

@@ -8,6 +8,7 @@ import SwiftUI
 struct LiveGuidanceSettingsView: View {
     @State private var guidance = LocalVisionGuidance.shared
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var enableLiveMonitoring: Bool = false
     @State private var enableVoiceGuidance: Bool = true
     @State private var selectedCaptureMode: Int = 0 // 0=Full Screen, 1=Active Window, 2=Region

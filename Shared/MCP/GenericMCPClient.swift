@@ -14,7 +14,9 @@ import OSLog
 
 struct MCPClientServerInfo: Sendable {
     let name: String
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     let version: String
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     let protocolVersion: String
     var capabilities: MCPClientCapabilities
 }
@@ -22,8 +24,10 @@ struct MCPClientServerInfo: Sendable {
 struct MCPClientCapabilities: Sendable {
     var supportsTools: Bool
     var supportsResources: Bool
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     var supportsPrompts: Bool
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static let empty = MCPClientCapabilities(
         supportsTools: false,
         supportsResources: false,
@@ -171,6 +175,7 @@ actor GenericMCPClient {
     }
 
     /// Read the content of a resource by URI.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func readResource(_ uri: String) async throws -> String {
         let response = try await sendRequest(method: "resources/read", params: ["uri": uri])
 

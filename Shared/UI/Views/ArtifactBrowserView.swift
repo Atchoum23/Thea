@@ -189,10 +189,12 @@ struct BrowserArtifactRow: View {
 // MARK: - Artifact Detail Sheet
 
 struct ArtifactDetailSheet: View {
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @Environment(\.modelContext) private var modelContext
     @Bindable var artifact: GeneratedArtifact
 
     #if os(macOS)
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @Environment(\.openWindow) private var openWindow
     #endif
 

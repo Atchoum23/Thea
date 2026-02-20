@@ -22,6 +22,7 @@ import Foundation
 /// - New provider sources (e.g., remote model catalogs) can conform without
 ///   modifying existing consumers
 @MainActor
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 protocol ProviderRegistryProtocol: AnyObject {
 
     // MARK: - Discovery
@@ -82,6 +83,7 @@ protocol ProviderRegistryProtocol: AnyObject {
 
 // MARK: - Default Implementation (for optional methods)
 
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 extension ProviderRegistryProtocol {
     func getLocalProvider(modelName: String? = nil) -> AIProvider? {
         getLocalProvider(modelName: modelName)

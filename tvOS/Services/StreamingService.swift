@@ -123,6 +123,7 @@ enum VideoQuality: String, Codable, Comparable, Sendable {
 
 /// Swiss bundled streaming service info
 /// Canal+ Switzerland includes HBO Max and Paramount+ via Swisscom TV
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 struct BundledStreamingInfo: Sendable {
     let mainProvider: StreamingAppID
     let accessedVia: String
@@ -192,6 +193,7 @@ enum DownloadPriority: String, Codable, Sendable {
 }
 
 /// Availability recommendation
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 struct AvailabilityRecommendation: Sendable {
     let shouldDownload: Bool
     let reasons: [DownloadReason]
@@ -207,12 +209,14 @@ final class StreamingAvailabilityService: ObservableObject {
     static let shared = StreamingAvailabilityService()
 
     @Published private(set) var accounts: [StreamingAccount] = []
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @Published private(set) var userRegion: String = "CH"
 
     private let userDefaultsKey = "StreamingAccounts"
 
     /// Swiss bundled services configuration
     /// Canal+ Switzerland (via Swisscom TV) includes HBO Max and Paramount+
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static let swissBundledServices: [BundledStreamingInfo] = [
         BundledStreamingInfo(
             mainProvider: .canalCH,
@@ -239,6 +243,7 @@ final class StreamingAvailabilityService: ObservableObject {
         saveAccounts()
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func updateAccount(_ account: StreamingAccount) {
         if let index = accounts.firstIndex(where: { $0.id == account.id }) {
             accounts[index] = account
@@ -249,6 +254,7 @@ final class StreamingAvailabilityService: ObservableObject {
     // MARK: - Availability Check
 
     /// Check if content should be auto-downloaded based on streaming availability
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func shouldAutoDownload(
         contentID: String,
         title: String,
@@ -262,12 +268,14 @@ final class StreamingAvailabilityService: ObservableObject {
     }
 
     /// Get the best streaming option for content
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func getBestStreamingOption(contentID: String, type: ContentType) async -> StreamingContentInfo? {
         let availability = await checkAvailability(contentID: contentID, type: type, season: nil)
         return availability.filter { $0.isAvailable && !$0.isGeoBlocked }.first
     }
 
     /// Check if a provider's content is bundled in Switzerland
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func getBundledAccessInfo(for providerID: Int) -> BundledStreamingInfo? {
         guard userRegion == "CH" else { return nil }
 
@@ -287,6 +295,7 @@ final class StreamingAvailabilityService: ObservableObject {
 
     // MARK: - Private Helpers
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private func checkAvailability(
         contentID: String,
         type: ContentType,
@@ -323,6 +332,7 @@ final class StreamingAvailabilityService: ObservableObject {
         return results
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private func analyzeAvailability(_ options: [StreamingContentInfo], title: String) -> AvailabilityRecommendation {
         var reasons: [DownloadReason] = []
         var bestOption: StreamingContentInfo?

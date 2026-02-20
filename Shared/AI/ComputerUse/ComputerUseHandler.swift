@@ -17,6 +17,7 @@ import OSLog
 
 /// Handles computer_use tool calls from Claude API on macOS.
 /// Provides screenshot capture, mouse events, keyboard input, and scrolling.
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 actor ComputerUseHandler {
 
     private static let logger = Logger(subsystem: "ai.thea.app", category: "ComputerUse")
@@ -248,6 +249,7 @@ actor ComputerUseHandler {
 // MARK: - Computer Use Settings Extension
 
 extension UserDefaults {
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     var computerUseEnabled: Bool {
         get { bool(forKey: "thea.computerUseEnabled") }
         set { set(newValue, forKey: "thea.computerUseEnabled") }

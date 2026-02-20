@@ -13,6 +13,7 @@ import OSLog
 /// Routes Anthropic tool_use calls to Thea's integration backends.
 /// All 7 integration categories supported: Calendar, Reminders, Shortcuts,
 /// Safari (macOS), Finder (macOS), Mail (macOS), Notes (macOS).
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 final actor IntegrationToolHandler {
     static let shared = IntegrationToolHandler()
 

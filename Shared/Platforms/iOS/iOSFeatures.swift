@@ -19,10 +19,12 @@
     }
 
     public class LegacyQuickActionIntent: INIntent {
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         var actionType: String?
     }
 
     public class LegacyVoiceCommandIntent: INIntent {
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         var commandPhrase: String?
     }
 

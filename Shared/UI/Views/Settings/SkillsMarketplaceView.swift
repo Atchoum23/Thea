@@ -16,6 +16,7 @@ struct SkillsMarketplaceView: View {
     @State private var selectedCategory: MarketplaceSkillCategory?
     @State private var searchText: String = ""
     @State private var isSyncing: Bool = false
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var syncError: String?
     @State private var installError: String?
     @State private var successMessage: String?

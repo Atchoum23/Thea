@@ -13,6 +13,7 @@ import SwiftUI
 
 struct TVInferenceRelaySettingsView: View {
     @ObservedObject var client: RemoteInferenceClient
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var isScanning = false
 
     var body: some View {

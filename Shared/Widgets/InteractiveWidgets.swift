@@ -300,6 +300,7 @@ struct StandByWidgetView: View {
 // MARK: - Interactive Large Widget (iOS 17+)
 
 @available(iOS 17.0, macOS 14.0, *)
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 struct InteractiveLargeWidgetView: View {
     let entry: TheaWidgetEntry
 
@@ -479,6 +480,7 @@ struct TheaStandByWidget: Widget {
 
 /// Extended widget bundle including interactive widgets
 @available(iOS 17.0, macOS 14.0, *)
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 struct TheaInteractiveWidgetBundle: WidgetBundle {
     var body: some Widget {
         TheaWidget()

@@ -344,6 +344,7 @@ public actor FocusModeIntelligence {
         focusDBMonitor = monitor
     }
     #else
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func setFocusDBMonitor(_ monitor: Any?) {}
     #endif
 

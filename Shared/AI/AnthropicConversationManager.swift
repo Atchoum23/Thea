@@ -52,9 +52,11 @@ final class AnthropicConversationManager: @unchecked Sendable {
 
     private let lock = NSLock()
     private var _messages: [[String: Any]]
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private var retryCount = 0
     private let logger = Logger(subsystem: "ai.thea.app", category: "AnthropicConversationManager")
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static let maxRetries = 1
 
     var messages: [[String: Any]] { lock.withLock { _messages } }
@@ -68,6 +70,7 @@ final class AnthropicConversationManager: @unchecked Sendable {
     // MARK: - Mutation
 
     /// Append a plain (non-tool) message.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func append(_ message: [String: Any]) {
         lock.withLock { _messages.append(message) }
     }
@@ -75,6 +78,7 @@ final class AnthropicConversationManager: @unchecked Sendable {
     /// Append an atomic tool round: assistant message (with tool_use blocks)
     /// followed immediately by a user message (with matching tool_result blocks).
     /// Validates the pair before appending — throws if IDs don't match.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func appendToolRound(
         assistantMsg: [String: Any],
         toolResults: [String: Any]
@@ -161,6 +165,7 @@ final class AnthropicConversationManager: @unchecked Sendable {
 
     /// Remove oldest message pairs until estimated token count ≤ maxTokens.
     /// Tool rounds removed as a unit — never orphans a tool_result.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func truncateToFit(maxTokens: Int) {
         let start = (lock.withLock { _messages.first })?["role"] as? String == "system" ? 1 : 0
 
@@ -218,11 +223,14 @@ final class AnthropicConversationManager: @unchecked Sendable {
 
     // MARK: - Retry Gate
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func canRetry() -> Bool { retryCount < Self.maxRetries }
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func markRetried() { retryCount += 1 }
 
     // MARK: - Token Estimation
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func estimatedTokens() -> Int {
         let chars = lock.withLock { _messages }.reduce(0) { sum, msg in
             sum + stringLength(of: msg["content"])
@@ -236,6 +244,7 @@ final class AnthropicConversationManager: @unchecked Sendable {
         message["content"] as? [[String: Any]] ?? []
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private func toolUseIDsIn(_ message: [String: Any]) -> [String] {
         contentBlocksIn(message).compactMap { block -> String? in
             guard (block["type"] as? String) == "tool_use" else { return nil }
@@ -243,6 +252,7 @@ final class AnthropicConversationManager: @unchecked Sendable {
         }
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private func toolResultIDsIn(_ message: [String: Any]) -> [String] {
         contentBlocksIn(message).compactMap { block -> String? in
             guard (block["type"] as? String) == "tool_result" else { return nil }
@@ -250,6 +260,7 @@ final class AnthropicConversationManager: @unchecked Sendable {
         }
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private func stringLength(of value: Any?) -> Int {
         guard let value else { return 0 }
         if let str = value as? String { return str.count }

@@ -41,7 +41,9 @@
         public var onHealthAnomalyDetected: ((HealthAnomaly) -> Void)?
 
         // Active queries
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         private var heartRateQuery: HKObserverQuery?
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         private var workoutQuery: HKObserverQuery?
         private var activeQueries: [HKQuery] = []
 

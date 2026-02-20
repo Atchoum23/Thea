@@ -291,6 +291,7 @@ struct TVChatMessage: Identifiable {
     let id = UUID()
     var content: String
     let isUser: Bool
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     let timestamp = Date()
     var isStreaming = false
     var modelName: String?

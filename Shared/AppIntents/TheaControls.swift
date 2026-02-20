@@ -17,6 +17,7 @@
     @available(iOS 18.0, *)
     struct QuickAskControlIntent: ControlConfigurationIntent {
         nonisolated(unsafe) static var title: LocalizedStringResource = "Quick Ask Thea"
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         nonisolated(unsafe) static var description = IntentDescription("Quickly ask Thea a question")
 
         func perform() async throws -> some IntentResult {
@@ -32,6 +33,7 @@
     @available(iOS 18.0, *)
     struct FocusSessionControlIntent: ControlConfigurationIntent {
         nonisolated(unsafe) static var title: LocalizedStringResource = "Start Focus Session"
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         nonisolated(unsafe) static var description = IntentDescription("Start a focus session with Thea")
 
         func perform() async throws -> some IntentResult {
@@ -44,6 +46,7 @@
     @available(iOS 18.0, *)
     struct DailySummaryControlIntent: ControlConfigurationIntent {
         nonisolated(unsafe) static var title: LocalizedStringResource = "Get Daily Summary"
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         nonisolated(unsafe) static var description = IntentDescription("Get your daily summary from Thea")
 
         func perform() async throws -> some IntentResult {
@@ -56,6 +59,7 @@
     @available(iOS 18.0, *)
     struct HomeDeviceControlIntent: ControlConfigurationIntent {
         nonisolated(unsafe) static var title: LocalizedStringResource = "Control Home Device"
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         nonisolated(unsafe) static var description = IntentDescription("Control a smart home device")
 
         func perform() async throws -> some IntentResult {

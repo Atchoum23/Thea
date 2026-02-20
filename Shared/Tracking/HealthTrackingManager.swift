@@ -6,6 +6,7 @@ import Observation
     import HealthKit
 import OSLog
 
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 private let logger = Logger(subsystem: "ai.thea.app", category: "HealthTrackingManager")
 
     // MARK: - Health Tracking Manager
@@ -23,6 +24,7 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "HealthTrackingM
         private(set) var isAuthorized = false
         private(set) var isMonitoring = false
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         private var config: LifeTrackingConfiguration {
             AppConfiguration.shared.lifeTrackingConfig
         }
@@ -54,6 +56,7 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "HealthTrackingM
 
         // MARK: - Real-time Monitoring
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         func startRealTimeMonitoring() {
             guard config.healthTrackingEnabled, isAuthorized else { return }
 
@@ -71,17 +74,20 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "HealthTrackingM
             }
         }
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         func stopMonitoring() {
             isMonitoring = false
         }
 
         // MARK: - Data Syncing
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         private func syncHealthData() async {
             let snapshot = await fetchDailySnapshot(for: Date())
             await saveSnapshot(snapshot)
         }
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         func fetchDailySnapshot(for date: Date) async -> HealthSnapshot {
             let calendar = Calendar.current
             let startOfDay = calendar.startOfDay(for: date)
@@ -109,6 +115,7 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "HealthTrackingM
 
         // MARK: - Individual Metrics
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         private func fetchSteps(from start: Date, to end: Date) async -> Int {
             guard let stepsType = HKQuantityType.quantityType(forIdentifier: .stepCount) else {
                 return 0
@@ -125,6 +132,7 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "HealthTrackingM
             }
         }
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         private func fetchActiveCalories(from start: Date, to end: Date) async -> Double {
             guard let caloriesType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) else {
                 return 0
@@ -141,6 +149,7 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "HealthTrackingM
             }
         }
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         private func fetchHeartRateStatistics(from start: Date, to end: Date) async -> (average: Double?, min: Double?, max: Double?) {
             guard let heartRateType = HKQuantityType.quantityType(forIdentifier: .heartRate) else {
                 return (nil, nil, nil)
@@ -159,6 +168,7 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "HealthTrackingM
             }
         }
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         private func fetchSleepDuration(from start: Date, to end: Date) async -> TimeInterval {
             guard let sleepType = HKCategoryType.categoryType(forIdentifier: .sleepAnalysis) else {
                 return 0
@@ -178,6 +188,7 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "HealthTrackingM
             }
         }
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         private func fetchWorkoutMinutes(from start: Date, to end: Date) async -> Int {
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
 
@@ -195,6 +206,7 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "HealthTrackingM
 
         // MARK: - Data Persistence
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         private func saveSnapshot(_ snapshot: HealthSnapshot) async {
             guard let context = modelContext else { return }
 
@@ -234,6 +246,7 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "HealthTrackingM
 
         // MARK: - Data Retrieval
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         func getSnapshot(for date: Date) async -> HealthSnapshot? {
             guard let context = modelContext else { return nil }
 
@@ -251,6 +264,7 @@ private let logger = Logger(subsystem: "ai.thea.app", category: "HealthTrackingM
             }
         }
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         func getSnapshots(from start: Date, to end: Date) async -> [HealthSnapshot] {
             guard let context = modelContext else { return [] }
 

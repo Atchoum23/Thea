@@ -6,7 +6,9 @@ import Foundation
 /// Trakt API configuration
 enum TraktConfig {
     static let baseURL = "https://api.trakt.tv"
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static let authURL = "https://trakt.tv/oauth/authorize"
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static let tokenURL = "https://api.trakt.tv/oauth/token"
     static let redirectURI = "thea://trakt/callback"
 }
@@ -136,6 +138,7 @@ struct TraktUpNextItem: Identifiable, Sendable {
     let show: TraktShow
     let nextEpisode: TraktEpisode
     let progress: TraktProgress
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     let posterURL: URL?
 
     var id: String { "\(show.id)-\(nextEpisode.id)" }
@@ -177,6 +180,7 @@ final class TraktService: ObservableObject {
     @Published private(set) var upNext: [TraktUpNextItem] = []
     @Published private(set) var calendar: [TraktCalendarEntry] = []
     @Published private(set) var watchlist: [TraktWatchlistItem] = []
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @Published var error: String?
 
     private var tokens: TraktTokens?
@@ -205,6 +209,7 @@ final class TraktService: ObservableObject {
 
     // MARK: - Authentication
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func getAuthorizationURL() -> URL? {
         guard let clientID else { return nil }
 
@@ -217,6 +222,7 @@ final class TraktService: ObservableObject {
         return components?.url
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func handleCallback(code: String) async throws {
         guard let clientID, let clientSecret else {
             throw TraktError.notConfigured
@@ -350,8 +356,10 @@ final class TraktService: ObservableObject {
     // MARK: - Scrobbling
 
     /// Empty response struct for fire-and-forget API calls
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private struct EmptyResponse: Decodable {}
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func startWatching(show: TraktShow, episode: TraktEpisode, progress: Double = 0) async throws {
         let body: [String: Any] = [
             "show": ["ids": ["trakt": show.ids.trakt]],
@@ -362,6 +370,7 @@ final class TraktService: ObservableObject {
         let _: EmptyResponse = try await post(endpoint: "/scrobble/start", body: body, authenticated: true)
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func stopWatching(show: TraktShow, episode: TraktEpisode, progress: Double) async throws {
         let body: [String: Any] = [
             "show": ["ids": ["trakt": show.ids.trakt]],

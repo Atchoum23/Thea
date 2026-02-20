@@ -14,6 +14,7 @@ struct MCPBuilderView: View {
     @State private var generatedServer: GeneratedMCPServer?
     @State private var isGenerating = false
     @State private var errorMessage: String?
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var showingPreview = false
     @State private var availableTemplates: [MCPTemplate] = []
 

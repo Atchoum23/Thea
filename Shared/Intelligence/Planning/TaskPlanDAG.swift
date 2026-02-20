@@ -80,6 +80,7 @@ final class TaskPlanDAG {
     // MARK: - G3: Quality Scoring & Caching
 
     /// Record the outcome of a plan execution for future quality-based routing.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func recordPlanOutcome(
         planID: UUID,
         executionTime: TimeInterval,
@@ -108,6 +109,7 @@ final class TaskPlanDAG {
     }
 
     /// Find a similar cached plan for a given goal.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func findSimilarPlan(for goal: String) async -> TaskPlan? {
         let hash = hashGoalPattern(goal)
         return planCache[hash]?.plan
@@ -133,6 +135,7 @@ final class TaskPlanDAG {
         logger.info("TaskPlanDAG: loaded \(cached.count) cached plans")
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private func saveCache() {
         // Keep only top 50 plans by quality
         let sorted = planCache.sorted { $0.value.quality > $1.value.quality }

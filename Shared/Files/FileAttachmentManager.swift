@@ -558,6 +558,7 @@ struct FileAttachment: Identifiable, Sendable {
     // periphery:ignore - Reserved: previewImage property reserved for future feature activation
     @MainActor var previewImage: NSImage?
     #elseif os(iOS) || os(tvOS)
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @MainActor var previewUIImage: UIImage?
     #endif
 

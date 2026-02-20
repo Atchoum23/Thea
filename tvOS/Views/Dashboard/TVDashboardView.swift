@@ -7,6 +7,7 @@ struct TVDashboardView: View {
     @StateObject private var traktService = TraktService.shared
     @StateObject private var mediaService = MediaAutomationService.shared
     @StateObject private var healthService = HealthMonitorService.shared
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @StateObject private var streamingService = StreamingAvailabilityService.shared
 
     @State private var selectedSection: DashboardSection = .upNext

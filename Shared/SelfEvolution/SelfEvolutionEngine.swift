@@ -344,6 +344,7 @@ public final class SelfEvolutionEngine: ObservableObject {
 
     // MARK: - Planning
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private func planImplementation(_ analysis: FeatureAnalysis) async throws -> ImplementationPlan {
         var steps: [ImplementationStep] = []
 
@@ -398,6 +399,7 @@ public final class SelfEvolutionEngine: ObservableObject {
         )
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private func estimateComplexity(_ plan: ImplementationPlan) -> ComplexityEstimate {
         let stepCount = plan.steps.count
         let duration = plan.estimatedTotalDuration

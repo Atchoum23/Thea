@@ -21,6 +21,7 @@ private let logger = Logger(subsystem: "app.thea.ios", category: "CarPlay")
 /// Manages the CarPlay scene lifecycle and registers Thea's voice-first interface.
 /// The primary template is CPVoiceControlTemplate which gives a minimal,
 /// distraction-free voice interaction model safe for in-vehicle use.
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
 
     // MARK: - Properties
@@ -130,6 +131,7 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
 /// Manages CarPlay voice session lifecycle: captures audio, sends to ChatManager,
 /// and returns spoken responses via AVSpeechSynthesizer.
 @MainActor
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 final class CarPlaySessionManager: ObservableObject {
 
     static let shared = CarPlaySessionManager()

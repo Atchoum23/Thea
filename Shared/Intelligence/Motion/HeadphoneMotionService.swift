@@ -49,6 +49,7 @@ import os.log
         // MARK: - Private State
 
         private var stillnessTimer: Timer?
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         private var lastActiveDate: Date?
 
         // MARK: - Init

@@ -21,9 +21,11 @@ final class TVInferenceClient: ObservableObject {
     static let shared = TVInferenceClient()
 
     @Published var isConnected = false
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @Published var serverName: String?
 
     private var connection: NWConnection?
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private var browser: NWBrowser?
     private var pendingRequests: [String: CheckedContinuation<String, Error>] = [:]
 

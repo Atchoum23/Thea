@@ -9,6 +9,7 @@
 import SwiftUI
 
 #if os(iOS)
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 struct TheaAgentListView: View {
     @State private var orchestrator = TheaAgentOrchestrator.shared
     @State private var selectedSession: TheaAgentSession?

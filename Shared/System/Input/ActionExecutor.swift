@@ -15,6 +15,7 @@ final class CGActionExecutor {
 
     // MARK: - State
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private(set) var lastError: Error?
     private(set) var isExecutingAction = false
 
@@ -108,6 +109,7 @@ final class CGActionExecutor {
     }
 
     /// Double-click at specific coordinates
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func doubleClick(at point: CGPoint) async throws {
         guard hasPermission else {
             throw ActionExecutionError.permissionDenied
@@ -241,6 +243,7 @@ final class CGActionExecutor {
 
     enum MouseButton {
         case left
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         case right
     }
 

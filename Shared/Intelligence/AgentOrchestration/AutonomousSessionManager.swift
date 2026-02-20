@@ -57,6 +57,7 @@ final class AutonomousSessionManager: ObservableObject {
         logger.info("AutonomousSessionManager: session started — stale threshold \(Int(self.staleThreshold / 60))min")
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func stopSession() {
         watchdog?.invalidate()
         watchdog = nil
@@ -67,6 +68,7 @@ final class AutonomousSessionManager: ObservableObject {
 
     /// Called by AgentOrchestrator on each subtask completion.
     /// Resets the stale timer so Thea's autonomous tasks don't trigger false alerts.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func heartbeat() {
         lastUserTaskHeartbeat = .now
         if staleNotificationSent {

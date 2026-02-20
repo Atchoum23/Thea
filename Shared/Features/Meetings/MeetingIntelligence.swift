@@ -40,6 +40,7 @@ public final class MeetingIntelligence: ObservableObject {
     #if canImport(AVFoundation)
         private var audioEngine: AVAudioEngine?
         #if os(iOS) || os(watchOS) || os(tvOS)
+            // periphery:ignore - Reserved: AD3 audit — wired in future integration
             private var audioSession: AVAudioSession?
         #endif
     #endif

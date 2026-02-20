@@ -460,6 +460,7 @@
     import AppIntents
 
     @available(iOS 16.0, *)
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     struct AssistantAskTheaIntent: AppIntent {
         static let title: LocalizedStringResource = "Ask Thea"
         static let description = IntentDescription("Ask Thea a question")
@@ -479,6 +480,7 @@
     }
 
     @available(iOS 16.0, *)
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     struct TheaVoiceCommandIntent: AppIntent {
         static let title: LocalizedStringResource = "Thea Voice Command"
         static let description = IntentDescription("Start listening for a voice command")

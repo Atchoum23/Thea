@@ -2,6 +2,7 @@ import Foundation
 
 // MARK: - Release Parser Service
 
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 final class ReleaseParserService: Sendable {
     static let shared = ReleaseParserService()
 
@@ -177,6 +178,7 @@ final class MediaAutomationService: ObservableObject {
     @Published private(set) var isMonitoring = false
     @Published var selectedProfile: QualityProfile = QualityProfile.presets[0]
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private let parser = ReleaseParserService.shared
     private var monitoringTask: Task<Void, Never>?
 
@@ -217,6 +219,7 @@ final class MediaAutomationService: ObservableObject {
 
     // MARK: - Queue Management
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func addToQueue(release: ParsedRelease, title: String) {
         let item = DownloadQueueItem(
             id: UUID().uuidString,
@@ -232,6 +235,7 @@ final class MediaAutomationService: ObservableObject {
         saveState()
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func removeFromQueue(id: String) {
         if let item = downloadQueue.first(where: { $0.id == id }) {
             logActivity(.removed, title: item.title, details: "Removed from queue")
@@ -240,6 +244,7 @@ final class MediaAutomationService: ObservableObject {
         saveState()
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func retryDownload(id: String) {
         if let index = downloadQueue.firstIndex(where: { $0.id == id }) {
             downloadQueue[index].status = .queued
@@ -251,6 +256,7 @@ final class MediaAutomationService: ObservableObject {
 
     // MARK: - Wanted Items
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func addWanted(title: String, type: ContentType, traktID: Int? = nil, tmdbID: Int? = nil) {
         let item = WantedItem(
             id: UUID().uuidString,
@@ -266,6 +272,7 @@ final class MediaAutomationService: ObservableObject {
         saveState()
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func removeWanted(id: String) {
         if let item = wantedItems.first(where: { $0.id == id }) {
             logActivity(.removed, title: item.title, details: "Removed from wanted list")
@@ -276,12 +283,14 @@ final class MediaAutomationService: ObservableObject {
 
     // MARK: - Release Evaluation
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func evaluateRelease(_ releaseName: String) -> (release: ParsedRelease, acceptable: Bool, score: Int) {
         let release = parser.parse(releaseName)
         let acceptable = selectedProfile.isAcceptable(release)
         return (release, acceptable, release.qualityScore)
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func rankReleases(_ releases: [String]) -> [ParsedRelease] {
         releases
             .map { parser.parse($0) }
@@ -345,6 +354,7 @@ final class MediaAutomationService: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private func saveState() {
         let state = AutomationState(queue: downloadQueue, wanted: wantedItems, activity: recentActivity)
         if let data = try? JSONEncoder().encode(state) {

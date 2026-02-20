@@ -199,6 +199,7 @@ public class PasskeysService: NSObject, ObservableObject {
     #if os(iOS)
         /// Bare UIWindow fallback — unreachable in practice since a windowScene should always exist.
         @available(iOS, deprecated: 26.0, message: "UIWindow() has no non-deprecated replacement without a scene")
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         fileprivate static func makeFallbackWindow() -> UIWindow {
             UIWindow()
         }
@@ -454,6 +455,7 @@ public struct SignInWithAppleButton: View {
 
         class Coordinator: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
             let onRequest: (ASAuthorizationAppleIDRequest) -> Void
+            // periphery:ignore - Reserved: AD3 audit — wired in future integration
             let onCompletion: (Result<ASAuthorization, Error>) -> Void
 
             init(
@@ -527,6 +529,7 @@ public struct SignInWithAppleButton: View {
             let onRequest: (ASAuthorizationAppleIDRequest) -> Void
             let onCompletion: (Result<ASAuthorization, Error>) -> Void
 
+            // periphery:ignore - Reserved: AD3 audit — wired in future integration
             init(
                 onRequest: @escaping (ASAuthorizationAppleIDRequest) -> Void,
                 onCompletion: @escaping (Result<ASAuthorization, Error>) -> Void

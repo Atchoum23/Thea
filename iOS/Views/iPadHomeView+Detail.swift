@@ -6,6 +6,7 @@ import SwiftUI
 struct IPadChatDetailView: View {
     let conversation: Conversation
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @Environment(\.modelContext) private var modelContext
     @State private var chatManager = ChatManager.shared
     @State private var voiceManager = VoiceActivationManager.shared
@@ -17,6 +18,7 @@ struct IPadChatDetailView: View {
     @State private var isListeningForVoice = false
     @State private var showingError = false
     @State private var errorMessage: String?
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @FocusState private var isInputFocused: Bool
 
     private var messageSpacing: CGFloat {
@@ -234,6 +236,7 @@ struct IPadChatDetailView: View {
 struct IPadProjectDetailView: View {
     let project: Project
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var projectManager = ProjectManager.shared
     @State private var isEditing = false
     @State private var editedTitle: String

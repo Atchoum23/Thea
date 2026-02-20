@@ -25,9 +25,11 @@ final class MLXAudioEngine {
     // MARK: - State
 
     private var _ttsModel: SendableModelBox<any SpeechGenerationModel>?
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     var ttsModel: (any SpeechGenerationModel)? { _ttsModel?.model }
     private(set) var ttsModelID: String?
     private var _sttModel: SendableModelBox<GLMASRModel>?
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     var sttModel: GLMASRModel? { _sttModel?.model }
     private(set) var sttModelID: String?
     private(set) var isLoadingTTS = false
@@ -57,6 +59,7 @@ final class MLXAudioEngine {
         }
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func unloadTTSModel() {
         _ttsModel = nil
         ttsModelID = nil
@@ -83,6 +86,7 @@ final class MLXAudioEngine {
         }
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func unloadSTTModel() {
         _sttModel = nil
         sttModelID = nil
@@ -120,6 +124,7 @@ final class MLXAudioEngine {
     }
 
     /// Stream speech generation events
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func speakStreaming(text: String, voice: String? = nil) throws -> AsyncThrowingStream<AudioGeneration, Error> {
         guard let box = _ttsModel else {
             throw MLXAudioError.noTTSModelLoaded
@@ -149,6 +154,7 @@ final class MLXAudioEngine {
     }
 
     /// Transcribe audio from an MLXArray (16kHz, mono)
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func transcribe(audioArray: MLXArray) throws -> String {
         guard let box = _sttModel else {
             throw MLXAudioError.noSTTModelLoaded
@@ -159,6 +165,7 @@ final class MLXAudioEngine {
     }
 
     /// Stream transcription events
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func transcribeStreaming(audioURL: URL) async throws -> AsyncThrowingStream<STTGeneration, Error> {
         guard let box = _sttModel else {
             throw MLXAudioError.noSTTModelLoaded

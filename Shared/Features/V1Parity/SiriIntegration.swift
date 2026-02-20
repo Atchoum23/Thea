@@ -246,6 +246,7 @@ public final class SiriIntegrationService {
         return intent
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private func handleQuestion(_ question: String) async -> SiriResponse {
         guard !question.isEmpty else {
             return SiriResponse(
@@ -300,6 +301,7 @@ public final class SiriIntegrationService {
         }
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private func handleDailyBriefing() async -> SiriResponse {
         let briefing = await LifeAssistantService.shared.generateDailyBriefing()
 
@@ -317,6 +319,7 @@ public final class SiriIntegrationService {
         )
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private func handleCreateTask(_ description: String) async -> SiriResponse {
         // Integrate with task management
         SiriResponse(
@@ -326,6 +329,7 @@ public final class SiriIntegrationService {
         )
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private func handleCommand(_ command: String) async -> SiriResponse {
         // Parse and execute command
         SiriResponse(

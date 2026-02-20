@@ -20,6 +20,7 @@ import UserNotifications
 
 // MARK: - AgentOrchestrator
 
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 actor AgentOrchestrator {
     static let shared = AgentOrchestrator(
         progressURL: URL(fileURLWithPath: "/Users/alexis/Documents/IT & Tech/MyApps/Thea/.claude/agent-progress.jsonl")

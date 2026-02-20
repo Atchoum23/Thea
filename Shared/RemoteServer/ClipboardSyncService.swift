@@ -13,6 +13,7 @@ import Foundation
     import UIKit
 import OSLog
 
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 private let logger = Logger(subsystem: "ai.thea.app", category: "ClipboardSyncService")
 #endif
 

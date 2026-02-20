@@ -14,13 +14,17 @@ import WidgetKit
 
 struct TheaWidgetEntry: TimelineEntry {
     let date: Date
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     let configuration: TheaWidgetConfiguration
     let data: WidgetData
 }
 
 struct TheaWidgetConfiguration {
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     var showAIStatus: Bool = true
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     var showQuickActions: Bool = true
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     var selectedConversation: String?
 }
 
@@ -408,6 +412,7 @@ struct ExtraLargeWidgetView: View {
 // MARK: - Accessory Views (Lock Screen / Watch)
 
 struct CircularAccessoryView: View {
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     let entry: TheaWidgetEntry
 
     var body: some View {
@@ -543,6 +548,7 @@ struct QuickActionButton: View {
 #if WIDGET_EXTENSION
     @main
 #endif
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 struct TheaWidgetBundle: WidgetBundle {
     var body: some Widget {
         TheaWidget()

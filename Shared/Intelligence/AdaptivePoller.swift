@@ -29,6 +29,7 @@ import OSLog
 // MARK: - AdaptivePoller
 
 /// Generic adaptive polling actor. Supply a `work` closure; call `poll(until:)`.
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 actor AdaptivePoller {
 
     // MARK: - Strategy

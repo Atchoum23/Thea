@@ -499,6 +499,7 @@ struct LifeTrackingPrivacyView: View {
     @AppStorage("lifeTracking.health") private var healthEnabled = true
     @AppStorage("lifeTracking.fileSystem") private var fileSystemEnabled = false
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private struct TrackingToggle: Identifiable {
         let id: String
         let label: String

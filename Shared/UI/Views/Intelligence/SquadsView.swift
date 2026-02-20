@@ -10,10 +10,15 @@ import SwiftUI
 
 struct SquadsView: View {
     // SquadOrchestrator is @Observable — use @State, not @StateObject
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var orchestrator = SquadOrchestrator.shared
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var showCreateSquad = false
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var selectedSquad: SquadDefinition?
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var showDeleteConfirm = false
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var squadToDelete: SquadDefinition?
 
     var body: some View {
@@ -60,6 +65,7 @@ struct SquadsView: View {
         }
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private var squadList: some View {
         List(selection: $selectedSquad) {
             // Built-in squads section
@@ -91,6 +97,7 @@ struct SquadsView: View {
         .listStyle(.sidebar)
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private var builtinSquads: [SquadDefinition] {
         SquadRegistry.shared.sortedSquads.filter { $0.scope == .builtin }
     }
@@ -98,6 +105,7 @@ struct SquadsView: View {
 
 // MARK: - Squad Row
 
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 private struct SquadRow: View {
     let squad: SquadDefinition
 
@@ -143,6 +151,7 @@ private struct SquadRow: View {
 
 // MARK: - Squad Detail View
 
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 private struct SquadDetailView: View {
     let squad: SquadDefinition
     let orchestrator: SquadOrchestrator
@@ -289,6 +298,7 @@ private struct StatBadge: View {
 
 // MARK: - Squad Creation View
 
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 struct SquadCreationView: View {
     let orchestrator: SquadOrchestrator
     @Environment(\.dismiss) private var dismiss

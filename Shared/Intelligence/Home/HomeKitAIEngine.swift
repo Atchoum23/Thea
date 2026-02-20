@@ -155,7 +155,9 @@ extension HomeKitAIEngine: HMHomeManagerDelegate {
 final class HomeKitAIEngine: ObservableObject {
     static let shared = HomeKitAIEngine()
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @Published var currentHomeState: HomeState = .unknown
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @Published var lastActivatedScene: String?
 
     private let logger = Logger(subsystem: "app.theathe", category: "HomeKitAIEngine")
@@ -164,18 +166,22 @@ final class HomeKitAIEngine: ObservableObject {
         logger.info("HomeKitAIEngine stub initialized (HomeKit unavailable on this platform)")
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func executeScene(named name: String) async {
         logger.info("HomeKitAIEngine stub: executeScene '\(name)' — HomeKit not available")
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func checkPredictiveActivation() async {}
 
     func startPredictiveLoop() {
         logger.info("HomeKitAIEngine stub: predictive loop not started (HomeKit unavailable)")
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func stopPredictiveLoop() {}
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func homeContextSummary() -> String {
         "HomeKit not available on this platform."
     }

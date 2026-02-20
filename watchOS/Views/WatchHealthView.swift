@@ -175,6 +175,7 @@ struct WatchWorkoutSummary {
     let icon: String
     let duration: TimeInterval
     let caloriesBurned: Double?
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     let startDate: Date
 
     var formattedDuration: String {

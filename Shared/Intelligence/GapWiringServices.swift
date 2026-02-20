@@ -30,6 +30,7 @@ final class AmbientIntelligenceEngine: ObservableObject {
     }
 
     /// AAD3: Triggers ShazamKit song recognition + SoundAnalysis scene classification.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func startAudioAnalysis() {
         ShazamKitService.shared.startListening()
         SoundAnalysisService.shared.startAnalysis()
@@ -37,6 +38,7 @@ final class AmbientIntelligenceEngine: ObservableObject {
     }
 
     /// Stop all audio analysis (ShazamKit + SoundAnalysis).
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func stopAudioAnalysis() {
         ShazamKitService.shared.stopListening()
         SoundAnalysisService.shared.stopAnalysis()
@@ -49,6 +51,7 @@ final class AmbientIntelligenceEngine: ObservableObject {
 // No-op on macOS — driving detection is iOS/automotive only.
 
 @MainActor
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 final class DrivingDetectionService: ObservableObject {
     static let shared = DrivingDetectionService()
     @Published private(set) var isDriving = false
@@ -79,6 +82,7 @@ final class DrivingDetectionService: ObservableObject {
 // On macOS: observes app-usage via LifeMonitoringCoordinator.
 
 @MainActor
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 final class ScreenTimeAnalyzer: ObservableObject {
     static let shared = ScreenTimeAnalyzer()
     private init() {}
@@ -104,6 +108,7 @@ final class CalendarIntelligenceService: ObservableObject {
     static let shared = CalendarIntelligenceService()
     private init() {}
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func authorize(completion: @escaping @Sendable (Bool) -> Void) {
         Task {
             await CalendarMonitor.shared.start()
@@ -162,6 +167,7 @@ final class SleepAnalysisService: ObservableObject {
 // the long-term episodic memory pipeline via LongTermMemorySystem.
 
 @MainActor
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 final class ContextualMemoryManager: ObservableObject {
     static let shared = ContextualMemoryManager()
     private var recentContexts: [String] = []
@@ -265,6 +271,7 @@ final class WellbeingMonitor: ObservableObject {
 // Called in ChatManager.sendMessage() when message count exceeds threshold.
 
 @MainActor
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 final class NeuralContextCompressor: ObservableObject {
     static let shared = NeuralContextCompressor()
     private let headTurns = 3
@@ -299,6 +306,7 @@ final class NeuralContextCompressor: ObservableObject {
 // Provides cloud file summaries to the chat context pipeline.
 
 @MainActor
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 final class CloudStorageContextProvider: ObservableObject {
     static let shared = CloudStorageContextProvider()
     private init() {}

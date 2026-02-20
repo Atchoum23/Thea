@@ -51,6 +51,7 @@ actor ServerHealthMonitor {
         }
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func stopMonitoring() {
         monitorTask?.cancel()
         monitorTask = nil

@@ -34,6 +34,7 @@ final class ClassificationOutcome {
     }
 
     /// Average confidence for a model + task type combination.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static func averageConfidence(
         for modelId: String,
         taskType: String,

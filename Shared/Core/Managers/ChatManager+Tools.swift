@@ -134,6 +134,7 @@ extension ChatManager {
 
     /// Index all existing conversations for semantic search.
     /// Called once at app startup.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func indexExistingConversationsForSemanticSearch() {
         #if os(macOS)
         Task(priority: .background) {

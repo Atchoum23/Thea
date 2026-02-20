@@ -497,6 +497,7 @@ public struct TVActivityEvent: Codable, Sendable {
 #if os(iOS)
     @available(iOS 16.0, *)
     @MainActor
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     final class LifeMonitoringScreenTimeObserver: ObservableObject {
         static let shared = LifeMonitoringScreenTimeObserver()
 

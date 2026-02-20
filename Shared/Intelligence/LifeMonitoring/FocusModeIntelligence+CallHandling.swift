@@ -91,6 +91,7 @@ extension FocusModeIntelligence {
     }
 
     #if os(iOS)
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func executeCallForwardingViaShortcuts(code: String, action: String) async {
         // Use the "THEA Call Forwarding" shortcut to execute USSD code
         let encodedCode = code.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? code

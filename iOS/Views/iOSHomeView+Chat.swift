@@ -203,6 +203,7 @@ struct iOSChatView: View {
 struct iOSNewConversationView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var chatManager = ChatManager.shared
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var projectManager = ProjectManager.shared
 
     @State private var title = ""

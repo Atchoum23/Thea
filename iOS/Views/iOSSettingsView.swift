@@ -5,6 +5,7 @@ import SwiftUI
 struct iOSSettingsView: View {
     @State private var settingsManager = SettingsManager.shared
     @State private var voiceManager = VoiceActivationManager.shared
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var migrationManager = MigrationManager.shared
 
     @State private var showingMigration = false

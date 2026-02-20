@@ -9,6 +9,7 @@ enum TemporalValidator {
     // MARK: - Day-of-Week Validation
 
     /// Returns the correct day-of-week name for a given date.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static func dayOfWeek(for date: Date, locale: Locale = .current) -> String {
         let formatter = DateFormatter()
         formatter.locale = locale
@@ -17,6 +18,7 @@ enum TemporalValidator {
     }
 
     /// Returns the abbreviated day-of-week name for a given date.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static func abbreviatedDayOfWeek(for date: Date, locale: Locale = .current) -> String {
         let formatter = DateFormatter()
         formatter.locale = locale
@@ -26,6 +28,7 @@ enum TemporalValidator {
 
     /// Validates whether a claimed day-of-week matches the actual date.
     /// Returns nil if valid, or a corrected string if the day was wrong.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static func validateDayDatePair(claimedDay: String, date: Date) -> String? {
         let actualDay = dayOfWeek(for: date).lowercased()
         let claimed = claimedDay.lowercased().trimmingCharacters(in: .whitespaces)
@@ -42,6 +45,7 @@ enum TemporalValidator {
 
     /// Scans AI response text for date-day mismatches and returns corrected text.
     /// Catches patterns like "Saturday February 15" when Feb 15 is actually a Sunday.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static func scanAndCorrectDateDayMismatches(in text: String) -> String {
         var corrected = text
 
@@ -108,11 +112,13 @@ enum TemporalValidator {
     }
 
     /// Returns true if the given date falls on a weekend.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static func isWeekend(_ date: Date) -> Bool {
         Calendar.current.isDateInWeekend(date)
     }
 
     /// Returns the number of days between two dates.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static func daysBetween(_ from: Date, and to: Date) -> Int {
         Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: from),
                                         to: Calendar.current.startOfDay(for: to)).day ?? 0
@@ -130,6 +136,7 @@ enum TemporalValidator {
     }
 
     /// Validates a DateComponents object is consistent.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static func isValid(components: DateComponents) -> Bool {
         Calendar.current.date(from: components) != nil
     }

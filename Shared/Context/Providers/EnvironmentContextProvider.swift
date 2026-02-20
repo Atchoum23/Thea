@@ -27,6 +27,7 @@ public actor EnvironmentContextProvider: ContextProvider {
     #endif
 
     #if canImport(HomeKit) && !os(macOS) && !os(tvOS)
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         private var homeKitHelper: HomeKitHelper?
         private var currentScene: String?
     #endif

@@ -433,6 +433,7 @@ extension MessageBubble {
 
 extension MessageBubble {
     /// Format token counts compactly: 1234 → "1.2K", 500 → "500"
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static func formatTokenCount(_ count: Int) -> String {
         if count >= 1000 {
             return String(format: "%.1fK", Double(count) / 1000.0)

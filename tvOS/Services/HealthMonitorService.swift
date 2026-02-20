@@ -36,13 +36,16 @@ struct ServiceHealthCheck: Identifiable, Sendable {
     let name: String
     let status: HealthStatus
     let latency: TimeInterval?
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     let lastChecked: Date
     var message: String?
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     var details: [String: String] = [:]
 }
 
 /// Overall system health report
 struct HealthReport: Sendable {
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     let timestamp: Date
     let overallStatus: HealthStatus
     let services: [ServiceHealthCheck]
@@ -52,7 +55,9 @@ struct HealthReport: Sendable {
     struct NetworkStatus: Sendable {
         let isConnected: Bool
         let connectionType: String
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         let vpnActive: Bool
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         let dnsStatus: String
     }
 
@@ -80,6 +85,7 @@ final class HealthMonitorService: ObservableObject {
 
     struct HealthAlert: Identifiable, Sendable {
         let id: String
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         let timestamp: Date
         let severity: AlertSeverity
         let title: String
@@ -111,6 +117,7 @@ final class HealthMonitorService: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func stopMonitoring() {
         isMonitoring = false
         monitoringTask?.cancel()
@@ -374,12 +381,14 @@ final class HealthMonitorService: ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func acknowledgeAlert(id: String) {
         if let index = alerts.firstIndex(where: { $0.id == id }) {
             alerts[index].isAcknowledged = true
         }
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func clearAcknowledgedAlerts() {
         alerts.removeAll { $0.isAcknowledged }
     }

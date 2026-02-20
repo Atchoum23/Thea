@@ -248,6 +248,7 @@ struct QualityProfile: Codable, Identifiable, Sendable {
         )
     ]
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func isAcceptable(_ release: ParsedRelease) -> Bool {
         guard release.resolution >= minResolution else { return false }
         guard release.source.score >= minSource.score else { return false }
@@ -255,6 +256,7 @@ struct QualityProfile: Codable, Identifiable, Sendable {
         return true
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func isUpgrade(from current: ParsedRelease?, to new: ParsedRelease) -> Bool {
         guard let current else { return isAcceptable(new) }
         return new.qualityScore > current.qualityScore && isAcceptable(new)

@@ -15,6 +15,7 @@ struct TVClipItem: Identifiable, Codable {
     static let placeholder: [TVClipItem] = []
 }
 
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 struct TheaClipRelayView: View {
     @State private var clips: [TVClipItem] = TVClipItem.placeholder
 

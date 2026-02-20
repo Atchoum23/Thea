@@ -156,6 +156,7 @@ import Observation
 
         // MARK: - Historical Data
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         func getVisitsForDate(_ date: Date) async -> [LocationVisit] {
             guard let context = modelContext else { return [] }
 
@@ -187,6 +188,7 @@ import Observation
             }
         }
 
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         func getVisits(from start: Date, to end: Date) async -> [LocationVisitRecord] {
             guard let context = modelContext else { return [] }
 

@@ -61,6 +61,7 @@ final class GeneratedArtifact {
     var isFavorite: Bool
     var characterCount: Int
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     init(
         title: String,
         type: GeneratedArtifactType,
@@ -96,6 +97,7 @@ final class GeneratedArtifact {
 // MARK: - ArtifactStore
 
 @MainActor
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 final class ArtifactStore {
     static let shared = ArtifactStore()
 

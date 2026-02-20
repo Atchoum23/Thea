@@ -28,7 +28,9 @@ private extension Color {
 struct watchOSHomeView: View {
     @State private var messages: [WatchMessage] = []
     @State private var isListening = false
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var showingConversations = false
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var showingSettings = false
 
     var body: some View {

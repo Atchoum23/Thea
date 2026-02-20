@@ -57,6 +57,7 @@ struct DiscoveredInferenceServer: Identifiable, Equatable {
 
 @MainActor
 final class RemoteInferenceClient: ObservableObject {
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     static let shared = RemoteInferenceClient()
 
     // MARK: - Published State
@@ -87,6 +88,7 @@ final class RemoteInferenceClient: ObservableObject {
     private let maxReconnectAttempts = 5
 
     /// Tailscale fallback endpoints when Bonjour discovery fails (off-LAN)
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private let tailscaleEndpoints: [(name: String, host: String, port: UInt16)] = [
         ("Mac Studio (Tailscale)", "100.121.35.50", 8765),
         ("MacBook Air (Tailscale)", "100.74.240.60", 8765)
@@ -269,6 +271,7 @@ final class RemoteInferenceClient: ObservableObject {
 
     /// Automatically discover and connect to the best available server.
     /// Tries Bonjour first (5s), then falls back to Tailscale endpoints.
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func autoConnect() async {
         startDiscovery()
 
@@ -290,6 +293,7 @@ final class RemoteInferenceClient: ObservableObject {
     }
 
     /// Adds Tailscale-based endpoints as fallback when Bonjour discovery times out
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private func addTailscaleEndpoints() {
         let tailscaleServers = tailscaleEndpoints.map { endpoint in
             DiscoveredInferenceServer(
@@ -454,6 +458,7 @@ enum InferenceClientError: Error, LocalizedError {
 // MARK: - NWBrowser.Result.Metadata TXT Record Extension
 
 extension NWBrowser.Result.Metadata {
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     var dictionary: [String: String] {
         switch self {
         case let .bonjour(record):

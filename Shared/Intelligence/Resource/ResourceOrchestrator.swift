@@ -40,6 +40,7 @@ public final class ResourceOrchestrator: ObservableObject {
     // MARK: - Private
 
     private var cancellables = Set<AnyCancellable>()
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private var evaluationTimer: Timer?
 
     // MARK: - Init

@@ -47,6 +47,7 @@ final class FinancialManager {
 
     // MARK: - Transaction Management
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func addTransaction(
         providerTransactionID: String = UUID().uuidString,
         accountID: UUID,

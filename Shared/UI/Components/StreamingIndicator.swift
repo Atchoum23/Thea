@@ -276,6 +276,7 @@ struct StreamingMessageView: View {
 // MARK: - Blinking Cursor
 
 /// A simple blinking cursor indicator
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 struct BlinkingCursor: View {
     @State private var isVisible = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion

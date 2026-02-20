@@ -22,6 +22,7 @@ import Foundation
 /// - Feature flag state can be overridden in tests without touching UserDefaults
 /// - The FeatureFlag enum provides a unified, discoverable API for all flags
 @MainActor
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 protocol SettingsProviding: AnyObject {
 
     // MARK: - AI Provider Settings

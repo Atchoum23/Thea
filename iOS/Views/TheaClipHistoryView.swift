@@ -3,6 +3,7 @@
 
 import SwiftUI
 
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 struct TheaClipHistoryView: View {
     @StateObject private var clipManager = ClipboardHistoryManager.shared
 

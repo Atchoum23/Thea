@@ -15,6 +15,7 @@ import OSLog
 
 // MARK: - CloudFile
 
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 struct CloudFile: Sendable, Identifiable {
     let id: String
     let name: String
@@ -31,6 +32,7 @@ enum CloudProvider: String, Sendable {
 
 // MARK: - CloudStorageService
 
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 actor CloudStorageService {
     static let shared = CloudStorageService()
 

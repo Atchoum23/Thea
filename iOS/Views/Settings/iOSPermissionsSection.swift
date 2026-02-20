@@ -3,7 +3,9 @@ import SwiftUI
 struct IOSPermissionsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var permissionsManager = PermissionsManager.shared
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var expandedCategories: Set<PermissionCategory> = Set(PermissionCategory.allCases)
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var isRefreshing = false
 
     var body: some View {

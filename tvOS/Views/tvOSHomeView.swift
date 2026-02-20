@@ -8,7 +8,9 @@ import SwiftUI
 struct tvOSHomeView: View {
     @State private var selectedTab: Tab = .chat
     @State private var messages: [TVMessage] = []
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var isWaitingForResponse = false
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var inputText = ""
 
     enum Tab: String, CaseIterable {

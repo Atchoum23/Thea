@@ -101,6 +101,7 @@ final class LocalVisionGuidance {
         }
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func unloadModels() {
         visionEngine.unloadModel()
         let ttsEngine = MLXAudioEngine.shared

@@ -56,6 +56,7 @@ public enum ChipFamily: String, Sendable {
 public final class SystemCapabilityService {
     public static let shared = SystemCapabilityService()
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private let logger = Logger(subsystem: "com.thea.intelligence", category: "SystemCapability")
 
     // MARK: - Hardware Properties (computed once at init)

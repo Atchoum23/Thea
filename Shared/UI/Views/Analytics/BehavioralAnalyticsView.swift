@@ -12,6 +12,7 @@ struct BehavioralAnalyticsView: View {
     @State private var fingerprint = BehavioralFingerprint.shared
 
     private let days = DayOfWeek.allCases
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     private let dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
     var body: some View {

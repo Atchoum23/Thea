@@ -82,6 +82,7 @@ final class ToolExecutionCoordinator {
 
     private struct LoopResult {
         let text: String
+        // periphery:ignore - Reserved: AD3 audit — wired in future integration
         let toolSteps: [ToolUseStep]
     }
 

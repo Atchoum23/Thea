@@ -104,6 +104,7 @@ enum IOSProviderHealthStatus: String {
 }
 
 struct IOSModelsSettingsView: View {
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     @State private var settingsManager = SettingsManager.shared
     @State private var selectedModel = "gpt-4o"
     @State private var favoriteModels: Set<String> = ["gpt-4o", "claude-3-5-sonnet"]

@@ -70,6 +70,7 @@ final class DeliveredInsight {
     var sourceRaw: String          // InsightSource.rawValue
     var relatedEntityID: String?   // Optional: links to KG entity
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     init(
         title: String,
         body: String,
@@ -106,6 +107,7 @@ final class DeliveredInsight {
 
 /// Service for creating and querying DeliveredInsight records.
 @MainActor
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 final class InsightRepository {
     static let shared = InsightRepository()
     private init() {}

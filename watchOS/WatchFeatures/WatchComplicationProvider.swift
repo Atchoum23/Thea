@@ -20,9 +20,13 @@ struct ComplicationData {
     var unreadCount: Int = 0
     var aiStatus: String = "Ready"
     var lastMessage: String?
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     var focusTimeRemaining: TimeInterval?
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     var healthScore: Int?
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     var nextReminder: Date?
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     var quickAction: String = "Ask"
 }
 
@@ -69,6 +73,7 @@ struct TheaComplicationProvider: TimelineProvider {
 
 // MARK: - Complication Widget
 
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 struct TheaComplicationWidget: Widget {
     let kind = "app.thea.complication"
 
@@ -227,6 +232,7 @@ extension View {
 
 // MARK: - Watch Quick Actions
 
+// periphery:ignore - Reserved: AD3 audit — wired in future integration
 struct WatchQuickActionsView: View {
     var body: some View {
         ScrollView {

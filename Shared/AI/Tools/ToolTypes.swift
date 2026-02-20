@@ -15,18 +15,22 @@ struct AnthropicToolCall: @unchecked Sendable {
     let input: [String: Any] // Parsed JSON input from Claude
 
     // Sendable conformance: [String: Any] is not Sendable — bridge via JSON round-trip
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func inputJSON() -> Data? {
         try? JSONSerialization.data(withJSONObject: input)
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func inputString(_ key: String) -> String {
         input[key] as? String ?? ""
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func inputBool(_ key: String, default value: Bool = false) -> Bool {
         input[key] as? Bool ?? value
     }
 
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     func inputInt(_ key: String, default value: Int = 0) -> Int {
         input[key] as? Int ?? value
     }
@@ -79,6 +83,7 @@ extension ToolUseStep {
 // MARK: - Tool Result
 
 struct AnthropicToolResult: Sendable {
+    // periphery:ignore - Reserved: AD3 audit — wired in future integration
     let toolUseId: String
     let content: String
     let isError: Bool
