@@ -20,18 +20,15 @@ final class ModelContainerFactory {
     /// NSException bypasses Swift catch blocks and crashes. This guard lets us skip tier 1
     /// safely in unsigned / CI builds.
     nonisolated private static func hasCloudKitContainerEntitlement() -> Bool {
-        var selfCode: SecCode?
-        guard SecCodeCopySelf(SecCSFlags(), &selfCode) == errSecSuccess,
-              let selfCode else { return false }
-        var staticCode: SecStaticCode?
-        guard SecCodeCopyStaticCode(selfCode, SecCSFlags(), &staticCode) == errSecSuccess,
-              let staticCode else { return false }
-        var info: CFDictionary?
-        let flags = SecCSFlags(rawValue: kSecCSSigningInformation)
-        guard SecStaticCodeCopySigningInformation(staticCode, flags, &info) == errSecSuccess,
-              let infoDict = info as? [String: Any] else { return false }
-        guard let entitlements = infoDict["entitlements-dict"] as? [String: Any] else { return false }
-        return entitlements["com.apple.developer.icloud-container-identifiers"] != nil
+        // SecTaskCreateFromSelf/SecTaskCopyValueForEntitlement: available on macOS 10.7+ and iOS 7+.
+        // Returns nil for unsigned builds (no entitlements) → we skip CloudKit tier.
+        guard let task = SecTaskCreateFromSelf(nil) else { return false }
+        let value = SecTaskCopyValueForEntitlement(
+            task,
+            "com.apple.developer.icloud-container-identifiers" as CFString,
+            nil
+        )
+        return value != nil
     }
 
     // periphery:ignore - Reserved: createContainer() instance method — reserved for future feature activation
