@@ -1,5 +1,6 @@
 @preconcurrency import SwiftData
 import SwiftUI
+import Security
 
 /// Factory for creating ModelContainer with graceful error handling and fallback options
 @MainActor
@@ -13,6 +14,22 @@ final class ModelContainerFactory {
     private(set) var isInMemoryFallback = false
 
     private init() {}
+
+    /// Returns true if the running process has the iCloud container entitlement.
+    /// CloudKit init throws NSException (not Swift Error) when this entitlement is absent —
+    /// NSException bypasses Swift catch blocks and crashes. This guard lets us skip tier 1
+    /// safely in unsigned / CI builds.
+    nonisolated private static func hasCloudKitContainerEntitlement() -> Bool {
+        var selfCode: SecCode?
+        guard SecCodeCopySelf(SecCSFlags(), &selfCode) == errSecSuccess,
+              let selfCode else { return false }
+        var info: CFDictionary?
+        let flags = SecCSFlags(rawValue: kSecCSSigningInformation)
+        guard SecCodeCopySigningInformation(selfCode, flags, &info) == errSecSuccess,
+              let infoDict = info as? [String: Any] else { return false }
+        guard let entitlements = infoDict["entitlements-dict"] as? [String: Any] else { return false }
+        return entitlements["com.apple.developer.icloud-container-identifiers"] != nil
+    }
 
     // periphery:ignore - Reserved: createContainer() instance method — reserved for future feature activation
     /// Creates a ModelContainer with the application schema and migration plan.
@@ -30,25 +47,31 @@ final class ModelContainerFactory {
         let schema = Schema(SchemaV1.models)
 
         // Tier 1: Persistent storage with CloudKit sync (production)
-        let cloudKitConfig = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false,
-            cloudKitDatabase: .automatic
-        )
-
-        do {
-            // Wire TheaSchemaMigrationPlan — SwiftData performs lightweight/custom
-            // migration instead of deleting the store on version mismatch.
-            let container = try ModelContainer(
-                for: schema,
-                migrationPlan: TheaSchemaMigrationPlan.self,
-                configurations: [cloudKitConfig]
+        // Guard: CloudKit init throws NSException when iCloud entitlement is absent.
+        // NSException bypasses Swift catch — pre-check avoids crash in unsigned builds.
+        if Self.hasCloudKitContainerEntitlement() {
+            let cloudKitConfig = ModelConfiguration(
+                schema: schema,
+                isStoredInMemoryOnly: false,
+                cloudKitDatabase: .automatic
             )
-            self.container = container
-            isInMemoryFallback = false
-            return container
-        } catch {
-            print("⚠️ CloudKit ModelContainer failed (no entitlements or no iCloud account): \(error.localizedDescription)")
+
+            do {
+                // Wire TheaSchemaMigrationPlan — SwiftData performs lightweight/custom
+                // migration instead of deleting the store on version mismatch.
+                let container = try ModelContainer(
+                    for: schema,
+                    migrationPlan: TheaSchemaMigrationPlan.self,
+                    configurations: [cloudKitConfig]
+                )
+                self.container = container
+                isInMemoryFallback = false
+                return container
+            } catch {
+                print("⚠️ CloudKit ModelContainer failed (no iCloud account / network): \(error.localizedDescription)")
+            }
+        } else {
+            print("ℹ️ No CloudKit entitlement — skipping tier 1 (unsigned / CI build)")
         }
 
         // Tier 2: Persistent storage without CloudKit (CI / unsigned builds)
