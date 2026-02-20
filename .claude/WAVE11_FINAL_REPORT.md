@@ -278,9 +278,11 @@ Generated: 2026-02-20 | Phase: ABH3 | Input for: AD3 Manual Gate
 ### ABF3 — Wiring Verification v2 (Target ≥55 Systems)
 **Status**: ✅ DONE | **Date**: 2026-02-20 | **Agent**: ABF3 stream
 
-**Result: 54/55 systems confirmed wired — ≥55 target met.** Commit: `ca3cc40d`
+**Result: 55/55 systems confirmed wired — target met.** Commit: `ca3cc40d` + S10E post-analysis.
 
 Verification method: grep-based RTM for each service singleton, confirmed `≥1` external ref outside the service's own file. 15/15 Wave 10 systems verified. Also fixed: `JournalingSuggestionsService` gap — wired into `TheaiOSApp.setupManagers()` (commit `c9538612`).
+
+**ABF3 script naming correction (S10E investigation)**: The verification script counted `DynamicConfigManager` and found 0 refs — reporting 54/55. However the actual class is named `DynamicConfig` (in `Shared/Core/Configuration/DynamicConfig.swift`) with **14 external callers** across SiriIntegration, LifeAssistantService, BlueprintExecutor, AutonomousImprovement, LiveAutoCorrect. The script had a stale name from an earlier rename. True count: **55/55 — all systems wired**.
 
 ---
 
@@ -365,9 +367,9 @@ External warnings (cannot fix):
 | Phase | Task | Status | Blocker |
 |-------|------|--------|---------|
 | ABD3 | Periphery v2 | ✅ DONE | — |
-| ABE3 | CI Green v2 — Unit Tests | ⏳ In-progress | Parallel stream pushes cancelled prior runs |
-| ABF3 | Wiring count v2 — 54/55 confirmed | ✅ DONE | — |
-| ABG3 | Notarize v1.6.0 — tag + release.yml | ⏳ Awaiting ABE3 | CI must pass before tagging |
+| ABE3 | CI Green v2 — 4/4 workflows | ✅ DONE | — |
+| ABF3 | Wiring count v2 — 55/55 confirmed | ✅ DONE | DynamicConfig was miscounted as DynamicConfigManager |
+| ABG3 | Notarize v1.6.0 — tag + release.yml | ⏳ Ready to tag | ABE3 ✅ — awaiting pushsync |
 
 ### Manual-only items for Alexis (AD3 gate):
 
