@@ -280,6 +280,44 @@ final class AnthropicToolCatalog: @unchecked Sendable {
             ]
         ))
 
+        // MARK: - L3: Computer Use (macOS only — requires explicit user permission)
+        #if os(macOS)
+        if UserDefaults.standard.bool(forKey: "thea.computerUseEnabled") {
+            tools.append(ToolDefinition(
+                name: "computer_use",
+                description: "Interact with the macOS GUI: take screenshots, click, type text, scroll, or press keyboard keys. Requires Computer Use permission in Thea settings.",
+                parameters: [
+                    "type": "object",
+                    "properties": [
+                        "action": [
+                            "type": "string",
+                            "enum": ["screenshot", "click", "type", "scroll", "key"],
+                            "description": "The GUI action to perform"
+                        ],
+                        "coordinate": [
+                            "type": "array",
+                            "items": ["type": "integer"],
+                            "description": "[x, y] screen coordinates for click/scroll actions"
+                        ],
+                        "text": [
+                            "type": "string",
+                            "description": "Text to type (for 'type' action)"
+                        ],
+                        "key": [
+                            "type": "string",
+                            "description": "Key combination to press (e.g. 'cmd+c', 'return', 'escape')"
+                        ],
+                        "delta": [
+                            "type": "integer",
+                            "description": "Scroll amount in lines (for 'scroll' action, negative = up)"
+                        ]
+                    ],
+                    "required": ["action"]
+                ]
+            ))
+        }
+        #endif
+
         // Append dynamically registered tools (from MCP servers, etc.)
         let dynamic = lock.withLock { dynamicTools }
         tools.append(contentsOf: dynamic)

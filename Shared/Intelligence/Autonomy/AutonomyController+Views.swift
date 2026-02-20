@@ -54,6 +54,18 @@ public struct THEAAutonomySettingsView: View {
                 }
             }
 
+            // L3: Computer Use (macOS only)
+            #if os(macOS)
+            Section {
+                ComputerUseToggleRow()
+            } header: {
+                Text("Computer Use")
+            } footer: {
+                Text("Allow Thea's AI to take screenshots and interact with your screen. Requires Screen Recording permission.")
+                    .foregroundStyle(.secondary)
+            }
+            #endif
+
             if controller.isPaused {
                 Section {
                     Button("Resume Autonomy") {
@@ -304,6 +316,46 @@ public struct THEAPendingActionsView: View {
         }
     }
 }
+
+// MARK: - L3: Computer Use Toggle
+
+/// Toggle for enabling the computer_use tool in Autonomy settings.
+/// macOS only — iOS sandbox does not allow GUI automation.
+#if os(macOS)
+private struct ComputerUseToggleRow: View {
+    @State private var isEnabled = UserDefaults.standard.bool(forKey: "thea.computerUseEnabled")
+
+    var body: some View {
+        Toggle(isOn: $isEnabled) {
+            Label {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Enable Computer Use")
+                        .font(.body)
+                    Text("Allows AI to take screenshots, click, type, and scroll")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } icon: {
+                Image(systemName: "macwindow.badge.plus")
+                    .foregroundStyle(.blue)
+            }
+        }
+        .onChange(of: isEnabled) { _, newValue in
+            UserDefaults.standard.set(newValue, forKey: "thea.computerUseEnabled")
+        }
+        .tint(.blue)
+
+        if isEnabled {
+            Label("Screen Recording permission required", systemImage: "exclamationmark.triangle")
+                .font(.caption)
+                .foregroundStyle(.orange)
+                .onTapGesture {
+                    NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")!)
+                }
+        }
+    }
+}
+#endif
 
 // MARK: - Preview
 
