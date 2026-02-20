@@ -339,7 +339,7 @@ targets:
           # EnhancedMessageBubble + ExecutableCodeBlock — ACTIVATED
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/TheaTextInputField.swift"
-          - "**/Views/Settings/LiveGuidanceSettingsView.swift"  # Temporarily using stub; @Observable @MainActor + Form SDK issue in macOS 26
+          - "**/LiveGuidanceSettingsViewStub.swift"  # Real LiveGuidanceSettingsView.swift is active (M3 re-enabled)
           - "**/Views/MetaAI/MetaAIDashboardView.swift"  # Depends on archived MetaAI types; stub below used instead
           - "**/Views/Intelligence/SquadsView.swift"  # Depends on SquadOrchestrator types not yet ported; stub below
           # CodeIntelligence — ACTIVATED (macOS-only, #if os(macOS) guarded)
