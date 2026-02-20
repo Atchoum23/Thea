@@ -342,11 +342,11 @@ final class AnthropicProvider: AIProvider, Sendable {
         if let anthropicMessages = requestBody["messages"] as? [[String: Any]] {
             let manager = AnthropicConversationManager(messages: anthropicMessages)
             do {
-                try await manager.validate()
+                try manager.validate()
             } catch {
                 logger.warning("AnthropicProvider: conversation validation failed (\(error.localizedDescription)) — recovering")
-                await manager.recoverFromToolMismatch()
-                requestBody["messages"] = await manager.messages
+                manager.recoverFromToolMismatch()
+                requestBody["messages"] = manager.messages
             }
         }
 

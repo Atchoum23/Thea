@@ -13,15 +13,18 @@
 // before every API send. On HTTP 400, calls recoverFromToolMismatch() and
 // retries exactly once via canRetry() / markRetried().
 //
-// Works with the raw Anthropic API message format ([[String: Any]]) that
-// buildAdvancedRequestBody() produces — no dependency on AIMessage.
+// Uses NSLock for thread safety (@unchecked Sendable). All access within
+// chatAdvanced() is sequential — no concurrent access in practice.
+// The lock guards against future multi-task usage without requiring `actor`
+// (which would make [[String: Any]] — a non-Sendable type — impossible to
+// return across the actor isolation boundary).
 
 import Foundation
 import OSLog
 
 // MARK: - AnthropicConversationManager
 
-actor AnthropicConversationManager {
+final class AnthropicConversationManager: @unchecked Sendable {
 
     // MARK: - Types
 
@@ -47,23 +50,26 @@ actor AnthropicConversationManager {
 
     // MARK: - State
 
-    private(set) var messages: [[String: Any]]
+    private let lock = NSLock()
+    private var _messages: [[String: Any]]
     private var retryCount = 0
     private let logger = Logger(subsystem: "ai.thea.app", category: "AnthropicConversationManager")
 
     static let maxRetries = 1
 
+    var messages: [[String: Any]] { lock.withLock { _messages } }
+
     // MARK: - Init
 
     init(messages: [[String: Any]] = []) {
-        self.messages = messages
+        _messages = messages
     }
 
     // MARK: - Mutation
 
     /// Append a plain (non-tool) message.
     func append(_ message: [String: Any]) {
-        messages.append(message)
+        lock.withLock { _messages.append(message) }
     }
 
     /// Append an atomic tool round: assistant message (with tool_use blocks)
@@ -73,31 +79,29 @@ actor AnthropicConversationManager {
         assistantMsg: [String: Any],
         toolResults: [String: Any]
     ) throws {
-        let toolUseIDs = toolUseIDs(in: assistantMsg)
+        let toolUseIDs = toolUseIDsIn(assistantMsg)
         guard !toolUseIDs.isEmpty else {
             throw ConversationError.wrongOrder("assistantMsg contains no tool_use blocks")
         }
 
-        let resultIDs = Set(toolResultIDs(in: toolResults))
+        let resultIDs = Set(toolResultIDsIn(toolResults))
         let useIDs = Set(toolUseIDs)
 
-        // Every tool_use must have a matching tool_result
         for id in useIDs {
             guard resultIDs.contains(id) else {
                 throw ConversationError.unmatchedToolUse(toolUseID: id)
             }
         }
-
-        // No extra tool_results without a preceding tool_use
         for id in resultIDs {
             guard useIDs.contains(id) else {
                 throw ConversationError.orphanedToolResult(toolUseID: id)
             }
         }
 
-        // Atomic append — both or neither
-        messages.append(assistantMsg)
-        messages.append(toolResults)
+        lock.withLock {
+            _messages.append(assistantMsg)
+            _messages.append(toolResults)
+        }
         logger.debug("AnthropicConversationManager: tool round appended — \(useIDs.count) tool(s)")
     }
 
@@ -106,16 +110,16 @@ actor AnthropicConversationManager {
     /// Pre-send validation. Throws ConversationError on first rule violation.
     /// AnthropicProvider calls this before every API request.
     func validate() throws {
-        guard !messages.isEmpty else {
+        let snapshot = lock.withLock { _messages }
+        guard !snapshot.isEmpty else {
             throw ConversationError.emptyConversation
         }
 
-        // Track tool_use IDs that have been issued but not yet matched
         var pendingToolUseIDs: [String] = []
 
-        for (index, message) in messages.enumerated() {
+        for (index, message) in snapshot.enumerated() {
             let role = message["role"] as? String ?? ""
-            let blocks = contentBlocks(in: message)
+            let blocks = contentBlocksIn(message)
 
             let useIDsHere = blocks.compactMap { block -> String? in
                 guard (block["type"] as? String) == "tool_use" else { return nil }
@@ -126,78 +130,66 @@ actor AnthropicConversationManager {
                 return block["tool_use_id"] as? String
             }
 
-            // Rule 1: tool_use only in assistant turns
             if !useIDsHere.isEmpty, role != "assistant" {
                 throw ConversationError.wrongOrder(
                     "tool_use in '\(role)' turn at index \(index) (must be assistant)"
                 )
             }
-
-            // Rule 2: tool_result only in user turns
             if !resultIDsHere.isEmpty, role != "user" {
                 throw ConversationError.wrongOrder(
                     "tool_result in '\(role)' turn at index \(index) (must be user)"
                 )
             }
 
-            // Rule 4: Every tool_result must reference a pending tool_use
             for id in resultIDsHere {
                 guard pendingToolUseIDs.contains(id) else {
                     throw ConversationError.orphanedToolResult(toolUseID: id)
                 }
                 pendingToolUseIDs.removeAll { $0 == id }
             }
-
             pendingToolUseIDs.append(contentsOf: useIDsHere)
         }
 
-        // Rule 3: All issued tool_use IDs must be matched
         if let unmatched = pendingToolUseIDs.first {
             throw ConversationError.unmatchedToolUse(toolUseID: unmatched)
         }
 
-        logger.debug("AnthropicConversationManager: validate() OK — \(self.messages.count) messages")
+        logger.debug("AnthropicConversationManager: validate() OK — \(snapshot.count) messages")
     }
 
     // MARK: - Truncation
 
     /// Remove oldest message pairs until estimated token count ≤ maxTokens.
-    /// Tool rounds (assistant tool_use + user tool_result) are removed as a unit —
-    /// never orphaning a tool_result. Plain user/assistant pairs are also removed together.
+    /// Tool rounds removed as a unit — never orphans a tool_result.
     func truncateToFit(maxTokens: Int) {
-        // Determine start index: skip any leading system message
-        let start = (messages.first?["role"] as? String) == "system" ? 1 : 0
+        let start = (lock.withLock { _messages.first })?["role"] as? String == "system" ? 1 : 0
 
-        while estimatedTokens() > maxTokens, messages.count > start + 1 {
-            let firstMsg = messages[start]
-            let useIDs = toolUseIDs(in: firstMsg)
+        while estimatedTokens() > maxTokens {
+            let count = lock.withLock { _messages.count }
+            guard count > start + 1 else { break }
 
-            // Remove 2 messages (one pair) from the front
-            messages.remove(at: start)
-            if start < messages.count {
-                messages.remove(at: start)
-            }
-
-            if !useIDs.isEmpty {
-                logger.debug("AnthropicConversationManager: truncated 1 tool round")
-            } else {
-                logger.debug("AnthropicConversationManager: truncated 1 plain pair")
+            lock.withLock {
+                guard _messages.count > start else { return }
+                _messages.remove(at: start)
+                if start < _messages.count { _messages.remove(at: start) }
             }
         }
 
-        logger.info("AnthropicConversationManager: truncated to ~\(self.estimatedTokens()) tokens (\(self.messages.count) messages)")
+        let remaining = lock.withLock { _messages.count }
+        logger.info("AnthropicConversationManager: truncated to ~\(self.estimatedTokens()) tokens (\(remaining) messages)")
     }
 
     // MARK: - Recovery
 
-    /// Scan to the last clean boundary (no pending tool_use without a matching tool_result)
-    /// and truncate everything after it. Called before a single retry on HTTP 400.
+    /// Scan to the last clean boundary and truncate everything after it.
+    /// Called before a single retry on HTTP 400.
     func recoverFromToolMismatch() {
+        let snapshot = lock.withLock { _messages }
         var lastCleanIndex = -1
         var pendingToolUseIDs: [String] = []
 
-        for (index, message) in messages.enumerated() {
-            let blocks = contentBlocks(in: message)
+        for (index, message) in snapshot.enumerated() {
+            let blocks = contentBlocksIn(message)
 
             let resultIDsHere = blocks.compactMap { block -> String? in
                 guard (block["type"] as? String) == "tool_result" else { return nil }
@@ -211,34 +203,28 @@ actor AnthropicConversationManager {
             for id in resultIDsHere { pendingToolUseIDs.removeAll { $0 == id } }
             pendingToolUseIDs.append(contentsOf: useIDsHere)
 
-            if pendingToolUseIDs.isEmpty {
-                lastCleanIndex = index
-            }
+            if pendingToolUseIDs.isEmpty { lastCleanIndex = index }
         }
 
-        guard lastCleanIndex < messages.count - 1 else {
+        guard lastCleanIndex < snapshot.count - 1 else {
             logger.debug("AnthropicConversationManager: recover — conversation already clean")
             return
         }
 
-        let removed = messages.count - lastCleanIndex - 1
-        messages = Array(messages.prefix(lastCleanIndex + 1))
+        let removed = snapshot.count - lastCleanIndex - 1
+        lock.withLock { _messages = Array(snapshot.prefix(lastCleanIndex + 1)) }
         logger.warning("AnthropicConversationManager: recover — removed \(removed) messages to last clean boundary")
     }
 
     // MARK: - Retry Gate
 
-    /// True if another retry is allowed (max 1 retry per manager instance).
     func canRetry() -> Bool { retryCount < Self.maxRetries }
-
-    /// Record that a retry was consumed.
     func markRetried() { retryCount += 1 }
 
     // MARK: - Token Estimation
 
-    /// Approximate token count: sum all string content lengths, divide by 4.
     func estimatedTokens() -> Int {
-        let chars = messages.reduce(0) { sum, msg in
+        let chars = lock.withLock { _messages }.reduce(0) { sum, msg in
             sum + stringLength(of: msg["content"])
         }
         return max(1, chars / 4)
@@ -246,19 +232,19 @@ actor AnthropicConversationManager {
 
     // MARK: - Private Helpers
 
-    private func contentBlocks(in message: [String: Any]) -> [[String: Any]] {
+    private func contentBlocksIn(_ message: [String: Any]) -> [[String: Any]] {
         message["content"] as? [[String: Any]] ?? []
     }
 
-    private func toolUseIDs(in message: [String: Any]) -> [String] {
-        contentBlocks(in: message).compactMap { block -> String? in
+    private func toolUseIDsIn(_ message: [String: Any]) -> [String] {
+        contentBlocksIn(message).compactMap { block -> String? in
             guard (block["type"] as? String) == "tool_use" else { return nil }
             return block["id"] as? String
         }
     }
 
-    private func toolResultIDs(in message: [String: Any]) -> [String] {
-        contentBlocks(in: message).compactMap { block -> String? in
+    private func toolResultIDsIn(_ message: [String: Any]) -> [String] {
+        contentBlocksIn(message).compactMap { block -> String? in
             guard (block["type"] as? String) == "tool_result" else { return nil }
             return block["tool_use_id"] as? String
         }
