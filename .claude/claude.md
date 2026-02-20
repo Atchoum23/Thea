@@ -49,11 +49,23 @@ git pushsync
 
 Full protocol: See `## SESSION SAFETY PROTOCOL` in THEA_SHIP_READY_PLAN_v2.md
 
+### ⚠️ NEVER ASK PERMISSION WHEN THE PLAN IS EXPLICIT (NON-NEGOTIABLE)
+
+If `THEA_CAPABILITY_PLAN_v3.md` (or any v3/v2 plan) explicitly says to do something — launch streams, run a script, execute a phase — **DO IT IMMEDIATELY. Never ask "should I do X?" when X is already in the plan.** Asking for confirmation when the plan is already Alexis's explicit instruction is a process failure. Act on the plan.
+
+---
+
 ### ⚠️ tmux send-keys VERIFICATION PROTOCOL (MANDATORY — NO EXCEPTIONS)
 
 **After EVERY `tmux send-keys` command that delivers a Claude Code instruction, ALWAYS verify the session is actively processing.**
 
 Root cause of failure: `tmux send-keys` without a confirmed Enter leaves the instruction sitting in the terminal input buffer permanently. The session APPEARS normal (shell is open, no error) but processes NOTHING and idles silently — this has caused 14+ hour executor stalls.
+
+**Additional known failure modes (Feb 2026):**
+- `sleep 3` between claude launch and prompt send is often insufficient — use `sleep 5-8` and verify
+- Over SSH: the Enter argument in `tmux send-keys -t SESSION "PROMPT" Enter` may not register if Claude Code input widget isn't fully ready. **Always verify and retry.**
+- MBAM2 tmux is at `$(brew --prefix)/bin/tmux` — NOT `/opt/homebrew/bin/tmux` (different prefix)
+- Launching claude from WITHIN a Claude Code session: MUST `unset CLAUDECODE` first, or it fails with "Claude Code cannot be launched inside another Claude Code session"
 
 **Verification steps (run immediately after every send-keys):**
 ```bash
