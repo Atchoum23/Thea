@@ -41,11 +41,10 @@ public struct HealthDashboardView: View {
 
                     // AAI3-4: Scan food barcode → log to HealthKit
                     Button {
-                        if let product = nutritionService.lastProduct {
+                        if nutritionService.lastProduct != nil {
                             showingNutritionLastScan = true
-                            _ = product // suppress warning
                         } else {
-                            nutritionService.scanAndLog()
+                            Task { await nutritionService.scanAndLog() }
                         }
                     } label: {
                         Image(systemName: "barcode.viewfinder")
