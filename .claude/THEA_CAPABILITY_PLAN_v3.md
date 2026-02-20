@@ -172,9 +172,9 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AAB3: Widget 2.0    | ⏳ PENDING      | AppIntents (AppIntentConfiguration), Live Activities (ActivityKit), TimelineRelevance, Share OCR, SwiftUI Keyboard, FinderSync rich menu |
 | Phase AAC3: Financial Hub | ✅ DONE         | KrakenService (URLSession+CryptoKit HMAC-SHA512), CoinbaseService, YNABService (URLSession REST delta), PlaidService (cursor-paged), FinancialIntelligenceService — all 9 types wired, BUILD SUCCEEDED |
 | Phase AAD3: Audio Intel   | ⏳ PENDING      | ShazamKitService (SHManagedSession), SoundAnalysisService (SNClassifySoundRequest — 300+ sounds on-device) |
-| Phase AAE3: Wearables     | ⏳ PENDING      | OuraService (REST v2), WhoopService (REST), WearableFusionEngine (Oura 45% + Whoop 35% + AppleWatch 20%) |
+| Phase AAE3: Wearables     | ✅ DONE         | OuraService (REST v2), WhoopService (REST), WearableFusionEngine (Oura 45% + Whoop 35% + AppleWatch 20%) — all 3 wired, BUILD SUCCEEDED |
 | Phase AAF3: HomeKit/NFC/Journal | ⏳ PENDING | HomeKitAIEngine (HMHomeManager + predictive scenes), JournalingSuggestionsService (iOS 17.2+), NFCContextService (CoreNFC tap-to-context) |
-| Phase AAG3: Cloud/GitHub  | ⏳ PENDING      | CloudStorageService (Google Drive REST v3 + SwiftyDropbox), GitHubIntelligenceService (PAT auth, notifications + PRs morning briefing) |
+| Phase AAG3: Cloud/GitHub  | ✅ DONE         | CloudStorageService (Google Drive REST v3 + Dropbox v2 pure URLSession — RM-1: no SwiftyDropbox), GitHubIntelligenceService (PAT auth, notifications + PRs morning briefing) — both wired, BUILD SUCCEEDED |
 | Phase AAH3: Social/Music/AI | ⏳ PENDING    | XAPIService (X v2 OAuth2 PKCE), MusicKitIntelligenceService (recently played), HeadphoneMotionService (CMHeadphoneMotionManager), FoundationModelsService (Apple on-device LLM) |
 | Phase AAI3: CarPlay/Vision/Data | ⏳ PENDING | CarPlay CPVoiceControlTemplate (iOS 26.4), visionOS real ARKitSession+WorldAnchor, TabularDataAnalyzer, NutritionBarcodeService (OpenFoodFacts→HealthKit), TravelIntelligenceService (Amadeus SDK) |
 | **Wave 11: Re-verification** | ⏳ PENDING   | ABA3–ABH3: Full re-run of all Wave 6 quality phases for Wave 9+10 codebase |
@@ -6858,9 +6858,9 @@ Update this section after each phase completes:
 | AAB3  | Widget 2.0 + Extension UX Excellence     | ⏳ PENDING  | —        | —         |
 | AAC3  | Financial Intelligence Hub               | ✅ DONE     | MSM3U    | 2026-02-20|
 | AAD3  | Ambient Audio (ShazamKit + SoundAnalysis)| ⏳ PENDING  | —        | —         |
-| AAE3  | Wearables (Oura + Whoop + Fusion)        | ⏳ PENDING  | —        | —         |
+| AAE3  | Wearables (Oura + Whoop + Fusion)        | ✅ DONE     | MSM3U    | 2026-02-20|
 | AAF3  | HomeKit AI + JournalingSuggestions + NFC | ⏳ PENDING  | —        | —         |
-| AAG3  | Cloud Storage + GitHub Intelligence      | ⏳ PENDING  | —        | —         |
+| AAG3  | Cloud Storage + GitHub Intelligence      | ✅ DONE     | MSM3U    | 2026-02-20|
 | AAH3  | Social + Music + HeadphoneMotion + FoundationModels | ⏳ PENDING | —  | —         |
 | AAI3  | CarPlay + visionOS + TabularData + Nutrition + Travel | ⏳ PENDING | — | —        |
 | ABA3  | Comprehensive QA v2                      | ⏳ PENDING  | —        | —         |
