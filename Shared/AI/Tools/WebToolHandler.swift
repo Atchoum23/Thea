@@ -12,51 +12,54 @@ enum WebToolHandler {
 
     // MARK: - web_search
 
-    static func search(_ input: [String: Any]) async -> ToolResult {
+    static func search(_ input: [String: Any]) async -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
         let query = input["query"] as? String ?? ""
         guard !query.isEmpty else {
-            return ToolResult(toolUseId: id, content: "No query provided.", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "No query provided.", isError: true)
         }
         logger.debug("web_search: '\(query)'")
-        // Reuse WebSearchVerifier's underlying search capability
+        // Use WebSearchVerifier to gather verified claims for the query
         let verifier = WebSearchVerifier()
         let result = await verifier.verify(response: query, query: query)
-        if result.sources.isEmpty {
-            return ToolResult(toolUseId: id, content: "No web results found for '\(query)'.")
+        let confirmedClaims = result.verifiedClaims.filter { $0.confirmed }
+        if confirmedClaims.isEmpty && result.unverifiedClaims.isEmpty {
+            return AnthropicToolResult(toolUseId: id, content: "No web results found for '\(query)'.")
         }
-        let text = result.sources.prefix(5).map { source in
-            "• \(source.title ?? "Untitled")\n  \(source.url)"
-        }.joined(separator: "\n")
-        return ToolResult(toolUseId: id, content: text)
+        let lines = confirmedClaims.prefix(5).map { claim in
+            let src = claim.source.map { " — \($0)" } ?? ""
+            return "• \(claim.claim)\(src)"
+        }
+        let text = lines.joined(separator: "\n")
+        return AnthropicToolResult(toolUseId: id, content: text.isEmpty ? "No confirmed results for '\(query)'." : text)
     }
 
     // MARK: - fetch_url
 
-    static func fetchURL(_ input: [String: Any]) async -> ToolResult {
+    static func fetchURL(_ input: [String: Any]) async -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
         let urlString = input["url"] as? String ?? ""
         guard !urlString.isEmpty, let url = URL(string: urlString) else {
-            return ToolResult(toolUseId: id, content: "Invalid URL: '\(urlString)'", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "Invalid URL: '\(urlString)'", isError: true)
         }
         // Only allow HTTPS URLs for security
         guard url.scheme == "https" else {
-            return ToolResult(toolUseId: id, content: "Only HTTPS URLs are supported.", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "Only HTTPS URLs are supported.", isError: true)
         }
         logger.debug("fetch_url: '\(urlString)'")
         do {
             let (data, response) = try await URLSession.shared.data(from: url)
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
             guard statusCode == 200 else {
-                return ToolResult(toolUseId: id, content: "HTTP \(statusCode) from \(urlString)", isError: true)
+                return AnthropicToolResult(toolUseId: id, content: "HTTP \(statusCode) from \(urlString)", isError: true)
             }
             let text = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) ?? ""
             // Strip HTML tags minimally and truncate
             let stripped = stripBasicHTML(text)
             let truncated = stripped.count > 6000 ? String(stripped.prefix(6000)) + "\n[…truncated]" : stripped
-            return ToolResult(toolUseId: id, content: truncated)
+            return AnthropicToolResult(toolUseId: id, content: truncated)
         } catch {
-            return ToolResult(toolUseId: id, content: "Fetch failed: \(error.localizedDescription)", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "Fetch failed: \(error.localizedDescription)", isError: true)
         }
     }
 
