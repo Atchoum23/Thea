@@ -15,6 +15,7 @@ struct DataStorageErrorView: View {
             VStack(spacing: 12) {
                 Text("Data Storage Error")
                     .font(.title.bold())
+                    .accessibilityIdentifier("storage-error-title")
 
                 Text("Thea was unable to initialize its data storage system.")
                     .font(.body)
