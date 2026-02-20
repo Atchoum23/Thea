@@ -12,11 +12,15 @@ appId: app.thea.ios
 # Screenshot immediately after launch — DIAGNOSTIC: capture whatever is on screen
 - takeScreenshot: debug_1_after_wait
 
-# Verify app launched to home screen — WelcomeView is always shown on fresh install
-# (no conversations exist after clearState, so chat tab shows WelcomeView)
-- assertVisible:
-    text: "How can I help you today?"
+# Dismiss any system alert (e.g. "Running in Temporary Mode" from ModelContainer fallback)
+- tapOn:
+    text: "Continue"
     optional: true
+
+# Verify home screen — WelcomeView always shown on fresh install (no conversations after clearState)
+# Asserts by accessibilityIdentifier on the greeting VStack (reliable, unaffected by time-of-day text)
+- assertVisible:
+    id: "welcome-greeting"
 
 - takeScreenshot: launch_initial_state
 

@@ -29,6 +29,7 @@ struct WelcomeView: View {
             }
             .accessibilityElement(children: .combine)
             .accessibilityLabel("\(Self.timeBasedGreeting()) How can I help you today?")
+            .accessibilityIdentifier("welcome-greeting")
 
             // Suggestion chips
             if onSuggestionSelected != nil {

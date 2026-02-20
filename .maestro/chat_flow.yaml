@@ -11,15 +11,19 @@ appId: app.thea.ios
 # DIAGNOSTIC: capture whatever is on screen immediately after launch
 - takeScreenshot: debug_1_after_wait
 
+# Dismiss any system alert (e.g. "Running in Temporary Mode" from ModelContainer fallback)
+- tapOn:
+    text: "Continue"
+    optional: true
+
 # Ensure we're on Chat tab
 - tapOn:
     id: "tab-chat"
     optional: true
 
-# Verify home screen content is visible
+# Verify home screen via accessibilityIdentifier (bypasses .combine visibility issue)
 - assertVisible:
-    text: "How can I help you today?"
-    optional: true
+    id: "welcome-greeting"
 
 - takeScreenshot: chat_initial
 

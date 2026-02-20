@@ -17,13 +17,20 @@ final class ModelContainerFactory {
     // periphery:ignore - Reserved: createContainer() instance method — reserved for future feature activation
     /// Creates a ModelContainer with the application schema and migration plan.
     /// Uses SchemaV1.models so the model list stays in sync with the versioned schema.
+    ///
+    /// Three-tier fallback strategy:
+    ///   1. Persistent + CloudKit  — production (signed builds with entitlements)
+    ///   2. Persistent, no CloudKit — CI / unsigned builds / no iCloud account (silent)
+    ///   3. In-memory              — catastrophic failure (shows alert to user)
+    ///
     /// - Returns: A configured ModelContainer
-    /// - Throws: ModelContainerError if both persistent and in-memory initialization fail
+    /// - Throws: ModelContainerError if all three tiers fail
     func createContainer() throws -> ModelContainer {
         // Use SchemaV1.models to stay in sync with the versioned schema definition
         let schema = Schema(SchemaV1.models)
 
-        let configuration = ModelConfiguration(
+        // Tier 1: Persistent storage with CloudKit sync (production)
+        let cloudKitConfig = ModelConfiguration(
             schema: schema,
             isStoredInMemoryOnly: false,
             cloudKitDatabase: .automatic
@@ -35,19 +42,39 @@ final class ModelContainerFactory {
             let container = try ModelContainer(
                 for: schema,
                 migrationPlan: TheaSchemaMigrationPlan.self,
-                configurations: [configuration]
+                configurations: [cloudKitConfig]
             )
             self.container = container
             isInMemoryFallback = false
             return container
         } catch {
-            // Log error for debugging
-            print("⚠️ ModelContainer initialization failed: \(error.localizedDescription)")
-            print("   Error details: \(error)")
-
-            // Attempt in-memory fallback
-            return try createInMemoryFallback(schema: schema)
+            print("⚠️ CloudKit ModelContainer failed (no entitlements or no iCloud account): \(error.localizedDescription)")
         }
+
+        // Tier 2: Persistent storage without CloudKit (CI / unsigned builds)
+        // Data persists between sessions; sync is simply disabled. No alert shown.
+        let persistentConfig = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false,
+            cloudKitDatabase: .none
+        )
+
+        do {
+            let container = try ModelContainer(
+                for: schema,
+                migrationPlan: TheaSchemaMigrationPlan.self,
+                configurations: [persistentConfig]
+            )
+            self.container = container
+            isInMemoryFallback = false
+            print("✅ Persistent (no CloudKit) ModelContainer initialized — sync disabled")
+            return container
+        } catch {
+            print("⚠️ Persistent ModelContainer also failed: \(error.localizedDescription)")
+        }
+
+        // Tier 3: In-memory fallback — catastrophic, data won't survive restart
+        return try createInMemoryFallback(schema: schema)
     }
 
     // periphery:ignore - Reserved: createInMemoryFallback(schema:) instance method — reserved for future feature activation
