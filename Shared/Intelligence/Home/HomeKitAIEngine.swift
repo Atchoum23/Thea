@@ -14,8 +14,8 @@ import os.log
 
 // MARK: - Supporting Types
 
+// periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 enum HomeState {
-    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     case unknown, morning, day, evening, sleeping
 }
 
