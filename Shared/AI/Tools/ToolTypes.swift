@@ -32,17 +32,11 @@ struct AnthropicToolCall: @unchecked Sendable {
     }
 }
 
-// MARK: - Tool Use Step (stored in MessageMetadata)
+// MARK: - Tool Use Step (base struct in Shared/Core/Models/ToolModels.swift)
 
-/// A single tool invocation step, visible in ChatView
-struct ToolUseStep: Codable, Sendable, Identifiable {
-    let id: String           // Matches AnthropicToolCall.id
-    let toolName: String
-    let inputSummary: String  // Human-readable description of what was sent
-    var result: String?       // Truncated result (≤300 chars)
-    var isRunning: Bool       // True while executing
-    var errorMessage: String? // Set on failure
-
+// ToolUseStep is defined in Shared/Core/Models/ToolModels.swift so SPM tests compile.
+// Extension adds AnthropicToolCall-dependent initializer + summarize helper.
+extension ToolUseStep {
     init(call: AnthropicToolCall) {
         self.id = call.id
         self.toolName = call.name
@@ -52,7 +46,7 @@ struct ToolUseStep: Codable, Sendable, Identifiable {
         self.errorMessage = nil
     }
 
-    private static func summarize(name: String, input: [String: Any]) -> String {
+    static func summarize(name: String, input: [String: Any]) -> String {
         switch name {
         case "search_memory", "web_search", "notes_search", "finder_search":
             return input["query"] as? String ?? "(no query)"
@@ -77,7 +71,6 @@ struct ToolUseStep: Codable, Sendable, Identifiable {
         case "shortcuts_run":
             return input["shortcut_name"] as? String ?? "(no shortcut)"
         default:
-            // Show first string value from input as summary
             return input.values.compactMap { $0 as? String }.first ?? name
         }
     }
