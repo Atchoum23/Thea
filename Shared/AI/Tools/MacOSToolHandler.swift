@@ -13,6 +13,7 @@ import os.log
 
 private let logger = Logger(subsystem: "ai.thea.app", category: "MacOSToolHandler")
 
+@MainActor
 enum MacOSToolHandler {
 
     // nonisolated(unsafe): EKEventStore is not Sendable; access is serialized via async calendar callbacks
@@ -174,6 +175,7 @@ enum MacOSToolHandler {
         return AnthropicToolResult(toolUseId: id, content: "Revealed in Finder: \(path)")
     }
 
+    @MainActor
     static func finderSearch(_ input: [String: Any]) -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
         let query = input["query"] as? String ?? ""

@@ -8,6 +8,7 @@ import os.log
 
 private let logger = Logger(subsystem: "ai.thea.app", category: "WebToolHandler")
 
+@MainActor
 enum WebToolHandler {
 
     // MARK: - web_search

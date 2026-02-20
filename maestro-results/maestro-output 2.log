@@ -1,0 +1,9 @@
+
+Waiting for flows to complete...
+[Failed] settings_flow (53s) (Element not found: Text matching regex: Settings)
+[Failed] chat_flow (32s) (Element not found: Text matching regex: Chat)
+[Failed] launch_flow (1m 17s) (Assertion is false: "Chat" is visible)
+[Failed] navigation_flow (36s) (Assertion is false: "Chat" is visible)
+
+4/4 Flows Failed
+

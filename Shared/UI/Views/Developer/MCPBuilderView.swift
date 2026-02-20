@@ -197,7 +197,10 @@ private struct EditableMCPToolRow: View {
                             TextField("description", text: $param.description)
                                 .font(.caption)
                             Toggle("Req", isOn: $param.isRequired)
+                                // .toggleStyle(.checkbox) // macOS only
+                                #if os(macOS)
                                 .toggleStyle(.checkbox)
+                                #endif
                                 .labelsHidden()
                         }
                         .padding(.vertical, 2)

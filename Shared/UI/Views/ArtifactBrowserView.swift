@@ -81,7 +81,7 @@ struct ArtifactBrowserView: View {
                     } label: {
                         HStack {
                             Label(type.displayName, systemImage: type.symbolName)
-                                .foregroundStyle(selectedType == type ? .accentColor : .primary)
+                                .foregroundStyle(selectedType == type ? Color.accentColor : Color.primary)
                             Spacer()
                             Text("\(artifacts.filter { $0.type == type }.count)")
                                 .foregroundStyle(.secondary).font(.caption)
@@ -113,7 +113,7 @@ struct ArtifactBrowserView: View {
 
     private var artifactList: some View {
         List(filteredArtifacts, selection: $selectedArtifact) { artifact in
-            ArtifactRow(artifact: artifact)
+            BrowserArtifactRow(artifact: artifact)
                 .tag(artifact)
                 .swipeActions(edge: .trailing) {
                     Button(role: .destructive) {
@@ -146,7 +146,7 @@ struct ArtifactBrowserView: View {
 
 // MARK: - Artifact Row
 
-struct ArtifactRow: View {
+struct BrowserArtifactRow: View {
     let artifact: GeneratedArtifact
 
     var body: some View {

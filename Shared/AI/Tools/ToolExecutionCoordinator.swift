@@ -12,9 +12,22 @@ import os.log
 
 private let coordLogger = Logger(subsystem: "ai.thea.app", category: "ToolExecutionCoordinator")
 
+// MARK: - Sendable wrapper for [String: Any] tool input dictionaries
+// [String: Any] is not Sendable; this wrapper lets us pass tool inputs across
+// actor boundaries. Safe because tool inputs are plain JSON-derived data.
+private struct _SendableInput: @unchecked Sendable {
+    let dict: [String: Any]
+    init(_ dict: [String: Any]) { self.dict = dict }
+}
+
+
 // MARK: - Coordinator
 
-actor ToolExecutionCoordinator {
+// Changed from `actor` to `@MainActor final class`: the coordinator has no mutable stored state,
+// so actor isolation adds no safety benefit. @MainActor lets handler calls avoid
+// actor-boundary sending checks on [String: Any] tool input dictionaries.
+@MainActor
+final class ToolExecutionCoordinator {
     static let shared = ToolExecutionCoordinator()
 
     private let maxSteps = 10  // Prevent infinite loops
@@ -23,13 +36,6 @@ actor ToolExecutionCoordinator {
 
     // MARK: - Main Entry Point
 
-    /// Execute a conversation with tool use support, returning a streaming response.
-    /// - Parameters:
-    ///   - messages: Full conversation history
-    ///   - model: Anthropic model ID
-    ///   - apiKey: Anthropic API key
-    ///   - tools: Tool definitions from AnthropicToolCatalog
-    ///   - onToolStep: Callback when a tool step is created/updated (for UI updates)
     func executeWithTools(
         messages: [AIMessage],
         model: String,
@@ -47,7 +53,6 @@ actor ToolExecutionCoordinator {
                         tools: tools,
                         onToolStep: onToolStep
                     )
-                    // Emit accumulated text as delta chunks, then complete
                     let words = result.text.components(separatedBy: " ")
                     var accumulated = ""
                     for word in words {
@@ -103,23 +108,19 @@ actor ToolExecutionCoordinator {
             let stopReason = response["stop_reason"] as? String ?? "end_turn"
             let content = response["content"] as? [[String: Any]] ?? []
 
-            // Collect all text from this response
             let textBlocks = content.compactMap { block -> String? in
                 guard block["type"] as? String == "text" else { return nil }
                 return block["text"] as? String
             }
             finalText = textBlocks.joined(separator: "\n")
 
-            // Add assistant's response to history
             conversationMessages.append(["role": "assistant", "content": content])
 
             guard stopReason == "tool_use" else {
-                // No more tool use — we're done
                 coordLogger.debug("Tool loop complete: stop_reason=\(stopReason)")
                 break
             }
 
-            // Process all tool_use blocks
             let toolUseBlocks = content.filter { ($0["type"] as? String) == "tool_use" }
             guard !toolUseBlocks.isEmpty else { break }
 
@@ -131,15 +132,15 @@ actor ToolExecutionCoordinator {
                       let rawInput = block["input"] as? [String: Any]
                 else { continue }
 
-                // Inject tool_use_id for handlers
+                var toolStep = ToolUseStep(call: AnthropicToolCall(id: toolId, name: toolName, input: rawInput))
                 var input = rawInput
                 input["_tool_use_id"] = toolId
-
-                var toolStep = ToolUseStep(call: AnthropicToolCall(id: toolId, name: toolName, input: rawInput))
+                // Wrap in @unchecked Sendable before first await to avoid actor-isolation errors
+                let sendableInput = _SendableInput(input)
                 coordLogger.debug("Executing tool: \(toolName)")
                 await onToolStep(toolStep)
 
-                let result = await executeToolCall(name: toolName, input: input)
+                let result = await executeToolCall(name: toolName, si: sendableInput)
 
                 toolStep.result = String(result.content.prefix(300))
                 toolStep.isRunning = false
@@ -155,7 +156,6 @@ actor ToolExecutionCoordinator {
                 ])
             }
 
-            // Append tool_results as user turn for next iteration
             conversationMessages.append(["role": "user", "content": toolResults])
         }
 
@@ -164,9 +164,10 @@ actor ToolExecutionCoordinator {
 
     // MARK: - Tool Dispatcher
 
-    private func executeToolCall(name: String, input: sending [String: Any]) async -> AnthropicToolResult {
+    // Class is @MainActor — all handler calls run on MainActor, no sending boundary crossing.
+    private func executeToolCall(name: String, si: _SendableInput) async -> AnthropicToolResult {
+        let input = si.dict
         switch name {
-        // Memory tools
         case "search_memory", "search_knowledge_graph":
             return await MemoryToolHandler.search(input)
         case "add_memory", "add_knowledge":
@@ -176,7 +177,6 @@ actor ToolExecutionCoordinator {
         case "update_memory":
             return await MemoryToolHandler.update(input)
 
-        // File tools
         case "read_file":
             return FileToolHandler.read(input)
         case "write_file":
@@ -186,36 +186,31 @@ actor ToolExecutionCoordinator {
         case "search_files":
             return FileToolHandler.searchFiles(input)
 
-        // Web tools
         case "web_search":
             return await WebToolHandler.search(input)
         case "fetch_url":
             return await WebToolHandler.fetchURL(input)
 
-        // Code tools
         case "run_code":
             return await CodeToolHandler.execute(input)
         case "analyze_code":
             return CodeToolHandler.analyze(input)
 
-        // System tools (cross-platform)
         case "get_system_info":
             return SystemToolHandler.getSystemInfo(input)
 
         #if os(macOS)
-        // System tools (macOS)
         case "system_notification":
-            return await Task { @MainActor in await SystemToolHandler.sendNotification(input) }.value
+            return await SystemToolHandler.sendNotification(input)
         case "system_clipboard_get":
-            return await Task { @MainActor in SystemToolHandler.getClipboard(input) }.value
+            return SystemToolHandler.getClipboard(input)
         case "system_clipboard_set":
-            return await Task { @MainActor in SystemToolHandler.setClipboard(input) }.value
+            return SystemToolHandler.setClipboard(input)
         case "run_command", "terminal_execute":
             return await SystemToolHandler.runCommand(input)
         case "open_application":
-            return await Task { @MainActor in SystemToolHandler.openApplication(input) }.value
+            return SystemToolHandler.openApplication(input)
 
-        // macOS integration tools
         case "calendar_list_events":
             return await MacOSToolHandler.calendarListEvents(input)
         case "calendar_create_event":
@@ -229,11 +224,11 @@ actor ToolExecutionCoordinator {
         case "mail_check_unread":
             return await MacOSToolHandler.mailCheckUnread(input)
         case "finder_reveal":
-            return await Task { @MainActor in MacOSToolHandler.finderReveal(input) }.value
+            return MacOSToolHandler.finderReveal(input)
         case "finder_search":
             return MacOSToolHandler.finderSearch(input)
         case "safari_open_url":
-            return await Task { @MainActor in MacOSToolHandler.safariOpenURL(input) }.value
+            return MacOSToolHandler.safariOpenURL(input)
         case "safari_get_current_url":
             return await MacOSToolHandler.safariGetCurrentURL(input)
         case "music_play":
@@ -318,7 +313,6 @@ actor ToolExecutionCoordinator {
 // MARK: - Tool Definition Helper
 
 extension AnthropicToolCatalog {
-    /// Convert ToolDefinitions to the [String: Any] format expected by Anthropic API
     func buildToolsForAPI() -> [[String: Any]] {
         buildToolCatalog().map { tool in
             [

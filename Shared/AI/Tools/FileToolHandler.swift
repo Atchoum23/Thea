@@ -9,11 +9,13 @@ import os.log
 
 private let logger = Logger(subsystem: "ai.thea.app", category: "FileToolHandler")
 
+@MainActor
 enum FileToolHandler {
 
     /// Directories the AI is allowed to read/write.
     private static let allowedDirectories: [String] = {
-        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        #if os(macOS)
+        let home = NSHomeDirectory()
         return [
             "\(home)/Documents",
             "\(home)/Downloads",
@@ -21,6 +23,10 @@ enum FileToolHandler {
             "\(home)/.claude/projects",
             NSTemporaryDirectory()
         ]
+        #else
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.path ?? ""
+        return [docs, NSTemporaryDirectory()]
+        #endif
     }()
 
     private static func isAllowed(_ path: String) -> Bool {
@@ -77,7 +83,14 @@ enum FileToolHandler {
 
     static func listDirectory(_ input: [String: Any]) -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
-        let path = input["path"] as? String ?? FileManager.default.homeDirectoryForCurrentUser.path
+        let defaultPath: String = {
+            #if os(macOS)
+            return NSHomeDirectory()
+            #else
+            return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.path ?? ""
+            #endif
+        }()
+        let path = input["path"] as? String ?? defaultPath
         guard isAllowed(path) else {
             return AnthropicToolResult(toolUseId: id, content: "Access denied: \(path)", isError: true)
         }
@@ -95,7 +108,7 @@ enum FileToolHandler {
     static func searchFiles(_ input: [String: Any]) -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
         let query = input["query"] as? String ?? ""
-        let dir = input["directory"] as? String ?? FileManager.default.homeDirectoryForCurrentUser.path
+        let dir = input["directory"] as? String ?? NSHomeDirectory()
         guard !query.isEmpty else {
             return AnthropicToolResult(toolUseId: id, content: "No query provided.", isError: true)
         }
