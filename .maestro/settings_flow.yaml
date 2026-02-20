@@ -20,9 +20,9 @@ appId: app.thea.ios
 - assertVisible:
     id: "welcome-greeting"
 
-# Navigate to Settings tab via accessibility identifier (iOS 26 liquid glass tab bar)
+# Navigate to Settings tab — tab title text is the reliable selector (id: does not propagate)
 - tapOn:
-    id: "tab-settings"
+    text: "Settings"
     optional: true
 
 - takeScreenshot: settings_main
@@ -64,5 +64,5 @@ appId: app.thea.ios
 
 # Navigate back to Chat
 - tapOn:
-    id: "tab-chat"
+    text: "Chat"
     optional: true

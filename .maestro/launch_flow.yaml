@@ -24,13 +24,14 @@ appId: app.thea.ios
 
 - takeScreenshot: launch_initial_state
 
-# Verify tab bar is accessible via accessibility identifiers (iOS 26 liquid glass)
+# Verify tab bar items — use title text (accessibilityIdentifier on Tab view does not
+# propagate to UITabBarButton; the title string is the reliable selector on iOS 26)
 - assertVisible:
-    id: "tab-chat"
+    text: "Chat"
     optional: true
 
 - assertVisible:
-    id: "tab-settings"
+    text: "Settings"
     optional: true
 
 - takeScreenshot: launch_tabs_visible

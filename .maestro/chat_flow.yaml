@@ -16,9 +16,9 @@ appId: app.thea.ios
     text: "Continue"
     optional: true
 
-# Ensure we're on Chat tab
+# Ensure we're on Chat tab — tab title text is the reliable selector (id: does not propagate)
 - tapOn:
-    id: "tab-chat"
+    text: "Chat"
     optional: true
 
 # Verify home screen via accessibilityIdentifier (bypasses .combine visibility issue)

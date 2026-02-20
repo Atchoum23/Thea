@@ -20,21 +20,22 @@ appId: app.thea.ios
 - assertVisible:
     id: "welcome-greeting"
 
-# Navigate to Projects tab via accessibility identifier (iOS 26 liquid glass tab bar)
+# Navigate to Projects tab — use tab title text (accessibilityIdentifier on Tab does not
+# propagate to UITabBarButton; the title string is the reliable selector on iOS 26)
 - tapOn:
-    id: "tab-projects"
+    text: "Projects"
     optional: true
 - takeScreenshot: projects_tab
 
 # Navigate to Health tab
 - tapOn:
-    id: "tab-health"
+    text: "Health"
     optional: true
 - takeScreenshot: health_tab
 
 # Navigate to Settings tab
 - tapOn:
-    id: "tab-settings"
+    text: "Settings"
     optional: true
 - assertVisible:
     text: "AI & Models"
@@ -43,6 +44,6 @@ appId: app.thea.ios
 
 # Navigate back to Chat tab
 - tapOn:
-    id: "tab-chat"
+    text: "Chat"
     optional: true
 - takeScreenshot: chat_tab_return
