@@ -129,7 +129,7 @@ final class ToolExecutionCoordinator {
                 coordLogger.debug("Executing tool: \(toolName)")
                 await onToolStep(toolStep)
 
-                let result = await executeToolCall(name: toolName, sendableInput: sendableInput)
+                let result = await executeToolCall(name: toolName, input: input)
 
                 toolStep.result = String(result.content.prefix(300))
                 toolStep.isRunning = false
@@ -154,8 +154,7 @@ final class ToolExecutionCoordinator {
     // MARK: - Tool Dispatcher
 
     // Class is @MainActor — all handler calls run on MainActor, no sending boundary crossing.
-    private func executeToolCall(name: String, sendableInput: _SendableDict) async -> AnthropicToolResult {
-        let input = sendableInput.dict
+    private func executeToolCall(name: String, input: [String: Any]) async -> AnthropicToolResult {
         switch name {
         case "search_memory", "search_knowledge_graph":
             return await MemoryToolHandler.search(input)
