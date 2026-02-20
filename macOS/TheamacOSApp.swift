@@ -333,6 +333,13 @@ struct TheamacOSApp: App {
             logger.info("SmartNotificationScheduler weekly summary loop started")
         }
 
+        // AP3: ServerHealthMonitor — watches MSM3U:18789; triggers failover after N failures
+        Task {
+            try? await Task.sleep(for: .seconds(10))
+            await ServerHealthMonitor.shared.startMonitoring()
+            logger.info("AP3: ServerHealthMonitor started — polling MSM3U:18789")
+        }
+
         // P3: PersonalKnowledgeGraph weekly background consolidation
         // Deduplicates entities, decays stale entries, resolves contradictions.
         Task.detached(priority: .background) {
