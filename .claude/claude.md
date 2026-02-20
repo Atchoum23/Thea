@@ -49,6 +49,34 @@ git pushsync
 
 Full protocol: See `## SESSION SAFETY PROTOCOL` in THEA_SHIP_READY_PLAN_v2.md
 
+### ⚠️ PERSONALPARAMETERS — CONTEXT INJECTION PROTOCOL (§0.3)
+
+**At session start, load `.claude/personal-parameters-defaults.txt` (or call `PersonalParameters.shared.snapshot()` once AI3 is built) and inject the relevant subset:**
+
+| Session type | Inject |
+|---|---|
+| Launching autonomous session | Part V §5.4-5.6 + Part IX + snapshot |
+| Writing Thea feature spec | Part XI + XII + XIII §13.0 + snapshot |
+| Debugging health/readiness | Part II + XIII §13.2-13.3 |
+| State-adaptive behavior | Part III + X §10.2-10.3 + snapshot |
+| Meta-AI feedback loop | Part X + XI §C6 |
+| Overnight autonomous code | Part V §5.4-5.6 + XIII §13.6 + snapshot |
+| Performance/energy session | Part VI + Part IX + snapshot |
+
+**Key values (Tier 2 defaults — SelfTuningEngine personalizes once it has data):**
+- Work: 75min | Break: 33min | Ultradian cycle: 100min
+- Flow threshold: 85% (confidence before entering flow-protection)
+- Interrupt budget: 4/day | Idle breakpoint: 3.0min
+- Claude compact: 70% context | Circuit breaker: 3 attempts | Budget: $2.00/session
+
+**Session end protocol** — append one line to `.claude/parameter-consultation-log.txt`:
+`DATE | SESSION | PHASE | PARAMETERS CONSULTED | DECISIONS MADE USING THEM`
+Example: `2026-02-20 | Stream2-B3 | flow threshold (85%) blocked interrupts 3x | work block 75min used as phase target`
+
+**CRITICAL**: `PersonalParameters.snapshot()` (AI3) supersedes the static defaults the moment it exists. The static file is bootstrap only.
+
+---
+
 ### ⚠️ NEVER ASK PERMISSION WHEN THE PLAN IS EXPLICIT (NON-NEGOTIABLE)
 
 If `THEA_CAPABILITY_PLAN_v3.md` (or any v3/v2 plan) explicitly says to do something — launch streams, run a script, execute a phase — **DO IT IMMEDIATELY. Never ask "should I do X?" when X is already in the plan.** Asking for confirmation when the plan is already Alexis's explicit instruction is a process failure. Act on the plan.

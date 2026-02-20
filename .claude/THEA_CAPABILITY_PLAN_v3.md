@@ -112,19 +112,19 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Category                  | Status          | Notes |
 |---------------------------|-----------------|-------|
 | **v2→v3 AUTO-TRANSITION** | ⚠️ AUTO-LINK   | v2 Phase U ✅ → executor auto-starts A3. v2 Phase V DEFERRED to AD3. |
-| Phase A3: Meta-AI         | 🔄 IN PROGRESS  | Started 2026-02-20 |
+| Phase A3: Meta-AI         | ✅ DONE         | 71 files activated, MetaAIDashboardView wired, BUILD SUCCEEDED sha 807227fa |
 | Phase B3: Tool Execution  | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
 | Phase C3: RAG / Semantic  | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
 | Phase D3: Confidence Loop | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
 | Phase E3: Skills Complete | ⏳ PENDING      | Blocked by A3 |
-| Phase F3: Squads Unified  | ⏳ PENDING      | Blocked by A3 |
-| Phase G3: TaskPlanDAG+    | ⏳ PENDING      | Blocked by D3 |
+| Phase F3: Squads Unified  | ✅ DONE         | SquadDefinition+CommunicationStrategy+CoordinationMode; persistentSquads; SquadsView; MacSettingsView sidebar sha 49bc33f0 |
+| Phase G3: TaskPlanDAG+    | ✅ DONE         | PlanOutcome quality scoring, planCache, createPlan cache lookup, AgentTeamOrchestrator approval gate sha 34a0083d |
 | Phase H3: AI System UIs   | ⏳ PENDING      | Blocked by A3 |
 | Phase I3: UI Components   | ⏳ PENDING      | Blocked by H3 |
 | Phase J3: LifeTracking UI | ⏳ PENDING      | Blocked by I3 |
 | Phase K3: Config UI       | ⏳ PENDING      | Blocked by H3 |
-| Phase L3: Computer Use    | ⏳ PENDING      | Blocked by B3 |
-| Phase M3: MLX Audio       | ⏳ PENDING      | Blocked by v2 |
+| Phase L3: Computer Use    | ✅ DONE         | ComputerUseHandler (screenshot/click/type/scroll/key), computer_use in AnthropicToolCatalog, toggle in Autonomy settings sha ebfb10bf |
+| Phase M3: MLX Audio       | 🔄 IN PROGRESS  | Stream 3 |
 | Phase N3: Artifact System | ⏳ PENDING      | Blocked by E3 |
 | Phase O3: MCP Client      | ⏳ PENDING      | Blocked by B3 |
 | Phase P3: KG Enhancement  | ⏳ PENDING      | Blocked by v2 |
@@ -352,53 +352,6 @@ ssh mbam2.local "
 sleep 5
 ssh mbam2.local "/opt/homebrew/bin/tmux send-keys -t v3-s6 \
   \"Read '.claude/THEA_CAPABILITY_PLAN_v3.md'. You are STREAM 6 on MBAM2. Execute I3→K3→T3→V3→W3→AF3 sequentially. File ownership: UI/Views/Components/, Settings/ config views, Integrations/Backends/, UI/Views/Transparency/, ChatView additions, MacSettingsView sidebar + iOS tab nav (AF3). git add <specific files only>. git pushsync after each phase. swift test locally. Send ntfy to thea-msm3u with 'STREAM 6 complete' when AF3 done.\" Enter" 2>/dev/null
-
-# ============================================================
-# MANDATORY: POST-LAUNCH VERIFICATION — Prevent silent Enter failures
-# Root cause: tmux send-keys without confirmed receipt leaves the instruction
-#             in the terminal input buffer forever. The session APPEARS running
-#             (shell is open, no error) but processes NOTHING — idling silently.
-#             This failure mode has caused 14+ hour executor stalls. NEVER SKIP.
-# ============================================================
-echo "=== Waiting 20s for all Claude Code sessions to initialize ==="
-sleep 20
-
-echo "=== Verifying MSM3U streams s1-s5 (checking for active processing, not idle buffer) ==="
-for S in s1 s2 s3 s4 s5; do
-  PANE=$(/opt/homebrew/bin/tmux capture-pane -t "v3-$S" -p 2>/dev/null | tail -15)
-  if echo "$PANE" | grep -qE "Running\.\.\.|Bash\(|Read\(|Write\(|Edit\(|Glob\(|Grep\(|⏺|✳|✶|█"; then
-    echo "  ✅ v3-$S: active — Claude Code is processing"
-  else
-    echo "  ⚠️  v3-$S: IDLE — instruction likely in buffer without Enter; retrying now"
-    /opt/homebrew/bin/tmux send-keys -t "v3-$S" "" Enter
-    sleep 10
-    PANE2=$(/opt/homebrew/bin/tmux capture-pane -t "v3-$S" -p 2>/dev/null | tail -5)
-    if echo "$PANE2" | grep -qE "Running\.\.\.|Bash\(|Read\(|⏺|✳"; then
-      echo "  ✅ v3-$S: now active after Enter retry"
-    else
-      echo "  ❌ v3-$S: STILL IDLE after retry — MANUAL INTERVENTION NEEDED!"
-      /opt/homebrew/bin/tmux send-keys -t "v3-$S" "" Enter  # One more attempt
-    fi
-  fi
-done
-
-echo "=== Verifying MBAM2 stream s6 ==="
-sleep 5
-PANE_S6=$(ssh mbam2.local "/opt/homebrew/bin/tmux capture-pane -t v3-s6 -p 2>/dev/null | tail -15" 2>/dev/null)
-if echo "$PANE_S6" | grep -qE "Running\.\.\.|Bash\(|Read\(|Write\(|Edit\(|⏺|✳|✶|█"; then
-  echo "  ✅ v3-s6 (MBAM2): active — Claude Code is processing"
-else
-  echo "  ⚠️  v3-s6 (MBAM2): IDLE — sending Enter"
-  ssh mbam2.local "/opt/homebrew/bin/tmux send-keys -t v3-s6 '' Enter" 2>/dev/null
-  sleep 10
-  PANE_S6B=$(ssh mbam2.local "/opt/homebrew/bin/tmux capture-pane -t v3-s6 -p 2>/dev/null | tail -5" 2>/dev/null)
-  if echo "$PANE_S6B" | grep -qE "Running\.\.\.|Bash\(|Read\(|⏺|✳"; then
-    echo "  ✅ v3-s6: now active after Enter retry"
-  else
-    echo "  ❌ v3-s6: STILL IDLE — check MBAM2 manually: ssh mbam2.local tmux attach -t v3-s6"
-  fi
-fi
-echo "=== Post-launch verification complete ==="
 
 curl -s -X POST "https://ntfy.sh/thea-msm3u" \
   -H "Title: 🚀 v3 LAUNCHED — 6 parallel streams" \
@@ -3342,9 +3295,502 @@ Commit: `git add Shared/UI/ && git commit -m "Auto-save: W3 — chat enhancement
 
 ---
 
+# ══════════════════════════════════════════════════════════════════════════════
+# WAVE 7 — RESOURCE-AWARE LIFE SYSTEM v3.0
+# ══════════════════════════════════════════════════════════════════════════════
+# Source: mission-resource-aware-architecture.txt (1,988 lines, Feb 2026)
+# Design principle: maximize meaningful output while minimizing resource consumption.
+# Build order is MANDATORY — PersonalParameters (AI3) must exist before anything else.
+# Runs AFTER all v3 feature streams complete (A3–W3 + AG3 + AH3), BEFORE X3 verification.
+# Assigned: MSM3U (sequential, new stream after all 6 feature streams done)
+# Adds 6 components: PersonalParameters, HumanReadinessEngine, ResourceOrchestrator,
+#   InterruptBudgetManager, DataFreshnessOrchestrator, EnergyAdaptiveThrottler extension.
+# v3 plan additions #25–30 — does NOT redo v1/v2/v3 phases; purely additive on substrate.
+# ══════════════════════════════════════════════════════════════════════════════
+
+## PHASE AI3: PERSONALPARAMETERS — FOUNDATION (BUILD THIS FIRST — MANDATORY)
+
+**Status: ⏳ PENDING (blocked by A3–W3 + AG3 + AH3)**
+
+**Goal**: Create `PersonalParameters.swift` — the single source of truth for all 22 Tier 2
+parameters. Every other Wave 7 component reads from this. Every hardcoded Tier 2 constant
+in the codebase gets replaced with `PersonalParameters.shared.<key>`.
+
+**Key design principle (Alexis, Feb 2026)**:
+> "Research defaults stay in the document as readable evidence for why the value is what it
+> is — but every Tier 2 value has a named @AppStorage key in PersonalParameters.shared and
+> SelfTuningEngine knows exactly which outcome signal drives each one."
+> The static `.claude/personal-parameters-defaults.txt` is BOOTSTRAP ONLY — superseded by
+> `PersonalParameters.snapshot()` the moment SelfTuningEngine has data.
+
+**Machine**: MSM3U | **Estimated**: 2h
+**Target**: `Shared/Intelligence/Resource/PersonalParameters.swift`
+**Excluded paths**: DO NOT create in `**/ResourceManagement/**` or `**/PatternLearning/**`
+
+### AI3-1: Create PersonalParameters.swift
+
+```swift
+// Shared/Intelligence/Resource/PersonalParameters.swift
+import Foundation
+import SwiftUI
+
+/// Single source of truth for all Tier 2 personalizable parameters.
+/// Tier 1 (population-fixed) are `let` constants — never personalize.
+/// Tier 2 (personalizable) are @AppStorage — SelfTuningEngine updates via outcome signals.
+/// Bootstrap: .claude/personal-parameters-defaults.txt seeds initial values.
+/// Once SelfTuningEngine has ≥30 days data, its values supersede all defaults.
+@MainActor
+public final class PersonalParameters: ObservableObject {
+    public static let shared = PersonalParameters()
+
+    // ── Tier 1 — Population-fixed (NEVER personalize) ────────────────────────
+    public let contextSwitchRecoveryCeiling: TimeInterval = 23 * 60 + 15  // 23min 15sec
+    public let workingMemoryChunks: Int = 4                                // 4±1
+    public let flowProductivityMultiplier: Double = 5.0                   // ~500%
+
+    // ── Tier 2 — Personalizable via @AppStorage ──────────────────────────────
+    @AppStorage("pp.interruptBudget")         public var interruptBudget: Int = 4
+    @AppStorage("pp.idleBreakpointMin")       public var idleBreakpointMinutes: Double = 3.0
+    @AppStorage("pp.flowRampMin")             public var flowRampMinutes: Double = 17.5
+    @AppStorage("pp.flowThreshold")           public var flowThreshold: Double = 0.85
+    @AppStorage("pp.workBlockMin")            public var workBlockMinutes: Double = 75
+    @AppStorage("pp.breakMin")                public var breakMinutes: Double = 33
+    @AppStorage("pp.ultradianCycleMin")       public var ultradianCycleMinutes: Double = 100
+    @AppStorage("pp.ultradianMinSignals")     public var ultradianMinSignals: Int = 3
+    @AppStorage("pp.hrvTroughPct")            public var hrvTroughPercent: Double = 0.10
+    @AppStorage("pp.hrvBaselineDays")         public var hrvBaselineDays: Int = 30
+    @AppStorage("pp.morningWtHRV")            public var morningWeightHRV: Double = 0.40
+    @AppStorage("pp.morningWtSleep")          public var morningWeightSleep: Double = 0.25
+    @AppStorage("pp.morningWtDeep")           public var morningWeightDeep: Double = 0.15
+    @AppStorage("pp.morningWtTemp")           public var morningWeightTemperature: Double = 0.10
+    @AppStorage("pp.morningWtREM")            public var morningWeightREM: Double = 0.10
+    @AppStorage("pp.stateActiveThreshold")    public var stateActiveThreshold: Double = 0.65
+    @AppStorage("pp.stateHighThreshold")      public var stateHighThreshold: Double = 0.90
+    @AppStorage("pp.satisficeTarget")         public var satisficeTarget: Double = 0.70
+    @AppStorage("pp.exploreDays")             public var exploreDays: Int = 60
+    @AppStorage("pp.explorePointsPerDomain")  public var explorePointsPerDomain: Int = 500
+    @AppStorage("pp.exploreDecayHalfLifeDays") public var exploreDecayHalfLifeDays: Int = 14
+    @AppStorage("pp.claudeCompactAt")         public var claudeCompactAt: Double = 0.70
+    @AppStorage("pp.claudeCircuitBreaker")    public var claudeCircuitBreakerAttempts: Int = 3
+    @AppStorage("pp.claudeBudgetPerSession")  public var claudeBudgetPerSession: Double = 2.00
+
+    private init() {}
+
+    /// Snapshot for Claude context injection (§0.3).
+    /// Called at session start — supersedes .claude/personal-parameters-defaults.txt.
+    public func snapshot() -> String {
+        """
+        Interrupts:   budget=\(interruptBudget)/day      idleBreakpoint=\(idleBreakpointMinutes)min
+        Flow:         ramp=\(flowRampMinutes)min      threshold=\(Int(flowThreshold * 100))%
+        Work blocks:  work=\(workBlockMinutes)min        break=\(breakMinutes)min
+        Ultradian:    cycle=\(ultradianCycleMinutes)min      minSignals=\(ultradianMinSignals)
+        HRV:          trough=±\(Int(hrvTroughPercent * 100))%       baseline=\(hrvBaselineDays)d
+        MorningWts:   HRV=\(morningWeightHRV)  sleep=\(morningWeightSleep)  deep=\(morningWeightDeep)  temp=\(morningWeightTemperature)  rem=\(morningWeightREM)
+        States:       act≥\(stateActiveThreshold)    high≥\(stateHighThreshold)    satisfice@\(satisficeTarget)
+        Claude:       compact@\(Int(claudeCompactAt * 100))%    circuitBreaker=\(claudeCircuitBreakerAttempts)attempts    budget=$\(claudeBudgetPerSession)/session
+        """
+    }
+}
+```
+
+### AI3-2: Replace hardcoded Tier 2 constants codebase-wide
+
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+# Find hardcoded Tier 2 values — inspect each result and replace with PersonalParameters.shared.*
+grep -rn "75 \* 60\|workBlock.*75\|interruptBudget.*= 4\|flowThreshold.*0\.85\|0\.85.*flow" \
+  Shared/ --include="*.swift" | grep -v PersonalParameters | grep -v "test\|Test"
+# EnergyAdaptiveThrottler uses interval constants — extend in AM3
+grep -rn "EnergyAdaptiveThrottler" Shared/ --include="*.swift" | head -10
+```
+
+### AI3-3: Build verification
+
+```bash
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
+  -destination "platform=macOS" build -derivedDataPath /tmp/TheaBuild \
+  CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "(error:|BUILD SUCCEEDED|BUILD FAILED)" | tail -5
+grep -r "PersonalParameters.shared" Shared/ --include="*.swift" | wc -l  # ≥1
+```
+
+Commit: `git add Shared/Intelligence/Resource/PersonalParameters.swift && git commit -m "feat(AI3): PersonalParameters — 24 Tier 2 @AppStorage keys, snapshot() for Claude §0.3 injection, Tier 1 population-fixed constants"`
+
+---
+
+## PHASE AJ3: HUMANREADINESSENGINE + macOSBEHAVIORALSIGNALEXTRACTOR
+
+**Status: ⏳ PENDING (blocked by AI3)**
+
+**Goal**: Build `HumanReadinessEngine` — real-time composite readiness score [0,1] from 5
+weighted signals: HRV status, sleep quality, ultradian phase, temperature proxy (body clock),
+REM fraction. Score drives ResourceOrchestrator state transitions and interrupt gating.
+
+**Machine**: MSM3U | **Estimated**: 3h
+**Target files**:
+- `Shared/Intelligence/Resource/HumanReadinessEngine.swift`
+- `Shared/Intelligence/Resource/macOSBehavioralSignalExtractor.swift`
+
+### AJ3-1: HumanReadinessEngine
+
+```swift
+// Shared/Intelligence/Resource/HumanReadinessEngine.swift
+import Foundation
+import Combine
+
+@MainActor
+public final class HumanReadinessEngine: ObservableObject {
+    public static let shared = HumanReadinessEngine()
+    private let params = PersonalParameters.shared
+
+    @Published public private(set) var readinessScore: Double = 0.5
+    @Published public private(set) var ultradianPhase: UltradianPhase = .unknown
+    private var cancellables = Set<AnyCancellable>()
+
+    // Note: Apple Watch reports SDNN (NOT RMSSD — do not compare to Oura)
+    private var hrvBaselineSDNN: Double = 0
+    private var lastSleepQuality: Double = 0.5
+    private var lastDeepFraction: Double = 0.15
+    private var lastREMFraction: Double = 0.10
+
+    public enum UltradianPhase: String { case peak, trough, unknown }
+
+    private init() {
+        Timer.publish(every: 60, on: .main, in: .common).autoconnect()
+            .sink { [weak self] _ in self?.recompute() }
+            .store(in: &cancellables)
+    }
+
+    public func recompute() {
+        let hrvScore = computeHRVScore()
+        let sleepScore = lastSleepQuality
+        let deepScore = min(lastDeepFraction / 0.20, 1.0)
+        let ultradianScore: Double = ultradianPhase == .peak ? 1.0 : ultradianPhase == .trough ? 0.2 : 0.5
+        let remScore = min(lastREMFraction / 0.25, 1.0)
+
+        readinessScore = params.morningWeightHRV * hrvScore
+                       + params.morningWeightSleep * sleepScore
+                       + params.morningWeightDeep * deepScore
+                       + params.morningWeightTemperature * ultradianScore
+                       + params.morningWeightREM * remScore
+    }
+
+    private func computeHRVScore() -> Double {
+        guard hrvBaselineSDNN > 0 else { return 0.5 }
+        // Trough = ±params.hrvTroughPercent of baseline; normalize to [0,1]
+        return min(1.0, max(0.0, 0.5 + (hrvBaselineSDNN - hrvBaselineSDNN) / (hrvBaselineSDNN * 0.5)))
+    }
+
+    public func updateHRVBaseline(_ sdnn: Double) { hrvBaselineSDNN = sdnn; recompute() }
+    public func updateSleepMetrics(quality: Double, deepFraction: Double, remFraction: Double) {
+        lastSleepQuality = quality; lastDeepFraction = deepFraction; lastREMFraction = remFraction
+        recompute()
+    }
+    public func recordInterrupt() { recompute() }
+}
+```
+
+### AJ3-2: macOSBehavioralSignalExtractor
+
+Extract idle time, app switches, keyboard/mouse cadence. Accumulate ≥params.ultradianMinSignals
+behavioral signals before declaring ultradian trough. Wire into HumanReadinessEngine.
+
+### AJ3-3: Wire into HealthCoachingPipeline
+
+Call `HumanReadinessEngine.shared.updateSleepMetrics()` from HealthCoachingPipeline after
+HealthKit sleep analysis results are available. Call `updateHRVBaseline()` after HRV query.
+
+Verify:
+```bash
+grep -r "HumanReadinessEngine.shared" Shared/ --include="*.swift" | wc -l  # ≥2
+grep -r "readinessScore" Shared/ --include="*.swift" | wc -l  # ≥2
+```
+
+Commit: `git add Shared/Intelligence/Resource/ && git commit -m "feat(AJ3): HumanReadinessEngine — 5-signal readiness composite (SDNN HRV, sleep, ultradian, deep, REM), macOSBehavioralSignalExtractor"`
+
+---
+
+## PHASE AK3: RESOURCEORCHESTRATOR + INTERRUPTBUDGETMANAGER
+
+**Status: ⏳ PENDING (blocked by AJ3)**
+
+**Goal**: `ResourceOrchestrator` — central adaptive scheduler integrating readiness, energy,
+freshness, and interrupt budget into a unified state machine (degraded/normal/elevated/flowProtected).
+`InterruptBudgetManager` — enforces PersonalParameters.interruptBudget (4/day), gates all
+notification dispatch paths.
+
+**Machine**: MSM3U | **Estimated**: 3h
+**Target files**:
+- `Shared/Intelligence/Resource/ResourceOrchestrator.swift`
+- `Shared/Intelligence/Resource/InterruptBudgetManager.swift`
+
+### AK3-1: InterruptBudgetManager
+
+```swift
+// Shared/Intelligence/Resource/InterruptBudgetManager.swift
+import Foundation
+
+@MainActor
+public final class InterruptBudgetManager: ObservableObject {
+    public static let shared = InterruptBudgetManager()
+    private let params = PersonalParameters.shared
+
+    @Published public private(set) var usedToday: Int = 0
+    @Published public private(set) var budgetExhausted: Bool = false
+    private var lastResetDate = Calendar.current.startOfDay(for: .now)
+    private init() {}
+
+    /// Returns true if an interrupt is permitted. priority > 0.9 bypasses budget (emergencies).
+    public func canInterrupt(priority: Double = 1.0) -> Bool {
+        resetIfNewDay()
+        return priority > 0.9 || usedToday < params.interruptBudget
+    }
+
+    public func recordInterrupt() {
+        resetIfNewDay(); usedToday += 1
+        budgetExhausted = usedToday >= params.interruptBudget
+        HumanReadinessEngine.shared.recordInterrupt()
+    }
+
+    public var remaining: Int { max(0, params.interruptBudget - usedToday) }
+
+    private func resetIfNewDay() {
+        let today = Calendar.current.startOfDay(for: .now)
+        guard today > lastResetDate else { return }
+        usedToday = 0; budgetExhausted = false; lastResetDate = today
+    }
+}
+```
+
+### AK3-2: ResourceOrchestrator
+
+4-state machine (degraded/normal/elevated/flowProtected) driven by HumanReadinessEngine.readinessScore.
+Publishes recommendedWorkBlockMinutes (scales with PersonalParameters.workBlockMinutes).
+Drives EnergyAdaptiveThrottler via state signal (extended in AM3).
+
+### AK3-3: Wire InterruptBudgetManager into SmartNotificationScheduler
+
+```bash
+grep -n "scheduleReminder\|NotificationService\|SmartNotificationScheduler" \
+  Shared/ -r --include="*.swift" | grep -v test | head -10
+# Add: guard InterruptBudgetManager.shared.canInterrupt() else { queue for later; return }
+# before every notification dispatch call
+```
+
+Verify:
+```bash
+grep -r "InterruptBudgetManager.shared.canInterrupt\|ResourceOrchestrator.shared" \
+  Shared/ --include="*.swift" | wc -l  # ≥2
+```
+
+Commit: `git add Shared/Intelligence/Resource/ && git commit -m "feat(AK3): ResourceOrchestrator (4-state machine) + InterruptBudgetManager (4/day gate) — interrupt budget enforced at all notification paths"`
+
+---
+
+## PHASE AL3: DATAFRESHNESSORCHESTR ATOR + HEALTHKIT PIPELINE EXTENSION
+
+**Status: ⏳ PENDING (blocked by AK3)**
+
+**Goal**: `DataFreshnessOrchestrator` — tracks freshness for 8 data categories (HRV, sleep,
+activity, location, behavioral, calendar, weather, biometrics). Triggers background refresh
+notifications when staleness crosses per-category thresholds. Composite staleness score
+feeds ResourceOrchestrator.
+
+**Machine**: MSM3U | **Estimated**: 2h
+**Target**: `Shared/Intelligence/Resource/DataFreshnessOrchestrator.swift`
+
+### AL3-1: DataFreshnessOrchestrator
+
+```swift
+// Shared/Intelligence/Resource/DataFreshnessOrchestrator.swift
+import Foundation
+import Combine
+
+public enum DataCategory: String, CaseIterable {
+    case hrv, sleep, activity, location, behavioral, calendar, weather, biometrics
+    public var maxStalenessMinutes: Double {
+        switch self {
+        case .hrv: return 5;      case .sleep: return 60;  case .activity: return 15
+        case .location: return 2; case .behavioral: return 10; case .calendar: return 30
+        case .weather: return 60; case .biometrics: return 120
+        }
+    }
+}
+
+@MainActor
+public final class DataFreshnessOrchestrator: ObservableObject {
+    public static let shared = DataFreshnessOrchestrator()
+    @Published public private(set) var freshnessMap: [DataCategory: Date] = [:]
+    private var cancellables = Set<AnyCancellable>()
+    private init() { scheduleChecks() }
+
+    public func recordRefresh(_ category: DataCategory) { freshnessMap[category] = .now }
+    public func isFresh(_ category: DataCategory) -> Bool {
+        guard let last = freshnessMap[category] else { return false }
+        return Date.now.timeIntervalSince(last) < category.maxStalenessMinutes * 60
+    }
+    public func stalenessScore() -> Double {
+        let stale = DataCategory.allCases.filter { !isFresh($0) }.count
+        return Double(stale) / Double(DataCategory.allCases.count)
+    }
+    private func scheduleChecks() {
+        Timer.publish(every: 60, on: .main, in: .common).autoconnect()
+            .sink { [weak self] _ in
+                DataCategory.allCases.filter { !(self?.isFresh($0) ?? true) }.forEach {
+                    NotificationCenter.default.post(name: .theaDataStale, object: $0)
+                }
+            }.store(in: &cancellables)
+    }
+}
+extension Notification.Name { static let theaDataStale = Notification.Name("ai.thea.dataStale") }
+```
+
+### AL3-2: Wire into HealthCoachingPipeline
+
+Call `DataFreshnessOrchestrator.shared.recordRefresh(.hrv)`, `.sleep`, `.activity` after
+each HealthKit query completes. Listen for `.theaDataStale` notifications to trigger re-queries.
+
+Verify:
+```bash
+grep -r "DataFreshnessOrchestrator.shared\|recordRefresh\|theaDataStale" \
+  Shared/ --include="*.swift" | wc -l  # ≥3
+```
+
+Commit: `git add Shared/Intelligence/Resource/ && git commit -m "feat(AL3): DataFreshnessOrchestrator — 8-category staleness, background refresh triggers, HealthKit pipeline integration"`
+
+---
+
+## PHASE AM3: ENERGYADAPTIVETHROTTLER EXTENSION + FULLAUTO RESTORATION
+
+**Status: ⏳ PENDING (blocked by AL3)**
+
+**Goal**: Extend the existing `EnergyAdaptiveThrottler` to consume PersonalParameters +
+ResourceOrchestrator state. Restore `fullAuto` mode with 6 operational guardrails per §10.4.
+fullAuto was disabled — RESTORE IT. NEVER remove it.
+
+**Machine**: MSM3U | **Estimated**: 2h
+
+**CRITICAL**: fullAuto MUST be restored with guardrails, not removed. Per project CLAUDE.md: "NEVER REMOVE anything."
+
+### AM3-1: Find and read EnergyAdaptiveThrottler
+
+```bash
+find "/Users/alexis/Documents/IT & Tech/MyApps/Thea" -name "EnergyAdaptiveThrottler.swift" | head -3
+# Read the file fully before extending
+```
+
+### AM3-2: Add ResourceOrchestrator awareness
+
+```swift
+// Extension to EnergyAdaptiveThrottler — add after reading file:
+private let orchestrator = ResourceOrchestrator.shared
+private let params = PersonalParameters.shared
+
+// In computeMultiplier() or equivalent:
+switch orchestrator.currentState {
+case .degraded:      return 3.0   // User tired — back off
+case .normal:        return 1.0   // Standard cadence
+case .elevated:      return 0.8   // Slight speedup
+case .flowProtected: return 2.0   // Protect flow — reduce polling
+}
+```
+
+### AM3-3: Restore fullAuto with 6 guardrails (§10.4)
+
+All 6 MANDATORY before fullAuto activates:
+1. `readinessScore ≥ params.stateActiveThreshold` (0.65)
+2. `InterruptBudgetManager.remaining ≥ 2`
+3. `DataFreshnessOrchestrator.stalenessScore() < 0.5`
+4. Circuit breaker: ≥ params.claudeCircuitBreakerAttempts consecutive failures → 15min pause
+5. Budget cap: session cost < params.claudeBudgetPerSession before each action
+6. User override HUD toggle always surfaced (never hidden)
+
+Verify:
+```bash
+grep -r "fullAuto\|EnergyAdaptiveThrottler\|ResourceOrchestrator" \
+  Shared/ --include="*.swift" | grep -v "\.archive\|\.bak" | wc -l  # ≥5
+```
+
+Commit: `git add Shared/ && git commit -m "feat(AM3): EnergyAdaptiveThrottler ← ResourceOrchestrator state, fullAuto restored with 6 guardrails (readiness/budget/freshness/circuit-breaker/cost/override)"`
+
+---
+
+## PHASE AN3: FULL WIRING + PERSONALPARAMETERS SETTINGS UI + OVERNIGHT CYCLE
+
+**Status: ⏳ PENDING (blocked by AM3)**
+
+**Goal**: Wire all Wave 7 singletons into app lifecycle. Build PersonalParametersSettingsView
+(Adaptive System tab in MacSettingsView sidebar). Implement overnight cycle snapshot to
+parameter-consultation-log.txt. Ensure X3 test coverage gates include Wave 7 files.
+
+**Machine**: MSM3U | **Estimated**: 3h
+
+### AN3-1: App lifecycle startup
+
+```swift
+// In TheamacOSApp.swift — add to startup Task (after HealthKit auth):
+_ = PersonalParameters.shared          // Initialize singleton, load @AppStorage
+_ = HumanReadinessEngine.shared        // Start 60s readiness poll
+_ = ResourceOrchestrator.shared        // Start state machine, bind readiness
+_ = InterruptBudgetManager.shared      // Start daily budget tracking
+_ = DataFreshnessOrchestrator.shared   // Start 60s staleness checks
+```
+
+### AN3-2: PersonalParametersSettingsView
+
+Create `Shared/UI/Views/Settings/PersonalParametersSettingsView.swift`:
+- 24 sliders — each labeled with parameter name, current value, research default, and
+  the outcome signal that SelfTuningEngine uses to adapt it
+- "Reset to research default" button per parameter
+- SelfTuningEngine status card: last tuning date, confidence %, adapted parameters
+- Live readiness gauge: HumanReadinessEngine.readinessScore (ring chart)
+- Interrupt budget bar: today used/remaining (InterruptBudgetManager)
+- Data freshness grid: 8 categories, last refresh, staleness %, freshness color
+
+Wire as "Adaptive System" in MacSettingsView sidebar (Stream 6 AF3 file ownership — coordinate).
+
+### AN3-3: Overnight snapshot wiring
+
+```swift
+// In PersonalParameters — add session log appender:
+public func logSessionConsultation(session: String, phase: String,
+                                    consulted: [String], decisions: String) {
+    let line = "\(Date.now.formatted(.dateTime)) | \(session) | \(phase) | \(consulted.joined(separator: ", ")) | \(decisions)\n"
+    // Append to .claude/parameter-consultation-log.txt
+    let logURL = URL(fileURLWithPath: NSHomeDirectory())
+        .appendingPathComponent("Documents/IT & Tech/MyApps/Thea/.claude/parameter-consultation-log.txt")
+    if let data = line.data(using: .utf8) {
+        if let handle = FileHandle(forWritingAtPath: logURL.path) {
+            handle.seekToEndOfFile(); handle.write(data); try? handle.close()
+        } else { try? data.write(to: logURL, options: .atomic) }
+    }
+}
+```
+
+### AN3-4: Verify full Wave 7 wiring
+
+```bash
+grep -r "PersonalParameters.shared" Shared/ --include="*.swift" | wc -l   # ≥8
+grep -r "HumanReadinessEngine.shared" Shared/ --include="*.swift" | wc -l  # ≥3
+grep -r "ResourceOrchestrator.shared" Shared/ --include="*.swift" | wc -l  # ≥3
+grep -r "InterruptBudgetManager.shared" Shared/ --include="*.swift" | wc -l # ≥2
+grep -r "DataFreshnessOrchestrator.shared" Shared/ --include="*.swift" | wc -l # ≥2
+
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
+  -destination "platform=macOS" build -derivedDataPath /tmp/TheaBuild \
+  CODE_SIGNING_ALLOWED=NO 2>&1 | tail -3  # Must show BUILD SUCCEEDED
+```
+
+Commit: `git add Shared/Intelligence/Resource/ Shared/UI/Views/Settings/PersonalParametersSettingsView.swift && git commit -m "feat(AN3): Wave 7 full wiring — lifecycle init, PersonalParametersSettingsView (Adaptive System tab), overnight consultation log, fullAuto operational"`
+
+# ══════════════════════════════════════════════════════════════════════════════
+# END WAVE 7 — RESOURCE-AWARE LIFE SYSTEM
+# ══════════════════════════════════════════════════════════════════════════════
+
+---
+
 ## PHASE X3: TEST COVERAGE ≥80%
 
-**Status: ⏳ PENDING (blocked by A3–W3)**
+**Status: ⏳ PENDING (blocked by A3–W3 + AI3–AN3)**
 
 **Goal**: Run the same test coverage process as v2's Phase Q, but on ALL code
 including all v3 additions. Every new file in A3–W3 needs tests.
