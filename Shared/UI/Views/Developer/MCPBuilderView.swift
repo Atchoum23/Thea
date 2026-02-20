@@ -35,7 +35,7 @@ struct MCPBuilderView: View {
             Text(errorMessage ?? "")
         }
         .task {
-            generator.initialize()
+            await generator.initialize()
         }
     }
 
@@ -123,12 +123,10 @@ struct MCPBuilderView: View {
     // MARK: - Actions
 
     private func applyTemplate(_ template: MCPTemplate) {
-        let spec = template.createSpec(with: MCPTemplateConfig(
-            serverName: serverName.isEmpty ? template.name : serverName,
-            includeDefaultTools: true,
-            includeDefaultResources: false,
-            includeDefaultPrompts: false
-        ))
+        var config = MCPTemplateConfig(serverName: serverName.isEmpty ? template.name : serverName)
+        config.includeDefaultResources = false
+        config.includeDefaultPrompts = false
+        let spec = template.createSpec(with: config)
         tools = spec.tools.map { EditableMCPTool(from: $0) }
         if serverDescription.isEmpty {
             serverDescription = template.description

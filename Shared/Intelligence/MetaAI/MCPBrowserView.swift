@@ -77,6 +77,22 @@ struct MCPBrowserView: View {
     }
 }
 
+// MARK: - Local Server Row (uses MetaAIMCPServerInfo, not ConnectedMCPServer)
+
+private struct MCPServerRow: View {
+    let server: MetaAIMCPServerInfo
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(server.name).font(.body)
+            Text("\(server.toolCount) tools")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 2)
+    }
+}
+
 // MARK: - Preview
 
 #Preview {

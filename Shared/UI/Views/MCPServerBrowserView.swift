@@ -37,7 +37,7 @@ struct MCPServerBrowserView: View {
             if !clientManager.connectedServers.isEmpty {
                 Section("Connected") {
                     ForEach(clientManager.connectedServers) { server in
-                        MCPServerRow(server: server)
+                        ConnectedMCPServerRow(server: server)
                             .tag(server)
                             .swipeActions(edge: .trailing) {
                                 Button(role: .destructive) {
@@ -184,10 +184,10 @@ struct MCPServerBrowserView: View {
     }
 }
 
-// MARK: - MCP Server Row
+// MARK: - Connected MCP Server Row
 
-struct MCPServerRow: View {
-    @Bindable var server: ConnectedMCPServer
+struct ConnectedMCPServerRow: View {
+    var server: ConnectedMCPServer
 
     var body: some View {
         HStack(spacing: 10) {
@@ -230,7 +230,7 @@ struct MCPServerRow: View {
 // MARK: - MCP Server Detail View
 
 struct MCPServerDetailView: View {
-    @Bindable var server: ConnectedMCPServer
+    var server: ConnectedMCPServer
     @State private var tools: [MCPToolSpec] = []
     @State private var resources: [MCPResourceSpec] = []
     @State private var isLoading = false
