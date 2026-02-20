@@ -81,7 +81,7 @@ struct ArtifactBrowserView: View {
                     } label: {
                         HStack {
                             Label(type.displayName, systemImage: type.symbolName)
-                                .foregroundStyle(selectedType == type ? .accentColor : .primary)
+                                .foregroundStyle(selectedType == type ? Color.accentColor : Color.primary)
                             Spacer()
                             Text("\(artifacts.filter { $0.type == type }.count)")
                                 .foregroundStyle(.secondary).font(.caption)
