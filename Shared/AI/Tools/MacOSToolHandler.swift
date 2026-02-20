@@ -174,6 +174,7 @@ enum MacOSToolHandler {
         return AnthropicToolResult(toolUseId: id, content: "Revealed in Finder: \(path)")
     }
 
+    @MainActor
     static func finderSearch(_ input: [String: Any]) -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
         let query = input["query"] as? String ?? ""
