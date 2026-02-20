@@ -61,7 +61,7 @@ final class LocalVisionGuidance {
     }
 
     func requestActionExecutorPermission() {
-        actionExecutor.requestAuthorization()
+        actionExecutor.requestPermission()
     }
 
     // MARK: - Model Loading
