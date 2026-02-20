@@ -346,6 +346,8 @@ targets:
           - "**/LiveGuidanceSettingsViewStub.swift"  # Real LiveGuidanceSettingsView.swift is active (M3 re-enabled)
           - "**/Views/MetaAI/MetaAIDashboardView.swift"  # Depends on archived MetaAI types; stub below used instead
           - "**/Views/Intelligence/SquadsView.swift"  # Depends on SquadOrchestrator types not yet ported; stub below
+          # Duplicate TabularDataAnalyzer — Intelligence/Data/ is canonical (has analyzeFinancialCSV + #if canImport guard)
+          - "**/Intelligence/DataAnalysis/TabularDataAnalyzer.swift"
           # macOS/Views/ Analytics stubs excluded via macOS path excludes below
           # CodeIntelligence — ACTIVATED (macOS-only, #if os(macOS) guarded)
           - "**/Views/Code/**"  # CodeProjectView extracted sub-view, duplicates types in parent
@@ -611,6 +613,8 @@ targets:
           - "**/Code/CodeIntelligence.swift"
           - "**/Views/Code/**"
           - "**/Settings/Privacy/**"  # Extracted sub-views duplicate PrivacySettingsView.swift
+          # Duplicate TabularDataAnalyzer — Intelligence/Data/ is canonical (has analyzeFinancialCSV + #if canImport guard)
+          - "**/Intelligence/DataAnalysis/TabularDataAnalyzer.swift"
           # ResourceAllocationSettingsView — ACTIVATED (DynamicResourceAllocator is active)
           # SelfExecutionView REMOVED from codebase on 2026-02-13
           - "**/AI/MultiModal/MultiModalCoordinator.swift"

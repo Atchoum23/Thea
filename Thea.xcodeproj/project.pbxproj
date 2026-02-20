@@ -1930,7 +1930,6 @@
 		C1A2E3648FE3E02C69984B18 /* dark-mode-inject.css in Resources */ = {isa = PBXBuildFile; fileRef = AD8580643130E3F95DCE9E18 /* dark-mode-inject.css */; };
 		C1B412A51A2845C5871DB0CA /* AnthropicTokenCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6F51E687FBF6463C0177F2 /* AnthropicTokenCounter.swift */; };
 		C1C5652AA805E500323F1AC7 /* PromptEngineeringModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C9E67F316E11C79A15D6FC /* PromptEngineeringModels.swift */; };
-		C1D7EEBDA87E02ADC7602D2B /* TabularDataAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41221A54CBDFC39EAE797A85 /* TabularDataAnalyzer.swift */; };
 		C1E7AD25990EB351D2DAC699 /* UnifiedDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA73D8A062838B6AFF06B6D /* UnifiedDashboardView.swift */; };
 		C1F0F6602004DD35E5300BF3 /* DynamicModelRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41F35459ADE32AF53AE872D7 /* DynamicModelRegistry.swift */; };
 		C1F7F1025F954DE3080E7925 /* DocumentationGrounding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06E31752880976FC52698EA4 /* DocumentationGrounding.swift */; };
@@ -2088,7 +2087,6 @@
 		D1BA2F642BB8305CA8B01CB2 /* StressDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C7C8FDA08493F9662A7A6C /* StressDetector.swift */; };
 		D1C0AC9D0FBBBFB5AC51E23B /* XAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0AADFAD01758A9D5CA7209 /* XAPIService.swift */; };
 		D1C379D564F3561CF09951EC /* RemindersIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E9D82E9593330A9EC81607 /* RemindersIntegration.swift */; };
-		D1CB09ECBED19DC72E5381C5 /* TabularDataAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41221A54CBDFC39EAE797A85 /* TabularDataAnalyzer.swift */; };
 		D1E6C9E6DBC4F5813BF4F4E8 /* TheaClipRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9990FF8297FF11E970ED677 /* TheaClipRowView.swift */; };
 		D1EC5634073A5881C594F3DF /* UserPreferenceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC7671DAA4A40F6CE6E80A3F /* UserPreferenceModel.swift */; };
 		D1F1DA58D5DB0813D0D23670 /* SystemCapabilityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99AC59954CBE2CBD287F27C4 /* SystemCapabilityService.swift */; };
@@ -3045,7 +3043,6 @@
 		40E67B6DFE45689B1512C485 /* QueryDecomposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryDecomposer.swift; sourceTree = "<group>"; };
 		40E98E77D02B3FDFA0017B18 /* VehicleMaintenanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VehicleMaintenanceView.swift; sourceTree = "<group>"; };
 		4115E486E90D98BB88ECB07D /* TerminalViewComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalViewComponents.swift; sourceTree = "<group>"; };
-		41221A54CBDFC39EAE797A85 /* TabularDataAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabularDataAnalyzer.swift; sourceTree = "<group>"; };
 		4131EC0F454EC0311F4DB393 /* PostResponsePipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostResponsePipeline.swift; sourceTree = "<group>"; };
 		416E689FFB1AFBE7CCF95A38 /* iPadHomeView+Detail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "iPadHomeView+Detail.swift"; sourceTree = "<group>"; };
 		418E8673B0275094BFCAC501 /* BadgeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeManager.swift; sourceTree = "<group>"; };
@@ -4484,7 +4481,6 @@
 				27009FA254DBE3E19BB4932D /* Context */,
 				1F5ADDC380C1AB64075B833D /* Core */,
 				35690125DE3B96CED46BF7C8 /* Data */,
-				D960A7D7D6AD19CA76AFD9DD /* DataAnalysis */,
 				880F67E4C1FB0245244599D7 /* DeviceIntegration */,
 				5F9C7040206BD918C814DDDF /* Documentation */,
 				9218E19E0DEE51685FED3D9D /* Financial */,
@@ -7446,14 +7442,6 @@
 			path = Execution;
 			sourceTree = "<group>";
 		};
-		D960A7D7D6AD19CA76AFD9DD /* DataAnalysis */ = {
-			isa = PBXGroup;
-			children = (
-				41221A54CBDFC39EAE797A85 /* TabularDataAnalyzer.swift */,
-			);
-			path = DataAnalysis;
-			sourceTree = "<group>";
-		};
 		D968F140F1938E71A77D7350 /* SharePlay */ = {
 			isa = PBXGroup;
 			children = (
@@ -9675,7 +9663,6 @@
 				753E5100F8BC0FD5E5F5CCEC /* THEATypes.swift in Sources */,
 				D848192C009219BBC02B3794 /* TOTPAuthenticator.swift in Sources */,
 				1139515453B73D7A615368F0 /* TabManager.swift in Sources */,
-				D1CB09ECBED19DC72E5381C5 /* TabularDataAnalyzer.swift in Sources */,
 				EC4F48E2570924F9BACAF3B9 /* TabularDataAnalyzer.swift in Sources */,
 				ED03EDC8465A846ACDDDF57C /* TaskBreakdownService.swift in Sources */,
 				9AB39F72BEC489B47F53EDAA /* TaskClassifier+Embeddings.swift in Sources */,
@@ -11014,7 +11001,6 @@
 				A028BE574E7E8C3AD7E4C5E7 /* THEATypes.swift in Sources */,
 				D565E08CAFD3DE5AA6AD0682 /* TOTPAuthenticator.swift in Sources */,
 				C7AFA5EC3B324AF8A26D70D5 /* TabManager.swift in Sources */,
-				C1D7EEBDA87E02ADC7602D2B /* TabularDataAnalyzer.swift in Sources */,
 				124B44089A05B92FA8C49AE8 /* TabularDataAnalyzer.swift in Sources */,
 				AA21C6329C6770F328CC62F3 /* TaskBreakdownService.swift in Sources */,
 				51B96CC0C437B94A798E6123 /* TaskClassifier+Embeddings.swift in Sources */,
