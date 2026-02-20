@@ -138,7 +138,7 @@ final class FinancialIntelligenceService: ObservableObject {
 
     /// Analyze a financial CSV export and merge the summary into `morningBriefing()` output.
     /// Uses TabularDataAnalyzer for DataFrame-backed parsing.
-    func analyzeCSV(at url: URL) async -> String {
+    func analyzeCSV(at url: URL) async -> String { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         guard TabularDataAnalyzer.isAvailable else {
             return "CSV analysis requires iOS 16.4 / macOS 13 or later."
         }
@@ -218,7 +218,7 @@ final class FinancialIntelligenceService: ObservableObject {
         return krakenUSD + coinbaseUSD
     }
 
-    private func formatAmount(_ value: Double) -> String {
+    private func formatAmount(_ value: Double) -> String { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         if value >= 1 {
             return String(format: "%.2f", value)
         } else {
@@ -226,7 +226,7 @@ final class FinancialIntelligenceService: ObservableObject {
         }
     }
 
-    private func formatDate(_ date: Date) -> String {
+    private func formatDate(_ date: Date) -> String { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         let f = DateFormatter()
         f.dateStyle = .medium
         f.timeStyle = .short
