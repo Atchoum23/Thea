@@ -160,9 +160,9 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AQ3: Agent Orch.     | ⏳ PENDING      | AgentOrchestrator (circuit breaker, dynamic reorchestration) + AutonomousSessionManager (watchdog, notification-only) |
 | Phase AR3: API Error Prev. | ⏳ PENDING      | AnthropicConversationManager: atomic pair, pre-send validation, safe truncation, 400 recovery |
 | Phase AS3: Adaptive Timing | ⏳ PENDING      | AdaptivePoller: decorrelated jitter + known-duration skip + activity-detection; replaces fixed sleep() |
-| **Overall v3 %**          | **99% autonomous done** | A3–W3 + AE3–AH3 + AI3–AN3 ✅ DONE (26 phases); Wave 8 (AO3–AS3) + Wave 6 (X3–AC3) + AD3 pending. |
+| **Overall v3 %**          | **99% autonomous done** | A3–W3 + AE3–AH3 + AI3–AN3 ✅ DONE (26 phases, v3.9); Wave 6 (X3–AC3) + Wave 8 (AO3–AS3) + AD3 pending. |
 
-*Last updated: 2026-02-20 — Wave 7 AI3–AN3 ✅ DONE (sha 24d2c894); all linted, pushsynced; next: Wave 8 AO3–AS3*
+*Last updated: 2026-02-20 — Wave 7 AI3–AN3 ✅ DONE (sha 24d2c894); v3.9 plan updates from MBAM2 merged; next: Wave 6 (X3-AC3) + Wave 8 (AO3-AS3)*
 
 ---
 

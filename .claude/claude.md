@@ -611,3 +611,58 @@ Thea uses `git pushsync` (a global git alias) to keep both Macs in sync:
 - The sync script (`~/bin/thea-sync.sh`) pulls, runs xcodegen, builds Release, and installs to `/Applications`
 - A **Claude Code hook** (`.claude/hooks/enforce-pushsync.sh`) blocks plain `git push` and reminds you to use `git pushsync`
 - **For internet sync**: Install Tailscale on both Macs (`brew install tailscale && tailscale up --ssh`)
+
+---
+
+## ⚠️ MANDATORY: ANTHROPIC API TOOL USE — CONVERSATION INTEGRITY
+
+**Violations cause error 400 `unexpected tool_use_id`. Non-negotiable rules for all Thea AI code.**
+
+1. **Atomic pair insertion**: NEVER insert a `tool_result` without simultaneously inserting the paired `assistant+tool_use` message. Both appended atomically, never separately.
+2. **Single user message per turn**: ALL `tool_result` blocks for a given assistant turn → ONE `user` message. Never split parallel results across multiple messages.
+3. **Ordering**: `tool_result` blocks FIRST in user message content, then text. Reversed = 400 error.
+4. **Pre-send validation**: Call `conversationManager.validate()` before every Anthropic API request.
+5. **Safe truncation**: Remove `tool_use`/`tool_result` pairs together. Never remove just the assistant message while keeping its tool_results.
+6. **Error 400 recovery**: Call `recoverFromToolMismatch()` → scan to last clean boundary → truncate → retry once. Never retry same broken history.
+
+Use `AnthropicConversationManager` (Shared/AI/AnthropicConversationManager.swift, Phase AR3) for all Claude API calls from Thea — it enforces all rules automatically.
+
+---
+
+## ⚠️ MANDATORY: POLLING DURATION RULES (NO FIXED SLEEPS IN THEA)
+
+Use `AdaptivePoller<T>` (Shared/Intelligence/AdaptivePoller.swift, Phase AS3) for all polling:
+
+- **CI job polling**: `AdaptivePoller.ciPoller` — skips 44 min (80% of 55 min typical), then 30s→120s decorrelated jitter
+- **tmux/process monitoring**: `AdaptivePoller.tmuxPoller` — 3s→60s activity-detection stepping
+- **HTTP health checks**: `AdaptivePoller.httpPoller` — 5s→60s decorrelated jitter
+- **Never busy-wait**: sleep < 3s in a loop running > 60s = bug
+- **Jitter mandatory**: ±20-40% on all retry sleeps to prevent thundering herd
+
+---
+
+## ⚠️ MANDATORY: THEA CODE GENERATION QUALITY RULES
+
+1. **Spec before code**: Write wiring requirements explicitly ("ServiceX.shared must be called from AppDelegate.setupManagers()") before generating any file.
+2. **Reference file required**: Always read ONE correctly-wired existing file before generating a new one. Pattern match on: imports, @MainActor usage, actor isolation, DI wiring.
+3. **Execution gates — before any task is "done"**:
+   - `xcodebuild` BUILD SUCCEEDED — actually run, never assumed
+   - `grep -r "NewTypeName" Shared/ --include="*.swift" | grep -v "NewTypeName.swift" | wc -l` ≥ 1
+   - `grep -r "TODO\|FIXME\|stub\|placeholder" <modified-files>` = 0 matches
+4. **Context rot**: Task touching > 15 files → split into ≤ 7-file sub-tasks with separate context windows.
+5. **Atomic commits**: One commit per file. `git log --stat` legible.
+
+---
+
+## ⚠️ MANDATORY: AUTONOMOUS SESSION RULES — ZERO MONITORING REQUIRED
+
+**Human notification policy: ALERT on failure/circuit-breaker/stall/budget. SILENT on progress and success.**
+
+- Session start: read plan/progress.json → no human briefing needed → build gate → start watchdog
+- Stale watchdog: no git commit in 20 min → send macOS notification ONCE — do not spam
+- Self-verification: BUILD SUCCEEDED + wiring grep + no stubs before marking any task done
+- Circuit breaker: 3 failures on same task → BLOCKED note → notify → continue other tasks
+- Checkpoint: every task completion → write progress log + git commit (atomic)
+- Resume: read progress log → skip done → resume first in-progress → zero human re-briefing
+
+Use `AgentOrchestrator` + `AutonomousSessionManager` (Shared/Intelligence/AgentOrchestration/, Phase AQ3) for all Thea autonomous AI workflows.
