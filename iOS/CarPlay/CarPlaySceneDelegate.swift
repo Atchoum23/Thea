@@ -59,7 +59,7 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
                 makeState(.idle),
                 makeState(.listening),
                 makeState(.processing),
-                makeState(.speaking),
+                makeState(.speaking)
             ]
         )
 

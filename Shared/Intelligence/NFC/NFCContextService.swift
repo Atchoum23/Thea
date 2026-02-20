@@ -50,7 +50,7 @@ final class NFCContextService: NSObject, ObservableObject {
     private var readerSession: NFCNDEFReaderSession?
     private let logger = Logger(subsystem: "app.theathe", category: "NFCContextService")
 
-    private override init() {
+    override private init() {
         super.init()
         logger.info("NFCContextService initialized")
     }

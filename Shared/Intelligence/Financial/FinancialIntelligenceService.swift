@@ -69,12 +69,12 @@ final class FinancialIntelligenceService: ObservableObject {
         let recentCount = plaidTransactions.count
 
         summary = FinancialSummary(
-            totalCryptoValueUSD:  estimateCryptoValue(kraken: krakenBalances, coinbase: coinbaseAccounts),
-            cryptoBalances:       krakenBalances,
-            coinbaseBalances:     coinbaseAccounts,
-            ynabBudgets:          ynabBudgets,
+            totalCryptoValueUSD: estimateCryptoValue(kraken: krakenBalances, coinbase: coinbaseAccounts),
+            cryptoBalances: krakenBalances,
+            coinbaseBalances: coinbaseAccounts,
+            ynabBudgets: ynabBudgets,
             recentTransactionCount: recentCount,
-            lastSyncedAt:         Date()
+            lastSyncedAt: Date()
         )
         lastSyncedAt = Date()
         logger.info("FinancialIntelligenceService: sync complete")
@@ -213,8 +213,8 @@ final class FinancialIntelligenceService: ObservableObject {
 
     private func estimateCryptoValue(kraken: [KrakenBalance], coinbase: [CoinbaseAccount]) -> Double {
         // Rough USD estimation: USD-labelled balances only (ZUSD = Kraken's USD)
-        let krakenUSD = kraken.first(where: { $0.asset == "ZUSD" })?.amount ?? 0
-        let coinbaseUSD = coinbase.first(where: { $0.nativeCurrency == "USD" })?.nativeBalance ?? 0
+        let krakenUSD = kraken.first { $0.asset == "ZUSD" }?.amount ?? 0
+        let coinbaseUSD = coinbase.first { $0.nativeCurrency == "USD" }?.nativeBalance ?? 0
         return krakenUSD + coinbaseUSD
     }
 

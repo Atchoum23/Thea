@@ -118,7 +118,7 @@ public final class XAPIService: ObservableObject {
             URLQueryItem(name: "scope", value: scopes.joined(separator: " ")),
             URLQueryItem(name: "state", value: state),
             URLQueryItem(name: "code_challenge", value: challenge),
-            URLQueryItem(name: "code_challenge_method", value: "S256"),
+            URLQueryItem(name: "code_challenge_method", value: "S256")
         ]
 
         return components?.url
@@ -168,7 +168,7 @@ public final class XAPIService: ObservableObject {
         let body = [
             "grant_type": "refresh_token",
             "refresh_token": refresh,
-            "client_id": clientID,
+            "client_id": clientID
         ]
         request.httpBody = body
             .map { "\($0.key)=\(percentEncode($0.value))" }
@@ -229,7 +229,7 @@ public final class XAPIService: ObservableObject {
             "/users/\(userID)/tweets",
             params: [
                 "max_results": "\(min(max(5, maxResults), 100))",
-                "tweet.fields": "id,text,created_at,public_metrics,context_annotations",
+                "tweet.fields": "id,text,created_at,public_metrics,context_annotations"
             ],
             requiresUserToken: true,
             responseType: XPostsResponse.self
@@ -249,7 +249,7 @@ public final class XAPIService: ObservableObject {
             params: [
                 "query": safeQuery,
                 "max_results": "\(min(max(10, maxResults), 100))",
-                "tweet.fields": "id,text,created_at,public_metrics",
+                "tweet.fields": "id,text,created_at,public_metrics"
             ],
             requiresUserToken: false,
             responseType: XPostsResponse.self
@@ -297,7 +297,7 @@ public final class XAPIService: ObservableObject {
             "code": code,
             "redirect_uri": redirectURI,
             "code_verifier": verifier,
-            "client_id": clientID,
+            "client_id": clientID
         ]
         request.httpBody = body
             .map { "\($0.key)=\(percentEncode($0.value))" }
@@ -349,7 +349,7 @@ public final class XAPIService: ObservableObject {
             kSecAttrAccount as String: key,
             kSecAttrService as String: "ai.thea.social.x",
             kSecValueData as String: data,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked
         ]
         SecItemDelete(query as CFDictionary)
         let status = SecItemAdd(query as CFDictionary, nil)
@@ -363,7 +363,7 @@ public final class XAPIService: ObservableObject {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
             kSecAttrService as String: "ai.thea.social.x",
-            kSecReturnData as String: true,
+            kSecReturnData as String: true
         ]
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
@@ -375,7 +375,7 @@ public final class XAPIService: ObservableObject {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
-            kSecAttrService as String: "ai.thea.social.x",
+            kSecAttrService as String: "ai.thea.social.x"
         ]
         SecItemDelete(query as CFDictionary)
     }

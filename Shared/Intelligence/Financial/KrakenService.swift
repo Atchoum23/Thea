@@ -46,7 +46,7 @@ actor KrakenService {
 
     /// Persist Kraken API credentials in Keychain.
     func saveCredentials(apiKey: String, secretKey: String) {
-        FinancialCredentialStore.save(token: apiKey,    for: FinancialAPIProvider.kraken.rawValue, suffix: "apiKey")
+        FinancialCredentialStore.save(token: apiKey, for: FinancialAPIProvider.kraken.rawValue, suffix: "apiKey")
         FinancialCredentialStore.save(token: secretKey, for: FinancialAPIProvider.kraken.rawValue, suffix: "secretKey")
         logger.info("KrakenService: credentials saved")
     }
@@ -91,13 +91,13 @@ actor KrakenService {
                 let cost   = info["cost"]  as? String
             else { return nil }
             return KrakenTrade(
-                txid:   txid,
-                pair:   pair,
-                time:   time,
-                type:   type,
-                price:  Double(price)  ?? 0,
+                txid: txid,
+                pair: pair,
+                time: time,
+                type: type,
+                price: Double(price)  ?? 0,
                 volume: Double(volume) ?? 0,
-                cost:   Double(cost)   ?? 0
+                cost: Double(cost)   ?? 0
             )
         }
         .sorted { $0.time > $1.time }

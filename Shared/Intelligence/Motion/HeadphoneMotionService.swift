@@ -193,9 +193,9 @@ import os.log
 
     /// Broad activity classification from headphone motion.
     public enum HeadphoneActivity: String, Sendable {
-        case active   = "active"    // User is moving / nodding / looking around
-        case resting  = "resting"   // User still for > restingDurationThreshold
-        case unknown  = "unknown"   // Not yet classified
+        case active   // User is moving / nodding / looking around
+        case resting  // User still for > restingDurationThreshold
+        case unknown  // Not yet classified
     }
 
 #else
@@ -216,9 +216,9 @@ import os.log
     }
 
     public enum HeadphoneActivity: String, Sendable {
-        case active = "active"
-        case resting = "resting"
-        case unknown = "unknown"
+        case active
+        case resting
+        case unknown
     }
 
     public struct HeadphoneAttitude: Sendable {

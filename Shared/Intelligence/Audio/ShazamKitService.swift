@@ -46,7 +46,7 @@ final class ShazamKitService: NSObject, ObservableObject {
     private var session: SHManagedSession?
     private var recognitionTask: Task<Void, Never>?
 
-    private override init() {
+    override private init() {
         super.init()
         if #available(iOS 16.0, macOS 13.0, *) {
             session = SHManagedSession()
@@ -107,13 +107,13 @@ final class ShazamKitService: NSObject, ObservableObject {
                 return
             }
             let shazamMatch = ShazamMatch(
-                title:          mediaItem.title ?? "Unknown",
-                artist:         mediaItem.artist ?? "Unknown",
-                album:          mediaItem.subtitle,  // SHMatchedMediaItem.subtitle is album title
-                appleMusicURL:  mediaItem.appleMusicURL,
-                artworkURL:     mediaItem.artworkURL,
-                isrc:           mediaItem.isrc,
-                recognizedAt:   Date()
+                title: mediaItem.title ?? "Unknown",
+                artist: mediaItem.artist ?? "Unknown",
+                album: mediaItem.subtitle,  // SHMatchedMediaItem.subtitle is album title
+                appleMusicURL: mediaItem.appleMusicURL,
+                artworkURL: mediaItem.artworkURL,
+                isrc: mediaItem.isrc,
+                recognizedAt: Date()
             )
             lastMatch = shazamMatch
             logger.info("ShazamKitService: matched '\(shazamMatch.title)' by \(shazamMatch.artist)")

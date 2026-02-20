@@ -74,10 +74,10 @@ struct TabularDataAnalyzer {
         let df = try analyzeCSV(at: url)
 
         // Heuristic: find an "amount" or "total" column
-        let amountColName = df.columns.first(where: {
+        let amountColName = df.columns.first {
             let lower = $0.name.lowercased()
             return lower.contains("amount") || lower.contains("total") || lower.contains("value")
-        })?.name
+        }?.name
 
         var income: Double = 0
         var spend: Double = 0

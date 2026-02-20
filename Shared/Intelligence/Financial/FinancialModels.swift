@@ -94,10 +94,10 @@ final class FinancialTransaction {
 
 /// Supported financial providers for type-safe routing.
 enum FinancialAPIProvider: String, CaseIterable, Sendable {
-    case kraken   = "kraken"
-    case coinbase = "coinbase"
-    case ynab     = "ynab"
-    case plaid    = "plaid"
+    case kraken
+    case coinbase
+    case ynab
+    case plaid
 
     var displayName: String {
         switch self {

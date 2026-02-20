@@ -61,7 +61,7 @@ final class NutritionBarcodeService: NSObject, ObservableObject {
 
     private static let offBaseURL = "https://world.openfoodfacts.org/api/v2/product/"
 
-    private override init() {
+    override private init() {
         super.init()
         Task { await requestHealthKitAuthorization() }
     }

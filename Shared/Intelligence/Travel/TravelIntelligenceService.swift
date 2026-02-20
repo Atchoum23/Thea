@@ -141,9 +141,9 @@ actor TravelIntelligenceService {
             let depCode = dep["iataCode"] as? String ?? ""
             let arrCode = arr["iataCode"] as? String ?? ""
             let depTime = (dep["departure"] as? [String: Any])?["timings"] as? [[String: Any]]
-            let scheduledDep = (depTime?.first(where: { $0["qualifier"] as? String == "STD" })?["value"] as? String) ?? ""
+            let scheduledDep = (depTime?.first { $0["qualifier"] as? String == "STD" }?["value"] as? String) ?? ""
             let arrTime = (arr["arrival"] as? [String: Any])?["timings"] as? [[String: Any]]
-            let scheduledArr = (arrTime?.first(where: { $0["qualifier"] as? String == "STA" })?["value"] as? String) ?? ""
+            let scheduledArr = (arrTime?.first { $0["qualifier"] as? String == "STA" }?["value"] as? String) ?? ""
 
             let legs_ = flight["legs"] as? [[String: Any]] ?? []
             let delayMins = legs_.first?["scheduledLegDuration"] as? Int
@@ -280,8 +280,7 @@ actor TravelIntelligenceService {
         var request = URLRequest(url: authURL)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        request.httpBody = "grant_type=client_credentials&client_id=\(apiKey)&client_secret=\(apiSecret)"
-            .data(using: .utf8)
+        request.httpBody = Data("grant_type=client_credentials&client_id=\(apiKey)&client_secret=\(apiSecret)".utf8)
         request.timeoutInterval = 15
 
         let (data, response) = try await URLSession.shared.data(for: request)

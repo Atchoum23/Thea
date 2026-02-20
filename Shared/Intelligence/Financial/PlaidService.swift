@@ -58,9 +58,9 @@ actor PlaidService {
     ///   - secret: Your Plaid secret for the configured environment
     ///   - accessToken: The item's access_token (obtained via Plaid Link)
     func saveCredentials(clientID: String, secret: String, accessToken: String) {
-        FinancialCredentialStore.save(token: clientID,     for: FinancialAPIProvider.plaid.rawValue, suffix: "clientID")
-        FinancialCredentialStore.save(token: secret,       for: FinancialAPIProvider.plaid.rawValue, suffix: "secret")
-        FinancialCredentialStore.save(token: accessToken,  for: FinancialAPIProvider.plaid.rawValue, suffix: "accessToken")
+        FinancialCredentialStore.save(token: clientID, for: FinancialAPIProvider.plaid.rawValue, suffix: "clientID")
+        FinancialCredentialStore.save(token: secret, for: FinancialAPIProvider.plaid.rawValue, suffix: "secret")
+        FinancialCredentialStore.save(token: accessToken, for: FinancialAPIProvider.plaid.rawValue, suffix: "accessToken")
         logger.info("PlaidService: credentials saved")
     }
 
@@ -87,7 +87,7 @@ actor PlaidService {
         let cursorKey = String(accessToken.prefix(16))
         var cursor = cursorCache[cursorKey]
 
-        var allAdded:    [PlaidTransaction] = []
+        var allAdded: [PlaidTransaction] = []
         var allModified: [PlaidTransaction] = []
         var allRemovedIDs: [String] = []
         var nextCursor = cursor ?? ""
@@ -95,11 +95,11 @@ actor PlaidService {
 
         while hasMore {
             let payload: [String: Any] = [
-                "client_id":    clientID,
-                "secret":       secret,
+                "client_id": clientID,
+                "secret": secret,
                 "access_token": accessToken,
-                "cursor":       nextCursor,
-                "count":        500
+                "cursor": nextCursor,
+                "count": 500
             ]
 
             let data = try await postJSON(path: "/transactions/sync", body: payload)
@@ -128,11 +128,11 @@ actor PlaidService {
         logger.debug("PlaidService: +\(allAdded.count) added, ~\(allModified.count) modified, -\(allRemovedIDs.count) removed")
 
         return PlaidSyncResult(
-            added:      allAdded,
-            modified:   allModified,
+            added: allAdded,
+            modified: allModified,
             removedIDs: allRemovedIDs,
             nextCursor: nextCursor,
-            hasMore:    false
+            hasMore: false
         )
     }
 
@@ -183,14 +183,14 @@ actor PlaidService {
 
             return PlaidTransaction(
                 transactionID: txID,
-                accountID:     accountID,
-                amount:        amount,
-                date:          date,
-                name:          name,
-                merchantName:  merchantName,
-                category:      category,
-                pending:       pending,
-                currencyCode:  currencyCode
+                accountID: accountID,
+                amount: amount,
+                date: date,
+                name: name,
+                merchantName: merchantName,
+                category: category,
+                pending: pending,
+                currencyCode: currencyCode
             )
         }
     }

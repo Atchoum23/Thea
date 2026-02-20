@@ -49,7 +49,7 @@ actor CoinbaseService {
 
     /// Store API key and secret in Keychain.
     func saveCredentials(apiKey: String, apiSecret: String) {
-        FinancialCredentialStore.save(token: apiKey,    for: FinancialAPIProvider.coinbase.rawValue, suffix: "apiKey")
+        FinancialCredentialStore.save(token: apiKey, for: FinancialAPIProvider.coinbase.rawValue, suffix: "apiKey")
         FinancialCredentialStore.save(token: apiSecret, for: FinancialAPIProvider.coinbase.rawValue, suffix: "apiSecret")
         logger.info("CoinbaseService: credentials saved")
     }
@@ -120,11 +120,11 @@ actor CoinbaseService {
                 let nativeStr = native["amount"]      as? String
             else { return nil }
             return CoinbaseAccount(
-                id:             id,
-                name:           name,
-                currency:       currency,
-                balance:        Double(balStr)    ?? 0,
-                nativeBalance:  Double(nativeStr) ?? 0,
+                id: id,
+                name: name,
+                currency: currency,
+                balance: Double(balStr)    ?? 0,
+                nativeBalance: Double(nativeStr) ?? 0,
                 nativeCurrency: nativeCur
             )
         }
@@ -151,15 +151,15 @@ actor CoinbaseService {
             let desc = (item["description"] as? String) ?? ""
             let date = iso.date(from: createdStr) ?? Date.distantPast
             return CoinbaseTransaction(
-                id:             id,
-                type:           type,
-                status:         status,
-                amount:         Double(amtStr) ?? 0,
-                currency:       cur,
-                nativeAmount:   Double(natStr) ?? 0,
+                id: id,
+                type: type,
+                status: status,
+                amount: Double(amtStr) ?? 0,
+                currency: cur,
+                nativeAmount: Double(natStr) ?? 0,
                 nativeCurrency: natCur,
-                description:    desc,
-                createdAt:      date
+                description: desc,
+                createdAt: date
             )
         }
         .sorted { $0.createdAt > $1.createdAt }

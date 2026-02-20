@@ -48,7 +48,7 @@ final class SoundAnalysisService: NSObject, ObservableObject {
     private var analysisObserver: SoundAnalysisObserver?
     private let maxRecentCount = 20
 
-    private override init() {
+    override private init() {
         super.init()
         logger.info("SoundAnalysisService initialized")
     }

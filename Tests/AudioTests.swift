@@ -61,7 +61,7 @@ final class SoundAnalysisServiceTests: XCTestCase {
         let service = SoundAnalysisService.shared
         // Initial state: not analyzing (no microphone access in test environment)
         // We just verify the type is accessible and isAnalyzing is readable
-        let _ = service.isAnalyzing
+        _ = service.isAnalyzing
         XCTAssertTrue(true, "SoundAnalysisService.shared is accessible")
     }
 
@@ -71,7 +71,7 @@ final class SoundAnalysisServiceTests: XCTestCase {
         // This verifies the property is accessible and Optional<SoundClassification>
         let top: SoundClassification? = service.topClassification
         // If a previous test started analysis, top may not be nil — just verify property exists
-        let _ = top
+        _ = top
         XCTAssertTrue(true, "topClassification property is accessible")
     }
 

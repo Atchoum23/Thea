@@ -70,11 +70,11 @@ actor YNABService {
         return budgetsArray.compactMap { dict -> YNABBudgetSummary? in
             guard let id = dict["id"] as? String, let name = dict["name"] as? String else { return nil }
             return YNABBudgetSummary(
-                id:             id,
-                name:           name,
+                id: id,
+                name: name,
                 lastModifiedOn: dict["last_modified_on"] as? String,
-                firstMonth:     dict["first_month"] as? String,
-                lastMonth:      dict["last_month"] as? String
+                firstMonth: dict["first_month"] as? String,
+                lastMonth: dict["last_month"] as? String
             )
         }
     }
@@ -115,8 +115,7 @@ actor YNABService {
     // MARK: - Reset Delta Sync
 
     func resetDeltaSync(for budgetID: String? = nil) {
-        if let id = budgetID { serverKnowledgeCache.removeValue(forKey: id) }
-        else { serverKnowledgeCache.removeAll() }
+        if let id = budgetID { serverKnowledgeCache.removeValue(forKey: id) } else { serverKnowledgeCache.removeAll() }
         logger.info("YNABService: delta sync cache cleared")
     }
 
@@ -152,16 +151,16 @@ actor YNABService {
             let date = dict["date"] as? String
         else { return nil }
         return YNABTransaction(
-            id:           id,
-            date:         date,
-            amount:       dict["amount"]       as? Int    ?? 0,
-            memo:         dict["memo"]         as? String,
-            cleared:      dict["cleared"]      as? String ?? "uncleared",
-            approved:     dict["approved"]     as? Bool   ?? false,
-            accountName:  dict["account_name"] as? String ?? "",
-            payeeName:    dict["payee_name"]   as? String,
+            id: id,
+            date: date,
+            amount: dict["amount"]       as? Int    ?? 0,
+            memo: dict["memo"]         as? String,
+            cleared: dict["cleared"]      as? String ?? "uncleared",
+            approved: dict["approved"]     as? Bool   ?? false,
+            accountName: dict["account_name"] as? String ?? "",
+            payeeName: dict["payee_name"]   as? String,
             categoryName: dict["category_name"] as? String,
-            deleted:      dict["deleted"]      as? Bool   ?? false
+            deleted: dict["deleted"]      as? Bool   ?? false
         )
     }
 }

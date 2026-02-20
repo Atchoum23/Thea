@@ -157,9 +157,9 @@ public final class MusicKitIntelligenceService: ObservableObject {
         let calmKeywords = ["classical", "ambient", "jazz", "acoustic", "folk", "meditation"]
         let focusKeywords = ["instrumental", "soundtrack", "lo-fi", "study", "concentration"]
 
-        let energeticScore = genres.filter { g in energeticKeywords.contains(where: { g.contains($0) }) }.count
-        let calmScore = genres.filter { g in calmKeywords.contains(where: { g.contains($0) }) }.count
-        let focusScore = genres.filter { g in focusKeywords.contains(where: { g.contains($0) }) }.count
+        let energeticScore = genres.filter { g in energeticKeywords.contains { g.contains($0) }}.count
+        let calmScore = genres.filter { g in calmKeywords.contains { g.contains($0) }}.count
+        let focusScore = genres.filter { g in focusKeywords.contains { g.contains($0) }}.count
 
         let maxScore = max(energeticScore, calmScore, focusScore)
         guard maxScore > 0 else { return .mixed }
