@@ -152,7 +152,8 @@ final class CarPlaySessionManager: ObservableObject {
     func processQuery(_ text: String) async {
         guard !text.isEmpty else { return }
         lastQuery = text
-        logger.info("CarPlay session: processing query '\(text)'")
+        // ABB3: Log length only — do not log voice content (privacy: voice queries stay private)
+        logger.info("CarPlay session: processing query (\(text.count) chars)")
 
         // Delegate to ChatManager for AI response.
         // Requires an active conversation — use existing or create a CarPlay conversation.

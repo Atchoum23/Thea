@@ -76,11 +76,13 @@ public final class FoundationModelsService: ObservableObject {
     public func summarizeContext(_ context: String) async -> String {
         guard isAvailable, !context.isEmpty else { return context }
 
+        // ABB3: Wrap user content in explicit delimiters to reduce prompt injection risk
         let prompt = """
         Summarize the following context concisely (≤100 words). Return only the summary.
 
-        Context:
+        <user_input>
         \(context.prefix(4000))
+        </user_input>
         """
         do {
             return try await generate(prompt: prompt)
@@ -96,12 +98,13 @@ public final class FoundationModelsService: ObservableObject {
     public func classifyIntent(_ query: String) async -> String {
         guard isAvailable, !query.isEmpty else { return "general" }
 
+        // ABB3: Wrap user input in delimiters to prevent prompt injection
         let prompt = """
         Classify the intent of this query with a single lowercase word from this list:
         code, question, planning, health, finance, creative, search, general.
         Return only the single word, no punctuation.
 
-        Query: \(query.prefix(500))
+        <user_input>\(query.prefix(500))</user_input>
         """
         do {
             let raw = try await generate(prompt: prompt)
@@ -118,11 +121,13 @@ public final class FoundationModelsService: ObservableObject {
     public func generateConversationTitle(from messages: String) async -> String {
         guard isAvailable, !messages.isEmpty else { return "New Conversation" }
 
+        // ABB3: Wrap user content in delimiters to prevent prompt injection
         let prompt = """
         Generate a concise 3–7 word title for this conversation. Return only the title, no quotes.
 
-        Conversation excerpt:
+        <user_input>
         \(messages.prefix(2000))
+        </user_input>
         """
         do {
             return try await generate(prompt: prompt)
@@ -138,10 +143,11 @@ public final class FoundationModelsService: ObservableObject {
     public func expandQuery(_ query: String) async -> String {
         guard isAvailable, !query.isEmpty else { return query }
 
+        // ABB3: Wrap user input in delimiters to prevent prompt injection
         let prompt = """
         Expand this search query with semantically related terms (≤20 words total). Return only the expanded query.
 
-        Query: \(query.prefix(200))
+        <user_input>\(query.prefix(200))</user_input>
         """
         do {
             return try await generate(prompt: prompt)

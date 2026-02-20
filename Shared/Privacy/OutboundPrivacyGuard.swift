@@ -422,7 +422,14 @@ actor OutboundPrivacyGuard {
             // Slack webhook URLs (already filtered at domain level, but catch the token component)
             ("xoxs-[a-zA-Z0-9-]+", "Slack session token"),
             // Signal group/session keys
-            ("(?i)signal[_-]?key\\s*[:=]\\s*[\"']?[a-zA-Z0-9+/=]{40,}", "Signal key")
+            ("(?i)signal[_-]?key\\s*[:=]\\s*[\"']?[a-zA-Z0-9+/=]{40,}", "Signal key"),
+            // ABB3: Financial address redaction (belt-and-suspenders; also classified in classifyContent)
+            // IBAN: 2-letter country code + 2 check digits + 4-30 alphanumeric BBAN
+            ("[A-Z]{2}\\d{2}[A-Z0-9]{4,30}", "IBAN bank account number"),
+            // Bitcoin P2PKH (1...) P2SH (3...) and Bech32 (bc1...) addresses
+            ("\\b(1[a-km-zA-HJ-NP-Z1-9]{25,34}|3[a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[a-z0-9]{39,59})\\b", "Bitcoin wallet address"),
+            // Ethereum: 0x + 40 hex characters
+            ("\\b0x[a-fA-F0-9]{40}\\b", "Ethereum wallet address")
         ]
 
         for (pattern, description) in patterns {
