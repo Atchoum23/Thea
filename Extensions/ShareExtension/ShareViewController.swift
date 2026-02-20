@@ -8,6 +8,7 @@
 import Social
 import UIKit
 import UniformTypeIdentifiers
+import Vision
 
 /// Share Extension for Thea
 /// Allows users to share content from any app to Thea for AI processing
@@ -252,6 +253,10 @@ class ShareViewController: SLComposeServiceViewController {
                     do {
                         try data.write(to: imagePath)
                         itemMeta["path"] = imagePath.lastPathComponent
+                        // AAB3-4: Vision OCR — extract text from shared images
+                        if let ocrText = performOCR(on: image) {
+                            itemMeta["ocrText"] = ocrText
+                        }
                     } catch {
                         throw ShareError.imageWriteFailed(index: index, error)
                     }
@@ -300,6 +305,31 @@ class ShareViewController: SLComposeServiceViewController {
         } catch {
             throw ShareError.pendingListWriteFailed(error)
         }
+    }
+
+    // MARK: - Vision OCR (AAB3-4)
+
+    /// Extracts text from an image using VNRecognizeTextRequest (on-device, no network).
+    private func performOCR(on image: UIImage) -> String? {
+        guard let cgImage = image.cgImage else { return nil }
+
+        var recognizedText: [String] = []
+        let semaphore = DispatchSemaphore(value: 0)
+
+        let request = VNRecognizeTextRequest { request, _ in
+            defer { semaphore.signal() }
+            guard let observations = request.results as? [VNRecognizedTextObservation] else { return }
+            recognizedText = observations.compactMap { $0.topCandidates(1).first?.string }
+        }
+        request.recognitionLevel = .accurate
+        request.usesLanguageCorrection = true
+
+        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+        try? handler.perform([request])
+        semaphore.wait()
+
+        let joined = recognizedText.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+        return joined.isEmpty ? nil : joined
     }
 
     private func notifyMainApp() {
