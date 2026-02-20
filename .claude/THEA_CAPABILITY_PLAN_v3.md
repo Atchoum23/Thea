@@ -160,9 +160,15 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AQ3: Agent Orch.     | ✅ DONE         | sha b59ed979 — AgentOrchestrator actor (circuit breaker, TaskGroup parallel), AutonomousSessionManager (@MainActor, 5min watchdog), PersonalParameters 6 new keys |
 | Phase AR3: API Error Prev. | ✅ DONE         | sha 4dff338b — AnthropicConversationManager (class + NSLock), 5 methods, wired in chatAdvanced() |
 | Phase AS3: Adaptive Timing | ✅ DONE         | sha d8407561 — AdaptivePoller actor, 3 strategies, 3 factories (retrying/ciJob/logMonitor), ciTypicalDurationMinutes from PersonalParameters |
-| **Overall v3 %**          | **99% autonomous done** | A3–W3 + AE3–AH3 + AI3–AN3 ✅ DONE (26 phases, v3.9); Wave 6 (X3–AC3) + Wave 8 (AO3–AS3) + AD3 pending. |
+| Phase AT3: TheaWeb         | ⏳ PENDING      | Swift server build clean, all routes real data, Docker passing, Cloudflare tunnel verified — S6 |
+| Phase AU3: Tizen           | ⏳ PENDING      | thea-tizen TypeScript 0 errors + build, TV/TheaTizen JS validated, both connect port 18789 — S6 after AT3 |
+| Phase AV3: Browser Ext.    | ⏳ PENDING      | NativeHost↔TheaMessagingGateway wired, Chrome/Safari end-to-end, Brave 14 canonical, SafariExt in project.yml — S7 |
+| Phase AW3: Widget Ext.     | ⏳ PENDING      | 5 widget types (Conversation/QuickActions/Memory/Context/LockScreen) fully implemented, SwiftData-backed — S8 |
+| Phase AX3: Native Ext. 1   | ⏳ PENDING      | Share, Intents (Siri), Messages, Mail, FocusFilter extensions — real implementations, wired to ChatManager/AgentOrchestrator — S8 after AW3 |
+| Phase AY3: Native Ext. 2   | ⏳ PENDING      | CallKit, Credentials, Keyboard, Notification, QuickLook, Spotlight, FinderSync extensions — real implementations — S9 |
+| **Overall v3 %**          | **97% autonomous done** | A3–W3 + AE3–AH3 + AI3–AN3 + AP3–AS3 ✅ DONE; Wave 6 (X3–AC3) + Wave 9 (AT3–AY3) + AD3 pending. |
 
-*Last updated: 2026-02-20 — Wave 7 AI3–AN3 ✅ DONE (sha 24d2c894); v3.9 plan updates from MBAM2 merged; next: Wave 6 (X3-AC3) + Wave 8 (AO3-AS3)*
+*Last updated: 2026-02-20 — Wave 9 (AT3–AY3) added: TheaWeb, Tizen, Browser+Native Extensions. Parallel: S5=Wave6, S6=AT3+AU3, S7=AV3, S8=AW3+AX3, S9=AY3*
 
 ---
 
@@ -5412,6 +5418,233 @@ xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
 ```
 
 Commit: `git commit -m "Auto-save: AS3 — AdaptivePoller: decorrelated jitter + known-duration skip + activity-detection; replaces all fixed sleep() in intelligence systems"`
+
+---
+
+## PHASE AT3: THEAWEB — FULL-STACK COMPLETION
+**Status: ⏳ PENDING** | Stream: S6 | Est: 3h
+**Goal**: TheaWeb Swift server builds clean, all routes return real data (no stubs/mocks), Docker image builds and runs, Cloudflare tunnel config verified.
+**Path**: `Web/TheaWeb/` | Framework: Hummingbird or Vapor (discover at runtime)
+**Mission file**: `.claude/mission-web.txt` — read it first, it has the full phase breakdown.
+
+### AT3 Steps (read mission-web.txt for full detail)
+1. `cd Web/TheaWeb && swift package resolve && swift build 2>&1 | tee /tmp/theaweb-build.log` — fix ALL errors
+2. Read every route handler: any `return .ok` or placeholder → implement real logic
+3. `docker build -t thea-web-test:latest .` → fix Dockerfile issues until it passes
+4. `swiftlint lint --fix && swiftlint lint` → 0 violations
+5. `cat cloudflare-tunnel.yaml` → verify port and service name correct
+6. `git add Web/ && git commit -m "feat(AT3): TheaWeb — build clean, routes real, Docker passing"`
+
+### AT3 Verification
+```bash
+swift build 2>&1 | grep -c "error:" # must be 0
+docker images | grep thea-web-test  # must exist
+swiftlint lint 2>&1 | grep -c "error:" # must be 0
+```
+
+---
+
+## PHASE AU3: TIZEN — BOTH APPS FULL BUILD + PROTOCOL ALIGNMENT
+**Status: ⏳ PENDING** | Stream: S6 (after AT3) | Est: 2h
+**Goal**: Both Tizen apps build clean, TypeScript errors = 0, JS syntax valid, both connect to TheaMessagingGateway on port 18789.
+**Paths**: `thea-tizen/` (TypeScript/React) + `TV/TheaTizen/` (legacy HTML/JS)
+**Mission file**: `.claude/mission-tizen.txt` — read it first.
+
+### AU3 Steps (read mission-tizen.txt for full detail)
+1. `cd thea-tizen && npm install && npx tsc --noEmit` → fix all TS errors
+2. `npm run build` → fix build errors
+3. Verify `sync-bridge/` connects to `ws://localhost:18789` (TheaMessagingGateway port)
+4. `cd TV/TheaTizen && python3 -c "import xml.etree.ElementTree as ET; ET.parse('config.xml')"` → fix XML
+5. Read all JS files → fix syntax errors, verify WebSocket connects to port 18789
+6. Wire Bixby voice intent stub: `tizen.humanactivitymonitor` → send voice text to port 18789
+7. `git add thea-tizen/ TV/TheaTizen/ && git commit -m "feat(AU3): Tizen — TS clean, JS valid, protocol port 18789 aligned"`
+
+### AU3 Verification
+```bash
+cd thea-tizen && npx tsc --noEmit 2>&1 | grep -c "error TS" # must be 0
+grep -r "18789" thea-tizen/src/ TV/TheaTizen/js/ --include="*.js" --include="*.ts" | wc -l # must be > 0
+```
+
+---
+
+## PHASE AV3: BROWSER EXTENSIONS — NATIVEHOST + CHROME/SAFARI/BRAVE
+**Status: ⏳ PENDING** | Stream: S7 | Est: 4h
+**Goal**: NativeHost wired to TheaMessagingGateway; Chrome AI sidebar → NativeHost → Thea AI works end-to-end; Safari extension added to Xcode build; Brave 14 is canonical (archive Brave 1–13); all extensions manifest v3 compliant.
+
+### AV3-1: NativeHost (critical path — do first)
+```bash
+ls Extensions/NativeHost/
+```
+NativeHost bridges `chrome.runtime.sendNativeMessage()` to Thea's local server.
+- Discover what NativeHost is (Swift/Python/Node.js) — read all files
+- Wire it: inbound native message → HTTP POST to `http://localhost:18789/message` (TheaMessagingGateway)
+- Register in `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/ai.thea.host.json`
+- Also register for Safari: `~/Library/Application Support/Mozilla/NativeMessagingHosts/` (if needed)
+- Test: `echo '{"type":"chat","text":"hello"}' | /path/to/nativehost`
+- Commit: `git add Extensions/NativeHost/ && git commit -m "feat(AV3): NativeHost — wired to TheaMessagingGateway port 18789 [1/4]"`
+
+### AV3-2: Chrome Extension audit
+- Read `Extensions/Chrome/background/native-bridge.js` → verify it calls correct native host ID
+- Read `Extensions/Chrome/content/ai-sidebar.js` → verify it posts to background, not hardcoded localhost
+- Read `Extensions/Chrome/background/memory-system.js` → verify it uses Thea's memory (not localStorage-only)
+- Fix any disconnected calls, stub functions (`// TODO`), or broken flows
+- Commit: `git add Extensions/Chrome/ && git commit -m "feat(AV3): Chrome extension — native bridge wired, AI sidebar functional [2/4]"`
+
+### AV3-3: Safari Extension + Xcode target
+- `Extensions/SafariExtension/Resources/` shares WebExtension JS with Chrome — verify `manifest.json` matches Chrome's (MV3, same permissions)
+- Add SafariExtension target to `project.yml` under macOS target if missing
+- Run `xcodegen generate` if project.yml changed
+- Verify `SafariWebExtensionHandler.swift` calls NativeHost or directly calls TheaMessagingGateway
+- Commit: `git add Extensions/SafariExtension/ project.yml && git commit -m "feat(AV3): SafariExtension — Xcode target added, handler wired [3/4]"`
+
+### AV3-4: Brave cleanup
+- `Brave 14` is canonical — verify it has same JS files as Chrome (or symlinks/copies)
+- `Brave 2` through `Brave 13` → move to `Extensions/_archive/` (not delete)
+- `Brave` (original) → compare with Brave 14, keep best version
+- Commit: `git add Extensions/ && git commit -m "feat(AV3): Brave canonical=Brave14, Brave2-13 archived [4/4]"`
+
+### AV3 Verification
+```bash
+# NativeHost reachable
+ls ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/ai.thea.host.json 2>/dev/null && echo "Chrome NMH: registered" || echo "MISSING"
+# No TODO in browser extension JS
+grep -r "TODO\|FIXME\|stub\|placeholder" Extensions/Chrome/background/ Extensions/Chrome/content/ Extensions/SafariExtension/Resources/ | grep -v ".map" | wc -l # target: 0
+```
+
+---
+
+## PHASE AW3: WIDGET EXTENSION — 5 WIDGET TYPES
+**Status: ⏳ PENDING** | Stream: S8 | Est: 4h
+**Goal**: All 5 widget implementations complete with real SwiftData/AppGroup data, WidgetKit timeline providers, correct sizing for all widget families (small/medium/large/accessory).
+**Path**: `Extensions/WidgetExtension/`
+
+### AW3 Design principles
+- All widgets read from shared AppGroup (`group.app.theathe`) — same SwiftData store as main app
+- No hardcoded/mock data anywhere
+- Each widget has a `TimelineProvider` that refreshes at sensible intervals
+- All support `.systemSmall`, `.systemMedium` at minimum; Conversation + Context support `.systemLarge`
+- Lock screen widgets use `.accessoryCircular` / `.accessoryRectangular`
+
+### AW3 Widgets to implement
+1. **TheaConversationWidget**: Last N messages (title of last conversation, last message preview, timestamp). Tap → opens Thea to that conversation.
+2. **TheaQuickActionsWidget**: 4 configurable quick-action buttons (e.g. "New chat", "Voice input", "Memory search", "Last context"). Uses `Link` for deep links.
+3. **TheaMemoryWidget**: Shows top 3 recent memory items (PersonalKnowledgeGraph entities, timestamp, category icon). Tap → opens Memory view.
+4. **TheaContextWidget**: Current awareness summary — location context, time-of-day greeting, active focus mode, HRV readiness score (if available). Updates every 15min.
+5. **TheaLockScreenWidget** (iOS only): `.accessoryCircular` = Thea icon + unread count. `.accessoryRectangular` = last message preview.
+
+### AW3 Reference
+- Read `Shared/Memory/PersonalKnowledgeGraph.swift` for memory data access
+- Read `Shared/AI/ChatManager.swift` for conversation data model
+- AppGroup: `group.app.theathe` — use `ModelContainer(for:..., configurations: ModelConfiguration(groupContainer: .identifier("group.app.theathe")))`
+
+### AW3 Steps
+For each of the 5 widgets (one file → build → fix → commit per widget):
+```bash
+# After each widget file:
+swift build 2>&1 | grep "error:" | head -5
+git add Extensions/WidgetExtension/<Widget>.swift && git commit -m "feat(AW3): TheaXxxWidget — real data, all families [N/5]"
+```
+Final: `xcodebuild -project Thea.xcodeproj -scheme Thea-iOS -configuration Debug -destination "generic/platform=iOS" build -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "error:|BUILD SUCCEEDED|BUILD FAILED" | tail -3`
+
+---
+
+## PHASE AX3: NATIVE EXTENSIONS GROUP 1 — SHARE, INTENTS, MESSAGES, MAIL, FOCUSFILTER
+**Status: ⏳ PENDING** | Stream: S8 (after AW3) | Est: 4h
+**Goal**: 5 native system extensions fully implemented, wired to Thea's ChatManager/AgentOrchestrator via AppGroup, added to project.yml.
+
+### AX3-1: ShareExtension
+- Accept any shareable content (text, URL, image, file) via `NSExtensionItem`
+- Create a new Thea conversation with the shared content as initial message
+- Write to AppGroup pending-share queue → main app picks up on next launch
+- UI: minimal SwiftUI sheet — "Share to Thea" with content preview + send button
+- Commit: `feat(AX3): ShareExtension — accepts text/URL/image, queues to AppGroup [1/5]`
+
+### AX3-2: IntentsExtension (Siri Shortcuts)
+- Define `INExtension` with at minimum 3 intents:
+  - `AskTheaIntent`: user speaks question → Thea answers via AnthropicProvider → speaks response
+  - `SearchMemoryIntent`: "Hey Siri, search my Thea memory for X"
+  - `NewConversationIntent`: "Hey Siri, start a new Thea conversation"
+- Read `Shared/AI/Providers/AnthropicProvider.swift` for API access pattern
+- Commit: `feat(AX3): IntentsExtension — AskThea, SearchMemory, NewConversation Siri intents [2/5]`
+
+### AX3-3: MessagesExtension (iMessage app)
+- iMessage app extension: renders in iMessage app drawer
+- UI: compact chat view showing Thea's last response + input field
+- Messages sent through extension → route via AppGroup to ChatManager
+- Commit: `feat(AX3): MessagesExtension — iMessage app, Thea AI responses in Messages [3/5]`
+
+### AX3-4: MailExtension
+- Mail app plugin (macOS) or app extension (iOS)
+- Reads selected email → offers: "Summarize", "Draft reply", "Add to memory"
+- Uses AnthropicProvider for generation
+- Commit: `feat(AX3): MailExtension — summarize/reply/memory actions on selected email [4/5]`
+
+### AX3-5: FocusFilterExtension
+- Implements `FocusFilterIntent` — Thea adapts behavior based on active Focus mode
+- Work Focus → suppress non-urgent proactive insights, increase response speed threshold
+- Sleep Focus → suppress all non-critical notifications, enable sleep tracking context
+- Commit: `feat(AX3): FocusFilterExtension — Work/Sleep/Personal/Do Not Disturb adaptation [5/5]`
+
+### AX3 Verification
+```bash
+for ext in ShareExtension IntentsExtension MessagesExtension MailExtension FocusFilterExtension; do
+  echo "$ext: $(grep -r "TODO\|stub\|placeholder\|fatalError" Extensions/$ext/ --include="*.swift" | wc -l) stubs"
+done # all must be 0
+xcodebuild -project Thea.xcodeproj -scheme Thea-iOS -configuration Debug -destination "generic/platform=iOS" build -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "error:|BUILD SUCCEEDED" | tail -3
+```
+
+---
+
+## PHASE AY3: NATIVE EXTENSIONS GROUP 2 — CALLKIT, CREDENTIALS, KEYBOARD, NOTIFICATION, QUICKLOOK, SPOTLIGHT, FINDERSYNC
+**Status: ⏳ PENDING** | Stream: S9 | Est: 5h
+**Goal**: 7 remaining native system extensions fully implemented. Each reads real Thea data via AppGroup.
+
+### AY3-1: CallKitExtension (CXCallDirectoryProvider)
+- Caller ID: load contacts from PersonalKnowledgeGraph → `context.addIdentificationEntry(withNextSequentialPhoneNumber:label:)`
+- Call blocking: load blocklist from SettingsManager → `context.addBlockingEntry(withNextSequentialPhoneNumber:)`
+- Commit: `feat(AY3): CallKitExtension — Caller ID + blocking from PersonalKnowledgeGraph [1/7]`
+
+### AY3-2: CredentialsExtension (ASCredentialProviderViewController)
+- Password autofill: bridge to iCloud Keychain entries surfaced in browser extension
+- Read `Extensions/NativeHost/` for iCloud Keychain access pattern already implemented
+- Commit: `feat(AY3): CredentialsExtension — iCloud Keychain bridge for autofill [2/7]`
+
+### AY3-3: KeyboardExtension (UIInputViewController)
+- Custom keyboard with Thea AI bar above keyboard row
+- AI bar: text field + "Ask Thea" button → lightweight AnthropicProvider call → inserts response
+- Suggestion row: last 3 Thea memory items relevant to current app context
+- Commit: `feat(AY3): KeyboardExtension — AI bar + memory suggestions above keyboard [3/7]`
+
+### AY3-4: NotificationServiceExtension (UNNotificationServiceExtension)
+- Intercept notifications before display: enrich with Thea context
+- Pattern: if notification contains person name → look up in PersonalKnowledgeGraph → append relationship context to body
+- Commit: `feat(AY3): NotificationServiceExtension — enrich with PersonalKnowledgeGraph context [4/7]`
+
+### AY3-5: QuickLookExtension (QLPreviewingController)
+- Preview `.thea` files (Thea conversation exports, memory exports) in Finder/Files
+- Render as formatted HTML: conversation timeline, entity cards
+- Commit: `feat(AY3): QuickLookExtension — .thea file preview with conversation timeline [5/7]`
+
+### AY3-6: SpotlightImporter (CSImporter)
+- Index Thea conversations + memory entities into Spotlight
+- `CSSearchableItem` per conversation (title, last message, date) + per KG entity (name, category)
+- Updates AppGroup-shared index on every conversation change
+- Commit: `feat(AY3): SpotlightImporter — conversations + KG entities indexed in Spotlight [6/7]`
+
+### AY3-7: FinderSyncExtension (FIFinderSyncController)
+- Finder badges on files Thea has context about (referenced in conversations or memory)
+- Badge: small Thea icon overlay + tooltip showing "Referenced in N Thea conversations"
+- Commit: `feat(AY3): FinderSyncExtension — Finder badges for Thea-referenced files [7/7]`
+
+### AY3 Verification
+```bash
+for ext in CallKitExtension CredentialsExtension KeyboardExtension NotificationServiceExtension QuickLookExtension SpotlightImporter FinderSyncExtension; do
+  STUBS=$(grep -r "TODO\|stub\|fatalError\|placeholder" "Extensions/$ext/" --include="*.swift" 2>/dev/null | wc -l | tr -d ' ')
+  echo "$ext: $STUBS stubs (must be 0)"
+done
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug -destination "platform=macOS" build -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "error:|BUILD SUCCEEDED" | tail -3
+xcodebuild -project Thea.xcodeproj -scheme Thea-iOS -configuration Debug -destination "generic/platform=iOS" build -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "error:|BUILD SUCCEEDED" | tail -3
+```
 
 ---
 
