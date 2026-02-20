@@ -730,6 +730,12 @@ targets:
           # SquadsViewStub redefines SquadsView — exclude stub from iOS (real view is included)
           - "**/Views/Intelligence/SquadsViewStub.swift"
       - path: iOS
+        excludes:
+          # Stale iOS financial views — use Shared/UI/Views/Financial/FinancialDashboardView.swift (canonical)
+          # These reference BudgetRecommendation, TransactionAnomaly, TimePeriod, MonthlyData, AccountType
+          # that no longer exist after FinancialModels AAC3 rework.
+          - "Views/iOSFinancialView.swift"
+          - "Views/iOSFinancialView+Insights.swift"
       - path: Shared/Resources/Assets.xcassets
       - path: Shared/Resources/Localizable.xcstrings
     settings:
