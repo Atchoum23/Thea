@@ -76,7 +76,7 @@ final class ShazamKitService: NSObject, ObservableObject {
                 // SHManagedSession.result() returns async (non-throwing) in ShazamKit 26+
                 // Error cases are surfaced as SHSession.Result.error(error, signature)
                 let result = await session.result()
-                await self.handleResult(result)
+                self.handleResult(result)
             }
         } else {
             logger.warning("ShazamKitService: SHManagedSession requires iOS 16+ or macOS 13+")
