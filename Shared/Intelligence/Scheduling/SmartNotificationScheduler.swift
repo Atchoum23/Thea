@@ -56,8 +56,17 @@ final class SmartNotificationScheduler {
 
         // Bypass smart scheduling if disabled or critical
         guard isEnabled, !bypassPriorities.contains(priority) else {
+            if priority == .critical { InterruptBudgetManager.shared.recordInterrupt() }
             immediateCount += 1
             return .now(reason: "Smart scheduling disabled or priority bypass")
+        }
+
+        // AK3: Interrupt budget gate — non-critical notifications respect daily budget
+        let interruptPriority: Double = priority == .critical ? 1.0 : priority == .high ? 0.7 : 0.3
+        guard InterruptBudgetManager.shared.canInterrupt(priority: interruptPriority) else {
+            deferredCount += 1
+            let tomorrow = Calendar.current.startOfDay(for: Date.now.addingTimeInterval(86400))
+            return .deferred(until: tomorrow, reason: "Interrupt budget exhausted (\(InterruptBudgetManager.shared.usedToday)/\(PersonalParameters.shared.interruptBudget) used today)")
         }
 
         let fingerprint = BehavioralFingerprint.shared
@@ -77,6 +86,7 @@ final class SmartNotificationScheduler {
         // High receptivity right now — deliver immediately
         if context.receptivity >= receptivityThreshold {
             immediateCount += 1
+            InterruptBudgetManager.shared.recordInterrupt()
             return .now(reason: "Current receptivity \(String(format: "%.0f%%", context.receptivity * 100)) meets threshold")
         }
 

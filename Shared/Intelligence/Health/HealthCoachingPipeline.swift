@@ -132,6 +132,23 @@ final class HealthCoachingPipeline {
                     date: record.startDate
                 ))
             }
+            // AJ3/AL3: Feed sleep metrics into HumanReadinessEngine + DataFreshnessOrchestrator
+            if let latest = sleepRecords.last {
+                let totalMin = Double(max(latest.totalMinutes, 1))
+                let quality: Double
+                switch latest.quality {
+                case .excellent: quality = 1.0
+                case .good: quality = 0.75
+                case .fair: quality = 0.5
+                default: quality = 0.25
+                }
+                await HumanReadinessEngine.shared.updateSleepMetrics(
+                    quality: quality,
+                    deepFraction: Double(latest.deepMinutes) / totalMin,
+                    remFraction: Double(latest.remMinutes) / totalMin
+                )
+            }
+            await DataFreshnessOrchestrator.shared.recordRefresh(.sleep)
         } catch {
             logger.warning("Failed to fetch sleep data: \(error.localizedDescription)")
         }
@@ -145,6 +162,8 @@ final class HealthCoachingPipeline {
                 exerciseMinutes: activity.activeMinutes,
                 date: now
             ))
+            // AL3: Record freshness
+            await DataFreshnessOrchestrator.shared.recordRefresh(.activity)
         } catch {
             logger.warning("Failed to fetch activity data: \(error.localizedDescription)")
         }
@@ -162,6 +181,13 @@ final class HealthCoachingPipeline {
                 restingBPM: restingHR,
                 date: now
             ))
+            // AJ3/AL3: Approximate SDNN from resting HR + record freshness
+            if restingHR > 0 {
+                let approxSDNN = max(10, 100 - Double(restingHR))
+                await HumanReadinessEngine.shared.updateHRVBaseline(approxSDNN)
+            }
+            await DataFreshnessOrchestrator.shared.recordRefresh(.hrv)
+            await DataFreshnessOrchestrator.shared.recordRefresh(.biometrics)
         } catch {
             logger.warning("Failed to fetch heart rate data: \(error.localizedDescription)")
         }

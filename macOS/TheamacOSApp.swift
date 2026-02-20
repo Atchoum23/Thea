@@ -285,6 +285,23 @@ struct TheamacOSApp: App {
             logger.info("E3: Skills registries initialized (built-in + marketplace)")
         }
 
+        // AN3: Wave 7 — Resource-Aware Life System
+        // PersonalParameters must init first (loads @AppStorage Tier 2 values),
+        // then HumanReadinessEngine (60s readiness poll), ResourceOrchestrator (state machine),
+        // InterruptBudgetManager (daily gate), DataFreshnessOrchestrator (staleness checks).
+        Task {
+            try? await Task.sleep(for: .seconds(4))
+            _ = PersonalParameters.shared          // Loads @AppStorage Tier 2 values
+            _ = HumanReadinessEngine.shared        // Starts 60s readiness recompute
+            _ = ResourceOrchestrator.shared        // Starts state machine, binds readiness
+            _ = InterruptBudgetManager.shared      // Starts daily budget tracking
+            _ = DataFreshnessOrchestrator.shared   // Starts 60s staleness checks
+            #if os(macOS)
+            macOSBehavioralSignalExtractor.shared.start()  // Idle + app-switch signals
+            #endif
+            logger.info("AN3: Wave 7 resource system initialized (PersonalParameters + readiness + orchestrator + budget + freshness)")
+        }
+
         // U3/AE3: PlatformFeaturesHub — activates ambient intelligence foundation:
         // MenuBarManager, MacSystemObserver, ServicesHandler, SpotlightService, etc.
         Task {

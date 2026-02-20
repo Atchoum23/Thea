@@ -148,6 +148,30 @@ public final class PersonalParameters: ObservableObject {
 
     private init() {}
 
+    // MARK: - AN3: Overnight Consultation Log
+
+    /// Append a one-line record to .claude/parameter-consultation-log.txt.
+    /// Called at the end of every autonomous Claude Code session (per §0.3 protocol).
+    public func logSessionConsultation(
+        session: String,
+        phase: String,
+        consulted: [String],
+        decisions: String
+    ) {
+        let dateStr = Date.now.formatted(.dateTime.year().month().day().hour().minute())
+        let line = "\(dateStr) | \(session) | \(phase) | \(consulted.joined(separator: ", ")) | \(decisions)\n"
+        let projectPath = NSHomeDirectory() + "/Documents/IT & Tech/MyApps/Thea"
+        let logURL = URL(fileURLWithPath: projectPath + "/.claude/parameter-consultation-log.txt")
+        guard let data = line.data(using: .utf8) else { return }
+        if let handle = try? FileHandle(forWritingAtPath: logURL.path) {
+            handle.seekToEndOfFile()
+            handle.write(data)
+            try? handle.close()
+        } else {
+            try? data.write(to: logURL, options: .atomic)
+        }
+    }
+
     // MARK: - Snapshot for Claude §0.3 Context Injection
 
     /// Returns a compact text block for injection into Claude Code session context.
