@@ -23,6 +23,12 @@ public struct SquadDefinition: Identifiable, Codable, Sendable {
     public var handoffRules: [HandoffRule]
     public var scope: SquadScope
     public var isEnabled: Bool
+    // F3: Persistent squad fields
+    public var goal: String?
+    public var communicationStrategy: CommunicationStrategy
+    public var coordinationMode: CoordinationMode
+    public var createdAt: Date
+    public var sessionCount: Int
 
     public init(
         id: String,
@@ -32,7 +38,10 @@ public struct SquadDefinition: Identifiable, Codable, Sendable {
         firstMemberId: String,
         handoffRules: [HandoffRule] = [],
         scope: SquadScope = .workspace,
-        isEnabled: Bool = true
+        isEnabled: Bool = true,
+        goal: String? = nil,
+        communicationStrategy: CommunicationStrategy = .broadcast,
+        coordinationMode: CoordinationMode = .leader
     ) {
         self.id = id
         self.name = name
@@ -42,6 +51,11 @@ public struct SquadDefinition: Identifiable, Codable, Sendable {
         self.handoffRules = handoffRules
         self.scope = scope
         self.isEnabled = isEnabled
+        self.goal = goal
+        self.communicationStrategy = communicationStrategy
+        self.coordinationMode = coordinationMode
+        self.createdAt = Date()
+        self.sessionCount = 0
     }
 
     /// Get member by ID
@@ -59,6 +73,40 @@ public enum SquadScope: String, Codable, Sendable {
     case builtin
     case global
     case workspace
+}
+
+// MARK: - F3: Communication Strategy & Coordination Mode
+
+public enum CommunicationStrategy: String, Codable, CaseIterable, Sendable {
+    case broadcast    // All members receive every message (many-to-many)
+    case sequential   // Messages flow member-to-member in order
+    case parallel     // Members work independently, results merged at end
+    case hierarchical // Leader → worker hierarchy
+
+    public var displayName: String {
+        switch self {
+        case .broadcast: "Broadcast"
+        case .sequential: "Sequential"
+        case .parallel: "Parallel"
+        case .hierarchical: "Hierarchical"
+        }
+    }
+}
+
+public enum CoordinationMode: String, Codable, CaseIterable, Sendable {
+    case leader       // One designated leader orchestrates all
+    case democratic   // Consensus required
+    case hierarchical // Strict hierarchy each level controls level below
+    case adaptive     // Dynamic leadership changes based on task
+
+    public var displayName: String {
+        switch self {
+        case .leader: "Leader-led"
+        case .democratic: "Democratic"
+        case .hierarchical: "Hierarchical"
+        case .adaptive: "Adaptive"
+        }
+    }
 }
 
 // MARK: - Squad Member

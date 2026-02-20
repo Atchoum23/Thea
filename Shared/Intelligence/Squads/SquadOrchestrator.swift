@@ -138,6 +138,9 @@ public final class SquadOrchestrator {
     private(set) var isExecuting = false
     private(set) var activeSquads: [String: SquadExecutionState] = [:]
     private(set) var executionHistory: [SquadTaskResult] = []
+    // F3: Persistent squads (user-created, multi-session, distinct from ephemeral execution state)
+    private(set) var persistentSquads: [SquadDefinition] = []
+    private let persistentSquadsKey = "thea.persistentSquads"
 
     // Dependencies
     private let registry: SquadRegistry
@@ -150,6 +153,64 @@ public final class SquadOrchestrator {
         self.communicationBus = AgentCommunicationBus.shared
         self.resourcePool = AgentResourcePool.shared
         self.providerRegistry = ProviderRegistry.shared
+        loadPersistentSquads()
+    }
+
+    // MARK: - F3: Persistent Squad Management
+
+    /// Create and persist a new long-running squad.
+    @discardableResult
+    public func createSquad(_ definition: SquadDefinition) async throws -> SquadDefinition {
+        logger.info("Creating persistent squad: \(definition.name)")
+        persistentSquads.append(definition)
+        registry.register(definition)
+        savePersistentSquads()
+        return definition
+    }
+
+    /// Assign optimal squad members based on goal analysis.
+    public func assignOptimalMembers(to squadID: String, goal: String) async {
+        guard let index = persistentSquads.firstIndex(where: { $0.id == squadID }) else { return }
+        let lower = goal.lowercased()
+        let isCodeGoal = lower.contains("code") || lower.contains("implement") || lower.contains("develop")
+        let sourceSquad = registry.squad(id: isCodeGoal ? "code-development" : "research")
+        let memberIDs = isCodeGoal
+            ? ["architect", "backend-dev", "frontend-dev", "reviewer"]
+            : ["coordinator", "web-researcher", "code-analyst", "synthesizer"]
+        let assigned = memberIDs.compactMap { sourceSquad?.member(id: $0) }
+        if !assigned.isEmpty {
+            persistentSquads[index].members = assigned
+            persistentSquads[index].firstMemberId = assigned[0].id
+        }
+        savePersistentSquads()
+    }
+
+    /// Delete a persistent squad.
+    public func deleteSquad(id: String) {
+        persistentSquads.removeAll { $0.id == id }
+        savePersistentSquads()
+    }
+
+    /// Detect whether a query represents a long-running goal suitable for a persistent Squad.
+    public func isLongRunningGoal(_ query: String) -> Bool {
+        let lower = query.lowercased()
+        return ["monitor", "track", "watch", "ongoing", "continuously",
+                "every day", "every week", "regularly", "set up a team",
+                "create a squad", "long-term", "alert me when", "notify me when"].contains { lower.contains($0) }
+    }
+
+    private func loadPersistentSquads() {
+        guard let data = UserDefaults.standard.data(forKey: persistentSquadsKey),
+              let squads = try? JSONDecoder().decode([SquadDefinition].self, from: data) else { return }
+        persistentSquads = squads
+        squads.forEach { registry.register($0) }
+        logger.info("Loaded \(squads.count) persistent squads")
+    }
+
+    private func savePersistentSquads() {
+        if let data = try? JSONEncoder().encode(persistentSquads) {
+            UserDefaults.standard.set(data, forKey: persistentSquadsKey)
+        }
     }
 
     // MARK: - Squad Selection
