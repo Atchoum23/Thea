@@ -58,6 +58,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case knowledge = "Knowledge"
     case liveGuidance = "Live Guidance"
     case metaAI = "Meta-AI"
+    case squads = "Squads"
 
     // Group 2: Features
     case clipboard = "Clipboard"
@@ -118,6 +119,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .knowledge: "books.vertical"
         case .liveGuidance: "eye.circle.fill"
         case .metaAI: "brain.filled.head.profile"
+        case .squads: "person.3.sequence.fill"
         case .clipboard: "doc.on.clipboard"
         case .translation: "character.bubble"
         case .voiceInput: "mic.fill"
@@ -162,7 +164,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     var group: Int {
         switch self {
         case .general, .aiModels: 0
-        case .providers, .memory, .agent, .moltbook, .knowledge, .liveGuidance, .metaAI: 1
+        case .providers, .memory, .agent, .moltbook, .knowledge, .liveGuidance, .metaAI, .squads: 1
         case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .messagingGateway, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home: 2
         case .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
         case .theme, .advanced: 4
@@ -282,6 +284,8 @@ struct MacSettingsView: View {
             LiveGuidanceSettingsView()
         case .metaAI:
             MetaAIDashboardView()
+        case .squads:
+            SquadsView()
         case .clipboard:
             TheaClipSettingsView()
         case .translation:
