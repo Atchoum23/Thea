@@ -604,24 +604,24 @@ struct ConnectAccountSheet: View {
                     throw FinancialError.invalidCredentials("API Key is required")
                 }
 
-                // Determine account type based on provider
-                let accountType: AccountType = switch selectedProvider.lowercased() {
-                case "binance", "coinbase":
-                    .crypto
+                // Determine account type string based on provider
+                let accountType: String = switch selectedProvider.lowercased() {
+                case "binance", "coinbase", "kraken":
+                    "crypto"
                 case "plaid":
-                    .checking
+                    "checking"
                 default:
-                    .checking
+                    "investment"
                 }
 
-                // Create account
+                // Create account using FinancialManager's canonical API
                 let account = financialManager.addAccount(
-                    name: accountName,
-                    type: accountType,
-                    institution: selectedProvider
+                    provider: selectedProvider,
+                    accountName: accountName,
+                    accountType: accountType
                 )
 
-                print("✅ Successfully connected account: \(account.name)")
+                print("✅ Successfully connected account: \(account.accountName)")
 
                 // Store credentials in Keychain via SecureStorage
                 try SecureStorage.shared.saveAPIKey(apiKey, for: "financial_\(account.id.uuidString)")

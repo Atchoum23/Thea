@@ -524,11 +524,7 @@ targets:
           - MLXAudioTTS
           - MLXAudioSTT
           - MLXAudioCore
-      # Financial Intelligence Hub (AAC3) — YNAB budget sync
-      # KrakenAPI removed (CryptoSwift RawSpan issue); KrakenService uses URLSession+CryptoKit
-      - package: SwiftYNAB
-      # HomeKit framework for HomeKitAIEngine (AAF3-1)
-      - sdk: HomeKit.framework
+      # HomeKit removed from macOS 26 SDK — no link needed; #if canImport(HomeKit) guards source
       - target: TheaFinderSyncExtension
         embed: true
         codeSign: true
@@ -766,9 +762,6 @@ targets:
       - package: KeychainAccess
       - package: MarkdownUI
       - package: Highlightr
-      # Financial Intelligence Hub (AAC3) — YNAB budget sync
-      # KrakenService uses URLSession+CryptoKit (no SPM dependency)
-      - package: SwiftYNAB
       - target: TheaShareExtension
         embed: true
         codeSign: true
