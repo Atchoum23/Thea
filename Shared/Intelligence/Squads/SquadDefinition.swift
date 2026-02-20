@@ -14,7 +14,7 @@ import OSLog
 
 /// A squad is a group of specialized agents that work together
 /// Each member has specific capabilities and can hand off to others
-public struct SquadDefinition: Identifiable, Codable, Sendable {
+public struct SquadDefinition: Identifiable, Codable, Sendable, Hashable {
     public let id: String
     public var name: String
     public var description: String
@@ -112,7 +112,7 @@ public enum CoordinationMode: String, Codable, CaseIterable, Sendable {
 // MARK: - Squad Member
 
 /// A specialized agent within a squad
-public struct SquadMember: Identifiable, Codable, Sendable {
+public struct SquadMember: Identifiable, Codable, Sendable, Hashable {
     public let id: String
     public var name: String
     public var role: String
