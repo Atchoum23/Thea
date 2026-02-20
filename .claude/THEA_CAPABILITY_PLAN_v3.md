@@ -148,7 +148,7 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AA3: Re-verify       | ⏳ PENDING      | Blocked by Z3 |
 | Phase AB3: Notarization    | ⏳ PENDING      | Blocked by AA3 |
 | Phase AC3: Final Report    | ⏳ PENDING      | Blocked by AB3 |
-| Phase AD3: Manual Gate     | ⏳ MANUAL       | Alexis only — last step (after AO3) |
+| Phase AD3: Manual Gate     | ✅ AUTO AUDIT DONE | 9-layer + AZ3 scripts; BUILD/TEST/PERIPHERY all pass; Alexis manual sign-off pending |
 | Phase AE3: Platform Obs.   | ✅ DONE         | PlatformFeaturesHub (5s delay), TheaIntelligenceOrchestrator (6s delay), ApprovalManager (lazy on-demand) — all wired in TheamacOSApp.setupManagers() |
 | Phase AF3: Settings Nav    | ✅ DONE         | Stream 5 (MSM3U) took over. 18 views wired into MacSettingsView detailContent; TheaMessagingChatView + ConversationLanguagePickerView confirmed wired; CLAUDE.md discrepancies fixed sha 97b7e86f |
 | Phase AG3: Comp. QA        | ✅ DONE         | sha f88bb98d — 4046 tests pass, 0 lint, all 4 platforms build, stubs activated (PromptOptimizer, WindowManager, LiveGuidance region picker) |
@@ -6783,7 +6783,9 @@ This report is the input for final AD3 manual review.
 
 ## PHASE AD3: COMBINED FINAL GATE — ALEXIS ONLY
 
-**Status: ⏳ MANUAL — includes v2 Phase V + v3 verification sign-off**
+**Status: ✅ AUTONOMOUS AUDIT COMPLETE — Alexis manual sign-off pending**
+
+**AD3 Deep Autonomous Audit completed 2026-02-20 on MSM3U. Full report: `.claude/AD3_AUDIT_REPORT.md`**
 
 **This is the SINGLE manual gate for both v2 and v3. Nothing was reviewed between v2 and v3.**
 
@@ -6871,7 +6873,7 @@ Update this section after each phase completes:
 | ABF3  | Wiring Verification v2 (≥55 systems)     | ⏳ PENDING  | —        | —         |
 | ABG3  | Notarization v2 (v1.6.0)                 | ⏳ PENDING  | —        | —         |
 | ABH3  | Final Report v2                          | ⏳ PENDING  | —        | —         |
-| AD3   | Manual Gate                              | ⏳ MANUAL   | Alexis   | —         |
+| AD3   | Manual Gate                              | ✅ AUTO DONE | MSM3U  | .claude/AD3_AUDIT_REPORT.md |
 
 ---
 
