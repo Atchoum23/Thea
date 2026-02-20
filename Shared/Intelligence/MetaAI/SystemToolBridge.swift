@@ -14,7 +14,7 @@
 
         @MainActor static func execute(arguments: [String: Any]) async throws -> Any {
             guard let path = arguments["path"] as? String else {
-                throw ToolError.invalidParameters
+                throw MetaAIToolError.invalidParameters
             }
 
             let expandedPath = NSString(string: path).expandingTildeInPath
@@ -50,7 +50,7 @@
             guard let path = arguments["path"] as? String,
                   let content = arguments["content"] as? String
             else {
-                throw ToolError.invalidParameters
+                throw MetaAIToolError.invalidParameters
             }
 
             let expandedPath = NSString(string: path).expandingTildeInPath
@@ -58,22 +58,22 @@
             // SECURITY FIX: Block writes to sensitive paths
             for blockedPath in blockedPaths {
                 if expandedPath.lowercased().contains(blockedPath.lowercased()) {
-                    throw ToolError.pathBlocked("Cannot write to protected path containing '\(blockedPath)'")
+                    throw MetaAIToolError.pathBlocked("Cannot write to protected path containing '\(blockedPath)'")
                 }
             }
 
             // SECURITY FIX: Validate file extension
             let fileExtension = (expandedPath as NSString).pathExtension.lowercased()
             guard !fileExtension.isEmpty else {
-                throw ToolError.pathBlocked("Cannot write files without an extension")
+                throw MetaAIToolError.pathBlocked("Cannot write files without an extension")
             }
             guard allowedExtensions.contains(fileExtension) else {
-                throw ToolError.pathBlocked("Cannot write files with extension '.\(fileExtension)'. Allowed: \(allowedExtensions.sorted().joined(separator: ", "))")
+                throw MetaAIToolError.pathBlocked("Cannot write files with extension '.\(fileExtension)'. Allowed: \(allowedExtensions.sorted().joined(separator: ", "))")
             }
 
             // SECURITY FIX: Limit file size to prevent disk exhaustion
             guard content.count <= 10_485_760 else { // 10MB max
-                throw ToolError.pathBlocked("File content exceeds maximum allowed size (10MB)")
+                throw MetaAIToolError.pathBlocked("File content exceeds maximum allowed size (10MB)")
             }
 
             // SECURITY FIX: ALWAYS require user approval - removed "approved" bypass parameter
@@ -88,7 +88,7 @@
                 """
             )
             guard approvalResult.approved else {
-                throw ToolError.commandBlocked("File write operation not approved by user")
+                throw MetaAIToolError.commandBlocked("File write operation not approved by user")
             }
 
             try content.write(toFile: expandedPath, atomically: true, encoding: .utf8)
@@ -108,7 +108,7 @@
             guard let directory = arguments["directory"] as? String,
                   let pattern = arguments["pattern"] as? String
             else {
-                throw ToolError.invalidParameters
+                throw MetaAIToolError.invalidParameters
             }
 
             let expandedDir = NSString(string: directory).expandingTildeInPath
@@ -137,7 +137,7 @@
 
         @MainActor static func execute(arguments: [String: Any]) async throws -> Any {
             guard let path = arguments["path"] as? String else {
-                throw ToolError.invalidParameters
+                throw MetaAIToolError.invalidParameters
             }
 
             let expandedPath = NSString(string: path).expandingTildeInPath
@@ -146,7 +146,7 @@
 
             if recursive {
                 guard let enumerator = fm.enumerator(atPath: expandedPath) else {
-                    throw ToolError.executionFailed
+                    throw MetaAIToolError.executionFailed
                 }
 
                 var files: [String] = []
@@ -194,14 +194,14 @@
 
         @MainActor static func execute(arguments: [String: Any]) async throws -> Any {
             guard let command = arguments["command"] as? String else {
-                throw ToolError.invalidParameters
+                throw MetaAIToolError.invalidParameters
             }
 
             // SECURITY: Validate command against blocklist
             let lowercaseCommand = command.lowercased()
             for pattern in blockedPatterns {
                 if lowercaseCommand.contains(pattern) {
-                    throw ToolError.commandBlocked("Command contains blocked pattern: \(pattern)")
+                    throw MetaAIToolError.commandBlocked("Command contains blocked pattern: \(pattern)")
                 }
             }
 
@@ -211,7 +211,7 @@
             let commandName = (baseCommand as NSString).lastPathComponent
 
             guard allowedCommands.contains(commandName) else {
-                throw ToolError.commandBlocked("Command '\(commandName)' is not in the allowlist. Allowed commands: \(allowedCommands.sorted().joined(separator: ", "))")
+                throw MetaAIToolError.commandBlocked("Command '\(commandName)' is not in the allowlist. Allowed commands: \(allowedCommands.sorted().joined(separator: ", "))")
             }
 
             // SECURITY: Validate working directory if provided
@@ -219,13 +219,13 @@
                 let expandedDir = NSString(string: workDir).expandingTildeInPath
                 // Ensure directory exists and is within allowed paths
                 guard FileManager.default.fileExists(atPath: expandedDir) else {
-                    throw ToolError.invalidParameters
+                    throw MetaAIToolError.invalidParameters
                 }
                 // Block access to sensitive system directories
                 let blockedPaths = ["/System", "/Library", "/private", "/var", "/etc", "/bin", "/sbin", "/usr"]
                 for blockedPath in blockedPaths {
                     if expandedDir.hasPrefix(blockedPath), !expandedDir.hasPrefix("/usr/local") {
-                        throw ToolError.commandBlocked("Working directory '\(expandedDir)' is in a protected system path")
+                        throw MetaAIToolError.commandBlocked("Working directory '\(expandedDir)' is in a protected system path")
                     }
                 }
             }
@@ -250,7 +250,7 @@
             let output = String(data: data, encoding: .utf8) ?? ""
 
             if process.terminationStatus != 0 {
-                throw ToolError.executionFailed
+                throw MetaAIToolError.executionFailed
             }
 
             return output
@@ -266,7 +266,7 @@
 
         @MainActor static func execute(arguments: [String: Any]) async throws -> Any {
             guard let query = arguments["query"] as? String else {
-                throw ToolError.invalidParameters
+                throw MetaAIToolError.invalidParameters
             }
 
             // Stub - would integrate with search API (DuckDuckGo, Google, etc.)
@@ -308,37 +308,37 @@
             guard let urlString = arguments["url"] as? String,
                   let url = URL(string: urlString)
             else {
-                throw ToolError.invalidParameters
+                throw MetaAIToolError.invalidParameters
             }
 
             // SECURITY FIX: Validate URL scheme (HTTPS only)
             guard let scheme = url.scheme?.lowercased(),
                   allowedSchemes.contains(scheme)
             else {
-                throw ToolError.urlBlocked("Only HTTPS URLs are allowed for security reasons")
+                throw MetaAIToolError.urlBlocked("Only HTTPS URLs are allowed for security reasons")
             }
 
             // SECURITY FIX: Validate host is not internal/private
             guard let host = url.host?.lowercased() else {
-                throw ToolError.urlBlocked("Invalid URL: no host specified")
+                throw MetaAIToolError.urlBlocked("Invalid URL: no host specified")
             }
 
             for blockedHost in blockedHosts {
                 if host.contains(blockedHost) || host.hasPrefix(blockedHost) {
-                    throw ToolError.urlBlocked("Cannot make requests to internal/private network addresses: \(host)")
+                    throw MetaAIToolError.urlBlocked("Cannot make requests to internal/private network addresses: \(host)")
                 }
             }
 
             // SECURITY FIX: Block cloud metadata endpoints
             if host.contains("metadata") || host == "169.254.169.254" {
-                throw ToolError.urlBlocked("Cannot access cloud metadata endpoints")
+                throw MetaAIToolError.urlBlocked("Cannot access cloud metadata endpoints")
             }
 
             // SECURITY FIX: Validate path doesn't access sensitive endpoints
             let path = url.path.lowercased()
             for blockedPath in blockedPaths {
                 if path.contains(blockedPath) {
-                    throw ToolError.urlBlocked("Cannot access restricted path: \(blockedPath)")
+                    throw MetaAIToolError.urlBlocked("Cannot access restricted path: \(blockedPath)")
                 }
             }
 
@@ -348,7 +348,7 @@
             for address in hostAddresses {
                 for blockedPrefix in blockedHosts {
                     if address.hasPrefix(blockedPrefix) {
-                        throw ToolError.urlBlocked("DNS resolution returned private IP address: \(address)")
+                        throw MetaAIToolError.urlBlocked("DNS resolution returned private IP address: \(address)")
                     }
                 }
             }
@@ -359,7 +359,7 @@
             // SECURITY: Limit allowed methods
             let allowedMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
             guard allowedMethods.contains(request.httpMethod?.uppercased() ?? "GET") else {
-                throw ToolError.invalidParameters
+                throw MetaAIToolError.invalidParameters
             }
 
             if let headers = arguments["headers"] as? [String: String] {
@@ -367,7 +367,7 @@
                 let blockedHeaders = ["authorization", "cookie", "x-api-key", "api-key"]
                 for (key, value) in headers {
                     if blockedHeaders.contains(key.lowercased()) {
-                        throw ToolError.urlBlocked("Cannot set sensitive header: \(key)")
+                        throw MetaAIToolError.urlBlocked("Cannot set sensitive header: \(key)")
                     }
                     request.setValue(value, forHTTPHeaderField: key)
                 }
@@ -385,12 +385,12 @@
             guard let httpResponse = response as? HTTPURLResponse,
                   (200 ... 299).contains(httpResponse.statusCode)
             else {
-                throw ToolError.executionFailed
+                throw MetaAIToolError.executionFailed
             }
 
             // SECURITY: Limit response size to 1MB
             guard data.count <= 1_048_576 else {
-                throw ToolError.executionFailed
+                throw MetaAIToolError.executionFailed
             }
 
             return String(data: data, encoding: .utf8) ?? ""
@@ -436,7 +436,7 @@
             guard let jsonString = arguments["json"] as? String,
                   let data = jsonString.data(using: .utf8)
             else {
-                throw ToolError.invalidParameters
+                throw MetaAIToolError.invalidParameters
             }
 
             let json = try JSONSerialization.jsonObject(with: data)
@@ -457,7 +457,7 @@
             guard let text = arguments["text"] as? String,
                   let pattern = arguments["pattern"] as? String
             else {
-                throw ToolError.invalidParameters
+                throw MetaAIToolError.invalidParameters
             }
 
             let regex = try NSRegularExpression(pattern: pattern)

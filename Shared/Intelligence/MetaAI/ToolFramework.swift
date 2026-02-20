@@ -36,7 +36,7 @@ final class ToolFramework {
 
     func discoverTools(for task: String) async throws -> [Tool] {
         guard let provider = ProviderRegistry.shared.getProvider(id: SettingsManager.shared.defaultProvider) else {
-            throw ToolError.providerNotAvailable
+            throw MetaAIToolError.providerNotAvailable
         }
 
         let toolDescriptions = registeredTools.map { tool in
@@ -63,20 +63,20 @@ final class ToolFramework {
 
     // MARK: - Tool Execution
 
-    func executeTool(_ tool: Tool, parameters: [String: Any]) async throws -> ToolResult {
+    func executeTool(_ tool: Tool, parameters: [String: Any]) async throws -> MetaAIToolResult {
         let startTime = Date()
 
         do {
             let result = try await tool.handler(parameters)
 
-            return ToolResult(
+            return MetaAIToolResult(
                 success: true,
                 output: result,
                 error: nil,
                 executionTime: Date().timeIntervalSince(startTime)
             )
         } catch {
-            return ToolResult(
+            return MetaAIToolResult(
                 success: false,
                 output: nil,
                 error: error.localizedDescription,
@@ -85,8 +85,8 @@ final class ToolFramework {
         }
     }
 
-    func executeToolChain(_ tools: [Tool], initialInput: [String: Any]) async throws -> [ToolResult] {
-        var results: [ToolResult] = []
+    func executeToolChain(_ tools: [Tool], initialInput: [String: Any]) async throws -> [MetaAIToolResult] {
+        var results: [MetaAIToolResult] = []
         var currentInput = initialInput
 
         for tool in tools {
@@ -163,7 +163,7 @@ struct Tool: Identifiable, Codable, @unchecked Sendable {
         parameters = try container.decode([ToolParameter].self, forKey: .parameters)
         category = try container.decode(ToolCategory.self, forKey: .category)
         // Handler cannot be decoded - must be set manually
-        handler = { _ in throw ToolError.notImplemented }
+        handler = { _ in throw MetaAIToolError.notImplemented }
     }
 
     func encode(to encoder: Encoder) throws {
@@ -213,14 +213,14 @@ struct ToolExecution: Identifiable {
     }
 }
 
-struct ToolResult: @unchecked Sendable {
+struct MetaAIToolResult: @unchecked Sendable {
     let success: Bool
     let output: Any?
     let error: String?
     let executionTime: TimeInterval
 }
 
-enum ToolError: LocalizedError {
+enum MetaAIToolError: LocalizedError {
     case providerNotAvailable
     case invalidParameters
     case executionFailed
