@@ -87,6 +87,7 @@
 		086E52900B9C59817BC9DFAA /* CodeAssistant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBE03363B8690D9147914A0 /* CodeAssistant.swift */; };
 		0879AC6AC97D190F1622325F /* MessagingHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6511D0C3411ADF78113F30A3 /* MessagingHubView.swift */; };
 		089C75A70197DAAC7F202B0A /* AssistantIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106506178A5C197F4EA81DD /* AssistantIntegration.swift */; };
+		089C91FB4BCA036064A31D64 /* KnowledgeGraphViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99618EEFCB9C6B6543368A7A /* KnowledgeGraphViewer.swift */; };
 		08A581EDAD050531FDAA89CE /* Context7Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = 092322EA857D666CA9BE6749 /* Context7Client.swift */; };
 		08AF7496FBA4D75C303FF0CD /* PersonalizedLearning.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC3643723C429FDBB6739AB0 /* PersonalizedLearning.swift */; };
 		08DC1562A2E4D725EE1F8DFC /* notification.js in Resources */ = {isa = PBXBuildFile; fileRef = 1744D7C78179C54412B89C5A /* notification.js */; };
@@ -1562,6 +1563,7 @@
 		A028BE574E7E8C3AD7E4C5E7 /* THEATypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C70C04DA109FD80452C3450 /* THEATypes.swift */; };
 		A057FFD048F12201F23459D3 /* IntegrationUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9651EDC1926D96C968DE6E34 /* IntegrationUtilities.swift */; };
 		A05BC0BA9AC12808E7D60F46 /* NetworkActivityMonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F47284A8131A9B3D49439405 /* NetworkActivityMonitorView.swift */; };
+		A063251FD9089D720BB9654B /* CGActionExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3671937C5BF25B42ADBFBAFF /* CGActionExecutor.swift */; };
 		A066F39A26CA5E28ECD7FBF3 /* QuickEntryWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D53A7C7AC531FF9BCF6CBB1 /* QuickEntryWindow.swift */; };
 		A070894269471083653EC8FF /* NutritionProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6B62D2961F52E41D17A7EA1 /* NutritionProtocols.swift */; };
 		A0A8A11BC16279C43B2B85D7 /* HabitTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80DE68E1A02D19B153B0901 /* HabitTracker.swift */; };
@@ -1768,6 +1770,7 @@
 		B52300FE85DF53F4E2CF2AC9 /* TaskPlanDAG.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD6DC659B1BF155288DF0093 /* TaskPlanDAG.swift */; };
 		B5374BF71AC1B60A560C0A17 /* ActiveMemoryRetrieval+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45190B257F709292DD3AB8E0 /* ActiveMemoryRetrieval+Helpers.swift */; };
 		B56BFB0589196452BD4B850F /* BrowserAutomation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312CDA1C3E942F50ACC3BFF2 /* BrowserAutomation.swift */; };
+		B588058EFDC0FFAEDBC72BBE /* CGActionExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3671937C5BF25B42ADBFBAFF /* CGActionExecutor.swift */; };
 		B5AF3D620B8B1E19B4F7AAA1 /* AnthropicProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5028FD03DD32838DE36130A7 /* AnthropicProvider.swift */; };
 		B5B130BA08C6B191D9405A09 /* TheaAgentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A69D52A26057121DAFE15E7A /* TheaAgentDetailView.swift */; };
 		B6133AAAB68E85373776F3D7 /* UnifiedContextEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC9E575E743A3367C2D7BB93 /* UnifiedContextEngine.swift */; };
@@ -2141,6 +2144,7 @@
 		DE7534BF5D7E730089CC9FC3 /* writing-assistant.css in Resources */ = {isa = PBXBuildFile; fileRef = ED326855F3028D3D54F741E1 /* writing-assistant.css */; };
 		DE7F64E6CACB3D2C38726ECC /* BackgroundServiceMonitorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC542E6980646E11E3805F4C /* BackgroundServiceMonitorTypes.swift */; };
 		DEC640F7F2CDC216E7E3A163 /* PersonalKnowledgeGraphTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B88981BFB2F81417B340799 /* PersonalKnowledgeGraphTests.swift */; };
+		DEF9BE5B07101F85AD810C4F /* MCPServerRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6853F06387BF8E415B99620 /* MCPServerRow.swift */; };
 		DEFB0C845BECC14460C7EA6E /* EventBusEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D548B9F6BD50813B3B86DA72 /* EventBusEvents.swift */; };
 		DEFEB34776C553B1DCB7616D /* AsanaIntegration+Goals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D7B51D6D46AB1A1F68036A2 /* AsanaIntegration+Goals.swift */; };
 		DF183DB849CB4A78902EA0C4 /* LocalModelRecommendationEngine+Scanning.swift in Sources */ = {isa = PBXBuildFile; fileRef = A992417D188F2F723B13A886 /* LocalModelRecommendationEngine+Scanning.swift */; };
@@ -2325,6 +2329,7 @@
 		F0D782FD44BAB0A67B623B82 /* VerificationPipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1D6EB42E995C87638173EE /* VerificationPipelineTests.swift */; };
 		F0E5ADAE72D1814038B2B8F4 /* APIBuilderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9A602963894A83668CD0A8 /* APIBuilderView.swift */; };
 		F0F5B2B3DDEEB878D4C4B341 /* CodeSandbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B885BC0597683471A95CE11 /* CodeSandbox.swift */; };
+		F117B1C8C29324042D2596AA /* MemoryInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1918675B8795C7EF48DDCA1 /* MemoryInspectorView.swift */; };
 		F178B51D2A681F917A01F4F8 /* AnthropicTokenCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6F51E687FBF6463C0177F2 /* AnthropicTokenCounter.swift */; };
 		F17E1431A9E3F3AB35F27F8C /* LifeMonitoringCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3940AC8AE9EBFA601406EFF /* LifeMonitoringCoordinator.swift */; };
 		F1874E397F6E4495049AA300 /* IntegratedTestRunnerTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77F8C7122289092A3F2C418 /* IntegratedTestRunnerTypes.swift */; };
@@ -2871,6 +2876,7 @@
 		34D5300008C38D31B27960E4 /* ApprovalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApprovalManager.swift; sourceTree = "<group>"; };
 		3579242B3BC082722588D04E /* BrowserAutomationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserAutomationService.swift; sourceTree = "<group>"; };
 		36243B4C002476BB08F4A7A0 /* Makefile */ = {isa = PBXFileReference; path = Makefile; sourceTree = "<group>"; };
+		3671937C5BF25B42ADBFBAFF /* CGActionExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGActionExecutor.swift; sourceTree = "<group>"; };
 		3679C6E470EF6E7258051796 /* FileSystemMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemMonitor.swift; sourceTree = "<group>"; };
 		36961E79ECB7AEFC08F0720B /* MacSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacSettingsView.swift; sourceTree = "<group>"; };
 		36AF7DA27F3CB1E987D640DC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -4193,6 +4199,7 @@
 		0876DEB592887564C0297096 /* LiveGuidance */ = {
 			isa = PBXGroup;
 			children = (
+				3671937C5BF25B42ADBFBAFF /* CGActionExecutor.swift */,
 				F53601B07434C4E982A2B448 /* LocalVisionGuidance.swift */,
 			);
 			path = LiveGuidance;
@@ -8555,6 +8562,7 @@
 				953E9A3395AF31C6D0E439ED /* BrowserAutomationService.swift in Sources */,
 				6C823DC0C095FD12A48BD5F9 /* BrowserHistoryTracker.swift in Sources */,
 				29E102C5970084D1E240690A /* BuildVerificationAgent.swift in Sources */,
+				A063251FD9089D720BB9654B /* CGActionExecutor.swift in Sources */,
 				0C5B9FBD9154826C50B94E9B /* CalendarContextProvider.swift in Sources */,
 				C473CE34F9A69073E0CFF22C /* CalendarIntegration.swift in Sources */,
 				3ED3EC5C5E132E3AF978E145 /* CalendarMonitor.swift in Sources */,
@@ -9806,6 +9814,7 @@
 				BA2909F77929085309140D3A /* BrowserAutomationService.swift in Sources */,
 				A6095ED0AB0948EA748A7E43 /* BrowserHistoryTracker.swift in Sources */,
 				EB805A6AB86941D4D18909C2 /* BuildVerificationAgent.swift in Sources */,
+				B588058EFDC0FFAEDBC72BBE /* CGActionExecutor.swift in Sources */,
 				B6EDEBD235EEB35047FA2B8A /* CalendarContextProvider.swift in Sources */,
 				11DEF5E381BAE43439921541 /* CalendarIntegration.swift in Sources */,
 				E61DCFF815AC91B01565540D /* CalendarMonitor.swift in Sources */,
@@ -10138,6 +10147,7 @@
 				0DB0324E931C4A5F0087D679 /* KeyboardShortcutsTypes.swift in Sources */,
 				A65BB583ED990F67BC6E48E4 /* KeyboardShortcutsView.swift in Sources */,
 				34C7F224E2E01488BA42B447 /* KnowledgeGraphExplorerView.swift in Sources */,
+				089C91FB4BCA036064A31D64 /* KnowledgeGraphViewer.swift in Sources */,
 				91E6C18B652A2FDE46058915 /* KnowledgeManagementView.swift in Sources */,
 				B335BE04D5330578E5E74E66 /* KnowledgeManager.swift in Sources */,
 				CB678BC79304A2A2876316EF /* KnowledgeSourceManager+Core.swift in Sources */,
@@ -10189,6 +10199,7 @@
 				119A4D98ED0B5966865F19D3 /* MCPServerGeneratorTypes.swift in Sources */,
 				E865AAB964647A5E63D13C2E /* MCPServerLifecycleManager.swift in Sources */,
 				122311DEC2F9A9FC00E43517 /* MCPServerManager.swift in Sources */,
+				DEF9BE5B07101F85AD810C4F /* MCPServerRow.swift in Sources */,
 				857F6E63071AECE68FB1AD1F /* MCPToolBridge.swift in Sources */,
 				F99315E275F1D8E6B7B8A7E7 /* MCPToolList.swift in Sources */,
 				9097CE4F66911F7127AC76B0 /* MLXAudioEngine.swift in Sources */,
@@ -10223,6 +10234,7 @@
 				BFA9A77E36D50053B536B557 /* MeetingIntelligence.swift in Sources */,
 				CCC30D075DF9C10753817E35 /* MemoryAugmentedChat.swift in Sources */,
 				9870B77D140BF19912DDD575 /* MemoryContextView.swift in Sources */,
+				F117B1C8C29324042D2596AA /* MemoryInspectorView.swift in Sources */,
 				BFB7997832667F29B8D75D44 /* MemoryManager+MemoryTypes.swift in Sources */,
 				3353C32EE0E974413821FF28 /* MemoryManager.swift in Sources */,
 				14B84D0D547167738998CBD0 /* MemoryManagerTypes.swift in Sources */,
