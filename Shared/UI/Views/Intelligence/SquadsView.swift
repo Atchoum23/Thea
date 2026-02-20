@@ -9,7 +9,8 @@ import SwiftUI
 // MARK: - Squads Root View
 
 struct SquadsView: View {
-    @StateObject private var orchestrator = SquadOrchestrator.shared
+    // SquadOrchestrator is @Observable — use @State, not @StateObject
+    @State private var orchestrator = SquadOrchestrator.shared
     @State private var showCreateSquad = false
     @State private var selectedSquad: SquadDefinition?
     @State private var showDeleteConfirm = false
