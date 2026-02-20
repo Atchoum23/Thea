@@ -6855,11 +6855,11 @@ Update this section after each phase completes:
 | AH3   | 8-Hat Audit + Implement All Findings     | ⏳ PENDING  | MSM3U    | —         |
 | AZ3   | Physical AV Testing (15 tools v2)        | ⏳ PENDING  | —        | —         |
 | AAA3  | Gap Remediation — 16 Unwired Systems     | ✅ DONE     | MSM3U    | 2026-02-20|
-| AAB3  | Widget 2.0 + Extension UX Excellence     | ⏳ PENDING  | —        | —         |
+| AAB3  | Widget 2.0 + Extension UX Excellence     | ✅ DONE     | S10D     | 2026-02-20|
 | AAC3  | Financial Intelligence Hub               | ✅ DONE     | MSM3U    | 2026-02-20|
 | AAD3  | Ambient Audio (ShazamKit + SoundAnalysis)| ⏳ PENDING  | —        | —         |
 | AAE3  | Wearables (Oura + Whoop + Fusion)        | ✅ DONE     | MSM3U    | 2026-02-20|
-| AAF3  | HomeKit AI + JournalingSuggestions + NFC | ⏳ PENDING  | —        | —         |
+| AAF3  | HomeKit AI + JournalingSuggestions + NFC | ✅ DONE     | S10D     | 2026-02-20|
 | AAG3  | Cloud Storage + GitHub Intelligence      | ✅ DONE     | MSM3U    | 2026-02-20|
 | AAH3  | Social + Music + HeadphoneMotion + FoundationModels | ⏳ PENDING | —  | —         |
 | AAI3  | CarPlay + visionOS + TabularData + Nutrition + Travel | ✅ DONE | BUILD SUCCEEDED | 2026-02-20 |
