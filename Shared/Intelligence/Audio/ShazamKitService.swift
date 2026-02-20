@@ -28,10 +28,10 @@ struct ShazamMatch: Sendable {
 #if canImport(ShazamKit)
 import ShazamKit
 
+// periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 /// Singleton service for real-time song recognition using SHManagedSession.
 /// Uses SHManagedSession (iOS 16+/macOS 13+) which handles audio capture internally.
 /// Falls back to nil on older OS versions.
-// periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 @MainActor
 final class ShazamKitService: NSObject, ObservableObject {
 
