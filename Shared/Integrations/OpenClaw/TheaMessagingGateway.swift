@@ -74,6 +74,10 @@ final class TheaMessagingGateway: ObservableObject {
         case .whatsapp:  connector = WhatsAppConnector(credentials: credentials)
         case .signal:    connector = SignalConnector(credentials: credentials)
         case .matrix:    connector = MatrixConnector(credentials: credentials)
+        case .browser:
+            // Browser platform handled by NativeHost extension, not gateway connector
+            logger.info("Browser platform uses NativeHost — skipping connector start")
+            return
         }
 
         // Wire message handler — all inbound messages funnel through routeInbound

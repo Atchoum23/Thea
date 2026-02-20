@@ -175,6 +175,11 @@ private struct PlatformCredentialRow: View {
             SecureField("Access Token", text: bindApiKey)
                 .textContentType(.password)
             saveButton
+
+        case .browser:
+            Text("Browser integration via Native Host extension — no credentials needed")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 
