@@ -155,11 +155,11 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AH3: 8-Hat Audit     | ✅ DONE         | sha 27649c41 — RED: language whitelist; PURPLE: autonomy audit trail; BLACK/WHITE/GREY/BLUE/GREEN/SCRIPT-KIDDIE all verified |
 | Phase AI3: PersonalParams  | ✅ DONE         | sha d91d3234 — 24 Tier 2 @AppStorage keys, snapshot() for Claude §0.3 injection, Tier 1 constants. Wave 7 underway on MSM3U S5. |
 | Phase AJ3–AN3: Wave 7      | ✅ DONE        | sha 24d2c894 — HumanReadinessEngine, macOSBehavioralSignalExtractor, InterruptBudgetManager, ResourceOrchestrator, DataFreshnessOrchestrator, EnergyAdaptiveThrottler AM3, PersonalParametersSettingsView. All linted. |
-| Phase AO3: Pre-AD3 AutoVer | ⏳ PENDING      | Runs after AC3 — gateway+tests+CI+release-tag automated (was v2 Phase V scriptable items) |
-| Phase AP3: MSM3U Reliability| ⏳ PENDING     | ServerHealthMonitor, heartbeat, MBAM2 failover, tmux-resurrect, Tailscale daemon |
-| Phase AQ3: Agent Orch.     | ⏳ PENDING      | AgentOrchestrator (circuit breaker, dynamic reorchestration) + AutonomousSessionManager (watchdog, notification-only) |
-| Phase AR3: API Error Prev. | ⏳ PENDING      | AnthropicConversationManager: atomic pair, pre-send validation, safe truncation, 400 recovery |
-| Phase AS3: Adaptive Timing | ⏳ PENDING      | AdaptivePoller: decorrelated jitter + known-duration skip + activity-detection; replaces fixed sleep() |
+| Phase AO3: Pre-AD3 AutoVer | ✅ DONE         | sha a3c0302f — Gateway(app must run), swift test OK, v1.5.0 tag ✅, CI 3/6 green (Thea CI in progress) |
+| Phase AP3: MSM3U Reliability| ✅ DONE         | sha 3aad3a3c — ServerHealthMonitor actor, OnceGate NWConnection pattern, ntfy+UNNotification, msm3u-failover.sh, msm3u-heartbeat.sh, LaunchAgent loaded |
+| Phase AQ3: Agent Orch.     | ✅ DONE         | sha b59ed979 — AgentOrchestrator actor (circuit breaker, TaskGroup parallel), AutonomousSessionManager (@MainActor, 5min watchdog), PersonalParameters 6 new keys |
+| Phase AR3: API Error Prev. | ✅ DONE         | sha 4dff338b — AnthropicConversationManager (class + NSLock), 5 methods, wired in chatAdvanced() |
+| Phase AS3: Adaptive Timing | ✅ DONE         | sha d8407561 — AdaptivePoller actor, 3 strategies, 3 factories (retrying/ciJob/logMonitor), ciTypicalDurationMinutes from PersonalParameters |
 | **Overall v3 %**          | **99% autonomous done** | A3–W3 + AE3–AH3 + AI3–AN3 ✅ DONE (26 phases, v3.9); Wave 6 (X3–AC3) + Wave 8 (AO3–AS3) + AD3 pending. |
 
 *Last updated: 2026-02-20 — Wave 7 AI3–AN3 ✅ DONE (sha 24d2c894); v3.9 plan updates from MBAM2 merged; next: Wave 6 (X3-AC3) + Wave 8 (AO3-AS3)*
