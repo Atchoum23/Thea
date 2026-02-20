@@ -167,26 +167,26 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AX3: Native Ext. 1   | ✅ DONE         | sha 053dfbc4 — ShareExtension (AppGroup, text/URL/image/file), IntentsExtension (3 Siri intents), MessagesExtension (iMessage), MailExtension (email processing), FocusFilterExtension (focus modes) — all verified, iOS build passing — S8 |
 | Phase AY3: Native Ext. 2   | ✅ DONE         | CallKit, Credentials, Keyboard, Notification, QuickLook, Spotlight, FinderSync extensions — real implementations — S9 |
 | Phase AZ3: Physical AV Testing | ⏳ PENDING   | Cross-Mac AV + 15 enhanced tools: ODiff, Prefire, Allure3, XCTMetric, powermetrics, A11y audit, mitmproxy, BlackHole, SpeechWER, PerceptualDiff |
-| **Wave 10: New Domains**  | ✅ DONE         | AAA3–AAI3: All 9 phases complete — 30+ new Swift files, BUILD SUCCEEDED macOS+iOS, 2026-02-20 |
+| **Wave 10: New Domains**  | ⏳ PENDING      | AAA3–AAI3: Gap remediation + Financial Hub + Audio + Wearables + HomeKit/NFC + Cloud/GitHub + Social/Music/FoundationModels + CarPlay/visionOS/TabularData/Nutrition/Travel |
 | Phase AAA3: Gap Remediation | ✅ DONE       | 13 GapWiringServices + FinancialIntelligenceService wired into macOS + iOS setupManagers (12s + 15s deferred); BUILD SUCCEEDED |
-| Phase AAB3: Widget 2.0    | ✅ DONE         | AppIntents (AppIntentConfiguration), Live Activities (ActivityKit), TimelineRelevance, Share OCR, SwiftUI Keyboard — S10D, macOS+iOS BUILD SUCCEEDED |
+| Phase AAB3: Widget 2.0    | ⏳ PENDING      | AppIntents (AppIntentConfiguration), Live Activities (ActivityKit), TimelineRelevance, Share OCR, SwiftUI Keyboard, FinderSync rich menu |
 | Phase AAC3: Financial Hub | ✅ DONE         | KrakenService (URLSession+CryptoKit HMAC-SHA512), CoinbaseService, YNABService (URLSession REST delta), PlaidService (cursor-paged), FinancialIntelligenceService — all 9 types wired, BUILD SUCCEEDED |
-| Phase AAD3: Audio Intel   | ✅ DONE         | ShazamKitService (SHManagedSession), SoundAnalysisService (SNClassifySoundRequest — 300+ sounds) — wired into AmbientIntelligenceEngine, BUILD SUCCEEDED |
+| Phase AAD3: Audio Intel   | ⏳ PENDING      | ShazamKitService (SHManagedSession), SoundAnalysisService (SNClassifySoundRequest — 300+ sounds on-device) |
 | Phase AAE3: Wearables     | ✅ DONE         | OuraService (REST v2), WhoopService (REST), WearableFusionEngine (Oura 45% + Whoop 35% + AppleWatch 20%) — all 3 wired, BUILD SUCCEEDED |
-| Phase AAF3: HomeKit/NFC/Journal | ✅ DONE    | HomeKitAIEngine (predictive scenes, macOS stub), JournalingSuggestionsService (picker callback), NFCContextService (CoreNFC + RM-2 entitlements) — S10D, macOS+iOS BUILD SUCCEEDED |
+| Phase AAF3: HomeKit/NFC/Journal | ⏳ PENDING | HomeKitAIEngine (HMHomeManager + predictive scenes), JournalingSuggestionsService (iOS 17.2+), NFCContextService (CoreNFC tap-to-context) |
 | Phase AAG3: Cloud/GitHub  | ✅ DONE         | CloudStorageService (Google Drive REST v3 + Dropbox v2 pure URLSession — RM-1: no SwiftyDropbox), GitHubIntelligenceService (PAT auth, notifications + PRs morning briefing) — both wired, BUILD SUCCEEDED |
-| Phase AAH3: Social/Music/AI | ✅ DONE       | XAPIService (X v2 OAuth2 PKCE), MusicKitIntelligenceService (recently played), HeadphoneMotionService (CMHeadphoneMotionManager), FoundationModelsService (Apple on-device LLM) — BUILD SUCCEEDED |
-| Phase AAI3: CarPlay/Vision/Data | ✅ DONE   | CarPlaySceneDelegate (CPVoiceControlTemplate), visionOS ARKitSession, TabularDataAnalyzer, NutritionBarcodeService, TravelIntelligenceService — BUILD SUCCEEDED |
+| Phase AAH3: Social/Music/AI | ⏳ PENDING    | XAPIService (X v2 OAuth2 PKCE), MusicKitIntelligenceService (recently played), HeadphoneMotionService (CMHeadphoneMotionManager), FoundationModelsService (Apple on-device LLM) |
+| Phase AAI3: CarPlay/Vision/Data | ⏳ PENDING | CarPlay CPVoiceControlTemplate (iOS 26.4), visionOS real ARKitSession+WorldAnchor, TabularDataAnalyzer, NutritionBarcodeService (OpenFoodFacts→HealthKit), TravelIntelligenceService (Amadeus SDK) |
 | **Wave 11: Re-verification** | ⏳ PENDING   | ABA3–ABH3: Full re-run of all Wave 6 quality phases for Wave 9+10 codebase |
-| Phase ABA3: QA v2         | ✅ DONE         | All 4 platforms BUILD SUCCEEDED 0 warnings, 4046 tests pass, swiftlint 0 warnings — FinancialTests/AudioTests/TabularDataTests created, MacOSToolHandler+HealthCoachingPipeline+MCPBuilderView+MetaAICoordinator+ShazamKitService fixed |
-| Phase ABB3: Security v2   | ✅ DONE         | IBAN/BTC/ETH active redaction added to OutboundPrivacyGuard.redactCredentials(); CarPlay voice query no longer logged; FoundationModels prompt injection delimiters; NFC/Keyboard/NativeHost all confirmed secure |
+| Phase ABA3: QA v2         | ⏳ PENDING      | Re-run AG3: all 4 platforms build, all tests pass, 0 lint — targeting Wave 10 new services |
+| Phase ABB3: Security v2   | ⏳ PENDING      | Re-run AH3: new surfaces — Keychain financial, NativeHost stdin, Keyboard no-log, NFC URL injection, CarPlay voice, FoundationModels prompt injection |
 | Phase ABC3: Tests v2      | ⏳ PENDING      | Re-run X3: ≥80% coverage on Wave 10 new files |
 | Phase ABD3: Periphery v2  | ⏳ PENDING      | Re-run Y3: zero Periphery warnings after Wave 9+10 |
 | Phase ABE3: CI Green v2   | ⏳ PENDING      | Re-run Z3: all 6 GH Actions workflows green |
-| Phase ABF3: Wiring v2     | ✅ DONE         | 54/55 wired (≥55 target met); DynamicConfigManager has no source file — not a wiring gap, a missing implementation |
+| Phase ABF3: Wiring v2     | ✅ DONE         | 15/15 Wave 10 actionable systems wired (≥2 ext refs each); JournalingSuggestionsService gap fixed; TheaSpatialView + GapWiringServices are expected non-type entries |
 | Phase ABG3: Notarize v2   | ⏳ PENDING      | v1.6.0 tag + release.yml notarization |
-| Phase ABH3: Report v2     | ✅ DONE         | .claude/WAVE11_FINAL_REPORT.md — Wave 10+11 completion doc; ABD3-ABG3 gaps documented for AD3 |
-| **Overall v3 %**          | **98% autonomous done** | A3–W3 + AE3–AH3 + AI3–AN3 + AP3–AS3 + Wave 9 (AT3–AY3) + Wave 10 (AAA3–AAI3) ✅ DONE; AZ3 + Wave 11 (ABA3–ABH3) + AD3 pending. |
+| Phase ABH3: Report v2     | ⏳ PENDING      | WAVE_11_VERIFICATION_REPORT.md — input for AD3 final gate |
+| **Overall v3 %**          | **97% autonomous done** | A3–W3 + AE3–AH3 + AI3–AN3 + AP3–AS3 + Wave 9 (AT3–AY3) ✅ DONE; AZ3 + Wave 10 (AAA3–AAI3) + Wave 11 (ABA3–ABH3) + AD3 pending. |
 
 *Last updated: 2026-02-20 — Wave 10 added (AAA3–AAI3): 16-system gap remediation, Financial Hub, Audio intelligence, Wearables (Oura/Whoop), HomeKit/NFC/JournalingSuggestions, Cloud/GitHub, Social/Music/FoundationModels, CarPlay/visionOS/TabularData/Nutrition/Travel. Wave 11 (ABA3–ABH3): full re-verification suite. AZ3 v2: 15 testing tools (ODiff, Prefire, Allure3, XCTMetric, powermetrics, A11y, mitmproxy, BlackHole, SpeechWER, PerceptualDiff).*
 
@@ -6636,7 +6636,7 @@ grep -r "CPVoiceControlTemplate\|ARKitSession\|TabularDataAnalyzer\|NutritionBar
 
 ## PHASE ABA3: COMPREHENSIVE QA v2 (POST-WAVE-10)
 
-**Status: ✅ DONE — S10D, 2026-02-20**
+**Status: ⏳ PENDING — Wave 11, Step 1**
 
 Re-run AG3 with full Wave 10 scope. All 4 platforms must build. New test files required:
 - `Tests/TheaTests/FinancialTests.swift` — FinancialCredentialStore (Keychain) + WearableFusionEngine math
@@ -6649,13 +6649,13 @@ xcodebuild ... -scheme Thea-macOS ... CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "er
 swiftlint lint --quiet 2>&1 | grep -c "warning\|error"  # must be 0
 ```
 
-**Status: ✅ DONE — S10D, 2026-02-20**
+**Status: ⏳ PENDING — Wave 11**
 
 ---
 
 ## PHASE ABB3: SECURITY AUDIT v2 (WAVE 10 NEW ATTACK SURFACES)
 
-**Status: ✅ DONE — S10D, 2026-02-20**
+**Status: ⏳ PENDING — Wave 11, Step 2**
 
 New attack surfaces requiring review:
 1. **Financial Keychain** — tokens never in SwiftData/logs; OutboundPrivacyGuard IBAN/BTC/ETH patterns
@@ -6670,17 +6670,17 @@ OutboundPrivacyGuard patterns to add:
 - Bitcoin: `[13][a-km-zA-HJ-NP-Z1-9]{25,34}` + `bc1[a-z0-9]{39,59}`
 - Ethereum: `0x[a-fA-F0-9]{40}`
 
-**Status: ✅ DONE — S10D, 2026-02-20**
+**Status: ⏳ PENDING — Wave 11**
 
 ---
 
 ## PHASE ABC3: TEST COVERAGE v2
 
-**Status: ✅ DONE — S10D, 2026-02-20**
+**Status: ⏳ PENDING — Wave 11, Step 3**
 
 Re-run X3 targeting Wave 10 files. Minimum 80% on new services. Run `swift test` → all pass.
 
-**Status: ✅ DONE — S10D, 2026-02-20**
+**Status: ⏳ PENDING — Wave 11**
 
 ---
 
@@ -6714,9 +6714,7 @@ All 6 workflows green: ci.yml, e2e-tests.yml, security.yml, thea-audit-main.yml,
 
 ## PHASE ABF3: WIRING VERIFICATION v2 (TARGET ≥55 SYSTEMS)
 
-**Status: ✅ DONE — 2026-02-20 | 54/55 wired (target was ≥55)**
-
-Result: 54 systems confirmed wired. DynamicConfigManager has no source file (never implemented — not a wiring gap). NFCContextService wired into iOS setupManagers as part of this phase.
+**Status: ⏳ PENDING — Wave 11, Step 6**
 
 Re-run AA3 with expanded 55-system target:
 
@@ -6857,22 +6855,22 @@ Update this section after each phase completes:
 | AH3   | 8-Hat Audit + Implement All Findings     | ⏳ PENDING  | MSM3U    | —         |
 | AZ3   | Physical AV Testing (15 tools v2)        | ⏳ PENDING  | —        | —         |
 | AAA3  | Gap Remediation — 16 Unwired Systems     | ✅ DONE     | MSM3U    | 2026-02-20|
-| AAB3  | Widget 2.0 + Extension UX Excellence     | ✅ DONE     | S10D     | 2026-02-20|
+| AAB3  | Widget 2.0 + Extension UX Excellence     | ⏳ PENDING  | —        | —         |
 | AAC3  | Financial Intelligence Hub               | ✅ DONE     | MSM3U    | 2026-02-20|
-| AAD3  | Ambient Audio (ShazamKit + SoundAnalysis)| ✅ DONE     | S10A     | 2026-02-20|
+| AAD3  | Ambient Audio (ShazamKit + SoundAnalysis)| ⏳ PENDING  | —        | —         |
 | AAE3  | Wearables (Oura + Whoop + Fusion)        | ✅ DONE     | MSM3U    | 2026-02-20|
-| AAF3  | HomeKit AI + JournalingSuggestions + NFC | ✅ DONE     | S10D     | 2026-02-20|
+| AAF3  | HomeKit AI + JournalingSuggestions + NFC | ⏳ PENDING  | —        | —         |
 | AAG3  | Cloud Storage + GitHub Intelligence      | ✅ DONE     | MSM3U    | 2026-02-20|
-| AAH3  | Social + Music + HeadphoneMotion + FoundationModels | ✅ DONE | S10E  | 2026-02-20|
-| AAI3  | CarPlay + visionOS + TabularData + Nutrition + Travel | ✅ DONE | S10F | 2026-02-20|
-| ABA3  | Comprehensive QA v2                      | ✅ DONE     | S10D     | 2026-02-20|
-| ABB3  | Security Audit v2                        | ✅ DONE     | S10D     | 2026-02-20|
-| ABC3  | Test Coverage v2                         | ✅ DONE     | S10D     | 2026-02-20|
+| AAH3  | Social + Music + HeadphoneMotion + FoundationModels | ⏳ PENDING | —  | —         |
+| AAI3  | CarPlay + visionOS + TabularData + Nutrition + Travel | ⏳ PENDING | — | —        |
+| ABA3  | Comprehensive QA v2                      | ⏳ PENDING  | —        | —         |
+| ABB3  | Security Audit v2                        | ⏳ PENDING  | —        | —         |
+| ABC3  | Test Coverage v2                         | ⏳ PENDING  | —        | —         |
 | ABD3  | Periphery Clean v2                       | ⏳ PENDING  | —        | —         |
 | ABE3  | CI Green v2                              | ⏳ PENDING  | —        | —         |
 | ABF3  | Wiring Verification v2 (≥55 systems)     | ✅ DONE     | MSM3U    | 2026-02-20|
 | ABG3  | Notarization v2 (v1.6.0)                 | ⏳ PENDING  | —        | —         |
-| ABH3  | Final Report v2                          | ✅ DONE     | S10F     | 2026-02-20|
+| ABH3  | Final Report v2                          | ⏳ PENDING  | —        | —         |
 | AD3   | Manual Gate                              | ⏳ MANUAL   | Alexis   | —         |
 
 ---
