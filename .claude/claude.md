@@ -643,14 +643,66 @@ Use `AdaptivePoller<T>` (Shared/Intelligence/AdaptivePoller.swift, Phase AS3) fo
 
 ## ⚠️ MANDATORY: THEA CODE GENERATION QUALITY RULES
 
-1. **Spec before code**: Write wiring requirements explicitly ("ServiceX.shared must be called from AppDelegate.setupManagers()") before generating any file.
-2. **Reference file required**: Always read ONE correctly-wired existing file before generating a new one. Pattern match on: imports, @MainActor usage, actor isolation, DI wiring.
-3. **Execution gates — before any task is "done"**:
-   - `xcodebuild` BUILD SUCCEEDED — actually run, never assumed
-   - `grep -r "NewTypeName" Shared/ --include="*.swift" | grep -v "NewTypeName.swift" | wc -l` ≥ 1
-   - `grep -r "TODO\|FIXME\|stub\|placeholder" <modified-files>` = 0 matches
-4. **Context rot**: Task touching > 15 files → split into ≤ 7-file sub-tasks with separate context windows.
-5. **Atomic commits**: One commit per file. `git log --stat` legible.
+**Root causes (researched 2026-02-20, CodeRabbit/Anthropic harness — ~1.7x more issues/PR):**
+- Context rot degrades coherence at ~80K tokens → rules 0 + 5
+- No execution feedback: compile errors found after all files generated → rule 3
+- Cross-file wiring gap: generated file works alone but nothing calls it → rules 1 + 8
+
+**Rule 0 — FAIL FAST: context budget (before starting)**
+If > 12 files touched OR > ~50K tokens: STOP, compact, start fresh. Signs of rot: forgot to wire something just made; created duplicate class; can't remember if error was fixed.
+
+**Rule 1 — SPEC-FIRST: explicit wiring contract (not prose)**
+```
+Generating: NewService.swift
+Wiring: TheamacOSApp.setupManagers() → .shared.start() | SomeView observes .$prop
+Isolation: @MainActor | Imports: Foundation, Combine, os.log
+```
+Cannot fill this in → research first, then write contract.
+
+**Rule 2 — REFERENCE FILE: read + pattern-match before generating**
+Read ONE correctly-wired existing file from same domain. Extract and match:
+imports, actor isolation, Logger subsystem, DI pattern, error handling idiom.
+
+**Rule 3 — GENERATION SEQUENCE: one file → build → commit → next (NEVER batch)**
+```
+Per file: generate → swift build (grep errors) → fix all → git add <file> → commit [N/M]
+After all: Rule 8 wiring check → xcodebuild BUILD SUCCEEDED
+```
+Generating 5 files then building = errors impossible to isolate. One file at a time.
+
+**Rule 4 — POST-GENERATION REVIEW: re-read every file immediately after writing**
+- [ ] Every method has a real body (not `{}`, `fatalError()`, `return nil`)
+- [ ] Zero TODO/FIXME/placeholder/stub anywhere in the file
+- [ ] Every referenced type exists in codebase (grep to confirm)
+- [ ] Every `catch` block logs, re-throws, or updates circuit breaker (Rule 6)
+
+**Rule 5 — CONTEXT ROT THRESHOLD: 12 files OR 50K tokens**
+(Tighter than old threshold of 15 files — evidence from Anthropic harness 2025.)
+Task > 12 files → split into ≤ 6-file sub-tasks. `swift build` errors unrelated to your
+change = context rot → start new session.
+
+**Rule 6 — NO SILENT ERROR SWALLOWING (Thea-wide, all new code)**
+Every `catch` must: throw | `Logger.x.error()` | user notification.
+Empty `catch {}` = guaranteed silent bug. Fix immediately on sight.
+
+**Rule 7 — ATOMIC COMMITS: specific file, descriptive message**
+`git add <specific-file.swift>` only (never `git add -A`).
+Message: `feat(Phase): ClassName — what it does [N of M]`.
+After commit: `git log --stat -1` → verify exactly ONE file.
+
+**Rule 8 — CROSS-FILE RTM: mechanically verify before marking any phase ✅ DONE**
+```bash
+# Forward: every new type has ≥ 1 external caller
+for T in Type1 Type2; do
+  echo "$T: $(grep -r "$T" Shared/ --include="*.swift" | grep -v "${T}.swift" | wc -l) refs"
+done
+# Stub check (0 matches required):
+git diff main..HEAD --name-only | xargs grep -l "TODO\|FIXME\|fatalError" 2>/dev/null
+# Build (run it — never assume):
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
+  -destination "platform=macOS" build -derivedDataPath /tmp/TheaBuild \
+  CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "error:|BUILD SUCCEEDED|BUILD FAILED" | tail -3
+```
 
 ---
 
