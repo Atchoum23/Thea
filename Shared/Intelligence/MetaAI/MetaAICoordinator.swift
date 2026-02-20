@@ -123,10 +123,10 @@ public final class MetaAICoordinator: ObservableObject {
     // swiftlint:disable:next function_body_length
     public func processStream(_ input: THEAInput) -> AsyncThrowingStream<THEAStreamChunk, Error> {
         AsyncThrowingStream { continuation in
-            Task {
+            Task { @MainActor in
                 do {
                     isProcessing = true
-                    defer { Task { @MainActor in isProcessing = false } }
+                    defer { isProcessing = false }
 
                     let startTime = Date()
 
@@ -714,7 +714,7 @@ public final class MetaAICoordinator: ObservableObject {
     private func recordOutcome(input: THEAInput, decision: THEADecision, response: THEAResponse) async {
         // Record in ContextAggregator for correlation learning
         await ContextAggregator.shared.recordOutcome(
-            context: await ContextAggregator.shared.currentContext,
+            context: ContextAggregator.shared.currentContext,
             query: input.text,
             taskType: decision.reasoning.taskType,
             modelUsed: decision.selectedModel,
