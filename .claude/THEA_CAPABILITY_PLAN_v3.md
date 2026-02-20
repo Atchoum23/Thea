@@ -118,12 +118,12 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase D3: Confidence Loop | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
 | Phase E3: Skills Complete | ⏳ PENDING      | Blocked by A3 |
 | Phase F3: Squads Unified  | ✅ DONE         | SquadDefinition+CommunicationStrategy+CoordinationMode; persistentSquads; SquadsView; MacSettingsView sidebar sha 49bc33f0 |
-| Phase G3: TaskPlanDAG+    | 🔄 IN PROGRESS  | Stream 3 |
+| Phase G3: TaskPlanDAG+    | ✅ DONE         | PlanOutcome quality scoring, planCache, createPlan cache lookup, AgentTeamOrchestrator approval gate sha 34a0083d |
 | Phase H3: AI System UIs   | ⏳ PENDING      | Blocked by A3 |
 | Phase I3: UI Components   | ⏳ PENDING      | Blocked by H3 |
 | Phase J3: LifeTracking UI | ⏳ PENDING      | Blocked by I3 |
 | Phase K3: Config UI       | ⏳ PENDING      | Blocked by H3 |
-| Phase L3: Computer Use    | ⏳ PENDING      | Blocked by B3 |
+| Phase L3: Computer Use    | 🔄 IN PROGRESS  | Stream 3 |
 | Phase M3: MLX Audio       | ⏳ PENDING      | Blocked by v2 |
 | Phase N3: Artifact System | ⏳ PENDING      | Blocked by E3 |
 | Phase O3: MCP Client      | ⏳ PENDING      | Blocked by B3 |
