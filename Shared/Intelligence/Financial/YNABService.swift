@@ -44,14 +44,14 @@ actor YNABService {
     private let baseURL = URL(string: "https://api.youneedabudget.com/v1")!
 
     /// Server knowledge per budget for delta sync. Key: budgetID, Value: Int knowledge
-    private var serverKnowledgeCache: [String: Int] = [:]
+    private var serverKnowledgeCache: [String: Int] = [:] // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 
     private init() {}
 
     // MARK: - Credential Management
 
     /// Store YNAB personal access token in Keychain.
-    func saveAccessToken(_ token: String) {
+    func saveAccessToken(_ token: String) { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         FinancialCredentialStore.save(token: token, provider: .ynab)
         logger.info("YNABService: access token saved")
     }
@@ -85,7 +85,7 @@ actor YNABService {
     /// Fetch transactions for a budget using delta sync.
     /// Pass `budgetID: "last-used"` to use the most recently opened budget.
     /// - Returns: New/changed transactions since last sync.
-    func fetchBudgetSummary(budgetID: String = "last-used") async throws -> [YNABTransaction] {
+    func fetchBudgetSummary(budgetID: String = "last-used") async throws -> [YNABTransaction] { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         var path = "/budgets/\(budgetID)/transactions"
         if let lastKnowledge = serverKnowledgeCache[budgetID] {
             path += "?last_knowledge_of_server=\(lastKnowledge)"
