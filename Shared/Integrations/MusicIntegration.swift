@@ -75,7 +75,7 @@ public actor MusicIntegration: AppIntegrationModule {
     }
 
     /// Get current track info
-    public func getCurrentTrack() async throws -> MusicTrackInfo? {
+    public func getCurrentTrack() async throws -> MusicKitTrackInfo? {
         #if os(macOS)
             let script = """
             tell application "Music"
@@ -93,7 +93,7 @@ public actor MusicIntegration: AppIntegrationModule {
             guard parts.count >= 4 else { return nil }
 
             let durationSecs = Int(Double(parts[3]) ?? 0)
-            return MusicTrackInfo(
+            return MusicKitTrackInfo(
                 id: "\(parts[0])-\(parts[1])",
                 title: parts[0],
                 artistName: parts[1],
@@ -158,5 +158,5 @@ public actor MusicIntegration: AppIntegrationModule {
     #endif
 }
 
-// MusicTrackInfo is defined in Shared/Intelligence/Music/MusicKitIntelligenceService.swift (canonical).
-// Use MusicKitIntelligenceService.MusicTrackInfo from that file.
+// MusicKitTrackInfo is defined in Shared/Intelligence/Music/MusicKitIntelligenceService.swift (canonical).
+// Use MusicKitIntelligenceService.MusicKitTrackInfo from that file.

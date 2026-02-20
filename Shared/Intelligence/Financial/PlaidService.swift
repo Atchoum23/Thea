@@ -58,15 +58,15 @@ actor PlaidService {
     ///   - secret: Your Plaid secret for the configured environment
     ///   - accessToken: The item's access_token (obtained via Plaid Link)
     func saveCredentials(clientID: String, secret: String, accessToken: String) {
-        FinancialCredentialStore.save(token: clientID,     for: FinancialProvider.plaid.rawValue, suffix: "clientID")
-        FinancialCredentialStore.save(token: secret,       for: FinancialProvider.plaid.rawValue, suffix: "secret")
-        FinancialCredentialStore.save(token: accessToken,  for: FinancialProvider.plaid.rawValue, suffix: "accessToken")
+        FinancialCredentialStore.save(token: clientID,     for: FinancialAPIProvider.plaid.rawValue, suffix: "clientID")
+        FinancialCredentialStore.save(token: secret,       for: FinancialAPIProvider.plaid.rawValue, suffix: "secret")
+        FinancialCredentialStore.save(token: accessToken,  for: FinancialAPIProvider.plaid.rawValue, suffix: "accessToken")
         logger.info("PlaidService: credentials saved")
     }
 
     /// Whether Plaid credentials are configured.
     func hasCredentials() -> Bool {
-        FinancialCredentialStore.load(for: FinancialProvider.plaid.rawValue, suffix: "clientID") != nil
+        FinancialCredentialStore.load(for: FinancialAPIProvider.plaid.rawValue, suffix: "clientID") != nil
     }
 
     // MARK: - Transactions Sync (Delta)
@@ -76,9 +76,9 @@ actor PlaidService {
     /// - Returns: Full sync result (all pages merged).
     func syncTransactions() async throws -> PlaidSyncResult {
         guard
-            let clientID    = FinancialCredentialStore.load(for: FinancialProvider.plaid.rawValue, suffix: "clientID"),
-            let secret      = FinancialCredentialStore.load(for: FinancialProvider.plaid.rawValue, suffix: "secret"),
-            let accessToken = FinancialCredentialStore.load(for: FinancialProvider.plaid.rawValue, suffix: "accessToken"),
+            let clientID    = FinancialCredentialStore.load(for: FinancialAPIProvider.plaid.rawValue, suffix: "clientID"),
+            let secret      = FinancialCredentialStore.load(for: FinancialAPIProvider.plaid.rawValue, suffix: "secret"),
+            let accessToken = FinancialCredentialStore.load(for: FinancialAPIProvider.plaid.rawValue, suffix: "accessToken"),
             !clientID.isEmpty, !secret.isEmpty, !accessToken.isEmpty
         else {
             throw PlaidServiceError.missingCredentials

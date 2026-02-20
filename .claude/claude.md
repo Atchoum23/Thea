@@ -222,6 +222,27 @@ When Alexis sends a new message while work is in progress:
 
 ---
 
+## ⚠️ MANDATORY: PARALLEL STREAM REALLOCATION (PROACTIVE — ZERO USER PROMPTING)
+
+During ANY multi-stream parallel execution (Waves 10, 11, etc.), the monitoring agent MUST self-manage capacity without waiting for instructions:
+
+**Rule**: When a stream finishes all assigned phases while others are still running → **IMMEDIATELY AND AUTONOMOUSLY** redirect it. Never leave a stream idle while parallel streams are still working.
+
+**Reallocation priority order:**
+1. **Fix active build-blockers first** — if any stream has BUILD FAILED blocking others, idle streams fix it immediately
+2. **Take over the slowest stream's next unstarted phase** — split the load, respecting file domain isolation
+3. **Wave N+1 prep** — read next wave's plan, set up verification scripts
+
+**Protocol (Thea-specific):**
+- Check `git log --oneline -10` to see what's already committed before taking over a task
+- Respect stream file domain isolation — never touch another stream's in-progress files
+- Send redeployment via tmux two-step protocol immediately — no asking first
+- Announce reallocation in the next 5-min status report
+
+**The test**: If Alexis has to ask "can you redirect idle streams?" — that is a monitoring process failure. Idle compute during parallel execution is always avoidable and always wasteful.
+
+---
+
 ## ⚠️ MANDATORY: SYSTEMATIC COMPLETENESS PROTOCOL
 
 Root cause of missed items: starting work before fully parsing the prompt.

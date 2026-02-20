@@ -170,7 +170,8 @@ public final class MusicKitIntelligenceService: ObservableObject {
         return .mixed
     }
 
-    private func buildContextSummary() -> String {
+    /// Returns a compact music context string suitable for injection into PersonalParameters.snapshot().
+    public func buildContextSummary() -> String {
         guard !recentTracks.isEmpty else { return "" }
         let topArtists = Array(
             Set(recentTracks.prefix(10).map { $0.artistName })

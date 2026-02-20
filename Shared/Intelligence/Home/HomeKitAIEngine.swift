@@ -5,10 +5,25 @@
 //  AAF3-1: HomeKit AI Engine — predictive scene activation + home state intelligence.
 //  Wired into TheamacOSApp.setupManagers() at 8s delay.
 //
+//  HomeKit is available on iOS, watchOS, tvOS only.
+//  macOS 26+ removed HomeKit from the SDK — a no-op stub is provided for macOS.
+//
 
 import Foundation
-import HomeKit
 import os.log
+
+// MARK: - Supporting Types
+
+enum HomeState {
+    case unknown, morning, day, evening, sleeping
+}
+
+// MARK: - Platform Implementation
+
+// HomeKit is available on iOS/watchOS/tvOS. macOS 26+ removed HomeKit from SDK.
+// Use OS conditional (not canImport) to avoid "module not found" in explicit-module-build mode.
+#if os(iOS) || os(watchOS) || os(tvOS)
+import HomeKit
 
 @MainActor
 final class HomeKitAIEngine: NSObject, ObservableObject {
@@ -128,8 +143,38 @@ extension HomeKitAIEngine: HMHomeManagerDelegate {
     }
 }
 
-// MARK: - Supporting Types
+#else
 
-enum HomeState {
-    case unknown, morning, day, evening, sleeping
+// MARK: - macOS Stub (HomeKit not available in macOS 26 SDK)
+
+@MainActor
+final class HomeKitAIEngine: ObservableObject {
+    static let shared = HomeKitAIEngine()
+
+    @Published var currentHomeState: HomeState = .unknown
+    @Published var lastActivatedScene: String?
+
+    private let logger = Logger(subsystem: "app.theathe", category: "HomeKitAIEngine")
+
+    private init() {
+        logger.info("HomeKitAIEngine stub initialized (HomeKit unavailable on this platform)")
+    }
+
+    func executeScene(named name: String) async {
+        logger.info("HomeKitAIEngine stub: executeScene '\(name)' — HomeKit not available")
+    }
+
+    func checkPredictiveActivation() async {}
+
+    func startPredictiveLoop() {
+        logger.info("HomeKitAIEngine stub: predictive loop not started (HomeKit unavailable)")
+    }
+
+    func stopPredictiveLoop() {}
+
+    func homeContextSummary() -> String {
+        "HomeKit not available on this platform."
+    }
 }
+
+#endif

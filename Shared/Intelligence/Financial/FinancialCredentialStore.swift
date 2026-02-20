@@ -20,7 +20,7 @@ enum FinancialCredentialStore {
     /// Persist a token for a given provider key.
     /// - Parameters:
     ///   - token: The secret value (API key, access token, etc.)
-    ///   - provider: A `FinancialProvider.keychainKey` or custom string identifier
+    ///   - provider: A `FinancialAPIProvider.keychainKey` or custom string identifier
     @discardableResult
     static func save(token: String, for provider: String) -> Bool {
         guard let data = token.data(using: .utf8) else {
@@ -115,21 +115,21 @@ enum FinancialCredentialStore {
         delete(for: "\(provider).\(suffix)")
     }
 
-    // MARK: - Convenience for FinancialProvider
+    // MARK: - Convenience for FinancialAPIProvider
 
-    /// Save using a typed `FinancialProvider`.
+    /// Save using a typed `FinancialAPIProvider`.
     @discardableResult
-    static func save(token: String, provider: FinancialProvider) -> Bool {
+    static func save(token: String, provider: FinancialAPIProvider) -> Bool {
         save(token: token, for: provider.rawValue)
     }
 
-    /// Load using a typed `FinancialProvider`.
-    static func load(provider: FinancialProvider) -> String? {
+    /// Load using a typed `FinancialAPIProvider`.
+    static func load(provider: FinancialAPIProvider) -> String? {
         load(for: provider.rawValue)
     }
 
     /// Check whether credentials exist for a provider.
-    static func hasCredentials(for provider: FinancialProvider) -> Bool {
+    static func hasCredentials(for provider: FinancialAPIProvider) -> Bool {
         load(provider: provider) != nil
     }
 

@@ -49,14 +49,14 @@ actor CoinbaseService {
 
     /// Store API key and secret in Keychain.
     func saveCredentials(apiKey: String, apiSecret: String) {
-        FinancialCredentialStore.save(token: apiKey,    for: FinancialProvider.coinbase.rawValue, suffix: "apiKey")
-        FinancialCredentialStore.save(token: apiSecret, for: FinancialProvider.coinbase.rawValue, suffix: "apiSecret")
+        FinancialCredentialStore.save(token: apiKey,    for: FinancialAPIProvider.coinbase.rawValue, suffix: "apiKey")
+        FinancialCredentialStore.save(token: apiSecret, for: FinancialAPIProvider.coinbase.rawValue, suffix: "apiSecret")
         logger.info("CoinbaseService: credentials saved")
     }
 
     /// Whether valid credentials are stored.
     func hasCredentials() -> Bool {
-        FinancialCredentialStore.load(for: FinancialProvider.coinbase.rawValue, suffix: "apiKey") != nil
+        FinancialCredentialStore.load(for: FinancialAPIProvider.coinbase.rawValue, suffix: "apiKey") != nil
     }
 
     // MARK: - Fetch Accounts
@@ -80,7 +80,7 @@ actor CoinbaseService {
 
     private func request(path: String) async throws -> Data {
         guard
-            let apiKey = FinancialCredentialStore.load(for: FinancialProvider.coinbase.rawValue, suffix: "apiKey"),
+            let apiKey = FinancialCredentialStore.load(for: FinancialAPIProvider.coinbase.rawValue, suffix: "apiKey"),
             !apiKey.isEmpty
         else {
             throw CoinbaseServiceError.missingCredentials

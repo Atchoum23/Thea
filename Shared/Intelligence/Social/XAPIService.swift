@@ -212,12 +212,11 @@ public final class XAPIService: ObservableObject {
     /// Fetches recent posts by the authenticated user (up to `maxResults`).
     @discardableResult
     public func fetchRecentPosts(maxResults: Int = 20) async throws -> [XPost] {
-        guard let userID = currentUserID else {
+        if currentUserID == nil {
             try await refreshCurrentUser()
-            guard let uid = currentUserID else { throw XAPIError.notAuthenticated }
-            return try await fetchRecentPosts(maxResults: maxResults)
-                .map { _ in [] }
-                .first ?? (try await _fetchUserTimeline(userID: uid, maxResults: maxResults))
+        }
+        guard let userID = currentUserID else {
+            throw XAPIError.notAuthenticated
         }
         return try await _fetchUserTimeline(userID: userID, maxResults: maxResults)
     }
