@@ -201,10 +201,8 @@ actor TheaGatewayWSServer {
 
         // Route through gateway (security guard → session manager → OpenClawBridge → AI)
         if let gw = gateway {
-            await MainActor.run {
-                Task {
-                    await gw.routeInbound(message)
-                }
+            Task { @MainActor in
+                await gw.routeInbound(message)
             }
             logger.info("POST /message routed to gateway: \(message.content.prefix(80))")
             await sendJSONResponse(connection: connection, statusCode: 200, body: ["success": true])

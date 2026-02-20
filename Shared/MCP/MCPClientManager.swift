@@ -7,10 +7,6 @@
 import Foundation
 import OSLog
 
-// Swift 6: [String: Any] (JSON-compatible dict) is effectively Sendable
-// because Dictionary is a value type and JSON primitives are all value types.
-extension Dictionary: @retroactive @unchecked Sendable where Key == String, Value == Any {}
-
 // MARK: - Connected MCP Server
 
 @MainActor

@@ -71,16 +71,10 @@ final class ShazamKitService: NSObject, ObservableObject {
             recognitionTask?.cancel()
             recognitionTask = Task { [weak self, weak session] in
                 guard let self, let session else { return }
-                do {
-                    let result = try await session.result()
-                    await self.handleResult(result)
-                } catch {
-                    await MainActor.run {
-                        self.isListening = false
-                        self.errorMessage = error.localizedDescription
-                        logger.error("ShazamKitService: recognition error: \(error.localizedDescription)")
-                    }
-                }
+                // SHManagedSession.result() returns async (non-throwing) in ShazamKit 26+
+                // Error cases are surfaced as SHSession.Result.error(error, signature)
+                let result = await session.result()
+                await self.handleResult(result)
             }
         } else {
             logger.warning("ShazamKitService: SHManagedSession requires iOS 16+ or macOS 13+")

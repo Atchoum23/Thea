@@ -85,7 +85,7 @@ actor PlaidService {
         }
 
         let cursorKey = String(accessToken.prefix(16))
-        var cursor = cursorCache[cursorKey]
+        let cursor = cursorCache[cursorKey]
 
         var allAdded: [PlaidTransaction] = []
         var allModified: [PlaidTransaction] = []
