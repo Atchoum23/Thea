@@ -22,7 +22,7 @@ enum FinancialCredentialStore {
     ///   - token: The secret value (API key, access token, etc.)
     ///   - provider: A `FinancialAPIProvider.keychainKey` or custom string identifier
     @discardableResult
-    static func save(token: String, for provider: String) -> Bool {
+    static func save(token: String, for provider: String) -> Bool { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         guard let data = token.data(using: .utf8) else {
             logger.error("Failed to encode token for \(provider)")
             return false

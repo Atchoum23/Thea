@@ -72,7 +72,7 @@ actor CoinbaseService {
 
     /// Fetch recent transactions for a specific account.
     /// - Parameter accountID: Coinbase account ID from `fetchAccounts()`.
-    func fetchTransactions(accountID: String) async throws -> [CoinbaseTransaction] {
+    func fetchTransactions(accountID: String) async throws -> [CoinbaseTransaction] { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         let data = try await request(path: "/accounts/\(accountID)/transactions")
         return try parseTransactions(from: data)
     }
@@ -131,7 +131,7 @@ actor CoinbaseService {
         }
     }
 
-    private func parseTransactions(from data: Data) throws -> [CoinbaseTransaction] {
+    private func parseTransactions(from data: Data) throws -> [CoinbaseTransaction] { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         guard let dataArray = json?["data"] as? [[String: Any]] else { return [] }
 
