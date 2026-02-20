@@ -136,7 +136,7 @@ final class TaskPlanDAG {
     private func saveCache() {
         // Keep only top 50 plans by quality
         let sorted = planCache.sorted { $0.value.quality > $1.value.quality }
-        let trimmed = Dictionary(uniqueKeysWithValues: sorted.prefix(50))
+        let trimmed = sorted.prefix(50).reduce(into: [Int: CachedPlan]()) { $0[$1.key] = $1.value }
         if let data = try? JSONEncoder().encode(trimmed) {
             UserDefaults.standard.set(data, forKey: cacheKey)
         }
