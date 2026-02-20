@@ -117,7 +117,7 @@ struct IPadHomeView: View {
             iOSKnowledgeView()
                 .navigationTitle("Knowledge")
         case .financial:
-            iOSFinancialView()
+            FinancialDashboardView()
                 .navigationTitle("Financial")
         case .settings:
             iOSSettingsView()

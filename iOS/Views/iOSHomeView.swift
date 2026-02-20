@@ -122,7 +122,7 @@ struct iOSHomeView: View {
         case .translation:
             TranslationView()
         case .financial:
-            iOSFinancialView()
+            FinancialDashboardView()
         case .settings:
             iOSSettingsView()
         }
