@@ -143,13 +143,13 @@ final class HealthCoachingPipeline {
                 case .fair: quality = 0.5
                 default: quality = 0.25
                 }
-                await HumanReadinessEngine.shared.updateSleepMetrics(
+                HumanReadinessEngine.shared.updateSleepMetrics(
                     quality: quality,
                     deepFraction: Double(latest.deepMinutes) / totalMin,
                     remFraction: Double(latest.remMinutes) / totalMin
                 )
             }
-            await DataFreshnessOrchestrator.shared.recordRefresh(.sleep)
+            DataFreshnessOrchestrator.shared.recordRefresh(.sleep)
         } catch {
             logger.warning("Failed to fetch sleep data: \(error.localizedDescription)")
         }
@@ -164,7 +164,7 @@ final class HealthCoachingPipeline {
                 date: now
             ))
             // AL3: Record freshness
-            await DataFreshnessOrchestrator.shared.recordRefresh(.activity)
+            DataFreshnessOrchestrator.shared.recordRefresh(.activity)
         } catch {
             logger.warning("Failed to fetch activity data: \(error.localizedDescription)")
         }

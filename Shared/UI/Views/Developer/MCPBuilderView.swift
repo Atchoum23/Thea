@@ -15,6 +15,7 @@ struct MCPBuilderView: View {
     @State private var isGenerating = false
     @State private var errorMessage: String?
     @State private var showingPreview = false
+    @State private var availableTemplates: [MCPTemplate] = []
 
     private let generator = MCPServerGenerator.shared
 
@@ -36,6 +37,7 @@ struct MCPBuilderView: View {
         }
         .task {
             await generator.initialize()
+            availableTemplates = await generator.getAvailableTemplates()
         }
     }
 
@@ -60,7 +62,7 @@ struct MCPBuilderView: View {
         Section("Template (Optional)") {
             Picker("Start from template", selection: $selectedTemplate) {
                 Text("Custom (blank)").tag(nil as MCPTemplate?)
-                ForEach(generator.getAvailableTemplates(), id: \.name) { template in
+                ForEach(availableTemplates, id: \.name) { template in
                     VStack(alignment: .leading) {
                         Text(template.name)
                         Text(template.description).font(.caption).foregroundStyle(.secondary)
