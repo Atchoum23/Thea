@@ -444,14 +444,8 @@ targets:
           - "**/Design/DesignSystemStubs.swift"
           # Exclude DashboardView duplicate — same types as HealthInsightsDetailView (TimeRange, TrendDataPoint, etc.)
           - "**/Integrations/Health/Views/HealthInsightsDashboardView.swift"
-          # Shared/UI/Views/Analytics/ — canonical V3 views INCLUDED (macOS/Views/ stubs excluded below)
+          # Shared/UI/Views/Analytics/ — canonical V3 views INCLUDED (macOS/Views/ stubs DELETED by V3)
       - path: macOS
-        excludes:
-          # Analytics view stubs — canonical versions in Shared/UI/Views/Analytics/
-          - "Views/BehavioralAnalyticsView.swift"
-          - "Views/MessagingGatewayStatusView.swift"
-          - "Views/NotificationIntelligenceView.swift"
-          - "Views/PrivacyTransparencyView.swift"
       - path: Shared/Resources/Assets.xcassets
       - path: Shared/Resources/Localizable.xcstrings
     settings:
