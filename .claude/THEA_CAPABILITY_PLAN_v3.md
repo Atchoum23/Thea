@@ -166,7 +166,7 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AW3: Widget Ext.     | ✅ DONE         | sha 322dce1b — 5 widget types (Conversation/QuickActions/Memory/Context/LockScreen) fully implemented, AppGroup shared storage, iOS build verified — S8 |
 | Phase AX3: Native Ext. 1   | ✅ DONE         | sha 053dfbc4 — ShareExtension (AppGroup, text/URL/image/file), IntentsExtension (3 Siri intents), MessagesExtension (iMessage), MailExtension (email processing), FocusFilterExtension (focus modes) — all verified, iOS build passing — S8 |
 | Phase AY3: Native Ext. 2   | ✅ DONE         | CallKit, Credentials, Keyboard, Notification, QuickLook, Spotlight, FinderSync extensions — real implementations — S9 |
-| Phase AZ3: Physical AV Testing | ⏳ PENDING   | Cross-Mac AV + 15 enhanced tools: ODiff, Prefire, Allure3, XCTMetric, powermetrics, A11y audit, mitmproxy, BlackHole, SpeechWER, PerceptualDiff |
+| Phase AZ3: Physical AV Testing | ✅ DONE   | Cross-Mac AV + 15 enhanced tools: ODiff, Prefire, Allure3, XCTMetric, powermetrics, A11y audit, mitmproxy, BlackHole, SpeechWER, PerceptualDiff |
 | **Wave 10: New Domains**  | ⏳ PENDING      | AAA3–AAI3: Gap remediation + Financial Hub + Audio + Wearables + HomeKit/NFC + Cloud/GitHub + Social/Music/FoundationModels + CarPlay/visionOS/TabularData/Nutrition/Travel |
 | Phase AAA3: Gap Remediation | ✅ DONE       | 13 GapWiringServices + FinancialIntelligenceService wired into macOS + iOS setupManagers (12s + 15s deferred); BUILD SUCCEEDED |
 | Phase AAB3: Widget 2.0    | ⏳ PENDING      | AppIntents (AppIntentConfiguration), Live Activities (ActivityKit), TimelineRelevance, Share OCR, SwiftUI Keyboard, FinderSync rich menu |
