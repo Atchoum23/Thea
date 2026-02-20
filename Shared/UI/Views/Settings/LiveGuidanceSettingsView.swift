@@ -37,7 +37,7 @@ struct LiveGuidanceSettingsView: View {
                         }
                     }
 
-                    if guidance.isVisionModelLoaded {
+                    if guidance.visionModelLoaded {
                         Label("Qwen2-VL 7B loaded", systemImage: "checkmark.circle.fill")
                             .font(.caption)
                             .foregroundStyle(.green)
@@ -83,7 +83,7 @@ struct LiveGuidanceSettingsView: View {
             Section("Configuration") {
                 Toggle("Enable voice guidance", isOn: $enableVoiceGuidance)
                     .onChange(of: enableVoiceGuidance) { _, newValue in
-                        guidance.enableVoice = newValue
+                        guidance.voiceGuidanceEnabled = newValue
                     }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -107,7 +107,7 @@ struct LiveGuidanceSettingsView: View {
                         .foregroundStyle(.secondary)
                     Slider(value: $analyzeInterval, in: 1.0...10.0, step: 0.5)
                         .onChange(of: analyzeInterval) { _, newValue in
-                            guidance.analyzeInterval = newValue
+                            guidance.guidanceIntervalSeconds = newValue
                         }
                 }
 
@@ -243,9 +243,9 @@ struct LiveGuidanceSettingsView: View {
     // MARK: - Actions
 
     private func loadInitialSettings() {
-        enableVoiceGuidance = guidance.enableVoice
+        enableVoiceGuidance = guidance.voiceGuidanceEnabled
         allowControlHandoff = guidance.allowControlHandoff
-        analyzeInterval = guidance.analyzeInterval
+        analyzeInterval = guidance.guidanceIntervalSeconds
 
         switch guidance.captureMode {
         case .fullScreen:
@@ -254,6 +254,8 @@ struct LiveGuidanceSettingsView: View {
             selectedCaptureMode = 1
         case .region:
             selectedCaptureMode = 2
+        case .window:
+            selectedCaptureMode = 1
         }
     }
 

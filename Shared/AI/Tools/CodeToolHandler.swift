@@ -14,12 +14,12 @@ enum CodeToolHandler {
 
     // MARK: - run_code
 
-    static func execute(_ input: [String: Any]) async -> ToolResult {
+    static func execute(_ input: [String: Any]) async -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
         let code = input["code"] as? String ?? ""
         let language = (input["language"] as? String ?? "javascript").lowercased()
         guard !code.isEmpty else {
-            return ToolResult(toolUseId: id, content: "No code provided.", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "No code provided.", isError: true)
         }
         logger.debug("run_code: \(code.prefix(60))... [\(language)]")
 
@@ -35,7 +35,7 @@ enum CodeToolHandler {
         #endif
 
         default:
-            return ToolResult(
+            return AnthropicToolResult(
                 toolUseId: id,
                 content: "Language '\(language)' not supported. Supported: javascript\(ProcessInfo.processInfo.environment["PATH"] != nil ? ", swift, python" : "")."
             )
@@ -44,19 +44,19 @@ enum CodeToolHandler {
 
     // MARK: - analyze_code
 
-    static func analyze(_ input: [String: Any]) -> ToolResult {
+    static func analyze(_ input: [String: Any]) -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
         let code = input["code"] as? String ?? ""
         guard !code.isEmpty else {
-            return ToolResult(toolUseId: id, content: "No code provided.", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "No code provided.", isError: true)
         }
         let analysis = performStaticAnalysis(code)
-        return ToolResult(toolUseId: id, content: analysis)
+        return AnthropicToolResult(toolUseId: id, content: analysis)
     }
 
     // MARK: - JavaScript Execution (via JavaScriptCore)
 
-    private static func runJavaScript(id: String, code: String) async -> ToolResult {
+    private static func runJavaScript(id: String, code: String) async -> AnthropicToolResult {
         return await Task.detached(priority: .userInitiated) {
             let ctx = JSContext()!
             ctx.exceptionHandler = { _, exception in
@@ -76,7 +76,7 @@ enum CodeToolHandler {
 
             if let exception = ctx.exception {
                 let errMsg = exception.toString() ?? "Unknown error"
-                return ToolResult(toolUseId: id, content: "Error: \(errMsg)", isError: true)
+                return AnthropicToolResult(toolUseId: id, content: "Error: \(errMsg)", isError: true)
             }
 
             var resultText = output.joined(separator: "\n")
@@ -87,7 +87,7 @@ enum CodeToolHandler {
                 }
             }
             _ = deadline // used to prevent compiler warning
-            return ToolResult(
+            return AnthropicToolResult(
                 toolUseId: id,
                 content: resultText.isEmpty ? "(no output)" : String(resultText.prefix(3000))
             )
@@ -97,7 +97,7 @@ enum CodeToolHandler {
     #if os(macOS)
     // MARK: - Swift Execution (via Process)
 
-    private static func runSwift(id: String, code: String) async -> ToolResult {
+    private static func runSwift(id: String, code: String) async -> AnthropicToolResult {
         return await Task.detached(priority: .userInitiated) {
             let tmpFile = FileManager.default.temporaryDirectory
                 .appendingPathComponent(UUID().uuidString + ".swift")
@@ -119,20 +119,20 @@ enum CodeToolHandler {
                 process.waitUntilExit()
                 let data = pipe.fileHandleForReading.readDataToEndOfFile()
                 let output = String(data: data, encoding: .utf8) ?? ""
-                return ToolResult(toolUseId: id, content: output.isEmpty ? "(no output)" : String(output.prefix(3000)))
+                return AnthropicToolResult(toolUseId: id, content: output.isEmpty ? "(no output)" : String(output.prefix(3000)))
             } catch {
-                return ToolResult(toolUseId: id, content: "Swift execution failed: \(error.localizedDescription)", isError: true)
+                return AnthropicToolResult(toolUseId: id, content: "Swift execution failed: \(error.localizedDescription)", isError: true)
             }
         }.value
     }
 
     // MARK: - Python Execution (via Process)
 
-    private static func runPython(id: String, code: String) async -> ToolResult {
+    private static func runPython(id: String, code: String) async -> AnthropicToolResult {
         return await Task.detached(priority: .userInitiated) {
             let pythonPaths = ["/usr/bin/python3", "/opt/homebrew/bin/python3", "/usr/local/bin/python3"]
             guard let pythonPath = pythonPaths.first(where: { FileManager.default.fileExists(atPath: $0) }) else {
-                return ToolResult(toolUseId: id, content: "Python3 not found.", isError: true)
+                return AnthropicToolResult(toolUseId: id, content: "Python3 not found.", isError: true)
             }
             let tmpFile = FileManager.default.temporaryDirectory
                 .appendingPathComponent(UUID().uuidString + ".py")
@@ -153,9 +153,9 @@ enum CodeToolHandler {
                 process.waitUntilExit()
                 let data = pipe.fileHandleForReading.readDataToEndOfFile()
                 let output = String(data: data, encoding: .utf8) ?? ""
-                return ToolResult(toolUseId: id, content: output.isEmpty ? "(no output)" : String(output.prefix(3000)))
+                return AnthropicToolResult(toolUseId: id, content: output.isEmpty ? "(no output)" : String(output.prefix(3000)))
             } catch {
-                return ToolResult(toolUseId: id, content: "Python execution failed: \(error.localizedDescription)", isError: true)
+                return AnthropicToolResult(toolUseId: id, content: "Python execution failed: \(error.localizedDescription)", isError: true)
             }
         }.value
     }

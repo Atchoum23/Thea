@@ -30,77 +30,77 @@ enum FileToolHandler {
 
     // MARK: - read_file
 
-    static func read(_ input: [String: Any]) -> ToolResult {
+    static func read(_ input: [String: Any]) -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
         let path = input["path"] as? String ?? ""
         guard !path.isEmpty else {
-            return ToolResult(toolUseId: id, content: "No path provided.", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "No path provided.", isError: true)
         }
         guard isAllowed(path) else {
             logger.warning("read_file: access denied '\(path)'")
-            return ToolResult(toolUseId: id, content: "Access denied: \(path)", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "Access denied: \(path)", isError: true)
         }
         do {
             let content = try String(contentsOfFile: path, encoding: .utf8)
             // Limit to 8 KB to stay within context budget
             let truncated = content.count > 8000 ? String(content.prefix(8000)) + "\n[…truncated]" : content
             logger.debug("read_file: '\(path)' (\(content.count) chars)")
-            return ToolResult(toolUseId: id, content: truncated)
+            return AnthropicToolResult(toolUseId: id, content: truncated)
         } catch {
-            return ToolResult(toolUseId: id, content: "Cannot read '\(path)': \(error.localizedDescription)", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "Cannot read '\(path)': \(error.localizedDescription)", isError: true)
         }
     }
 
     // MARK: - write_file
 
-    static func write(_ input: [String: Any]) -> ToolResult {
+    static func write(_ input: [String: Any]) -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
         let path = input["path"] as? String ?? ""
         let content = input["content"] as? String ?? ""
         guard !path.isEmpty else {
-            return ToolResult(toolUseId: id, content: "No path provided.", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "No path provided.", isError: true)
         }
         guard isAllowed(path) else {
             logger.warning("write_file: access denied '\(path)'")
-            return ToolResult(toolUseId: id, content: "Access denied: \(path)", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "Access denied: \(path)", isError: true)
         }
         do {
             try content.write(toFile: path, atomically: true, encoding: .utf8)
             logger.info("write_file: wrote \(content.count) bytes to '\(path)'")
-            return ToolResult(toolUseId: id, content: "Wrote \(content.count) bytes to \(path)")
+            return AnthropicToolResult(toolUseId: id, content: "Wrote \(content.count) bytes to \(path)")
         } catch {
-            return ToolResult(toolUseId: id, content: "Cannot write '\(path)': \(error.localizedDescription)", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "Cannot write '\(path)': \(error.localizedDescription)", isError: true)
         }
     }
 
     // MARK: - list_directory
 
-    static func listDirectory(_ input: [String: Any]) -> ToolResult {
+    static func listDirectory(_ input: [String: Any]) -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
         let path = input["path"] as? String ?? FileManager.default.homeDirectoryForCurrentUser.path
         guard isAllowed(path) else {
-            return ToolResult(toolUseId: id, content: "Access denied: \(path)", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "Access denied: \(path)", isError: true)
         }
         do {
             let items = try FileManager.default.contentsOfDirectory(atPath: path)
             let sorted = items.sorted().prefix(50)
-            return ToolResult(toolUseId: id, content: sorted.joined(separator: "\n"))
+            return AnthropicToolResult(toolUseId: id, content: sorted.joined(separator: "\n"))
         } catch {
-            return ToolResult(toolUseId: id, content: "Cannot list '\(path)': \(error.localizedDescription)", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "Cannot list '\(path)': \(error.localizedDescription)", isError: true)
         }
     }
 
     // MARK: - search_files
 
-    static func searchFiles(_ input: [String: Any]) -> ToolResult {
+    static func searchFiles(_ input: [String: Any]) -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
         let query = input["query"] as? String ?? ""
         let dir = input["directory"] as? String ?? FileManager.default.homeDirectoryForCurrentUser.path
         guard !query.isEmpty else {
-            return ToolResult(toolUseId: id, content: "No query provided.", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "No query provided.", isError: true)
         }
         guard isAllowed(dir) else {
-            return ToolResult(toolUseId: id, content: "Access denied: \(dir)", isError: true)
+            return AnthropicToolResult(toolUseId: id, content: "Access denied: \(dir)", isError: true)
         }
         let enumerator = FileManager.default.enumerator(atPath: dir)
         var matches: [String] = []
@@ -111,8 +111,8 @@ enum FileToolHandler {
             if matches.count >= 20 { break }
         }
         if matches.isEmpty {
-            return ToolResult(toolUseId: id, content: "No files matching '\(query)' in \(dir)")
+            return AnthropicToolResult(toolUseId: id, content: "No files matching '\(query)' in \(dir)")
         }
-        return ToolResult(toolUseId: id, content: matches.joined(separator: "\n"))
+        return AnthropicToolResult(toolUseId: id, content: matches.joined(separator: "\n"))
     }
 }

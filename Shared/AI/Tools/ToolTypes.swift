@@ -9,7 +9,7 @@ import Foundation
 // MARK: - Anthropic Tool Call
 
 /// Represents a tool_use block returned by the Anthropic API
-struct AnthropicToolCall: Sendable {
+struct AnthropicToolCall: @unchecked Sendable {
     let id: String           // Anthropic tool_use id (needed for tool_result)
     let name: String
     let input: [String: Any] // Parsed JSON input from Claude
@@ -85,7 +85,7 @@ struct ToolUseStep: Codable, Sendable, Identifiable {
 
 // MARK: - Tool Result
 
-struct ToolResult: Sendable {
+struct AnthropicToolResult: Sendable {
     let toolUseId: String
     let content: String
     let isError: Bool

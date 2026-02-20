@@ -165,7 +165,7 @@ struct SynthesizedActivity: Identifiable {
     }
 
     // Synthesize from coordinator state for display
-    static func recent(coordinator: LifeMonitoringCoordinator) -> [SynthesizedActivity] {
+@MainActor static func recent(coordinator: LifeMonitoringCoordinator) -> [SynthesizedActivity] {
         guard coordinator.todayEventCount > 0 else { return [] }
 
         // Build representative activity list from active data sources
@@ -391,7 +391,7 @@ struct PatternStatCard: View {
 // MARK: - J3-3: Coaching Insight Cards
 
 struct CoachingInsightCards: View {
-    @ObservedObject var pipeline: HealthCoachingPipeline
+    let pipeline: HealthCoachingPipeline
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {

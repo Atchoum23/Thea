@@ -164,7 +164,7 @@ actor ToolExecutionCoordinator {
 
     // MARK: - Tool Dispatcher
 
-    private func executeToolCall(name: String, input: [String: Any]) async -> ToolResult {
+    private func executeToolCall(name: String, input: [String: Any]) async -> AnthropicToolResult {
         switch name {
         // Memory tools
         case "search_memory", "search_knowledge_graph":
@@ -251,7 +251,7 @@ actor ToolExecutionCoordinator {
         default:
             coordLogger.warning("Unhandled tool: \(name)")
             let id = input["_tool_use_id"] as? String ?? ""
-            return ToolResult(
+            return AnthropicToolResult(
                 toolUseId: id,
                 content: "Tool '\(name)' is not yet implemented.",
                 isError: false

@@ -14,7 +14,7 @@ struct ArtifactBrowserView: View {
     @Query(sort: \GeneratedArtifact.createdAt, order: .reverse) private var artifacts: [GeneratedArtifact]
 
     @State private var searchText = ""
-    @State private var selectedType: ArtifactType?
+    @State private var selectedType: GeneratedArtifactType?
     @State private var selectedArtifact: GeneratedArtifact?
     @State private var showFavoritesOnly = false
 
@@ -74,7 +74,7 @@ struct ArtifactBrowserView: View {
             }
 
             Section("Types") {
-                ForEach(ArtifactType.allCases, id: \.self) { type in
+                ForEach(GeneratedArtifactType.allCases, id: \.self) { type in
                     Button {
                         selectedType = type == selectedType ? nil : type
                         showFavoritesOnly = false

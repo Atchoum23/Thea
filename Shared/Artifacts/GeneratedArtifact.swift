@@ -10,7 +10,7 @@ import SwiftData
 
 // MARK: - Artifact Types
 
-enum ArtifactType: String, Codable, CaseIterable, Sendable {
+enum GeneratedArtifactType: String, Codable, CaseIterable, Sendable {
     case code
     case plan
     case mcpServer
@@ -50,7 +50,7 @@ enum ArtifactType: String, Codable, CaseIterable, Sendable {
 final class GeneratedArtifact {
     @Attribute(.unique) var id: UUID
     var title: String
-    var artifactType: String          // ArtifactType.rawValue
+    var artifactType: String          // GeneratedArtifactType.rawValue
     var content: String
     var language: String              // For .code: "swift", "python", etc.
     var metadata: [String: String]
@@ -63,7 +63,7 @@ final class GeneratedArtifact {
 
     init(
         title: String,
-        type: ArtifactType,
+        type: GeneratedArtifactType,
         content: String,
         language: String = "",
         metadata: [String: String] = [:],
@@ -84,8 +84,8 @@ final class GeneratedArtifact {
         self.characterCount = content.count
     }
 
-    var type: ArtifactType {
-        ArtifactType(rawValue: artifactType) ?? .document
+    var type: GeneratedArtifactType {
+        GeneratedArtifactType(rawValue: artifactType) ?? .document
     }
 
     func touch() {
@@ -104,7 +104,7 @@ final class ArtifactStore {
     /// Create and persist an artifact, returning the new instance.
     func create(
         title: String,
-        type: ArtifactType,
+        type: GeneratedArtifactType,
         content: String,
         language: String = "",
         conversationID: UUID? = nil,
@@ -124,7 +124,7 @@ final class ArtifactStore {
     }
 
     /// Suggest a title from content if the provided title is empty.
-    private func suggestTitle(_ provided: String, content: String, type: ArtifactType) -> String {
+    private func suggestTitle(_ provided: String, content: String, type: GeneratedArtifactType) -> String {
         guard provided.isEmpty else { return provided }
         // Extract first non-comment, non-empty line as a title hint
         let firstLine = content

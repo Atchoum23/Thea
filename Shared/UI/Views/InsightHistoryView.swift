@@ -61,7 +61,7 @@ struct InsightHistoryView: View {
                 } label: {
                     HStack {
                         Label("Unreviewed", systemImage: "bell.badge")
-                            .foregroundStyle(showOnlyUnreviewed ? .accentColor : .primary)
+                            .foregroundStyle(showOnlyUnreviewed ? Color.accentColor : Color.primary)
                         Spacer()
                         Text("\(insights.filter { $0.userFeedback == nil }.count)")
                             .foregroundStyle(.secondary).font(.caption)
