@@ -298,11 +298,9 @@ targets:
           - "**/Core/Services/ProjectService.swift"
           # Exclude duplicate folders (use Shared/System/Terminal not Shared/Execution/Terminal)
           - "**/Execution/Terminal/**"
-          # TEMPORARY: Exclude MLXAudioEngine + dependents causing Release build issues
-          - "**/AI/Audio/MLXAudioEngine.swift"
-          - "**/Voice/MLXVoiceBackend.swift"
-          - "**/AI/LiveGuidance/LocalVisionGuidance.swift"
-          - "**/Settings/LiveGuidanceSettingsView.swift"
+          # MLXAudioEngine + LocalVisionGuidance — ACTIVATED (M3 re-enable)
+          # CGActionExecutor duplicate — Shared/System/Input/ActionExecutor.swift is canonical; exclude LiveGuidance copy
+          - "**/AI/LiveGuidance/CGActionExecutor.swift"
           # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
           # AnthropicFilesAPI — ACTIVATED (ported to AnthropicError/AIMessage)
           # AnthropicTokenCounter — ACTIVATED (ported to AnthropicError/AIMessage)
@@ -341,6 +339,7 @@ targets:
           # EnhancedMessageBubble + ExecutableCodeBlock — ACTIVATED
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/TheaTextInputField.swift"
+          - "**/LiveGuidanceSettingsViewStub.swift"  # Real LiveGuidanceSettingsView.swift is active (M3 re-enabled)
           # CodeIntelligence — ACTIVATED (macOS-only, #if os(macOS) guarded)
           - "**/Views/Code/**"  # CodeProjectView extracted sub-view, duplicates types in parent
           # ResourceAllocationSettingsView — ACTIVATED (DynamicResourceAllocator is active)
@@ -705,6 +704,11 @@ targets:
           - "**/Design/DesignSystemStubs.swift"
           # Exclude DashboardView duplicate — same types as HealthInsightsDetailView (TimeRange, TrendDataPoint, etc.)
           - "**/Integrations/Health/Views/HealthInsightsDashboardView.swift"
+          # MetaAI views that reference archived types (KnowledgeNode, NodeType, MemoryTier)
+          - "**/Views/MetaAI/KnowledgeGraphViewer.swift"
+          - "**/Views/MetaAI/MemoryInspectorView.swift"
+          - "UI/Views/MetaAI/KnowledgeGraphViewer.swift"
+          - "UI/Views/MetaAI/MemoryInspectorView.swift"
       - path: iOS
       - path: Shared/Resources/Assets.xcassets
       - path: Shared/Resources/Localizable.xcstrings

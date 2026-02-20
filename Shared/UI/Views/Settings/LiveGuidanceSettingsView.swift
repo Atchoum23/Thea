@@ -37,7 +37,7 @@ struct LiveGuidanceSettingsView: View {
                         }
                     }
 
-                    if guidance.isVisionModelLoaded {
+                    if guidance.visionModelLoaded {
                         Label("Qwen2-VL 7B loaded", systemImage: "checkmark.circle.fill")
                             .font(.caption)
                             .foregroundStyle(.green)
@@ -243,15 +243,17 @@ struct LiveGuidanceSettingsView: View {
     // MARK: - Actions
 
     private func loadInitialSettings() {
-        enableVoiceGuidance = guidance.enableVoice
+        enableVoiceGuidance = guidance.voiceGuidanceEnabled
         allowControlHandoff = guidance.allowControlHandoff
-        analyzeInterval = guidance.analyzeInterval
+        analyzeInterval = guidance.guidanceIntervalSeconds
 
         switch guidance.captureMode {
         case .fullScreen:
             selectedCaptureMode = 0
         case .activeWindow:
             selectedCaptureMode = 1
+        case .window:
+            selectedCaptureMode = 1  // Treat specific window like active window
         case .region:
             selectedCaptureMode = 2
         }
