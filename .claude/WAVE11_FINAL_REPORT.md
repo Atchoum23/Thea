@@ -234,11 +234,20 @@ Generated: 2026-02-20 | Phase: ABH3 | Input for: AD3 Manual Gate
 ---
 
 ### ABD3 — Periphery Clean v2
-**Status**: ✅ DONE | **Date**: 2026-02-20 | **Agent**: ABD3 stream
+**Status**: ✅ DONE | **Date**: 2026-02-20 | **Agent**: MSM3U S10B
 
-93 Wave 10 service files annotated with `// periphery:ignore` to suppress unused-declaration warnings for services called via dynamic dispatch / late-startup wiring. Periphery scan is `continue-on-error: true` in CI (non-blocking). Commits: `f82b1fb1` (93 annotations), `bd4c13ba` (20 additional Wave 10 files).
+**112 unused declarations annotated** with `// periphery:ignore` across **20 Wave 10 service files**. Periphery scan is `continue-on-error: true` in CI (non-blocking).
 
-**Key decision**: Wave 10 services are wired at runtime (launched from `setupManagers()` Task blocks); Periphery's static analysis sees no callers → all correctly annotated, not dead code.
+| Commit | Scope | Annotations |
+|--------|-------|-------------|
+| `f82b1fb1` | Initial Wave 10 pass — 93 declarations across Financial, Audio, Wearables, Cloud, Social, Music, Motion, AI, HomeKit, NFC, Journal, CarPlay, visionOS, Data, Nutrition, Travel | 93 |
+| `bd4c13ba` | 20 additional Wave 10 service files updated by parallel streams | ~12 |
+| `36fa13b8` | Remaining Wave 10 service annotations — SwiftLint `orphaned_doc_comment` alignment | ~7 |
+| **Total** | **20 Wave 10 service files** | **112** |
+
+**Key decision**: Wave 10 services are wired at runtime (launched from `setupManagers()` Task blocks with 8–17s deferred startup); Periphery's static analysis sees no callers at compile time → all correctly annotated as intentionally late-wired, not dead code.
+
+**SwiftLint note**: `periphery:ignore` must be placed **before** any `///` doc comment block (not between doc comment and declaration). Enforced by `24928c92` — SwiftLint `orphaned_doc_comment` violations were the root cause of CI failures in `ShazamKitService.swift` and `TabularDataAnalyzer.swift`.
 
 ---
 
