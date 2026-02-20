@@ -275,6 +275,14 @@ packages:
   mlx-audio-swift:
     url: https://github.com/Blaizzy/mlx-audio-swift
     branch: main
+  # KrakenAPI for Kraken crypto exchange REST integration (AAC3)
+  KrakenAPI:
+    url: https://github.com/lukepistrol/KrakenAPI
+    from: 1.0.0
+  # SwiftYNAB for YNAB budget integration (AAC3)
+  SwiftYNAB:
+    url: https://github.com/andrebocchini/swiftynab
+    from: 1.0.0
 
 # ============================================
 # Targets
@@ -520,6 +528,9 @@ targets:
           - MLXAudioTTS
           - MLXAudioSTT
           - MLXAudioCore
+      # Financial Intelligence Hub (AAC3)
+      - package: KrakenAPI
+      - package: SwiftYNAB
       - target: TheaFinderSyncExtension
         embed: true
         codeSign: true
@@ -755,6 +766,9 @@ targets:
       - package: KeychainAccess
       - package: MarkdownUI
       - package: Highlightr
+      # Financial Intelligence Hub (AAC3)
+      - package: KrakenAPI
+      - package: SwiftYNAB
       - target: TheaShareExtension
         embed: true
         codeSign: true
