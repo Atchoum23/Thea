@@ -144,6 +144,34 @@ public final class PersonalParameters: ObservableObject {
     @AppStorage("pp.claudeBudgetPerSession")
     public var claudeBudgetPerSession: Double = 2.00
 
+    // MARK: - Tier 2 — Agent Orchestration (Wave 8 — AQ3)
+
+    /// Context tokens threshold before spawning a fresh sub-agent (default: 8000)
+    @AppStorage("pp.agentSpawnTokenThreshold")
+    public var agentSpawnTokenThreshold: Int = 8000
+
+    /// Maximum seconds to allow a single agent task before timeout (default: 300)
+    @AppStorage("pp.agentTaskTimeoutSeconds")
+    public var agentTaskTimeoutSeconds: Double = 300.0
+
+    /// Minutes without progress before stale-session notification fires (default: 20)
+    @AppStorage("pp.agentStaleThresholdMin")
+    public var agentStaleThresholdMinutes: Double = 20.0
+
+    // MARK: - Tier 2 — Server Health (Wave 8 — AP3)
+
+    /// Consecutive failures before MSM3U failover triggers (default: 3)
+    @AppStorage("pp.serverFailoverThreshold")
+    public var serverFailoverThreshold: Int = 3
+
+    /// Seconds between server health-check polls (default: 60)
+    @AppStorage("pp.serverPollIntervalSec")
+    public var serverPollIntervalSeconds: Int = 60
+
+    /// Typical CI test-suite duration in minutes — AdaptivePoller skips first 80% (default: 55)
+    @AppStorage("pp.ciTypicalDurationMin")
+    public var ciTypicalDurationMinutes: Double = 55.0
+
     // MARK: - Private Init
 
     private init() {}
@@ -189,6 +217,8 @@ public final class PersonalParameters: ObservableObject {
         States:       act≥\(stateActiveThreshold)    high≥\(stateHighThreshold)    satisfice@\(satisficeTarget)
         Explore:      days=\(exploreDays)  points/domain=\(explorePointsPerDomain)  decay=\(exploreDecayHalfLifeDays)d
         Claude:       compact@\(Int(claudeCompactAt * 100))%    circuit=\(claudeCircuitBreakerAttempts)    budget=$\(String(format: "%.2f", claudeBudgetPerSession))/session
+        Agents:       spawnAt=\(agentSpawnTokenThreshold)tok    timeout=\(Int(agentTaskTimeoutSeconds))s    stale=\(Int(agentStaleThresholdMinutes))min
+        Server:       failover=\(serverFailoverThreshold)fails    poll=\(serverPollIntervalSeconds)s    ciDuration=\(Int(ciTypicalDurationMinutes))min
         """
     }
 }
