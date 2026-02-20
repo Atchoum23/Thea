@@ -164,7 +164,7 @@ actor ToolExecutionCoordinator {
 
     // MARK: - Tool Dispatcher
 
-    private func executeToolCall(name: String, input: [String: Any]) async -> AnthropicToolResult {
+    private func executeToolCall(name: String, input: sending [String: Any]) async -> AnthropicToolResult {
         switch name {
         // Memory tools
         case "search_memory", "search_knowledge_graph":
