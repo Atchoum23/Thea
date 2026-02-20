@@ -204,8 +204,8 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     var group: Int {
         switch self {
         case .general, .aiModels: 0
-        case .providers, .memory, .agent, .moltbook, .knowledge, .liveGuidance, .metaAI, .squads, .intelligenceDashboard, .skills: 1
-        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .messagingGateway, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home: 2
+        case .providers, .memory, .agent, .moltbook, .knowledge, .knowledgeGraph, .liveGuidance, .metaAI, .squads, .intelligenceDashboard, .skills, .behavioralPatterns, .notificationSchedule, .conversationSettings, .personalization, .responseStyles: 1
+        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .lifeTracking, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .messagingGateway, .messagingChat, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home, .appPairing, .shortcuts, .wakeWord, .promptEngineering, .systemPrompt: 2
         case .behavioralAnalytics, .privacyTransparency, .gatewayStatus, .notificationIntel,
              .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
         case .theme, .advanced, .mcpBuilder: 4
