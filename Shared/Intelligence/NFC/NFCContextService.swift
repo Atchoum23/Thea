@@ -21,6 +21,21 @@ import Foundation
 import CoreNFC
 import os.log
 
+/// Allowed thea:// context URL paths — file-private constant for nonisolated access from NFC delegate.
+private let nfcAllowedContextPaths: Set<String> = [
+    "work", "sleep", "gym", "home", "travel", "morning", "evening", "focus"
+]
+
+/// Validates that a URL is a safe thea://context/<path> deep link.
+/// File-private free function so it can be called from nonisolated NFC delegate methods.
+private func validateNFCURL(_ url: URL) -> NFCContext? {
+    guard url.scheme?.lowercased() == "thea",
+          url.host?.lowercased() == "context" else { return nil }
+    let path = url.lastPathComponent.lowercased()
+    guard nfcAllowedContextPaths.contains(path) else { return nil }
+    return NFCContext(rawValue: path)
+}
+
 @MainActor
 final class NFCContextService: NSObject, ObservableObject {
     static let shared = NFCContextService()
@@ -34,11 +49,6 @@ final class NFCContextService: NSObject, ObservableObject {
 
     private var readerSession: NFCNDEFReaderSession?
     private let logger = Logger(subsystem: "app.theathe", category: "NFCContextService")
-
-    /// Allowed thea:// context URL paths — validated to prevent injection.
-    private static let allowedContextPaths: Set<String> = [
-        "work", "sleep", "gym", "home", "travel", "morning", "evening", "focus"
-    ]
 
     private override init() {
         super.init()
@@ -69,20 +79,6 @@ final class NFCContextService: NSObject, ObservableObject {
         readerSession?.invalidate()
         readerSession = nil
         isScanning = false
-    }
-
-    // MARK: - URL Validation
-
-    /// Validates that a URL is a safe thea://context/<path> deep link.
-    private static func validate(url: URL) -> NFCContext? {
-        guard url.scheme?.lowercased() == "thea",
-              url.host?.lowercased() == "context" else { return nil }
-
-        let path = url.lastPathComponent.lowercased()
-        guard allowedContextPaths.contains(path) else {
-            return nil  // Reject unknown context paths
-        }
-        return NFCContext(rawValue: path)
     }
 
     // MARK: - Context Routing
@@ -117,7 +113,7 @@ extension NFCContextService: NFCNDEFReaderSessionDelegate {
                 guard let payload = String(data: record.payload, encoding: .utf8) ??
                                    String(data: record.payload, encoding: .utf8),
                       let url = URL(string: payload.trimmingCharacters(in: .whitespacesAndNewlines)),
-                      let context = NFCContextService.validate(url: url) else { continue }
+                      let context = validateNFCURL(url) else { continue }
 
                 Task { @MainActor in
                     await self.handle(context: context)
@@ -193,9 +189,5 @@ enum NFCContext: String, CaseIterable, Sendable {
     }
 }
 
-// MARK: - Notification Name
-
-private extension Notification.Name {
-    static let theaFocusSessionRequested = Notification.Name("theaFocusSessionRequested")
-}
+// theaFocusSessionRequested is defined in ActionButtonHandler.swift (public extension Notification.Name).
 #endif
