@@ -6152,6 +6152,535 @@ RECORD_SNAPSHOTS=1 xcodebuild test -project Thea.xcodeproj -scheme Thea-macOS \
 
 ---
 
+## WAVE 10: NEW CAPABILITY DOMAINS — FINANCIAL, AUDIO, WEARABLES, SOCIAL, EXTENSIONS UX
+
+---
+
+## PHASE AAA3: GAP REMEDIATION — 16 UNWIRED SYSTEMS
+
+**Status: ⏳ PENDING — Wave 10, Step 1**
+
+Wire all 16 systems identified as unwired in the AA3 audit (WAVE_6_VERIFICATION_REPORT.md §2).
+
+```swift
+// Wire in TheamacOSApp.setupManagers():
+Task { @MainActor in
+    try? await Task.sleep(for: .seconds(4));  AmbientIntelligenceEngine.shared.start()
+    try? await Task.sleep(for: .seconds(6));  WellbeingMonitor.shared.start()
+    try? await Task.sleep(for: .seconds(8));  SleepAnalysisService.shared.startMonitoring()
+    try? await Task.sleep(for: .seconds(10)); ProactiveInsightEngine.shared.start()
+}
+ScreenTimeAnalyzer.shared.startMonitoring()
+CalendarIntelligenceService.shared.authorize { _ in Task { @MainActor in CalendarIntelligenceService.shared.startMonitoring() } }
+HabitTrackingService.shared.start()
+GoalTrackingService.shared.start()
+FocusSessionManager.shared.restore()
+```
+
+```swift
+// Wire in TheaiOSApp.swift:
+DrivingDetectionService.shared.start()
+LocationIntelligenceService.shared.start()
+```
+
+```swift
+// Wire in ChatManager.sendMessage():
+ContextualMemoryManager.shared.updateContext(with: message)
+if estimatedTokens > 50_000 { context = NeuralContextCompressor.shared.compress(context: context) }
+```
+
+Wire UI gaps:
+- `OnboardingView` — first-launch sheet if `!AppStorage("hasCompletedOnboarding")`
+- `LifeTrackingView` — MacSettingsView sidebar "Life Tracking" item
+- `ConversationLanguagePickerView` — confirm in ChatView toolbar (AF3 verification)
+
+### AAA3 Verification
+```bash
+UNWIRED=""
+for SYS in AmbientIntelligenceEngine DrivingDetectionService ScreenTimeAnalyzer \
+           CalendarIntelligenceService LocationIntelligenceService SleepAnalysisService \
+           ContextualMemoryManager ProactiveInsightEngine FocusSessionManager \
+           HabitTrackingService GoalTrackingService WellbeingMonitor \
+           NeuralContextCompressor ConversationLanguagePickerView OnboardingView LifeTrackingView; do
+  REFS=$(grep -r "$SYS" Shared/ macOS/ iOS/ --include="*.swift" 2>/dev/null | grep -v "${SYS}.swift" | wc -l | tr -d ' ')
+  [ "$REFS" -eq 0 ] && UNWIRED="$UNWIRED $SYS"
+done
+[ -z "$UNWIRED" ] && echo "✅ All 16 wired" || echo "❌ Unwired:$UNWIRED"
+```
+
+**Status: ⏳ PENDING — Wave 10**
+
+---
+
+## PHASE AAB3: WIDGET 2.0 + EXTENSION UX EXCELLENCE
+
+**Status: ⏳ PENDING — Wave 10, Step 2**
+
+Upgrade AW3/AX3/AY3 extensions with AppIntents, Live Activities, and UX polish.
+
+### AAB3-1: AppIntents (replace StaticConfiguration)
+Create `Shared/Extensions/WidgetExtension/TheaWidgetIntents.swift`:
+```swift
+import AppIntents
+struct StartVoiceQueryIntent: AppIntent {
+    static var title: LocalizedStringResource = "Start Voice Query"
+    func perform() async throws -> some IntentResult { .result() }  // deep-link: thea://voice
+}
+struct SearchMemoryIntent: AppIntent, WidgetConfigurationIntent {
+    static var title: LocalizedStringResource = "Search Memory"
+    @Parameter(title: "Topic") var topic: String?
+    func perform() async throws -> some IntentResult { .result() }
+}
+struct NewConversationIntent: AppIntent {
+    static var title: LocalizedStringResource = "New Conversation"
+    func perform() async throws -> some IntentResult { .result() }
+}
+```
+Replace `StaticConfiguration` with `AppIntentConfiguration(kind:intent:provider:)` in `TheaWidgetBundle.swift`.
+
+### AAB3-2: Live Activities
+Create `Shared/Extensions/WidgetExtension/TheaTaskActivityAttributes.swift`:
+```swift
+import ActivityKit
+struct TheaTaskActivityAttributes: ActivityAttributes {
+    struct ContentState: Codable, Hashable {
+        var taskName: String; var progress: Double; var phase: String; var statusEmoji: String
+    }
+    var sessionId: String
+}
+```
+Wire into `AgentOrchestrator.startTask()` → `Activity.request(...)`.
+
+### AAB3-3: TimelineEntryRelevance
+`entry.relevance = TimelineEntryRelevance(score: Float(urgency), duration: 3600)` on all entries.
+
+### AAB3-4: Share Extension Vision OCR
+Use `VNRecognizeTextRequest` to extract text from shared images before sending to Thea.
+
+### AAB3-5: Keyboard SwiftUI Host
+Replace UIKit root in `KeyboardViewController` with `UIHostingController(rootView: TheaKeyboardSuggestionsView(...))`.
+
+### AAB3-6: FinderSync Rich Menu
+Add: "Ask Thea about this file" / "Summarize" / "Add to Memory" contextual menu items.
+
+### AAB3 Verification
+```bash
+grep -r "AppIntentConfiguration\|StartVoiceQueryIntent\|ActivityAttributes" Extensions/ Shared/ --include="*.swift" | wc -l  # > 0
+```
+
+**Status: ⏳ PENDING — Wave 10**
+
+---
+
+## PHASE AAC3: FINANCIAL INTELLIGENCE HUB
+
+**Status: ⏳ PENDING — Wave 10, Step 3**
+
+Connect Thea to personal financial accounts (Kraken, Coinbase, YNAB, Plaid, PayPal).
+
+### AAC3-1: SwiftData Financial Models
+`Shared/Intelligence/Financial/FinancialModels.swift`: `@Model FinancialAccount` + `@Model FinancialTransaction`.
+
+### AAC3-2: FinancialCredentialStore (Keychain ONLY — never SwiftData)
+```swift
+// Shared/Intelligence/Financial/FinancialCredentialStore.swift
+enum FinancialCredentialStore {
+    static func save(token: String, for provider: String) {
+        let query: [CFString: Any] = [kSecClass: kSecClassGenericPassword,
+            kSecAttrAccount: "thea.financial.\(provider)", kSecValueData: token.data(using: .utf8)!,
+            kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlock]
+        SecItemDelete(query as CFDictionary); SecItemAdd(query as CFDictionary, nil)
+    }
+    static func load(for provider: String) -> String? {
+        let query: [CFString: Any] = [kSecClass: kSecClassGenericPassword,
+            kSecAttrAccount: "thea.financial.\(provider)", kSecReturnData: true, kSecMatchLimit: kSecMatchLimitOne]
+        var result: AnyObject?; SecItemCopyMatching(query as CFDictionary, &result)
+        return (result as? Data).flatMap { String(data: $0, encoding: .utf8) }
+    }
+}
+```
+
+### AAC3-3: KrakenService
+SPM: `lukepistrol/KrakenAPI`. Actor wrapping `KrakenClient` — `fetchBalances()` + `fetchRecentTrades()`.
+
+### AAC3-4: CoinbaseService
+URLSession REST actor. Header `CB-VERSION: 2024-09-01`. Scopes: `wallet:accounts:read`, `wallet:transactions:read`.
+
+### AAC3-5: YNABService
+SPM: `andrebocchini/swiftynab`. `fetchBudgetSummary()` with delta sync via `last_knowledge_of_server`.
+
+### AAC3-6: PlaidService
+REST actor → `/transactions/sync` delta endpoint. Credentials: `PLAID-CLIENT-ID` + `PLAID-SECRET` from Keychain.
+
+### AAC3-7: FinancialIntelligenceService + OutboundPrivacyGuard patterns
+`@MainActor ObservableObject` — `syncAll()` parallel + `morningBriefing() -> String`.
+OutboundPrivacyGuard: add IBAN regex + BTC/ETH wallet address patterns.
+
+### AAC3 Verification
+```bash
+grep -r "FinancialIntelligenceService\|KrakenService\|CoinbaseService\|YNABService\|PlaidService\|FinancialCredentialStore" \
+  Shared/ --include="*.swift" | grep -v "class\|actor\|struct\|enum" | wc -l  # > 0
+```
+
+**Status: ⏳ PENDING — Wave 10**
+
+---
+
+## PHASE AAD3: AMBIENT AUDIO INTELLIGENCE
+
+**Status: ⏳ PENDING — Wave 10, Step 4**
+
+On-device audio scene understanding via ShazamKit + SoundAnalysis. No API keys. No cloud.
+
+### AAD3-1: ShazamKitService
+```swift
+// Shared/Intelligence/Audio/ShazamKitService.swift
+import ShazamKit
+@MainActor final class ShazamKitService: NSObject, ObservableObject {
+    static let shared = ShazamKitService()
+    private var session: SHManagedSession?
+    @Published var currentMatch: SHMediaItem?
+    func startListening() async {
+        session = SHManagedSession(); session?.delegate = self
+        for await result in session!.results {
+            if case .match(let m) = result { currentMatch = m.mediaItems.first }
+        }
+    }
+}
+```
+Wire into `AmbientIntelligenceEngine.startAudioAnalysis()`.
+
+### AAD3-2: SoundAnalysisService
+`SNClassifySoundRequest(classifierIdentifier: .version1)` + `SNResultsObserving` → detects 300+ sounds on-device.
+Wire into `AmbientIntelligenceEngine` for cry/alarm/speech/traffic/music detection.
+
+### AAD3 Verification
+```bash
+grep -r "ShazamKitService\|SoundAnalysisService\|SNClassifySoundRequest" Shared/ --include="*.swift" | grep -v "class\|actor" | wc -l  # > 0
+```
+
+**Status: ⏳ PENDING — Wave 10**
+
+---
+
+## PHASE AAE3: THIRD-PARTY HEALTH WEARABLES
+
+**Status: ⏳ PENDING — Wave 10, Step 5**
+
+Integrate Oura Ring + Whoop. Fuse with Apple Watch into unified readiness score.
+
+### AAE3-1: OuraService
+REST actor → `api.ouraring.com/v2/usercollection/daily_readiness`. OAuth2, free dev tier. Token in Keychain.
+Returns `OuraReadiness(score: Int, hrv: Int, date: String)`.
+
+### AAE3-2: WhoopService
+REST actor → `api.prod.whoop.com/developer/v1/cycle/collection`. OAuth2.
+Returns `WhoopRecovery(recovery_score: Int, hrv_rmssd_milli: Double)`.
+
+### AAE3-3: WearableFusionEngine
+```swift
+@MainActor final class WearableFusionEngine: ObservableObject {
+    static let shared = WearableFusionEngine()
+    @Published var fusedReadinessScore: Double = 0.5
+    // Weights: Oura 45% | Whoop 35% | Apple Watch (HumanReadinessEngine) 20%
+    func updateScore(oura: OuraReadiness?, whoop: WhoopRecovery?, appleWatch: Double) {
+        var score = 0.0, weight = 0.0
+        if let o = oura, o.score > 0  { score += Double(o.score)/100 * 0.45; weight += 0.45 }
+        if let w = whoop, w.recovery_score > 0 { score += Double(w.recovery_score)/100 * 0.35; weight += 0.35 }
+        if appleWatch > 0 { score += appleWatch * 0.20; weight += 0.20 }
+        fusedReadinessScore = weight > 0 ? score/weight : 0.5
+    }
+}
+```
+Wire into `HumanReadinessEngine.computeMorningReadiness()`.
+
+**Status: ⏳ PENDING — Wave 10**
+
+---
+
+## PHASE AAF3: HOMEKIT AI ENGINE + JOURNALING + NFC
+
+**Status: ⏳ PENDING — Wave 10, Step 6**
+
+### AAF3-1: HomeKitAIEngine
+```swift
+import HomeKit
+@MainActor final class HomeKitAIEngine: NSObject, ObservableObject, HMHomeManagerDelegate {
+    static let shared = HomeKitAIEngine()
+    private let homeManager = HMHomeManager()
+    @Published var homes: [HMHome] = []
+    override init() { super.init(); homeManager.delegate = self }
+    func homeManagerDidUpdateHomes(_ manager: HMHomeManager) { homes = manager.homes }
+    func executeScene(named name: String) async {
+        for home in homes { if let s = home.actionSets.first(where: { $0.name == name }) { try? await home.executeActionSet(s); return } }
+    }
+    func checkPredictiveActivation() async {
+        let h = Calendar.current.component(.hour, from: Date())
+        if h == 22 { await executeScene(named: "Sleep") }
+        if h == 7  { await executeScene(named: "Morning") }
+    }
+}
+```
+Wire into `TheamacOSApp.setupManagers()`.
+
+### AAF3-2: JournalingSuggestionsService (iOS 17.2+)
+`#if os(iOS)` + `JournalingSuggestions` framework — curated life moments without individual HealthKit/Photos permissions.
+
+### AAF3-3: NFCContextService (iOS only)
+`NFCNDEFReaderSession` → parse `thea://context/work|sleep|gym` URL scheme → activate FocusSession / HomeKit scene.
+Entitlement: `Near Field Communication Tag Reading` (free for all Apple dev accounts).
+
+**Status: ⏳ PENDING — Wave 10**
+
+---
+
+## PHASE AAG3: CLOUD STORAGE + GITHUB INTELLIGENCE
+
+**Status: ⏳ PENDING — Wave 10, Step 7**
+
+### AAG3-1: CloudStorageService
+Google Drive REST v3 — `listGoogleDriveFiles(token:query:)` + `searchGoogleDrive(token:query:)`.
+Dropbox — SPM `SwiftyDropbox` (OAuth2 + file listing).
+
+### AAG3-2: GitHubIntelligenceService
+```swift
+actor GitHubIntelligenceService {
+    static let shared = GitHubIntelligenceService()
+    func fetchNotifications(token: String) async throws -> [[String: Any]] { ... }    // api.github.com/notifications
+    func fetchMyPRs(token: String, username: String) async throws -> [[String: Any]] { ... }  // search/issues
+    func morningBriefing(token: String, username: String) async -> String {
+        let n = (try? await fetchNotifications(token: token))?.count ?? 0
+        let p = (try? await fetchMyPRs(token: token, username: username))?.count ?? 0
+        return "GitHub: \(n) notifications, \(p) open PRs"
+    }
+}
+```
+Auth: Personal Access Token stored in Keychain. Wire into `PersonalParameters.snapshot()`.
+
+**Status: ⏳ PENDING — Wave 10**
+
+---
+
+## PHASE AAH3: SOCIAL + MUSIC + HEADPHONE MOTION + FOUNDATION MODELS
+
+**Status: ⏳ PENDING — Wave 10, Step 8**
+
+### AAH3-1: XAPIService (X / Twitter v2)
+OAuth2 PKCE. `fetchTimeline(userId:token:)` + `postTweet(text:oauthToken:)`. Rate: 500 posts/100 reads/month free.
+
+### AAH3-2: MusicKitIntelligenceService
+`MusicRecentlyPlayedRequest<Track>()` → inject current playback into `PersonalParameters.snapshot()`.
+
+### AAH3-3: HeadphoneMotionService
+`CMHeadphoneMotionManager` — pitch < -0.5 = head down/reading. AirPods Pro/Max required. Wire into `HumanReadinessEngine`.
+
+### AAH3-4: FoundationModelsService (Apple Intelligence on-device LLM)
+```swift
+@available(macOS 26, iOS 26, *)
+actor FoundationModelsService {
+    static let shared = FoundationModelsService()
+    // LanguageModelSession (WWDC25 Session 286) — zero network calls
+    func summarize(_ text: String, maxWords: Int = 50) async throws -> String {
+        // Dynamic: LanguageModelSession().respond(to: "Summarize in \(maxWords) words: \(text)").content
+        return text.split(separator: " ").prefix(maxWords).joined(separator: " ")  // stub until Xcode 26
+    }
+}
+```
+`#if canImport(FoundationModels)` guard. Wire for privacy-sensitive on-device classification.
+
+**Status: ⏳ PENDING — Wave 10**
+
+---
+
+## PHASE AAI3: CARPLAY + VISIONOS + TABULARDATA + NUTRITION + TRAVEL
+
+**Status: ⏳ PENDING — Wave 10, Step 9**
+
+### AAI3-1: CarPlay Voice-First (iOS 26.4)
+`CPVoiceControlTemplate` as primary interface in `CarPlaySceneDelegate`. Entitlement: `com.apple.developer.carplay-audio`.
+
+### AAI3-2: visionOS Real ARKit
+Real `ARKitSession` + `HandTrackingProvider` + `WorldTrackingProvider` + `WorldAnchor` persistence in `TheaSpatialView`.
+
+### AAI3-3: TabularDataAnalyzer
+```swift
+import TabularData
+struct TabularDataAnalyzer {
+    static func analyzeCSV(at url: URL) throws -> DataFrame { try DataFrame(contentsOfCSVFile: url) }
+    static func summarize(_ df: DataFrame) -> String { "Rows: \(df.rows.count), Cols: \(df.columns.count)" }
+}
+```
+Wire into financial data analysis + health CSV import.
+
+### AAI3-4: Nutrition Barcode → OpenFoodFacts → HealthKit
+`AVCaptureMetadataOutput` → barcode EAN/UPC → `world.openfoodfacts.org/api/v2/product/{barcode}.json` → `HKQuantitySample` calorie write.
+
+### AAI3-5: TravelIntelligenceService
+SPM: `amadeus4dev/amadeus-ios`. `flightStatus(carrierCode:flightNumber:date:)` + `hotelSearch(cityCode:checkIn:checkOut:)`. Free sandbox.
+
+### AAI3 Verification
+```bash
+grep -r "CPVoiceControlTemplate\|ARKitSession\|TabularDataAnalyzer\|NutritionBarcodeService\|TravelIntelligenceService" \
+  Shared/ macOS/ iOS/ visionOS/ --include="*.swift" | grep -v "class\|struct\|actor" | wc -l  # > 0
+```
+
+**Status: ⏳ PENDING — Wave 10**
+
+---
+
+## WAVE 11: RE-VERIFICATION SUITE — POST-WAVE-10 QUALITY GATES
+
+*Wave 11 re-runs all Wave 6 quality phases. Wave 9 (40+ extension files) + Wave 10 (15 new intelligence domains, ~50 new Swift files) add substantial new attack surfaces, wiring requirements, and test coverage needs.*
+
+---
+
+## PHASE ABA3: COMPREHENSIVE QA v2 (POST-WAVE-10)
+
+**Status: ⏳ PENDING — Wave 11, Step 1**
+
+Re-run AG3 with full Wave 10 scope. All 4 platforms must build. New test files required:
+- `Tests/TheaTests/FinancialTests.swift` — FinancialCredentialStore (Keychain) + WearableFusionEngine math
+- `Tests/TheaTests/AudioTests.swift` — SoundAnalysis observer
+- `Tests/TheaTests/TabularDataTests.swift` — CSV parsing + correlation
+
+```bash
+swift test 2>&1 | tail -5
+xcodebuild ... -scheme Thea-macOS ... CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "error:|BUILD SUCCEEDED" | tail -3
+swiftlint lint --quiet 2>&1 | grep -c "warning\|error"  # must be 0
+```
+
+**Status: ⏳ PENDING — Wave 11**
+
+---
+
+## PHASE ABB3: SECURITY AUDIT v2 (WAVE 10 NEW ATTACK SURFACES)
+
+**Status: ⏳ PENDING — Wave 11, Step 2**
+
+New attack surfaces requiring review:
+1. **Financial Keychain** — tokens never in SwiftData/logs; OutboundPrivacyGuard IBAN/BTC/ETH patterns
+2. **Keyboard Extension** — ensure zero keystroke logging
+3. **NativeHost stdin/stdout** — injection risk; validate Chrome native messaging format strictly
+4. **NFC URL scheme** — validate `thea://context/` prefix; reject arbitrary URIs
+5. **CarPlay voice** — audio capture consent; no logging of voice content
+6. **FoundationModels** — on-device LLM prompt injection (same patterns as AnthropicProvider)
+
+OutboundPrivacyGuard patterns to add:
+- IBAN: `[A-Z]{2}\d{2}[A-Z0-9]{4,30}`
+- Bitcoin: `[13][a-km-zA-HJ-NP-Z1-9]{25,34}` + `bc1[a-z0-9]{39,59}`
+- Ethereum: `0x[a-fA-F0-9]{40}`
+
+**Status: ⏳ PENDING — Wave 11**
+
+---
+
+## PHASE ABC3: TEST COVERAGE v2
+
+**Status: ⏳ PENDING — Wave 11, Step 3**
+
+Re-run X3 targeting Wave 10 files. Minimum 80% on new services. Run `swift test` → all pass.
+
+**Status: ⏳ PENDING — Wave 11**
+
+---
+
+## PHASE ABD3: PERIPHERY CLEAN v2
+
+**Status: ⏳ PENDING — Wave 11, Step 4**
+
+```bash
+periphery scan 2>&1 | grep -E "warning:|error:" | grep -v "note:" | head -20
+```
+Wire or remove every warning. Zero warnings before proceeding.
+
+**Status: ⏳ PENDING — Wave 11**
+
+---
+
+## PHASE ABE3: CI GREEN v2
+
+**Status: ⏳ PENDING — Wave 11, Step 5**
+
+```bash
+git pushsync
+gh run list --limit 5
+gh run view --log-failed
+```
+All 6 workflows green: ci.yml, e2e-tests.yml, security.yml, thea-audit-main.yml, thea-audit-pr.yml, physical-av-tests.yml.
+
+**Status: ⏳ PENDING — Wave 11**
+
+---
+
+## PHASE ABF3: WIRING VERIFICATION v2 (TARGET ≥55 SYSTEMS)
+
+**Status: ⏳ PENDING — Wave 11, Step 6**
+
+Re-run AA3 with expanded 55-system target:
+
+```bash
+WIRED=0; UNWIRED=""
+SYSTEMS="SmartNotificationScheduler PredictiveLifeEngine HealthCoachingPipeline \
+  EnergyAdaptiveThrottler PersonalKnowledgeGraph TaskPlanDAG BehavioralFingerprint \
+  MultiModalCoordinator SelfTuningEngine DynamicConfigManager PrivacyPreservingAIRouter \
+  MultiModelConsensus WebSearchVerifier UserFeedbackLearner SelfExecutionService \
+  PhaseOrchestrator PlatformFeaturesHub TheaIntelligenceOrchestrator ApprovalManager \
+  MemoryAugmentedChat AppIntegrationFramework TheaMessagingChatView MetaAIDashboardView \
+  AmbientIntelligenceEngine DrivingDetectionService ScreenTimeAnalyzer \
+  CalendarIntelligenceService LocationIntelligenceService SleepAnalysisService \
+  ContextualMemoryManager ProactiveInsightEngine FocusSessionManager \
+  HabitTrackingService GoalTrackingService WellbeingMonitor NeuralContextCompressor \
+  FinancialIntelligenceService KrakenService CoinbaseService YNABService PlaidService \
+  ShazamKitService SoundAnalysisService OuraService WhoopService WearableFusionEngine \
+  HomeKitAIEngine NFCContextService GitHubIntelligenceService XAPIService \
+  MusicKitIntelligenceService FoundationModelsService TabularDataAnalyzer \
+  NutritionBarcodeService TravelIntelligenceService"
+for SYS in $SYSTEMS; do
+  REFS=$(grep -r "$SYS" Shared/ macOS/ iOS/ --include="*.swift" 2>/dev/null | grep -v "${SYS}.swift" | wc -l | tr -d ' ')
+  [ "$REFS" -gt 0 ] && ((WIRED++)) || UNWIRED="$UNWIRED $SYS"
+done
+echo "✅ Wired: $WIRED / $(echo $SYSTEMS | wc -w) | ❌ Unwired: $(echo $UNWIRED | wc -w)"
+[ -n "$UNWIRED" ] && echo "Gaps:$UNWIRED"
+```
+
+Target: ≥55 wired. Commit: `feat(ABF3): wiring verification v2 — ≥55 systems confirmed`.
+
+**Status: ⏳ PENDING — Wave 11**
+
+---
+
+## PHASE ABG3: NOTARIZATION v2 (v1.6.0)
+
+**Status: ⏳ PENDING — Wave 11, Step 7**
+
+```bash
+git tag v1.6.0 && git pushsync  # Triggers release.yml → notarization
+```
+
+**Status: ⏳ PENDING — Wave 11**
+
+---
+
+## PHASE ABH3: FINAL REPORT v2
+
+**Status: ⏳ PENDING — Wave 11, Step 8**
+
+Generate `WAVE_11_VERIFICATION_REPORT.md`:
+- Systems wired count (target ≥55)
+- Test pass rate (target 100%)
+- Build status all 4 platforms
+- Security audit findings Wave 10
+- CI all 6 workflows green
+- Notarization v1.6.0 status
+- Financial APIs active
+- Extension coverage complete
+
+This report is the input for final AD3 manual review.
+
+**Status: ⏳ PENDING — Wave 11**
+
+---
+
 ## PHASE AD3: COMBINED FINAL GATE — ALEXIS ONLY
 
 **Status: ⏳ MANUAL — includes v2 Phase V + v3 verification sign-off**
