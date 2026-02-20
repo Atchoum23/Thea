@@ -91,5 +91,31 @@ struct TheaiOSApp: App {
             try? await Task.sleep(for: .seconds(4))
             TheaIntelligenceOrchestrator.shared.start()
         }
+
+        // AAA3 Gap Wiring — 13 previously disconnected systems (iOS-aware subset).
+        // DrivingDetectionService + ScreenTimeAnalyzer start iOS-only code paths internally.
+        Task {
+            try? await Task.sleep(for: .seconds(8))
+            AmbientIntelligenceEngine.shared.start()
+            DrivingDetectionService.shared.start()
+            ScreenTimeAnalyzer.shared.startMonitoring()
+            CalendarIntelligenceService.shared.startMonitoring()
+            LocationIntelligenceService.shared.start()
+            SleepAnalysisService.shared.startMonitoring()
+            ProactiveInsightEngine.shared.start()
+            FocusSessionManager.shared.restore()
+            HabitTrackingService.shared.start()
+            GoalTrackingService.shared.start()
+            WellbeingMonitor.shared.start()
+        }
+
+        // AAC3: FinancialIntelligenceService — initial sync on launch (non-blocking)
+        Task {
+            try? await Task.sleep(for: .seconds(12))
+            let hasProvider = await FinancialIntelligenceService.shared.isAnyProviderConfigured()
+            if hasProvider {
+                await FinancialIntelligenceService.shared.syncAll()
+            }
+        }
     }
 }
