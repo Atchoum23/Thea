@@ -112,7 +112,7 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Category                  | Status          | Notes |
 |---------------------------|-----------------|-------|
 | **v2→v3 AUTO-TRANSITION** | ⚠️ AUTO-LINK   | v2 Phase U ✅ → executor auto-starts A3. v2 Phase V DEFERRED to AD3. |
-| Phase A3: Meta-AI         | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
+| Phase A3: Meta-AI         | 🔄 IN PROGRESS  | Started 2026-02-20 |
 | Phase B3: Tool Execution  | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
 | Phase C3: RAG / Semantic  | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
 | Phase D3: Confidence Loop | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
@@ -352,6 +352,53 @@ ssh mbam2.local "
 sleep 5
 ssh mbam2.local "/opt/homebrew/bin/tmux send-keys -t v3-s6 \
   \"Read '.claude/THEA_CAPABILITY_PLAN_v3.md'. You are STREAM 6 on MBAM2. Execute I3→K3→T3→V3→W3→AF3 sequentially. File ownership: UI/Views/Components/, Settings/ config views, Integrations/Backends/, UI/Views/Transparency/, ChatView additions, MacSettingsView sidebar + iOS tab nav (AF3). git add <specific files only>. git pushsync after each phase. swift test locally. Send ntfy to thea-msm3u with 'STREAM 6 complete' when AF3 done.\" Enter" 2>/dev/null
+
+# ============================================================
+# MANDATORY: POST-LAUNCH VERIFICATION — Prevent silent Enter failures
+# Root cause: tmux send-keys without confirmed receipt leaves the instruction
+#             in the terminal input buffer forever. The session APPEARS running
+#             (shell is open, no error) but processes NOTHING — idling silently.
+#             This failure mode has caused 14+ hour executor stalls. NEVER SKIP.
+# ============================================================
+echo "=== Waiting 20s for all Claude Code sessions to initialize ==="
+sleep 20
+
+echo "=== Verifying MSM3U streams s1-s5 (checking for active processing, not idle buffer) ==="
+for S in s1 s2 s3 s4 s5; do
+  PANE=$(/opt/homebrew/bin/tmux capture-pane -t "v3-$S" -p 2>/dev/null | tail -15)
+  if echo "$PANE" | grep -qE "Running\.\.\.|Bash\(|Read\(|Write\(|Edit\(|Glob\(|Grep\(|⏺|✳|✶|█"; then
+    echo "  ✅ v3-$S: active — Claude Code is processing"
+  else
+    echo "  ⚠️  v3-$S: IDLE — instruction likely in buffer without Enter; retrying now"
+    /opt/homebrew/bin/tmux send-keys -t "v3-$S" "" Enter
+    sleep 10
+    PANE2=$(/opt/homebrew/bin/tmux capture-pane -t "v3-$S" -p 2>/dev/null | tail -5)
+    if echo "$PANE2" | grep -qE "Running\.\.\.|Bash\(|Read\(|⏺|✳"; then
+      echo "  ✅ v3-$S: now active after Enter retry"
+    else
+      echo "  ❌ v3-$S: STILL IDLE after retry — MANUAL INTERVENTION NEEDED!"
+      /opt/homebrew/bin/tmux send-keys -t "v3-$S" "" Enter  # One more attempt
+    fi
+  fi
+done
+
+echo "=== Verifying MBAM2 stream s6 ==="
+sleep 5
+PANE_S6=$(ssh mbam2.local "/opt/homebrew/bin/tmux capture-pane -t v3-s6 -p 2>/dev/null | tail -15" 2>/dev/null)
+if echo "$PANE_S6" | grep -qE "Running\.\.\.|Bash\(|Read\(|Write\(|Edit\(|⏺|✳|✶|█"; then
+  echo "  ✅ v3-s6 (MBAM2): active — Claude Code is processing"
+else
+  echo "  ⚠️  v3-s6 (MBAM2): IDLE — sending Enter"
+  ssh mbam2.local "/opt/homebrew/bin/tmux send-keys -t v3-s6 '' Enter" 2>/dev/null
+  sleep 10
+  PANE_S6B=$(ssh mbam2.local "/opt/homebrew/bin/tmux capture-pane -t v3-s6 -p 2>/dev/null | tail -5" 2>/dev/null)
+  if echo "$PANE_S6B" | grep -qE "Running\.\.\.|Bash\(|Read\(|⏺|✳"; then
+    echo "  ✅ v3-s6: now active after Enter retry"
+  else
+    echo "  ❌ v3-s6: STILL IDLE — check MBAM2 manually: ssh mbam2.local tmux attach -t v3-s6"
+  fi
+fi
+echo "=== Post-launch verification complete ==="
 
 curl -s -X POST "https://ntfy.sh/thea-msm3u" \
   -H "Title: 🚀 v3 LAUNCHED — 6 parallel streams" \
