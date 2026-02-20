@@ -106,6 +106,7 @@ disabled_rules:
   - vertical_parameter_alignment_on_call # Style preference
   - multiline_function_chains # Style preference
   - multiline_arguments       # Style preference
+  - orphaned_doc_comment     # periphery:ignore comments between /// and declaration are intentional
   - number_separator          # Style preference
   - closure_end_indentation   # SwiftUI patterns vary indentation
   - switch_case_alignment     # Style preference
