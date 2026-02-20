@@ -294,17 +294,17 @@ log ""
 log "--- TEST 8: ExtensionSyncBridge ---"
 
 python3 - <<'PYEOF' 2>/dev/null && pass "ExtensionSyncBridge WebSocket accepts connections on port 9876" || fail "ExtensionSyncBridge WebSocket failed"
-import asyncio, websockets, json, socket
+import asyncio, websockets, json, time
 
-# Quick TCP probe first (faster than WebSocket handshake)
-try:
-    s = socket.create_connection(('127.0.0.1', 9876), timeout=3)
-    s.close()
-    print('TCP connect OK')
-    exit(0)  # Port is open = ExtensionSyncBridge running
-except Exception as e:
-    print(f'TCP probe failed: {e}')
-    exit(1)
+async def test_bridge():
+    uri = 'ws://127.0.0.1:9876'
+    async with websockets.connect(uri, open_timeout=5) as ws:
+        msg = json.dumps({"type": "heartbeat", "data": {}, "timestamp": "2026-02-20T22:00:00Z"})
+        await ws.send(msg)
+        await asyncio.sleep(1)
+        return True
+
+asyncio.run(test_bridge())
 PYEOF
 
 # ───────────────────────────────────────────────────────────────
@@ -313,20 +313,20 @@ PYEOF
 log ""
 log "--- TEST 9: URL Scheme Navigation ---"
 
-VIEWS_NAMES="chat knowledge new_conversation"
-VIEWS_URLS="thea://chat thea://knowledge thea://new"
+declare -A VIEWS=(
+    ["chat"]="thea://chat"
+    ["knowledge"]="thea://knowledge"
+    ["new_conversation"]="thea://new"
+)
 
-VIEW_IDX=0
-for VIEW_URL in $VIEWS_URLS; do
-    VIEW_IDX=$((VIEW_IDX + 1))
-    VIEW_NAME=$(echo "$VIEWS_NAMES" | cut -d' ' -f"$VIEW_IDX")
-    open "$VIEW_URL" 2>/dev/null
+for VIEW_NAME in "${!VIEWS[@]}"; do
+    open "${VIEWS[$VIEW_NAME]}" 2>/dev/null
     sleep 2
     if [[ -n "${MBAM2_AGENT:-}" ]]; then
         screenshot "09-view-${VIEW_NAME}"
-        pass "URL scheme: $VIEW_URL → screenshot captured"
+        pass "URL scheme: ${VIEWS[$VIEW_NAME]} → screenshot captured"
     else
-        pass "URL scheme: $VIEW_URL → launched (no screenshot)"
+        pass "URL scheme: ${VIEWS[$VIEW_NAME]} → launched (no screenshot)"
     fi
 done
 
