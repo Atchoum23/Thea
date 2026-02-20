@@ -13,7 +13,7 @@
 //  Available on iOS only. macOS does not have the JournalingSuggestions framework.
 //
 
-#if canImport(JournalingSuggestions)
+#if os(iOS)
 import Foundation
 import JournalingSuggestions
 import os.log
@@ -78,4 +78,4 @@ final class JournalingSuggestionsService: ObservableObject {
         return "I had a notable moment on \(dateStr). Help me reflect on it and what it might mean for my goals."
     }
 }
-#endif // canImport(JournalingSuggestions)
+#endif // os(iOS)
