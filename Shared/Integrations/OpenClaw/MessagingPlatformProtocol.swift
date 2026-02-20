@@ -16,6 +16,7 @@ enum MessagingPlatform: String, CaseIterable, Codable, Sendable, Hashable {
     case whatsapp    // via Meta Cloud API
     case signal      // via signal-cli Unix socket
     case matrix
+    case browser     // via native host (Chrome/Brave/Safari extensions)
 
     var displayName: String {
         switch self {
@@ -26,6 +27,7 @@ enum MessagingPlatform: String, CaseIterable, Codable, Sendable, Hashable {
         case .whatsapp: "WhatsApp"
         case .signal:   "Signal"
         case .matrix:   "Matrix/Element"
+        case .browser:  "Browser Extension"
         }
     }
 
@@ -39,6 +41,7 @@ enum MessagingPlatform: String, CaseIterable, Codable, Sendable, Hashable {
         case .whatsapp: "phone.bubble.fill"
         case .signal:   "lock.shield.fill"
         case .matrix:   "square.grid.3x3.fill"
+        case .browser:  "safari.fill"
         }
     }
 
@@ -52,6 +55,7 @@ enum MessagingPlatform: String, CaseIterable, Codable, Sendable, Hashable {
         case .whatsapp: .whatsapp
         case .signal:   .signal
         case .matrix:   .matrix
+        case .browser:  .webchat
         }
     }
 }

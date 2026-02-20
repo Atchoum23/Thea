@@ -124,6 +124,7 @@ final class AutonomousSessionManager: ObservableObject {
 
     /// Returns seconds since the last git commit in the repo.
     private func gitCommitAge() -> TimeInterval {
+        #if os(macOS)
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
         process.arguments = ["-C", repoPath, "log", "-1", "--format=%ct"]
