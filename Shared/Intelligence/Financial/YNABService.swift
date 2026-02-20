@@ -115,7 +115,7 @@ actor YNABService {
 
     // MARK: - Reset Delta Sync
 
-    func resetDeltaSync(for budgetID: String? = nil) {
+    func resetDeltaSync(for budgetID: String? = nil) { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         if let id = budgetID { serverKnowledgeCache.removeValue(forKey: id) } else { serverKnowledgeCache.removeAll() }
         logger.info("YNABService: delta sync cache cleared")
     }
@@ -146,7 +146,7 @@ actor YNABService {
         return (root["data"] as? [String: Any]) ?? root
     }
 
-    private func parseTransaction(_ dict: [String: Any]) -> YNABTransaction? {
+    private func parseTransaction(_ dict: [String: Any]) -> YNABTransaction? { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         guard
             let id   = dict["id"]   as? String,
             let date = dict["date"] as? String
