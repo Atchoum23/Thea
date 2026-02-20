@@ -6,7 +6,7 @@
 //  Wire: AgentOrchestrator.startTask() → Activity<TheaTaskActivityAttributes>.request(...)
 //
 
-import ActivityKit
+@preconcurrency import ActivityKit
 import Foundation
 
 // MARK: - TheaTaskActivityAttributes
