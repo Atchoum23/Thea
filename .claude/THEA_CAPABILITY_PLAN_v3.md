@@ -138,7 +138,7 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase Q3: Proactive Intel | ✅ DONE         | DeliveredInsight SwiftData model, InsightHistoryView, WeeklyInsightSummaryView, ProactiveInsightEngine cron |
 | Phase R3: SelfEvolution   | ✅ DONE         | Artifact-based approach: SelfEvolutionManager wired to ArtifactManager; drafts code changes as GeneratedArtifact |
 | Phase S3: MCPGen UI       | ✅ DONE         | MCPBuilderView + GeneratedServerPreview + MCPServerGenerator; wired in MacSettingsView Developer tab sha 3848a29d |
-| Phase T3: Integration Bknd| ⏳ PENDING      | Blocked by B3; Safari/Cal/Shortcuts/Reminders/Notes/Finder/Mail |
+| Phase T3: Integration Bknd| ✅ DONE         | IntegrationToolHandler.swift has all 7 handlers; macOS integrations ACTIVATED in project.yml (lines 402-405); iOS correctly excludes AppKit-only files |
 | Phase U3: AI Subsystems   | ✅ DONE         | All subsystems (Context/Adaptive/Proactive/PatternLearning/Predict/PromptEng/ResourceMgmt/Anticipatory) activated in project.yml blanket activations; macOS+iOS BUILD SUCCEEDED sha b55537b1 |
 | Phase V3: Transparency UIs| ⏳ PENDING      | Blocked by H3; BehavioralFingerprint viz, Privacy, Messaging |
 | Phase W3: Chat Enhance    | ⏳ PENDING      | Blocked by I3; FilesAPI UI, Tokens, MultiModel UI, AgentMode |
