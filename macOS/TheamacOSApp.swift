@@ -301,6 +301,13 @@ struct TheamacOSApp: App {
             logger.info("ReliabilityMonitor started")
         }
 
+        // Q3: Start weekly proactive intelligence summary loop
+        Task {
+            try? await Task.sleep(for: .seconds(10))
+            await SmartNotificationScheduler.shared.startWeeklySummaryLoop()
+            logger.info("SmartNotificationScheduler weekly summary loop started")
+        }
+
         // P3: PersonalKnowledgeGraph weekly background consolidation
         // Deduplicates entities, decays stale entries, resolves contradictions.
         Task.detached(priority: .background) {

@@ -56,7 +56,13 @@ enum SchemaV1: VersionedSchema {
 
             // Habit Tracker models
             TheaHabit.self,
-            TheaHabitEntry.self
+            TheaHabitEntry.self,
+
+            // N3: Artifact System
+            GeneratedArtifact.self,
+
+            // Q3: Proactive Intelligence
+            DeliveredInsight.self
         ]
     }
 }
