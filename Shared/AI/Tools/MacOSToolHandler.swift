@@ -13,6 +13,7 @@ import os.log
 
 private let logger = Logger(subsystem: "ai.thea.app", category: "MacOSToolHandler")
 
+@MainActor
 enum MacOSToolHandler {
 
     // nonisolated(unsafe): EKEventStore is not Sendable; access is serialized via async calendar callbacks
