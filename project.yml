@@ -342,6 +342,7 @@ targets:
           - "**/LiveGuidanceSettingsViewStub.swift"  # Real LiveGuidanceSettingsView.swift is active (M3 re-enabled)
           - "**/Views/MetaAI/MetaAIDashboardView.swift"  # Depends on archived MetaAI types; stub below used instead
           - "**/Views/Intelligence/SquadsView.swift"  # Depends on SquadOrchestrator types not yet ported; stub below
+          # macOS/Views/ Analytics stubs excluded via macOS path excludes below
           # CodeIntelligence — ACTIVATED (macOS-only, #if os(macOS) guarded)
           - "**/Views/Code/**"  # CodeProjectView extracted sub-view, duplicates types in parent
           # ResourceAllocationSettingsView — ACTIVATED (DynamicResourceAllocator is active)
@@ -443,10 +444,14 @@ targets:
           - "**/Design/DesignSystemStubs.swift"
           # Exclude DashboardView duplicate — same types as HealthInsightsDetailView (TimeRange, TrendDataPoint, etc.)
           - "**/Integrations/Health/Views/HealthInsightsDashboardView.swift"
+          # Shared/UI/Views/Analytics/ — canonical V3 views INCLUDED (macOS/Views/ stubs excluded below)
       - path: macOS
         excludes:
-          # Exclude macOS/Views duplicate — Shared/UI/Views/Analytics/ version is canonical
+          # Analytics view stubs — canonical versions in Shared/UI/Views/Analytics/
+          - "Views/BehavioralAnalyticsView.swift"
           - "Views/MessagingGatewayStatusView.swift"
+          - "Views/NotificationIntelligenceView.swift"
+          - "Views/PrivacyTransparencyView.swift"
       - path: Shared/Resources/Assets.xcassets
       - path: Shared/Resources/Localizable.xcstrings
     settings:
@@ -717,6 +722,8 @@ targets:
           # MetaAIDashboardView uses macOS-only APIs (HSplitView, NSColor) — exclude from iOS
           - "**/Views/MetaAI/MetaAIDashboardView.swift"
           - "UI/Views/MetaAI/MetaAIDashboardView.swift"
+          # SquadsViewStub redefines SquadsView — exclude stub from iOS (real view is included)
+          - "**/Views/Intelligence/SquadsViewStub.swift"
       - path: iOS
       - path: Shared/Resources/Assets.xcassets
       - path: Shared/Resources/Localizable.xcstrings

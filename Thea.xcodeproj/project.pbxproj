@@ -1824,7 +1824,6 @@
 		BAA992D21EBE083F32F879DA /* THEAThinkingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0BF8184FFF36F2A4C9A22D /* THEAThinkingView.swift */; };
 		BAC2C674EEC36C7511FB6690 /* ConversationListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98E47FDB0A16348C0DC36728 /* ConversationListViewModel.swift */; };
 		BB1FAF69FBB1DFFE428D6920 /* OpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = 6FC04ED19713156D5983EB02 /* OpenAI */; };
-		BB3CAD3A6A5CE780F6F5642C /* SquadsViewStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E216CA01F8ECDC2F1EF8CD4 /* SquadsViewStub.swift */; };
 		BB4C43583D77DE92B0817320 /* TransactionImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 723A3C145E26F2974DD9E148 /* TransactionImporter.swift */; };
 		BB4DCB5B55F19EB4AA514D0A /* NutritionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB158CDCC0DA1BB2D5E1386 /* NutritionService.swift */; };
 		BB5EBF80E211668B5F088F0D /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53C28597903749D947CF54F1 /* HealthKitService.swift */; };
@@ -9322,7 +9321,6 @@
 				E3941522B36BF93F39BD1187 /* SquadDefinition.swift in Sources */,
 				B3BD55B1D2C3DAD24E4CB85E /* SquadOrchestrator.swift in Sources */,
 				307F9A2FC0CB194BEB5C0988 /* SquadsView.swift in Sources */,
-				BB3CAD3A6A5CE780F6F5642C /* SquadsViewStub.swift in Sources */,
 				2C8B4D62A9E3C259FB9EB820 /* StaticAnalysisVerifier.swift in Sources */,
 				48E0CA4E38A86C24CEB5D5B4 /* StoreKitService.swift in Sources */,
 				9B0F85A5213130B4FEA9406C /* StreamingIndicator.swift in Sources */,

@@ -176,7 +176,7 @@ struct IntelligenceDashboardView: View {
                         Circle()
                             .fill(team.status == .running ? Color.green : Color.gray)
                             .frame(width: 8, height: 8)
-                        Text(team.objective)
+                        Text(team.goal)
                             .font(.caption)
                             .lineLimit(1)
                         Spacer()
