@@ -21,10 +21,15 @@ public class EvolutionTask: Identifiable, ObservableObject, Codable {
     public var buildResult: BuildResult?
     public var testsPassed: Bool = false
     public var error: String?
+    /// R3: ID of the ArtifactManager artifact created for user review (artifact-based approach)
+    public var artifactID: UUID?
+    /// R3: Summary shown to user when artifact is ready for review
+    public var reviewSummary: String?
 
     enum CodingKeys: String, CodingKey {
         case id, request, status, createdAt, analysis, plan, estimate
         case currentStep, completedSteps, buildResult, testsPassed, error
+        case artifactID, reviewSummary
     }
 
     init(id: UUID, request: String, status: TaskStatus, createdAt: Date) {
@@ -48,6 +53,8 @@ public class EvolutionTask: Identifiable, ObservableObject, Codable {
         buildResult = try container.decodeIfPresent(BuildResult.self, forKey: .buildResult)
         testsPassed = try container.decodeIfPresent(Bool.self, forKey: .testsPassed) ?? false
         error = try container.decodeIfPresent(String.self, forKey: .error)
+        artifactID = try container.decodeIfPresent(UUID.self, forKey: .artifactID)
+        reviewSummary = try container.decodeIfPresent(String.self, forKey: .reviewSummary)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -64,6 +71,8 @@ public class EvolutionTask: Identifiable, ObservableObject, Codable {
         try container.encodeIfPresent(buildResult, forKey: .buildResult)
         try container.encode(testsPassed, forKey: .testsPassed)
         try container.encodeIfPresent(error, forKey: .error)
+        try container.encodeIfPresent(artifactID, forKey: .artifactID)
+        try container.encodeIfPresent(reviewSummary, forKey: .reviewSummary)
     }
 }
 
@@ -71,6 +80,8 @@ public enum TaskStatus: String, Codable {
     case analyzing
     case planned
     case implementing
+    /// R3: artifact-based approach — implementation drafted as a reviewable artifact
+    case awaitingReview
     case building
     case testing
     case testsFailed
