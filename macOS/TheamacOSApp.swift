@@ -340,6 +340,13 @@ struct TheamacOSApp: App {
             logger.info("AP3: ServerHealthMonitor started — polling MSM3U:18789")
         }
 
+        // AAF3: HomeKitAIEngine — predictive scene activation (Sleep at 22h, Morning at 7h)
+        Task {
+            try? await Task.sleep(for: .seconds(8))
+            HomeKitAIEngine.shared.startPredictiveLoop()
+            logger.info("AAF3: HomeKitAIEngine predictive loop started")
+        }
+
         // AQ3: AutonomousSessionManager — stale-session watchdog (dev + user-task modes)
         Task {
             try? await Task.sleep(for: .seconds(14))
