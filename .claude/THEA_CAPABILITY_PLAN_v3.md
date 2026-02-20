@@ -5945,6 +5945,189 @@ Add to `ci.yml` `paths-ignore`: `.github/workflows/physical-av-tests.yml`
 
 ---
 
+### AZ3-6: ODiff Pixel-Perfect Visual Diffing
+
+**Tool**: `odiff` (Zig-based SIMD/NEON — 6× faster than ImageMagick SSIM on Apple Silicon)
+
+```bash
+brew install odiff
+# Capture baseline: screencapture -t png /tmp/thea-baseline-$(date +%Y%m%d).png
+# After changes:   screencapture -t png /tmp/thea-compare.png
+# Diff with JSON output for CI parsing:
+odiff /tmp/thea-baseline-*.png /tmp/thea-compare.png /tmp/thea-diff.png \
+  --antialiasing --threshold 0.05 --output-format json
+```
+`--antialiasing`: ignores subpixel AA differences. `--threshold 0.05`: 5% per-pixel tolerance.
+- Commit: `feat(AZ3): ODiff pixel-perfect diffing for screenshot regression [6/15]`
+
+---
+
+### AZ3-7: Prefire — Auto-Generated SwiftUI Snapshot Tests
+
+**Tool**: `BarredEwe/Prefire` — generates one snapshot test per `#Preview` block in the codebase. Zero per-view writing.
+
+Add to `Package.swift` test dependencies: `.package(url: "https://github.com/BarredEwe/Prefire.git", from: "2.0.0")`
+
+```bash
+PREFIRE_RECORD=true swift test --filter PrefireTests  # Record baselines
+swift test --filter PrefireTests                       # CI comparison
+```
+Baselines stored in `Tests/PrefireTests/__Snapshots__/` — commit them.
+- Commit: `feat(AZ3): Prefire auto-snapshot generation from all #Preview blocks [7/15]`
+
+---
+
+### AZ3-8: Allure 3 + XCTestHTMLReport — Test Report Pipeline
+
+```bash
+brew install allure && brew install xchtmlreport
+# Run tests: xcodebuild test ... -resultBundlePath /tmp/TestResults.xcresult
+# Allure (reads .xcresult natively): allure generate /tmp/TestResults.xcresult -o /tmp/AllureReport --clean
+# Portable HTML: xchtmlreport -r /tmp/TestResults.xcresult -i → /tmp/TestResults.html
+```
+Add artifact upload step to `physical-av-tests.yml` with `if: always()`.
+- Commit: `feat(AZ3): Allure 3 + XCTestHTMLReport report pipeline [8/15]`
+
+---
+
+### AZ3-9: XCTMetric Performance Baselines + xctrace Profiling
+
+```swift
+// Tests/TheaTests/PerformanceBaselinesTests.swift
+final class PerformanceBaselinesTests: XCTestCase {
+    func testSystemPromptBuildPerformance() {
+        measure(metrics: [XCTCPUMetric(), XCTMemoryMetric(), XCTClockMetric()]) {
+            _ = ChatManager.shared.buildSystemPrompt()
+        }
+    }
+}
+```
+Out-of-process: `xcrun xctrace record --template "Time Profiler" --attach $(pgrep -f "Thea.app") --time-limit 30s --no-prompt --output /tmp/thea.trace`
+- Commit: `feat(AZ3): PerformanceBaselinesTests XCTMetric + xctrace profiling [9/15]`
+
+---
+
+### AZ3-10: powermetrics Energy Impact CI Baseline
+
+```bash
+# Tests/PhysicalAV/energy_baseline.sh (run as sudo)
+sudo powermetrics --samplers tasks,cpu_power,thermal --format json --duration 30 2>/dev/null | \
+  python3 -c "
+import sys,json; data=json.load(sys.stdin)
+tasks=[t for s in data.get('tasks',[]) for t in s.get('tasks',[]) if 'Thea' in t.get('name','')]
+avg=sum(t.get('cpu_energy_impact',0) for t in tasks)/max(len(tasks),1)
+print(f'Thea avg: {avg:.1f} mW'); sys.exit(1 if avg>2000 else 0)"
+```
+- Commit: `feat(AZ3): powermetrics energy budget CI script [10/15]`
+
+---
+
+### AZ3-11: performAccessibilityAudit() — Built-in XCTest Accessibility Tests
+
+```swift
+// Tests/TheaTests/AccessibilityAuditTests.swift
+@MainActor final class AccessibilityAuditTests: XCTestCase {
+    func testChatViewAccessibility() throws {
+        let app = XCUIApplication(); app.launch()
+        try app.performAccessibilityAudit(for: [.contrast, .dynamicType, .hitRegion,
+                                                 .sufficientElementDescription, .textClipping])
+    }
+    func testSettingsAccessibility() throws {
+        let app = XCUIApplication(); app.launch()
+        app.buttons["Settings"].tap()
+        try app.performAccessibilityAudit()  // All 20+ rules
+    }
+}
+```
+Built into XCTest (Xcode 15+) — no extra tools needed.
+- Commit: `feat(AZ3): AccessibilityAuditTests — performAccessibilityAudit() [11/15]`
+
+---
+
+### AZ3-12: mitmproxy Network Traffic Validator
+
+```python
+# Tests/PhysicalAV/network_validator.py — run: mitmdump --script network_validator.py --listen-port 8888
+from mitmproxy import http
+ALLOWED = {"api.anthropic.com","api.openai.com","api.coinbase.com","api.ouraring.com",
+           "api.prod.whoop.com","api.ynab.com","development.plaid.com","api.github.com","ntfy.sh"}
+def request(flow: http.HTTPFlow) -> None:
+    h = flow.request.pretty_host
+    if not any(h == d or h.endswith("."+d) for d in ALLOWED):
+        flow.kill(); print(f"🚫 BLOCKED: {h}")
+```
+- Commit: `feat(AZ3): mitmproxy network validator + allowed-domain allowlist [12/15]`
+
+---
+
+### AZ3-13: BlackHole Single-Mac Audio Loopback (No Physical MBAM2 Needed)
+
+```bash
+brew install blackhole-2ch switchaudio-osx ffmpeg && pip3 install jiwer openai-whisper
+SwitchAudioSource -s "BlackHole 2ch" -t output          # Route Thea TTS → virtual device
+ffmpeg -f avfoundation -i ":BlackHole 2ch" -t 8 /tmp/thea-tts.wav -y
+SwitchAudioSource -s "Mac Studio Speakers" -t output    # Restore
+whisper /tmp/thea-tts.wav --model small --output_format txt --output_dir /tmp/
+python3 -c "from jiwer import wer; print(f'WER: {wer(\"hello\", open(\"/tmp/thea-tts.txt\").read().strip().lower()):.2%}')"
+```
+Zero cable/reverb — captures clean digital audio.
+- Commit: `feat(AZ3): BlackHole single-Mac audio loopback + WER validation [13/15]`
+
+---
+
+### AZ3-14: SpeechQualityTests — On-Device WER via SFSpeechRecognizer
+
+```swift
+// Tests/TheaTests/SpeechQualityTests.swift
+import Speech
+final class SpeechQualityTests: XCTestCase {
+    func testTTSWordErrorRate() async throws {
+        let url = URL(fileURLWithPath: "/tmp/thea-tts.wav")
+        guard FileManager.default.fileExists(atPath: url.path) else { throw XCTSkip("Run AZ3-13 first") }
+        let recognizer = SFSpeechRecognizer(locale: .init(identifier: "en-US"))!
+        let request = SFSpeechURLRecognitionRequest(url: url)
+        request.requiresOnDeviceRecognition = true
+        let result: SFSpeechRecognitionResult = try await withCheckedThrowingContinuation { cont in
+            recognizer.recognitionTask(with: request) { r, e in
+                if let e { cont.resume(throwing: e) } else if r?.isFinal == true { cont.resume(returning: r!) }
+            }
+        }
+        let ref = "hello this is thea".split(separator: " ")
+        let hyp = result.bestTranscription.formattedString.lowercased().split(separator: " ")
+        let errors = zip(ref, hyp).filter { $0.0 != $0.1 }.count
+        XCTAssertLessThan(Double(errors)/Double(ref.count), 0.10, "WER exceeds 10%")
+    }
+}
+```
+- Commit: `feat(AZ3): SpeechQualityTests — on-device WER for TTS quality [14/15]`
+
+---
+
+### AZ3-15: ScreenCaptureKit + VNFeaturePrint Perceptual Diff
+
+```swift
+// Tests/TheaTests/PerceptualDiffTests.swift
+import XCTest, Vision, ScreenCaptureKit
+final class PerceptualDiffTests: XCTestCase {
+    func testChatViewPerceptualRegression() async throws {
+        let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+        guard let win = content.windows.first(where: { $0.owningApplication?.bundleIdentifier == "app.theathe.Thea" })
+        else { throw XCTSkip("Thea not running") }
+        // Capture → featurePrint → compare to baseline (distance < 0.15 = no regression)
+        // See full implementation in Tests/TheaTests/PerceptualDiffTests.swift
+    }
+    private func featurePrint(for image: CGImage) throws -> VNFeaturePrintObservation {
+        let req = VNGenerateImageFeaturePrintRequest()
+        try VNImageRequestHandler(cgImage: image).perform([req])
+        return req.results!.first!
+    }
+}
+```
+0.15 distance threshold: semantic content preserved, rendering noise ignored.
+- Commit: `feat(AZ3): PerceptualDiffTests — ScreenCaptureKit + VNFeaturePrint regression [15/15]`
+
+---
+
 ### AZ3 Verification
 ```bash
 # Files exist
