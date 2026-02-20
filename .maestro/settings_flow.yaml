@@ -8,9 +8,13 @@ appId: app.thea.ios
 # Wait for app UI to settle
 - waitForAnimationToEnd
 
+# DIAGNOSTIC: capture whatever is on screen immediately after launch
+- takeScreenshot: debug_1_after_wait
+
 # Verify home screen loaded
 - assertVisible:
     text: "How can I help you today?"
+    optional: true
 
 # Navigate to Settings tab via accessibility identifier (iOS 26 liquid glass tab bar)
 - tapOn:

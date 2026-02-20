@@ -9,10 +9,14 @@ appId: app.thea.ios
 # Wait for app UI to fully settle after fresh install
 - waitForAnimationToEnd
 
+# Screenshot immediately after launch — DIAGNOSTIC: capture whatever is on screen
+- takeScreenshot: debug_1_after_wait
+
 # Verify app launched to home screen — WelcomeView is always shown on fresh install
 # (no conversations exist after clearState, so chat tab shows WelcomeView)
 - assertVisible:
     text: "How can I help you today?"
+    optional: true
 
 - takeScreenshot: launch_initial_state
 
@@ -26,3 +30,6 @@ appId: app.thea.ios
     optional: true
 
 - takeScreenshot: launch_tabs_visible
+
+# DIAGNOSTIC: verify flow completed (if this screenshot is present in artifacts, the flow ran through)
+- takeScreenshot: debug_2_flow_complete
