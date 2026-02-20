@@ -41,6 +41,9 @@ if [ ! -f "$CONSULT_LOG" ] && [ -n "$CLAUDECODE" ]; then
   touch "$CONSULT_LOG"
 fi
 
+# ── Gate 4: Remove session sentinel (always, whether blocked or not) ────────
+rm -f /tmp/claude-code-thea-active
+
 # ── Output ─────────────────────────────────────────────────────────────────
 if [ "$BLOCKED" -eq 1 ]; then
   printf "QUALITY GATE FAILED — do not stop yet:\n%b\nResolve all issues above, then you may finish.\n" "$REASONS" >&2
