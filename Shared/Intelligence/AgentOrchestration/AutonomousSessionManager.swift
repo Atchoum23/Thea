@@ -145,5 +145,9 @@ final class AutonomousSessionManager: ObservableObject {
 
         guard let timestamp = TimeInterval(raw), timestamp > 0 else { return 0 }
         return Date.now.timeIntervalSince1970 - timestamp
+        #else
+        // iOS: git monitoring not available (Process API unavailable)
+        return 0
+        #endif
     }
 }
