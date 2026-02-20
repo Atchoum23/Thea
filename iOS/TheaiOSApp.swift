@@ -133,5 +133,15 @@ struct TheaiOSApp: App {
             try? await Task.sleep(for: .seconds(10))
             _ = NFCContextService.shared
         }
+
+        // AAF3-2: JournalingSuggestionsService — initialize singleton (picker-driven; iOS 17.2+)
+        #if canImport(JournalingSuggestions)
+        if #available(iOS 17.2, *) {
+            Task {
+                try? await Task.sleep(for: .seconds(10))
+                _ = JournalingSuggestionsService.shared
+            }
+        }
+        #endif
     }
 }
