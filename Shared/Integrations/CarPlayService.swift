@@ -19,6 +19,7 @@ import SwiftUI
     @MainActor
     public class CarPlayService: NSObject, ObservableObject {
         public static let shared = CarPlayService()
+        // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         private let logger = Logger(subsystem: "ai.thea.app", category: "CarPlayService")
 
         // MARK: - Published State
@@ -30,9 +31,10 @@ import SwiftUI
 
         // MARK: - CarPlay Interface
 
-        private var interfaceController: CPInterfaceController?
         // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+        private var interfaceController: CPInterfaceController?
         private var carWindow: CPWindow?
+// periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 
         // MARK: - Initialization
 
@@ -44,6 +46,7 @@ import SwiftUI
         // MARK: - CarPlay Connection
 
         public func connect(interfaceController: CPInterfaceController, window: CPWindow) {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             self.interfaceController = interfaceController
             carWindow = window
             isConnected = true
@@ -55,6 +58,7 @@ import SwiftUI
         }
 
         public func disconnect() {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             interfaceController = nil
             carWindow = nil
             isConnected = false
@@ -63,6 +67,7 @@ import SwiftUI
         // MARK: - Template Setup
 
         private func setupRootTemplate() {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             let tabBar = CPTabBarTemplate(templates: [
                 createChatTab(),
                 createQuickActionsTab(),
@@ -74,6 +79,7 @@ import SwiftUI
         }
 
         private func createChatTab() -> CPListTemplate {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             let items: [CPListItem] = [
                 createListItem(
                     title: "New Conversation",
@@ -98,6 +104,7 @@ import SwiftUI
         }
 
         private func createQuickActionsTab() -> CPListTemplate {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             let items = quickPrompts.map { prompt in
                 createListItem(
                     title: prompt.title,
@@ -115,6 +122,7 @@ import SwiftUI
         }
 
         private func createHistoryTab() -> CPListTemplate {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             let items = recentConversations.prefix(10).map { conversation in
                 createListItem(
                     title: conversation.title,
@@ -132,6 +140,7 @@ import SwiftUI
         }
 
         private func createSettingsTab() -> CPListTemplate {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             let items: [CPListItem] = [
                 createListItem(
                     title: "Voice Settings",
@@ -158,6 +167,7 @@ import SwiftUI
         // MARK: - Helper Methods
 
         private func createListItem(
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             title: String,
             subtitle: String?,
             image: UIImage?,
@@ -174,6 +184,7 @@ import SwiftUI
         // MARK: - Actions
 
         private func startVoiceConversation() {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             let voiceTemplate = CPVoiceControlTemplate(voiceControlStates: [
                 CPVoiceControlState(
                     identifier: "listening",
@@ -204,11 +215,13 @@ import SwiftUI
         }
 
         private func beginVoiceRecognition() async {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             // Integration with VoiceRecognitionService
             // This would connect to the existing voice infrastructure
         }
 
         private func continueLastConversation() {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             guard let lastConversation = recentConversations.first else {
                 showAlert(title: "No Recent Chats", message: "Start a new conversation")
                 return
@@ -217,6 +230,7 @@ import SwiftUI
         }
 
         private func openConversation(_ conversation: CarPlayConversation) {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             let items = conversation.messages.suffix(10).map { message in
                 createListItem(
                     title: message.isUser ? "You" : "Thea",
@@ -232,6 +246,7 @@ import SwiftUI
         }
 
         private func executeQuickPrompt(_ prompt: CarPlayQuickPrompt) {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             // Show processing state
             let alertTemplate = CPAlertTemplate(
                 titleVariants: ["Processing..."],
@@ -256,6 +271,7 @@ import SwiftUI
         }
 
         private func showResponse(for prompt: CarPlayQuickPrompt) {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             let informationTemplate = CPInformationTemplate(
                 title: prompt.title,
                 layout: .leading,
@@ -276,14 +292,17 @@ import SwiftUI
         }
 
         private func showVoiceSettings() {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             // Voice settings implementation
         }
 
         private func toggleAutoRead() {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             // Toggle auto-read setting
         }
 
         private func showAlert(title: String, message _: String) {
+            // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
             let alertTemplate = CPAlertTemplate(
                 titleVariants: [title],
                 actions: [
@@ -390,6 +409,7 @@ public struct CarPlayMessage: Identifiable, Codable, Sendable {
     public let timestamp: Date
 
     public init(id: UUID = UUID(), content: String, isUser: Bool, timestamp: Date = Date()) {
+        // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         self.id = id
         self.content = content
         self.isUser = isUser
