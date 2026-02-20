@@ -12,6 +12,13 @@ import os.log
 
 private let coordLogger = Logger(subsystem: "ai.thea.app", category: "ToolExecutionCoordinator")
 
+/// Wraps [String: Any] to satisfy Swift 6 Sendable requirements for JSON-compatible dicts.
+/// Safe: Dictionary is a value type; JSON primitives (String, Number, Bool, null) are all value types.
+private struct _SendableDict: @unchecked Sendable {
+    let dict: [String: Any]
+    init(_ dict: [String: Any]) { self.dict = dict }
+}
+
 // MARK: - Coordinator
 
 // Changed from `actor` to `@MainActor final class`: the coordinator has no mutable stored state,
@@ -138,11 +145,12 @@ final class ToolExecutionCoordinator {
                 var toolStep = ToolUseStep(call: AnthropicToolCall(id: toolId, name: toolName, input: rawInput))
                 // Create input as a fresh region (not derived from rawInput which is captured by onToolStep)
                 var inputDict = (block["input"] as? [String: Any]) ?? [:] 
-                input["_tool_use_id"] = toolId
+                inputDict["_tool_use_id"] = toolId
+                let sendableInput = _SendableDict(inputDict)
                 coordLogger.debug("Executing tool: \(toolName)")
                 await onToolStep(toolStep)
 
-                let result = await executeToolCall(name: toolName, input: input)
+                let result = await executeToolCall(name: toolName, input: sendableInput.dict)
 
                 toolStep.result = String(result.content.prefix(300))
                 toolStep.isRunning = false
