@@ -104,7 +104,7 @@ struct ArtifactBrowserView: View {
             ContentUnavailableView(
                 "No Artifacts",
                 systemImage: "square.stack.3d.up",
-                description: Text(searchText.isEmpty ? "Generated code, plans, and exports will appear here." : "No results for \"\(searchText)\"."))
+                description: Text(searchText.isEmpty ? "Generated code, plans, and exports will appear here." : "No results for \"\(searchText)\".")
             )
         } else {
             artifactList

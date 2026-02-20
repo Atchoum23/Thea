@@ -376,7 +376,7 @@ targets:
           - "**/Widgets/**"
           # **/Views/Code/** already excluded above (line ~338)
           - "**/Views/LocalModels/**"  # LocalModelsView extracted sub-view (duplicate at UI/Views/LocalModels/)
-          # Views/LifeTracking — ACTIVATED (LifeTrackingDashboardView, LifeMonitoring active)
+          - "Shared/Views/LifeTracking/**"  # Canonical copy is Shared/UI/Views/LifeTracking/ — exclude old Shared/Views/ path to prevent duplicate
           - "**/Settings/Advanced/**"  # Extracted sub-views duplicate AdvancedSettingsView inline types
           - "**/Settings/LocalModels/**"  # Extracted sub-views duplicate LocalModelsSettingsView inline types
           - "**/Settings/Privacy/**"  # Extracted sub-views duplicate PrivacySettingsView inline types

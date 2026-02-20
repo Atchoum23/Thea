@@ -62,7 +62,10 @@ enum SchemaV1: VersionedSchema {
             GeneratedArtifact.self,
 
             // Q3: Proactive Intelligence
-            DeliveredInsight.self
+            DeliveredInsight.self,
+
+            // D3: Classification Outcome Learning
+            ClassificationOutcome.self
         ]
     }
 }
