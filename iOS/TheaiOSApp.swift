@@ -117,5 +117,15 @@ struct TheaiOSApp: App {
                 await FinancialIntelligenceService.shared.syncAll()
             }
         }
+
+        // AAH3: HeadphoneMotionService — start AirPods/Beats motion monitoring for readiness signals.
+        // FoundationModelsService — check Apple Intelligence availability.
+        // MusicKitIntelligenceService — fetch recent tracks.
+        Task {
+            try? await Task.sleep(for: .seconds(9))
+            HeadphoneMotionService.shared.startMonitoring()
+            await FoundationModelsService.shared.refreshAvailability()
+            await MusicKitIntelligenceService.shared.fetchRecentTracks()
+        }
     }
 }

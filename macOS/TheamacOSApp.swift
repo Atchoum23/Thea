@@ -408,6 +408,20 @@ struct TheamacOSApp: App {
             let briefing = await GitHubIntelligenceService.shared.morningBriefing()
             logger.info("AAG3: GitHub morning briefing — \(briefing, privacy: .public)")
         }
+
+        // AAH3: FoundationModelsService — check Apple Intelligence availability on launch.
+        // MusicKitIntelligenceService — fetch recent tracks for PersonalParameters context.
+        // XAPIService — refresh authenticated user if PAT is configured.
+        Task {
+            try? await Task.sleep(for: .seconds(18))
+            await FoundationModelsService.shared.refreshAvailability()
+            await MusicKitIntelligenceService.shared.fetchRecentTracks()
+            if XAPIService.shared.isAuthenticated {
+                try? await XAPIService.shared.refreshCurrentUser()
+                logger.info("AAH3: XAPIService user refreshed")
+            }
+            logger.info("AAH3: FoundationModelsService + MusicKit + X startup complete")
+        }
     }
 
     private func configureWindow() {
