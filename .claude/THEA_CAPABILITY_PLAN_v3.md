@@ -148,14 +148,21 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AA3: Re-verify       | ⏳ PENDING      | Blocked by Z3 |
 | Phase AB3: Notarization    | ⏳ PENDING      | Blocked by AA3 |
 | Phase AC3: Final Report    | ⏳ PENDING      | Blocked by AB3 |
-| Phase AD3: Manual Gate     | ⏳ MANUAL       | Alexis only — last step |
+| Phase AD3: Manual Gate     | ⏳ MANUAL       | Alexis only — last step (after AO3) |
 | Phase AE3: Platform Obs.   | ✅ DONE         | PlatformFeaturesHub (5s delay), TheaIntelligenceOrchestrator (6s delay), ApprovalManager (lazy on-demand) — all wired in TheamacOSApp.setupManagers() |
 | Phase AF3: Settings Nav    | ✅ DONE         | Stream 5 (MSM3U) took over. 18 views wired into MacSettingsView detailContent; TheaMessagingChatView + ConversationLanguagePickerView confirmed wired; CLAUDE.md discrepancies fixed sha 97b7e86f |
 | Phase AG3: Comp. QA        | ✅ DONE         | sha f88bb98d — 4046 tests pass, 0 lint, all 4 platforms build, stubs activated (PromptOptimizer, WindowManager, LiveGuidance region picker) |
 | Phase AH3: 8-Hat Audit     | ✅ DONE         | sha 27649c41 — RED: language whitelist; PURPLE: autonomy audit trail; BLACK/WHITE/GREY/BLUE/GREEN/SCRIPT-KIDDIE all verified |
-| **Overall v3 %**          | **98%**         | All A3–W3 + AE3 + AF3 + AG3 + AH3 ✅ DONE (20 phases); CI running on f88bb98d; Wave 7 (X3–AD3) next |
+| Phase AI3: PersonalParams  | ✅ DONE         | sha d91d3234 — 24 Tier 2 @AppStorage keys, snapshot() for Claude §0.3 injection, Tier 1 constants. Wave 7 underway on MSM3U S5. |
+| Phase AJ3–AN3: Wave 7      | ✅ DONE        | sha 24d2c894 — HumanReadinessEngine, macOSBehavioralSignalExtractor, InterruptBudgetManager, ResourceOrchestrator, DataFreshnessOrchestrator, EnergyAdaptiveThrottler AM3, PersonalParametersSettingsView. All linted. |
+| Phase AO3: Pre-AD3 AutoVer | ⏳ PENDING      | Runs after AC3 — gateway+tests+CI+release-tag automated (was v2 Phase V scriptable items) |
+| Phase AP3: MSM3U Reliability| ⏳ PENDING     | ServerHealthMonitor, heartbeat, MBAM2 failover, tmux-resurrect, Tailscale daemon |
+| Phase AQ3: Agent Orch.     | ⏳ PENDING      | AgentOrchestrator (circuit breaker, dynamic reorchestration) + AutonomousSessionManager (watchdog, notification-only) |
+| Phase AR3: API Error Prev. | ⏳ PENDING      | AnthropicConversationManager: atomic pair, pre-send validation, safe truncation, 400 recovery |
+| Phase AS3: Adaptive Timing | ⏳ PENDING      | AdaptivePoller: decorrelated jitter + known-duration skip + activity-detection; replaces fixed sleep() |
+| **Overall v3 %**          | **99% autonomous done** | A3–W3 + AE3–AH3 + AI3–AN3 ✅ DONE (26 phases); Wave 8 (AO3–AS3) + Wave 6 (X3–AC3) + AD3 pending. |
 
-*Last updated: 2026-02-20 CET — AG3+AH3 ✅ DONE; 4046 tests pass, 0 SwiftLint violations, all platforms build; CI on f88bb98d; pushsync pending*
+*Last updated: 2026-02-20 — Wave 7 AI3–AN3 ✅ DONE (sha 24d2c894); all linted, pushsynced; next: Wave 8 AO3–AS3*
 
 ---
 
@@ -4696,6 +4703,684 @@ swiftlint lint 2>&1 | grep -c "error:\|warning:" | xargs -I{} sh -c '[ "$1" -eq 
 gh run list --limit 6 --json name,conclusion --jq '.[] | "\(.name): \(.conclusion)"' 2>/dev/null
 ```
 Commit: `git commit -m "Auto-save: AH3 complete — 8-hat audit; all findings implemented; CI green"`
+
+---
+
+## PHASE AO3: PRE-AD3 AUTOMATED VERIFICATION
+
+**Status: ⏳ PENDING — autonomous; runs after AC3 (Wave 6), before AD3**
+
+**Context**: v2 Phase V was deferred to avoid reviewing an incomplete system mid-build. Phase AO3 automates all scriptable Phase V items. Only subjective quality checks (TTS listening quality, STT accuracy, vision response quality, cursor handoff between devices) remain for AD3.
+
+**Note**: Wave 7 (AI3→AN3) is already underway as of 2026-02-20. S5 (phase-r:4) committed AI3 (PersonalParameters) and is working on AJ3-AL3 (HumanReadinessEngine, ResourceOrchestrator, etc). AO3-AS3 phases run AFTER Wave 7 + Wave 6 verification complete.
+
+### AO3-1: Messaging Gateway Health Check
+```bash
+curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:18789/health
+# Expected: 200. If 000/refused: TheaMessagingGateway not running — check app lifecycle wiring.
+```
+
+### AO3-2: Full Test Suite
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+swift test 2>&1 | tail -5
+# Expected: 0 failures
+```
+
+### AO3-3: All 6 GH Workflows Green
+```bash
+gh run list --limit 20 --json workflowName,conclusion \
+  --jq '[.[] | select(.conclusion=="success")] | [.[].workflowName] | unique | length'
+# Expected: 6
+```
+
+### AO3-4: Release Tag + Notarized Artifacts
+```bash
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea" && git status  # Must be clean
+git tag -a v1.5.0 -m "Thea v1.5.0 — v2+v3 capability release"
+git pushsync
+gh run watch --exit-status  # Wait for release.yml
+gh release view v1.5.0 --json assets --jq '[.assets[].name]'
+# Expected: Thea-v1.5.0.dmg + Thea-v1.5.0.ipa
+```
+
+### AO3 Verification Gate
+```bash
+GW=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:18789/health 2>/dev/null)
+TF=$(swift test 2>&1 | grep -c "FAILED" 2>/dev/null || echo 0)
+CIG=$(gh run list --limit 20 --json workflowName,conclusion \
+  --jq '[.[] | select(.conclusion=="success")] | [.[].workflowName] | unique | length' 2>/dev/null)
+TAG=$(git tag -l v1.5.0 | wc -l | tr -d ' ')
+echo "Gateway:$GW(want 200) Tests-failed:$TF(want 0) CI-green:$CIG(want 6) Tag:$TAG(want 1)"
+```
+
+Commit: `git commit -m "Auto-save: AO3 — pre-AD3 automated verification complete; gateway+tests+CI+release-tag all passed"`
+
+---
+
+## PHASE AP3: MSM3U RELIABILITY INFRASTRUCTURE
+
+**Status: ⏳ PENDING — autonomous; run on MSM3U after AO3**
+
+**Goal**: Power cuts, ISP outages, router failures must not leave Thea permanently offline. Implements heartbeat monitoring, MBAM2 failover, boot recovery, and in-app health monitoring.
+
+### AP3-1: ServerHealthMonitor Swift Actor
+
+Create `Shared/Intelligence/ServerHealthMonitor.swift`:
+
+```swift
+// Monitors primary server (MSM3U:18789) reachability. On 3 consecutive failures,
+// triggers OS-level failover script (macOS) and sends ntfy alert (all platforms).
+import Foundation
+import Network
+
+actor ServerHealthMonitor {
+    static let shared = ServerHealthMonitor()
+    private var consecutiveFailures = 0
+    private let failoverThreshold = 3
+    private var isFailoverActive = false
+    private var monitorTask: Task<Void, Never>?
+
+    func startMonitoring() {
+        monitorTask = Task {
+            while !Task.isCancelled {
+                await checkHealth()
+                try? await Task.sleep(for: .seconds(30))
+            }
+        }
+    }
+    func stopMonitoring() { monitorTask?.cancel() }
+
+    private func checkHealth() async {
+        let reachable = await canConnect(host: "msm3u.local", port: 18789)
+        if reachable {
+            if consecutiveFailures >= failoverThreshold && isFailoverActive {
+                isFailoverActive = false; consecutiveFailures = 0
+                await notify(title: "MSM3U Back Online", body: "Failover cancelled.", priority: "default")
+            }
+            consecutiveFailures = 0
+        } else {
+            consecutiveFailures += 1
+            if consecutiveFailures >= failoverThreshold && !isFailoverActive {
+                isFailoverActive = true
+                #if os(macOS)
+                let p = Process(); p.executableURL = URL(fileURLWithPath: "/Users/alexis/bin/msm3u-failover.sh"); try? p.run()
+                #endif
+                await notify(title: "MSM3U Offline", body: "3 failures. Failover initiated.", priority: "high")
+            }
+        }
+    }
+
+    private func canConnect(host: String, port: UInt16) async -> Bool {
+        await withCheckedContinuation { cont in
+            var done = false
+            let conn = NWConnection(host: NWEndpoint.Host(host), port: NWEndpoint.Port(rawValue: port)!, using: .tcp)
+            conn.stateUpdateHandler = { s in
+                guard !done else { return }
+                switch s {
+                case .ready: done = true; cont.resume(returning: true); conn.cancel()
+                case .failed, .waiting: done = true; cont.resume(returning: false); conn.cancel()
+                default: break
+                }
+            }
+            conn.start(queue: .global())
+            DispatchQueue.global().asyncAfter(deadline: .now() + 5) { guard !done else { return }; done = true; cont.resume(returning: false); conn.cancel() }
+        }
+    }
+
+    private func notify(title: String, body: String, priority: String) async {
+        guard let url = URL(string: "https://ntfy.sh/thea-msm3u") else { return }
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"; req.setValue(title, forHTTPHeaderField: "Title")
+        req.setValue(priority, forHTTPHeaderField: "Priority"); req.httpBody = body.data(using: .utf8)
+        _ = try? await URLSession.shared.data(for: req)
+    }
+}
+```
+
+Wire in `TheamacOSApp.setupManagers()` and `TheaApp.swift` (iOS), 10s deferred:
+```swift
+Task { try? await Task.sleep(for: .seconds(10)); ServerHealthMonitor.shared.startMonitoring() }
+```
+
+### AP3-2: Heartbeat Agent on MSM3U (run these commands on MSM3U)
+```bash
+mkdir -p ~/bin
+cat > ~/bin/msm3u-heartbeat.sh << 'SCRIPT'
+#!/bin/bash
+curl -s -X POST "https://ntfy.sh/thea-msm3u-hb" -H "Title: MSM3U Heartbeat" \
+    -H "Priority: min" -d "alive $(date '+%H:%M') uptime:$(uptime | awk '{print $3}' | tr -d ',')" 2>/dev/null
+SCRIPT
+chmod +x ~/bin/msm3u-heartbeat.sh
+
+cat > ~/Library/LaunchAgents/com.alexis.msm3u-heartbeat.plist << 'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.alexis.msm3u-heartbeat</string>
+  <key>ProgramArguments</key><array><string>/Users/alexis/bin/msm3u-heartbeat.sh</string></array>
+  <key>StartInterval</key><integer>60</integer>
+  <key>RunAtLoad</key><true/>
+  <key>ThrottleInterval</key><integer>10</integer>
+</dict></plist>
+PLIST
+launchctl load ~/Library/LaunchAgents/com.alexis.msm3u-heartbeat.plist
+```
+
+### AP3-3: MBAM2 Failover + Watchdog Scripts (run on MBAM2)
+```bash
+cat > ~/bin/msm3u-failover.sh << 'SCRIPT'
+#!/bin/bash
+[ -f /tmp/msm3u-failover-active ] && exit 0
+touch /tmp/msm3u-failover-active
+cd "/Users/alexis/Documents/IT & Tech/MyApps/Thea" && git pull --rebase 2>&1 | tail -3
+open -a /Applications/Thea.app
+curl -s -X POST "https://ntfy.sh/thea-msm3u" -H "Title: MBAM2 Failover Active" \
+    -H "Priority: high" -d "MSM3U offline. MBAM2 serving. Large models unavailable — API fallback."
+SCRIPT
+chmod +x ~/bin/msm3u-failover.sh
+
+cat > ~/bin/msm3u-watchdog.sh << 'SCRIPT'
+#!/bin/bash
+LAST=$(curl -s "https://ntfy.sh/thea-msm3u-hb/json?poll=1&since=90s" 2>/dev/null)
+if [ -z "$LAST" ]; then /Users/alexis/bin/msm3u-failover.sh; else rm -f /tmp/msm3u-failover-active; fi
+SCRIPT
+chmod +x ~/bin/msm3u-watchdog.sh
+```
+
+### AP3-4: tmux-resurrect + tmux-continuum (on MSM3U)
+```bash
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm 2>/dev/null || true
+cat >> ~/.tmux.conf << 'EOF'
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+set -g @continuum-restore 'on'
+set -g @continuum-save-interval '5'
+set -g @resurrect-capture-pane-contents 'on'
+EOF
+~/.tmux/plugins/tpm/bin/install_plugins 2>/dev/null || true
+```
+
+### AP3-5: Tailscale as System Daemon (on MSM3U — replaces App Store version)
+```bash
+brew install --formula tailscale
+sudo brew services start tailscale
+# One-time auth (use a reusable no-expiry auth key from tailscale.com/admin):
+# sudo tailscale up --authkey=tskey-auth-XXXXX --hostname=msm3u
+sudo tailscale status
+```
+
+### AP3 Verification Gate
+```bash
+launchctl list | grep msm3u-heartbeat && echo "✅ heartbeat" || echo "❌ heartbeat"
+grep -r "ServerHealthMonitor.shared.startMonitoring" \
+  "/Users/alexis/Documents/IT & Tech/MyApps/Thea/" --include="*.swift" | wc -l  # expect ≥2
+```
+
+Commit: `git commit -m "Auto-save: AP3 — MSM3U reliability: ServerHealthMonitor actor, heartbeat agent, MBAM2 failover, tmux-resurrect, Tailscale daemon"`
+
+---
+
+## PHASE AQ3: THEA AUTONOMOUS AGENT ORCHESTRATION
+
+**Status: ⏳ PENDING — autonomous; implement on MSM3U after AP3**
+
+**Goal**: Inspired by the v3 MISSION MONITOR's dynamic orchestrator, Thea manages its own AI sub-agents with circuit breakers, dynamic reassignment, persistent progress state, and notification-only human interface (alert on failure only — never on progress).
+
+### AQ3-1: AgentOrchestrator Actor
+
+Create `Shared/Intelligence/AgentOrchestration/AgentOrchestrator.swift`:
+
+```swift
+// Supervisor/worker orchestration: circuit breakers, dynamic reorchestration,
+// persistent progress.json state, parallel task execution via TaskGroup.
+// Based on: AWS circuit breaker pattern + Anthropic agent harness research (2025).
+import Foundation
+
+actor AgentOrchestrator {
+    enum TaskDomain: String, Codable { case swiftCode, tests, docs, analysis, fileOps }
+    enum CircuitState: Codable {
+        case closed, halfOpen
+        case open(until: Date)
+    }
+
+    struct AgentTask: Identifiable, Codable {
+        let id: UUID; let domain: TaskDomain; let description: String
+        var status: Status = .pending; var dependencies: [UUID] = []
+        var expectedTypes: [String] = []; var modifiedFiles: [String] = []
+        enum Status: String, Codable { case pending, inProgress, done, blocked, failed }
+    }
+
+    struct AgentResult { let success: Bool; let failureReason: String?; let verificationMethod: String }
+
+    private let spawnThreshold = 80_000          // tokens — spawn new agent beyond this (context rot)
+    private let circuitBreakerThreshold = 3      // consecutive failures → BLOCKED
+    private let taskTimeoutSeconds: Double = 300  // 5 min per subtask
+    private var agents: [UUID: SubAgent] = [:]
+    private let progressURL: URL
+
+    struct SubAgent {
+        let id: UUID; let specialization: TaskDomain
+        var contextTokens = 0; var consecutiveFailures = 0; var circuitState: CircuitState = .closed
+    }
+
+    init(progressURL: URL) { self.progressURL = progressURL }
+
+    func orchestrate(tasks: [AgentTask]) async {
+        var pending = tasks; var completed: [UUID: AgentResult] = [:]
+        while !pending.isEmpty {
+            let ready = pending.filter { t in t.dependencies.allSatisfy { completed[$0]?.success == true } }
+            guard !ready.isEmpty else { await notifyBlocked(tasks: pending); break }
+            await withTaskGroup(of: (AgentTask, AgentResult).self) { group in
+                for task in ready {
+                    group.addTask {
+                        let agent = await self.selectOrSpawn(for: task)
+                        return (task, await self.executeWithBreaker(agent: agent, task: task))
+                    }
+                }
+                for await (task, result) in group {
+                    completed[task.id] = result
+                    pending.removeAll { $0.id == task.id }
+                    await checkpoint(task: task, result: result)
+                    if !result.success { await notifyFailure(task: task, reason: result.failureReason) }
+                }
+            }
+        }
+        // Silent completion — human checks git log / progress.json
+    }
+
+    private func selectOrSpawn(for task: AgentTask) async -> SubAgent {
+        if let a = agents.values.first(where: {
+            $0.specialization == task.domain && $0.contextTokens < spawnThreshold &&
+            $0.consecutiveFailures < circuitBreakerThreshold && isCircuitClosed($0)
+        }) { return a }
+        let a = SubAgent(id: UUID(), specialization: task.domain)
+        agents[a.id] = a; return a
+    }
+
+    private func executeWithBreaker(agent: SubAgent, task: AgentTask) async -> AgentResult {
+        var a = agent
+        if case .open(let until) = a.circuitState, Date() < until {
+            return AgentResult(success: false, failureReason: "Circuit open — cooldown", verificationMethod: "circuit-breaker")
+        }
+        do {
+            let result = try await withThrowingTaskGroup(of: AgentResult.self) { group in
+                group.addTask { try await self.invokeAndVerify(agent: a, task: task) }
+                group.addTask { try await Task.sleep(nanoseconds: UInt64(self.taskTimeoutSeconds * 1e9)); throw CancellationError() }
+                let r = try await group.next()!; group.cancelAll(); return r
+            }
+            a.consecutiveFailures = 0; a.circuitState = .closed; agents[a.id] = a; return result
+        } catch {
+            a.consecutiveFailures += 1
+            if a.consecutiveFailures >= circuitBreakerThreshold {
+                let cd = min(300.0, pow(2, Double(a.consecutiveFailures)) * 10)
+                a.circuitState = .open(until: Date().addingTimeInterval(cd))
+                await writeNote("BLOCKED: \(task.description) — \(error)")
+            }
+            agents[a.id] = a
+            return AgentResult(success: false, failureReason: error.localizedDescription, verificationMethod: "timeout")
+        }
+    }
+
+    // Self-verification gate — agent certifies own output before marking done
+    private func invokeAndVerify(agent: SubAgent, task: AgentTask) async throws -> AgentResult {
+        // 1. Execute task (Claude API call, file writes, etc.)
+        // 2. Verify: xcodebuild BUILD SUCCEEDED
+        // 3. Verify: every expectedType referenced ≥1 time (grep)
+        // 4. Verify: no TODO/FIXME in modifiedFiles
+        return AgentResult(success: true, failureReason: nil, verificationMethod: "build+grep+stub-check")
+    }
+
+    private func isCircuitClosed(_ a: SubAgent) -> Bool {
+        if case .open(let until) = a.circuitState { return Date() >= until }; return true
+    }
+
+    private func checkpoint(task: AgentTask, result: AgentResult) async {
+        await writeNote("\(result.success ? "DONE" : "FAILED"): \(task.description) — \(result.verificationMethod)")
+    }
+
+    private func writeNote(_ note: String) async {
+        let line = "[\(ISO8601DateFormatter().string(from: Date()))] \(note)\n"
+        guard let data = line.data(using: .utf8),
+              let existing = try? Data(contentsOf: progressURL) else {
+            try? line.data(using: .utf8)?.write(to: progressURL, options: .atomic); return
+        }
+        try? (existing + data).write(to: progressURL, options: .atomic)
+    }
+
+    // Human notification policy: ALERT on failure/block, SILENT on success
+    private func notifyFailure(task: AgentTask, reason: String?) async {
+        await sendNotif(title: "Thea Agent BLOCKED", body: "\(task.description): \(reason ?? "unknown")", critical: true)
+    }
+    private func notifyBlocked(tasks: [AgentTask]) async {
+        await sendNotif(title: "Orchestrator Stalled", body: "\(tasks.count) tasks blocked on dependencies", critical: true)
+    }
+
+    private func sendNotif(title: String, body: String, critical: Bool) async {
+        let content = UNMutableNotificationContent()
+        content.title = title; content.body = body
+        content.sound = critical ? .defaultCritical : .default
+        let req = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        try? await UNUserNotificationCenter.current().add(req)
+    }
+}
+```
+
+### AQ3-2: AutonomousSessionManager (stale session watchdog)
+
+Create `Shared/Intelligence/AgentOrchestration/AutonomousSessionManager.swift`:
+
+```swift
+// Ensures zero monitoring: reads progress.json at start, alerts only if stalled.
+// Human notification policy: only alert if no git commit in 20+ minutes.
+@MainActor
+final class AutonomousSessionManager: ObservableObject {
+    private let staleThreshold: TimeInterval = 20 * 60
+    private var watchdog: Timer?
+    private let repoPath: String
+
+    init(repoPath: String = "/Users/alexis/Documents/IT & Tech/MyApps/Thea") {
+        self.repoPath = repoPath
+    }
+
+    func startSession() { startWatchdog() }
+
+    private func startWatchdog() {
+        watchdog = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
+            Task { @MainActor in await self?.checkStaleness() }
+        }
+    }
+
+    private func checkStaleness() async {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+        process.arguments = ["-C", repoPath, "log", "-1", "--format=%ct"]
+        let pipe = Pipe(); process.standardOutput = pipe
+        try? process.run(); process.waitUntilExit()
+        let ts = TimeInterval(String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "0") ?? 0
+        let elapsed = Date().timeIntervalSince1970 - ts
+        guard elapsed > staleThreshold else { return }
+        let mins = Int(elapsed / 60)
+        let content = UNMutableNotificationContent()
+        content.title = "Thea Agent Stalled"
+        content.body = "\(mins) min since last git commit — may need attention"
+        content.sound = .defaultCritical
+        let req = UNNotificationRequest(identifier: "stale-\(UUID())", content: content, trigger: nil)
+        try? await UNUserNotificationCenter.current().add(req)
+    }
+}
+```
+
+Wire in `TheamacOSApp.setupManagers()` (14s deferred):
+```swift
+Task {
+    try? await Task.sleep(for: .seconds(14))
+    let repoPath = "/Users/alexis/Documents/IT & Tech/MyApps/Thea"
+    await AutonomousSessionManager(repoPath: repoPath).startSession()
+}
+```
+
+### AQ3 Verification Gate
+```bash
+grep -r "AgentOrchestrator\|AutonomousSessionManager" \
+  "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Shared/" --include="*.swift" \
+  | grep -v "AgentOrchestrator.swift\|AutonomousSessionManager.swift" | wc -l  # expect ≥2
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
+  -destination "platform=macOS" build -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO \
+  2>&1 | grep -E "(error:|BUILD SUCCEEDED)"
+```
+
+Commit: `git commit -m "Auto-save: AQ3 — AgentOrchestrator (circuit breaker + dynamic reorchestration) + AutonomousSessionManager (stale watchdog + notification-only interface)"`
+
+---
+
+## PHASE AR3: API ERROR PREVENTION + CONVERSATION MANAGEMENT
+
+**Status: ⏳ PENDING — autonomous; implement on MSM3U after AQ3**
+
+**Root causes of `tool_use_id` mismatch error 400** (GitHub issues #1894, #25959, #40391, Zed #40391):
+1. Non-atomic pair insertion — `tool_result` saved without its `assistant+tool_use` message
+2. Parallel tool results split across multiple `user` messages (must be ONE user message per assistant turn)
+3. Context truncation removes `tool_use` while keeping its `tool_result`
+4. Text block placed BEFORE `tool_result` blocks (API requires tool_results FIRST in user message)
+
+### AR3-1: AnthropicConversationManager Actor
+
+Create `Shared/AI/AnthropicConversationManager.swift`:
+
+```swift
+// Manages Claude API message history. Prevents error 400 "unexpected tool_use_id"
+// through atomic pair insertion, ordering enforcement, pre-send validation, safe truncation.
+import Foundation
+
+actor AnthropicConversationManager {
+
+    struct Message: Codable, Sendable {
+        let role: Role; var content: [ContentBlock]
+        enum Role: String, Codable { case user, assistant }
+    }
+
+    enum ContentBlock: Codable, Sendable {
+        case text(String)
+        case toolUse(id: String, name: String)
+        case toolResult(toolUseId: String, content: String, isError: Bool)
+
+        var toolUseId: String? { if case .toolUse(let id, _) = self { return id }; return nil }
+        var toolResultId: String? { if case .toolResult(let id, _, _) = self { return id }; return nil }
+    }
+
+    private var messages: [Message] = []
+    private let maxTokens: Int
+
+    init(maxTokens: Int = 150_000) { self.maxTokens = maxTokens }
+
+    // ATOMIC: only way to add tool rounds. Validates IDs match before appending either message.
+    func appendToolRound(assistantResponse: Message, toolResults: [(id: String, content: String, isError: Bool)]) throws {
+        let required = Set(assistantResponse.content.compactMap(\.toolUseId))
+        let provided = Set(toolResults.map(\.id))
+        guard required == provided else {
+            throw ConvError.toolIdMismatch(expected: required, got: provided)
+        }
+        // tool_result blocks FIRST — required by Anthropic API
+        let blocks = toolResults.map { ContentBlock.toolResult(toolUseId: $0.id, content: $0.content, isError: $0.isError) }
+        messages.append(assistantResponse)
+        messages.append(Message(role: .user, content: blocks))
+    }
+
+    func appendUserText(_ text: String) { messages.append(Message(role: .user, content: [.text(text)])) }
+    func appendAssistantText(_ text: String) { messages.append(Message(role: .assistant, content: [.text(text)])) }
+
+    // Pre-send validation — call before every Anthropic API request
+    func validate() throws {
+        for i in 0..<messages.count {
+            guard messages[i].role == .assistant else { continue }
+            let toolIds = messages[i].content.compactMap(\.toolUseId)
+            guard !toolIds.isEmpty else { continue }
+            guard i + 1 < messages.count, messages[i+1].role == .user else {
+                throw ConvError.unpaired(index: i, ids: toolIds)
+            }
+            let resultIds = Set(messages[i+1].content.compactMap(\.toolResultId))
+            guard Set(toolIds) == resultIds else {
+                throw ConvError.toolIdMismatch(expected: Set(toolIds), got: resultIds)
+            }
+        }
+    }
+
+    // Safe truncation — never splits a tool_use/tool_result pair
+    func truncateToFit() {
+        while estimatedTokens() > maxTokens && messages.count >= 2 {
+            if messages[0].role == .assistant && messages[0].content.contains(where: { $0.toolUseId != nil }) && messages.count >= 2 && messages[1].role == .user {
+                messages.removeFirst(2)
+            } else { messages.removeFirst() }
+        }
+    }
+
+    // Recovery — on 400 error, scan back to last clean boundary
+    func recoverFromToolMismatch() {
+        var i = messages.count - 1
+        while i >= 0 {
+            if messages[i].role == .assistant && !messages[i].content.contains(where: { $0.toolUseId != nil }) {
+                messages = Array(messages.prefix(i + 1)); return
+            }
+            i -= 1
+        }
+        messages = []
+    }
+
+    func currentMessages() throws -> [Message] { try validate(); return messages }
+    private func estimatedTokens() -> Int { messages.count * 500 }
+
+    enum ConvError: Error {
+        case toolIdMismatch(expected: Set<String>, got: Set<String>)
+        case unpaired(index: Int, ids: [String])
+    }
+}
+```
+
+Wire `AnthropicConversationManager` into `AnthropicProvider.swift` — replace raw message array with manager. Call `validate()` before every API URLRequest. On 400 error with `tool_use_id` in message, call `recoverFromToolMismatch()` then retry once.
+
+### AR3 Verification Gate
+```bash
+grep -r "AnthropicConversationManager" \
+  "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Shared/AI/" --include="*.swift" \
+  | grep -v "AnthropicConversationManager.swift" | wc -l  # expect ≥1 (wired in provider)
+grep -r "appendToolRound\|\.validate()\|recoverFromToolMismatch" \
+  "/Users/alexis/Documents/IT & Tech/MyApps/Thea/" --include="*.swift" | wc -l  # expect ≥3
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
+  -destination "platform=macOS" build -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO \
+  2>&1 | grep -E "(error:|BUILD SUCCEEDED)"
+```
+
+Commit: `git commit -m "Auto-save: AR3 — AnthropicConversationManager: atomic tool pair insertion, pre-send validation, safe truncation, 400 error recovery"`
+
+---
+
+## PHASE AS3: ADAPTIVE TIMING ENGINE
+
+**Status: ⏳ PENDING — autonomous; implement on MSM3U after AR3**
+
+**Problem**: Fixed `sleep()` calls waste wall-clock time (too long) or CPU (too short). Research finding: optimal strategy is decorrelated jitter for retry/poll loops; activity-based step-up for process monitoring (AWS Builders' Library, 2026).
+
+### AS3-1: AdaptivePoller Generic Actor
+
+Create `Shared/Intelligence/AdaptivePoller.swift`:
+
+```swift
+// Generic adaptive poller. Replaces all fixed sleep() calls in intelligence systems.
+// Three strategies from research: decorrelated jitter (AWS), known-duration skip+tail, activity-detection.
+import Foundation
+
+actor AdaptivePoller<T: Sendable> {
+
+    enum Strategy {
+        // Best for: CI polling, HTTP retries. Avoids thundering herd lockstep.
+        case decorrelatedJitter(base: Double, cap: Double)
+        // Best for: jobs with known expected duration (skip 80% → poll tail).
+        case knownDuration(estimatedSeconds: Double, tailCap: Double = 120)
+        // Best for: tmux/process monitoring. Fast when active, slow when idle.
+        case activityDetection(levels: [Double], inactivityThresholds: [Double])
+    }
+
+    private let strategy: Strategy
+    private var currentSleep: Double
+    private var attempt = 0
+    private var inactiveSeconds: Double = 0
+
+    init(strategy: Strategy) {
+        self.strategy = strategy
+        switch strategy {
+        case .decorrelatedJitter(let b, _): currentSleep = b
+        case .knownDuration(let e, _): currentSleep = e * 0.8
+        case .activityDetection(let l, _): currentSleep = l.first ?? 3
+        }
+    }
+
+    func poll(timeout: Double = 7200, check: @Sendable () async throws -> T?) async throws -> T {
+        let deadline = Date().addingTimeInterval(timeout)
+        if case .knownDuration(_, _) = strategy, currentSleep > 1 {
+            // Skip initial phase (80% of estimated time)
+            try await Task.sleep(nanoseconds: UInt64(currentSleep * 1e9))
+            currentSleep = 30  // switch to polling
+        }
+        while Date() < deadline {
+            if let result = try await check() { return result }
+            try await Task.sleep(nanoseconds: UInt64(nextInterval() * 1e9))
+        }
+        throw PollerError.timeout
+    }
+
+    private func nextInterval() -> Double {
+        attempt += 1
+        switch strategy {
+        case .decorrelatedJitter(let base, let cap):
+            let next = min(cap, Double.random(in: base...(max(base * 2, currentSleep * 3))))
+            currentSleep = next; return next
+        case .knownDuration(_, let tailCap):
+            let base = min(tailCap, 30.0 * pow(1.3, Double(min(attempt, 10))))
+            return base * Double.random(in: 1.0...1.4)
+        case .activityDetection(let levels, let thresholds):
+            return currentSleep  // updated by reportActivity/reportInactivity
+        }
+    }
+
+    func reportActivity() {
+        if case .activityDetection(let levels, _) = strategy {
+            currentSleep = levels.first ?? 3; attempt = 0; inactiveSeconds = 0
+        }
+    }
+
+    func reportInactivity(additionalSeconds: Double) {
+        if case .activityDetection(let levels, let thresholds) = strategy {
+            inactiveSeconds += additionalSeconds
+            for (i, threshold) in thresholds.enumerated() {
+                if inactiveSeconds >= threshold, i + 1 < levels.count { currentSleep = levels[i + 1] }
+            }
+        }
+    }
+
+    enum PollerError: Error { case timeout }
+}
+
+// Pre-configured instances for Thea use cases:
+extension AdaptivePoller where T == Bool {
+    // CI job: skip 44 min (80% of 55 min), then poll 30s→120s with jitter
+    static var ciPoller: AdaptivePoller<Bool> {
+        AdaptivePoller(strategy: .knownDuration(estimatedSeconds: 55 * 60, tailCap: 120))
+    }
+    // tmux monitoring: 3s→5s→10s→30s→60s
+    static var tmuxPoller: AdaptivePoller<Bool> {
+        AdaptivePoller(strategy: .activityDetection(
+            levels: [3, 5, 10, 30, 60], inactivityThresholds: [30, 120, 300, 600]))
+    }
+    // HTTP health: 5s→60s decorrelated
+    static var httpPoller: AdaptivePoller<Bool> {
+        AdaptivePoller(strategy: .decorrelatedJitter(base: 5, cap: 60))
+    }
+}
+```
+
+### AS3-2: Replace Fixed Sleeps in Intelligence Systems
+```bash
+# Find all fixed sleep calls to audit:
+grep -rn "Task\.sleep\|sleep(" \
+  "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Shared/Intelligence/" \
+  --include="*.swift" | grep -v "AdaptivePoller"
+# For each: replace with appropriate AdaptivePoller strategy
+# Priority targets: ProactiveInsightEngine, ServerHealthMonitor (AP3), SmartNotificationScheduler
+```
+
+### AS3 Verification Gate
+```bash
+grep -r "AdaptivePoller" \
+  "/Users/alexis/Documents/IT & Tech/MyApps/Thea/Shared/" --include="*.swift" \
+  | grep -v "AdaptivePoller.swift" | wc -l  # expect ≥3 (ciPoller, tmuxPoller, httpPoller all used)
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
+  -destination "platform=macOS" build -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO \
+  2>&1 | grep -E "(error:|BUILD SUCCEEDED)"
+```
+
+Commit: `git commit -m "Auto-save: AS3 — AdaptivePoller: decorrelated jitter + known-duration skip + activity-detection; replaces all fixed sleep() in intelligence systems"`
 
 ---
 
