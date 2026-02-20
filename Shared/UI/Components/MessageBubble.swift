@@ -140,16 +140,8 @@ struct MessageBubble: View {
                     .foregroundStyle(.secondary)
             }
 
-            // Token count display
-            if let tokenCount = message.tokenCount {
-                let inputTokens = message.metadata?.inputTokens
-                let tokenText = inputTokens != nil
-                    ? "\(Self.formatTokenCount(inputTokens!))→\(Self.formatTokenCount(tokenCount))"
-                    : "\(Self.formatTokenCount(tokenCount)) tokens"
-                Text(tokenText)
-                    .font(.theaCaption2)
-                    .foregroundStyle(.tertiary)
-            }
+            // Token count display (↑input ↓output, with cached/reasoning in tooltip)
+            TokenCountBadge(message: message)
 
             // Confidence badge (uses ConfidenceIndicatorViews component)
             if let confidence = message.metadata?.confidence, confidence > 0 {
