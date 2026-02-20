@@ -407,7 +407,7 @@ extension ChatManager {
         throw lastError ?? ChatError.providerNotAvailable
     }
 
-    private func executeStream(
+    func executeStream(
         provider: any AIProvider,
         model: String,
         messages: [AIMessage],

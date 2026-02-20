@@ -36,9 +36,15 @@ extension ChatManager {
     ) async throws {
         let apiKey: String
         do {
-            apiKey = try SecureStorage.shared.loadAPIKey(for: "anthropic")
+            guard let key = try SecureStorage.shared.loadAPIKey(for: "anthropic") else {
+                toolsLogger.warning("B3: no Anthropic key stored, falling back to standard stream")
+                try await executeStream(provider: provider, model: model,
+                                        messages: messages, assistantMessage: assistantMessage)
+                return
+            }
+            apiKey = key
         } catch {
-            toolsLogger.warning("B3: no Anthropic key, falling back to standard stream")
+            toolsLogger.warning("B3: error loading Anthropic key, falling back to standard stream")
             try await executeStream(provider: provider, model: model,
                                     messages: messages, assistantMessage: assistantMessage)
             return
@@ -47,16 +53,14 @@ extension ChatManager {
         let tools = AnthropicToolCatalog.shared.buildToolsForAPI()
         toolsLogger.debug("B3: executing with \(tools.count) tools")
 
-        var toolSteps: [ToolUseStep] = []
-
         let stream = await ToolExecutionCoordinator.shared.executeWithTools(
             messages: messages,
             model: model,
             apiKey: apiKey,
             tools: tools
-        ) { [weak self] step in
+        ) { @MainActor [weak self] step in
             guard let self else { return }
-            await self.handleToolStepUpdate(step, toolSteps: &toolSteps, assistantMessage: assistantMessage)
+            self.updateLiveToolStep(step, on: assistantMessage)
         }
 
         for try await chunk in stream {
@@ -67,13 +71,7 @@ extension ChatManager {
 
             case let .complete(finalMessage):
                 assistantMessage.contentData = try JSONEncoder().encode(finalMessage.content)
-                if !toolSteps.isEmpty {
-                    var meta = assistantMessage.metadata ?? MessageMetadata()
-                    meta.toolUseSteps = toolSteps
-                    if let encoded = try? JSONEncoder().encode(meta) {
-                        assistantMessage.metadataData = encoded
-                    }
-                }
+                // Tool steps already stored in metadataData by updateLiveToolStep callbacks above
 
             case let .error(error):
                 throw error
@@ -81,22 +79,20 @@ extension ChatManager {
         }
     }
 
+    /// Update a single tool step in the message metadata. Reads current steps from metadata,
+    /// updates in-place (or appends), then writes back. Called on MainActor from the B3 callback.
     @MainActor
-    private func handleToolStepUpdate(
-        _ step: ToolUseStep,
-        toolSteps: inout [ToolUseStep],
-        assistantMessage: Message
-    ) {
-        if let idx = toolSteps.firstIndex(where: { $0.id == step.id }) {
-            toolSteps[idx] = step
+    private func updateLiveToolStep(_ step: ToolUseStep, on message: Message) {
+        var meta = message.metadata ?? MessageMetadata()
+        var steps = meta.toolUseSteps ?? []
+        if let idx = steps.firstIndex(where: { $0.id == step.id }) {
+            steps[idx] = step
         } else {
-            toolSteps.append(step)
+            steps.append(step)
         }
-        // Live metadata update so ChatView can observe tool steps as they run
-        var meta = assistantMessage.metadata ?? MessageMetadata()
-        meta.toolUseSteps = toolSteps
+        meta.toolUseSteps = steps
         if let encoded = try? JSONEncoder().encode(meta) {
-            assistantMessage.metadataData = encoded
+            message.metadataData = encoded
         }
         toolsLogger.debug("B3 tool step: \(step.toolName) running=\(step.isRunning)")
     }
@@ -165,25 +161,27 @@ extension ChatManager {
         toolsLogger.debug("D3: confidence=\(String(format: "%.0f%%", confidenceScore * 100)) model=\(modelId) task=\(taskType.rawValue)")
 
         // Feed back to ModelRouter via synthetic RoutingDecision
-        if let aiModel = AppConfiguration.shared.availableModels.first(where: { $0.id == modelId }) {
-            let syntheticDecision = RoutingDecision(
-                model: aiModel,
-                provider: aiModel.provider,
-                taskType: taskType,
-                confidence: confidenceScore,
-                reason: "ConfidenceSystem feedback",
-                alternatives: []
+        // Construct a minimal AIModel from the ID (sufficient for ModelRouter.recordOutcome tracking)
+        let providerName = ProviderRegistry.shared.getProvider(for: modelId)?.metadata.name ?? "unknown"
+        let aiModel = AIModel(id: modelId, name: modelId, provider: providerName)
+        let syntheticDecision = RoutingDecision(
+            model: aiModel,
+            provider: aiModel.provider,
+            taskType: taskType,
+            confidence: confidenceScore,
+            reason: "ConfidenceSystem feedback",
+            alternatives: [],
+            timestamp: Date()
+        )
+        await MainActor.run {
+            ModelRouter.shared.recordOutcome(
+                for: syntheticDecision,
+                success: confidenceScore >= 0.5,
+                quality: confidenceScore,
+                latency: 0,
+                tokens: 0,
+                cost: 0
             )
-            await MainActor.run {
-                ModelRouter.shared.recordOutcome(
-                    for: syntheticDecision,
-                    success: confidenceScore >= 0.5,
-                    quality: confidenceScore,
-                    latency: 0,
-                    tokens: 0,
-                    cost: 0
-                )
-            }
         }
 
         // Log misclassification if confidence is very low
