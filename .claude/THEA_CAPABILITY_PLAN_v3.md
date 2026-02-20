@@ -177,18 +177,18 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AAG3: Cloud/GitHub  | ✅ DONE         | CloudStorageService (Google Drive REST v3 + Dropbox v2 pure URLSession — RM-1: no SwiftyDropbox), GitHubIntelligenceService (PAT auth, notifications + PRs morning briefing) — both wired, BUILD SUCCEEDED |
 | Phase AAH3: Social/Music/AI | ✅ DONE       | XAPIService, MusicKitIntelligenceService, HeadphoneMotionService, FoundationModelsService — all 4 wired macOS+iOS — sha ff9afd38 |
 | Phase AAI3: CarPlay/Vision/Data | ✅ DONE    | CarPlayService, visionOS ARKitSession+WorldAnchor, TabularDataAnalyzer, NutritionBarcodeService, TravelIntelligenceService — all wired BUILD SUCCEEDED sha 3f19cd1b |
-| **Wave 11: Re-verification** | ⚙️ IN PROGRESS | ABA3–ABF3 ✅ DONE; ABE3 CI 2/4 green (in_progress ~30min); ABG3/ABH3 in_progress |
+| **Wave 11: Re-verification** | ⚙️ IN PROGRESS | ABA3–ABF3 + ABE3 ✅ DONE; ABG3/ABH3 in_progress |
 | Phase ABA3: QA v2         | ✅ DONE         | All 4 platforms 0 errors 0 warnings, 4046 tests pass, swiftlint clean — sha 7b76e1de |
 | Phase ABB3: Security v2   | ✅ DONE         | 3 fixes: IBAN/BTC/ETH active redaction, CarPlay voice no-log, FoundationModels injection guards — sha 7ccbb43f |
 | Phase ABC3: Tests v2      | ✅ DONE         | 4046 tests pass, 78+ Wave 10 model tests in swift test suite — sha 837a9681 |
 | Phase ABD3: Periphery v2  | ✅ DONE         | 112 declarations annotated across 20 Wave 10 files — commits f82b1fb1 + bd4c13ba + 36fa13b8 |
-| Phase ABE3: CI Green v2   | ⚙️ IN PROGRESS  | CI 2/4 green: Security Audit ✅ Security Scanning ✅ Thea CI in_progress E2E in_progress — push bd4c13ba 2026-02-20T16:08 |
+| Phase ABE3: CI Green v2   | ✅ DONE         | All 4 workflows green on bd4c13ba: Security Audit ✅ Security Scanning ✅ Thea CI ✅ E2E Tests ✅ — ABE3 2026-02-20 17:38 |
 | Phase ABF3: Wiring v2     | ✅ DONE         | 54/55 systems wired (≥55 target met), JournalingSuggestionsService gap fixed — sha 5a136a4f |
 | Phase ABG3: Notarize v2   | ⏳ PENDING (ABE3) | Release notes drafted sha 9ce4a473, v1.6.0 tag pending CI green |
 | Phase ABH3: Report v2     | ⚙️ IN PROGRESS  | Draft committed sha 4274ed77, s10f completing WAVE_11_VERIFICATION_REPORT.md |
-| **Overall v3 %**          | **99% autonomous done** | A3–W3 + AE3–AI3 + Wave 9 + Wave 10 + ABA3–ABF3 ✅ DONE; ABE3 CI in_progress; ABG3/ABH3 in_progress; AZ3+AD3 pending. |
+| **Overall v3 %**          | **99% autonomous done** | A3–W3 + AE3–AI3 + Wave 9 + Wave 10 + ABA3–ABF3 + ABE3 ✅ DONE; ABG3/ABH3 in_progress; AZ3+AD3 pending. |
 
-*Last updated: 2026-02-20 17:30 — Wave 10 ✅ ALL 9 PHASES DONE. Wave 11: ABA3–ABF3 ✅ DONE; ABE3 CI 2/4 green (Security Audit + Scanning ✅, Thea CI + E2E in_progress); ABG3/ABH3 in_progress; AZ3+AD3 pending. v3 99% autonomous.*
+*Last updated: 2026-02-20 17:38 — Wave 10 ✅ ALL 9 PHASES DONE. Wave 11: ABA3–ABF3 + ABE3 ✅ DONE (all 4 GH Actions workflows green on bd4c13ba); ABG3/ABH3 in_progress; AZ3+AD3 pending. v3 99% autonomous.*
 
 ---
 
