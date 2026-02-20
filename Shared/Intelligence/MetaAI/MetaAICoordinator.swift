@@ -157,8 +157,8 @@ public final class MetaAICoordinator: ObservableObject {
                         )
 
                         continuation.yield(.planCreated(plan))
-                        await PlanManager.shared.showPanel()
-                        await PlanManager.shared.startExecution()
+                        PlanManager.shared.showPanel()
+                        PlanManager.shared.startExecution()
 
                         var fullContent = ""
                         var tokenCount = 0
@@ -174,24 +174,24 @@ public final class MetaAICoordinator: ObservableObject {
                                 guard subQuery.canExecute(completed: completedIds) else { continue }
 
                                 continuation.yield(.planStepStarted(step.id))
-                                await PlanManager.shared.stepStarted(step.id, modelUsed: decision.selectedModel)
+                                PlanManager.shared.stepStarted(step.id, modelUsed: decision.selectedModel)
 
                                 do {
                                     let stepResult = try await self.executeSubQuery(subQuery, decision: decision)
                                     continuation.yield(.content(stepResult.content))
                                     continuation.yield(.planStepCompleted(step.id, stepResult.content))
-                                    await PlanManager.shared.stepCompleted(step.id, result: stepResult.content)
+                                    PlanManager.shared.stepCompleted(step.id, result: stepResult.content)
                                     fullContent += stepResult.content + "\n\n"
                                     tokenCount += stepResult.tokenCount
                                     completedIds.insert(subQuery.id)
                                 } catch {
                                     continuation.yield(.planStepFailed(step.id, error.localizedDescription))
-                                    await PlanManager.shared.stepFailed(step.id, error: error.localizedDescription)
+                                    PlanManager.shared.stepFailed(step.id, error: error.localizedDescription)
                                 }
                             }
                         }
 
-                        if let finalPlan = await PlanManager.shared.activePlan {
+                        if let finalPlan = PlanManager.shared.activePlan {
                             continuation.yield(.planCompleted(finalPlan))
                         }
 
@@ -212,7 +212,7 @@ public final class MetaAICoordinator: ObservableObject {
 
                         continuation.yield(.complete(response))
 
-                        if await self.enableLearning {
+                        if self.enableLearning {
                             await self.recordOutcome(input: input, decision: decision, response: response)
                         }
 
@@ -239,7 +239,7 @@ public final class MetaAICoordinator: ObservableObject {
                         context: context
                     )
 
-                    let learnings = await extractLearnings(
+                    _ = await extractLearnings(
                         input: input,
                         decision: decision,
                         response: THEAExecutionResult(content: fullContent, tokenCount: tokenCount)
@@ -263,7 +263,7 @@ public final class MetaAICoordinator: ObservableObject {
                     continuation.yield(.complete(response))
 
                     // Record outcome
-                    if await enableLearning {
+                    if enableLearning {
                         await recordOutcome(input: input, decision: decision, response: response)
                     }
 
