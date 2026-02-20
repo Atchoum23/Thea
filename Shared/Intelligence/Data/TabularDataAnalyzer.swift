@@ -16,6 +16,7 @@ import TabularData
 
 /// Analyzes CSV files using Apple's TabularData framework.
 /// Provides financial and health data analysis with natural-language summaries.
+// periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 struct TabularDataAnalyzer {
 
     private static let logger = Logger(subsystem: "app.thea", category: "TabularDataAnalyzer")
@@ -147,6 +148,7 @@ struct TabularDataAnalyzer {
 
 // MARK: - Error
 
+// periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 enum TabularDataAnalyzerError: Error, LocalizedError {
     case frameworkUnavailable
     case noAmountColumn

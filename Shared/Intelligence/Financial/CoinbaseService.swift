@@ -22,8 +22,9 @@ struct CoinbaseAccount: Sendable {
 
 // MARK: - Coinbase Transaction Model
 
+// periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 struct CoinbaseTransaction: Sendable {
-    let id: String
+    let id: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     let type: String      // "send", "receive", "buy", "sell", etc.
     let status: String
     let amount: Double
@@ -39,7 +40,7 @@ struct CoinbaseTransaction: Sendable {
 actor CoinbaseService {
     static let shared = CoinbaseService()
 
-    private let logger = Logger(subsystem: "com.thea.app", category: "CoinbaseService")
+    private let logger = Logger(subsystem: "com.thea.app", category: "CoinbaseService") // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     private let baseURL = URL(string: "https://api.coinbase.com/v2")!
     private let apiVersion = "2024-09-01"
 
@@ -48,7 +49,7 @@ actor CoinbaseService {
     // MARK: - Credential Management
 
     /// Store API key and secret in Keychain.
-    func saveCredentials(apiKey: String, apiSecret: String) {
+    func saveCredentials(apiKey: String, apiSecret: String) { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         FinancialCredentialStore.save(token: apiKey, for: FinancialAPIProvider.coinbase.rawValue, suffix: "apiKey")
         FinancialCredentialStore.save(token: apiSecret, for: FinancialAPIProvider.coinbase.rawValue, suffix: "apiSecret")
         logger.info("CoinbaseService: credentials saved")
