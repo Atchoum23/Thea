@@ -298,7 +298,7 @@ targets:
           - "**/Core/Services/ProjectService.swift"
           # Exclude duplicate folders (use Shared/System/Terminal not Shared/Execution/Terminal)
           - "**/Execution/Terminal/**"
-          # M3: MLXAudioEngine + dependents — RE-ENABLED (Release build verified)
+          # M3: MLXAudioEngine + dependents — RE-ENABLED (Release build verified clean)
           # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
           # AnthropicFilesAPI — ACTIVATED (ported to AnthropicError/AIMessage)
           # AnthropicTokenCounter — ACTIVATED (ported to AnthropicError/AIMessage)
@@ -376,7 +376,7 @@ targets:
           - "**/Widgets/**"
           # **/Views/Code/** already excluded above (line ~338)
           - "**/Views/LocalModels/**"  # LocalModelsView extracted sub-view (duplicate at UI/Views/LocalModels/)
-          - "Shared/Views/LifeTracking/**"  # Canonical copy is Shared/UI/Views/LifeTracking/ — exclude old Shared/Views/ path to prevent duplicate
+          # Views/LifeTracking — ACTIVATED (LifeTrackingDashboardView, LifeMonitoring active)
           - "**/Settings/Advanced/**"  # Extracted sub-views duplicate AdvancedSettingsView inline types
           - "**/Settings/LocalModels/**"  # Extracted sub-views duplicate LocalModelsSettingsView inline types
           - "**/Settings/Privacy/**"  # Extracted sub-views duplicate PrivacySettingsView inline types
@@ -394,6 +394,8 @@ targets:
           # IntegrationModule — ACTIVATED (protocol + registry for all integrations)
           - "**/Integrations/MCPConnectionManager.swift"  # Duplicate MCPConnection type in MCPServerGenerator
           - "**/Integrations/MCPGateway.swift"  # Duplicate MCPRequest/MCPError types in MCPServerGenerator
+          - "**/Views/MetaAI/KnowledgeGraphViewer.swift"  # Uses KnowledgeNode/NodeType API not in PersonalKnowledgeGraph
+          - "**/Views/MetaAI/MemoryInspectorView.swift"  # Uses MemoryTier API not in current MemorySystem
           # Integration modules — ALL ACTIVATED (macOS, use AppKit/AppleScript)
           # MailIntegration, TerminalIntegration, MusicIntegration, SystemIntegration,
           # FinderIntegration, SafariIntegration, CalendarIntegration, ShortcutsIntegration,

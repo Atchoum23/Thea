@@ -58,7 +58,7 @@ final class AgentTeamOrchestrator: ObservableObject {
                     execute: { .init(success: true, message: "Approved") }
                 )
             )
-            if approval == .rejected {
+            if case .requiresApproval = approval {
                 throw AgentTeamError.planRejectedByUser
             }
         }
