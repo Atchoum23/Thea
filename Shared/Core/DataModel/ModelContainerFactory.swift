@@ -1,6 +1,5 @@
 @preconcurrency import SwiftData
 import SwiftUI
-import Security
 
 /// Factory for creating ModelContainer with graceful error handling and fallback options
 @MainActor
@@ -20,15 +19,32 @@ final class ModelContainerFactory {
     /// NSException bypasses Swift catch blocks and crashes. This guard lets us skip tier 1
     /// safely in unsigned / CI builds.
     nonisolated private static func hasCloudKitContainerEntitlement() -> Bool {
-        // SecTaskCreateFromSelf/SecTaskCopyValueForEntitlement: available on macOS 10.7+ and iOS 7+.
-        // Returns nil for unsigned builds (no entitlements) → we skip CloudKit tier.
-        guard let task = SecTaskCreateFromSelf(nil) else { return false }
-        let value = SecTaskCopyValueForEntitlement(
-            task,
-            "com.apple.developer.icloud-container-identifiers" as CFString,
-            nil
-        )
-        return value != nil
+        // Check TeamIdentifier via codesign CLI — the only reliable runtime distinction
+        // between ad-hoc/linker-signed builds (TeamIdentifier=not set) and properly
+        // Apple-developer-signed builds (TeamIdentifier=6B66PM4JLK).
+        // SecTask APIs return embedded entitlements from __TEXT,__entitlements even for
+        // unsigned builds, so cannot distinguish signed vs unsigned builds.
+        // This function runs once at startup; ~100ms subprocess overhead is acceptable.
+        guard let execPath = Bundle.main.executablePath else { return false }
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/codesign")
+        process.arguments = ["--display", "--verbose=4", execPath]
+        let pipe = Pipe()
+        process.standardError = pipe
+        process.standardOutput = Pipe()
+        do {
+            try process.run()
+            process.waitUntilExit()
+            guard process.terminationStatus == 0 else { return false }
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let output = String(data: data, encoding: .utf8) ?? ""
+            // Ad-hoc: "TeamIdentifier=not set" → no CloudKit
+            // Signed: "TeamIdentifier=XXXXXXXXXX" → try CloudKit
+            return !output.contains("TeamIdentifier=not set") &&
+                   output.contains("TeamIdentifier=")
+        } catch {
+            return false
+        }
     }
 
     // periphery:ignore - Reserved: createContainer() instance method — reserved for future feature activation
