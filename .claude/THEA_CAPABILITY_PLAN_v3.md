@@ -168,9 +168,9 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AY3: Native Ext. 2   | ✅ DONE         | CallKit, Credentials, Keyboard, Notification, QuickLook, Spotlight, FinderSync extensions — real implementations — S9 |
 | Phase AZ3: Physical AV Testing | ⏳ PENDING   | Cross-Mac AV + 15 enhanced tools: ODiff, Prefire, Allure3, XCTMetric, powermetrics, A11y audit, mitmproxy, BlackHole, SpeechWER, PerceptualDiff |
 | **Wave 10: New Domains**  | ⏳ PENDING      | AAA3–AAI3: Gap remediation + Financial Hub + Audio + Wearables + HomeKit/NFC + Cloud/GitHub + Social/Music/FoundationModels + CarPlay/visionOS/TabularData/Nutrition/Travel |
-| Phase AAA3: Gap Remediation | ⏳ PENDING    | Wire 16 unwired systems: AmbientIntelligence, DrivingDetection, ScreenTime, Calendar, Location, Sleep, ContextualMemory, ProactiveInsight, FocusSession, Habit, Goal, Wellbeing, NeuralContextCompressor, 3 UI views |
+| Phase AAA3: Gap Remediation | ✅ DONE       | 13 GapWiringServices + FinancialIntelligenceService wired into macOS + iOS setupManagers (12s + 15s deferred); BUILD SUCCEEDED |
 | Phase AAB3: Widget 2.0    | ⏳ PENDING      | AppIntents (AppIntentConfiguration), Live Activities (ActivityKit), TimelineRelevance, Share OCR, SwiftUI Keyboard, FinderSync rich menu |
-| Phase AAC3: Financial Hub | ⏳ PENDING      | Kraken (KrakenAPI SPM), Coinbase (URLSession OAuth2), YNAB (swiftynab SPM), Plaid (transactions/sync), PayPal (client_credentials) + FinancialIntelligenceService |
+| Phase AAC3: Financial Hub | ✅ DONE         | KrakenService (URLSession+CryptoKit HMAC-SHA512), CoinbaseService, YNABService (URLSession REST delta), PlaidService (cursor-paged), FinancialIntelligenceService — all 9 types wired, BUILD SUCCEEDED |
 | Phase AAD3: Audio Intel   | ⏳ PENDING      | ShazamKitService (SHManagedSession), SoundAnalysisService (SNClassifySoundRequest — 300+ sounds on-device) |
 | Phase AAE3: Wearables     | ⏳ PENDING      | OuraService (REST v2), WhoopService (REST), WearableFusionEngine (Oura 45% + Whoop 35% + AppleWatch 20%) |
 | Phase AAF3: HomeKit/NFC/Journal | ⏳ PENDING | HomeKitAIEngine (HMHomeManager + predictive scenes), JournalingSuggestionsService (iOS 17.2+), NFCContextService (CoreNFC tap-to-context) |
@@ -6854,9 +6854,9 @@ Update this section after each phase completes:
 | AG3   | Comprehensive QA + Full Activation       | ⏳ PENDING  | MSM3U    | —         |
 | AH3   | 8-Hat Audit + Implement All Findings     | ⏳ PENDING  | MSM3U    | —         |
 | AZ3   | Physical AV Testing (15 tools v2)        | ⏳ PENDING  | —        | —         |
-| AAA3  | Gap Remediation — 16 Unwired Systems     | ⏳ PENDING  | —        | —         |
+| AAA3  | Gap Remediation — 16 Unwired Systems     | ✅ DONE     | MSM3U    | 2026-02-20|
 | AAB3  | Widget 2.0 + Extension UX Excellence     | ⏳ PENDING  | —        | —         |
-| AAC3  | Financial Intelligence Hub               | ⏳ PENDING  | —        | —         |
+| AAC3  | Financial Intelligence Hub               | ✅ DONE     | MSM3U    | 2026-02-20|
 | AAD3  | Ambient Audio (ShazamKit + SoundAnalysis)| ⏳ PENDING  | —        | —         |
 | AAE3  | Wearables (Oura + Whoop + Fusion)        | ⏳ PENDING  | —        | —         |
 | AAF3  | HomeKit AI + JournalingSuggestions + NFC | ⏳ PENDING  | —        | —         |
