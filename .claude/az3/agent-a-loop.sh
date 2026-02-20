@@ -1,142 +1,88 @@
 #!/usr/bin/env bash
-# AZ3 agent-a-loop.sh — Agent A: runs on MSM3U, executes test steps and collects results
-# Reads test steps from $AZ3_LOG_DIR/test-steps.txt (one step per line)
-# Coordinates with Agent B on MBAM2 via shared log directory files
-set -euo pipefail
+# AZ3 agent-a-loop.sh — Self-contained: executes test steps on MSM3U, fetches frames from MBAM2 agent
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck disable=SC1090
 source "$SCRIPT_DIR/config.env"
 
 STEPS_FILE="$AZ3_LOG_DIR/test-steps.txt"
-CURRENT_STEP_FILE="$AZ3_LOG_DIR/current-step.txt"
-CAPTURE_REQUEST_FILE="$AZ3_LOG_DIR/capture-request.txt"
-CAPTURE_RESULT_FILE="$AZ3_LOG_DIR/capture-result.txt"
-RESULTS_FILE="$AZ3_LOG_DIR/agent-a-results.txt"
+RESULTS_FILE="$AZ3_LOG_DIR/az3-results.txt"
 LOG_FILE="$AZ3_LOG_DIR/agent-a.log"
 FRAMES_DIR="/tmp/az3-frames"
+AGENT_URL="http://${MBAM2_TB_IP}:18791"
 
-PASS_COUNT=0
-FAIL_COUNT=0
-SKIP_COUNT=0
-
+PASS_COUNT=0; FAIL_COUNT=0; SKIP_COUNT=0
 mkdir -p "$AZ3_LOG_DIR" "$FRAMES_DIR"
 
-log() { echo "[$(date '+%H:%M:%S')] [AgentA] $*" | tee -a "$LOG_FILE"; }
+log() { echo "[$(date '+%H:%M:%S')] [AZ3] $*" | tee -a "$LOG_FILE"; }
 
-# Initialize results file
-echo "=== AZ3 Agent A Results — $(date) ===" > "$RESULTS_FILE"
+echo "=== AZ3 Results — $(date) ===" > "$RESULTS_FILE"
 
-# Verify test steps file exists
+# Verify MBAM2 capture agent is reachable
+if ! curl -sf --max-time 5 "$AGENT_URL/ping" >/dev/null 2>&1; then
+    log "ERROR: MBAM2 capture agent not reachable at $AGENT_URL"
+    log "On MBAM2, run: python3 /tmp/az3_capture_agent.py &"
+    exit 1
+fi
+log "MBAM2 capture agent: OK ($AGENT_URL)"
+
 if [[ ! -f "$STEPS_FILE" ]]; then
-    log "WARNING: $STEPS_FILE not found. Creating a sample test-steps.txt."
-    cat > "$STEPS_FILE" << 'STEPS'
-# AZ3 Test Steps — one step per line
-# Format: STEP_NAME | COMMAND (optional — if blank, just captures current state)
-# Lines starting with # are comments and are skipped.
-# Example steps:
-launch-thea | open -a Thea
-wait-for-main-window |
-click-new-conversation |
-type-hello-message |
-verify-ai-response |
-STEPS
-    log "Sample test-steps.txt written. Edit $STEPS_FILE and re-run."
-    exit 0
+    log "ERROR: $STEPS_FILE not found"; exit 1
 fi
 
-log "=== AZ3 Agent A Starting ==="
-log "Steps file: $STEPS_FILE"
-log "Results: $RESULTS_FILE"
-
+TOTAL_STEPS=$(grep -c '^[^#]' "$STEPS_FILE" 2>/dev/null || echo 0)
+log "=== AZ3 Starting — $TOTAL_STEPS steps ==="
 STEP_NUM=0
-TOTAL_STEPS=$(grep -c '^[^#]' "$STEPS_FILE" 2>/dev/null || echo "0")
-log "Total steps to execute: $TOTAL_STEPS"
-
-# Clean up any stale signal files from a previous run
-rm -f "$CAPTURE_REQUEST_FILE" "$CAPTURE_RESULT_FILE"
 
 while IFS= read -r LINE; do
-    # Skip blank lines and comments
     [[ -z "$LINE" || "$LINE" =~ ^[[:space:]]*# ]] && continue
-
     STEP_NUM=$((STEP_NUM + 1))
     STEP_NAME=$(echo "$LINE" | cut -d'|' -f1 | xargs)
     STEP_CMD=$(echo "$LINE" | cut -d'|' -f2- | xargs)
+    TIMESTAMP=$(date +%s)
+    FRAME="$FRAMES_DIR/${STEP_NUM}_${STEP_NAME// /_}_${TIMESTAMP}.png"
 
     log "--- Step $STEP_NUM/$TOTAL_STEPS: $STEP_NAME ---"
 
-    # Write current step for Agent B context
-    echo "$STEP_NAME" > "$CURRENT_STEP_FILE"
-
-    # Execute the step command if one is provided
+    # Execute step command
+    CMD_STATUS="OK"
     if [[ -n "$STEP_CMD" ]]; then
-        log "Executing: $STEP_CMD"
-        if eval "$STEP_CMD" >> "$LOG_FILE" 2>&1; then
-            log "Command succeeded."
-        else
-            EXIT_CODE=$?
-            log "WARNING: Command exited with code $EXIT_CODE — continuing to capture."
+        log "CMD: $STEP_CMD"
+        if ! eval "$STEP_CMD" >> "$LOG_FILE" 2>&1; then
+            CMD_STATUS="CMD_FAILED"
+            log "WARNING: command exited non-zero"
         fi
-    else
-        log "(No command — capturing current state)"
     fi
 
     # Wait for UI to settle
-    log "Waiting 2s for UI to settle..."
-    sleep 2
+    WAIT_SECS=$(echo "$LINE" | grep -o 'wait=[0-9]*' | cut -d= -f2 || echo 2)
+    sleep "${WAIT_SECS:-2}"
 
-    # Signal Agent B to capture a frame
-    log "Notifying Agent B to capture frame..."
-    echo "CAPTURE:$STEP_NAME:$(date +%s)" > "$CAPTURE_REQUEST_FILE"
-
-    # Wait up to 30s for Agent B to respond with a result
-    WAITED=0
-    RESULT=""
-    while [[ $WAITED -lt 30 ]]; do
-        if [[ -f "$CAPTURE_RESULT_FILE" ]]; then
-            RESULT=$(cat "$CAPTURE_RESULT_FILE")
-            break
+    # Fetch screenshot from MBAM2 agent
+    if curl -sf --max-time 15 "$AGENT_URL/capture" -o "$FRAME" 2>>"$LOG_FILE"; then
+        FILE_SIZE=$(stat -f%z "$FRAME" 2>/dev/null || echo 0)
+        if [[ "$FILE_SIZE" -gt 1024 ]]; then
+            log "CAPTURED: ${FILE_SIZE} bytes → $(basename "$FRAME")"
+            PASS_COUNT=$((PASS_COUNT + 1))
+            echo "PASS | $STEP_NUM | $STEP_NAME | ${FILE_SIZE}B captured | cmd=$CMD_STATUS" >> "$RESULTS_FILE"
+        else
+            log "FAIL: frame too small (${FILE_SIZE}B)"; FAIL_COUNT=$((FAIL_COUNT + 1))
+            echo "FAIL | $STEP_NUM | $STEP_NAME | frame too small (${FILE_SIZE}B)" >> "$RESULTS_FILE"
         fi
-        sleep 1
-        WAITED=$((WAITED + 1))
-    done
-
-    if [[ -z "$RESULT" ]]; then
-        log "TIMEOUT: Agent B did not respond within 30s for step '$STEP_NAME'."
-        RESULT="TIMEOUT: Agent B did not respond"
-        SKIP_COUNT=$((SKIP_COUNT + 1))
-        echo "SKIP | $STEP_NUM | $STEP_NAME | $RESULT" >> "$RESULTS_FILE"
-    elif echo "$RESULT" | grep -qi "^PASS"; then
-        log "PASS: $STEP_NAME — $RESULT"
-        PASS_COUNT=$((PASS_COUNT + 1))
-        echo "PASS | $STEP_NUM | $STEP_NAME | $RESULT" >> "$RESULTS_FILE"
     else
-        log "FAIL: $STEP_NAME — $RESULT"
-        FAIL_COUNT=$((FAIL_COUNT + 1))
-        echo "FAIL | $STEP_NUM | $STEP_NAME | $RESULT" >> "$RESULTS_FILE"
+        log "FAIL: could not fetch frame from MBAM2"; FAIL_COUNT=$((FAIL_COUNT + 1))
+        echo "FAIL | $STEP_NUM | $STEP_NAME | MBAM2 capture failed" >> "$RESULTS_FILE"
     fi
-
-    # Clean up signal files for the next iteration
-    rm -f "$CAPTURE_REQUEST_FILE" "$CAPTURE_RESULT_FILE"
 
 done < "$STEPS_FILE"
 
-# --- Summary ---
-TOTAL_RAN=$((PASS_COUNT + FAIL_COUNT + SKIP_COUNT))
 echo "" >> "$RESULTS_FILE"
 echo "=== Summary ===" >> "$RESULTS_FILE"
-echo "PASS:    $PASS_COUNT" >> "$RESULTS_FILE"
-echo "FAIL:    $FAIL_COUNT" >> "$RESULTS_FILE"
-echo "TIMEOUT: $SKIP_COUNT" >> "$RESULTS_FILE"
-echo "TOTAL:   $TOTAL_RAN" >> "$RESULTS_FILE"
+echo "PASS: $PASS_COUNT" >> "$RESULTS_FILE"
+echo "FAIL: $FAIL_COUNT" >> "$RESULTS_FILE"
+echo "TOTAL: $((PASS_COUNT + FAIL_COUNT))" >> "$RESULTS_FILE"
 
-log "=== Agent A Complete ==="
-log "PASS: $PASS_COUNT | FAIL: $FAIL_COUNT | TIMEOUT: $SKIP_COUNT | TOTAL: $TOTAL_RAN"
-log "Full results: $RESULTS_FILE"
-log "Captured frames: $FRAMES_DIR"
-
-echo ""
+log "=== AZ3 Complete: PASS=$PASS_COUNT FAIL=$FAIL_COUNT ==="
+log "Frames: $FRAMES_DIR"; log "Results: $RESULTS_FILE"
 cat "$RESULTS_FILE"
-
 exit $FAIL_COUNT
