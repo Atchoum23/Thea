@@ -1,56 +1,11 @@
 // ChatEnhancementViews.swift
 // Thea — W3: Chat Enhancement Feature Components
 //
-// AgentPhaseProgressBar (W3-4), ActionApprovalSheet (W3-5),
-// ConsensusBreakdownView (W3-3), CloudSyncStatusView (W3-6)
+// ActionApprovalSheet (W3-5), ConsensusBreakdownView (W3-3)
+// Note: AgentPhaseProgressBar lives in Shared/UI/Components/AgentPhaseProgressBar.swift
+// Note: CloudSyncStatusView lives in Shared/UI/Components/CloudSyncStatusView.swift
 
 import SwiftUI
-
-// MARK: - W3-4: AgentMode Phase Progress Bar
-
-/// Linear progress indicator showing the current AgentMode execution phase.
-/// Displayed below the follow-up chips when an agent task is in progress.
-struct AgentPhaseProgressBar: View {
-    @ObservedObject var state: AgentExecutionState
-
-    private let orderedPhases: [AgentPhase] = [.gatherContext, .takeAction, .verifyResults, .done]
-
-    private func phaseIndex(_ phase: AgentPhase) -> Int {
-        orderedPhases.firstIndex(of: phase) ?? 0
-    }
-
-    var body: some View {
-        VStack(spacing: 4) {
-            HStack(spacing: TheaSpacing.xs) {
-                ForEach(orderedPhases, id: \.self) { phase in
-                    Capsule()
-                        .fill(phaseIndex(state.phase) >= phaseIndex(phase) ? Color.purple : Color.secondary.opacity(0.25))
-                        .frame(height: 3)
-                        .animation(.easeInOut(duration: 0.3), value: state.phase)
-                }
-            }
-            .padding(.horizontal, TheaSpacing.lg)
-
-            HStack {
-                if state.phase == .userIntervention {
-                    Label("Waiting for your input", systemImage: "pause.circle.fill")
-                        .foregroundStyle(.orange)
-                } else {
-                    Text(state.statusMessage.isEmpty ? state.phase.displayName : state.statusMessage)
-                        .foregroundStyle(.secondary)
-                }
-
-                if state.progress > 0 && state.progress < 1.0 {
-                    Spacer()
-                    Text("\(Int(state.progress * 100))%")
-                }
-            }
-            .font(.theaCaption2)
-            .padding(.horizontal, TheaSpacing.lg)
-        }
-        .padding(.vertical, TheaSpacing.xs)
-    }
-}
 
 // MARK: - W3-5: AutonomyController Action Approval Sheet
 
@@ -196,37 +151,5 @@ struct ConsensusBreakdownView: View {
 
     var body: some View {
         ConfidenceBadge(result: syntheticResult)
-    }
-}
-
-// MARK: - W3-6: CloudKit Sync Status View
-
-/// Compact CloudKit sync status icon indicator.
-/// Complementary to SyncStatusIndicator; shows a minimal icon with help tooltip.
-struct CloudSyncStatusView: View {
-    let status: CloudSyncStatus
-
-    var body: some View {
-        Group {
-            switch status {
-            case .syncing:
-                ProgressView()
-                    .scaleEffect(0.7)
-                    .help("Syncing…")
-            case .idle:
-                Image(systemName: "checkmark.icloud")
-                    .foregroundStyle(.secondary)
-                    .help("Synced")
-            case .error(let msg):
-                Image(systemName: "exclamationmark.icloud")
-                    .foregroundStyle(.red)
-                    .help("Sync error: \(msg)")
-            case .offline:
-                Image(systemName: "icloud.slash")
-                    .foregroundStyle(.secondary)
-                    .help("iCloud offline")
-            }
-        }
-        .font(.system(size: 14))
     }
 }

@@ -476,7 +476,7 @@ struct ChatView: View {
     private var agentPhaseBar: some View {
         let isActive = chatManager.agentState.currentTask != nil && chatManager.agentState.phase != .done
         if isActive {
-            AgentPhaseProgressBar(state: chatManager.agentState)
+            AgentPhaseProgressBar(agentState: chatManager.agentState)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         }
     }
