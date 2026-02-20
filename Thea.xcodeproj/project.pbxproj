@@ -97,6 +97,7 @@
 		095FFBADEBB2D60F161417D4 /* QASettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76870AAA7181E13E1E492F47 /* QASettingsView.swift */; };
 		0A1011F8FAFFBDAE8E1F2FEB /* thea_icon_master_1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 0455AA0DA254DBC4CF1E78C9 /* thea_icon_master_1024.png */; };
 		0A1F24F3D12F84277D0E2200 /* OrchestratorConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B2F0B5C0C342B237690D603 /* OrchestratorConfiguration.swift */; };
+		0A2D10460E50083131DD0D73 /* ToolModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6751AD20A790E5F94F381C0 /* ToolModels.swift */; };
 		0A343E312E3C9F544CA364D3 /* IntegrationToolHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3603F983C18A4104273BF9F1 /* IntegrationToolHandler.swift */; };
 		0A3B37BDC31CDAEAFF44458A /* ExtensionSyncBridge+SyncAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475430365812249964991ABD /* ExtensionSyncBridge+SyncAPI.swift */; };
 		0A66CFB1E4C58F0932095BD0 /* AsanaIntegration+Users.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0449E7316B40DD1F500F5544 /* AsanaIntegration+Users.swift */; };
@@ -2287,6 +2288,7 @@
 		EC68C4E65EC5C0A140491607 /* MessagingHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6511D0C3411ADF78113F30A3 /* MessagingHubView.swift */; };
 		EC8C5610EEDB0D13F7834F35 /* ModelSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A31D5A95202A25306AF85DA /* ModelSelectorView.swift */; };
 		EC960D3D73391AE92E397535 /* TVInferenceClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08CA1F45DD5F6B577CDEE925 /* TVInferenceClient.swift */; };
+		ECE22BEFCC77DFF0A8084E9F /* ToolModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6751AD20A790E5F94F381C0 /* ToolModels.swift */; };
 		ECE485F687B31A6BA0735EF3 /* OnboardingManagerTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85B1685CF8CDD2175144F48D /* OnboardingManagerTypes.swift */; };
 		ED03EDC8465A846ACDDDF57C /* TaskBreakdownService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27D90B373D6905F399C035F /* TaskBreakdownService.swift */; };
 		ED1F786A074584E6871683C8 /* PredictivePreloader+SequenceAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2422302CEF08B84F7AAC0514 /* PredictivePreloader+SequenceAnalysis.swift */; };
@@ -3503,6 +3505,7 @@
 		A60F00CA792140EF4E81D414 /* SpeechTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechTranscriptionService.swift; sourceTree = "<group>"; };
 		A63326A9AC104F79EF7E8322 /* AgentEnhancements+MessageQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AgentEnhancements+MessageQueue.swift"; sourceTree = "<group>"; };
 		A653557E1C002D54C28CD834 /* SwiftKnowledgeLearnerTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftKnowledgeLearnerTypes.swift; sourceTree = "<group>"; };
+		A6751AD20A790E5F94F381C0 /* ToolModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolModels.swift; sourceTree = "<group>"; };
 		A68ACE58F0A8B29C7E773CDA /* PredictiveLifeEngine+Core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PredictiveLifeEngine+Core.swift"; sourceTree = "<group>"; };
 		A69D52A26057121DAFE15E7A /* TheaAgentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaAgentDetailView.swift; sourceTree = "<group>"; };
 		A6AF93650026D5BF21AE0F38 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -4503,6 +4506,7 @@
 				03BB3EBA785BF93AA2323108 /* ResponseStyle.swift */,
 				DFE0F80561949E45736F96EC /* TheaClipModels.swift */,
 				102DB77D77D12266072B1388 /* TheaTask.swift */,
+				A6751AD20A790E5F94F381C0 /* ToolModels.swift */,
 				AA8FD2C37F45BB996BAFEA7E /* TrackingModels.swift */,
 			);
 			path = Models;
@@ -9373,6 +9377,7 @@
 				C4D914BD2E8422646F6F609A /* ToolComposition.swift in Sources */,
 				E33A96352BEBA41EE3AD2251 /* ToolExecutionCoordinator.swift in Sources */,
 				2705AA463A7629BE877CFDBF /* ToolFramework.swift in Sources */,
+				0A2D10460E50083131DD0D73 /* ToolModels.swift in Sources */,
 				519C50526F335FD16F8110CE /* ToolTypes.swift in Sources */,
 				BBEC164874777749CBA69C4B /* ToolUseStepView.swift in Sources */,
 				BF8E6CE86921EAA28204725D /* TrackingCoordinator.swift in Sources */,
@@ -10686,6 +10691,7 @@
 				A3643F2A73506713F828183A /* ToolComposition.swift in Sources */,
 				FA5F3FED4870D47C926D0738 /* ToolExecutionCoordinator.swift in Sources */,
 				EAC88160114A81341D40339B /* ToolFramework.swift in Sources */,
+				ECE22BEFCC77DFF0A8084E9F /* ToolModels.swift in Sources */,
 				A35BB3BD21110331882E9ABE /* ToolTypes.swift in Sources */,
 				B1D22D33D882D6040CE64152 /* ToolUseStepView.swift in Sources */,
 				21EEEE1EB3B5398A8E98CEA1 /* TouchBarSupport.swift in Sources */,
