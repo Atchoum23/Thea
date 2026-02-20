@@ -5,6 +5,7 @@
 //  Created by Thea
 //
 
+import SwiftUI
 import UIKit
 
 /// Thea AI-Powered Keyboard Extension
@@ -21,6 +22,9 @@ class KeyboardViewController: UIInputViewController {
     // UI Elements
     private var suggestionBar: UIStackView!
     private var aiButton: UIButton!
+
+    // AAB3-5: SwiftUI hosting controller for suggestions bar
+    private var suggestionsHostingController: UIHostingController<TheaKeyboardSuggestionsView>?
 
     // MARK: - Lifecycle
 
@@ -64,26 +68,51 @@ class KeyboardViewController: UIInputViewController {
         setupKeyboardGrid(in: containerView)
     }
 
+    // AAB3-5: SwiftUI suggestions bar via UIHostingController
     private func setupSuggestionBar(in container: UIView) {
-        suggestionBar = UIStackView()
-        suggestionBar.axis = .horizontal
-        suggestionBar.distribution = .fillEqually
-        suggestionBar.spacing = 4
-        suggestionBar.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(suggestionBar)
+        let swiftUIView = TheaKeyboardSuggestionsView(
+            suggestions: suggestions,
+            onSelect: { [weak self] text in self?.insertText(text) },
+            onAIAssist: { [weak self] in self?.aiAssistTapped() }
+        )
+        let hostingController = UIHostingController(rootView: swiftUIView)
+        suggestionsHostingController = hostingController
+
+        addChild(hostingController)
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(hostingController.view)
+        hostingController.didMove(toParent: self)
+
+        hostingController.view.backgroundColor = .clear
 
         NSLayoutConstraint.activate([
-            suggestionBar.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 4),
-            suggestionBar.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -4),
+            hostingController.view.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            hostingController.view.topAnchor.constraint(equalTo: container.topAnchor, constant: 4),
+            hostingController.view.heightAnchor.constraint(equalToConstant: 36)
+        ])
+
+        // Keep the UIStackView reference valid for layout anchors used below
+        suggestionBar = UIStackView()
+        suggestionBar.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(suggestionBar)
+        NSLayoutConstraint.activate([
+            suggestionBar.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            suggestionBar.trailingAnchor.constraint(equalTo: container.trailingAnchor),
             suggestionBar.topAnchor.constraint(equalTo: container.topAnchor, constant: 4),
             suggestionBar.heightAnchor.constraint(equalToConstant: 36)
         ])
+        suggestionBar.isHidden = true  // SwiftUI host is the visible layer
+    }
 
-        // Add placeholder suggestions
-        for _ in 0 ..< 3 {
-            let button = createSuggestionButton(title: "")
-            suggestionBar.addArrangedSubview(button)
-        }
+    /// Updates the SwiftUI suggestion chips when new suggestions arrive.
+    private func updateSuggestionsView() {
+        guard let hosting = suggestionsHostingController else { return }
+        hosting.rootView = TheaKeyboardSuggestionsView(
+            suggestions: suggestions,
+            onSelect: { [weak self] text in self?.insertText(text) },
+            onAIAssist: { [weak self] in self?.aiAssistTapped() }
+        )
     }
 
     private func setupAIBar(in container: UIView) {
@@ -296,13 +325,10 @@ class KeyboardViewController: UIInputViewController {
             predictions = specific
         }
 
-        // Update UI
+        // Update UI — SwiftUI suggestions view (AAB3-5) + legacy UIStackView
         DispatchQueue.main.async {
-            for (index, view) in self.suggestionBar.arrangedSubviews.enumerated() {
-                if let button = view as? UIButton, index < predictions.count {
-                    button.setTitle(predictions[index], for: .normal)
-                }
-            }
+            self.suggestions = predictions
+            self.updateSuggestionsView()
         }
     }
 
