@@ -41,11 +41,9 @@ final class JournalingSuggestionsService: ObservableObject {
     /// Called when the user selects a suggestion from JournalingSuggestionsPicker.
     /// Add a `JournalingSuggestionsPicker { suggestion in self.addSuggestion(suggestion) }` to your view.
     func addSuggestion(_ suggestion: JournalingSuggestion) {
-        // Prepend so most recent is first
-        if !recentSuggestions.contains(where: { $0.id == suggestion.id }) {
-            recentSuggestions.insert(suggestion, at: 0)
-            if recentSuggestions.count > 20 { recentSuggestions.removeLast() }
-        }
+        // Prepend most recent; cap at 20
+        recentSuggestions.insert(suggestion, at: 0)
+        if recentSuggestions.count > 20 { recentSuggestions.removeLast() }
         lastFetchDate = Date()
         logger.info("Added journaling suggestion — total: \(self.recentSuggestions.count)")
     }
