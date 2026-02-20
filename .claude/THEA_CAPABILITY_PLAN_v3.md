@@ -147,7 +147,7 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase Z3: CI Green        | ⏳ PENDING      | Local: tests pass, 0 lint, build OK; needs remote sync |
 | Phase AA3: Re-verify       | ⚠️  COMPLETE    | 23/39 wired; 16 gaps (AmbientIntEngine, 5 services, 6 trackers, 3 UI) |
 | Phase AB3: Notarization    | ⏳ PENDING      | v1.5.0 tag exists locally; requires git pushsync to trigger release.yml |
-| Phase AC3: Final Report    | ⏳ PENDING      | Blocked by AB3 |
+| Phase AC3: Final Report    | ✅ DONE         | WAVE_6_VERIFICATION_REPORT.md — comprehensive status |
 | Phase AD3: Manual Gate     | ⏳ MANUAL       | Alexis only — last step (after AO3) |
 | Phase AE3: Platform Obs.   | ✅ DONE         | PlatformFeaturesHub (5s delay), TheaIntelligenceOrchestrator (6s delay), ApprovalManager (lazy on-demand) — all wired in TheamacOSApp.setupManagers() |
 | Phase AF3: Settings Nav    | ✅ DONE         | Stream 5 (MSM3U) took over. 18 views wired into MacSettingsView detailContent; TheaMessagingChatView + ConversationLanguagePickerView confirmed wired; CLAUDE.md discrepancies fixed sha 97b7e86f |
