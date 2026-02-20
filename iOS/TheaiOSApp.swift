@@ -127,5 +127,11 @@ struct TheaiOSApp: App {
             await FoundationModelsService.shared.refreshAvailability()
             await MusicKitIntelligenceService.shared.fetchRecentTracks()
         }
+
+        // AAF3-3: NFCContextService — ready to scan thea:// NFC tags (iOS only)
+        Task {
+            try? await Task.sleep(for: .seconds(10))
+            _ = NFCContextService.shared
+        }
     }
 }
