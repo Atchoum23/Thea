@@ -5,6 +5,7 @@
 //  Created by Thea
 //
 
+import AppIntents
 import SwiftUI
 import WidgetKit
 
@@ -48,16 +49,20 @@ struct TheaConversationWidget: Widget {
 
 struct ConversationProvider: TimelineProvider {
     func placeholder(in _: Context) -> ConversationEntry {
-        ConversationEntry(date: Date(), conversations: [])
+        ConversationEntry(date: Date(), conversations: [], relevance: nil)
     }
 
     func getSnapshot(in _: Context, completion: @escaping (ConversationEntry) -> Void) {
-        let entry = ConversationEntry(date: Date(), conversations: loadConversations())
+        let convos = loadConversations()
+        let entry = ConversationEntry(date: Date(), conversations: convos,
+                                      relevance: TimelineEntryRelevance(score: convos.isEmpty ? 0.1 : 0.8, duration: 300))
         completion(entry)
     }
 
     func getTimeline(in _: Context, completion: @escaping (Timeline<ConversationEntry>) -> Void) {
-        let entry = ConversationEntry(date: Date(), conversations: loadConversations())
+        let convos = loadConversations()
+        let entry = ConversationEntry(date: Date(), conversations: convos,
+                                      relevance: TimelineEntryRelevance(score: convos.isEmpty ? 0.1 : 0.8, duration: 300))
         let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(300)))
         completion(timeline)
     }
@@ -82,6 +87,7 @@ struct ConversationProvider: TimelineProvider {
 struct ConversationEntry: TimelineEntry {
     let date: Date
     let conversations: [ConversationSummary]
+    var relevance: TimelineEntryRelevance?
 }
 
 struct ConversationSummary: Codable, Identifiable {
@@ -148,15 +154,15 @@ struct TheaQuickActionsWidget: Widget {
 
 struct QuickActionsProvider: TimelineProvider {
     func placeholder(in _: Context) -> QuickActionsEntry {
-        QuickActionsEntry(date: Date())
+        QuickActionsEntry(date: Date(), relevance: nil)
     }
 
     func getSnapshot(in _: Context, completion: @escaping (QuickActionsEntry) -> Void) {
-        completion(QuickActionsEntry(date: Date()))
+        completion(QuickActionsEntry(date: Date(), relevance: TimelineEntryRelevance(score: 0.5, duration: 3600)))
     }
 
     func getTimeline(in _: Context, completion: @escaping (Timeline<QuickActionsEntry>) -> Void) {
-        let entry = QuickActionsEntry(date: Date())
+        let entry = QuickActionsEntry(date: Date(), relevance: TimelineEntryRelevance(score: 0.5, duration: 3600))
         let timeline = Timeline(entries: [entry], policy: .never)
         completion(timeline)
     }
@@ -164,6 +170,7 @@ struct QuickActionsProvider: TimelineProvider {
 
 struct QuickActionsEntry: TimelineEntry {
     let date: Date
+    var relevance: TimelineEntryRelevance?
 }
 
 struct QuickActionsWidgetView: View {
@@ -227,49 +234,56 @@ struct QuickActionButton: View {
     }
 }
 
-// MARK: - Memory Widget
+// MARK: - Memory Widget (AppIntentConfiguration — AAB3-1)
 
 struct TheaMemoryWidget: Widget {
     let kind: String = "TheaMemoryWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: MemoryProvider()) { entry in
+        AppIntentConfiguration(kind: kind, intent: SearchMemoryIntent.self, provider: MemoryIntentProvider()) { entry in
             MemoryWidgetView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("Thea Memory")
-        .description("Recent memories and facts.")
+        .description("Recent memories and facts. Configure a topic to filter.")
         .supportedFamilies([.systemMedium, .systemLarge])
     }
 }
 
-struct MemoryProvider: TimelineProvider {
+/// AppIntentTimelineProvider for TheaMemoryWidget — supports topic filtering via SearchMemoryIntent.
+struct MemoryIntentProvider: AppIntentTimelineProvider {
+    typealias Entry = MemoryEntry
+    typealias Intent = SearchMemoryIntent
+
     func placeholder(in _: Context) -> MemoryEntry {
-        MemoryEntry(date: Date(), memories: [])
+        MemoryEntry(date: Date(), memories: [], topic: nil, relevance: nil)
     }
 
-    func getSnapshot(in _: Context, completion: @escaping (MemoryEntry) -> Void) {
-        completion(MemoryEntry(date: Date(), memories: loadMemories()))
+    func snapshot(for intent: SearchMemoryIntent, in _: Context) async -> MemoryEntry {
+        let memories = loadMemories(topic: intent.topic)
+        return MemoryEntry(date: Date(), memories: memories, topic: intent.topic,
+                           relevance: TimelineEntryRelevance(score: memories.isEmpty ? 0.1 : 0.7, duration: 600))
     }
 
-    func getTimeline(in _: Context, completion: @escaping (Timeline<MemoryEntry>) -> Void) {
-        let entry = MemoryEntry(date: Date(), memories: loadMemories())
-        let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(600)))
-        completion(timeline)
+    func timeline(for intent: SearchMemoryIntent, in _: Context) async -> Timeline<MemoryEntry> {
+        let memories = loadMemories(topic: intent.topic)
+        let entry = MemoryEntry(date: Date(), memories: memories, topic: intent.topic,
+                                relevance: TimelineEntryRelevance(score: memories.isEmpty ? 0.1 : 0.7, duration: 600))
+        return Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(600)))
     }
 
-    private func loadMemories() -> [MemorySummary] {
+    private func loadMemories(topic: String?) -> [MemorySummary] {
         guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.app.theathe") else {
             return []
         }
-
         let memoriesPath = containerURL.appendingPathComponent("memories.json")
         guard let data = try? Data(contentsOf: memoriesPath),
               let memories = try? JSONDecoder().decode([MemorySummary].self, from: data)
-        else {
-            return []
-        }
+        else { return [] }
 
+        if let topic, !topic.isEmpty {
+            return Array(memories.filter { $0.content.localizedCaseInsensitiveContains(topic) }.prefix(5))
+        }
         return Array(memories.prefix(5))
     }
 }
@@ -277,6 +291,8 @@ struct MemoryProvider: TimelineProvider {
 struct MemoryEntry: TimelineEntry {
     let date: Date
     let memories: [MemorySummary]
+    var topic: String?
+    var relevance: TimelineEntryRelevance?
 }
 
 struct MemorySummary: Codable, Identifiable {
@@ -340,15 +356,19 @@ struct TheaContextWidget: Widget {
 
 struct ContextProvider: TimelineProvider {
     func placeholder(in _: Context) -> ContextEntry {
-        ContextEntry(date: Date(), contextSummary: "Understanding your context...")
+        ContextEntry(date: Date(), contextSummary: "Understanding your context...", relevance: nil)
     }
 
     func getSnapshot(in _: Context, completion: @escaping (ContextEntry) -> Void) {
-        completion(ContextEntry(date: Date(), contextSummary: loadContextSummary()))
+        let summary = loadContextSummary()
+        completion(ContextEntry(date: Date(), contextSummary: summary,
+                                relevance: TimelineEntryRelevance(score: 0.6, duration: 60)))
     }
 
     func getTimeline(in _: Context, completion: @escaping (Timeline<ContextEntry>) -> Void) {
-        let entry = ContextEntry(date: Date(), contextSummary: loadContextSummary())
+        let summary = loadContextSummary()
+        let entry = ContextEntry(date: Date(), contextSummary: summary,
+                                 relevance: TimelineEntryRelevance(score: 0.6, duration: 60))
         let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(60)))
         completion(timeline)
     }
@@ -357,19 +377,15 @@ struct ContextProvider: TimelineProvider {
         guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.app.theathe") else {
             return "Tap to open Thea"
         }
-
         let contextPath = containerURL.appendingPathComponent("context_summary.txt")
-        guard let summary = try? String(contentsOf: contextPath, encoding: .utf8) else {
-            return "Tap to open Thea"
-        }
-
-        return summary
+        return (try? String(contentsOf: contextPath, encoding: .utf8)) ?? "Tap to open Thea"
     }
 }
 
 struct ContextEntry: TimelineEntry {
     let date: Date
     let contextSummary: String
+    var relevance: TimelineEntryRelevance?
 }
 
 struct ContextWidgetView: View {
@@ -413,15 +429,15 @@ struct ContextWidgetView: View {
 
     struct LockScreenProvider: TimelineProvider {
         func placeholder(in _: Context) -> LockScreenEntry {
-            LockScreenEntry(date: Date())
+            LockScreenEntry(date: Date(), relevance: nil)
         }
 
         func getSnapshot(in _: Context, completion: @escaping (LockScreenEntry) -> Void) {
-            completion(LockScreenEntry(date: Date()))
+            completion(LockScreenEntry(date: Date(), relevance: TimelineEntryRelevance(score: 0.9, duration: 3600)))
         }
 
         func getTimeline(in _: Context, completion: @escaping (Timeline<LockScreenEntry>) -> Void) {
-            let entry = LockScreenEntry(date: Date())
+            let entry = LockScreenEntry(date: Date(), relevance: TimelineEntryRelevance(score: 0.9, duration: 3600))
             let timeline = Timeline(entries: [entry], policy: .never)
             completion(timeline)
         }
@@ -429,6 +445,7 @@ struct ContextWidgetView: View {
 
     struct LockScreenEntry: TimelineEntry {
         let date: Date
+        var relevance: TimelineEntryRelevance?
     }
 
     struct LockScreenWidgetView: View {
