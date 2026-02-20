@@ -179,7 +179,7 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AAI3: CarPlay/Vision/Data | ✅ DONE   | CarPlaySceneDelegate (CPVoiceControlTemplate), visionOS ARKitSession, TabularDataAnalyzer, NutritionBarcodeService, TravelIntelligenceService — BUILD SUCCEEDED |
 | **Wave 11: Re-verification** | ⏳ PENDING   | ABA3–ABH3: Full re-run of all Wave 6 quality phases for Wave 9+10 codebase |
 | Phase ABA3: QA v2         | ✅ DONE         | All 4 platforms BUILD SUCCEEDED 0 warnings, 4046 tests pass, swiftlint 0 warnings — FinancialTests/AudioTests/TabularDataTests created, MacOSToolHandler+HealthCoachingPipeline+MCPBuilderView+MetaAICoordinator+ShazamKitService fixed |
-| Phase ABB3: Security v2   | ⏳ PENDING      | Re-run AH3: new surfaces — Keychain financial, NativeHost stdin, Keyboard no-log, NFC URL injection, CarPlay voice, FoundationModels prompt injection |
+| Phase ABB3: Security v2   | ✅ DONE         | IBAN/BTC/ETH active redaction added to OutboundPrivacyGuard.redactCredentials(); CarPlay voice query no longer logged; FoundationModels prompt injection delimiters; NFC/Keyboard/NativeHost all confirmed secure |
 | Phase ABC3: Tests v2      | ⏳ PENDING      | Re-run X3: ≥80% coverage on Wave 10 new files |
 | Phase ABD3: Periphery v2  | ⏳ PENDING      | Re-run Y3: zero Periphery warnings after Wave 9+10 |
 | Phase ABE3: CI Green v2   | ⏳ PENDING      | Re-run Z3: all 6 GH Actions workflows green |
@@ -6655,7 +6655,7 @@ swiftlint lint --quiet 2>&1 | grep -c "warning\|error"  # must be 0
 
 ## PHASE ABB3: SECURITY AUDIT v2 (WAVE 10 NEW ATTACK SURFACES)
 
-**Status: ⏳ PENDING — Wave 11, Step 2**
+**Status: ✅ DONE — S10D, 2026-02-20**
 
 New attack surfaces requiring review:
 1. **Financial Keychain** — tokens never in SwiftData/logs; OutboundPrivacyGuard IBAN/BTC/ETH patterns
@@ -6670,7 +6670,7 @@ OutboundPrivacyGuard patterns to add:
 - Bitcoin: `[13][a-km-zA-HJ-NP-Z1-9]{25,34}` + `bc1[a-z0-9]{39,59}`
 - Ethereum: `0x[a-fA-F0-9]{40}`
 
-**Status: ⏳ PENDING — Wave 11**
+**Status: ✅ DONE — S10D, 2026-02-20**
 
 ---
 
@@ -6864,7 +6864,7 @@ Update this section after each phase completes:
 | AAH3  | Social + Music + HeadphoneMotion + FoundationModels | ✅ DONE | S10E  | 2026-02-20|
 | AAI3  | CarPlay + visionOS + TabularData + Nutrition + Travel | ✅ DONE | S10F | 2026-02-20|
 | ABA3  | Comprehensive QA v2                      | ✅ DONE     | S10D     | 2026-02-20|
-| ABB3  | Security Audit v2                        | ⏳ PENDING  | —        | —         |
+| ABB3  | Security Audit v2                        | ✅ DONE     | S10D     | 2026-02-20|
 | ABC3  | Test Coverage v2                         | ⏳ PENDING  | —        | —         |
 | ABD3  | Periphery Clean v2                       | ⏳ PENDING  | —        | —         |
 | ABE3  | CI Green v2                              | ⏳ PENDING  | —        | —         |
