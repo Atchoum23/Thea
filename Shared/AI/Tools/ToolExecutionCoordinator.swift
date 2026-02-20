@@ -12,6 +12,15 @@ import os.log
 
 private let coordLogger = Logger(subsystem: "ai.thea.app", category: "ToolExecutionCoordinator")
 
+// MARK: - Sendable wrapper for [String: Any] tool input dictionaries
+// [String: Any] is not Sendable; this wrapper lets us pass tool inputs across
+// actor boundaries. Safe because tool inputs are plain JSON-derived data.
+private struct _SendableInput: @unchecked Sendable {
+    let dict: [String: Any]
+    init(_ dict: [String: Any]) { self.dict = dict }
+}
+
+
 // MARK: - Coordinator
 
 // Changed from `actor` to `@MainActor final class`: the coordinator has no mutable stored state,
@@ -126,10 +135,12 @@ final class ToolExecutionCoordinator {
                 var toolStep = ToolUseStep(call: AnthropicToolCall(id: toolId, name: toolName, input: rawInput))
                 var input = rawInput
                 input["_tool_use_id"] = toolId
+                // Wrap in @unchecked Sendable before first await to avoid actor-isolation errors
+                let sendableInput = _SendableInput(input)
                 coordLogger.debug("Executing tool: \(toolName)")
                 await onToolStep(toolStep)
 
-                let result = await executeToolCall(name: toolName, input: input)
+                let result = await executeToolCall(name: toolName, si: sendableInput)
 
                 toolStep.result = String(result.content.prefix(300))
                 toolStep.isRunning = false
@@ -154,7 +165,8 @@ final class ToolExecutionCoordinator {
     // MARK: - Tool Dispatcher
 
     // Class is @MainActor — all handler calls run on MainActor, no sending boundary crossing.
-    private func executeToolCall(name: String, input: [String: Any]) async -> AnthropicToolResult {
+    private func executeToolCall(name: String, si: _SendableInput) async -> AnthropicToolResult {
+        let input = si.dict
         switch name {
         case "search_memory", "search_knowledge_graph":
             return await MemoryToolHandler.search(input)

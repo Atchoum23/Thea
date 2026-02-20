@@ -15,6 +15,7 @@ import UIKit
 
 private let logger = Logger(subsystem: "ai.thea.app", category: "SystemToolHandler")
 
+@MainActor
 enum SystemToolHandler {
 
     // MARK: - system_notification
