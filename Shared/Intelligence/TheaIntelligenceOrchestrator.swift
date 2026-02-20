@@ -300,3 +300,26 @@ struct IntelligenceStatusReport: Sendable {
     let fallbackCurrentTier: FallbackTier
     let fallbackIsOffline: Bool
 }
+
+// MARK: - Meta-AI Extension
+
+extension TheaIntelligenceOrchestrator {
+    /// Process a user query through the MetaAI coordination layer.
+    /// Routes the query via MetaAICoordinator which applies full orchestration:
+    /// classification, model selection, plan mode, decomposition, and learning.
+    /// - Parameters:
+    ///   - query: The raw user query text.
+    ///   - classification: Optional pre-computed classification result.
+    /// - Returns: The full THEA response with decision and metadata.
+    @discardableResult
+    func processWithMetaAI(
+        _ query: String,
+        classification: ClassificationResult? = nil
+    ) async throws -> THEAResponse {
+        let input = THEAInput(
+            text: query,
+            conversationId: UUID()
+        )
+        return try await MetaAICoordinator.shared.process(input)
+    }
+}

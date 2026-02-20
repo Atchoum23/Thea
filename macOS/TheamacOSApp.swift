@@ -268,6 +268,14 @@ struct TheamacOSApp: App {
             BackgroundServiceMonitor.shared.startMonitoring()
             logger.info("BackgroundServiceMonitor started")
         }
+
+        // SelfExecutionService — pre-warm the service for use from MetaAI dashboard
+        // The service is actor-isolated; touching .shared triggers its lazy init
+        Task {
+            try? await Task.sleep(for: .seconds(4))
+            _ = SelfExecutionService.shared
+            logger.info("SelfExecutionService initialized (available via Meta-AI dashboard)")
+        }
     }
 
     private func configureWindow() {

@@ -332,6 +332,9 @@ targets:
           # LocalModelsSettingsView — no file at this path (subfolder version at Settings/LocalModels/ separately excluded)
           # AutonomousTaskSettingsView — no file at this path
           # MetaAI views ARCHIVED to .v1-archive/ on 2026-02-11 (no files remain in Shared/)
+          # KnowledgeGraphViewer + MemoryInspectorView use archived types (KnowledgeNode/MemoryTier) — excluded
+          - "**/Views/MetaAI/KnowledgeGraphViewer.swift"
+          - "**/Views/MetaAI/MemoryInspectorView.swift"
           # OrchestratorSettingsView — ACTIVATED (ModelBenchmarkService replaced with stub)
           # MemorySettingsView — ACTIVATED
           # PrivacySettingsView — ACTIVATED
@@ -587,6 +590,9 @@ targets:
           # LocalModelsSettingsView — no file at this path
           # AutonomousTaskSettingsView — no file at this path
           # MetaAI views ARCHIVED to .v1-archive/ on 2026-02-11 (no files remain in Shared/)
+          # KnowledgeGraphViewer + MemoryInspectorView use archived types (KnowledgeNode/MemoryTier) — excluded
+          - "**/Views/MetaAI/KnowledgeGraphViewer.swift"
+          - "**/Views/MetaAI/MemoryInspectorView.swift"
           # OrchestratorSettingsView — ACTIVATED (macOS-only via #if os(macOS), safe on iOS)
           - "**/Settings/Orchestrator/**"
           # MemorySettingsView — ACTIVATED
