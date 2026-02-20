@@ -134,6 +134,24 @@ final class FinancialIntelligenceService: ObservableObject {
         }
     }
 
+    // MARK: - CSV Import (AAI3-3: TabularDataAnalyzer)
+
+    /// Analyze a financial CSV export and merge the summary into `morningBriefing()` output.
+    /// Uses TabularDataAnalyzer for DataFrame-backed parsing.
+    func analyzeCSV(at url: URL) async -> String {
+        guard TabularDataAnalyzer.isAvailable else {
+            return "CSV analysis requires iOS 16.4 / macOS 13 or later."
+        }
+        do {
+            let (_, summary, income, spend) = try TabularDataAnalyzer.analyzeFinancialCSV(at: url)
+            logger.info("FinancialIntelligenceService: CSV analyzed — income=\(income) spend=\(spend)")
+            return summary
+        } catch {
+            logger.error("FinancialIntelligenceService CSV analysis error: \(error.localizedDescription)")
+            return "CSV analysis failed: \(error.localizedDescription)"
+        }
+    }
+
     // MARK: - Provider Configuration Check
 
     func isAnyProviderConfigured() async -> Bool {
