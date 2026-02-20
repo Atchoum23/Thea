@@ -12,7 +12,7 @@ struct MCPBrowserView: View {
         NavigationSplitView {
             // Server list sidebar
             List(servers, selection: $selectedServer) { server in
-                MCPServerRow(server: server)
+                MCPMetaServerRow(server: server)
                     .tag(server)
             }
             .navigationTitle("MCP Servers")
@@ -79,7 +79,7 @@ struct MCPBrowserView: View {
 
 // MARK: - Local Server Row (uses MetaAIMCPServerInfo, not ConnectedMCPServer)
 
-private struct MCPServerRow: View {
+private struct MCPMetaServerRow: View {
     let server: MetaAIMCPServerInfo
 
     var body: some View {

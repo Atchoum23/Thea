@@ -333,7 +333,7 @@ struct MCPServerDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(resource.name)
                         .font(.system(.body, design: .monospaced).weight(.medium))
-                    Text(resource.uri).font(.caption2).foregroundStyle(.tertiary)
+                    Text(resource.uriTemplate).font(.caption2).foregroundStyle(.tertiary)
                     if !resource.description.isEmpty {
                         Text(resource.description).font(.caption).foregroundStyle(.secondary)
                     }
