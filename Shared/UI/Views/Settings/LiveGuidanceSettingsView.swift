@@ -169,31 +169,31 @@ struct LiveGuidanceSettingsView: View {
             Section("Permissions") {
                 permissionRow(
                     title: "Screen Recording",
-                    granted: guidance.screenCapture.isAuthorized
-                )                    {
-                        Task {
-                            do {
-                                try await guidance.screenCapture.requestAuthorization()
-                            } catch {
-                                errorMessage = "Failed to request screen recording permission: \(error.localizedDescription)"
-                                showError = true
-                            }
+                    granted: guidance.screenCaptureIsAuthorized
+                ) {
+                    Task {
+                        do {
+                            try await guidance.requestScreenCapturePermission()
+                        } catch {
+                            errorMessage = "Failed to request screen recording permission: \(error.localizedDescription)"
+                            showError = true
                         }
                     }
+                }
 
                 permissionRow(
                     title: "Accessibility (Pointer Tracking)",
-                    granted: guidance.pointerTracker.isAuthorized
-                )                    {
-                        guidance.pointerTracker.requestAuthorization()
-                    }
+                    granted: guidance.pointerTrackerHasPermission
+                ) {
+                    guidance.requestPointerPermission()
+                }
 
                 permissionRow(
                     title: "Accessibility (Control Handoff)",
-                    granted: guidance.actionExecutor.isAuthorized()
-                )                    {
-                        guidance.actionExecutor.requestAuthorization()
-                    }
+                    granted: guidance.actionExecutorHasPermission
+                ) {
+                    guidance.requestActionExecutorPermission()
+                }
             }
 
             // Info

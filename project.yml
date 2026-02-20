@@ -298,7 +298,8 @@ targets:
           - "**/Core/Services/ProjectService.swift"
           # Exclude duplicate folders (use Shared/System/Terminal not Shared/Execution/Terminal)
           - "**/Execution/Terminal/**"
-          # M3: MLXAudioEngine + dependents — RE-ENABLED (Release build verified clean)
+          # M3: RE-ENABLED — MLXAudioEngine, MLXVoiceBackend, LocalVisionGuidance, LiveGuidanceSettingsView
+          # CGActionExecutor.swift added; LocalVisionGuidance now exposes permission accessors for view
           # Exclude duplicate providers (use Shared/AI/Providers not Shared/Providers)
           # AnthropicFilesAPI — ACTIVATED (ported to AnthropicError/AIMessage)
           # AnthropicTokenCounter — ACTIVATED (ported to AnthropicError/AIMessage)
@@ -394,8 +395,6 @@ targets:
           # IntegrationModule — ACTIVATED (protocol + registry for all integrations)
           - "**/Integrations/MCPConnectionManager.swift"  # Duplicate MCPConnection type in MCPServerGenerator
           - "**/Integrations/MCPGateway.swift"  # Duplicate MCPRequest/MCPError types in MCPServerGenerator
-          - "**/Views/MetaAI/KnowledgeGraphViewer.swift"  # Uses KnowledgeNode/NodeType API not in PersonalKnowledgeGraph
-          - "**/Views/MetaAI/MemoryInspectorView.swift"  # Uses MemoryTier API not in current MemorySystem
           # Integration modules — ALL ACTIVATED (macOS, use AppKit/AppleScript)
           # MailIntegration, TerminalIntegration, MusicIntegration, SystemIntegration,
           # FinderIntegration, SafariIntegration, CalendarIntegration, ShortcutsIntegration,
