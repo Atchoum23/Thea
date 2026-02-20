@@ -365,6 +365,49 @@ struct TheamacOSApp: App {
                 try? await Task.sleep(for: .seconds(7 * 24 * 3600))
             }
         }
+
+        // AAA3 Gap Wiring — 13 previously disconnected systems now active.
+        // All delegates are thin facades over canonical implementations.
+        Task {
+            try? await Task.sleep(for: .seconds(12))
+            AmbientIntelligenceEngine.shared.start()
+            CalendarIntelligenceService.shared.startMonitoring()
+            LocationIntelligenceService.shared.start()
+            SleepAnalysisService.shared.startMonitoring()
+            ProactiveInsightEngine.shared.start()
+            FocusSessionManager.shared.restore()
+            HabitTrackingService.shared.start()
+            GoalTrackingService.shared.start()
+            WellbeingMonitor.shared.start()
+            logger.info("AAA3: Gap wiring services started (9 systems)")
+        }
+
+        // AAC3: FinancialIntelligenceService — initial sync on launch (non-blocking).
+        // Only syncs if at least one provider (Kraken/Coinbase/YNAB/Plaid) is configured.
+        Task {
+            try? await Task.sleep(for: .seconds(15))
+            let hasProvider = await FinancialIntelligenceService.shared.isAnyProviderConfigured()
+            if hasProvider {
+                await FinancialIntelligenceService.shared.syncAll()
+                logger.info("AAC3: FinancialIntelligenceService initial sync complete")
+            } else {
+                logger.info("AAC3: FinancialIntelligenceService — no providers configured, skipping sync")
+            }
+        }
+
+        // AAE3: WearableFusionEngine — fetch Oura + Whoop readiness and fuse with Apple Watch.
+        Task {
+            try? await Task.sleep(for: .seconds(16))
+            await WearableFusionEngine.shared.refresh()
+            logger.info("AAE3: WearableFusionEngine initial refresh complete")
+        }
+
+        // AAG3: GitHubIntelligenceService — morning briefing (runs if PAT configured).
+        Task {
+            try? await Task.sleep(for: .seconds(17))
+            let briefing = await GitHubIntelligenceService.shared.morningBriefing()
+            logger.info("AAG3: GitHub morning briefing — \(briefing, privacy: .public)")
+        }
     }
 
     private func configureWindow() {
