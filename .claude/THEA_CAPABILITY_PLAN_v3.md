@@ -165,8 +165,8 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AV3: Browser Ext.    | ⏳ PENDING      | NativeHost↔TheaMessagingGateway wired, Chrome/Safari end-to-end, Brave 14 canonical, SafariExt in project.yml — S7 |
 | Phase AW3: Widget Ext.     | ⏳ PENDING      | 5 widget types (Conversation/QuickActions/Memory/Context/LockScreen) fully implemented, SwiftData-backed — S8 |
 | Phase AX3: Native Ext. 1   | ⏳ PENDING      | Share, Intents (Siri), Messages, Mail, FocusFilter extensions — real implementations, wired to ChatManager/AgentOrchestrator — S8 after AW3 |
-| Phase AY3: Native Ext. 2   | ⏳ PENDING      | CallKit, Credentials, Keyboard, Notification, QuickLook, Spotlight, FinderSync extensions — real implementations — S9 |
-| **Overall v3 %**          | **97% autonomous done** | A3–W3 + AE3–AH3 + AI3–AN3 + AP3–AS3 ✅ DONE; Wave 6 (X3–AC3) + Wave 9 (AT3–AY3) + AD3 pending. |
+| Phase AY3: Native Ext. 2   | ✅ DONE         | CallKit, Credentials, Keyboard, Notification, QuickLook, Spotlight, FinderSync extensions — real implementations — S9 |
+| **Overall v3 %**          | **97% autonomous done** | A3–W3 + AE3–AH3 + AI3–AN3 + AP3–AS3 ✅ DONE; Wave 6 (X3–AC3) + Wave 9 (AT3–AX3) + AY3 ✅ + AD3 pending. |
 
 *Last updated: 2026-02-20 — Wave 9 (AT3–AY3) added: TheaWeb, Tizen, Browser+Native Extensions. Parallel: S5=Wave6, S6=AT3+AU3, S7=AV3, S8=AW3+AX3, S9=AY3*
 
