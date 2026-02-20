@@ -170,9 +170,11 @@ actor AgentOrchestrator {
         let timeout = await taskTimeoutSeconds
 
         do {
+            // Capture immutable copy for Sendable closure (struct is value type — safe)
+            let capturedAgent = mutableAgent
             let result = try await withThrowingTaskGroup(of: AgentResult.self) { group in
                 group.addTask {
-                    try await self.invokeAndVerify(agent: mutableAgent, task: task)
+                    try await self.invokeAndVerify(agent: capturedAgent, task: task)
                 }
                 group.addTask {
                     try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
@@ -230,7 +232,7 @@ actor AgentOrchestrator {
         // Verification step: check for TODO/FIXME in modified files
         var stubFiles: [String] = []
         for file in task.modifiedFiles {
-            let content = (try? String(contentsOfFile: file)) ?? ""
+            let content = (try? String(contentsOfFile: file, encoding: .utf8)) ?? ""
             if content.contains("TODO") || content.contains("FIXME") {
                 stubFiles.append(file)
             }
