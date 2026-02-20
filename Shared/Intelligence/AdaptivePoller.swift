@@ -143,7 +143,8 @@ actor AdaptivePoller {
 
             // Compute next interval
             let interval = await nextInterval(activityCheck: activity)
-            logger.debug("AdaptivePoller: poll \(pollCount) — waiting \(String(format: \"%.1f\", interval))s")
+            let intervalStr = String(format: "%.1f", interval)
+            logger.debug("AdaptivePoller: poll \(pollCount) — waiting \(intervalStr)s")
 
             do {
                 try await Task.sleep(for: .seconds(interval))
