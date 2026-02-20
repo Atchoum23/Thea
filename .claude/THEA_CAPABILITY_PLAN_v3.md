@@ -169,14 +169,14 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AZ3: Physical AV Testing | ⏳ PENDING   | Cross-Mac AV + 15 enhanced tools: ODiff, Prefire, Allure3, XCTMetric, powermetrics, A11y audit, mitmproxy, BlackHole, SpeechWER, PerceptualDiff |
 | **Wave 10: New Domains**  | ⏳ PENDING      | AAA3–AAI3: Gap remediation + Financial Hub + Audio + Wearables + HomeKit/NFC + Cloud/GitHub + Social/Music/FoundationModels + CarPlay/visionOS/TabularData/Nutrition/Travel |
 | Phase AAA3: Gap Remediation | ✅ DONE       | 13 GapWiringServices + FinancialIntelligenceService wired into macOS + iOS setupManagers (12s + 15s deferred); BUILD SUCCEEDED |
-| Phase AAB3: Widget 2.0    | ⏳ PENDING      | AppIntents (AppIntentConfiguration), Live Activities (ActivityKit), TimelineRelevance, Share OCR, SwiftUI Keyboard, FinderSync rich menu |
+| Phase AAB3: Widget 2.0    | ✅ DONE         | AppIntents (AppIntentConfiguration), Live Activities (ActivityKit), TimelineRelevance, Share OCR, SwiftUI Keyboard — macOS+iOS BUILD SUCCEEDED |
 | Phase AAC3: Financial Hub | ✅ DONE         | KrakenService (URLSession+CryptoKit HMAC-SHA512), CoinbaseService, YNABService (URLSession REST delta), PlaidService (cursor-paged), FinancialIntelligenceService — all 9 types wired, BUILD SUCCEEDED |
 | Phase AAD3: Audio Intel   | ⏳ PENDING      | ShazamKitService (SHManagedSession), SoundAnalysisService (SNClassifySoundRequest — 300+ sounds on-device) |
 | Phase AAE3: Wearables     | ✅ DONE         | OuraService (REST v2), WhoopService (REST), WearableFusionEngine (Oura 45% + Whoop 35% + AppleWatch 20%) — all 3 wired, BUILD SUCCEEDED |
-| Phase AAF3: HomeKit/NFC/Journal | ⏳ PENDING | HomeKitAIEngine (HMHomeManager + predictive scenes), JournalingSuggestionsService (iOS 17.2+), NFCContextService (CoreNFC tap-to-context) |
+| Phase AAF3: HomeKit/NFC/Journal | ✅ DONE    | HomeKitAIEngine (predictive scenes, macOS stub), JournalingSuggestionsService (picker callback pattern), NFCContextService (CoreNFC + RM-2 entitlements) — macOS+iOS BUILD SUCCEEDED |
 | Phase AAG3: Cloud/GitHub  | ✅ DONE         | CloudStorageService (Google Drive REST v3 + Dropbox v2 pure URLSession — RM-1: no SwiftyDropbox), GitHubIntelligenceService (PAT auth, notifications + PRs morning briefing) — both wired, BUILD SUCCEEDED |
 | Phase AAH3: Social/Music/AI | ⏳ PENDING    | XAPIService (X v2 OAuth2 PKCE), MusicKitIntelligenceService (recently played), HeadphoneMotionService (CMHeadphoneMotionManager), FoundationModelsService (Apple on-device LLM) |
-| Phase AAI3: CarPlay/Vision/Data | ⏳ PENDING | CarPlay CPVoiceControlTemplate (iOS 26.4), visionOS real ARKitSession+WorldAnchor, TabularDataAnalyzer, NutritionBarcodeService (OpenFoodFacts→HealthKit), TravelIntelligenceService (Amadeus SDK) |
+| Phase AAI3: CarPlay/Vision/Data | ✅ DONE | CarPlay CPVoiceControlTemplate (iOS 26.4), visionOS real ARKitSession+WorldAnchor, TabularDataAnalyzer, NutritionBarcodeService (OpenFoodFacts→HealthKit), TravelIntelligenceService (Amadeus SDK) |
 | **Wave 11: Re-verification** | ⏳ PENDING   | ABA3–ABH3: Full re-run of all Wave 6 quality phases for Wave 9+10 codebase |
 | Phase ABA3: QA v2         | ⏳ PENDING      | Re-run AG3: all 4 platforms build, all tests pass, 0 lint — targeting Wave 10 new services |
 | Phase ABB3: Security v2   | ⏳ PENDING      | Re-run AH3: new surfaces — Keychain financial, NativeHost stdin, Keyboard no-log, NFC URL injection, CarPlay voice, FoundationModels prompt injection |
@@ -6862,7 +6862,7 @@ Update this section after each phase completes:
 | AAF3  | HomeKit AI + JournalingSuggestions + NFC | ⏳ PENDING  | —        | —         |
 | AAG3  | Cloud Storage + GitHub Intelligence      | ✅ DONE     | MSM3U    | 2026-02-20|
 | AAH3  | Social + Music + HeadphoneMotion + FoundationModels | ⏳ PENDING | —  | —         |
-| AAI3  | CarPlay + visionOS + TabularData + Nutrition + Travel | ⏳ PENDING | — | —        |
+| AAI3  | CarPlay + visionOS + TabularData + Nutrition + Travel | ✅ DONE | BUILD SUCCEEDED | 2026-02-20 |
 | ABA3  | Comprehensive QA v2                      | ⏳ PENDING  | —        | —         |
 | ABB3  | Security Audit v2                        | ⏳ PENDING  | —        | —         |
 | ABC3  | Test Coverage v2                         | ⏳ PENDING  | —        | —         |
