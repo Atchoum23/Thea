@@ -6171,6 +6171,87 @@ RECORD_SNAPSHOTS=1 xcodebuild test -project Thea.xcodeproj -scheme Thea-macOS \
 
 ---
 
+## WAVE 10 RISK MITIGATION PROTOCOL — MANDATORY BEFORE ANY PHASE STARTS
+
+**Every executor stream MUST follow this protocol. Violations = guaranteed delays.**
+
+### RM-1: SPM Package Type Pre-Audit
+Before adding ANY SPM dependency to `project.yml`, run this check:
+```bash
+# 1. Clone package, dump all public types:
+PKG_URL="https://github.com/OWNER/PACKAGE"; TMP=$(mktemp -d)
+git clone --depth 1 "$PKG_URL" "$TMP/pkg" 2>/dev/null
+grep -rE "^public (class|struct|enum|actor|protocol|typealias)" "$TMP/pkg/Sources/" | awk -F'[ <(]' '{print $NF}' | sort -u > /tmp/pkg-types.txt
+# 2. Check every exported type against Thea:
+while IFS= read -r TYPE; do
+  COUNT=$(grep -r "\b$TYPE\b" Shared/ --include="*.swift" 2>/dev/null | wc -l | tr -d ' ')
+  [ "$COUNT" -gt 0 ] && echo "⚠️  CONFLICT: $TYPE ($COUNT existing refs)"
+done < /tmp/pkg-types.txt
+```
+**Affected phases**: AAC3 (KrakenAPI, swiftynab, amadeus-ios). Run BEFORE `swift package resolve`.
+
+### RM-2: Entitlement-First Workflow
+For NFC (AAF3) and CarPlay (AAI3), verify entitlements BEFORE writing any code:
+```bash
+# NFC:
+grep "Near Field Communication" Thea/Thea.entitlements || \
+  echo "ADD to Thea.entitlements: com.apple.developer.nfc.readersession.formats = [NDEF]"
+grep "NFCReaderUsage\|NearField" iOS/Info.plist || \
+  echo "ADD NSNearFieldCommunicationUsageDescription to iOS Info.plist"
+
+# CarPlay: requires Apple approval — implement behind build flag only:
+# Use #if CARPLAY_ENTITLEMENT_APPROVED ... #endif wrapper
+# Do NOT add com.apple.developer.carplay-audio to entitlements until approved
+```
+Build gate after entitlement changes: `xcodebuild ... CODE_SIGNING_ALLOWED=NO` → BUILD SUCCEEDED before proceeding.
+
+### RM-3: CI Idle Check (Mandatory Before Every pushsync in Wave 11)
+```bash
+RUNNING=$(gh api repos/Atchoum23/Thea/actions/runs?per_page=5 \
+  --jq '[.workflow_runs[] | select(.status=="in_progress" or .status=="queued")] | length' 2>/dev/null)
+[ "$RUNNING" -gt 0 ] && echo "⛔ CI BUSY ($RUNNING runs) — wait before pushing .yml changes" \
+                      || echo "✅ CI idle — safe to push"
+```
+**Rule**: NEVER push `.github/workflows/*.yml` while CI is running.
+
+### RM-4: Micro-QA Per File (Non-Negotiable)
+```
+For EVERY new .swift file (no exceptions):
+  1. Write file
+  2. swift build 2>&1 | grep "error:" → must return EMPTY
+  3. git add <that-specific-file-only>
+  4. git commit -m "feat(PhaseXX): ClassName — description [N/M]"
+  5. git log --stat -1 → verify exactly ONE file committed
+  6. THEN write next file
+```
+Never batch-generate files. Never commit before build passes.
+
+### RM-5: Session Budget + Stream Assignment
+≤6 new Swift files per autonomous session. Wave 10 = 27 new files → **6 parallel streams**:
+
+| Stream | Session | Phases | New Files | Owner |
+|--------|---------|--------|-----------|-------|
+| S10A | msm3u-s10a | AAA3 + AAD3 | ~3 (ShazamKit, SoundAnalysis) | MSM3U |
+| S10B | msm3u-s10b | **AAC3 solo** | 7 (Financial/) | MSM3U — sole owner |
+| S10C | msm3u-s10c | AAE3 + AAG3 | 5 (Wearables, Cloud/GitHub) | MSM3U |
+| S10D | msm3u-s10d | AAF3 + AAB3 | 5 (HomeKit/NFC/Journal, Widget) | MSM3U |
+| S10E | msm3u-s10e | AAH3 | 4 (Social/Music/Motion/Foundation) | MSM3U |
+| S10F | msm3u-s10f | AAI3 | 5 (CarPlay/visionOS/Tabular/Nutrition/Travel) | MSM3U |
+
+AZ3 (testing infrastructure): separate session, can run in parallel with Wave 10 (no Swift source files).
+Wave 11 (ABA3–ABH3): sequential after Wave 10 complete.
+
+**Before each stream starts:**
+```bash
+git pull && git log --oneline -3 && git status --short
+xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug \
+  -destination "platform=macOS" build -derivedDataPath /tmp/TheaBuild \
+  CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "error:|BUILD SUCCEEDED|BUILD FAILED" | tail -3
+# Must show BUILD SUCCEEDED before touching any code
+```
+
+---
+
 ## WAVE 10: NEW CAPABILITY DOMAINS — FINANCIAL, AUDIO, WEARABLES, SOCIAL, EXTENSIONS UX
 
 ---
