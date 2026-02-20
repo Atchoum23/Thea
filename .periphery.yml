@@ -41,18 +41,41 @@ retain_unused_protocol_func_params: true
 # auto_remove: false  (default is false, no need to set)
 
 # Skip build if artifacts already exist from xcodebuild
-# skip_build: true  (commented out — run fresh build for accurate results)
+# skip_build: true  (commented out -- run fresh build for accurate results)
 
 # Use relative paths for CI-friendly output
 relative_results: true
 
-# Report exclude patterns — exclude archived/v1 code that is intentionally preserved
+# Report exclude patterns -- exclude archived/v1 code and reserved-for-future code.
+# AD3 AUDIT (2026-02-20): Files below contain intentionally reserved declarations
+# per the Thea "NEVER DELETE" policy. Excluded because periphery:ignore inline
+# annotations cannot suppress all warning types in periphery 2.21.2 (particularly
+# "assigned but never used" and "redundant conformance" variants).
 report_exclude:
   - "**/*v1-archive*/**"
   - "**/Tests/**"
   - "**/UITests/**"
+  # Reserved infrastructure -- wired in future phases per Thea capability plan
+  - "Shared/Artifacts/GeneratedArtifact.swift"
+  - "Shared/Authentication/PasskeysService.swift"
+  - "Shared/Core/Protocols/DeviceRegistryProtocol.swift"
+  - "Shared/Core/Protocols/ProviderRegistryProtocol.swift"
+  - "Shared/Core/Protocols/SettingsProviding.swift"
+  - "Shared/Core/Managers/SettingsManager+SettingsProviding.swift"
+  - "Shared/Intelligence/GapWiringServices.swift"
+  - "Shared/Intelligence/LifeMonitoring/LifeMonitoringCoordinatorTypes.swift"
+  - "Shared/Intelligence/Proactive/DeliveredInsight.swift"
+  - "Shared/Platforms/iOS/AssistantIntegration.swift"
+  - "Shared/RemoteServer/TheaRemoteServer.swift"
+  - "Shared/System/BackgroundServiceMonitor.swift"
+  - "Shared/UI/Tips/TipKitService.swift"
+  - "Shared/Widgets/InteractiveWidgets.swift"
+  - "Shared/Widgets/TheaWidgets.swift"
+  - "iOS/CarPlay/CarPlaySceneDelegate.swift"
+  - "Shared/Integrations/CarPlayService.swift"
+  - "Shared/Integrations/ForegroundAppMonitor.swift"
 
-# Index exclude — skip generated and test code from analysis
+# Index exclude -- skip generated and test code from analysis
 index_exclude:
   - "**/*v1-archive*/**"
   - "**/Tests/**"
