@@ -96,8 +96,21 @@ actor ServerHealthMonitor {
 
     /// TCP connect attempt to host:port with 5s timeout.
     private func canConnect(host: String, port: UInt16) async -> Bool {
-        await withCheckedContinuation { continuation in
-            var resolved = false
+        /// One-shot gate: protects continuation from being resumed twice across concurrent closures.
+        final class OnceGate: @unchecked Sendable {
+            private let lock = NSLock()
+            private var fired = false
+            func fire(_ block: () -> Void) {
+                lock.withLock {
+                    guard !fired else { return }
+                    fired = true
+                    block()
+                }
+            }
+        }
+
+        return await withCheckedContinuation { continuation in
+            let gate = OnceGate()
 
             let connection = NWConnection(
                 host: NWEndpoint.Host(host),
@@ -106,15 +119,12 @@ actor ServerHealthMonitor {
             )
 
             connection.stateUpdateHandler = { [weak connection] state in
-                guard !resolved else { return }
                 switch state {
                 case .ready:
-                    resolved = true
-                    continuation.resume(returning: true)
+                    gate.fire { continuation.resume(returning: true) }
                     connection?.cancel()
                 case .failed, .waiting:
-                    resolved = true
-                    continuation.resume(returning: false)
+                    gate.fire { continuation.resume(returning: false) }
                     connection?.cancel()
                 default:
                     break
@@ -125,9 +135,7 @@ actor ServerHealthMonitor {
 
             // 5-second hard timeout
             DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 5) { [weak connection] in
-                guard !resolved else { return }
-                resolved = true
-                continuation.resume(returning: false)
+                gate.fire { continuation.resume(returning: false) }
                 connection?.cancel()
             }
         }
