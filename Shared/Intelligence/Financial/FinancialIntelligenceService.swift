@@ -13,7 +13,7 @@ import OSLog
 // MARK: - Financial Summary
 
 struct FinancialSummary: Sendable {
-    let totalCryptoValueUSD: Double
+    let totalCryptoValueUSD: Double // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     let cryptoBalances: [KrakenBalance]
     let coinbaseBalances: [CoinbaseAccount]
     let ynabBudgets: [YNABBudgetSummary]
@@ -30,8 +30,8 @@ final class FinancialIntelligenceService: ObservableObject {
     // MARK: - Published State
 
     @Published var isLoading: Bool = false
-    @Published var lastSyncError: String?
-    @Published var lastSyncedAt: Date?
+    @Published var lastSyncError: String? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    @Published var lastSyncedAt: Date? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     @Published var summary: FinancialSummary?
 
     // MARK: - Provider Services (actor references)
@@ -84,7 +84,7 @@ final class FinancialIntelligenceService: ObservableObject {
 
     /// Generate a concise natural-language financial morning briefing.
     /// All figures are sanitized through OutboundPrivacyGuard before use in prompts.
-    func morningBriefing() async -> String {
+    func morningBriefing() async -> String { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         guard let s = summary else {
             return "No financial data available. Please configure your accounts in Settings → Financial and sync."
         }
