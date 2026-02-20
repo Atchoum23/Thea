@@ -1,0 +1,232 @@
+// ChatEnhancementViews.swift
+// Thea — W3: Chat Enhancement Feature Components
+//
+// AgentPhaseProgressBar (W3-4), ActionApprovalSheet (W3-5),
+// ConsensusBreakdownView (W3-3), CloudSyncStatusView (W3-6)
+
+import SwiftUI
+
+// MARK: - W3-4: AgentMode Phase Progress Bar
+
+/// Linear progress indicator showing the current AgentMode execution phase.
+/// Displayed below the follow-up chips when an agent task is in progress.
+struct AgentPhaseProgressBar: View {
+    @ObservedObject var state: AgentExecutionState
+
+    private let orderedPhases: [AgentPhase] = [.gatherContext, .takeAction, .verifyResults, .done]
+
+    private func phaseIndex(_ phase: AgentPhase) -> Int {
+        orderedPhases.firstIndex(of: phase) ?? 0
+    }
+
+    var body: some View {
+        VStack(spacing: 4) {
+            HStack(spacing: TheaSpacing.xs) {
+                ForEach(orderedPhases, id: \.self) { phase in
+                    Capsule()
+                        .fill(phaseIndex(state.phase) >= phaseIndex(phase) ? Color.purple : Color.secondary.opacity(0.25))
+                        .frame(height: 3)
+                        .animation(.easeInOut(duration: 0.3), value: state.phase)
+                }
+            }
+            .padding(.horizontal, TheaSpacing.lg)
+
+            HStack {
+                if state.phase == .userIntervention {
+                    Label("Waiting for your input", systemImage: "pause.circle.fill")
+                        .foregroundStyle(.orange)
+                } else {
+                    Text(state.statusMessage.isEmpty ? state.phase.displayName : state.statusMessage)
+                        .foregroundStyle(.secondary)
+                }
+
+                if state.progress > 0 && state.progress < 1.0 {
+                    Spacer()
+                    Text("\(Int(state.progress * 100))%")
+                }
+            }
+            .font(.theaCaption2)
+            .padding(.horizontal, TheaSpacing.lg)
+        }
+        .padding(.vertical, TheaSpacing.xs)
+    }
+}
+
+// MARK: - W3-5: AutonomyController Action Approval Sheet
+
+/// Rich approval sheet for pending autonomous actions.
+/// Shows risk level, action details, reversibility warning, and decision buttons.
+struct ActionApprovalSheet: View {
+    let pendingAction: THEAPendingAction
+    @Binding var isPresented: Bool
+
+    var body: some View {
+        VStack(spacing: TheaSpacing.lg) {
+            // Risk level header
+            HStack {
+                Image(systemName: riskIcon)
+                    .font(.system(size: 32))
+                    .foregroundStyle(pendingAction.action.riskLevel.color)
+                VStack(alignment: .leading) {
+                    Text("Action Approval Required")
+                        .font(.theaHeadline)
+                    Text("\(pendingAction.action.riskLevel.displayName) Risk")
+                        .font(.theaCaption1)
+                        .foregroundStyle(pendingAction.action.riskLevel.color)
+                }
+                Spacer()
+            }
+
+            Divider()
+
+            // Action title + description
+            VStack(alignment: .leading, spacing: TheaSpacing.sm) {
+                Text(pendingAction.action.title)
+                    .font(.theaTitle3)
+                Text(pendingAction.action.description)
+                    .font(.theaBody)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // Reason from autonomy system
+            if !pendingAction.reason.isEmpty {
+                GroupBox("Why Thea wants to do this") {
+                    Text(pendingAction.reason)
+                        .font(.theaCaption1)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+
+            // Category pill
+            HStack {
+                Label(pendingAction.action.category.rawValue.capitalized, systemImage: "tag")
+                    .font(.caption)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.secondary.opacity(0.1))
+                    .clipShape(Capsule())
+                Spacer()
+            }
+
+            // Reversibility warning
+            if pendingAction.action.rollback == nil {
+                Label("This action cannot be undone", systemImage: "exclamationmark.triangle.fill")
+                    .font(.theaCaption1)
+                    .foregroundStyle(.orange)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            Spacer()
+
+            // Decision buttons
+            HStack(spacing: TheaSpacing.md) {
+                Button("Deny") {
+                    AutonomyController.shared.rejectAction(pendingAction.id)
+                    isPresented = false
+                }
+                .buttonStyle(.bordered)
+                .tint(.red)
+
+                Spacer()
+
+                Button("Allow Once") {
+                    Task { @MainActor in
+                        await AutonomyController.shared.approveAction(pendingAction.id)
+                    }
+                    isPresented = false
+                }
+                .buttonStyle(.borderedProminent)
+            }
+        }
+        .padding(TheaSpacing.xl)
+        .frame(minWidth: 360, maxWidth: 480, minHeight: 300)
+    }
+
+    private var riskIcon: String {
+        switch pendingAction.action.riskLevel {
+        case .none, .minimal: return "checkmark.shield"
+        case .low: return "shield"
+        case .medium: return "shield.lefthalf.filled"
+        case .high: return "shield.fill"
+        case .critical: return "exclamationmark.shield.fill"
+        }
+    }
+}
+
+// MARK: - W3-3: Confidence / Consensus Breakdown View
+
+/// Tappable confidence indicator that expands to show the full verification breakdown.
+/// Wraps `ConfidenceBadge` with a synthesized `ConfidenceResult` from a scalar score.
+struct ConsensusBreakdownView: View {
+    let confidence: Double
+
+    private var syntheticResult: ConfidenceResult {
+        let source = ConfidenceSource(
+            type: .modelConsensus,
+            name: "Verification Pipeline",
+            confidence: confidence,
+            weight: 1.0,
+            details: "\(Int(confidence * 100))% verified across sources",
+            verified: confidence >= 0.6
+        )
+        let decomp = ConfidenceDecomposition(
+            factors: [
+                ConfidenceDecomposition.DecompositionFactor(
+                    name: "Overall Score",
+                    contribution: (confidence * 2) - 1.0,   // map [0,1] → [-1,+1]
+                    explanation: confidence >= 0.85
+                        ? "High confidence — multiple sources agree"
+                        : confidence >= 0.6
+                        ? "Moderate confidence — some uncertainty present"
+                        : "Low confidence — sources diverge or unverified"
+                )
+            ],
+            conflicts: [],
+            reasoning: "Confidence score: \(Int(confidence * 100))%",
+            suggestions: confidence < 0.6 ? ["Ask Thea to verify this answer", "Cross-check with another source"] : []
+        )
+        return ConfidenceResult(
+            overallConfidence: confidence,
+            sources: [source],
+            decomposition: decomp
+        )
+    }
+
+    var body: some View {
+        ConfidenceBadge(result: syntheticResult)
+    }
+}
+
+// MARK: - W3-6: CloudKit Sync Status View
+
+/// Compact CloudKit sync status icon indicator.
+/// Complementary to SyncStatusIndicator; shows a minimal icon with help tooltip.
+struct CloudSyncStatusView: View {
+    let status: CloudSyncStatus
+
+    var body: some View {
+        Group {
+            switch status {
+            case .syncing:
+                ProgressView()
+                    .scaleEffect(0.7)
+                    .help("Syncing…")
+            case .idle:
+                Image(systemName: "checkmark.icloud")
+                    .foregroundStyle(.secondary)
+                    .help("Synced")
+            case .error(let msg):
+                Image(systemName: "exclamationmark.icloud")
+                    .foregroundStyle(.red)
+                    .help("Sync error: \(msg)")
+            case .offline:
+                Image(systemName: "icloud.slash")
+                    .foregroundStyle(.secondary)
+                    .help("iCloud offline")
+            }
+        }
+        .font(.system(size: 14))
+    }
+}
