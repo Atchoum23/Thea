@@ -92,11 +92,16 @@ public actor MusicIntegration: AppIntegrationModule {
             let parts = result.components(separatedBy: "|||")
             guard parts.count >= 4 else { return nil }
 
+            let durationSecs = Int(Double(parts[3]) ?? 0)
             return MusicTrackInfo(
-                name: parts[0],
-                artist: parts[1],
-                album: parts[2],
-                duration: Double(parts[3]) ?? 0
+                id: "\(parts[0])-\(parts[1])",
+                title: parts[0],
+                artistName: parts[1],
+                albumTitle: parts[2],
+                genreNames: [],
+                durationSeconds: durationSecs > 0 ? durationSecs : nil,
+                releaseDate: nil,
+                isExplicit: false
             )
         #else
             throw AppIntegrationModuleError.notSupported
@@ -153,15 +158,5 @@ public actor MusicIntegration: AppIntegrationModule {
     #endif
 }
 
-public struct MusicTrackInfo: Sendable {
-    public let name: String
-    public let artist: String
-    public let album: String
-    public let duration: Double
-
-    public var formattedDuration: String {
-        let minutes = Int(duration) / 60
-        let seconds = Int(duration) % 60
-        return String(format: "%d:%02d", minutes, seconds)
-    }
-}
+// MusicTrackInfo is defined in Shared/Intelligence/Music/MusicKitIntelligenceService.swift (canonical).
+// Use MusicKitIntelligenceService.MusicTrackInfo from that file.
