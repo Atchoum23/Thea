@@ -125,6 +125,15 @@
 	<key>com.apple.developer.family-controls</key>
 	<true/>
 
+	<!-- ================================ -->
+	<!-- NFC Tag Reading                  -->
+	<!-- ================================ -->
+	<key>com.apple.developer.nfc.readersession.formats</key>
+	<array>
+		<string>NDEF</string>
+		<string>TAG</string>
+	</array>
+
 	<!-- ======================================================== -->
 	<!-- RESTRICTED ENTITLEMENTS - Uncomment after Apple approval -->
 	<!-- Request at: https://developer.apple.com/contact/request/network-extension -->

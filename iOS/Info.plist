@@ -160,6 +160,10 @@
 	<key>NSHomeKitUsageDescription</key>
 	<string>Thea controls your smart home devices and scenes.</string>
 
+	<!-- NFC -->
+	<key>NSNFCReaderUsageDescription</key>
+	<string>Thea reads NFC tags to activate focus sessions, scenes, and context-aware automation.</string>
+
 	<!-- Apple Music -->
 	<key>NSAppleMusicUsageDescription</key>
 	<string>Thea accesses your music library for playback control.</string>
