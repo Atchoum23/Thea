@@ -12,25 +12,28 @@ export async function askTheaAI(question, context) {
     return 'AI assistant is disabled';
   }
 
-  // This would communicate with Thea's AI backend
+  // Route through native host → TheaMessagingGateway → Thea AI
   try {
-    const response = await fetch('https://api.thea.app/v1/quick-prompt', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ question, context })
-    });
+    const response = await chrome.runtime.sendNativeMessage(
+      'com.thea.native',
+      {
+        type: 'chat',
+        requestId: crypto.randomUUID(),
+        data: {
+          content: question,
+          context: context
+        }
+      }
+    );
 
-    if (response.ok) {
-      const data = await response.json();
-      return data.response;
+    if (response.success) {
+      return 'Message sent to Thea AI (check Thea app for response)';
     }
   } catch (e) {
-    console.error('AI request failed:', e);
+    console.error('Native messaging failed:', e);
   }
 
-  return 'Unable to connect to Thea AI';
+  return 'Unable to connect to Thea native host';
 }
 
 // ============================================================================
@@ -41,7 +44,7 @@ export async function syncWithTheaApp() {
   try {
     // Try native messaging first
     const response = await chrome.runtime.sendNativeMessage(
-      'com.thea.app',
+      'com.thea.native',
       { type: 'sync', state }
     );
 
@@ -63,7 +66,7 @@ export async function syncWithTheaApp() {
 
   // Try WebSocket connection to local app
   try {
-    const ws = new WebSocket('ws://localhost:9876/extension');
+    const ws = new WebSocket('ws://localhost:18789/extension');
 
     return new Promise((resolve, reject) => {
       ws.onopen = () => {
@@ -120,7 +123,7 @@ export async function getCredentialsForDomain(domain) {
   // For now, return empty (credentials handled by native app)
   try {
     const response = await chrome.runtime.sendNativeMessage(
-      'com.thea.app',
+      'com.thea.native',
       { type: 'getCredentials', domain }
     );
     return response.credentials || [];
