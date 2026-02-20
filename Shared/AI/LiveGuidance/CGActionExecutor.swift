@@ -36,6 +36,9 @@ final class CGActionExecutor {
         _ = AXIsProcessTrustedWithOptions(options)
     }
 
+    /// Alias matching PointerTracker.requestPermission() naming convention.
+    func requestPermission() { requestAuthorization() }
+
     // MARK: - Mouse Click
 
     func click(at point: CGPoint) async throws {
