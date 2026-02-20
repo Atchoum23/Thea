@@ -67,6 +67,8 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case conversationSettings = "Conversation"
     case personalization = "Personalization"
     case responseStyles = "Response Styles"
+    case aiFeatures = "AI Features"
+    case workflowSettings = "Workflows"
 
     // Group 2: Features
     case clipboard = "Clipboard"
@@ -102,6 +104,8 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case wakeWord = "Wake Word"
     case promptEngineering = "Prompt Engineering"
     case systemPrompt = "System Prompt"
+    case remoteAccess = "Remote Access"
+    case healthInsights = "Health Insights"
 
     // Group 3: System & Analytics
     case behavioralAnalytics = "Behavioral Analytics"
@@ -116,6 +120,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     case permissions = "Permissions"
     case sync = "Sync"
     case privacy = "Privacy"
+    case monitoringSettings = "Monitoring"
 
     // Group 4: Customization
     case theme = "Theme"
@@ -148,6 +153,8 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .conversationSettings: "bubble.left.and.bubble.right"
         case .personalization: "person.crop.circle.badge.plus"
         case .responseStyles: "text.alignleft"
+        case .aiFeatures: "sparkles.rectangle.stack"
+        case .workflowSettings: "arrow.triangle.branch"
         case .clipboard: "doc.on.clipboard"
         case .translation: "character.bubble"
         case .voiceInput: "mic.fill"
@@ -181,6 +188,8 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .wakeWord: "waveform.badge.mic"
         case .promptEngineering: "text.badge.star"
         case .systemPrompt: "doc.badge.gearshape"
+        case .remoteAccess: "wifi.circle"
+        case .healthInsights: "heart.text.square"
         case .behavioralAnalytics: "chart.bar.xaxis"
         case .privacyTransparency: "eye.slash.fill"
         case .gatewayStatus: "antenna.radiowaves.left.and.right"
@@ -193,6 +202,7 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
         case .permissions: "hand.raised.fill"
         case .sync: "icloud.fill"
         case .privacy: "lock.shield"
+        case .monitoringSettings: "waveform.and.magnifyingglass"
         case .theme: "paintpalette"
         case .advanced: "slider.horizontal.3"
         case .mcpBuilder: "network.badge.shield.half.filled"
@@ -204,10 +214,10 @@ enum SettingsCategory: String, CaseIterable, Identifiable {
     var group: Int {
         switch self {
         case .general, .aiModels: 0
-        case .providers, .memory, .agent, .moltbook, .knowledge, .knowledgeGraph, .liveGuidance, .metaAI, .squads, .intelligenceDashboard, .skills, .behavioralPatterns, .notificationSchedule, .conversationSettings, .personalization, .responseStyles: 1
-        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .lifeTracking, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .messagingGateway, .messagingChat, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home, .appPairing, .shortcuts, .wakeWord, .promptEngineering, .systemPrompt: 2
+        case .providers, .memory, .agent, .moltbook, .knowledge, .knowledgeGraph, .liveGuidance, .metaAI, .squads, .intelligenceDashboard, .skills, .behavioralPatterns, .notificationSchedule, .conversationSettings, .personalization, .responseStyles, .aiFeatures, .workflowSettings: 1
+        case .clipboard, .translation, .voiceInput, .codeIntelligence, .imageIntelligence, .health, .lifeTracking, .finance, .tasks, .habits, .packages, .documents, .documentSuite, .downloads, .webClipper, .qrScanner, .mediaPlayer, .mediaServer, .notifications, .messaging, .messagingGateway, .messagingChat, .travel, .vehicles, .extSubscriptions, .passwords, .learning, .home, .appPairing, .shortcuts, .wakeWord, .promptEngineering, .systemPrompt, .remoteAccess, .healthInsights: 2
         case .behavioralAnalytics, .privacyTransparency, .gatewayStatus, .notificationIntel,
-             .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy: 3
+             .systemMonitor, .systemCleaner, .battery, .serviceHealth, .securityScanner, .permissions, .sync, .privacy, .monitoringSettings: 3
         case .theme, .advanced, .mcpBuilder: 4
         case .subscription, .about: 5
         }
@@ -454,6 +464,16 @@ struct MacSettingsView: View {
             PromptEngineeringSettingsView()
         case .systemPrompt:
             SystemPromptSettingsView()
+        case .aiFeatures:
+            AIFeaturesSettingsView()
+        case .workflowSettings:
+            WorkflowSettingsView()
+        case .remoteAccess:
+            RemoteAccessSettingsView()
+        case .healthInsights:
+            HealthInsightsView()
+        case .monitoringSettings:
+            MonitoringSettingsView()
         }
     }
 }
