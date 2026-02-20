@@ -23,9 +23,12 @@ final class ModelContainerFactory {
         var selfCode: SecCode?
         guard SecCodeCopySelf(SecCSFlags(), &selfCode) == errSecSuccess,
               let selfCode else { return false }
+        var staticCode: SecStaticCode?
+        guard SecCodeCopyStaticCode(selfCode, SecCSFlags(), &staticCode) == errSecSuccess,
+              let staticCode else { return false }
         var info: CFDictionary?
         let flags = SecCSFlags(rawValue: kSecCSSigningInformation)
-        guard SecCodeCopySigningInformation(selfCode, flags, &info) == errSecSuccess,
+        guard SecStaticCodeCopySigningInformation(staticCode, flags, &info) == errSecSuccess,
               let infoDict = info as? [String: Any] else { return false }
         guard let entitlements = infoDict["entitlements-dict"] as? [String: Any] else { return false }
         return entitlements["com.apple.developer.icloud-container-identifiers"] != nil
