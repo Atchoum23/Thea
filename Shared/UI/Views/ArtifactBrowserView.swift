@@ -113,7 +113,7 @@ struct ArtifactBrowserView: View {
 
     private var artifactList: some View {
         List(filteredArtifacts, selection: $selectedArtifact) { artifact in
-            ArtifactRow(artifact: artifact)
+            BrowserArtifactRow(artifact: artifact)
                 .tag(artifact)
                 .swipeActions(edge: .trailing) {
                     Button(role: .destructive) {
@@ -146,7 +146,7 @@ struct ArtifactBrowserView: View {
 
 // MARK: - Artifact Row
 
-struct ArtifactRow: View {
+struct BrowserArtifactRow: View {
     let artifact: GeneratedArtifact
 
     var body: some View {
