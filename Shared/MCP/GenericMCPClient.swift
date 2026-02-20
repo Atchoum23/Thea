@@ -166,7 +166,7 @@ actor GenericMCPClient {
                   let name = dict["name"] as? String else { return nil }
             let description = dict["description"] as? String ?? ""
             let mimeType = dict["mimeType"] as? String
-            return MCPResourceSpec(uri: uri, name: name, description: description, mimeType: mimeType)
+            return MCPResourceSpec(name: name, description: description, uriTemplate: uri, mimeType: mimeType ?? "text/plain")
         }
     }
 
@@ -205,12 +205,12 @@ actor GenericMCPClient {
 
         let data = try await rawRequest(body: body)
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw MCPError.invalidResponse("Could not parse JSON-RPC response")
+            throw MCPError.internalError("Could not parse JSON-RPC response")
         }
 
         if let error = json["error"] as? [String: Any],
            let message = error["message"] as? String {
-            throw MCPError.invalidResponse("MCP error: \(message)")
+            throw MCPError.internalError("MCP error: \(message)")
         }
 
         return json["result"] as? [String: Any] ?? [:]
@@ -227,7 +227,7 @@ actor GenericMCPClient {
 
         if let httpResponse = response as? HTTPURLResponse,
            !(200...299).contains(httpResponse.statusCode) {
-            throw MCPError.invalidResponse("HTTP \(httpResponse.statusCode)")
+            throw MCPError.internalError("HTTP \(httpResponse.statusCode)")
         }
 
         return data

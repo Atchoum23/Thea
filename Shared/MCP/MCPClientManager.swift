@@ -13,8 +13,8 @@ import OSLog
 @Observable
 final class ConnectedMCPServer: Identifiable, Hashable {
 
-    static func == (lhs: ConnectedMCPServer, rhs: ConnectedMCPServer) -> Bool { lhs.id == rhs.id }
-    func hash(into hasher: inout Hasher) { hasher.combine(id) }
+    nonisolated static func == (lhs: ConnectedMCPServer, rhs: ConnectedMCPServer) -> Bool { lhs.id == rhs.id }
+    nonisolated func hash(into hasher: inout Hasher) { hasher.combine(id) }
 
     let id: UUID
     let url: URL
