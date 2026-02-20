@@ -200,6 +200,13 @@ struct ChatInputView: View {
             isFocused = true
             selectedModel = AppConfiguration.shared.providerConfig.defaultModel
         }
+        // W3-1: Respond to toolbar paperclip button via FileAttachmentManager.showFilePicker
+        .onChange(of: attachmentManager.showFilePicker) { _, triggered in
+            if triggered {
+                showingFilePicker = true
+                attachmentManager.showFilePicker = false
+            }
+        }
         #if os(macOS) || os(iOS)
         .onChange(of: text) { _, newValue in
             updateOverlayState(newValue)

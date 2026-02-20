@@ -143,9 +143,9 @@ struct MessageBubble: View {
             // Token count display (↑input ↓output, with cached/reasoning in tooltip)
             TokenCountBadge(message: message)
 
-            // Confidence badge (uses ConfidenceIndicatorViews component)
+            // Confidence badge — W3-3: tappable to show full breakdown
             if let confidence = message.metadata?.confidence, confidence > 0 {
-                ConfidenceIndicatorSmall(confidence: confidence)
+                ConsensusBreakdownView(confidence: confidence)
             }
 
             // Memory context badge (shown when memory was injected into request)

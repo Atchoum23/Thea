@@ -9,6 +9,10 @@ struct MoltbookSettingsView: View {
     @State private var insightCount = 0
     @State private var isRefreshing = false
 
+    // W3-7: Activity log loaded from actor
+    @State private var recentInsights: [DevelopmentInsight] = []
+    @State private var lastHeartbeat: Date?
+
     var body: some View {
         Form {
             Section("Moltbook Agent") {
@@ -68,16 +72,61 @@ struct MoltbookSettingsView: View {
                 Section("Status") {
                     LabeledContent("Pending Posts", value: "\(pendingPostCount)")
                     LabeledContent("Collected Insights", value: "\(insightCount)")
+                    LabeledContent("Daily Limit", value: "\(pendingPostCount)/\(settings.moltbookMaxDailyPosts)")
+
+                    if let heartbeat = lastHeartbeat {
+                        LabeledContent("Last Active") {
+                            Text(heartbeat, style: .relative)
+                                .foregroundStyle(.secondary)
+                                .font(.theaCaption1)
+                        }
+                    }
 
                     Button("Refresh Status") {
                         isRefreshing = true
                         Task {
                             pendingPostCount = await MoltbookAgent.shared.pendingPosts.count
                             insightCount = await MoltbookAgent.shared.insights.count
+                            lastHeartbeat = await MoltbookAgent.shared.lastHeartbeat
+                            recentInsights = Array((await MoltbookAgent.shared.insights)
+                                .sorted { $0.timestamp > $1.timestamp }
+                                .prefix(5))
                             isRefreshing = false
                         }
                     }
                     .disabled(isRefreshing)
+                }
+
+                // W3-7: Activity log — recent insights
+                if !recentInsights.isEmpty {
+                    Section("Recent Insights") {
+                        ForEach(recentInsights) { insight in
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack {
+                                    Text(insight.title)
+                                        .font(.theaCaption1)
+                                        .fontWeight(.medium)
+                                    Spacer()
+                                    actionabilityBadge(insight.actionability)
+                                }
+                                if !insight.topics.isEmpty {
+                                    Text(insight.topics.prefix(3).joined(separator: " · "))
+                                        .font(.theaCaption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                                HStack {
+                                    Text(insight.source)
+                                        .font(.theaCaption2)
+                                        .foregroundStyle(.tertiary)
+                                    Spacer()
+                                    Text(insight.timestamp, style: .relative)
+                                        .font(.theaCaption2)
+                                        .foregroundStyle(.tertiary)
+                                }
+                            }
+                            .padding(.vertical, 2)
+                        }
+                    }
                 }
             }
         }
@@ -86,7 +135,27 @@ struct MoltbookSettingsView: View {
             if settings.moltbookAgentEnabled {
                 pendingPostCount = await MoltbookAgent.shared.pendingPosts.count
                 insightCount = await MoltbookAgent.shared.insights.count
+                lastHeartbeat = await MoltbookAgent.shared.lastHeartbeat
+                recentInsights = Array((await MoltbookAgent.shared.insights)
+                    .sorted { $0.timestamp > $1.timestamp }
+                    .prefix(5))
             }
         }
+    }
+
+    @ViewBuilder
+    private func actionabilityBadge(_ actionability: DevelopmentInsight.Actionability) -> some View {
+        let (label, color): (String, Color) = switch actionability {
+        case .informational: ("FYI", .secondary)
+        case .suggestion: ("Suggestion", .blue)
+        case .recommended: ("Recommended", .green)
+        }
+        Text(label)
+            .font(.theaCaption2)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(color.opacity(0.15))
+            .foregroundStyle(color)
+            .clipShape(Capsule())
     }
 }

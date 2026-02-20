@@ -25,6 +25,10 @@ struct ChatView: View {
     // I3-4: QuerySuggestionOverlay — shows AI-powered input suggestions
     @State private var showQuerySuggestions = false
 
+    // W3-5: Autonomy action approval
+    @StateObject private var autonomyController = AutonomyController.shared
+    @State private var showApprovalSheet = false
+
     /// Message being edited (triggers edit sheet)
     @State var editingMessage: Message?
 
@@ -118,6 +122,9 @@ struct ChatView: View {
             // Agent phase progress bar — shown when ChatManager agent is executing
             AgentPhaseProgressBar(agentState: chatManager.agentState)
             followUpSuggestionChips
+
+            agentPhaseBar  // W3-4
+
             chatInput
         }
         .overlay(alignment: .bottomTrailing) {
@@ -201,6 +208,17 @@ struct ChatView: View {
                 }
                 #endif
 
+                // W3-1: File attachment shortcut (routes to ChatInputView's picker via FileAttachmentManager)
+                ToolbarItem {
+                    Button {
+                        FileAttachmentManager.shared.showFilePicker = true
+                    } label: {
+                        Image(systemName: "paperclip")
+                    }
+                    .help("Attach a file to your next message")
+                    .accessibilityLabel("Attach file")
+                }
+
                 ToolbarItem {
                     SyncStatusIndicator()
                         .help("Sync status and transport info")
@@ -264,6 +282,17 @@ struct ChatView: View {
             }
             .task {
                 await setupProvider()
+            }
+            // W3-5: Autonomy action approval sheet
+            .sheet(isPresented: $showApprovalSheet) {
+                if let pending = autonomyController.pendingActions.first(where: { $0.status == .pending }) {
+                    ActionApprovalSheet(pendingAction: pending, isPresented: $showApprovalSheet)
+                }
+            }
+            .onChange(of: autonomyController.pendingActions.count) { _, _ in
+                if autonomyController.pendingActions.contains(where: { $0.status == .pending }) {
+                    showApprovalSheet = true
+                }
             }
             .sheet(item: $editingMessage) { message in
                 MessageEditSheet(
@@ -440,6 +469,17 @@ struct ChatView: View {
     }
 
     // MARK: - Chat Input
+
+    // MARK: - W3-4: Agent Phase Bar
+
+    @ViewBuilder
+    private var agentPhaseBar: some View {
+        let isActive = chatManager.agentState.currentTask != nil && chatManager.agentState.phase != .done
+        if isActive {
+            AgentPhaseProgressBar(state: chatManager.agentState)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+    }
 
     private var chatInput: some View {
         #if os(macOS)

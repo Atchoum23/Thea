@@ -28,6 +28,9 @@ final class FileAttachmentManager {
     private(set) var processingProgress: Double = 0.0
     private(set) var errorMessage: String?
 
+    // W3-1: External trigger for file picker (toolbar button → ChatInputView)
+    var showFilePicker = false
+
     // Configuration
     private(set) var configuration = Configuration()
 
