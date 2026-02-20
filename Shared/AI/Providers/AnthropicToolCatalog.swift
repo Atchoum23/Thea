@@ -5,10 +5,61 @@ import Foundation
 // Used with Claude's Tool Search for efficient tool discovery without context consumption
 
 // periphery:ignore - Reserved: AnthropicToolCatalog type reserved for future feature activation
-final class AnthropicToolCatalog: Sendable {
+final class AnthropicToolCatalog: @unchecked Sendable {
     static let shared = AnthropicToolCatalog()
 
+    // MARK: - Dynamic Tool Registry (O3)
+    // Thread-safe storage for tools registered at runtime from MCP servers.
+
+    private let lock = NSLock()
+    private var dynamicTools: [ToolDefinition] = []
+    // Handler closure: [String: Any] → MCPToolResult
+    private var dynamicHandlers: [String: @Sendable ([String: Any]) async throws -> MCPToolResult] = [:]
+
     private init() {}
+
+    /// Register a tool dynamically (e.g. from a connected MCP server).
+    func registerDynamicTool(
+        name: String,
+        description: String,
+        handler: @escaping @Sendable ([String: Any]) async throws -> MCPToolResult
+    ) {
+        let tool = ToolDefinition(
+            name: name,
+            description: description,
+            parameters: ["type": "object", "properties": [:] as [String: Any]]
+        )
+        lock.withLock {
+            dynamicTools.removeAll { $0.name == name }
+            dynamicTools.append(tool)
+            dynamicHandlers[name] = handler
+        }
+    }
+
+    /// Remove a dynamically-registered tool.
+    func unregisterDynamicTool(name: String) {
+        lock.withLock {
+            dynamicTools.removeAll { $0.name == name }
+            dynamicHandlers.removeValue(forKey: name)
+        }
+    }
+
+    /// Execute a dynamic tool by name.
+    func executeDynamicTool(name: String, input: [String: Any]) async throws -> MCPToolResult {
+        let handler = lock.withLock { dynamicHandlers[name] }
+        guard let handler else {
+            return MCPToolResult(
+                content: [MCPContent(type: "text", text: "Unknown dynamic tool: \(name)")],
+                isError: true
+            )
+        }
+        return try await handler(input)
+    }
+
+    /// Returns true if a tool is dynamically registered.
+    func isDynamicTool(_ name: String) -> Bool {
+        lock.withLock { dynamicHandlers[name] != nil }
+    }
 
     /// Build tool definitions from all active Thea integrations
     nonisolated func buildToolCatalog() -> [ToolDefinition] {
@@ -228,6 +279,10 @@ final class AnthropicToolCatalog: Sendable {
                 "required": ["text"]
             ]
         ))
+
+        // Append dynamically registered tools (from MCP servers, etc.)
+        let dynamic = lock.withLock { dynamicTools }
+        tools.append(contentsOf: dynamic)
 
         return tools
     }
