@@ -10,7 +10,7 @@ import SwiftData
 /// Persisted record of a task classification and its AI response confidence score.
 /// Accumulates over time to enable learning-based model routing.
 @Model
-final class ClassificationOutcome: Sendable {
+final class ClassificationOutcome {
     var query: String
     var taskType: String
     var modelId: String
