@@ -106,9 +106,18 @@ If `THEA_CAPABILITY_PLAN_v3.md` (or any v3/v2 plan) explicitly says to do someth
 
 ---
 
-### ⚠️ tmux send-keys VERIFICATION PROTOCOL (MANDATORY — NO EXCEPTIONS)
+### ⚠️ tmux send-keys TWO-STEP PROTOCOL (MANDATORY — ALL SESSIONS FOREVER)
 
-**After EVERY `tmux send-keys` command that delivers a Claude Code instruction, ALWAYS verify the session is actively processing.**
+**Alexis must NEVER have to manually press Enter to submit a tmux message. If she does, it is a process failure.**
+
+**ALWAYS two separate send-keys calls — NEVER combine message + Enter in one:**
+```bash
+tmux send-keys -t SESSION "your message"   # step 1: type
+sleep 1
+tmux send-keys -t SESSION "" Enter         # step 2: submit separately
+sleep 5
+tmux capture-pane -t SESSION -p | tail -8  # step 3: verify always
+```
 
 Root cause of failure: `tmux send-keys` without a confirmed Enter leaves the instruction sitting in the terminal input buffer permanently. The session APPEARS normal (shell is open, no error) but processes NOTHING and idles silently — this has caused 14+ hour executor stalls.
 
