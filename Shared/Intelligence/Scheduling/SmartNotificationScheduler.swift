@@ -194,6 +194,70 @@ final class SmartNotificationScheduler {
         default: nil
         }
     }
+
+    // MARK: - Q3: Weekly Summary Scheduling
+
+    /// Schedule a weekly coaching summary at the user's optimal receptivity time.
+    /// Called every Sunday via startWeeklySummaryLoop().
+    func scheduleWeeklySummary() {
+        Task {
+            let summary = await generateWeeklySummaryText()
+            let calendar = Calendar.current
+            let weekday = (calendar.component(.weekday, from: Date()) + 5) % 7
+            guard let today = dayOfWeek(from: weekday) else { return }
+
+            let deliveryHour = BehavioralFingerprint.shared.bestNotificationTime(on: today)
+            let deliveryDate = nextOccurrence(ofHour: deliveryHour)
+
+            logger.info("Scheduling weekly summary at \(deliveryHour):00 — \(deliveryDate)")
+
+            do {
+                _ = try await NotificationService.shared.scheduleReminder(
+                    title: "Your Weekly Thea Summary",
+                    body: summary,
+                    at: deliveryDate
+                )
+            } catch {
+                logger.error("Failed to schedule weekly summary: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    /// Start a background loop that fires scheduleWeeklySummary every Sunday.
+    func startWeeklySummaryLoop() {
+        Task.detached(priority: .background) { [weak self] in
+            while true {
+                let calendar = Calendar.current
+                let weekday = calendar.component(.weekday, from: Date())
+                // Sunday = weekday 1 in Calendar.current
+                let daysUntilSunday = weekday == 1 ? 7 : (8 - weekday) % 7
+                let sleepSeconds = Double(daysUntilSunday) * 86400
+
+                do {
+                    try await Task.sleep(for: .seconds(sleepSeconds))
+                } catch {
+                    break
+                }
+
+                await self?.scheduleWeeklySummary()
+            }
+        }
+    }
+
+    private func generateWeeklySummaryText() async -> String {
+        let pipeline = HealthCoachingPipeline.shared
+        let insightCount = await pipeline.activeInsights.count
+        let lastDate = await pipeline.lastAnalysisDate
+
+        if insightCount > 0 {
+            return "\(insightCount) coaching insight\(insightCount == 1 ? "" : "s") from this week. Tap to review your health and productivity patterns."
+        } else if let date = lastDate {
+            let days = Int(-date.timeIntervalSinceNow / 86400)
+            return "Your health analysis from \(days) day\(days == 1 ? "" : "s") ago is ready to review. Check in on your patterns."
+        } else {
+            return "Open Thea to see your weekly behavioral patterns and coaching insights."
+        }
+    }
 }
 
 // MARK: - Types
