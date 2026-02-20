@@ -7,7 +7,7 @@
 
 import Combine
 import Foundation
-#if canImport(HomeKit)
+#if canImport(HomeKit) && !os(macOS)
     import HomeKit
 #endif
 
@@ -30,7 +30,7 @@ public class HomeKitService: NSObject, ObservableObject {
 
     // MARK: - HomeKit Manager
 
-    #if canImport(HomeKit)
+    #if canImport(HomeKit) && !os(macOS)
         private var homeManager: HMHomeManager?
     #endif
 
@@ -38,12 +38,12 @@ public class HomeKitService: NSObject, ObservableObject {
 
     override private init() {
         super.init()
-        #if canImport(HomeKit)
+        #if canImport(HomeKit) && !os(macOS)
             setupHomeKit()
         #endif
     }
 
-    #if canImport(HomeKit)
+    #if canImport(HomeKit) && !os(macOS)
         private func setupHomeKit() {
             homeManager = HMHomeManager()
             homeManager?.delegate = self
@@ -54,7 +54,7 @@ public class HomeKitService: NSObject, ObservableObject {
 
     /// Get all available homes
     public func refreshHomes() async {
-        #if canImport(HomeKit)
+        #if canImport(HomeKit) && !os(macOS)
             guard let manager = homeManager else { return }
 
             homes = manager.homes.map { SmartHome(from: $0) }
@@ -79,7 +79,7 @@ public class HomeKitService: NSObject, ObservableObject {
 
     /// Turn on/off an accessory
     public func setAccessoryPower(accessoryId: String, on: Bool) async throws {
-        #if canImport(HomeKit)
+        #if canImport(HomeKit) && !os(macOS)
             guard let manager = homeManager,
                   let home = manager.homes.first,
                   let accessory = home.accessories.first(where: { $0.uniqueIdentifier.uuidString == accessoryId })
@@ -103,7 +103,7 @@ public class HomeKitService: NSObject, ObservableObject {
 
     /// Set brightness for a light
     public func setLightBrightness(accessoryId: String, brightness: Int) async throws {
-        #if canImport(HomeKit)
+        #if canImport(HomeKit) && !os(macOS)
             guard let manager = homeManager,
                   let home = manager.homes.first,
                   let accessory = home.accessories.first(where: { $0.uniqueIdentifier.uuidString == accessoryId })
@@ -126,7 +126,7 @@ public class HomeKitService: NSObject, ObservableObject {
 
     /// Set thermostat temperature
     public func setThermostatTemperature(accessoryId: String, temperature: Double) async throws {
-        #if canImport(HomeKit)
+        #if canImport(HomeKit) && !os(macOS)
             guard let manager = homeManager,
                   let home = manager.homes.first,
                   let accessory = home.accessories.first(where: { $0.uniqueIdentifier.uuidString == accessoryId })
@@ -149,7 +149,7 @@ public class HomeKitService: NSObject, ObservableObject {
 
     /// Lock/unlock a door lock
     public func setLockState(accessoryId: String, locked: Bool) async throws {
-        #if canImport(HomeKit)
+        #if canImport(HomeKit) && !os(macOS)
             guard let manager = homeManager,
                   let home = manager.homes.first,
                   let accessory = home.accessories.first(where: { $0.uniqueIdentifier.uuidString == accessoryId })
@@ -177,7 +177,7 @@ public class HomeKitService: NSObject, ObservableObject {
 
     /// Execute a scene
     public func executeScene(sceneId: String) async throws {
-        #if canImport(HomeKit)
+        #if canImport(HomeKit) && !os(macOS)
             guard let manager = homeManager,
                   let home = manager.homes.first,
                   let actionSet = home.actionSets.first(where: { $0.uniqueIdentifier.uuidString == sceneId })
@@ -195,7 +195,7 @@ public class HomeKitService: NSObject, ObservableObject {
 
     /// Get accessories in a specific room
     public func getAccessoriesInRoom(roomName: String) -> [SmartAccessory] {
-        #if canImport(HomeKit)
+        #if canImport(HomeKit) && !os(macOS)
             guard let manager = homeManager,
                   let home = manager.homes.first,
                   let room = home.rooms.first(where: { $0.name == roomName })
@@ -287,7 +287,7 @@ public class HomeKitService: NSObject, ObservableObject {
 
 // MARK: - HomeKit Delegate
 
-#if canImport(HomeKit)
+#if canImport(HomeKit) && !os(macOS)
     extension HomeKitService: HMHomeManagerDelegate {
         nonisolated public func homeManagerDidUpdateHomes(_: HMHomeManager) {
             Task { @MainActor in
@@ -312,7 +312,7 @@ public struct SmartHome: Identifiable, Sendable {
     public let roomCount: Int
     public let accessoryCount: Int
 
-    #if canImport(HomeKit)
+    #if canImport(HomeKit) && !os(macOS)
         init(from home: HMHome) {
             id = home.uniqueIdentifier.uuidString
             name = home.name
@@ -354,7 +354,7 @@ public struct SmartAccessory: Identifiable, Sendable {
         case other = "Other"
     }
 
-    #if canImport(HomeKit)
+    #if canImport(HomeKit) && !os(macOS)
         init(from accessory: HMAccessory) {
             id = accessory.uniqueIdentifier.uuidString
             name = accessory.name
@@ -405,7 +405,7 @@ public struct SmartScene: Identifiable, Sendable {
     public let name: String
     public let actionCount: Int
 
-    #if canImport(HomeKit)
+    #if canImport(HomeKit) && !os(macOS)
         init(from actionSet: HMActionSet) {
             id = actionSet.uniqueIdentifier.uuidString
             name = actionSet.name

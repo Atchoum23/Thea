@@ -6,7 +6,7 @@
 //  Advanced HomeKit orchestration with predictive automation
 //
 
-#if canImport(HomeKit)
+#if canImport(HomeKit) && !os(macOS)
     import Foundation
     import HomeKit
     import os.log

@@ -3,7 +3,7 @@ import OSLog
 #if canImport(CoreBluetooth)
     @preconcurrency import CoreBluetooth
 #endif
-#if canImport(HomeKit)
+#if canImport(HomeKit) && !os(macOS)
     @preconcurrency import HomeKit
 #endif
 
@@ -26,7 +26,7 @@ public actor EnvironmentContextProvider: ContextProvider {
         private var discoveredDevices: [String] = []
     #endif
 
-    #if canImport(HomeKit) && !os(tvOS)
+    #if canImport(HomeKit) && !os(macOS) && !os(tvOS)
         private var homeKitHelper: HomeKitHelper?
         private var currentScene: String?
     #endif
@@ -56,7 +56,7 @@ public actor EnvironmentContextProvider: ContextProvider {
             await setupBluetooth()
         #endif
 
-        #if canImport(HomeKit) && !os(tvOS)
+        #if canImport(HomeKit) && !os(macOS) && !os(tvOS)
             await setupHomeKit()
         #endif
 
@@ -90,7 +90,7 @@ public actor EnvironmentContextProvider: ContextProvider {
             bluetoothHelper = nil
         #endif
 
-        #if canImport(HomeKit) && !os(tvOS)
+        #if canImport(HomeKit) && !os(macOS) && !os(tvOS)
             homeKitHelper = nil
         #endif
 
@@ -132,7 +132,7 @@ public actor EnvironmentContextProvider: ContextProvider {
         }
     #endif
 
-    #if canImport(HomeKit) && !os(tvOS)
+    #if canImport(HomeKit) && !os(macOS) && !os(tvOS)
         private func setupHomeKit() async {
             let helper = await MainActor.run {
                 HomeKitHelper()
@@ -187,7 +187,7 @@ public actor EnvironmentContextProvider: ContextProvider {
             let bluetoothDevices: [String] = []
         #endif
 
-        #if canImport(HomeKit) && !os(tvOS)
+        #if canImport(HomeKit) && !os(macOS) && !os(tvOS)
             let homeScene = currentScene
         #else
             let homeScene: String? = nil
@@ -273,7 +273,7 @@ public actor EnvironmentContextProvider: ContextProvider {
 
 // MARK: - HomeKit Helper
 
-#if canImport(HomeKit) && !os(tvOS)
+#if canImport(HomeKit) && !os(macOS) && !os(tvOS)
     @MainActor
     private final class HomeKitHelper: NSObject, HMHomeManagerDelegate {
         private var homeManager: HMHomeManager?

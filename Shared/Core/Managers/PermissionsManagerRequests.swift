@@ -19,7 +19,7 @@ import Speech
     import HealthKit
 #endif
 
-#if canImport(HomeKit)
+#if canImport(HomeKit) && !os(macOS)
     import HomeKit
 #endif
 

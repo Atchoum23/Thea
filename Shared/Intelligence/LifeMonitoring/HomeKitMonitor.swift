@@ -9,7 +9,7 @@
 import Combine
 import Foundation
 import os.log
-#if canImport(HomeKit)
+#if canImport(HomeKit) && !os(macOS)
     import HomeKit
 #endif
 
@@ -26,7 +26,7 @@ public class HomeKitMonitor: NSObject, ObservableObject {
     @Published public private(set) var isRunning = false
     @Published public private(set) var monitoredAccessories: Int = 0
 
-    #if canImport(HomeKit)
+    #if canImport(HomeKit) && !os(macOS)
         private var homeManager: HMHomeManager?
         private var accessoryDelegates: [UUID: AccessoryDelegate] = [:]
     #endif
@@ -44,7 +44,7 @@ public class HomeKitMonitor: NSObject, ObservableObject {
     public func start() async {
         guard !isRunning else { return }
 
-        #if canImport(HomeKit)
+        #if canImport(HomeKit) && !os(macOS)
             homeManager = HMHomeManager()
             homeManager?.delegate = self
 
@@ -61,7 +61,7 @@ public class HomeKitMonitor: NSObject, ObservableObject {
 
         isRunning = false
 
-        #if canImport(HomeKit)
+        #if canImport(HomeKit) && !os(macOS)
             // Remove all accessory delegates
             accessoryDelegates.removeAll()
             homeManager = nil
@@ -75,7 +75,7 @@ public class HomeKitMonitor: NSObject, ObservableObject {
 
     // MARK: - Accessory Monitoring
 
-    #if canImport(HomeKit)
+    #if canImport(HomeKit) && !os(macOS)
         private func setupAccessoryMonitoring() {
             guard let manager = homeManager else { return }
 
@@ -135,7 +135,7 @@ public class HomeKitMonitor: NSObject, ObservableObject {
         oldValue: Any?,
         newValue: Any?
     ) {
-        #if canImport(HomeKit)
+        #if canImport(HomeKit) && !os(macOS)
             guard let manager = homeManager else { return }
 
             // Find the accessory
@@ -202,7 +202,7 @@ public class HomeKitMonitor: NSObject, ObservableObject {
         oldValue: Any?,
         newValue: Any?
     ) -> (LifeEventType, String, EventSignificance) {
-        #if canImport(HomeKit)
+        #if canImport(HomeKit) && !os(macOS)
             switch characteristicType {
             case HMCharacteristicTypePowerState:
                 let isOn = (newValue as? Bool) == true
@@ -291,7 +291,7 @@ public class HomeKitMonitor: NSObject, ObservableObject {
         #endif
     }
 
-    #if canImport(HomeKit)
+    #if canImport(HomeKit) && !os(macOS)
         private func accessoryCategoryName(_ categoryType: String) -> String {
             switch categoryType {
             case HMAccessoryCategoryTypeLightbulb: return "light"
@@ -310,7 +310,7 @@ public class HomeKitMonitor: NSObject, ObservableObject {
 
     // MARK: - Scene Execution Tracking
 
-    #if canImport(HomeKit)
+    #if canImport(HomeKit) && !os(macOS)
         /// Track when a scene is executed
         public func trackSceneExecution(sceneName: String, homeName: String) {
             let lifeEvent = LifeEvent(
@@ -332,7 +332,7 @@ public class HomeKitMonitor: NSObject, ObservableObject {
 
 // MARK: - HomeKit Manager Delegate
 
-#if canImport(HomeKit)
+#if canImport(HomeKit) && !os(macOS)
     extension HomeKitMonitor: HMHomeManagerDelegate {
         nonisolated public func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
             Task { @MainActor in
@@ -350,7 +350,7 @@ public class HomeKitMonitor: NSObject, ObservableObject {
 
 // MARK: - Accessory Delegate
 
-#if canImport(HomeKit)
+#if canImport(HomeKit) && !os(macOS)
     // @unchecked Sendable: NSObject subclass required for HMAccessoryDelegate; HomeKit delivers
     // callbacks on its own private queue; lastKnownValues only mutated from those callbacks
     private final class AccessoryDelegate: NSObject, HMAccessoryDelegate, @unchecked Sendable {
