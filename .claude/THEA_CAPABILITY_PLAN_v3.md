@@ -60,6 +60,13 @@
 #   22. AI Subsystem Re-evaluation — Context/Adaptive/Proactive/PatternLearning/Prediction/PromptEng
 #   23. Transparency & Analytics UIs — BehavioralFingerprint viz, Privacy, Messaging, Notifications
 #   24. Chat Enhancement Features — FilesAPI UI, TokenCounter, MultiModelConsensus, AgentMode viz
+#   25. PersonalParameters — 22 Tier 2 @AppStorage keys, snapshot() for Claude §0.3 injection
+#   26. HumanReadinessEngine — 5-signal readiness composite (HRV SDNN, sleep, ultradian, deep, REM)
+#   27. ResourceOrchestrator (4-state) + InterruptBudgetManager (4/day gate, notification gating)
+#   28. DataFreshnessOrchestrator — 8 data categories, staleness thresholds, background refresh
+#   29. EnergyAdaptiveThrottler extension ← ResourceOrchestrator; fullAuto restored (6 guardrails)
+#   30. Wave 7 full wiring — lifecycle init, PersonalParametersSettingsView, overnight log
+#   [Wave 7 runs AFTER A3–AH3, BEFORE X3 verification — purely additive, no v1/v2/v3 redo]
 # ══════════════════════════════════════════════════════════════════════════════
 
 ---
@@ -293,14 +300,20 @@ STREAM 6 — MBAM2 window "v3-s6" — UI + Integrations (~16h, auto-spawned via 
   Files: UI/Views/Components/ (excluded comps), Settings/ (config UI), Integrations/Backends/, UI/Views/Transparency/, UI/Views/Chat/ (enhancements), MacSettingsView sidebar + iOS tab nav (AF3)
   pushsync after EVERY phase — MSM3U Wave 6 pulls MBAM2's changes before verification.
 
+WAVE 7 — MSM3U sequential (after all 6 streams done, before X3):
+  AI3 (2h) → AJ3 (3h) → AK3 (3h) → AL3 (2h) → AM3 (2h) → AN3 (3h) = ~15h
+  Files: Shared/Intelligence/Resource/ (new dir), Shared/UI/Views/Settings/PersonalParametersSettingsView.swift
+  Dependency: ALL feature streams (A3–AH3) must be done before AI3 starts (AI3 = foundation).
+
 BOTTLENECK: ~16h (streams 5, 6 are longest: AE3+AF3 each add ~2h)
   All feature work done: ~15:00 CET Fri Feb 20 (starting from ~23:00 CET Feb 19)
   H3 done: ~17:00 CET Fri Feb 20 (stream 1 waits for E3/F3/G3 from s2+s3)
   AE3 done (stream 5): ~17:00 CET Fri Feb 20 → AG3+AH3 start
   AF3 done (stream 6): ~17:00 CET Fri Feb 20
-  Wave 6 starts (sequential verification): ~17:00 CET Fri Feb 20 (H3 done + all streams done)
-  Wave 6 (sequential, ~10h): ~03:00 CET Sat Feb 21
-  AG3+AH3 (stream 5, ~11h): done before Wave 6 → AD3 gate: Sat Feb 21 morning
+  Wave 7 starts (MSM3U sequential): ~17:00 CET Fri Feb 20 → done ~08:00 CET Sat Feb 21
+  Wave 6/X3 verification starts: after Wave 7 AN3 completes
+  Wave 6 (sequential, ~10h): ~18:00 CET Sat Feb 21
+  AD3 gate: Sat Feb 21 evening
 
 FILE OWNERSHIP — ABSOLUTE RULES (prevents merge conflicts):
   ChatManager.swift     → STREAM 2 ONLY
