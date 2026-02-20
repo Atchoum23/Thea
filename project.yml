@@ -275,11 +275,9 @@ packages:
   mlx-audio-swift:
     url: https://github.com/Blaizzy/mlx-audio-swift
     branch: main
-  # KrakenAPI for Kraken crypto exchange REST integration (AAC3)
-  KrakenAPI:
-    url: https://github.com/lukepistrol/KrakenAPI
-    from: 1.0.0
   # SwiftYNAB for YNAB budget integration (AAC3)
+  # Note: KrakenAPI (lukepistrol) removed — its CryptoSwift dep returns RawSpan on macOS 26 SDK,
+  # incompatible with Array<UInt8>. KrakenService now uses URLSession + CryptoKit instead.
   SwiftYNAB:
     url: https://github.com/andrebocchini/swiftynab
     from: 1.0.0
@@ -530,9 +528,11 @@ targets:
           - MLXAudioTTS
           - MLXAudioSTT
           - MLXAudioCore
-      # Financial Intelligence Hub (AAC3)
-      - package: KrakenAPI
+      # Financial Intelligence Hub (AAC3) — YNAB budget sync
+      # KrakenAPI removed (CryptoSwift RawSpan issue); KrakenService uses URLSession+CryptoKit
       - package: SwiftYNAB
+      # HomeKit framework for HomeKitAIEngine (AAF3-1)
+      - sdk: HomeKit.framework
       - target: TheaFinderSyncExtension
         embed: true
         codeSign: true
@@ -770,8 +770,8 @@ targets:
       - package: KeychainAccess
       - package: MarkdownUI
       - package: Highlightr
-      # Financial Intelligence Hub (AAC3)
-      - package: KrakenAPI
+      # Financial Intelligence Hub (AAC3) — YNAB budget sync
+      # KrakenService uses URLSession+CryptoKit (no SPM dependency)
       - package: SwiftYNAB
       - target: TheaShareExtension
         embed: true

@@ -25,14 +25,12 @@ final class FinancialManager {
 
     // MARK: - Account Management
 
-    func addAccount(name: String, type: AccountType, institution: String) -> FinancialAccount {
+    func addAccount(provider: String, accountName: String, accountType: String, currency: String = "USD") -> FinancialAccount {
         let account = FinancialAccount(
-            id: UUID(),
-            name: name,
-            type: type,
-            institution: institution,
-            balance: 0,
-            currency: "USD"
+            provider: provider,
+            accountName: accountName,
+            accountType: accountType,
+            currency: currency
         )
         modelContext?.insert(account)
         do { try modelContext?.save() } catch { financialLogger.error("Failed to save new account: \(error.localizedDescription)") }
@@ -40,31 +38,36 @@ final class FinancialManager {
         return account
     }
 
-    // periphery:ignore - Reserved: removeAccount(_:) instance method — reserved for future feature activation
+    // periphery:ignore - Reserved for future feature activation
     func removeAccount(_ account: FinancialAccount) {
         modelContext?.delete(account)
         do { try modelContext?.save() } catch { financialLogger.error("Failed to save after removing account: \(error.localizedDescription)") }
         accounts.removeAll { $0.id == account.id }
     }
 
-    // periphery:ignore - Reserved: removeAccount(_:) instance method reserved for future feature activation
     // MARK: - Transaction Management
 
     func addTransaction(
-        accountId: UUID,
+        providerTransactionID: String = UUID().uuidString,
+        accountID: UUID,
+        provider: String,
+        date: Date = Date(),
         amount: Double,
-        description: String,
-        category: String,
-        // periphery:ignore - Reserved: addTransaction(accountId:amount:description:category:date:) instance method reserved for future feature activation
-        date: Date = Date()
+        currency: String = "USD",
+        memo: String,
+        category: String = "",
+        isPending: Bool = false
     ) -> FinancialTransaction {
         let transaction = FinancialTransaction(
-            id: UUID(),
-            accountId: accountId,
+            providerTransactionID: providerTransactionID,
+            accountID: accountID,
+            provider: provider,
+            date: date,
             amount: amount,
-            transactionDescription: description,
+            currency: currency,
+            memo: memo,
             category: category,
-            date: date
+            isPending: isPending
         )
         modelContext?.insert(transaction)
         do { try modelContext?.save() } catch { financialLogger.error("Failed to save new transaction: \(error.localizedDescription)") }
@@ -72,67 +75,51 @@ final class FinancialManager {
         return transaction
     }
 
-    // periphery:ignore - Reserved: removeTransaction(_:) instance method — reserved for future feature activation
+    // periphery:ignore - Reserved for future feature activation
     func removeTransaction(_ transaction: FinancialTransaction) {
         modelContext?.delete(transaction)
         do { try modelContext?.save() } catch { financialLogger.error("Failed to save after removing transaction: \(error.localizedDescription)") }
         transactions.removeAll { $0.id == transaction.id }
-    // periphery:ignore - Reserved: removeTransaction(_:) instance method reserved for future feature activation
     }
 
-    // periphery:ignore - Reserved: clearAllData() instance method — reserved for future feature activation
+    // periphery:ignore - Reserved for future feature activation
     func clearAllData() {
         guard let context = modelContext else { return }
-
-        // periphery:ignore - Reserved: clearAllData() instance method reserved for future feature activation
-        for transaction in transactions {
-            context.delete(transaction)
-        }
-        for account in accounts {
-            context.delete(account)
-        }
+        for transaction in transactions { context.delete(transaction) }
+        for account in accounts { context.delete(account) }
         do { try context.save() } catch { financialLogger.error("Failed to save after clearing all data: \(error.localizedDescription)") }
-
         transactions.removeAll()
         accounts.removeAll()
         isSyncing = false
     }
 
-    // periphery:ignore - Reserved: syncAccount(_:) instance method — reserved for future feature activation
+    // periphery:ignore - Reserved for future feature activation
     func syncAccount(_ account: FinancialAccount) async {
         isSyncing = true
-
-// periphery:ignore - Reserved: syncAccount(_:) instance method reserved for future feature activation
-
-        // Simulate sync delay
         do {
             try await Task.sleep(for: .seconds(1))
         } catch {
             // Task cancelled — expected during shutdown
         }
-
-        // Update the account's last sync time
-        account.updatedAt = Date()
+        account.lastSyncedAt = Date()
         do { try modelContext?.save() } catch { financialLogger.error("Failed to save after syncing account: \(error.localizedDescription)") }
-
         isSyncing = false
     }
 
     // MARK: - Analytics
 
-    // periphery:ignore - Reserved: getBalance(for:) instance method — reserved for future feature activation
-    func getBalance(for accountId: UUID) -> Double {
-        // periphery:ignore - Reserved: getBalance(for:) instance method reserved for future feature activation
+    // periphery:ignore - Reserved for future feature activation
+    func getBalance(for accountID: UUID) -> Double {
         transactions
-            .filter { $0.accountId == accountId }
+            .filter { $0.accountID == accountID }
             .reduce(0) { $0 + $1.amount }
     }
 
-    // periphery:ignore - Reserved: getSpendingByCategory() instance method reserved for future feature activation
+    // periphery:ignore - Reserved for future feature activation
     func getSpendingByCategory() -> [String: Double] {
         var result: [String: Double] = [:]
         for transaction in transactions where transaction.amount < 0 {
-            let category = transaction.category ?? "Uncategorized"
+            let category = transaction.category.isEmpty ? "Uncategorized" : transaction.category
             result[category, default: 0] += abs(transaction.amount)
         }
         return result
@@ -140,21 +127,15 @@ final class FinancialManager {
 
     private func loadData() {
         guard let context = modelContext else { return }
-
         var accountDescriptor = FetchDescriptor<FinancialAccount>()
-        accountDescriptor.sortBy = [SortDescriptor(\.name)]
-        do {
-            accounts = try context.fetch(accountDescriptor)
-        } catch {
+        accountDescriptor.sortBy = [SortDescriptor(\.accountName)]
+        do { accounts = try context.fetch(accountDescriptor) } catch {
             financialLogger.error("Failed to fetch accounts: \(error.localizedDescription)")
             accounts = []
         }
-
         var transactionDescriptor = FetchDescriptor<FinancialTransaction>()
         transactionDescriptor.sortBy = [SortDescriptor(\.date, order: .reverse)]
-        do {
-            transactions = try context.fetch(transactionDescriptor)
-        } catch {
+        do { transactions = try context.fetch(transactionDescriptor) } catch {
             financialLogger.error("Failed to fetch transactions: \(error.localizedDescription)")
             transactions = []
         }

@@ -175,7 +175,7 @@ actor GitHubIntelligenceService {
     }
 
     private func requireToken() async throws -> String {
-        guard let token = await MainActor.run({ SettingsManager.shared.getAPIKey(for: "github") }),
+        guard let token = await MainActor.run(resultType: String?.self, body: { SettingsManager.shared.getAPIKey(for: "github") }),
               !token.isEmpty else {
             throw GitHubError.missingToken
         }

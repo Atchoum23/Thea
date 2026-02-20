@@ -58,7 +58,7 @@ final class FinancialTransaction {
     var date: Date
     var amount: Double                 // Positive = credit, negative = debit
     var currency: String
-    var description: String            // Payee or memo from provider
+    var memo: String                   // Payee or memo from provider (renamed from 'description' — conflicts with @Model macro)
     var category: String               // YNAB/Plaid category or empty string
     var isPending: Bool
     var importedAt: Date
@@ -71,7 +71,7 @@ final class FinancialTransaction {
         date: Date,
         amount: Double,
         currency: String,
-        description: String,
+        memo: String,
         category: String = "",
         isPending: Bool = false,
         importedAt: Date = Date()
@@ -83,7 +83,7 @@ final class FinancialTransaction {
         self.date = date
         self.amount = amount
         self.currency = currency
-        self.description = description
+        self.memo = memo
         self.category = category
         self.isPending = isPending
         self.importedAt = importedAt
@@ -93,7 +93,7 @@ final class FinancialTransaction {
 // MARK: - Provider Enum
 
 /// Supported financial providers for type-safe routing.
-enum FinancialProvider: String, CaseIterable, Sendable {
+enum FinancialAPIProvider: String, CaseIterable, Sendable {
     case kraken   = "kraken"
     case coinbase = "coinbase"
     case ynab     = "ynab"
