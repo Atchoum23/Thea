@@ -339,6 +339,7 @@ targets:
           # EnhancedMessageBubble + ExecutableCodeBlock — ACTIVATED
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/TheaTextInputField.swift"
+          - "**/LiveGuidanceSettingsViewStub.swift"  # Real LiveGuidanceSettingsView.swift is active (M3 re-enabled)
           # CodeIntelligence — ACTIVATED (macOS-only, #if os(macOS) guarded)
           - "**/Views/Code/**"  # CodeProjectView extracted sub-view, duplicates types in parent
           # ResourceAllocationSettingsView — ACTIVATED (DynamicResourceAllocator is active)
