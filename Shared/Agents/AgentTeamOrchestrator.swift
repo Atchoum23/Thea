@@ -144,12 +144,24 @@ final class AgentTeamOrchestrator: ObservableObject {
 
         do {
             // Build isolated system prompt (each teammate is unaware of other teammates)
-            let systemPrompt = """
+            var systemPrompt = """
             You are a specialized AI sub-agent in a team led by Thea.
             Your sole task is: \(subTask.description)
             Respond with the result only — concise, focused, no preamble.
             The Team Lead will synthesize all sub-agent results.
             """
+
+            // Inject active installed skills into sub-agent context
+            let installedSkills = SkillsRegistryService.shared.installedSkills
+            if !installedSkills.isEmpty {
+                let skillContext = installedSkills
+                    .filter { $0.trustScore >= 0 } // all enabled skills (InstalledSkill has no isEnabled; include all)
+                    .map { "Skill [\($0.name)]: \($0.instructions)" }
+                    .joined(separator: "\n\n")
+                if !skillContext.isEmpty {
+                    systemPrompt += "\n\n---\nInstalled Skills:\n\(skillContext)"
+                }
+            }
 
             let provider = try getProvider()
             let model = getTeammateModel()
