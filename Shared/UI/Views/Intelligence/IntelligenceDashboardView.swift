@@ -22,6 +22,10 @@ struct IntelligenceDashboardView: View {
     @State private var refreshToken = UUID()
     @State private var timer: Timer?
 
+    // PKG stats (fetched async from actor, updated with refresh timer)
+    @State private var pkgEntityCount: Int = 0
+    @State private var pkgEdgeCount: Int = 0
+
     private let columns = [GridItem(.adaptive(minimum: 280), spacing: 16)]
 
     var body: some View {
@@ -46,6 +50,11 @@ struct IntelligenceDashboardView: View {
         .onAppear { startRefreshTimer() }
         .onDisappear { stopRefreshTimer() }
         .id(refreshToken)
+        .task(id: refreshToken) {
+            let pkg = PersonalKnowledgeGraph.shared
+            pkgEntityCount = await pkg.entityCount
+            pkgEdgeCount = await pkg.edgeCount
+        }
     }
 
     // MARK: - Header
@@ -202,11 +211,10 @@ struct IntelligenceDashboardView: View {
             systemImage: "brain",
             color: .orange
         ) {
-            let pkg = PersonalKnowledgeGraph.shared
-            MetricRow(label: "Entities", value: "\(pkg.entityCount)")
-            MetricRow(label: "Relationships", value: "\(pkg.edgeCount)")
-            let density: String = pkg.entityCount > 0
-                ? String(format: "%.1f avg", Double(pkg.edgeCount) / Double(pkg.entityCount))
+            MetricRow(label: "Entities", value: "\(pkgEntityCount)")
+            MetricRow(label: "Relationships", value: "\(pkgEdgeCount)")
+            let density: String = pkgEntityCount > 0
+                ? String(format: "%.1f avg", Double(pkgEdgeCount) / Double(pkgEntityCount))
                 : "—"
             MetricRow(label: "Avg Connections", value: density)
             Divider()
@@ -379,8 +387,10 @@ struct IntelligenceDashboardView: View {
     // MARK: - Timer
 
     private func startRefreshTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
-            refreshToken = UUID()
+        timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [self] _ in
+            Task { @MainActor in
+                refreshToken = UUID()
+            }
         }
     }
 

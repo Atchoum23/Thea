@@ -185,10 +185,10 @@ final class HealthCoachingPipeline {
             // AJ3/AL3: Approximate SDNN from resting HR + record freshness
             if restingHR > 0 {
                 let approxSDNN = max(10, 100 - Double(restingHR))
-                await HumanReadinessEngine.shared.updateHRVBaseline(approxSDNN)
+                HumanReadinessEngine.shared.updateHRVBaseline(approxSDNN)
             }
-            await DataFreshnessOrchestrator.shared.recordRefresh(.hrv)
-            await DataFreshnessOrchestrator.shared.recordRefresh(.biometrics)
+            DataFreshnessOrchestrator.shared.recordRefresh(.hrv)
+            DataFreshnessOrchestrator.shared.recordRefresh(.biometrics)
         } catch {
             logger.warning("Failed to fetch heart rate data: \(error.localizedDescription)")
         }
