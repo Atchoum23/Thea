@@ -29,11 +29,18 @@ final class AmbientIntelligenceEngine: ObservableObject {
         gapLog.info("AmbientIntelligenceEngine: started")
     }
 
-    /// AAD3: Triggers ShazamKit song recognition + SoundAnalysis scene understanding.
-    /// Wired after AAD3 creates ShazamKitService + SoundAnalysisService.
+    /// AAD3: Triggers ShazamKit song recognition + SoundAnalysis scene classification.
     func startAudioAnalysis() {
-        // Implemented in AmbientIntelligenceEngine+Audio.swift (AAD3)
-        gapLog.info("AmbientIntelligenceEngine: startAudioAnalysis() — AAD3 wiring pending")
+        ShazamKitService.shared.startListening()
+        SoundAnalysisService.shared.startAnalysis()
+        gapLog.info("AmbientIntelligenceEngine: startAudioAnalysis() — ShazamKit + SoundAnalysis started")
+    }
+
+    /// Stop all audio analysis (ShazamKit + SoundAnalysis).
+    func stopAudioAnalysis() {
+        ShazamKitService.shared.stopListening()
+        SoundAnalysisService.shared.stopAnalysis()
+        gapLog.info("AmbientIntelligenceEngine: stopAudioAnalysis()")
     }
 }
 
