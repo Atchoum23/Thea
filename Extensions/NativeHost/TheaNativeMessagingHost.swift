@@ -53,6 +53,9 @@ final class TheaNativeMessagingHost {
         // Autofill
         case autofillCredential
         case autofillAlias
+
+        // AI Chat (routes to Thea's TheaMessagingGateway port 18789)
+        case chat
     }
 
     struct IncomingMessage: Codable {
@@ -179,6 +182,9 @@ final class TheaNativeMessagingHost {
                 return try await handleAutofillCredential(message)
             case .autofillAlias:
                 return try await handleAutofillAlias(message)
+            // AI Chat
+            case .chat:
+                return try await handleChat(message)
             }
         } catch {
             return OutgoingMessage(
@@ -514,6 +520,49 @@ final class TheaNativeMessagingHost {
                 ],
                 error: nil
             )
+        }
+    }
+
+    // MARK: - AI Chat Handler
+
+    private func handleChat(_ message: IncomingMessage) async throws -> OutgoingMessage {
+        guard let content = message.data?["content"]?.value as? String else {
+            throw NativeHostError.missingParameter("content")
+        }
+
+        // Forward to Thea's TheaMessagingGateway on port 18789
+        let url = URL(string: "http://localhost:18789/message")!  // swiftlint:disable:this force_unwrapping
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let payload: [String: Any] = [
+            "content": content,
+            "chatId": message.data?["chatId"]?.value as? String ?? "browser-extension",
+            "senderId": message.data?["senderId"]?.value as? String ?? "local-user",
+            "senderName": message.data?["senderName"]?.value as? String ?? "Browser"
+        ]
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+
+        // Send POST request
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NativeHostError.invalidData
+        }
+
+        if httpResponse.statusCode == 200 {
+            return OutgoingMessage(
+                type: message.type.rawValue,
+                requestId: message.requestId,
+                success: true,
+                data: ["forwarded": AnyCodable(true)],
+                error: nil
+            )
+        } else {
+            let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+            throw NativeHostError.invalidData
         }
     }
 
