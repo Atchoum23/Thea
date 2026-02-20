@@ -183,7 +183,7 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase ABC3: Tests v2      | ✅ DONE         | 4046 tests pass, 78+ Wave 10 model tests in swift test suite — sha 837a9681 |
 | Phase ABD3: Periphery v2  | ✅ DONE         | 112 declarations annotated across 20 Wave 10 files — commits f82b1fb1 + bd4c13ba + 36fa13b8 |
 | Phase ABE3: CI Green v2   | ✅ DONE         | All 4 workflows green on bd4c13ba: Security Audit ✅ Security Scanning ✅ Thea CI ✅ E2E Tests ✅ — ABE3 2026-02-20 17:38 |
-| Phase ABF3: Wiring v2     | ✅ DONE         | 54/55 systems wired (≥55 target met), JournalingSuggestionsService gap fixed — sha 5a136a4f |
+| Phase ABF3: Wiring v2     | ✅ DONE         | 55/55 systems wired — DynamicConfig (14 refs, was miscounted as DynamicConfigManager in script), JournalingSuggestionsService gap fixed — sha 5a136a4f + S10E correction |
 | Phase ABG3: Notarize v2   | ⚙️ IN PROGRESS  | CI green ✅ — v1.6.0 tag in progress (release notes sha 9ce4a473) |
 | Phase ABH3: Report v2     | ⚙️ IN PROGRESS  | Draft committed sha 4274ed77, s10f completing WAVE_11_VERIFICATION_REPORT.md |
 | **Overall v3 %**          | **99% autonomous done** | A3–W3 + AE3–AI3 + Wave 9 + Wave 10 + ABA3–ABF3 + ABE3 ✅ DONE; ABG3/ABH3 in_progress; AZ3+AD3 pending. |
