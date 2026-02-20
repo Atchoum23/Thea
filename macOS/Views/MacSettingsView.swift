@@ -428,6 +428,32 @@ struct MacSettingsView: View {
             SubscriptionSettingsView()
         case .about:
             AboutView()
+        case .knowledgeGraph:
+            KnowledgeGraphExplorerView()
+        case .behavioralPatterns:
+            BehavioralPatternsView()
+        case .notificationSchedule:
+            NotificationScheduleView()
+        case .conversationSettings:
+            ConversationSettingsView()
+        case .personalization:
+            PersonalizationSettingsView()
+        case .responseStyles:
+            ResponseStylesSettingsView()
+        case .lifeTracking:
+            LifeTrackingSettingsView()
+        case .messagingChat:
+            TheaMessagingChatView()
+        case .appPairing:
+            AppPairingSettingsView()
+        case .shortcuts:
+            ShortcutsSettingsView()
+        case .wakeWord:
+            WakeWordSettingsView()
+        case .promptEngineering:
+            PromptEngineeringSettingsView()
+        case .systemPrompt:
+            SystemPromptSettingsView()
         }
     }
 }
