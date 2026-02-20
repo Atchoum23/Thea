@@ -45,6 +45,25 @@ final class AgentTeamOrchestrator: ObservableObject {
 
         // 1. Decompose via TaskPlanDAG
         let plan = try await TaskPlanDAG.shared.createPlan(goal: goal)
+
+        // G3-3: User Approval Gate — check plan risk before executing
+        let planRisk = estimatePlanRisk(plan: plan, goal: goal)
+        if planRisk >= AutonomyController.shared.autonomyLevel.maxAutoRisk {
+            let approval = await AutonomyController.shared.requestAction(
+                AutonomousAction(
+                    id: UUID(),
+                    type: .other,
+                    description: "Execute multi-step plan: \(goal.prefix(100))",
+                    riskLevel: planRisk,
+                    isReversible: false,
+                    requiresExternalAccess: false,
+                    metadata: ["subtasks": "\(plan.nodes.count)", "goal": goal]
+                )
+            )
+            if approval == .rejected {
+                throw AgentTeamError.planRejectedByUser
+            }
+        }
         let subTasks = plan.nodes.filter { $0.dependsOn.isEmpty || $0.status == .pending }
             .prefix(maxParallel)
             .map { AgentSubTask(id: $0.id, description: $0.action, node: $0) }
@@ -267,6 +286,31 @@ final class AgentTeamOrchestrator: ObservableObject {
     /// Teammates use Sonnet 4.6 (near-flagship at lower cost for parallel calls).
     private func getTeammateModel() -> String { "claude-sonnet-4-6" }
 
+    // MARK: - G3: Plan Risk Estimation
+
+    /// Estimate the risk level of a plan based on its nodes and goal.
+    /// Used to determine if the approval gate should be triggered.
+    private func estimatePlanRisk(plan: TaskPlan, goal: String) -> THEARiskLevel {
+        let lower = goal.lowercased()
+        let nodeCount = plan.nodes.count
+        let hasIntegrationNodes = plan.nodes.contains { $0.actionType == .integration }
+
+        // High-risk: many nodes + integration actions + sensitive keywords
+        if nodeCount > 5 && hasIntegrationNodes {
+            return .high
+        }
+        // Medium-risk: integration actions or many steps
+        if hasIntegrationNodes || nodeCount > 3 {
+            return .medium
+        }
+        // Low-risk keywords (send, delete, post, publish)
+        let sensitiveKeywords = ["send", "delete", "publish", "post", "submit", "deploy", "remove"]
+        if sensitiveKeywords.contains(where: { lower.contains($0) }) {
+            return .medium
+        }
+        return .low
+    }
+
     // MARK: - Team Management
 
     // periphery:ignore - Reserved: removeCompletedTeams() instance method — reserved for future feature activation
@@ -347,12 +391,14 @@ enum AgentTeamError: LocalizedError {
     case noProviderAvailable
     case planCreationFailed
     case synthesisTimeout
+    case planRejectedByUser  // G3-3: user declined the approval gate
 
     var errorDescription: String? {
         switch self {
         case .noProviderAvailable: "No AI provider configured for agent team"
         case .planCreationFailed: "Failed to decompose task into sub-tasks"
         case .synthesisTimeout: "Team synthesis timed out"
+        case .planRejectedByUser: "Plan execution was declined in the approval gate"
         }
     }
 }

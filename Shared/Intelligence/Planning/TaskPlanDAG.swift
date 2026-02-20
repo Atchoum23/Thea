@@ -22,16 +22,39 @@ final class TaskPlanDAG {
     private(set) var activePlans: [TaskPlan] = []
     private(set) var isPlanning = false
 
-    private init() {}
+    // MARK: - G3: Plan Caching & Quality
+
+    /// Cache of successful plans keyed by goal pattern hash → plan outcome
+    private var planCache: [Int: CachedPlan] = [:]
+    private var planOutcomes: [UUID: PlanOutcome] = [:]
+    private let cacheKey = "thea.taskPlanCache"
+
+    private init() {
+        loadCache()
+    }
 
     // MARK: - Plan Creation
 
-    /// Create a task plan from a user goal
+    /// Create a task plan from a user goal.
+    /// G3: checks plan cache first; returns adapted cached plan if quality > 0.8.
     func createPlan(goal: String, context: String = "") async throws -> TaskPlan {
         isPlanning = true
         defer { isPlanning = false }
 
         logger.info("Creating plan for goal: \(goal)")
+
+        // G3: Check plan cache for similar successful plans
+        let hash = hashGoalPattern(goal)
+        if let cached = planCache[hash], cached.quality > 0.8 {
+            logger.info("TaskPlanDAG: reusing cached plan (quality \(String(format: "%.2f", cached.quality)))")
+            var adaptedPlan = cached.plan
+            adaptedPlan.id = UUID()
+            adaptedPlan.goal = goal
+            adaptedPlan.createdAt = Date()
+            adaptedPlan.status = .ready
+            activePlans.append(adaptedPlan)
+            return adaptedPlan
+        }
 
         // Decompose the goal into steps
         let steps = decompose(goal: goal, context: context)
@@ -52,6 +75,71 @@ final class TaskPlanDAG {
 
         activePlans.append(plan)
         return plan
+    }
+
+    // MARK: - G3: Quality Scoring & Caching
+
+    /// Record the outcome of a plan execution for future quality-based routing.
+    func recordPlanOutcome(
+        planID: UUID,
+        executionTime: TimeInterval,
+        successRate: Double,
+        confidenceScore: Double
+    ) {
+        guard let plan = activePlans.first(where: { $0.id == planID }) else { return }
+        let outcome = PlanOutcome(
+            planID: planID,
+            patternHash: hashGoalPattern(plan.goal),
+            executionTime: executionTime,
+            successRate: successRate,
+            confidence: confidenceScore,
+            timestamp: Date()
+        )
+        planOutcomes[planID] = outcome
+
+        // Update cache if this was a high-quality plan
+        let quality = (successRate + confidenceScore) / 2.0
+        if quality > 0.7 {
+            let cached = CachedPlan(plan: plan, quality: quality, lastUsed: Date())
+            planCache[outcome.patternHash] = cached
+            saveCache()
+            logger.info("TaskPlanDAG: cached plan for pattern \(outcome.patternHash) (quality \(String(format: "%.2f", quality)))")
+        }
+    }
+
+    /// Find a similar cached plan for a given goal.
+    func findSimilarPlan(for goal: String) async -> TaskPlan? {
+        let hash = hashGoalPattern(goal)
+        return planCache[hash]?.plan
+    }
+
+    /// Hash a goal string to a stable pattern key (ignores specific nouns, focuses on structure).
+    func hashGoalPattern(_ goal: String) -> Int {
+        // Normalize: lowercase, strip specific entities, keep structural words
+        let structural = goal.lowercased()
+            .components(separatedBy: .whitespaces)
+            .filter { $0.count > 3 }  // Skip short filler words
+            .prefix(6)
+            .joined(separator: " ")
+        return structural.hashValue
+    }
+
+    // MARK: - G3: Cache Persistence
+
+    private func loadCache() {
+        guard let data = UserDefaults.standard.data(forKey: cacheKey),
+              let cached = try? JSONDecoder().decode([Int: CachedPlan].self, from: data) else { return }
+        planCache = cached
+        logger.info("TaskPlanDAG: loaded \(cached.count) cached plans")
+    }
+
+    private func saveCache() {
+        // Keep only top 50 plans by quality
+        let sorted = planCache.sorted { $0.value.quality > $1.value.quality }
+        let trimmed = Dictionary(uniqueKeysWithValues: sorted.prefix(50))
+        if let data = try? JSONEncoder().encode(trimmed) {
+            UserDefaults.standard.set(data, forKey: cacheKey)
+        }
     }
 
     // MARK: - Plan Execution
@@ -362,20 +450,39 @@ final class TaskPlanDAG {
     }
 }
 
+// MARK: - G3: Supporting Types
+
+/// Records the outcome of a plan execution for quality learning.
+struct PlanOutcome: Codable, Sendable {
+    let planID: UUID
+    let patternHash: Int
+    let executionTime: TimeInterval
+    let successRate: Double
+    let confidence: Double
+    let timestamp: Date
+}
+
+/// A cached successful plan for reuse with similar goals.
+struct CachedPlan: Codable, Sendable {
+    var plan: TaskPlan
+    let quality: Double
+    let lastUsed: Date
+}
+
 // periphery:ignore - Reserved: clearCompletedPlans() instance method reserved for future feature activation
 // MARK: - Types
 
-struct TaskPlan: Identifiable, Sendable {
-    let id: UUID
-    let goal: String
+struct TaskPlan: Identifiable, Codable, Sendable {
+    var id: UUID
+    var goal: String
     var nodes: [TaskPlanNode]
-    let createdAt: Date
+    var createdAt: Date
     var status: PlanStatus
 
 // periphery:ignore - Reserved: goal property reserved for future feature activation
 
     // periphery:ignore - Reserved: createdAt property reserved for future feature activation
-    enum PlanStatus: String, Sendable {
+    enum PlanStatus: String, Codable, Sendable {
         case ready
         case executing
         case completed
@@ -384,7 +491,7 @@ struct TaskPlan: Identifiable, Sendable {
     }
 }
 
-struct TaskPlanNode: Identifiable, Sendable {
+struct TaskPlanNode: Identifiable, Codable, Sendable {
     let id: UUID
     // periphery:ignore - Reserved: title property — reserved for future feature activation
     let title: String
@@ -406,14 +513,14 @@ struct TaskPlanNode: Identifiable, Sendable {
         self.dependsOn = dependsOn
     }
 
-    enum ActionType: String, Sendable {
+    enum ActionType: String, Codable, Sendable {
         case aiQuery       // Send to AI provider
         case integration   // Execute via FunctionGemma/integrations
         case compound      // Aggregate results from dependencies
         case userInput     // Wait for user input
     }
 
-    enum NodeStatus: String, Sendable {
+    enum NodeStatus: String, Codable, Sendable {
         case pending
         case executing
         case completed
