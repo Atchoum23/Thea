@@ -131,11 +131,10 @@ actor ToolExecutionCoordinator {
                       let rawInput = block["input"] as? [String: Any]
                 else { continue }
 
-                // Inject tool_use_id for handlers
-                var input = rawInput
-                input["_tool_use_id"] = toolId
-
                 var toolStep = ToolUseStep(call: AnthropicToolCall(id: toolId, name: toolName, input: rawInput))
+                // Create input as a fresh region (not derived from rawInput which is captured by onToolStep)
+                var input = (block["input"] as? [String: Any]) ?? [:]
+                input["_tool_use_id"] = toolId
                 coordLogger.debug("Executing tool: \(toolName)")
                 await onToolStep(toolStep)
 
@@ -164,7 +163,7 @@ actor ToolExecutionCoordinator {
 
     // MARK: - Tool Dispatcher
 
-    private func executeToolCall(name: String, input: sending [String: Any]) async -> AnthropicToolResult {
+    private func executeToolCall(name: String, input: [String: Any]) async -> AnthropicToolResult {
         switch name {
         // Memory tools
         case "search_memory", "search_knowledge_graph":
