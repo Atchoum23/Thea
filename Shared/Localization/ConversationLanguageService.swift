@@ -52,14 +52,19 @@ final class ConversationLanguageService {
 
     // MARK: - Language Toggle
 
-    /// Set the conversation language (nil to revert to default/English)
+    /// Set the conversation language (nil to revert to default/English).
+    /// Only BCP-47 codes from the supported whitelist are accepted — unknown codes are silently ignored (AH3-RED).
     func setLanguage(_ languageCode: String?, for conversation: Conversation) {
-        conversation.metadata.preferredLanguage = languageCode
-
         if let code = languageCode {
+            guard supportedLanguages.contains(where: { $0.code == code }) else {
+                logger.warning("Rejected unsupported language code '\(code, privacy: .public)' — not in whitelist")
+                return
+            }
+            conversation.metadata.preferredLanguage = code
             let name = supportedLanguages.first { $0.code == code }?.nativeName ?? code
             logger.info("Conversation \(conversation.id): language set to \(name) (\(code))")
         } else {
+            conversation.metadata.preferredLanguage = nil
             logger.info("Conversation \(conversation.id): language reset to default")
         }
     }

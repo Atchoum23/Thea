@@ -411,8 +411,13 @@ public final class AutonomyController: ObservableObject {
         let action = pendingActions[index].action
         pendingActions[index].status = .executing
 
+        // AH3-PURPLE: Structured audit trail — approval + outcome
+        logger.info("AUDIT approved: '\(action.title, privacy: .public)' risk=\(action.riskLevel.rawValue, privacy: .public) category=\(action.category.rawValue, privacy: .public) id=\(pendingId.uuidString, privacy: .public)")
+
         let result = await executeAction(action)
         pendingActions[index].status = result.success ? .completed : .failed
+
+        logger.info("AUDIT outcome: '\(action.title, privacy: .public)' \(result.success ? "succeeded" : "failed", privacy: .public): \(result.message, privacy: .public)")
 
         // Remove after a delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
@@ -424,7 +429,9 @@ public final class AutonomyController: ObservableObject {
     public func rejectAction(_ pendingId: UUID) {
         if let index = pendingActions.firstIndex(where: { $0.id == pendingId }) {
             pendingActions[index].status = .rejected
-            logger.info("Rejected action: \(self.pendingActions[index].action.title)")
+            let actionTitle = pendingActions[index].action.title
+            // AH3-PURPLE: Structured audit trail — rejection
+            logger.info("AUDIT rejected: '\(actionTitle, privacy: .public)' id=\(pendingId.uuidString, privacy: .public)")
 
             // Remove after a delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
