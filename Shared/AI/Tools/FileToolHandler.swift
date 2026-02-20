@@ -9,6 +9,7 @@ import os.log
 
 private let logger = Logger(subsystem: "ai.thea.app", category: "FileToolHandler")
 
+@MainActor
 enum FileToolHandler {
 
     /// Directories the AI is allowed to read/write.

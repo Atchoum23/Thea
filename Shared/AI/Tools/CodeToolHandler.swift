@@ -10,6 +10,7 @@ import os.log
 
 private let logger = Logger(subsystem: "ai.thea.app", category: "CodeToolHandler")
 
+@MainActor
 enum CodeToolHandler {
 
     // MARK: - run_code

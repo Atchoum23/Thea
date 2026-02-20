@@ -9,6 +9,7 @@ import os.log
 
 private let logger = Logger(subsystem: "ai.thea.app", category: "MemoryToolHandler")
 
+@MainActor
 enum MemoryToolHandler {
 
     // MARK: - search_memory / search_knowledge_graph
