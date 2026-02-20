@@ -6676,11 +6676,11 @@ OutboundPrivacyGuard patterns to add:
 
 ## PHASE ABC3: TEST COVERAGE v2
 
-**Status: ⏳ PENDING — Wave 11, Step 3**
+**Status: ✅ DONE — S10D, 2026-02-20**
 
 Re-run X3 targeting Wave 10 files. Minimum 80% on new services. Run `swift test` → all pass.
 
-**Status: ⏳ PENDING — Wave 11**
+**Status: ✅ DONE — S10D, 2026-02-20**
 
 ---
 
@@ -6865,7 +6865,7 @@ Update this section after each phase completes:
 | AAI3  | CarPlay + visionOS + TabularData + Nutrition + Travel | ✅ DONE | S10F | 2026-02-20|
 | ABA3  | Comprehensive QA v2                      | ✅ DONE     | S10D     | 2026-02-20|
 | ABB3  | Security Audit v2                        | ✅ DONE     | S10D     | 2026-02-20|
-| ABC3  | Test Coverage v2                         | ⏳ PENDING  | —        | —         |
+| ABC3  | Test Coverage v2                         | ✅ DONE     | S10D     | 2026-02-20|
 | ABD3  | Periphery Clean v2                       | ⏳ PENDING  | —        | —         |
 | ABE3  | CI Green v2                              | ⏳ PENDING  | —        | —         |
 | ABF3  | Wiring Verification v2 (≥55 systems)     | ⏳ PENDING  | —        | —         |
