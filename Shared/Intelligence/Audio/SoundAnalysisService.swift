@@ -133,6 +133,7 @@ final class SoundAnalysisService: NSObject, ObservableObject {
 
 // MARK: - SNResultsObserving
 
+// periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 private final class SoundAnalysisObserver: NSObject, SNResultsObserving, @unchecked Sendable {
 
     private weak var service: SoundAnalysisService?
