@@ -6,6 +6,7 @@ import OSLog
 // MARK: - Thea Built-in WebSocket Server
 // Listens on port 18789 (plain TCP). Handles:
 //   • GET /health  → HTTP 200 JSON health response (for curl health checks)
+//   • POST /message → HTTP 200 JSON (for NativeHost + browser extensions)
 //   • WebSocket upgrade → full WS session (for OpenClawClient.swift + companion apps)
 // Uses CryptoKit for Sec-WebSocket-Accept key derivation (SHA-1 + base64).
 // Auth: challenge-response token stored in Keychain (generated on first launch).
@@ -85,6 +86,12 @@ actor TheaGatewayWSServer {
             return
         }
 
+        // POST /message endpoint (for NativeHost and browser extensions)
+        if firstLine.hasPrefix("POST /message") {
+            await handleMessagePost(connection: connection, request: requestString)
+            return
+        }
+
         // WebSocket upgrade
         if requestString.contains("Upgrade: websocket") || requestString.contains("Upgrade: WebSocket") {
             await handleWebSocketUpgrade(connection: connection, request: requestString)
@@ -126,6 +133,111 @@ actor TheaGatewayWSServer {
         ].joined(separator: "\r\n")
 
         guard let responseData = response.data(using: .utf8) else { connection.cancel(); return }
+
+        connection.send(content: responseData, completion: .contentProcessed { _ in
+            connection.cancel()
+        })
+    }
+
+    // MARK: - Message POST Endpoint
+
+    /// Handle POST /message from NativeHost (browser extensions)
+    private func handleMessagePost(connection: NWConnection, request: String) async {
+        // Parse Content-Length header
+        let lines = request.components(separatedBy: "\r\n")
+        guard let contentLengthLine = lines.first(where: { $0.hasPrefix("Content-Length:") }),
+              let lengthStr = contentLengthLine.components(separatedBy: ": ").last,
+              let contentLength = Int(lengthStr.trimmingCharacters(in: .whitespaces)),
+              contentLength > 0, contentLength < 1_048_576  // Max 1MB
+        else {
+            await sendJSONResponse(connection: connection, statusCode: 400, body: ["success": false, "error": "Invalid or missing Content-Length"])
+            return
+        }
+
+        // Read request body
+        let bodyData = await withCheckedContinuation { (cont: CheckedContinuation<Data, Never>) in
+            connection.receive(minimumIncompleteLength: contentLength, maximumLength: contentLength) { content, _, _, error in
+                if let error {
+                    _ = error
+                    cont.resume(returning: Data())
+                } else {
+                    cont.resume(returning: content ?? Data())
+                }
+            }
+        }
+
+        guard !bodyData.isEmpty else {
+            await sendJSONResponse(connection: connection, statusCode: 400, body: ["success": false, "error": "Empty request body"])
+            return
+        }
+
+        // Parse JSON body
+        struct InboundMessage: Codable {
+            let content: String
+            let chatId: String?
+            let senderId: String?
+            let senderName: String?
+        }
+
+        let inbound: InboundMessage
+        do {
+            inbound = try JSONDecoder().decode(InboundMessage.self, from: bodyData)
+        } catch {
+            await sendJSONResponse(connection: connection, statusCode: 400, body: ["success": false, "error": "Invalid JSON: \(error.localizedDescription)"])
+            return
+        }
+
+        // Create synthetic TheaGatewayMessage
+        let message = TheaGatewayMessage(
+            platform: .browser,
+            chatId: inbound.chatId ?? "browser-extension",
+            senderId: inbound.senderId ?? "local-user",
+            senderName: inbound.senderName ?? "Browser",
+            content: inbound.content,
+            timestamp: Date(),
+            isGroup: false,
+            attachments: []
+        )
+
+        // Route through gateway (security guard → session manager → OpenClawBridge → AI)
+        if let gw = gateway {
+            await MainActor.run {
+                Task {
+                    await gw.routeInbound(message)
+                }
+            }
+            logger.info("POST /message routed to gateway: \(message.content.prefix(80))")
+            await sendJSONResponse(connection: connection, statusCode: 200, body: ["success": true])
+        } else {
+            logger.error("POST /message failed: gateway is nil")
+            await sendJSONResponse(connection: connection, statusCode: 500, body: ["success": false, "error": "Gateway unavailable"])
+        }
+    }
+
+    /// Send an HTTP JSON response
+    private func sendJSONResponse(connection: NWConnection, statusCode: Int, body: [String: Any]) async {
+        let statusText = statusCode == 200 ? "OK" : (statusCode == 400 ? "Bad Request" : "Internal Server Error")
+        let bodyJSON: String
+        if let data = try? JSONSerialization.data(withJSONObject: body),
+           let json = String(data: data, encoding: .utf8) {
+            bodyJSON = json
+        } else {
+            bodyJSON = "{\"success\":false,\"error\":\"JSON serialization failed\"}"
+        }
+
+        let response = [
+            "HTTP/1.1 \(statusCode) \(statusText)",
+            "Content-Type: application/json",
+            "Content-Length: \(bodyJSON.utf8.count)",
+            "Connection: close",
+            "",
+            bodyJSON
+        ].joined(separator: "\r\n")
+
+        guard let responseData = response.data(using: .utf8) else {
+            connection.cancel()
+            return
+        }
 
         connection.send(content: responseData, completion: .contentProcessed { _ in
             connection.cancel()
