@@ -21,6 +21,7 @@ struct KrakenBalance: Sendable {
 
 // MARK: - Kraken Trade Summary
 
+// periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 struct KrakenTrade: Sendable {
     let txid: String
     let pair: String
@@ -45,7 +46,7 @@ actor KrakenService {
     // MARK: - Credential Management
 
     /// Persist Kraken API credentials in Keychain.
-    func saveCredentials(apiKey: String, secretKey: String) {
+    func saveCredentials(apiKey: String, secretKey: String) { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         FinancialCredentialStore.save(token: apiKey, for: FinancialAPIProvider.kraken.rawValue, suffix: "apiKey")
         FinancialCredentialStore.save(token: secretKey, for: FinancialAPIProvider.kraken.rawValue, suffix: "secretKey")
         logger.info("KrakenService: credentials saved")
@@ -75,7 +76,7 @@ actor KrakenService {
     // MARK: - Fetch Recent Trades
 
     /// Fetch recent trade history (up to 50 most recent trades).
-    func fetchRecentTrades() async throws -> [KrakenTrade] {
+    func fetchRecentTrades() async throws -> [KrakenTrade] { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         let response = try await privateRequest(path: "/TradesHistory", params: [:])
         guard let result = response["result"] as? [String: Any],
               let trades = result["trades"] as? [String: [String: Any]] else {
