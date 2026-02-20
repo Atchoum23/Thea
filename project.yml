@@ -340,6 +340,8 @@ targets:
           - "**/Components/MentionAutocomplete.swift"  # Duplicate of MentionAutocompleteView.swift
           - "**/Components/TheaTextInputField.swift"
           - "**/LiveGuidanceSettingsViewStub.swift"  # Real LiveGuidanceSettingsView.swift is active (M3 re-enabled)
+          - "**/Views/MetaAI/MetaAIDashboardView.swift"  # Depends on archived MetaAI types; stub below used instead
+          - "**/Views/Intelligence/SquadsView.swift"  # Depends on SquadOrchestrator types not yet ported; stub below
           # CodeIntelligence — ACTIVATED (macOS-only, #if os(macOS) guarded)
           - "**/Views/Code/**"  # CodeProjectView extracted sub-view, duplicates types in parent
           # ResourceAllocationSettingsView — ACTIVATED (DynamicResourceAllocator is active)
@@ -709,6 +711,9 @@ targets:
           - "**/Views/MetaAI/MemoryInspectorView.swift"
           - "UI/Views/MetaAI/KnowledgeGraphViewer.swift"
           - "UI/Views/MetaAI/MemoryInspectorView.swift"
+          # MetaAIDashboardView uses macOS-only APIs (HSplitView, NSColor) — exclude from iOS
+          - "**/Views/MetaAI/MetaAIDashboardView.swift"
+          - "UI/Views/MetaAI/MetaAIDashboardView.swift"
       - path: iOS
       - path: Shared/Resources/Assets.xcassets
       - path: Shared/Resources/Localizable.xcstrings

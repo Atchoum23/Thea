@@ -256,8 +256,6 @@ struct LiveGuidanceSettingsView: View {
             selectedCaptureMode = 1  // Treat specific window like active window
         case .region:
             selectedCaptureMode = 2
-        case .window:
-            selectedCaptureMode = 1
         }
     }
 
