@@ -16,10 +16,9 @@ appId: app.thea.ios
     text: "Continue"
     optional: true
 
-# Verify home screen via accessibilityIdentifier (bypasses .combine visibility issue)
-# iOS 26.2 + Maestro 2.1.x: XCUITest accessibility bridge broken for id: queries — optional until fixed
+# Verify home screen via static subtitle text — leaf element, not hidden by .combine
 - assertVisible:
-    id: "welcome-greeting"
+    text: "How can I help you today?"
     optional: true
 
 # Navigate to Settings tab — tab title text is the reliable selector (id: does not propagate)

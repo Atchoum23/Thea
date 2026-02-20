@@ -18,10 +18,10 @@ appId: app.thea.ios
     optional: true
 
 # Verify home screen — WelcomeView always shown on fresh install (no conversations after clearState)
-# iOS 26.2 + Maestro 2.1.x: XCUITest accessibility bridge broken for id: queries (Apple Xcode 26.2 known issue)
-# Using optional: true — screenshot captures visual evidence; re-enable assertion when Maestro fixes iOS 26 support
+# Uses text: "How can I help you today?" — static subtitle, always present (no .combine, leaf element)
+# Fallback: optional: true in case iOS 26.2 XCUITest bridge is broken for text: too
 - assertVisible:
-    id: "welcome-greeting"
+    text: "How can I help you today?"
     optional: true
 
 - takeScreenshot: launch_initial_state

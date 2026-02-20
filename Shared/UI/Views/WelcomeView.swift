@@ -23,13 +23,12 @@ struct WelcomeView: View {
                     .font(.theaLargeDisplay)
                     .foregroundStyle(TheaBrandColors.spiralGradient)
 
+                // Static subtitle — individually accessible for Maestro E2E (no .combine wrapper)
                 Text("How can I help you today?")
                     .font(.theaTitle2)
                     .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("welcome-subtitle")
             }
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("\(Self.timeBasedGreeting()) How can I help you today?")
-            .accessibilityIdentifier("welcome-greeting")
 
             // Suggestion chips
             if onSuggestionSelected != nil {
