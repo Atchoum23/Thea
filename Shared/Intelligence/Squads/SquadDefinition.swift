@@ -171,7 +171,7 @@ public enum ContextTransferMode: String, Codable, Sendable {
 // MARK: - Handoff
 
 /// A handoff rule defining when and how to transfer to another agent
-public struct HandoffRule: Identifiable, Codable, Sendable {
+public struct HandoffRule: Identifiable, Codable, Sendable, Hashable {
     public let id: UUID
     public var fromMemberId: String
     public var toMemberId: String
@@ -197,7 +197,7 @@ public struct HandoffRule: Identifiable, Codable, Sendable {
 }
 
 /// What triggers a handoff
-public enum HandoffTrigger: Codable, Sendable {
+public enum HandoffTrigger: Codable, Sendable, Hashable {
     /// Keyword in user message
     case keyword(String)
 
