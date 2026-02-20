@@ -109,7 +109,7 @@ final class ShazamKitService: NSObject, ObservableObject {
             let shazamMatch = ShazamMatch(
                 title:          mediaItem.title ?? "Unknown",
                 artist:         mediaItem.artist ?? "Unknown",
-                album:          mediaItem.albumTitle,
+                album:          mediaItem.subtitle,  // SHMatchedMediaItem.subtitle is album title
                 appleMusicURL:  mediaItem.appleMusicURL,
                 artworkURL:     mediaItem.artworkURL,
                 isrc:           mediaItem.isrc,
