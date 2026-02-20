@@ -16,7 +16,7 @@ private let logger = Logger(subsystem: "app.thea", category: "SoundAnalysisServi
 struct SoundClassification: Sendable {
     let identifier: String      // e.g. "music", "speech", "dog_barking"
     let confidence: Double      // 0.0 – 1.0
-    let classifiedAt: Date
+    let classifiedAt: Date // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 }
 
 // MARK: - SoundAnalysisService
@@ -31,21 +31,21 @@ import AVFoundation
 @MainActor
 final class SoundAnalysisService: NSObject, ObservableObject {
 
-    static let shared = SoundAnalysisService()
+    static let shared = SoundAnalysisService() // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 
     // MARK: - Published State
 
-    @Published var isAnalyzing: Bool = false
+    @Published var isAnalyzing: Bool = false // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     @Published var topClassification: SoundClassification?
     @Published var recentClassifications: [SoundClassification] = []
-    @Published var errorMessage: String?
+    @Published var errorMessage: String? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 
     // MARK: - Private
 
-    private var audioEngine: AVAudioEngine?
-    private var analyzer: SNAudioStreamAnalyzer?
-    private var analysisRequest: SNClassifySoundRequest?
-    private var analysisObserver: SoundAnalysisObserver?
+    private var audioEngine: AVAudioEngine? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private var analyzer: SNAudioStreamAnalyzer? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private var analysisRequest: SNClassifySoundRequest? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private var analysisObserver: SoundAnalysisObserver? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     private let maxRecentCount = 20
 
     override private init() {

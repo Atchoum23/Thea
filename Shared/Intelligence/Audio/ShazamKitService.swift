@@ -12,6 +12,7 @@ private let logger = Logger(subsystem: "app.thea", category: "ShazamKitService")
 
 // MARK: - ShazamKit Match Result
 
+// periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 struct ShazamMatch: Sendable {
     let title: String
     let artist: String
@@ -30,6 +31,7 @@ import ShazamKit
 /// Singleton service for real-time song recognition using SHManagedSession.
 /// Uses SHManagedSession (iOS 16+/macOS 13+) which handles audio capture internally.
 /// Falls back to nil on older OS versions.
+// periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 @MainActor
 final class ShazamKitService: NSObject, ObservableObject {
 
