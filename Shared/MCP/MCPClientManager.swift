@@ -137,8 +137,8 @@ final class MCPClientManager {
                 let toolName = "\(server.name.lowercased().replacingOccurrences(of: " ", with: "_"))__\(tool.name)"
                 catalog.registerDynamicTool(
                     name: toolName,
-                    description: "[\(server.name)] \(tool.description)",
-                    handler: { [weak server] input in
+                    description: "[\(server.name)] \(tool.description)"
+                ) { [weak server] input in
                         guard let client = server?.client else {
                             return MCPToolResult(content: [MCPContent(type: "text", text: "Server disconnected")], isError: true)
                         }
@@ -147,8 +147,7 @@ final class MCPClientManager {
                         let argsData = (try? JSONSerialization.data(withJSONObject: input)) ?? Data()
                         let args = (try? JSONSerialization.jsonObject(with: argsData) as? [String: Any]) ?? [:]
                         return try await client.callTool(tool.name, arguments: args)
-                    }
-                )
+                }
             }
             logger.info("Registered \(tools.count) dynamic tools from \(server.name)")
         }
@@ -192,7 +191,7 @@ final class MCPClientManager {
         }
 
         discoveredServers = discovered.filter { d in
-            !connectedServers.contains(where: { $0.url == d.url })
+            !connectedServers.contains { $0.url == d.url }
         }
 
         logger.info("Discovered \(discovered.count) local MCP servers")

@@ -58,7 +58,7 @@ enum CodeToolHandler {
     // MARK: - JavaScript Execution (via JavaScriptCore)
 
     private static func runJavaScript(id: String, code: String) async -> AnthropicToolResult {
-        return await Task.detached(priority: .userInitiated) {
+        await Task.detached(priority: .userInitiated) {
             let ctx = JSContext()!
             ctx.exceptionHandler = { _, exception in
                 _ = exception?.toString()
@@ -99,7 +99,7 @@ enum CodeToolHandler {
     // MARK: - Swift Execution (via Process)
 
     private static func runSwift(id: String, code: String) async -> AnthropicToolResult {
-        return await Task.detached(priority: .userInitiated) {
+        await Task.detached(priority: .userInitiated) {
             let tmpFile = FileManager.default.temporaryDirectory
                 .appendingPathComponent(UUID().uuidString + ".swift")
             do {
@@ -130,7 +130,7 @@ enum CodeToolHandler {
     // MARK: - Python Execution (via Process)
 
     private static func runPython(id: String, code: String) async -> AnthropicToolResult {
-        return await Task.detached(priority: .userInitiated) {
+        await Task.detached(priority: .userInitiated) {
             let pythonPaths = ["/usr/bin/python3", "/opt/homebrew/bin/python3", "/usr/local/bin/python3"]
             guard let pythonPath = pythonPaths.first(where: { FileManager.default.fileExists(atPath: $0) }) else {
                 return AnthropicToolResult(toolUseId: id, content: "Python3 not found.", isError: true)

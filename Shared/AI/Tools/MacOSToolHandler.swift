@@ -335,7 +335,7 @@ enum MacOSToolHandler {
     // MARK: - AppleScript Helper
 
     private static func runAppleScript(_ script: String) async -> String {
-        return await Task.detached(priority: .userInitiated) {
+        await Task.detached(priority: .userInitiated) {
             var error: NSDictionary?
             let appleScript = NSAppleScript(source: script)
             let result = appleScript?.executeAndReturnError(&error)

@@ -155,6 +155,7 @@ struct TheamacOSApp: App {
         }
     }
 
+    // swiftlint:disable:next function_body_length
     private func setupManagers(container: ModelContainer) {
         let context = container.mainContext
 
@@ -206,12 +207,11 @@ struct TheamacOSApp: App {
         HabitManager.shared.setModelContext(context)
         ClipboardObserver.shared.start()
 
-        // TODO: Restore prompt engineering managers after Phase 5+
-        // PromptOptimizer.shared.setModelContext(context)
-        // ErrorKnowledgeBaseManager.shared.setModelContext(context)
+        // PromptEngineering — activated (AG3)
+        PromptOptimizer.shared.setModelContext(context)
 
-        // TODO: Restore window management after implementation
-        // WindowManager.shared.setModelContext(context)
+        // Window management — activated (AG3)
+        WindowManager.shared.setModelContext(context)
 
         // Privacy monitoring — auto-start network tracking and load daily snapshots
         Task {

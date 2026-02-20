@@ -25,7 +25,7 @@ public final class ExecutionPipeline {
 
     // MARK: - Pipeline Execution
 
-    /// Execute a pipeline with the given stages
+    // Execute a pipeline with the given stages
     // swiftlint:disable:next function_body_length
     public func execute(
         _ pipeline: Pipeline,

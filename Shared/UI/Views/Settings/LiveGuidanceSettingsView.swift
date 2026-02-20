@@ -15,6 +15,11 @@ struct LiveGuidanceSettingsView: View {
     @State private var allowControlHandoff: Bool = false
     @State private var analyzeInterval: Double = 2.0
 
+    @State private var regionX: Double = 0
+    @State private var regionY: Double = 0
+    @State private var regionWidth: Double = 800
+    @State private var regionHeight: Double = 600
+
     @State private var isLoadingModel: Bool = false
     @State private var showError: Bool = false
     @State private var errorMessage: String = ""
@@ -99,6 +104,38 @@ struct LiveGuidanceSettingsView: View {
                     .onChange(of: selectedCaptureMode) { _, newValue in
                         updateCaptureMode(newValue)
                     }
+
+                if selectedCaptureMode == 2 {
+                    GroupBox("Region (pixels)") {
+                        Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 8) {
+                            GridRow {
+                                Text("X").frame(width: 20)
+                                TextField("0", value: $regionX, format: .number)
+                                    .textFieldStyle(.roundedBorder)
+                                    .frame(width: 80)
+                                    .onChange(of: regionX) { _, _ in updateCaptureMode(2) }
+                                Text("Y").frame(width: 20)
+                                TextField("0", value: $regionY, format: .number)
+                                    .textFieldStyle(.roundedBorder)
+                                    .frame(width: 80)
+                                    .onChange(of: regionY) { _, _ in updateCaptureMode(2) }
+                            }
+                            GridRow {
+                                Text("W").frame(width: 20)
+                                TextField("800", value: $regionWidth, format: .number)
+                                    .textFieldStyle(.roundedBorder)
+                                    .frame(width: 80)
+                                    .onChange(of: regionWidth) { _, _ in updateCaptureMode(2) }
+                                Text("H").frame(width: 20)
+                                TextField("600", value: $regionHeight, format: .number)
+                                    .textFieldStyle(.roundedBorder)
+                                    .frame(width: 80)
+                                    .onChange(of: regionHeight) { _, _ in updateCaptureMode(2) }
+                            }
+                        }
+                        .padding(4)
+                    }
+                }
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -266,8 +303,7 @@ struct LiveGuidanceSettingsView: View {
         case 1:
             guidance.captureMode = .activeWindow
         case 2:
-            // TODO: Show region selection UI
-            guidance.captureMode = .region(CGRect(x: 0, y: 0, width: 800, height: 600))
+            guidance.captureMode = .region(CGRect(x: regionX, y: regionY, width: max(100, regionWidth), height: max(100, regionHeight)))
         default:
             break
         }

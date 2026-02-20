@@ -1877,6 +1877,7 @@
 		C0F87B57E556B446F7450BA2 /* ProactiveSuggestionEngine+Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD870CD2078AC2578C4E4CA4 /* ProactiveSuggestionEngine+Views.swift */; };
 		C1044F5E6A72F228532A306E /* password-enhancer-ui.js in Resources */ = {isa = PBXBuildFile; fileRef = F6499FE68779A3AFD04CE2BE /* password-enhancer-ui.js */; };
 		C111667F3BD89F361B5F671F /* AssertionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F136C9853E8EAD371566DE /* AssertionManager.swift */; };
+		C13B3DCCF3D700EB4FE91C8E /* ChatEnhancementViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74889293E2895796FC095F2B /* ChatEnhancementViews.swift */; };
 		C14B5265535975D993BD4FD6 /* DisplayDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F942918E6E73355ABE5C5712 /* DisplayDashboardView.swift */; };
 		C1A2E3648FE3E02C69984B18 /* dark-mode-inject.css in Resources */ = {isa = PBXBuildFile; fileRef = AD8580643130E3F95DCE9E18 /* dark-mode-inject.css */; };
 		C1B412A51A2845C5871DB0CA /* AnthropicTokenCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6F51E687FBF6463C0177F2 /* AnthropicTokenCounter.swift */; };
@@ -2040,6 +2041,7 @@
 		D2ADF36031F463C45E94FE93 /* ArtifactPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C7636472A090704E0588078 /* ArtifactPanel.swift */; };
 		D2B18C12D0739615295599D9 /* PasswordVaultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC20912797B668DFBFE71FB /* PasswordVaultView.swift */; };
 		D2B42614759F0D06BD33B104 /* TheaAgentSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D3F49FEE86A434FDA477C8 /* TheaAgentSession.swift */; };
+		D2C2CF3E28C7DC7648511EDC /* ChatEnhancementViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74889293E2895796FC095F2B /* ChatEnhancementViews.swift */; };
 		D2F1645B08355F038B796208 /* FileCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE40759F360E2DC3CF73FDFE /* FileCreator.swift */; };
 		D3496E7B52070EFD5193A694 /* DistributedTaskExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2AE425B0B8FE0D50096C3F4 /* DistributedTaskExecutor.swift */; };
 		D358A633AF348143B0123E98 /* OpenRouterProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED10AE3FAE083FCBBCB4115B /* OpenRouterProvider.swift */; };
@@ -3267,6 +3269,7 @@
 		73D9A711AEC2BF35FC6A06EC /* AssessmentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssessmentViewModel.swift; sourceTree = "<group>"; };
 		73D9AC842C2086280AC04E6F /* session-manager.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "session-manager.js"; sourceTree = "<group>"; };
 		747AC9EF7F809BA6D151EB42 /* KeyboardShortcutsHelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardShortcutsHelpView.swift; sourceTree = "<group>"; };
+		74889293E2895796FC095F2B /* ChatEnhancementViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatEnhancementViews.swift; sourceTree = "<group>"; };
 		74925CC1319728AD55A5F849 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		74F3D50D4F7CBA7CCA08C611 /* TheaDesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaDesignTokens.swift; sourceTree = "<group>"; };
 		752BB8792758E6EBBDE9CEE9 /* GeneratedArtifact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneratedArtifact.swift; sourceTree = "<group>"; };
@@ -5892,6 +5895,7 @@
 		7202A9751AB4A637C186AF37 /* Chat */ = {
 			isa = PBXGroup;
 			children = (
+				74889293E2895796FC095F2B /* ChatEnhancementViews.swift */,
 				65C4704EF0D6DDEA996F5BE8 /* ToolUseStepView.swift */,
 			);
 			path = Chat;
@@ -8627,6 +8631,7 @@
 				11B7071F44704CBFA5A499E5 /* CausalPatternAnalyzer+Core.swift in Sources */,
 				10C194C9F4AAEA6587D49655 /* CausalPatternAnalyzer.swift in Sources */,
 				A92792C437067717AF0DBCBE /* ChainOfThought.swift in Sources */,
+				D2C2CF3E28C7DC7648511EDC /* ChatEnhancementViews.swift in Sources */,
 				9839385B6A35FF0D4541CC33 /* ChatInputView.swift in Sources */,
 				118988E0B58187B331E75A83 /* ChatManager+Intelligence.swift in Sources */,
 				8BF9DB4ECC3C465124DCD4EC /* ChatManager+Messaging.swift in Sources */,
@@ -9887,6 +9892,7 @@
 				ABAF715E7C9ECE8A2F2A2838 /* CausalPatternAnalyzer+Core.swift in Sources */,
 				9E1446CCD00CEB972F5F612E /* CausalPatternAnalyzer.swift in Sources */,
 				1B937681AA67FCD6CEB0B7BB /* ChainOfThought.swift in Sources */,
+				C13B3DCCF3D700EB4FE91C8E /* ChatEnhancementViews.swift in Sources */,
 				BBBB408924B0C4F1BD6EA0F7 /* ChatInputView.swift in Sources */,
 				991759DDA81442A84FA00814 /* ChatManager+Intelligence.swift in Sources */,
 				0D467E2BD53CE4A1B7D64FB3 /* ChatManager+Messaging.swift in Sources */,
