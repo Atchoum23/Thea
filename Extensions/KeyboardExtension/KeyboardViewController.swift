@@ -72,7 +72,7 @@ class KeyboardViewController: UIInputViewController {
     private func setupSuggestionBar(in container: UIView) {
         let swiftUIView = TheaKeyboardSuggestionsView(
             suggestions: suggestions,
-            onSelect: { [weak self] text in self?.insertText(text) },
+            onSelect: { [weak self] text in self?.textDocumentProxy.insertText(text) },
             onAIAssist: { [weak self] in self?.aiAssistTapped() }
         )
         let hostingController = UIHostingController(rootView: swiftUIView)
@@ -83,7 +83,7 @@ class KeyboardViewController: UIInputViewController {
         container.addSubview(hostingController.view)
         hostingController.didMove(toParent: self)
 
-        hostingController.view.backgroundColor = .clear
+        hostingController.view.backgroundColor = UIColor.clear
 
         NSLayoutConstraint.activate([
             hostingController.view.leadingAnchor.constraint(equalTo: container.leadingAnchor),
@@ -110,7 +110,7 @@ class KeyboardViewController: UIInputViewController {
         guard let hosting = suggestionsHostingController else { return }
         hosting.rootView = TheaKeyboardSuggestionsView(
             suggestions: suggestions,
-            onSelect: { [weak self] text in self?.insertText(text) },
+            onSelect: { [weak self] text in self?.textDocumentProxy.insertText(text) },
             onAIAssist: { [weak self] in self?.aiAssistTapped() }
         )
     }
