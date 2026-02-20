@@ -1,0 +1,39 @@
+## PersonalParameters — Research Defaults Snapshot
+## Generated: 2026-02-20 | Source: mission-resource-aware-architecture.txt
+## STATUS: STATIC DEFAULTS — replace with PersonalParameters.snapshot() once built
+##
+## Rule (§0.3): Inject at start of EVERY autonomous Claude session.
+## Rule (§0.2): These are Tier 2 starting points. SelfTuningEngine will refine them.
+## When PersonalParameters.snapshot() exists, it supersedes ALL values below.
+
+Interrupts:   budget=4/day      idleBreakpoint=3.0min
+Flow:         ramp=17.5min      threshold=85%        (>85% confidence before entering flow-protection)
+Work blocks:  work=75min        break=33min
+Ultradian:    cycle=100min      minSignals=3          (require ≥3 signals before declaring trough)
+HRV:          trough=±10%       baseline=30d          (Apple Watch = SDNN, NOT RMSSD — do not compare to Oura)
+MorningWts:   HRV=0.40  sleep=0.25  deep=0.15  temp=0.10  rem=0.10
+States:       act≥0.65    high≥0.90    satisfice@0.70
+Explore:      60days / 500pts per domain     decay=14d half-life
+Claude:       compact@70%    circuitBreaker=3attempts    budget=$2.00/session
+
+## Key Tier 1 constants (population-fixed — never personalize):
+## Context switch recovery: 23min 15sec ceiling
+## Working memory: 4±1 chunks (never surface >4 items in any UI decision surface)
+## Flow productivity: ~500% multiplier
+## State inference (personal baseline): 85–98% accuracy after 30+ days of data
+## Agent 50%-horizon: ~50min (Claude 3.7; doubling every ~4 months)
+## Multi-agent failure rate: 41–86.7%; 79% from specification deficiencies
+
+## Context injection protocol (§0.3) — inject only the relevant parts:
+## Launching autonomous session  → Part V §5.4-5.6 + Part IX + this snapshot
+## Writing Thea feature spec     → Part XI + XII + XIII §13.0 + this snapshot
+## Debugging health/readiness    → Part II + XIII §13.2-13.3
+## State-adaptive behavior       → Part III + X §10.2-10.3 + this snapshot
+## Meta-AI feedback loop         → Part X + XI §C6
+## Overnight autonomous code     → Part V §5.4-5.6 + XIII §13.6 + this snapshot
+## Performance/energy session    → Part VI + Part IX + this snapshot
+
+## Session end protocol (§0.3):
+## Before finishing, write to .claude/parameter-consultation-log.txt:
+##   DATE | SESSION | PHASE | PARAMETERS CONSULTED | DECISIONS MADE USING THEM
+## Example: 2026-02-20 | Stream2-B3 | flow threshold (85%) blocked interrupts 3x | work block 75min used as phase target

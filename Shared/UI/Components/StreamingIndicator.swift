@@ -234,20 +234,19 @@ struct StreamingMessageView: View {
                 StreamingIndicatorView(status: status)
 
                 if !streamingText.isEmpty {
-                    Text(streamingText)
-                        .font(.theaBody)
-                        .textSelection(.enabled)
-                        .padding(.horizontal, TheaSpacing.lg)
-                        .padding(.vertical, TheaSpacing.md)
-                        .background(Color.theaAssistantBubble)
-                        .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
-                        .overlay(alignment: .bottomTrailing) {
-                            BlinkingCursor()
-                                .padding(.trailing, TheaSpacing.sm)
-                                .padding(.bottom, TheaSpacing.sm)
-                        }
+                    // I3-1: StreamingTextView replaces plain Text for animated token reveal
+                    StreamingTextView(
+                        text: streamingText,
+                        contentType: .markdown,
+                        isActive: true
+                    )
+                    .padding(.horizontal, TheaSpacing.lg)
+                    .padding(.vertical, TheaSpacing.md)
+                    .background(Color.theaAssistantBubble)
+                    .clipShape(RoundedRectangle(cornerRadius: TheaCornerRadius.lg))
                 } else if status == .thinking || status == .generating {
-                    TypingIndicator()
+                    // I3-5: THEAStreamingWithDecision replaces TypingIndicator
+                    THEAStreamingWithDecision(decision: nil, isStreaming: true)
                 }
             }
 

@@ -250,6 +250,9 @@ struct MessageMetadata: Codable, Sendable {
 
     // Tool use steps executed during this response (B3 — tool execution pipeline)
     var toolUseSteps: [ToolUseStep]?
+    // Memory context injected into this request (set by memory retrieval pipeline)
+    var memorySourceCount: Int?
+    var memoryConfidence: Double?
 
     /// Raw Anthropic content blocks (JSON-encoded `[[String: Any]]`) for assistant messages
     /// that contain extended thinking. The Anthropic API requires these blocks to be passed

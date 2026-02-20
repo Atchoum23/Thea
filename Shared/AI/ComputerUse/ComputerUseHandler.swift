@@ -62,14 +62,16 @@ actor ComputerUseHandler {
     // MARK: - Screenshot
 
     private static func takeScreenshot() async -> String {
-        return await MainActor.run {
-            // Capture the main display
-            let displayID = CGMainDisplayID()
-            guard let cgImage = CGDisplayCreateImage(displayID) else {
-                return "Error: Could not capture screenshot — check Screen Recording permission"
-            }
+        // Capture via ScreenCaptureKit (CGDisplayCreateImage unavailable in macOS 15+)
+        let cgImage: CGImage
+        do {
+            cgImage = try await ScreenCaptureManager.shared.captureScreen()
+        } catch {
+            return "Error: Could not capture screenshot — \(error.localizedDescription). Check Screen Recording permission."
+        }
 
-            // Scale down for API: max 1280px wide
+        // Scale and encode on MainActor (AppKit drawing requires main thread)
+        return await MainActor.run {
             let maxWidth: CGFloat = 1280
             let origWidth = CGFloat(cgImage.width)
             let origHeight = CGFloat(cgImage.height)
@@ -132,7 +134,7 @@ actor ComputerUseHandler {
             let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: true)
             let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: false)
 
-            var unicodeValue = scalar.value
+            var unicodeValue = UniChar(truncatingIfNeeded: scalar.value)
             keyDown?.keyboardSetUnicodeString(stringLength: 1, unicodeString: &unicodeValue)
             keyUp?.keyboardSetUnicodeString(stringLength: 1, unicodeString: &unicodeValue)
 

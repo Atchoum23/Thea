@@ -151,15 +151,16 @@ struct MessageBubble: View {
                     .foregroundStyle(.tertiary)
             }
 
-            // Confidence badge
+            // Confidence badge (uses ConfidenceIndicatorViews component)
             if let confidence = message.metadata?.confidence, confidence > 0 {
-                HStack(spacing: 2) {
-                    Image(systemName: confidence >= 0.8 ? "checkmark.shield.fill" : "shield")
-                        .font(.system(size: 8))
-                    Text("\(Int(confidence * 100))%")
-                        .font(.theaCaption2)
-                }
-                .foregroundStyle(confidence >= 0.8 ? .green : confidence >= 0.5 ? .orange : .red)
+                ConfidenceIndicatorSmall(confidence: confidence)
+            }
+
+            // Memory context badge (shown when memory was injected into request)
+            if let sourceCount = message.metadata?.memorySourceCount,
+               let memConfidence = message.metadata?.memoryConfidence,
+               sourceCount > 0 {
+                MemoryContextBadge(sourceCount: sourceCount, confidence: memConfidence)
             }
 
             // Respect timestampDisplay setting

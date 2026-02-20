@@ -22,6 +22,9 @@ struct ChatView: View {
     @StateObject private var settingsManager = SettingsManager.shared
     @StateObject private var syncConflictManager = SyncConflictManager.shared
 
+    // I3-4: QuerySuggestionOverlay — shows AI-powered input suggestions
+    @State private var showQuerySuggestions = false
+
     /// Message being edited (triggers edit sheet)
     @State var editingMessage: Message?
 
@@ -438,15 +441,33 @@ struct ChatView: View {
 
     private var chatInput: some View {
         #if os(macOS)
-            ChatInputView(
-                text: $inputText,
-                isStreaming: chatManager.isStreaming
-            ) {
-                if chatManager.isStreaming {
-                    chatManager.cancelStreaming()
-                } else {
-                    sendMessage()
+            VStack(spacing: 0) {
+                // I3-4: QuerySuggestionOverlay — context-aware query suggestions
+                if inputText.count > 3 {
+                    QuerySuggestionOverlay(
+                        conversationId: conversation.id,
+                        isVisible: $showQuerySuggestions
+                    ) { suggestion in
+                        inputText = suggestion
+                        showQuerySuggestions = false
+                    }
+                    .padding(.horizontal, TheaSpacing.lg)
+                    .padding(.bottom, TheaSpacing.xs)
                 }
+
+                ChatInputView(
+                    text: $inputText,
+                    isStreaming: chatManager.isStreaming
+                ) {
+                    if chatManager.isStreaming {
+                        chatManager.cancelStreaming()
+                    } else {
+                        sendMessage()
+                    }
+                }
+            }
+            .onChange(of: inputText) { _, newText in
+                showQuerySuggestions = newText.count > 3 && !chatManager.isStreaming
             }
         #else
             HStack(spacing: TheaSpacing.md) {

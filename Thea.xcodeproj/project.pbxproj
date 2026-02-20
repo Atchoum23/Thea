@@ -97,6 +97,7 @@
 		095FFBADEBB2D60F161417D4 /* QASettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76870AAA7181E13E1E492F47 /* QASettingsView.swift */; };
 		0A1011F8FAFFBDAE8E1F2FEB /* thea_icon_master_1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 0455AA0DA254DBC4CF1E78C9 /* thea_icon_master_1024.png */; };
 		0A1F24F3D12F84277D0E2200 /* OrchestratorConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B2F0B5C0C342B237690D603 /* OrchestratorConfiguration.swift */; };
+		0A343E312E3C9F544CA364D3 /* IntegrationToolHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3603F983C18A4104273BF9F1 /* IntegrationToolHandler.swift */; };
 		0A3B37BDC31CDAEAFF44458A /* ExtensionSyncBridge+SyncAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475430365812249964991ABD /* ExtensionSyncBridge+SyncAPI.swift */; };
 		0A66CFB1E4C58F0932095BD0 /* AsanaIntegration+Users.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0449E7316B40DD1F500F5544 /* AsanaIntegration+Users.swift */; };
 		0A7C15B3057316F5087D35B1 /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = A39A485B529A1FB622C9D3F4 /* CommandPalette.swift */; };
@@ -166,6 +167,7 @@
 		101CB0E3AE6C606407C24681 /* EnhancedSubagentSystem+Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1E4FDF3F982B27D551A6EF /* EnhancedSubagentSystem+Core.swift */; };
 		102A69A771C29EF780BB1AA9 /* DeliveredInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3E81B122C0B62A83AF1E2A /* DeliveredInsight.swift */; };
 		102BF69ABEAF6FC6C4026913 /* DeviceRegistryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CAE162C04FE8F851F16B14 /* DeviceRegistryProtocol.swift */; };
+		104811015F575A6CCBDC5FB8 /* AdvancedAIConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CC7964153D73589D237B8EF /* AdvancedAIConfigView.swift */; };
 		104E797F8FB24B15C00A9F40 /* LocalModelRecommendationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FAD4A128B1DD8882B34BAF7 /* LocalModelRecommendationEngine.swift */; };
 		1061CFD605A90D447B314ECF /* DynamicResourceAllocatorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13511D0BD0909B08B905BF1E /* DynamicResourceAllocatorTypes.swift */; };
 		1095994DED37F4EEDCADFC09 /* DistributedTaskExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2AE425B0B8FE0D50096C3F4 /* DistributedTaskExecutor.swift */; };
@@ -677,6 +679,7 @@
 		4212C3BEE1F460877BA1ECAA /* ReActExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A49F14C169DD65F16DD3B66F /* ReActExecutor.swift */; };
 		4227D3E4823287F4A87781C3 /* SuggestionChipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7145143259590A9E6D9C71 /* SuggestionChipView.swift */; };
 		4235360EF4A5033E38CBBC3C /* PredictiveLifeEngine+PatternPredictions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29437F6E450406273BBFE12A /* PredictiveLifeEngine+PatternPredictions.swift */; };
+		424D40ED6D1443E2A745D134 /* AdvancedAIConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CC7964153D73589D237B8EF /* AdvancedAIConfigView.swift */; };
 		4276A5153158128CD0A1899F /* ConversationMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45AE888FBB3CAD38DB600EC5 /* ConversationMemory.swift */; };
 		429B4B3713213434A6B4712B /* ConversationIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA47D1889A0DF7617094D88 /* ConversationIntelligence.swift */; };
 		42B2B3D4726D41B7CC14D218 /* ai-sidebar.css in Resources */ = {isa = PBXBuildFile; fileRef = 2CDA7757850F5850A7CAFC5E /* ai-sidebar.css */; };
@@ -1682,6 +1685,7 @@
 		AC3B640C8722D9523FBFD367 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C01C4C607C750D6280C839D /* SettingsView.swift */; };
 		AC61FBF334532956A9CDEA8A /* InsightHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D988810D0549D6501430CD9C /* InsightHistoryView.swift */; };
 		AC9F5A6B16C5147C7FF4DC04 /* CrossDomainCorrelationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA0A9118EE6B039FD3E3149 /* CrossDomainCorrelationEngine.swift */; };
+		ACB3A728497C8055CEE56EB5 /* IntegrationToolHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3603F983C18A4104273BF9F1 /* IntegrationToolHandler.swift */; };
 		ACC3246738C2C388AA25358B /* FocusModeIntelligence+StatusSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C56BD5A3A16BFE649C9DC8C /* FocusModeIntelligence+StatusSync.swift */; };
 		ACDC0C0E9D4B4619621418C2 /* AgentCommunicationBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8714BF79EB3CEF3694A28693 /* AgentCommunicationBus.swift */; };
 		ACFFABA96C1BD3C4CABB0508 /* TipKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1494E4D469F08A1B62549F29 /* TipKitService.swift */; };
@@ -2869,6 +2873,7 @@
 		34B7B58A3A1BDC917D7461F8 /* ClipboardObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardObserver.swift; sourceTree = "<group>"; };
 		34D5300008C38D31B27960E4 /* ApprovalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApprovalManager.swift; sourceTree = "<group>"; };
 		3579242B3BC082722588D04E /* BrowserAutomationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserAutomationService.swift; sourceTree = "<group>"; };
+		3603F983C18A4104273BF9F1 /* IntegrationToolHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationToolHandler.swift; sourceTree = "<group>"; };
 		36243B4C002476BB08F4A7A0 /* Makefile */ = {isa = PBXFileReference; path = Makefile; sourceTree = "<group>"; };
 		3679C6E470EF6E7258051796 /* FileSystemMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemMonitor.swift; sourceTree = "<group>"; };
 		36961E79ECB7AEFC08F0720B /* MacSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacSettingsView.swift; sourceTree = "<group>"; };
@@ -3196,6 +3201,7 @@
 		6C3D28C6BCD24A79A3A8B050 /* CareerDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareerDashboardView.swift; sourceTree = "<group>"; };
 		6C5EA6946627A5978A5A76FA /* THEASelfAwareness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = THEASelfAwareness.swift; sourceTree = "<group>"; };
 		6C998585A29FB5A6E61DD5A3 /* CrossDeviceNotificationServiceTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossDeviceNotificationServiceTypes.swift; sourceTree = "<group>"; };
+		6CC7964153D73589D237B8EF /* AdvancedAIConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedAIConfigView.swift; sourceTree = "<group>"; };
 		6CCBC9AE92AB2A7D38E15728 /* CodeIntelligenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeIntelligenceManager.swift; sourceTree = "<group>"; };
 		6CCC8927EC2960C15352D7CC /* iOSSyncSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSSyncSection.swift; sourceTree = "<group>"; };
 		6D6906CAD82DE615B16424B7 /* TVEnhancedHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVEnhancedHomeView.swift; sourceTree = "<group>"; };
@@ -4695,6 +4701,7 @@
 		32066BFD986E9074D79C5189 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				6CC7964153D73589D237B8EF /* AdvancedAIConfigView.swift */,
 				B80C2A97D7BC2A5F92F789B4 /* AdvancedPromptSettingsTypes.swift */,
 				15232BD8D9E81B18A70E72E4 /* AdvancedPromptSettingsView.swift */,
 				3F44FB30A541E1F4C048941F /* AdvancedSettingsView.swift */,
@@ -4981,6 +4988,7 @@
 				DECA80B53D36DC31BDCBF6AB /* AnthropicToolCatalog.swift */,
 				F74F450B2F44A98E1CE88C84 /* GoogleProvider.swift */,
 				6A342AA74736F692B933EE3F /* GroqProvider.swift */,
+				3603F983C18A4104273BF9F1 /* IntegrationToolHandler.swift */,
 				EB2388FEAE2CAC4AB7DE3EEE /* OpenAIProvider.swift */,
 				ED10AE3FAE083FCBBCB4115B /* OpenRouterProvider.swift */,
 				CB28A15CE7A73BFD79060704 /* PerplexityProvider.swift */,
@@ -8435,6 +8443,7 @@
 				45C5222E54B4BF3F2C9812F1 /* AdaptiveOCREngine.swift in Sources */,
 				A989ACD65A552BF5A00B65E7 /* AdaptivePromptEngine.swift in Sources */,
 				B173534F0AF1A4486891AC12 /* AdaptiveUIEngine.swift in Sources */,
+				104811015F575A6CCBDC5FB8 /* AdvancedAIConfigView.swift in Sources */,
 				A71D7029C4C3D348CD9C9833 /* AdvancedPromptSettingsTypes.swift in Sources */,
 				C87C6E2F4DEE1728B42907DC /* AdvancedPromptSettingsView.swift in Sources */,
 				361C1E1AAC0B4B336C1E9A9E /* AdvancedSettingsView.swift in Sources */,
@@ -8845,6 +8854,7 @@
 				F1874E397F6E4495049AA300 /* IntegratedTestRunnerTypes.swift in Sources */,
 				363A0B989CEA01B6931924C2 /* IntegrationCoordinator.swift in Sources */,
 				5179515ADD5C22657D7949E5 /* IntegrationModule.swift in Sources */,
+				ACB3A728497C8055CEE56EB5 /* IntegrationToolHandler.swift in Sources */,
 				0FD0DB6758079D1738FE7E4D /* IntegrationTypes.swift in Sources */,
 				52D1B6E0721D6A1AA34EE6CF /* IntegrationUtilities.swift in Sources */,
 				8D985025543DD64BAB0353A2 /* IntegrationsManager.swift in Sources */,
@@ -9679,6 +9689,7 @@
 				29070BEE2878CA42CDEDDDD8 /* AdaptiveOCREngine.swift in Sources */,
 				8039A0A11344819981E14259 /* AdaptivePromptEngine.swift in Sources */,
 				E91956283681BD253ACE2394 /* AdaptiveUIEngine.swift in Sources */,
+				424D40ED6D1443E2A745D134 /* AdvancedAIConfigView.swift in Sources */,
 				8B8A1BFB78FA986C939D26EB /* AdvancedPromptSettingsTypes.swift in Sources */,
 				D0D9D0EB9218E38CF3644919 /* AdvancedPromptSettingsView.swift in Sources */,
 				1D662706B9EE2B842EC20C66 /* AdvancedSettingsView.swift in Sources */,
@@ -10110,6 +10121,7 @@
 				0453777C6D9CF7B3FC527CAE /* IntegratedTestRunnerTypes.swift in Sources */,
 				88021347E2E5F7476A17950A /* IntegrationCoordinator.swift in Sources */,
 				EFA7BD74BCEF5E0A2C968C01 /* IntegrationModule.swift in Sources */,
+				0A343E312E3C9F544CA364D3 /* IntegrationToolHandler.swift in Sources */,
 				FA2D6706566DAE9AD6C56A80 /* IntegrationTypes.swift in Sources */,
 				A057FFD048F12201F23459D3 /* IntegrationUtilities.swift in Sources */,
 				2F6BFA64A8C967345DDBC5E6 /* IntegrationsManager.swift in Sources */,

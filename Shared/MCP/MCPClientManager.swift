@@ -138,7 +138,11 @@ final class MCPClientManager {
                         guard let client = server?.client else {
                             return MCPToolResult(content: [MCPContent(type: "text", text: "Server disconnected")], isError: true)
                         }
-                        return try await client.callTool(tool.name, arguments: input)
+                        // JSON roundtrip creates a fresh locally-owned [String: Any],
+                        // satisfying Swift 6 sending ownership for the actor call.
+                        let argsData = (try? JSONSerialization.data(withJSONObject: input)) ?? Data()
+                        let args = (try? JSONSerialization.jsonObject(with: argsData) as? [String: Any]) ?? [:]
+                        return try await client.callTool(tool.name, arguments: args)
                     }
                 )
             }
