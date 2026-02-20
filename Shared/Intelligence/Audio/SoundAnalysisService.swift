@@ -56,7 +56,7 @@ final class SoundAnalysisService: NSObject, ObservableObject {
     // MARK: - Start/Stop
 
     /// Begin real-time sound classification from the device microphone.
-    func startAnalysis() {
+    func startAnalysis() { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         guard !isAnalyzing else { return }
 
         do {
@@ -92,7 +92,7 @@ final class SoundAnalysisService: NSObject, ObservableObject {
     }
 
     /// Stop classification and release audio resources.
-    func stopAnalysis() {
+    func stopAnalysis() { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         audioEngine?.inputNode.removeTap(onBus: 0)
         audioEngine?.stop()
         audioEngine    = nil
@@ -124,7 +124,7 @@ final class SoundAnalysisService: NSObject, ObservableObject {
     // MARK: - Context Summary
 
     /// Returns a brief summary for AI context injection.
-    func contextSummary() -> String? {
+    func contextSummary() -> String? { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         guard let top = topClassification, top.confidence > 0.5 else { return nil }
         let humanReadable = top.identifier.replacingOccurrences(of: "_", with: " ")
         return "Ambient sound: \(humanReadable) (confidence: \(Int(top.confidence * 100))%)."
