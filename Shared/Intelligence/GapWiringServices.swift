@@ -286,3 +286,24 @@ final class NeuralContextCompressor: ObservableObject {
         return compressed
     }
 }
+
+// MARK: - CloudStorageContextProvider
+// AAG3: Thin facade over CloudStorageService for context-layer access.
+// Provides cloud file summaries to the chat context pipeline.
+
+@MainActor
+final class CloudStorageContextProvider: ObservableObject {
+    static let shared = CloudStorageContextProvider()
+    private init() {}
+
+    /// Fetch a brief listing of recent cloud files for context injection.
+    /// Uses stored tokens from SettingsManager; silently returns empty if unconfigured.
+    func recentFileSummary() async -> String {
+        async let driveFiles = (try? await CloudStorageService.shared.listGoogleDriveFiles()) ?? []
+        async let dropboxFiles = (try? await CloudStorageService.shared.listDropboxFiles()) ?? []
+        let (drive, dropbox) = await (driveFiles, dropboxFiles)
+        guard !drive.isEmpty || !dropbox.isEmpty else { return "" }
+        let total = drive.count + dropbox.count
+        return "Cloud files: \(total) (\(drive.count) Google Drive, \(dropbox.count) Dropbox)"
+    }
+}
