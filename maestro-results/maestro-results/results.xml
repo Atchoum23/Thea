@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 16e - iOS 26.2 - 4481928F-2921-440E-9D93-85CCB2BBD105" tests="4" failures="4" time="198.0">
+    <testcase id="settings_flow" name="settings_flow" classname="settings_flow" time="53.0" status="ERROR">
+      <properties/>
+      <failure>Element not found: Text matching regex: Settings</failure>
+    </testcase>
+    <testcase id="chat_flow" name="chat_flow" classname="chat_flow" time="32.0" status="ERROR">
+      <properties/>
+      <failure>Element not found: Text matching regex: Chat</failure>
+    </testcase>
+    <testcase id="launch_flow" name="launch_flow" classname="launch_flow" time="77.0" status="ERROR">
+      <properties/>
+      <failure>Assertion is false: "Chat" is visible</failure>
+    </testcase>
+    <testcase id="navigation_flow" name="navigation_flow" classname="navigation_flow" time="36.0" status="ERROR">
+      <properties/>
+      <failure>Assertion is false: "Chat" is visible</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

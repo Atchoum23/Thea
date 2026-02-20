@@ -51,13 +51,11 @@ final class AgentTeamOrchestrator: ObservableObject {
         if planRisk >= AutonomyController.shared.autonomyLevel.maxAutoRisk {
             let approval = await AutonomyController.shared.requestAction(
                 AutonomousAction(
-                    id: UUID(),
-                    type: .other,
-                    description: "Execute multi-step plan: \(goal.prefix(100))",
+                    category: .automation,
+                    title: "Execute multi-step plan",
+                    description: "Execute multi-step plan: \(goal.prefix(100)) (\(plan.nodes.count) subtasks)",
                     riskLevel: planRisk,
-                    isReversible: false,
-                    requiresExternalAccess: false,
-                    metadata: ["subtasks": "\(plan.nodes.count)", "goal": goal]
+                    execute: { .init(success: true, message: "Approved") }
                 )
             )
             if approval == .rejected {

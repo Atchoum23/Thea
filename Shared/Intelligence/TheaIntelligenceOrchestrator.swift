@@ -170,11 +170,17 @@ final class TheaIntelligenceOrchestrator {
     func processAIResponse(
         task: String,
         response: String,
-        conversationContext: String = ""
+        conversationContext: String = "",
+        conversationID: UUID? = nil
     ) async -> String {
         guard isEnabled else { return response }
 
-// periphery:ignore - Reserved: processAIResponse(task:response:conversationContext:) instance method reserved for future feature activation
+        // U3: MemoryAugmentedChat — learn from exchange, record to conversation memory
+        await MemoryAugmentedChat.shared.processResponse(
+            userMessage: task,
+            assistantResponse: response,
+            conversationId: conversationID ?? UUID()
+        )
 
         // Run through reflexion if needed
         let reflexionResult = await ChatReflexionIntegration.shared.processResponse(

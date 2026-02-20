@@ -248,6 +248,9 @@ struct MessageMetadata: Codable, Sendable {
     // Follow-up suggestions generated after AI response
     var followUpSuggestions: [FollowUpSuggestion]?
 
+    // Tool use steps executed during this response (B3 — tool execution pipeline)
+    var toolUseSteps: [ToolUseStep]?
+
     /// Raw Anthropic content blocks (JSON-encoded `[[String: Any]]`) for assistant messages
     /// that contain extended thinking. The Anthropic API requires these blocks to be passed
     /// back verbatim in subsequent turns — they must never be stripped or replaced with
