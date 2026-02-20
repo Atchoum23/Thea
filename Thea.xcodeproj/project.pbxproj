@@ -408,6 +408,7 @@
 		26F148D2C94303775D0709C3 /* DownloadManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF53057E6830656131C697DA /* DownloadManagerView.swift */; };
 		2705AA463A7629BE877CFDBF /* ToolFramework.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067796F8E80337B35E4264F9 /* ToolFramework.swift */; };
 		270AAAC7A89AF0054E20132B /* ModelRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BB9744B949BD7B4F272881A /* ModelRouter.swift */; };
+		272072EC6F21E418B11F553C /* HeadphoneMotionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749DDD3439AD090E17150C4E /* HeadphoneMotionService.swift */; };
 		272641E70AD663AD38C6EA8C /* THEASelfAwareness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C5EA6946627A5978A5A76FA /* THEASelfAwareness.swift */; };
 		27D82D2DCE357ABA58E996A0 /* PostResponsePipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4131EC0F454EC0311F4DB393 /* PostResponsePipeline.swift */; };
 		27FBE944EB93CF0C76E8F9E0 /* TheaIdentityPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5332BDAA6EFC76D79BB43CF /* TheaIdentityPrompt.swift */; };
@@ -952,6 +953,7 @@
 		5B9970E6BB4111424C68BADE /* UnifiedDeviceAwareness+Gathering.swift in Sources */ = {isa = PBXBuildFile; fileRef = D291809918D99EE3109D2640 /* UnifiedDeviceAwareness+Gathering.swift */; };
 		5BB9CC155C54EAD25A29B5A5 /* FocusModeIntelligence+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D84A92E12B1BC58712AB2F6 /* FocusModeIntelligence+Persistence.swift */; };
 		5BD51961E0B4F4D94E50CC93 /* PasskeysService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FD981DA6AD30BA5CB78032 /* PasskeysService.swift */; };
+		5BEF031FF38AA6F888F0CCD3 /* HeadphoneMotionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749DDD3439AD090E17150C4E /* HeadphoneMotionService.swift */; };
 		5C0072E61DE8AB76C60737CF /* EndpointSecurityObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB70D682E97FC181F560F2A5 /* EndpointSecurityObserver.swift */; };
 		5C0559378D49A255953D96B6 /* CloudKitServiceTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 928787865A9383E5BB05B929 /* CloudKitServiceTypes.swift */; };
 		5C2CAACB5A96B36BB709DE01 /* NetworkDiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88E698F95E65BD37E781DA91 /* NetworkDiscoveryService.swift */; };
@@ -3346,6 +3348,7 @@
 		747AC9EF7F809BA6D151EB42 /* KeyboardShortcutsHelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardShortcutsHelpView.swift; sourceTree = "<group>"; };
 		74889293E2895796FC095F2B /* ChatEnhancementViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatEnhancementViews.swift; sourceTree = "<group>"; };
 		74925CC1319728AD55A5F849 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		749DDD3439AD090E17150C4E /* HeadphoneMotionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadphoneMotionService.swift; sourceTree = "<group>"; };
 		74F3D50D4F7CBA7CCA08C611 /* TheaDesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheaDesignTokens.swift; sourceTree = "<group>"; };
 		752BB8792758E6EBBDE9CEE9 /* GeneratedArtifact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneratedArtifact.swift; sourceTree = "<group>"; };
 		7552E563944EA3C228BB0FAC /* MapsIntegration+Geocoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapsIntegration+Geocoding.swift"; sourceTree = "<group>"; };
@@ -6635,6 +6638,7 @@
 		9E9F92F9CC46C5BCF00D30CC /* Motion */ = {
 			isa = PBXGroup;
 			children = (
+				749DDD3439AD090E17150C4E /* HeadphoneMotionService.swift */,
 			);
 			path = Motion;
 			sourceTree = "<group>";
@@ -9132,6 +9136,7 @@
 				33B140EC900B269EFF746098 /* HandoffManager.swift in Sources */,
 				8C71E14032CC47504921AE29 /* HandoffService.swift in Sources */,
 				6B8904175CEBC221B0E97DD4 /* HardwareShortcutManager.swift in Sources */,
+				5BEF031FF38AA6F888F0CCD3 /* HeadphoneMotionService.swift in Sources */,
 				E62DD7C8401D5BA019298D1F /* HealthCoachingPipeline.swift in Sources */,
 				53C0A27F192E729D8516EDAA /* HealthContextProvider.swift in Sources */,
 				F2327063D46519B6458415E9 /* HealthDashboardView.swift in Sources */,
@@ -10440,6 +10445,7 @@
 				126422756BBF35638189272E /* HandoffManager.swift in Sources */,
 				DC1723407859CF5CC0743CF9 /* HandoffService.swift in Sources */,
 				9A435A8C13E81C5FEE9CAF23 /* HardwareShortcutManager.swift in Sources */,
+				272072EC6F21E418B11F553C /* HeadphoneMotionService.swift in Sources */,
 				5CAE6EED75C4CF4C5262D59B /* HealthCoachingPipeline.swift in Sources */,
 				A275D4654289CAC60CBCB817 /* HealthContextProvider.swift in Sources */,
 				B1073161B9C25AABC699ECA7 /* HealthDashboardView.swift in Sources */,
