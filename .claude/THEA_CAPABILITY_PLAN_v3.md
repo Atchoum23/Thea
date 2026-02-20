@@ -161,7 +161,7 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AR3: API Error Prev. | ✅ DONE         | sha 4dff338b — AnthropicConversationManager (class + NSLock), 5 methods, wired in chatAdvanced() |
 | Phase AS3: Adaptive Timing | ✅ DONE         | sha d8407561 — AdaptivePoller actor, 3 strategies, 3 factories (retrying/ciJob/logMonitor), ciTypicalDurationMinutes from PersonalParameters |
 | Phase AT3: TheaWeb         | ✅ DONE         | verified pre-existing — Swift build 0 errors, all routes real data, Cloudflare tunnel verified (Docker N/A on MSM3U) — S6 |
-| Phase AU3: Tizen           | ⏳ PENDING      | thea-tizen TypeScript 0 errors + build, TV/TheaTizen JS validated, both connect port 18789 — S6 after AT3 |
+| Phase AU3: Tizen           | ✅ DONE         | verified pre-existing — thea-tizen TS 0 errors + build passing, TV/TheaTizen JS validated, protocol via TheaWeb API → localhost:8081 — S6 |
 | Phase AV3: Browser Ext.    | ⏳ PENDING      | NativeHost↔TheaMessagingGateway wired, Chrome/Safari end-to-end, Brave 14 canonical, SafariExt in project.yml — S7 |
 | Phase AW3: Widget Ext.     | ⏳ PENDING      | 5 widget types (Conversation/QuickActions/Memory/Context/LockScreen) fully implemented, SwiftData-backed — S8 |
 | Phase AX3: Native Ext. 1   | ⏳ PENDING      | Share, Intents (Siri), Messages, Mail, FocusFilter extensions — real implementations, wired to ChatManager/AgentOrchestrator — S8 after AW3 |
