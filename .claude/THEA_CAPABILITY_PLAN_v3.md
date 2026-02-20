@@ -162,13 +162,14 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AS3: Adaptive Timing | ✅ DONE         | sha d8407561 — AdaptivePoller actor, 3 strategies, 3 factories (retrying/ciJob/logMonitor), ciTypicalDurationMinutes from PersonalParameters |
 | Phase AT3: TheaWeb         | ✅ DONE         | verified pre-existing — Swift build 0 errors, all routes real data, Cloudflare tunnel verified (Docker N/A on MSM3U) — S6 |
 | Phase AU3: Tizen           | ✅ DONE         | verified pre-existing — thea-tizen TS 0 errors + build passing, TV/TheaTizen JS validated, protocol via TheaWeb API → localhost:8081 — S6 |
-| Phase AV3: Browser Ext.    | ⏳ PENDING      | NativeHost↔TheaMessagingGateway wired, Chrome/Safari end-to-end, Brave 14 canonical, SafariExt in project.yml — S7 |
+| Phase AV3: Browser Ext.    | ✅ DONE         | NativeHost↔TheaMessagingGateway wired (port 18789 POST /message), Chrome native-bridge.js fixed, Safari via SafariWebExtensionHandler, Brave 14 canonical (2-13 archived) — S7 sha 9a9388e5 |
 | Phase AW3: Widget Ext.     | ✅ DONE         | sha 322dce1b — 5 widget types (Conversation/QuickActions/Memory/Context/LockScreen) fully implemented, AppGroup shared storage, iOS build verified — S8 |
 | Phase AX3: Native Ext. 1   | ✅ DONE         | sha 053dfbc4 — ShareExtension (AppGroup, text/URL/image/file), IntentsExtension (3 Siri intents), MessagesExtension (iMessage), MailExtension (email processing), FocusFilterExtension (focus modes) — all verified, iOS build passing — S8 |
 | Phase AY3: Native Ext. 2   | ✅ DONE         | CallKit, Credentials, Keyboard, Notification, QuickLook, Spotlight, FinderSync extensions — real implementations — S9 |
-| **Overall v3 %**          | **97% autonomous done** | A3–W3 + AE3–AH3 + AI3–AN3 + AP3–AS3 ✅ DONE; Wave 6 (X3–AC3) + Wave 9 (AT3–AX3) + AY3 ✅ + AD3 pending. |
+| Phase AZ3: Physical AV Testing | ⏳ PENDING   | Cross-Mac automated audio+visual+screenshot testing using MBAM2/MSM3U physical proximity |
+| **Overall v3 %**          | **97% autonomous done** | A3–W3 + AE3–AH3 + AI3–AN3 + AP3–AS3 ✅ DONE; Wave 6 (X3–AC3) + Wave 9 (AT3–AY3) ✅ + AZ3 + AD3 pending. |
 
-*Last updated: 2026-02-20 — Wave 9 (AT3–AY3) added: TheaWeb, Tizen, Browser+Native Extensions. Parallel: S5=Wave6, S6=AT3+AU3, S7=AV3, S8=AW3+AX3, S9=AY3*
+*Last updated: 2026-02-20 — Wave 9 (AT3–AY3) added: TheaWeb, Tizen, Browser+Native Extensions. AZ3 added: Physical AV testing (cross-Mac audio+camera+screenshot). Parallel: S5=Wave6, S6=AT3+AU3, S7=AV3, S8=AW3+AX3, S9=AY3*
 
 ---
 
