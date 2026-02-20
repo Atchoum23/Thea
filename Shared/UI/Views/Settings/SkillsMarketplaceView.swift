@@ -13,12 +13,12 @@ import SwiftUI
 struct SkillsMarketplaceView: View {
     @StateObject private var registry = SkillsRegistryService.shared
 
-    @State private var selectedCategory: MarketplaceSkillCategory? = nil
+    @State private var selectedCategory: MarketplaceSkillCategory?
     @State private var searchText: String = ""
     @State private var isSyncing: Bool = false
-    @State private var syncError: String? = nil
-    @State private var installError: String? = nil
-    @State private var successMessage: String? = nil
+    @State private var syncError: String?
+    @State private var installError: String?
+    @State private var successMessage: String?
 
     var body: some View {
         NavigationSplitView {
@@ -87,10 +87,9 @@ struct SkillsMarketplaceView: View {
             if !registry.installedSkills.isEmpty {
                 Section("Installed (\(registry.installedSkills.count))") {
                     ForEach(registry.installedSkills) { installed in
-                        InstalledSkillRow(
-                            skill: installed,
-                            onUninstall: { await uninstall(skillId: installed.id) }
-                        )
+                        InstalledSkillRow(skill: installed) {
+                            await uninstall(skillId: installed.id)
+                        }
                     }
                 }
             }

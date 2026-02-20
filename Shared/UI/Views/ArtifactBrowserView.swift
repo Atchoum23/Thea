@@ -24,7 +24,7 @@ struct ArtifactBrowserView: View {
             let favMatch = !showFavoritesOnly || artifact.isFavorite
             let searchMatch = searchText.isEmpty ||
                 artifact.title.localizedCaseInsensitiveContains(searchText) ||
-                artifact.tags.contains(where: { $0.localizedCaseInsensitiveContains(searchText) }) ||
+                artifact.tags.contains { $0.localizedCaseInsensitiveContains(searchText) } ||
                 artifact.content.localizedCaseInsensitiveContains(searchText)
             return typeMatch && favMatch && searchMatch
         }

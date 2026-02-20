@@ -120,6 +120,7 @@ public final class MetaAICoordinator: ObservableObject {
     }
 
     /// Stream processing - returns an async stream with progressive response
+    // swiftlint:disable:next function_body_length
     public func processStream(_ input: THEAInput) -> AsyncThrowingStream<THEAStreamChunk, Error> {
         AsyncThrowingStream { continuation in
             Task {

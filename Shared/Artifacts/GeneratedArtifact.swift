@@ -129,8 +129,8 @@ final class ArtifactStore {
         // Extract first non-comment, non-empty line as a title hint
         let firstLine = content
             .components(separatedBy: "\n")
-            .first(where: { !$0.trimmingCharacters(in: .whitespaces).isEmpty &&
-                           !$0.hasPrefix("//") && !$0.hasPrefix("#") })
+            .first { !$0.trimmingCharacters(in: .whitespaces).isEmpty &&
+                     !$0.hasPrefix("//") && !$0.hasPrefix("#") }
             ?? content.prefix(60).description
         let trimmed = firstLine.trimmingCharacters(in: .whitespaces)
         let truncated = trimmed.count > 50 ? String(trimmed.prefix(50)) + "…" : trimmed

@@ -46,6 +46,7 @@ final class MCPToolRegistry {
 
     // MARK: - Discovery
 
+    // swiftlint:disable:next function_body_length
     func discoverMCPTools() {
         logger.info("Discovering MCP tools...")
 

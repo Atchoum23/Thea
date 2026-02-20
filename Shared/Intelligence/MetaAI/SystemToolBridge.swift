@@ -304,6 +304,7 @@
             "/metadata", "/latest/meta-data", "/computeMetadata"
         ]
 
+        // swiftlint:disable:next cyclomatic_complexity
         @MainActor static func execute(arguments: [String: Any]) async throws -> Any {
             guard let urlString = arguments["url"] as? String,
                   let url = URL(string: urlString)
@@ -477,6 +478,7 @@
     // MARK: - System Tool Registration Helper
 
     extension ToolFramework {
+        // swiftlint:disable:next function_body_length
         func registerSystemTools() {
             // File System Tools
             registerTool(Tool(

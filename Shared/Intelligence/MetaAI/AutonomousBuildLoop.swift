@@ -59,6 +59,7 @@
 
         // MARK: - Run Loop
 
+        // swiftlint:disable:next function_body_length
         public func run(
             maxIterations: Int = 10,
             scheme: String = "Thea-macOS",

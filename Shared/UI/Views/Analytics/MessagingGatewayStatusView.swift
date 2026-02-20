@@ -97,15 +97,14 @@ struct MessagingGatewayStatusView: View {
                     PlatformStatusCard(
                         platform: platform,
                         isConnected: gateway.connectedPlatforms.contains(platform),
-                        isRestarting: restartingPlatform == platform,
-                        onRestart: {
-                            Task {
-                                restartingPlatform = platform
-                                await gateway.restartConnector(for: platform)
-                                restartingPlatform = nil
-                            }
+                        isRestarting: restartingPlatform == platform
+                    ) {
+                        Task {
+                            restartingPlatform = platform
+                            await gateway.restartConnector(for: platform)
+                            restartingPlatform = nil
                         }
-                    )
+                    }
                 }
             }
         }

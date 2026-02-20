@@ -45,6 +45,7 @@
 
         // MARK: - Public API
 
+        // swiftlint:disable:next function_body_length
         public func executePhase(_ number: Int) async throws -> PhaseResult {
             guard !isRunning else {
                 throw OrchestratorError.alreadyRunning

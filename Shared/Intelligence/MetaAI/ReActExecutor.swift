@@ -57,6 +57,7 @@ public final class ReActExecutor {
     }
 
     /// Execute with deadline checking for timeout enforcement
+    // swiftlint:disable:next function_body_length
     private func executeWithDeadline(
         task: String,
         context: [String: Any],
@@ -406,6 +407,7 @@ public final class ReActExecutor {
 
     // MARK: - Action Execution
 
+    // swiftlint:disable:next function_body_length
     private func executeAction(_ action: ReActAction) async throws -> ReActActionResult {
         let startTime = Date()
 

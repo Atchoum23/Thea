@@ -144,6 +144,7 @@ final class DeepAgentEngine {
         return .general
     }
 
+    // swiftlint:disable:next function_body_length
     private func decomposeTask(_ instruction: String, type: TaskType, context: TaskContext) async throws -> [Subtask] {
         switch type {
         case .appDevelopment:

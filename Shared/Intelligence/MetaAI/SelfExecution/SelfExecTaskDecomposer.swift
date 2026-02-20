@@ -44,6 +44,7 @@ public actor TaskDecomposer {
 
     // MARK: - Public API
 
+    // swiftlint:disable:next function_body_length
     public func decompose(phase: PhaseDefinition) async -> TaskPlan {
         logger.info("Decomposing phase \(phase.number): \(phase.title)")
 

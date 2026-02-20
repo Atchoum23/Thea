@@ -54,9 +54,8 @@ final class AgentTeamOrchestrator: ObservableObject {
                     category: .automation,
                     title: "Execute multi-step plan",
                     description: "Execute multi-step plan: \(goal.prefix(100)) (\(plan.nodes.count) subtasks)",
-                    riskLevel: planRisk,
-                    execute: { .init(success: true, message: "Approved") }
-                )
+                    riskLevel: planRisk
+                ) { .init(success: true, message: "Approved") }
             )
             if case .requiresApproval = approval {
                 throw AgentTeamError.planRejectedByUser

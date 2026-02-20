@@ -123,6 +123,7 @@ struct MCPToolList: View {
 
     // MARK: - Actions
 
+    // swiftlint:disable:next function_body_length
     private func loadTools() {
         // Load tools from MCP server
         // For now, use mock data based on server type

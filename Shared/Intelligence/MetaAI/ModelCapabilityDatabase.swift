@@ -140,6 +140,7 @@ public final class ModelCapabilityDatabase {
 
     // MARK: - Seed Data
 
+    // swiftlint:disable:next function_body_length
     private func addSeedData() {
         models = [
             // Claude Models
