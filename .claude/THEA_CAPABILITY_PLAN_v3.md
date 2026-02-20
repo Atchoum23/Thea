@@ -151,11 +151,11 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AD3: Manual Gate     | ⏳ MANUAL       | Alexis only — last step |
 | Phase AE3: Platform Obs.   | ✅ DONE         | PlatformFeaturesHub (5s delay), TheaIntelligenceOrchestrator (6s delay), ApprovalManager (lazy on-demand) — all wired in TheamacOSApp.setupManagers() |
 | Phase AF3: Settings Nav    | ✅ DONE         | Stream 5 (MSM3U) took over. 18 views wired into MacSettingsView detailContent; TheaMessagingChatView + ConversationLanguagePickerView confirmed wired; CLAUDE.md discrepancies fixed sha 97b7e86f |
-| Phase AG3: Comp. QA        | ⏳ PENDING      | STREAM 5 final — waiting for S1/S2/S3/S6 final pushsyncs before starting |
-| Phase AH3: 8-Hat Audit     | ⏳ PENDING      | STREAM 5 final — after AG3 |
-| **Overall v3 %**          | **90%**         | All A3–W3 + AE3 + AF3 ✅ DONE (18 phases); Streams 1–6 complete; waiting for S1/S2/S3/S6 final pushsyncs → AG3/AH3 |
+| Phase AG3: Comp. QA        | ✅ DONE         | sha f88bb98d — 4046 tests pass, 0 lint, all 4 platforms build, stubs activated (PromptOptimizer, WindowManager, LiveGuidance region picker) |
+| Phase AH3: 8-Hat Audit     | ✅ DONE         | sha 27649c41 — RED: language whitelist; PURPLE: autonomy audit trail; BLACK/WHITE/GREY/BLUE/GREEN/SCRIPT-KIDDIE all verified |
+| **Overall v3 %**          | **98%**         | All A3–W3 + AE3 + AF3 + AG3 + AH3 ✅ DONE (20 phases); CI running on f88bb98d; Wave 7 (X3–AD3) next |
 
-*Last updated: 2026-02-20 CET — AF3 ✅ DONE (18 views wired, CLAUDE.md fixed); macOS+iOS BUILD SUCCEEDED; waiting for other stream final pushsyncs → AG3*
+*Last updated: 2026-02-20 CET — AG3+AH3 ✅ DONE; 4046 tests pass, 0 SwiftLint violations, all platforms build; CI on f88bb98d; pushsync pending*
 
 ---
 
