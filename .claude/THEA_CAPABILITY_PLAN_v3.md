@@ -4777,7 +4777,9 @@ import Network
 actor ServerHealthMonitor {
     static let shared = ServerHealthMonitor()
     private var consecutiveFailures = 0
-    private let failoverThreshold = 3
+    // Dynamic via PersonalParameters — SelfTuningEngine adjusts based on observed network reliability
+    private var failoverThreshold: Int { get async { await MainActor.run { PersonalParameters.shared.serverFailoverThreshold } } }
+    private var pollIntervalSec: Int { get async { await MainActor.run { PersonalParameters.shared.serverPollIntervalSeconds } } }
     private var isFailoverActive = false
     private var monitorTask: Task<Void, Never>?
 
@@ -4785,28 +4787,30 @@ actor ServerHealthMonitor {
         monitorTask = Task {
             while !Task.isCancelled {
                 await checkHealth()
-                try? await Task.sleep(for: .seconds(30))
+                let interval = await pollIntervalSec
+                try? await Task.sleep(for: .seconds(interval))
             }
         }
     }
     func stopMonitoring() { monitorTask?.cancel() }
 
     private func checkHealth() async {
+        let threshold = await failoverThreshold
         let reachable = await canConnect(host: "msm3u.local", port: 18789)
         if reachable {
-            if consecutiveFailures >= failoverThreshold && isFailoverActive {
+            if consecutiveFailures >= threshold && isFailoverActive {
                 isFailoverActive = false; consecutiveFailures = 0
                 await notify(title: "MSM3U Back Online", body: "Failover cancelled.", priority: "default")
             }
             consecutiveFailures = 0
         } else {
             consecutiveFailures += 1
-            if consecutiveFailures >= failoverThreshold && !isFailoverActive {
+            if consecutiveFailures >= threshold && !isFailoverActive {
                 isFailoverActive = true
                 #if os(macOS)
                 let p = Process(); p.executableURL = URL(fileURLWithPath: "/Users/alexis/bin/msm3u-failover.sh"); try? p.run()
                 #endif
-                await notify(title: "MSM3U Offline", body: "3 failures. Failover initiated.", priority: "high")
+                await notify(title: "MSM3U Offline", body: "\(threshold) failures. Failover initiated.", priority: "high")
             }
         }
     }
@@ -4928,6 +4932,8 @@ Commit: `git commit -m "Auto-save: AP3 — MSM3U reliability: ServerHealthMonito
 
 **Goal**: Inspired by the v3 MISSION MONITOR's dynamic orchestrator, Thea manages its own AI sub-agents with circuit breakers, dynamic reassignment, persistent progress state, and notification-only human interface (alert on failure only — never on progress).
 
+**Thea user benefit** — When Alexis asks Thea to do multi-step autonomous tasks (research + summarize, analyze health data, generate + run code), Thea internally spawns AI sub-agents. Without AQ3: runaway agents loop forever; silent failures; crash = data lost; notification spam. With AQ3: AgentOrchestrator manages sub-agents silently, alerts ONCE on failure, checkpoints to progress.json for crash recovery, circuit-breaks after 3 failures. Same zero-monitoring guarantee as overnight coding sessions — applied to Alexis's own requests. **AgentOrchestrator is called from AgentMode.executeTask() and ChatManager.processAgentTask().**
+
 ### AQ3-1: AgentOrchestrator Actor
 
 Create `Shared/Intelligence/AgentOrchestration/AgentOrchestrator.swift`:
@@ -4954,9 +4960,11 @@ actor AgentOrchestrator {
 
     struct AgentResult { let success: Bool; let failureReason: String?; let verificationMethod: String }
 
-    private let spawnThreshold = 80_000          // tokens — spawn new agent beyond this (context rot)
-    private let circuitBreakerThreshold = 3      // consecutive failures → BLOCKED
-    private let taskTimeoutSeconds: Double = 300  // 5 min per subtask
+    // All tunable via PersonalParameters — SelfTuningEngine adapts based on session outcomes.
+    // Access from actor: `await MainActor.run { PersonalParameters.shared.xxx }`
+    private var spawnThreshold: Int { get async { await MainActor.run { PersonalParameters.shared.agentSpawnTokenThreshold } } }
+    private var circuitBreakerThreshold: Int { get async { await MainActor.run { PersonalParameters.shared.claudeCircuitBreakerAttempts } } }
+    private var taskTimeoutSeconds: Double { get async { await MainActor.run { PersonalParameters.shared.agentTaskTimeoutSeconds } } }
     private var agents: [UUID: SubAgent] = [:]
     private let progressURL: URL
 
@@ -5072,19 +5080,29 @@ actor AgentOrchestrator {
 Create `Shared/Intelligence/AgentOrchestration/AutonomousSessionManager.swift`:
 
 ```swift
-// Ensures zero monitoring: reads progress.json at start, alerts only if stalled.
-// Human notification policy: only alert if no git commit in 20+ minutes.
+// DUAL-PURPOSE zero-monitoring watchdog:
+// 1. DEV: git commit staleness for autonomous coding sessions
+// 2. USER: AgentOrchestrator task staleness for Thea's own multi-step AI tasks
+// Policy: SILENT during progress. ONE notification only if stalled. Never spam.
+// @MainActor — reads PersonalParameters.shared directly (same isolation).
 @MainActor
 final class AutonomousSessionManager: ObservableObject {
-    private let staleThreshold: TimeInterval = 20 * 60
+    // Dynamic via PersonalParameters — SelfTuningEngine adapts based on task type + time of day
+    private var staleThreshold: TimeInterval { PersonalParameters.shared.agentStaleThresholdMinutes * 60 }
     private var watchdog: Timer?
     private let repoPath: String
+    private var lastUserTaskHeartbeat: Date = .now
+    private var staleNotificationSent = false
 
     init(repoPath: String = "/Users/alexis/Documents/IT & Tech/MyApps/Thea") {
         self.repoPath = repoPath
     }
 
-    func startSession() { startWatchdog() }
+    func startSession() { staleNotificationSent = false; startWatchdog() }
+
+    /// USER MODE: AgentOrchestrator calls this on each subtask completion.
+    /// Resets the stale timer so Thea's autonomous tasks don't trigger false alerts.
+    func heartbeat() { lastUserTaskHeartbeat = .now; staleNotificationSent = false }
 
     private func startWatchdog() {
         watchdog = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
@@ -5093,21 +5111,31 @@ final class AutonomousSessionManager: ObservableObject {
     }
 
     private func checkStaleness() async {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
-        process.arguments = ["-C", repoPath, "log", "-1", "--format=%ct"]
-        let pipe = Pipe(); process.standardOutput = pipe
-        try? process.run(); process.waitUntilExit()
-        let ts = TimeInterval(String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "0") ?? 0
-        let elapsed = Date().timeIntervalSince1970 - ts
-        guard elapsed > staleThreshold else { return }
-        let mins = Int(elapsed / 60)
+        guard !staleNotificationSent else { return }
+        let devElapsed = gitCommitAge()
+        let userElapsed = Date.now.timeIntervalSince(lastUserTaskHeartbeat)
+        let maxElapsed = max(devElapsed, userElapsed)
+        guard maxElapsed > staleThreshold else { return }
+        staleNotificationSent = true
+        let mins = Int(maxElapsed / 60)
+        let source = devElapsed > userElapsed ? "git commit" : "Thea task"
         let content = UNMutableNotificationContent()
         content.title = "Thea Agent Stalled"
-        content.body = "\(mins) min since last git commit — may need attention"
+        content.body = "\(mins) min since last \(source) — may need attention"
         content.sound = .defaultCritical
-        let req = UNNotificationRequest(identifier: "stale-\(UUID())", content: content, trigger: nil)
+        let req = UNNotificationRequest(identifier: "stale-\(Int(Date.now.timeIntervalSince1970))", content: content, trigger: nil)
         try? await UNUserNotificationCenter.current().add(req)
+    }
+
+    private func gitCommitAge() -> TimeInterval {
+        let p = Process(); p.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+        p.arguments = ["-C", repoPath, "log", "-1", "--format=%ct"]
+        let pipe = Pipe(); p.standardOutput = pipe
+        try? p.run(); p.waitUntilExit()
+        let raw = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? "0"
+        guard let ts = TimeInterval(raw), ts > 0 else { return 0 }
+        return Date.now.timeIntervalSince1970 - ts
     }
 }
 ```
@@ -5344,9 +5372,12 @@ actor AdaptivePoller<T: Sendable> {
 
 // Pre-configured instances for Thea use cases:
 extension AdaptivePoller where T == Bool {
-    // CI job: skip 44 min (80% of 55 min), then poll 30s→120s with jitter
+    // CI job: skip 80% of typical duration, then poll 30s→120s decorrelated jitter.
+    // Duration read from PersonalParameters so SelfTuningEngine can adapt as CI speed changes.
+    @MainActor
     static var ciPoller: AdaptivePoller<Bool> {
-        AdaptivePoller(strategy: .knownDuration(estimatedSeconds: 55 * 60, tailCap: 120))
+        let mins = PersonalParameters.shared.ciTypicalDurationMinutes
+        return AdaptivePoller(strategy: .knownDuration(estimatedSeconds: mins * 60, tailCap: 120))
     }
     // tmux monitoring: 3s→5s→10s→30s→60s
     static var tmuxPoller: AdaptivePoller<Bool> {
