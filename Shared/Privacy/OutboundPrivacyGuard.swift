@@ -99,7 +99,9 @@ actor OutboundPrivacyGuard {
             ("web_api", "Web API calls", WebAPIPolicy(), [.text, .structuredData]),
             ("moltbook", "Moltbook discussions", MoltbookPolicy(), [.text]),
             ("cloudkit_sync", "iCloud sync", CloudAPIPolicy(), [.text, .structuredData, .deviceInfo]),
-            ("health_ai", "Health data to AI", CloudAPIPolicy(), [.text, .healthData])
+            ("health_ai", "Health data to AI", CloudAPIPolicy(), [.text, .healthData]),
+            // Financial briefing channel — text summaries only, no raw account numbers (AAC3)
+            ("financial_briefing", "Financial morning briefing to AI", CloudAPIPolicy(), [.text])
         ]
         for (id, desc, policy, types) in defaults {
             registeredChannels[id] = ChannelRegistration(
@@ -537,7 +539,16 @@ actor OutboundPrivacyGuard {
         if matchesAny(content, patterns: healthPatterns) { types.insert(.healthData) }
 
         // Financial data
-        let financePatterns = ["(?i)(iban|swift|bic|account.?number|routing|tax.?id|ssn|social.?security|credit.?card|\\b\\d{4}[- ]?\\d{4}[- ]?\\d{4}[- ]?\\d{4}\\b)"]
+        let financePatterns = [
+            // Traditional finance identifiers
+            "(?i)(iban|swift|bic|account.?number|routing|tax.?id|ssn|social.?security|credit.?card|\\b\\d{4}[- ]?\\d{4}[- ]?\\d{4}[- ]?\\d{4}\\b)",
+            // IBAN format: 2-letter country code + 2 digits + up to 30 alphanumeric (AAC3)
+            "[A-Z]{2}\\d{2}[A-Z0-9]{4}\\d{7}([A-Z0-9]?){0,16}",
+            // BTC wallet: P2PKH (1...) or P2SH (3...) or Bech32 (bc1...) (AAC3)
+            "\\b(1[a-km-zA-HJ-NP-Z1-9]{25,34}|3[a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[a-z0-9]{39,59})\\b",
+            // ETH wallet: 0x followed by 40 hex chars (AAC3)
+            "\\b0x[a-fA-F0-9]{40}\\b"
+        ]
         if matchesAny(content, patterns: financePatterns) { types.insert(.financialData) }
 
         // Location data

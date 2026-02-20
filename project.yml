@@ -304,6 +304,8 @@ targets:
           - "**/Core/Services/Mock*.swift"
           - "**/Core/Services/ChatService.swift"
           - "**/Core/Services/ProjectService.swift"
+          # FinancialModels superseded by Intelligence/Financial/FinancialModels.swift (AAC3)
+          - "**/Core/Models/FinancialModels.swift"
           # Exclude duplicate folders (use Shared/System/Terminal not Shared/Execution/Terminal)
           - "**/Execution/Terminal/**"
           # MLXAudioEngine + LocalVisionGuidance — ACTIVATED (M3 re-enable)
@@ -557,6 +559,8 @@ targets:
           - "**/Core/Services/Mock*.swift"
           - "**/Core/Services/ChatService.swift"
           - "**/Core/Services/ProjectService.swift"
+          # FinancialModels superseded by Intelligence/Financial/FinancialModels.swift (AAC3)
+          - "**/Core/Models/FinancialModels.swift"
           - "**/Terminal/**"
           - "**/ScreenCapture.swift"
           - "System/ScreenCapture/ScreenCaptureManager.swift"
