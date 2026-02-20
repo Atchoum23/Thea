@@ -128,14 +128,14 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase G3: TaskPlanDAG+    | ✅ DONE         | PlanOutcome quality scoring, planCache, createPlan cache lookup, AgentTeamOrchestrator approval gate sha 34a0083d |
 | Phase H3: AI System UIs   | ⏳ PENDING      | Blocked by A3 |
 | Phase I3: UI Components   | ⏳ PENDING      | Blocked by H3 |
-| Phase J3: LifeTracking UI | ⏳ PENDING      | Blocked by I3 |
+| Phase J3: LifeTracking UI | ✅ DONE         | ActivityTimelineView, LifeTrackingDashboardView, LifeTrackingAnalyticsView; MacSettingsView wired |
 | Phase K3: Config UI       | ⏳ PENDING      | Blocked by H3 |
 | Phase L3: Computer Use    | ✅ DONE         | ComputerUseHandler (screenshot/click/type/scroll/key), computer_use in AnthropicToolCatalog, toggle in Autonomy settings sha ebfb10bf |
 | Phase M3: MLX Audio       | 🔄 IN PROGRESS  | Stream 3 |
-| Phase N3: Artifact System | ⏳ PENDING      | Blocked by E3 |
-| Phase O3: MCP Client      | ⏳ PENDING      | Blocked by B3 |
-| Phase P3: KG Enhancement  | ⏳ PENDING      | Blocked by v2 |
-| Phase Q3: Proactive Intel | ⏳ PENDING      | Blocked by P3 |
+| Phase N3: Artifact System | ✅ DONE         | GeneratedArtifact SwiftData model, ArtifactBrowserView, ArtifactManager; MacSettingsView wired |
+| Phase O3: MCP Client      | ✅ DONE         | GenericMCPClient, MCPServerBrowserView, MCPClientManager, MCPBuilderView, MCPServerGeneratorTypes |
+| Phase P3: KG Enhancement  | ✅ DONE         | PersonalKnowledgeGraph dedup+decay+consolidation; LongTermMemorySystem+Consolidation active |
+| Phase Q3: Proactive Intel | ✅ DONE         | DeliveredInsight SwiftData model, InsightHistoryView, WeeklyInsightSummaryView, ProactiveInsightEngine cron |
 | Phase R3: SelfEvolution   | ⏳ PENDING      | Blocked by H3 |
 | Phase S3: MCPGen UI       | ⏳ PENDING      | Blocked by O3 |
 | Phase T3: Integration Bknd| ⏳ PENDING      | Blocked by B3; Safari/Cal/Shortcuts/Reminders/Notes/Finder/Mail |
