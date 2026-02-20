@@ -123,8 +123,8 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase I3: UI Components   | ⏳ PENDING      | Blocked by H3 |
 | Phase J3: LifeTracking UI | ⏳ PENDING      | Blocked by I3 |
 | Phase K3: Config UI       | ⏳ PENDING      | Blocked by H3 |
-| Phase L3: Computer Use    | 🔄 IN PROGRESS  | Stream 3 |
-| Phase M3: MLX Audio       | ⏳ PENDING      | Blocked by v2 |
+| Phase L3: Computer Use    | ✅ DONE         | ComputerUseHandler (screenshot/click/type/scroll/key), computer_use in AnthropicToolCatalog, toggle in Autonomy settings sha ebfb10bf |
+| Phase M3: MLX Audio       | 🔄 IN PROGRESS  | Stream 3 |
 | Phase N3: Artifact System | ⏳ PENDING      | Blocked by E3 |
 | Phase O3: MCP Client      | ⏳ PENDING      | Blocked by B3 |
 | Phase P3: KG Enhancement  | ⏳ PENDING      | Blocked by v2 |
