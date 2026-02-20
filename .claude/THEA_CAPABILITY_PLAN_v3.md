@@ -163,7 +163,7 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AT3: TheaWeb         | ✅ DONE         | verified pre-existing — Swift build 0 errors, all routes real data, Cloudflare tunnel verified (Docker N/A on MSM3U) — S6 |
 | Phase AU3: Tizen           | ✅ DONE         | verified pre-existing — thea-tizen TS 0 errors + build passing, TV/TheaTizen JS validated, protocol via TheaWeb API → localhost:8081 — S6 |
 | Phase AV3: Browser Ext.    | ⏳ PENDING      | NativeHost↔TheaMessagingGateway wired, Chrome/Safari end-to-end, Brave 14 canonical, SafariExt in project.yml — S7 |
-| Phase AW3: Widget Ext.     | ⏳ PENDING      | 5 widget types (Conversation/QuickActions/Memory/Context/LockScreen) fully implemented, SwiftData-backed — S8 |
+| Phase AW3: Widget Ext.     | ✅ DONE         | sha 322dce1b — 5 widget types (Conversation/QuickActions/Memory/Context/LockScreen) fully implemented, AppGroup shared storage, iOS build verified — S8 |
 | Phase AX3: Native Ext. 1   | ⏳ PENDING      | Share, Intents (Siri), Messages, Mail, FocusFilter extensions — real implementations, wired to ChatManager/AgentOrchestrator — S8 after AW3 |
 | Phase AY3: Native Ext. 2   | ✅ DONE         | CallKit, Credentials, Keyboard, Notification, QuickLook, Spotlight, FinderSync extensions — real implementations — S9 |
 | **Overall v3 %**          | **97% autonomous done** | A3–W3 + AE3–AH3 + AI3–AN3 + AP3–AS3 ✅ DONE; Wave 6 (X3–AC3) + Wave 9 (AT3–AX3) + AY3 ✅ + AD3 pending. |
