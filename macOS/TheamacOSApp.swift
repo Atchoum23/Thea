@@ -277,6 +277,14 @@ struct TheamacOSApp: App {
             logger.info("SelfExecutionService initialized (available via Meta-AI dashboard)")
         }
 
+        // E3: Skills — pre-warm SkillRegistry (built-in + global) and SkillsRegistryService (marketplace)
+        Task {
+            try? await Task.sleep(for: .seconds(4))
+            _ = SkillRegistry.shared
+            _ = SkillsRegistryService.shared
+            logger.info("E3: Skills registries initialized (built-in + marketplace)")
+        }
+
         // U3/AE3: PlatformFeaturesHub — activates ambient intelligence foundation:
         // MenuBarManager, MacSystemObserver, ServicesHandler, SpotlightService, etc.
         Task {

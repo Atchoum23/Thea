@@ -140,6 +140,23 @@ extension ChatManager {
         }
         #endif
 
+        // E3: Inject active Skills instructions into system prompt (all platforms)
+        if let systemMsg = apiMessages.first, systemMsg.role == .system {
+            let withSkills = injectSkillsIntoSystemPrompt(
+                systemMsg.content.textValue, for: text, taskType: taskType
+            )
+            if withSkills != systemMsg.content.textValue {
+                apiMessages[0] = AIMessage(
+                    id: systemMsg.id,
+                    conversationID: systemMsg.conversationID,
+                    role: .system,
+                    content: .text(withSkills),
+                    timestamp: systemMsg.timestamp,
+                    model: systemMsg.model
+                )
+            }
+        }
+
         // Count input tokens for Anthropic models (free API, non-blocking)
         let inputTokenCount = await countInputTokens(
             messages: apiMessages, model: model, provider: provider

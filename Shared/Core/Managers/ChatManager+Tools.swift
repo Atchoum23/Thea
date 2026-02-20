@@ -147,6 +147,31 @@ extension ChatManager {
         #endif
     }
 
+    // MARK: - E3: Skills Injection
+
+    /// Inject active skills instructions into the system prompt.
+    /// Finds matching skills for the query + task type and appends their instructions.
+    /// Synchronous — SkillRegistry reads from in-memory dictionaries.
+    func injectSkillsIntoSystemPrompt(
+        _ systemPrompt: String,
+        for query: String,
+        taskType: TaskType?
+    ) -> String {
+        let matchingSkills = SkillRegistry.shared.findMatchingSkills(
+            for: query,
+            taskType: taskType,
+            currentFile: nil
+        )
+        guard !matchingSkills.isEmpty else { return systemPrompt }
+
+        let skillInstructions = matchingSkills.map { skill in
+            "### Skill: \(skill.name)\n\(skill.instructions)"
+        }.joined(separator: "\n\n")
+
+        toolsLogger.debug("E3: injecting \(matchingSkills.count) skill(s): \(matchingSkills.map(\.name).joined(separator: ", "))")
+        return systemPrompt + "\n\n---\nActive Skills:\n\(skillInstructions)"
+    }
+
     // MARK: - D3: Confidence Feedback Loop
 
     /// Record confidence outcome to improve future routing.
