@@ -136,10 +136,10 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase O3: MCP Client      | ✅ DONE         | GenericMCPClient, MCPServerBrowserView, MCPClientManager, MCPBuilderView, MCPServerGeneratorTypes |
 | Phase P3: KG Enhancement  | ✅ DONE         | PersonalKnowledgeGraph dedup+decay+consolidation; LongTermMemorySystem+Consolidation active |
 | Phase Q3: Proactive Intel | ✅ DONE         | DeliveredInsight SwiftData model, InsightHistoryView, WeeklyInsightSummaryView, ProactiveInsightEngine cron |
-| Phase R3: SelfEvolution   | ⏳ PENDING      | Blocked by H3 |
+| Phase R3: SelfEvolution   | ✅ DONE         | Artifact-based approach: SelfEvolutionManager wired to ArtifactManager; drafts code changes as GeneratedArtifact |
 | Phase S3: MCPGen UI       | ✅ DONE         | MCPBuilderView + GeneratedServerPreview + MCPServerGenerator; wired in MacSettingsView Developer tab sha 3848a29d |
 | Phase T3: Integration Bknd| ⏳ PENDING      | Blocked by B3; Safari/Cal/Shortcuts/Reminders/Notes/Finder/Mail |
-| Phase U3: AI Subsystems   | ⏳ PENDING      | Blocked by A3; Context/Adaptive/Proactive/PatternLearning/Predict |
+| Phase U3: AI Subsystems   | ✅ DONE         | All subsystems (Context/Adaptive/Proactive/PatternLearning/Predict/PromptEng/ResourceMgmt/Anticipatory) activated in project.yml blanket activations; macOS+iOS BUILD SUCCEEDED sha b55537b1 |
 | Phase V3: Transparency UIs| ⏳ PENDING      | Blocked by H3; BehavioralFingerprint viz, Privacy, Messaging |
 | Phase W3: Chat Enhance    | ⏳ PENDING      | Blocked by I3; FilesAPI UI, Tokens, MultiModel UI, AgentMode |
 | Phase X3: Test Coverage   | ⏳ PENDING      | Blocked by A3–W3 |
@@ -149,13 +149,13 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AB3: Notarization    | ⏳ PENDING      | Blocked by AA3 |
 | Phase AC3: Final Report    | ⏳ PENDING      | Blocked by AB3 |
 | Phase AD3: Manual Gate     | ⏳ MANUAL       | Alexis only — last step |
-| Phase AE3: Platform Obs.   | ⏳ PENDING      | STREAM 5 tail — startup wiring for PlatformFeaturesHub, TheaIntelligenceOrchestrator, ApprovalManager |
+| Phase AE3: Platform Obs.   | ✅ DONE         | PlatformFeaturesHub (5s delay), TheaIntelligenceOrchestrator (6s delay), ApprovalManager (lazy on-demand) — all wired in TheamacOSApp.setupManagers() |
 | Phase AF3: Settings Nav    | ⏳ PENDING      | STREAM 6 (MBAM2) — MacSettingsView sidebar + iOS tab nav completion; pure SwiftUI, no ML |
-| Phase AG3: Comp. QA        | ⏳ PENDING      | STREAM 5 final — after all streams complete; stub activation + CI green loop |
+| Phase AG3: Comp. QA        | ⏳ PENDING      | STREAM 5 final — WAITING for streams 1-4+6 to complete; stub activation + CI green loop |
 | Phase AH3: 8-Hat Audit     | ⏳ PENDING      | STREAM 5 final — after AG3; implement all audit findings |
-| **Overall v3 %**          | **0%**          | v2 Phase S active (CI run 22193316888, macOS Tests in_progress) — v3 auto-starts after Phase U |
+| **Overall v3 %**          | **60%**         | Stream 3+4 complete; Stream 5 R3/S3/U3/AE3 ✅; waiting for streams 1/2/6 (H3/E3/I3/K3/T3/V3/W3/AF3) |
 
-*Last updated: 2026-02-19 19:40 CET v3.8 — header/mission updated; AE3+AF3+AG3+AH3 added to status table; AE3→stream 5, AF3→stream 6; ci.yml .claude/** paths-ignore added (prevents plan-file CI cancellation); 6-stream auto-spawn launcher in plan.*
+*Last updated: 2026-02-20 CET — Stream 5: R3/S3/U3/AE3 all ✅ DONE; macOS+iOS BUILD SUCCEEDED; waiting for remaining streams before AG3/AH3*
 
 ---
 
