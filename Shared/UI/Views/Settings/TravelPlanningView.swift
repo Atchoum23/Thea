@@ -2,7 +2,8 @@
 // Thea — Travel planning and itinerary management UI
 //
 // Trip management with itinerary builder, packing checklist,
-// and expense tracking across platforms.
+// expense tracking, and live flight status via Amadeus.
+// Wire-in: TravelIntelligenceService (AAI3-5)
 
 import SwiftUI
 
@@ -10,7 +11,9 @@ struct TravelPlanningView: View {
     @ObservedObject private var manager = TravelManager.shared
     @State private var selectedTab = 0
     @State private var showingAddTrip = false
+    @State private var showingFlightStatus = false
     @State private var searchText = ""
+    private let travelIntelligence = TravelIntelligenceService.shared
 
     var body: some View {
         VStack(spacing: 0) {
@@ -35,11 +38,19 @@ struct TravelPlanningView: View {
                     Label("Add Trip", systemImage: "plus")
                 }
             }
+            ToolbarItem(placement: .automatic) {
+                Button { showingFlightStatus = true } label: {
+                    Label("Flight Status", systemImage: "airplane.circle")
+                }
+            }
         }
         .sheet(isPresented: $showingAddTrip) {
             AddTripSheet { trip in
                 manager.addTrip(trip)
             }
+        }
+        .sheet(isPresented: $showingFlightStatus) {
+            FlightStatusSheet(service: travelIntelligence)
         }
     }
 
@@ -161,6 +172,88 @@ private struct AddTripSheet: View {
                         dismiss()
                     }
                     .disabled(name.isEmpty || destination.isEmpty)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Flight Status Sheet
+
+private struct FlightStatusSheet: View {
+    let service: TravelIntelligenceService
+    @Environment(\.dismiss) private var dismiss
+    @State private var carrier = ""
+    @State private var flightNum = ""
+    @State private var date = Date()
+    @State private var results: [FlightStatusResult] = []
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Flight") {
+                    TextField("Carrier (e.g. AA)", text: $carrier)
+                    TextField("Flight Number (e.g. 1234)", text: $flightNum)
+                    DatePicker("Date", selection: $date, displayedComponents: .date)
+                }
+                if isLoading {
+                    Section { ProgressView("Checking flight status…") }
+                } else if let err = errorMessage {
+                    Section { Text(err).foregroundStyle(.red) }
+                } else if !results.isEmpty {
+                    Section("Results") {
+                        ForEach(results, id: \.flightNumber) { flight in
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("\(flight.carrierCode)\(flight.flightNumber) — \(flight.status)")
+                                    .font(.headline)
+                                Text("\(flight.departureAirport) → \(flight.arrivalAirport)")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                if let delay = flight.delayMinutes, delay > 0 {
+                                    Text("Delay: \(delay) min").foregroundStyle(.orange)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Flight Status")
+            #if os(macOS)
+            .frame(minWidth: 400, minHeight: 300)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Check") { checkFlight() }
+                        .disabled(carrier.isEmpty || flightNum.isEmpty)
+                }
+            }
+        }
+    }
+
+    private func checkFlight() {
+        guard !carrier.isEmpty, !flightNum.isEmpty else { return }
+        isLoading = true
+        errorMessage = nil
+        results = []
+        let dateStr = ISO8601DateFormatter().string(from: date).prefix(10).description
+        Task {
+            do {
+                let flights = try await service.flightStatus(
+                    carrierCode: carrier.uppercased(),
+                    flightNumber: flightNum,
+                    date: dateStr
+                )
+                await MainActor.run {
+                    results = flights
+                    isLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    isLoading = false
                 }
             }
         }

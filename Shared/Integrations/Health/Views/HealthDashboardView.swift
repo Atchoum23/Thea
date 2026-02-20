@@ -8,6 +8,9 @@ private let healthDashboardLogger = Logger(subsystem: "ai.thea.app", category: "
 public struct HealthDashboardView: View {
     @State private var exportURL: URL?
     @State private var viewModel = HealthDashboardViewModel()
+    // AAI3-4: NutritionBarcodeService wire-in — scan food barcodes → HealthKit logging
+    @ObservedObject private var nutritionService = NutritionBarcodeService.shared
+    @State private var showingNutritionLastScan = false
 
     public init() {}
 
@@ -34,6 +37,31 @@ public struct HealthDashboardView: View {
                             Image(systemName: "square.and.arrow.up")
                         }
                         .accessibilityLabel("Export health data")
+                    }
+
+                    // AAI3-4: Scan food barcode → log to HealthKit
+                    Button {
+                        if let product = nutritionService.lastProduct {
+                            showingNutritionLastScan = true
+                            _ = product // suppress warning
+                        } else {
+                            nutritionService.scanAndLog()
+                        }
+                    } label: {
+                        Image(systemName: "barcode.viewfinder")
+                    }
+                    .accessibilityLabel("Scan food barcode")
+                    .popover(isPresented: $showingNutritionLastScan) {
+                        if let p = nutritionService.lastProduct {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(p.name).font(.headline)
+                                Text(p.brand).foregroundStyle(.secondary)
+                                Text("\(Int(p.caloriesPerServing)) kcal/serving")
+                                Text("P: \(String(format: "%.1f", p.proteinG))g  F: \(String(format: "%.1f", p.fatG))g  C: \(String(format: "%.1f", p.carbsG))g")
+                                    .font(.caption)
+                            }
+                            .padding()
+                        }
                     }
 
                     Button(action: {
