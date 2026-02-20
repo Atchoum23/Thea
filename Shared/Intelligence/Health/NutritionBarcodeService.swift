@@ -25,16 +25,21 @@ private let logger = Logger(subsystem: "app.thea", category: "NutritionBarcodeSe
 // MARK: - Nutrition Product
 
 struct NutritionProduct: Sendable {
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     let barcode: String
     let name: String
     let brand: String
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     let servingSizeG: Double      // grams per serving
     let caloriesPerServing: Double // kcal per serving
     let proteinG: Double
     let fatG: Double
     let carbsG: Double
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     let fiberG: Double
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     let sodiumMg: Double
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     let nutriScore: String?       // "a"–"e" or nil
 }
 
@@ -50,6 +55,7 @@ final class NutritionBarcodeService: NSObject, ObservableObject {
 
     @Published private(set) var isScanning = false
     @Published private(set) var lastProduct: NutritionProduct?
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     @Published private(set) var lastError: String?
     @Published private(set) var healthKitAuthorized = false
 

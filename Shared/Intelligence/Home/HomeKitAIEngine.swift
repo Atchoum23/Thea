@@ -15,6 +15,7 @@ import os.log
 // MARK: - Supporting Types
 
 enum HomeState {
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     case unknown, morning, day, evening, sleeping
 }
 
@@ -32,6 +33,7 @@ final class HomeKitAIEngine: NSObject, ObservableObject {
     // MARK: - Published State
 
     @Published var homes: [HMHome] = []
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     @Published var currentHomeState: HomeState = .unknown
     @Published var lastActivatedScene: String?
 
@@ -101,6 +103,7 @@ final class HomeKitAIEngine: NSObject, ObservableObject {
         logger.info("HomeKitAIEngine predictive loop started")
     }
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     func stopPredictiveLoop() {
         predictiveCheckTask?.cancel()
         predictiveCheckTask = nil
@@ -108,6 +111,7 @@ final class HomeKitAIEngine: NSObject, ObservableObject {
 
     // MARK: - Home State Query
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Returns a summary of current home state for AI context injection.
     func homeContextSummary() -> String {
         guard !homes.isEmpty else { return "HomeKit not authorized or no homes configured." }

@@ -42,11 +42,13 @@ final class NFCContextService: NSObject, ObservableObject {
 
     // MARK: - Published State
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     @Published var lastDetectedContext: NFCContext?
     @Published var isScanning: Bool = false
 
     // MARK: - Private
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     private var readerSession: NFCNDEFReaderSession?
     private let logger = Logger(subsystem: "app.theathe", category: "NFCContextService")
 
@@ -57,6 +59,7 @@ final class NFCContextService: NSObject, ObservableObject {
 
     // MARK: - Scanning
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Starts an NFC NDEF reader session with user-facing alert message.
     func beginScan(alertMessage: String = "Hold your iPhone near a Thea NFC tag.") {
         guard NFCNDEFReaderSession.readingAvailable else {
@@ -75,6 +78,7 @@ final class NFCContextService: NSObject, ObservableObject {
         logger.info("NFC scan session started")
     }
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     func cancelScan() {
         readerSession?.invalidate()
         readerSession = nil
@@ -157,6 +161,7 @@ enum NFCContext: String, CaseIterable, Sendable {
     case travel
     case focus
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     var displayName: String {
         switch self {
         case .work:    return "Work Mode"
@@ -170,6 +175,7 @@ enum NFCContext: String, CaseIterable, Sendable {
         }
     }
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     var systemIcon: String {
         switch self {
         case .work:    return "briefcase.fill"
@@ -183,6 +189,7 @@ enum NFCContext: String, CaseIterable, Sendable {
         }
     }
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// The NFC tag URL to encode on a physical tag.
     var tagURL: URL {
         URL(string: "thea://context/\(rawValue)")!

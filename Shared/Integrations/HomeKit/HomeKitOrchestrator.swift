@@ -43,6 +43,7 @@
 
         // MARK: - Automation Engine
 
+        // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         private var automationTimer: Timer?
         private var deviceUsageHistory: [String: [DeviceUsageRecord]] = [:]
 

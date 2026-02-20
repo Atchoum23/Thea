@@ -13,7 +13,8 @@ import OSLog
 // MARK: - Financial Summary
 
 struct FinancialSummary: Sendable {
-    let totalCryptoValueUSD: Double // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let totalCryptoValueUSD: Double
     let cryptoBalances: [KrakenBalance]
     let coinbaseBalances: [CoinbaseAccount]
     let ynabBudgets: [YNABBudgetSummary]
@@ -30,8 +31,10 @@ final class FinancialIntelligenceService: ObservableObject {
     // MARK: - Published State
 
     @Published var isLoading: Bool = false
-    @Published var lastSyncError: String? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    @Published var lastSyncedAt: Date? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    @Published var lastSyncError: String?
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    @Published var lastSyncedAt: Date?
     @Published var summary: FinancialSummary?
 
     // MARK: - Provider Services (actor references)
@@ -82,9 +85,10 @@ final class FinancialIntelligenceService: ObservableObject {
 
     // MARK: - Morning Briefing
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Generate a concise natural-language financial morning briefing.
     /// All figures are sanitized through OutboundPrivacyGuard before use in prompts.
-    func morningBriefing() async -> String { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func morningBriefing() async -> String {
         guard let s = summary else {
             return "No financial data available. Please configure your accounts in Settings → Financial and sync."
         }
@@ -136,9 +140,10 @@ final class FinancialIntelligenceService: ObservableObject {
 
     // MARK: - CSV Import (AAI3-3: TabularDataAnalyzer)
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Analyze a financial CSV export and merge the summary into `morningBriefing()` output.
     /// Uses TabularDataAnalyzer for DataFrame-backed parsing.
-    func analyzeCSV(at url: URL) async -> String { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func analyzeCSV(at url: URL) async -> String {
         guard TabularDataAnalyzer.isAvailable else {
             return "CSV analysis requires iOS 16.4 / macOS 13 or later."
         }
@@ -218,7 +223,8 @@ final class FinancialIntelligenceService: ObservableObject {
         return krakenUSD + coinbaseUSD
     }
 
-    private func formatAmount(_ value: Double) -> String { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private func formatAmount(_ value: Double) -> String {
         if value >= 1 {
             return String(format: "%.2f", value)
         } else {
@@ -226,7 +232,8 @@ final class FinancialIntelligenceService: ObservableObject {
         }
     }
 
-    private func formatDate(_ date: Date) -> String { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private func formatDate(_ date: Date) -> String {
         let f = DateFormatter()
         f.dateStyle = .medium
         f.timeStyle = .short

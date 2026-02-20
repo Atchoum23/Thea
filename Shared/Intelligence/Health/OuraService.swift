@@ -14,7 +14,9 @@ import OSLog
 
 struct OuraReadiness: Sendable {
     let score: Int      // 0..100 — overall readiness score
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     let hrv: Int        // HRV balance contributor (0..100 scale)
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     let date: String    // YYYY-MM-DD
 }
 

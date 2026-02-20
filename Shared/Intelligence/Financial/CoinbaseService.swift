@@ -12,6 +12,7 @@ import OSLog
 // MARK: - Coinbase Account Model
 
 struct CoinbaseAccount: Sendable {
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     let id: String
     let name: String
     let currency: String
@@ -24,7 +25,7 @@ struct CoinbaseAccount: Sendable {
 
 // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 struct CoinbaseTransaction: Sendable {
-    let id: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let id: String
     let type: String      // "send", "receive", "buy", "sell", etc.
     let status: String
     let amount: Double
@@ -40,7 +41,8 @@ struct CoinbaseTransaction: Sendable {
 actor CoinbaseService {
     static let shared = CoinbaseService()
 
-    private let logger = Logger(subsystem: "com.thea.app", category: "CoinbaseService") // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private let logger = Logger(subsystem: "com.thea.app", category: "CoinbaseService")
     private let baseURL = URL(string: "https://api.coinbase.com/v2")!
     private let apiVersion = "2024-09-01"
 
@@ -48,8 +50,9 @@ actor CoinbaseService {
 
     // MARK: - Credential Management
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Store API key and secret in Keychain.
-    func saveCredentials(apiKey: String, apiSecret: String) { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func saveCredentials(apiKey: String, apiSecret: String) {
         FinancialCredentialStore.save(token: apiKey, for: FinancialAPIProvider.coinbase.rawValue, suffix: "apiKey")
         FinancialCredentialStore.save(token: apiSecret, for: FinancialAPIProvider.coinbase.rawValue, suffix: "apiSecret")
         logger.info("CoinbaseService: credentials saved")
@@ -70,9 +73,10 @@ actor CoinbaseService {
 
     // MARK: - Fetch Transactions
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Fetch recent transactions for a specific account.
     /// - Parameter accountID: Coinbase account ID from `fetchAccounts()`.
-    func fetchTransactions(accountID: String) async throws -> [CoinbaseTransaction] { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func fetchTransactions(accountID: String) async throws -> [CoinbaseTransaction] {
         let data = try await request(path: "/accounts/\(accountID)/transactions")
         return try parseTransactions(from: data)
     }
@@ -131,7 +135,8 @@ actor CoinbaseService {
         }
     }
 
-    private func parseTransactions(from data: Data) throws -> [CoinbaseTransaction] { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private func parseTransactions(from data: Data) throws -> [CoinbaseTransaction] {
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         guard let dataArray = json?["data"] as? [[String: Any]] else { return [] }
 

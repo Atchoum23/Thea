@@ -355,6 +355,7 @@ public class HomeKitMonitor: NSObject, ObservableObject {
     // callbacks on its own private queue; lastKnownValues only mutated from those callbacks
     private final class AccessoryDelegate: NSObject, HMAccessoryDelegate, @unchecked Sendable {
         let accessoryId: String
+        // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
         let homeName: String
         let onStateChange: (String, String, Any?, Any?) -> Void
 

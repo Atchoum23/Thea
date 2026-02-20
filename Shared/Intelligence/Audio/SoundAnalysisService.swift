@@ -16,7 +16,8 @@ private let logger = Logger(subsystem: "app.thea", category: "SoundAnalysisServi
 struct SoundClassification: Sendable {
     let identifier: String      // e.g. "music", "speech", "dog_barking"
     let confidence: Double      // 0.0 – 1.0
-    let classifiedAt: Date // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let classifiedAt: Date
 }
 
 // MARK: - SoundAnalysisService
@@ -31,21 +32,28 @@ import AVFoundation
 @MainActor
 final class SoundAnalysisService: NSObject, ObservableObject {
 
-    static let shared = SoundAnalysisService() // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    static let shared = SoundAnalysisService()
 
     // MARK: - Published State
 
-    @Published var isAnalyzing: Bool = false // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    @Published var isAnalyzing: Bool = false
     @Published var topClassification: SoundClassification?
     @Published var recentClassifications: [SoundClassification] = []
-    @Published var errorMessage: String? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    @Published var errorMessage: String?
 
     // MARK: - Private
 
-    private var audioEngine: AVAudioEngine? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    private var analyzer: SNAudioStreamAnalyzer? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    private var analysisRequest: SNClassifySoundRequest? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    private var analysisObserver: SoundAnalysisObserver? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private var audioEngine: AVAudioEngine?
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private var analyzer: SNAudioStreamAnalyzer?
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private var analysisRequest: SNClassifySoundRequest?
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private var analysisObserver: SoundAnalysisObserver?
     private let maxRecentCount = 20
 
     override private init() {
@@ -55,8 +63,9 @@ final class SoundAnalysisService: NSObject, ObservableObject {
 
     // MARK: - Start/Stop
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Begin real-time sound classification from the device microphone.
-    func startAnalysis() { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func startAnalysis() {
         guard !isAnalyzing else { return }
 
         do {
@@ -91,8 +100,9 @@ final class SoundAnalysisService: NSObject, ObservableObject {
         }
     }
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Stop classification and release audio resources.
-    func stopAnalysis() { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func stopAnalysis() {
         audioEngine?.inputNode.removeTap(onBus: 0)
         audioEngine?.stop()
         audioEngine    = nil
@@ -123,8 +133,9 @@ final class SoundAnalysisService: NSObject, ObservableObject {
 
     // MARK: - Context Summary
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Returns a brief summary for AI context injection.
-    func contextSummary() -> String? { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func contextSummary() -> String? {
         guard let top = topClassification, top.confidence > 0.5 else { return nil }
         let humanReadable = top.identifier.replacingOccurrences(of: "_", with: " ")
         return "Ambient sound: \(humanReadable) (confidence: \(Int(top.confidence * 100))%)."

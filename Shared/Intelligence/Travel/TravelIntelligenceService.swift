@@ -26,15 +26,20 @@ private let logger = Logger(subsystem: "app.thea", category: "TravelIntelligence
 struct FlightStatusResult: Sendable {
     let carrierCode: String
     let flightNumber: String
-    let scheduledDate: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let scheduledDate: String
     let departureAirport: String
     let arrivalAirport: String
-    let scheduledDepartureTime: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let scheduledArrivalTime: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let scheduledDepartureTime: String
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let scheduledArrivalTime: String
     let status: String            // "Scheduled", "OnTime", "Delayed", "Cancelled"
     let delayMinutes: Int?
-    let terminal: String? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let gate: String? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let terminal: String?
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let gate: String?
 }
 
 // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
@@ -70,8 +75,10 @@ actor TravelIntelligenceService {
 
     private let authURL = URL(string: "https://test.api.amadeus.com/v1/security/oauth2/token")!
     private let flightScheduleURL = URL(string: "https://test.api.amadeus.com/v2/schedule/flights")!
-    private let hotelOffersURL = URL(string: "https://test.api.amadeus.com/v2/shopping/hotel-offers")! // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    private let hotelListURL = URL(string: "https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city")! // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private let hotelOffersURL = URL(string: "https://test.api.amadeus.com/v2/shopping/hotel-offers")!
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private let hotelListURL = URL(string: "https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city")!
 
     private var accessToken: String?
     private var tokenExpiry: Date = .distantPast
@@ -80,7 +87,8 @@ actor TravelIntelligenceService {
 
     // MARK: - Credential Management
 
-    func configure(apiKey: String, apiSecret: String) async { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func configure(apiKey: String, apiSecret: String) async {
         await MainActor.run {
             SettingsManager.shared.setAPIKey(apiKey, for: "amadeus_key")
             SettingsManager.shared.setAPIKey(apiSecret, for: "amadeus_secret")
@@ -88,7 +96,8 @@ actor TravelIntelligenceService {
         logger.info("TravelIntelligenceService: credentials configured")
     }
 
-    func hasCredentials() async -> Bool { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func hasCredentials() async -> Bool {
         let (key, secret) = await MainActor.run {
             (SettingsManager.shared.getAPIKey(for: "amadeus_key"),
              SettingsManager.shared.getAPIKey(for: "amadeus_secret"))
@@ -170,13 +179,14 @@ actor TravelIntelligenceService {
 
     // MARK: - Hotel Search
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Search for available hotels in a city.
     /// - Parameters:
     ///   - cityCode: IATA city code (e.g. "PAR", "LON", "NYC")
     ///   - checkIn: ISO date string YYYY-MM-DD
     ///   - checkOut: ISO date string YYYY-MM-DD
     ///   - adults: Number of adult guests (default: 1)
-    func hotelSearch(cityCode: String, checkIn: String, checkOut: String, adults: Int = 1) async throws -> HotelSearchResult { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func hotelSearch(cityCode: String, checkIn: String, checkOut: String, adults: Int = 1) async throws -> HotelSearchResult {
         let token = try await getAccessToken()
 
         // Step 1: Get hotel list for the city

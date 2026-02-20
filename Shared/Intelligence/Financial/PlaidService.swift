@@ -11,25 +11,38 @@ import OSLog
 // MARK: - Plaid Transaction Model
 
 struct PlaidTransaction: Sendable {
-    let transactionID: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let accountID: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let amount: Double          // Negative = debit, positive = credit (Plaid convention inverted) // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let date: String            // ISO date e.g. "2024-03-15" // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let name: String            // Payee name // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let merchantName: String? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let category: [String]      // Hierarchical category e.g. ["Food and Drink", "Restaurants"] // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let pending: Bool // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let currencyCode: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let transactionID: String
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let accountID: String
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let amount: Double          // Negative = debit, positive = credit (Plaid convention inverted)
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let date: String            // ISO date e.g. "2024-03-15"
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let name: String            // Payee name
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let merchantName: String?
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let category: [String]      // Hierarchical category e.g. ["Food and Drink", "Restaurants"]
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let pending: Bool
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let currencyCode: String
 }
 
 // MARK: - Plaid Sync Result
 
 struct PlaidSyncResult: Sendable {
     let added: [PlaidTransaction]
-    let modified: [PlaidTransaction] // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let removedIDs: [String] // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let nextCursor: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let hasMore: Bool // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let modified: [PlaidTransaction]
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let removedIDs: [String]
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let nextCursor: String
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let hasMore: Bool
 }
 
 // MARK: - PlaidService
@@ -52,12 +65,13 @@ actor PlaidService {
 
     // MARK: - Credential Management
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Persist Plaid credentials in Keychain.
     /// - Parameters:
     ///   - clientID: Your Plaid client_id
     ///   - secret: Your Plaid secret for the configured environment
     ///   - accessToken: The item's access_token (obtained via Plaid Link)
-    func saveCredentials(clientID: String, secret: String, accessToken: String) { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func saveCredentials(clientID: String, secret: String, accessToken: String) {
         FinancialCredentialStore.save(token: clientID, for: FinancialAPIProvider.plaid.rawValue, suffix: "clientID")
         FinancialCredentialStore.save(token: secret, for: FinancialAPIProvider.plaid.rawValue, suffix: "secret")
         FinancialCredentialStore.save(token: accessToken, for: FinancialAPIProvider.plaid.rawValue, suffix: "accessToken")
@@ -138,8 +152,9 @@ actor PlaidService {
 
     // MARK: - Reset Delta Sync
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Clear the cursor cache to force a full sync on the next call.
-    func resetSync() { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func resetSync() {
         cursorCache.removeAll()
         logger.info("PlaidService: cursor cache cleared")
     }

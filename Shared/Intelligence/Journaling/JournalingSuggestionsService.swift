@@ -25,7 +25,9 @@ final class JournalingSuggestionsService: ObservableObject {
 
     // MARK: - Published State
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     @Published var recentSuggestions: [JournalingSuggestion] = []
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     @Published var lastFetchDate: Date?
 
     // MARK: - Private
@@ -38,6 +40,7 @@ final class JournalingSuggestionsService: ObservableObject {
 
     // MARK: - Picker Callback
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Called when the user selects a suggestion from JournalingSuggestionsPicker.
     /// Add a `JournalingSuggestionsPicker { suggestion in self.addSuggestion(suggestion) }` to your view.
     func addSuggestion(_ suggestion: JournalingSuggestion) {
@@ -50,6 +53,7 @@ final class JournalingSuggestionsService: ObservableObject {
 
     // MARK: - Context Summary
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Returns a prose summary of recent suggestions for AI context injection.
     func contextSummary() -> String {
         guard !recentSuggestions.isEmpty else {
@@ -64,6 +68,7 @@ final class JournalingSuggestionsService: ObservableObject {
 
     // MARK: - Suggested Prompt
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Generates a reflective AI prompt based on the most recent suggestion.
     func suggestedReflectionPrompt() -> String? {
         guard let first = recentSuggestions.first else { return nil }

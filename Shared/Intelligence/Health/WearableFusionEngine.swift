@@ -129,6 +129,7 @@ final class WearableFusionEngine: ObservableObject {
 // MARK: - HumanReadinessEngine Integration
 
 extension HumanReadinessEngine {
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Returns the tri-source fused readiness score when wearable data is available,
     /// falling back to the Apple Watch–only readinessScore.
     func computeMorningReadiness() -> Double {

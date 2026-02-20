@@ -14,6 +14,7 @@ import OSLog
 
 struct WhoopRecovery: Sendable {
     let recovery_score: Int         // 0..100 — overall recovery %
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     let hrv_rmssd_milli: Double     // HRV RMSSD in milliseconds
 }
 

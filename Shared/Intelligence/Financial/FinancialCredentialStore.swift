@@ -22,7 +22,8 @@ enum FinancialCredentialStore {
     ///   - token: The secret value (API key, access token, etc.)
     ///   - provider: A `FinancialAPIProvider.keychainKey` or custom string identifier
     @discardableResult
-    static func save(token: String, for provider: String) -> Bool { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    static func save(token: String, for provider: String) -> Bool {
         guard let data = token.data(using: .utf8) else {
             logger.error("Failed to encode token for \(provider)")
             return false
@@ -79,7 +80,8 @@ enum FinancialCredentialStore {
 
     /// Remove stored credentials for a provider.
     @discardableResult
-    static func delete(for provider: String) -> Bool { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    static func delete(for provider: String) -> Bool {
         let query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
             kSecAttrAccount: accountKey(for: provider)
@@ -100,7 +102,8 @@ enum FinancialCredentialStore {
     /// Save multiple credentials for a provider (e.g. apiKey + secret pair).
     /// Uses composite key: "thea.financial.{provider}.{suffix}"
     @discardableResult
-    static func save(token: String, for provider: String, suffix: String) -> Bool { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    static func save(token: String, for provider: String, suffix: String) -> Bool {
         save(token: token, for: "\(provider).\(suffix)")
     }
 
@@ -111,7 +114,8 @@ enum FinancialCredentialStore {
 
     /// Delete a credential by provider + suffix.
     @discardableResult
-    static func delete(for provider: String, suffix: String) -> Bool { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    static func delete(for provider: String, suffix: String) -> Bool {
         delete(for: "\(provider).\(suffix)")
     }
 
@@ -119,7 +123,8 @@ enum FinancialCredentialStore {
 
     /// Save using a typed `FinancialAPIProvider`.
     @discardableResult
-    static func save(token: String, provider: FinancialAPIProvider) -> Bool { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    static func save(token: String, provider: FinancialAPIProvider) -> Bool {
         save(token: token, for: provider.rawValue)
     }
 

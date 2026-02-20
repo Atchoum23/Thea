@@ -100,7 +100,8 @@ enum FinancialAPIProvider: String, CaseIterable, Sendable {
     case ynab
     case plaid
 
-    var displayName: String { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    var displayName: String {
         switch self {
         case .kraken:   return "Kraken"
         case .coinbase: return "Coinbase"
@@ -109,6 +110,7 @@ enum FinancialAPIProvider: String, CaseIterable, Sendable {
         }
     }
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Keychain identifier used by FinancialCredentialStore
-    var keychainKey: String { "thea.financial.\(rawValue)" } // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    var keychainKey: String { "thea.financial.\(rawValue)" }
 }

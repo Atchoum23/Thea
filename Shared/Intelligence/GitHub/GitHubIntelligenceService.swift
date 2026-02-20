@@ -15,21 +15,33 @@ import OSLog
 // MARK: - GitHub Types
 
 struct GitHubNotification: Sendable {
-    let id: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let title: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let type: String      // "PullRequest", "Issue", "Release", etc. // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let repoName: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let updatedAt: Date? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let id: String
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let title: String
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let type: String      // "PullRequest", "Issue", "Release", etc.
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let repoName: String
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let updatedAt: Date?
 }
 
 struct GitHubPullRequest: Sendable {
-    let id: Int // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let number: Int // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let title: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let repoName: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let state: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let updatedAt: Date? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let htmlURL: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let id: Int
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let number: Int
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let title: String
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let repoName: String
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let state: String
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let updatedAt: Date?
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let htmlURL: String
 }
 
 // MARK: - GitHubIntelligenceService
@@ -67,8 +79,9 @@ actor GitHubIntelligenceService {
         }
     }
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Convenience: fetch notifications using stored PAT.
-    func fetchNotifications() async throws -> [GitHubNotification] { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func fetchNotifications() async throws -> [GitHubNotification] {
         let token = try await requireToken()
         return try await fetchNotifications(token: token)
     }
@@ -108,8 +121,9 @@ actor GitHubIntelligenceService {
         }
     }
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Convenience: fetch open PRs using stored PAT and stored username.
-    func fetchMyPRs() async throws -> [GitHubPullRequest] { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func fetchMyPRs() async throws -> [GitHubPullRequest] {
         let token = try await requireToken()
         let username = await MainActor.run { SettingsManager.shared.getAPIKey(for: "github_username") } ?? ""
         guard !username.isEmpty else { throw GitHubError.missingUsername }
@@ -143,8 +157,9 @@ actor GitHubIntelligenceService {
 
     // MARK: - Repository Metadata
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Fetch basic metadata for a repo (stars, open issues, last push).
-    func fetchRepoInfo(token: String, owner: String, repo: String) async throws -> [String: Any] { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func fetchRepoInfo(token: String, owner: String, repo: String) async throws -> [String: Any] {
         let url = URL(string: "\(baseURL)/repos/\(owner)/\(repo)")!
         let data = try await get(url: url, token: token)
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {

@@ -12,18 +12,22 @@ import OSLog
 // MARK: - YNAB Budget Summary Model
 
 struct YNABBudgetSummary: Sendable {
-    let id: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let id: String
     let name: String
-    let lastModifiedOn: String? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let firstMonth: String? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
-    let lastMonth: String? // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let lastModifiedOn: String?
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let firstMonth: String?
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let lastMonth: String?
 }
 
 // MARK: - YNAB Transaction
 
 // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
 struct YNABTransaction: Sendable {
-    let id: String // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    let id: String
     let date: String            // ISO date e.g. "2024-03-15"
     let amount: Int             // Milliunits (divide by 1000 for real value)
     let memo: String?
@@ -40,18 +44,21 @@ struct YNABTransaction: Sendable {
 actor YNABService {
     static let shared = YNABService()
 
-    private let logger = Logger(subsystem: "com.thea.app", category: "YNABService") // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private let logger = Logger(subsystem: "com.thea.app", category: "YNABService")
     private let baseURL = URL(string: "https://api.youneedabudget.com/v1")!
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Server knowledge per budget for delta sync. Key: budgetID, Value: Int knowledge
-    private var serverKnowledgeCache: [String: Int] = [:] // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private var serverKnowledgeCache: [String: Int] = [:]
 
     private init() {}
 
     // MARK: - Credential Management
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Store YNAB personal access token in Keychain.
-    func saveAccessToken(_ token: String) { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func saveAccessToken(_ token: String) {
         FinancialCredentialStore.save(token: token, provider: .ynab)
         logger.info("YNABService: access token saved")
     }
@@ -82,10 +89,11 @@ actor YNABService {
 
     // MARK: - Fetch Transactions (Delta Sync)
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Fetch transactions for a budget using delta sync.
     /// Pass `budgetID: "last-used"` to use the most recently opened budget.
     /// - Returns: New/changed transactions since last sync.
-    func fetchBudgetSummary(budgetID: String = "last-used") async throws -> [YNABTransaction] { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func fetchBudgetSummary(budgetID: String = "last-used") async throws -> [YNABTransaction] {
         var path = "/budgets/\(budgetID)/transactions"
         if let lastKnowledge = serverKnowledgeCache[budgetID] {
             path += "?last_knowledge_of_server=\(lastKnowledge)"
@@ -115,7 +123,8 @@ actor YNABService {
 
     // MARK: - Reset Delta Sync
 
-    func resetDeltaSync(for budgetID: String? = nil) { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func resetDeltaSync(for budgetID: String? = nil) {
         if let id = budgetID { serverKnowledgeCache.removeValue(forKey: id) } else { serverKnowledgeCache.removeAll() }
         logger.info("YNABService: delta sync cache cleared")
     }
@@ -146,7 +155,8 @@ actor YNABService {
         return (root["data"] as? [String: Any]) ?? root
     }
 
-    private func parseTransaction(_ dict: [String: Any]) -> YNABTransaction? { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private func parseTransaction(_ dict: [String: Any]) -> YNABTransaction? {
         guard
             let id   = dict["id"]   as? String,
             let date = dict["date"] as? String

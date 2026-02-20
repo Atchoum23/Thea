@@ -37,7 +37,8 @@ struct KrakenTrade: Sendable {
 actor KrakenService {
     static let shared = KrakenService()
 
-    private let logger = Logger(subsystem: "com.thea.app", category: "KrakenService") // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    private let logger = Logger(subsystem: "com.thea.app", category: "KrakenService")
     private let baseURL = "https://api.kraken.com"
     private let apiVersion = "0"
 
@@ -45,8 +46,9 @@ actor KrakenService {
 
     // MARK: - Credential Management
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Persist Kraken API credentials in Keychain.
-    func saveCredentials(apiKey: String, secretKey: String) { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func saveCredentials(apiKey: String, secretKey: String) {
         FinancialCredentialStore.save(token: apiKey, for: FinancialAPIProvider.kraken.rawValue, suffix: "apiKey")
         FinancialCredentialStore.save(token: secretKey, for: FinancialAPIProvider.kraken.rawValue, suffix: "secretKey")
         logger.info("KrakenService: credentials saved")
@@ -75,8 +77,9 @@ actor KrakenService {
 
     // MARK: - Fetch Recent Trades
 
+    // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
     /// Fetch recent trade history (up to 50 most recent trades).
-    func fetchRecentTrades() async throws -> [KrakenTrade] { // periphery:ignore - Reserved: Wave 10 service — wired in future integration phase
+    func fetchRecentTrades() async throws -> [KrakenTrade] {
         let response = try await privateRequest(path: "/TradesHistory", params: [:])
         guard let result = response["result"] as? [String: Any],
               let trades = result["trades"] as? [String: [String: Any]] else {
