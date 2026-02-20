@@ -268,6 +268,57 @@ struct TheamacOSApp: App {
             BackgroundServiceMonitor.shared.startMonitoring()
             logger.info("BackgroundServiceMonitor started")
         }
+
+        // SelfExecutionService — pre-warm the service for use from MetaAI dashboard
+        // The service is actor-isolated; touching .shared triggers its lazy init
+        Task {
+            try? await Task.sleep(for: .seconds(4))
+            _ = SelfExecutionService.shared
+            logger.info("SelfExecutionService initialized (available via Meta-AI dashboard)")
+        }
+
+        // U3/AE3: PlatformFeaturesHub — activates ambient intelligence foundation:
+        // MenuBarManager, MacSystemObserver, ServicesHandler, SpotlightService, etc.
+        Task {
+            try? await Task.sleep(for: .seconds(5))
+            await PlatformFeaturesHub.shared.initialize()
+            logger.info("PlatformFeaturesHub initialized — ambient features active")
+        }
+
+        // U3/AE3: TheaIntelligenceOrchestrator — top-level intelligence coordinator.
+        // Cascade-starts: BehavioralFingerprint, HealthCoachingPipeline,
+        // ConversationMemoryExtractor, ChatReflexionIntegration, SmartNotificationScheduler.
+        Task {
+            try? await Task.sleep(for: .seconds(6))
+            TheaIntelligenceOrchestrator.shared.start()
+            logger.info("TheaIntelligenceOrchestrator started — intelligence pipeline active")
+        }
+
+        // U3: ReliabilityMonitor — monitors AI response reliability; feeds into ConfidenceSystem
+        Task {
+            try? await Task.sleep(for: .seconds(7))
+            ReliabilityMonitor.shared.startMonitoring()
+            logger.info("ReliabilityMonitor started")
+        }
+
+        // Q3: Start weekly proactive intelligence summary loop
+        Task {
+            try? await Task.sleep(for: .seconds(10))
+            await SmartNotificationScheduler.shared.startWeeklySummaryLoop()
+            logger.info("SmartNotificationScheduler weekly summary loop started")
+        }
+
+        // P3: PersonalKnowledgeGraph weekly background consolidation
+        // Deduplicates entities, decays stale entries, resolves contradictions.
+        Task.detached(priority: .background) {
+            // First run after 24h so startup is unaffected
+            try? await Task.sleep(for: .seconds(24 * 3600))
+            while true {
+                await PersonalKnowledgeGraph.shared.consolidate()
+                // Re-run weekly
+                try? await Task.sleep(for: .seconds(7 * 24 * 3600))
+            }
+        }
     }
 
     private func configureWindow() {

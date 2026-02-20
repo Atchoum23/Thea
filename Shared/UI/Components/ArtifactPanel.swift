@@ -492,53 +492,7 @@ enum ArtifactExtractor {
         ArtifactPanel(
             artifacts: .constant([]),
             selectedArtifactId: .constant(nil)
-        )            {}
+        ) {}
         .frame(height: 500)
-    }
-
-    #Preview("Artifact Panel - With Items") {
-        ArtifactPanel(
-            artifacts: .constant([
-                Artifact(
-                    title: "UserModel.swift",
-                    type: .code(language: .swift),
-                    content: "struct User {\n    let id: UUID\n    let name: String\n}"
-                ),
-                Artifact(
-                    title: "README.md",
-                    type: .document(format: .markdown),
-                    content: "# Project\n\nThis is a sample project."
-                ),
-                Artifact(
-                    title: "config.json",
-                    type: .data(format: .json),
-                    content: "{\n  \"key\": \"value\"\n}"
-                )
-            ]),
-            selectedArtifactId: .constant(nil)
-        )            {}
-        .frame(height: 500)
-    }
-
-    #Preview("Artifact Detail View") {
-        ArtifactDetailView(
-            artifact: Artifact(
-                title: "Example.swift",
-                type: .code(language: .swift),
-                content: """
-                import Foundation
-
-                struct Example {
-                    let value: Int
-
-                    func compute() -> Int {
-                        return value * 2
-                    }
-                }
-                """
-            ),
-            showingVersionHistory: .constant(false)
-        )
-        .frame(width: 400, height: 400)
     }
 #endif

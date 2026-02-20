@@ -78,5 +78,18 @@ struct TheaiOSApp: App {
             OpenClawBridge.shared.setup()
             await TheaMessagingGateway.shared.start()
         }
+
+        // U3/AE3: PlatformFeaturesHub — activates iOS-specific intelligence foundation:
+        // HealthKitProvider, MotionContextProvider, ScreenTimeObserver, etc.
+        Task {
+            try? await Task.sleep(for: .seconds(3))
+            await PlatformFeaturesHub.shared.initialize()
+        }
+
+        // U3/AE3: TheaIntelligenceOrchestrator — top-level intelligence coordinator
+        Task {
+            try? await Task.sleep(for: .seconds(4))
+            TheaIntelligenceOrchestrator.shared.start()
+        }
     }
 }

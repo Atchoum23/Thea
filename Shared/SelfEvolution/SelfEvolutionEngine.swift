@@ -58,42 +58,149 @@ public final class SelfEvolutionEngine: ObservableObject {
 
     // MARK: - Feature Request Processing
 
-    /// Process a feature request from the user
+    /// Process a feature request via artifact-based approach (R3).
+    ///
+    /// Thea drafts code change proposals as reviewable Artifacts rather than applying live
+    /// modifications. The user inspects the artifact and applies changes manually. This is safe
+    /// and architecturally sound for a sandboxed app that cannot rewrite its own binary.
     public func processFeatureRequest(_ request: String) async throws -> EvolutionTask {
         isAnalyzing = true
-        defer { isAnalyzing = false }
 
-        logger.info("Processing feature request: \(request)")
+        logger.info("Processing feature request (artifact mode): \(request)")
 
-        // Create evolution task
         let task = EvolutionTask(
             id: UUID(),
             request: request,
             status: .analyzing,
             createdAt: Date()
         )
-
         currentTask = task
 
-        // Phase 1: Analyze the request
+        // Phase 1: Structural analysis
         let analysis = try await analyzeRequest(request)
         task.analysis = analysis
+        isAnalyzing = false
 
-        // Phase 2: Plan implementation
-        let plan = try await planImplementation(analysis)
-        task.plan = plan
+        // Phase 2: Generate implementation via AI, produce as artifact
+        isImplementing = true
+        defer { isImplementing = false }
 
-        // Phase 3: Estimate complexity
-        let estimate = estimateComplexity(plan)
-        task.estimate = estimate
+        let featureName = deriveFeatureName(from: request)
+        let relevantCode = readRelevantSourceFiles(for: analysis)
+        let implementationCode = try await generateImplementationArtifact(
+            request: request,
+            featureName: featureName,
+            relevantCode: relevantCode
+        )
 
-        task.status = .planned
+        // Phase 3: Store as reviewable artifact (NOT applied to disk)
+        let artifact = try await ArtifactManager.shared.createCodeArtifact(
+            title: "SelfEvolution: \(featureName)",
+            language: .swift,
+            code: implementationCode,
+            description: "Auto-generated proposal for: \(request). Review and apply manually.",
+            conversationId: nil
+        )
 
-        // Save to history
+        task.artifactID = artifact.id
+        task.reviewSummary = "Implementation ready in Artifacts: '\(artifact.title)'. Apply changes manually after review."
+        task.status = .awaitingReview
+
         taskHistory.insert(task, at: 0)
         saveTaskHistory()
 
+        logger.info("Feature request → artifact created: \(artifact.id)")
         return task
+    }
+
+    // MARK: - R3 Artifact Helpers
+
+    private func deriveFeatureName(from request: String) -> String {
+        let stopWords: Set<String> = ["a", "an", "the", "in", "on", "for", "to", "of", "and", "with"]
+        let words = request.components(separatedBy: .whitespacesAndNewlines)
+            .map { $0.capitalized }
+            .filter { !$0.isEmpty && !stopWords.contains($0.lowercased()) }
+        return words.prefix(3).joined()
+    }
+
+    private func readRelevantSourceFiles(for analysis: FeatureAnalysis) -> String {
+        var snippets: [String] = []
+        var budget = 8_192
+        let divisor = max(1, analysis.affectedFiles.filter { $0.action == .modify }.count)
+        for affected in analysis.affectedFiles.prefix(6) where affected.action == .modify {
+            let url = sourceDirectory.appendingPathComponent(affected.path)
+            guard let content = try? String(contentsOf: url, encoding: .utf8) else { continue }
+            let snippet = String(content.prefix(budget / divisor))
+            snippets.append("// FILE: \(affected.path)\n\(snippet)")
+            budget -= snippet.count
+            if budget <= 0 { break }
+        }
+        return snippets.joined(separator: "\n\n")
+    }
+
+    private func generateImplementationArtifact(
+        request: String,
+        featureName: String,
+        relevantCode: String
+    ) async throws -> String {
+        let contextSection = relevantCode.isEmpty ? "" : "\n\nRelevant existing code:\n\(relevantCode)"
+        let prompt = """
+        You are implementing a feature for the Thea AI assistant app (Swift 6.0, strict concurrency, MVVM + SwiftUI + SwiftData, macOS/iOS/watchOS/tvOS).
+
+        Feature request: \(request)
+        Suggested class/file name: \(featureName)\(contextSection)
+
+        Output ONLY Swift source file contents — no markdown, no explanation.
+        Requirements: Swift 6.0 strict concurrency, @Observable, @MainActor, async/await, MVVM.
+        """
+
+        guard let provider = ProviderRegistry.shared.getProvider(id: "anthropic") ??
+            ProviderRegistry.shared.getProvider(id: "openrouter") ??
+            ProviderRegistry.shared.getLocalProvider() else {
+            return buildFallbackTemplate(featureName: featureName, request: request)
+        }
+
+        let message = AIMessage(
+            id: UUID(),
+            conversationID: UUID(),
+            role: .user,
+            content: .text(prompt),
+            timestamp: Date(),
+            model: "evolution"
+        )
+
+        var response = ""
+        let stream = try await provider.chat(messages: [message], model: "claude-sonnet-4-6", stream: false)
+        for try await chunk in stream {
+            if case .delta(let text) = chunk.type { response += text }
+        }
+
+        let code = extractSwiftCode(from: response, fallbackFileName: featureName)
+        return code.isEmpty ? buildFallbackTemplate(featureName: featureName, request: request) : code
+    }
+
+    private func buildFallbackTemplate(featureName: String, request: String) -> String {
+        """
+        // \(featureName).swift
+        // Auto-generated by Thea Self-Evolution Engine (no provider available — review and implement)
+        // Feature request: \(request)
+
+        import Foundation
+        import OSLog
+        import SwiftUI
+
+        @Observable
+        @MainActor
+        public final class \(featureName) {
+            public static let shared = \(featureName)()
+            private let logger = Logger(subsystem: "app.thea", category: "\(featureName)")
+            private init() {}
+
+            public func execute() async throws {
+                logger.info("\(featureName): implement feature logic here")
+            }
+        }
+        """
     }
 
     // MARK: - Analysis

@@ -83,7 +83,7 @@ struct LiveGuidanceSettingsView: View {
             Section("Configuration") {
                 Toggle("Enable voice guidance", isOn: $enableVoiceGuidance)
                     .onChange(of: enableVoiceGuidance) { _, newValue in
-                        guidance.enableVoice = newValue
+                        guidance.voiceGuidanceEnabled = newValue
                     }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -107,7 +107,7 @@ struct LiveGuidanceSettingsView: View {
                         .foregroundStyle(.secondary)
                     Slider(value: $analyzeInterval, in: 1.0...10.0, step: 0.5)
                         .onChange(of: analyzeInterval) { _, newValue in
-                            guidance.analyzeInterval = newValue
+                            guidance.guidanceIntervalSeconds = newValue
                         }
                 }
 
@@ -169,31 +169,31 @@ struct LiveGuidanceSettingsView: View {
             Section("Permissions") {
                 permissionRow(
                     title: "Screen Recording",
-                    granted: guidance.screenCapture.isAuthorized
-                )                    {
-                        Task {
-                            do {
-                                try await guidance.screenCapture.requestAuthorization()
-                            } catch {
-                                errorMessage = "Failed to request screen recording permission: \(error.localizedDescription)"
-                                showError = true
-                            }
+                    granted: guidance.screenCaptureIsAuthorized
+                ) {
+                    Task {
+                        do {
+                            try await guidance.requestScreenCapturePermission()
+                        } catch {
+                            errorMessage = "Failed to request screen recording permission: \(error.localizedDescription)"
+                            showError = true
                         }
                     }
+                }
 
                 permissionRow(
                     title: "Accessibility (Pointer Tracking)",
-                    granted: guidance.pointerTracker.isAuthorized
-                )                    {
-                        guidance.pointerTracker.requestAuthorization()
-                    }
+                    granted: guidance.pointerTrackerHasPermission
+                ) {
+                    guidance.requestPointerPermission()
+                }
 
                 permissionRow(
                     title: "Accessibility (Control Handoff)",
-                    granted: guidance.actionExecutor.isAuthorized()
-                )                    {
-                        guidance.actionExecutor.requestAuthorization()
-                    }
+                    granted: guidance.actionExecutorHasPermission
+                ) {
+                    guidance.requestActionExecutorPermission()
+                }
             }
 
             // Info
@@ -256,6 +256,8 @@ struct LiveGuidanceSettingsView: View {
             selectedCaptureMode = 1  // Treat specific window like active window
         case .region:
             selectedCaptureMode = 2
+        case .window:
+            selectedCaptureMode = 1
         }
     }
 

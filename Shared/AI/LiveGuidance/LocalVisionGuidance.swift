@@ -46,6 +46,24 @@ final class LocalVisionGuidance {
 
     private init() {}
 
+    // MARK: - Permission Accessors (used by LiveGuidanceSettingsView)
+
+    var screenCaptureIsAuthorized: Bool { screenCapture.isAuthorized }
+    var pointerTrackerHasPermission: Bool { pointerTracker.hasPermission }
+    var actionExecutorHasPermission: Bool { actionExecutor.hasPermission }
+
+    func requestScreenCapturePermission() async throws {
+        try await screenCapture.requestAuthorization()
+    }
+
+    func requestPointerPermission() {
+        pointerTracker.requestPermission()
+    }
+
+    func requestActionExecutorPermission() {
+        actionExecutor.requestAuthorization()
+    }
+
     // MARK: - Model Loading
 
     /// Load Qwen2-VL 7B vision model and Soprano-80M TTS model

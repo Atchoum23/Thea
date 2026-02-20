@@ -27,6 +27,9 @@ final class CGActionExecutor {
         AXIsProcessTrusted()
     }
 
+    /// Alias for requestPermission() — used by LocalVisionGuidance
+    nonisolated func requestAuthorization() { requestPermission() }
+
     /// Request Accessibility permission (opens System Settings)
     nonisolated func requestPermission() {
         // Use string literal to avoid concurrency warning on kAXTrustedCheckOptionPrompt global

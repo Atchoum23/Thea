@@ -294,6 +294,125 @@ actor PersonalKnowledgeGraph {
         }
     }
 
+    // MARK: - P3: Full Entity Deduplication
+
+    /// Scan all entities and merge duplicates with near-identical names.
+    /// Uses normalized string comparison; keeps the highest-referenceCount version.
+    func deduplicateEntities() {
+        let grouped = Dictionary(grouping: entities.values) { entity -> String in
+            entity.name.lowercased()
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .trimmingCharacters(in: .punctuationCharacters)
+        }
+
+        var mergeCount = 0
+        for (_, group) in grouped where group.count > 1 {
+            // Keep the entity with the most references as canonical
+            guard let canonical = group.max(by: { $0.referenceCount < $1.referenceCount }) else { continue }
+            let duplicates = group.filter { $0.id != canonical.id }
+
+            for duplicate in duplicates {
+                mergeEntity(duplicate, into: canonical)
+                entities.removeValue(forKey: duplicate.id)
+                mergeCount += 1
+            }
+        }
+
+        if mergeCount > 0 {
+            isDirty = true
+            logger.info("P3 dedup: merged \(mergeCount) duplicate entities")
+            save()
+        }
+    }
+
+    /// Merge `source` entity into `target`, transferring all edges and attributes.
+    private func mergeEntity(_ source: KGEntity, into target: KGEntity) {
+        // Redirect edges pointing to/from the duplicate to the canonical
+        for i in edges.indices {
+            if edges[i].sourceID == source.id {
+                edges[i] = KGEdge(
+                    sourceID: target.id,
+                    targetID: edges[i].targetID,
+                    relationship: edges[i].relationship,
+                    confidence: edges[i].confidence,
+                    createdAt: edges[i].createdAt,
+                    lastReferencedAt: edges[i].lastReferencedAt
+                )
+            } else if edges[i].targetID == source.id {
+                edges[i] = KGEdge(
+                    sourceID: edges[i].sourceID,
+                    targetID: target.id,
+                    relationship: edges[i].relationship,
+                    confidence: edges[i].confidence,
+                    createdAt: edges[i].createdAt,
+                    lastReferencedAt: edges[i].lastReferencedAt
+                )
+            }
+        }
+
+        // Remove self-loops created by the merge
+        edges.removeAll { $0.sourceID == $0.targetID }
+
+        // Merge attributes into canonical
+        var updated = target
+        for (key, value) in source.attributes where updated.attributes[key] == nil {
+            updated.attributes[key] = value
+        }
+        updated.referenceCount += source.referenceCount
+        updated.lastUpdatedAt = max(updated.lastUpdatedAt, source.lastUpdatedAt)
+        entities[updated.id] = updated
+        isDirty = true
+    }
+
+    // MARK: - P3: Importance Decay
+
+    /// Decay importance of stale entities. Delegates to decayStaleEntities()
+    /// with standard 90-day / min-2-reference parameters.
+    func applyImportanceDecay() {
+        decayStaleEntities(daysThreshold: 90, minimumReferenceCount: 2)
+    }
+
+    // MARK: - P3: Contradiction Resolution
+
+    /// Find and remove contradictory edges (same source, target, relationship but very different confidence).
+    /// Keeps the higher-confidence version.
+    func resolveContradictions() {
+        // Group edges by (sourceID, targetID, relationship)
+        let grouped = Dictionary(grouping: edges.indices) { i -> String in
+            "\(edges[i].sourceID)|\(edges[i].targetID)|\(edges[i].relationship)"
+        }
+
+        var toRemove: Set<Int> = []
+        for (_, indices) in grouped where indices.count > 1 {
+            // Keep the highest-confidence edge, remove duplicates
+            let sorted = indices.sorted { edges[$0].confidence > edges[$1].confidence }
+            for i in sorted.dropFirst() {
+                toRemove.insert(i)
+            }
+        }
+
+        if !toRemove.isEmpty {
+            // Remove in reverse order to preserve indices
+            for i in toRemove.sorted().reversed() {
+                edges.remove(at: i)
+            }
+            isDirty = true
+            logger.info("P3 contradiction resolution: removed \(toRemove.count) duplicate edges")
+        }
+    }
+
+    // MARK: - P3: Background Consolidation
+
+    /// Run a full consolidation cycle: dedup → decay → contradiction resolution → save.
+    /// Called weekly from app scene lifecycle.
+    func consolidate() {
+        deduplicateEntities()
+        applyImportanceDecay()
+        resolveContradictions()
+        save()
+        logger.info("P3 consolidation complete: \(self.entities.count) entities, \(self.edges.count) edges")
+    }
+
     // MARK: - Statistics
 
     // periphery:ignore - Reserved: entityCount property — reserved for future feature activation

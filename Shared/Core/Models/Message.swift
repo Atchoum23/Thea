@@ -248,6 +248,8 @@ struct MessageMetadata: Codable, Sendable {
     // Follow-up suggestions generated after AI response
     var followUpSuggestions: [FollowUpSuggestion]?
 
+    // Tool use steps executed during this response (B3 — tool execution pipeline)
+    var toolUseSteps: [ToolUseStep]?
     // Memory context injected into this request (set by memory retrieval pipeline)
     var memorySourceCount: Int?
     var memoryConfidence: Double?

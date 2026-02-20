@@ -176,6 +176,13 @@ public struct MCPTemplate: Sendable {
     }
 }
 
+// MARK: - MCPTemplate Hashable + Equatable (required for Picker/onChange)
+
+extension MCPTemplate: Hashable, Equatable {
+    public static func == (lhs: MCPTemplate, rhs: MCPTemplate) -> Bool { lhs.name == rhs.name }
+    public func hash(into hasher: inout Hasher) { hasher.combine(name) }
+}
+
 // MARK: - MCP Template Config
 
 public struct MCPTemplateConfig: Sendable {

@@ -116,9 +116,29 @@ extension ChatManager {
         try context.save()
 
         // Build API messages (system prompt + conversation history)
-        let apiMessages = await buildAPIMessages(
+        var apiMessages = await buildAPIMessages(
             for: conversation, model: model, taskType: taskType, device: currentDevice
         )
+
+        // C3: Enrich system prompt with semantically relevant past context (RAG)
+        #if os(macOS)
+        if let systemMsg = apiMessages.first, systemMsg.role == .system {
+            let enriched = await enrichSystemPromptWithSemanticContext(
+                systemMsg.content.textValue, for: text, excluding: conversation
+            )
+            if enriched != systemMsg.content.textValue {
+                let enrichedMsg = AIMessage(
+                    id: systemMsg.id,
+                    conversationID: systemMsg.conversationID,
+                    role: .system,
+                    content: .text(enriched),
+                    timestamp: systemMsg.timestamp,
+                    model: systemMsg.model
+                )
+                apiMessages[0] = enrichedMsg
+            }
+        }
+        #endif
 
         // Count input tokens for Anthropic models (free API, non-blocking)
         let inputTokenCount = await countInputTokens(
@@ -326,6 +346,15 @@ extension ChatManager {
             messagesToSend = await OutboundPrivacyGuard.shared.sanitizeMessages(apiMessages, channel: "cloud_api")
         }
 
+        // B3: Use tool execution pipeline for Anthropic providers
+        if shouldUseTools(for: provider, taskType: nil) {
+            try await executeStreamWithTools(
+                provider: provider, model: model,
+                messages: messagesToSend, assistantMessage: assistantMessage
+            )
+            return
+        }
+
         agentState.transition(to: .takeAction)
 
         // Retry with exponential backoff, then fallback to alternative provider
@@ -378,7 +407,7 @@ extension ChatManager {
         throw lastError ?? ChatError.providerNotAvailable
     }
 
-    private func executeStream(
+    func executeStream(
         provider: any AIProvider,
         model: String,
         messages: [AIMessage],
@@ -492,6 +521,13 @@ extension ChatManager {
                     msgLogger.error("❌ Failed to save confidence: \(error.localizedDescription)")
                 }
                 msgLogger.debug("🔍 Confidence: \(String(format: "%.0f%%", result.overallConfidence * 100))")
+                // D3: Feed confidence score back to routing system
+                await self.recordConfidenceFeedback(
+                    taskType: taskType,
+                    modelId: assistantMessage.model ?? "unknown",
+                    confidenceScore: result.overallConfidence,
+                    originalQuery: text
+                )
             }
         }
         #endif

@@ -378,11 +378,29 @@ public final class AutonomyController: ObservableObject {
         }
     }
 
-    /// Queue an action for approval
+    /// Queue an action for approval.
+    ///
+    /// U3/AE3: Routes through ApprovalManager for unified approval queue management,
+    /// then also adds to the local pendingActions list for UI observation.
     public func queueForApproval(_ action: AutonomousAction, reason: String) {
         let pending = THEAPendingAction(action: action, reason: reason)
         pendingActions.append(pending)
         logger.info("Queued action for approval: \(action.title)")
+
+        // Mirror to ApprovalManager so the shared approval queue is also notified.
+        // ApprovalManager provides the UI dialog; AutonomyController tracks state.
+        Task { @MainActor in
+            let operationType: OperationType = switch action.riskLevel {
+            case .critical, .high: .systemAutomation
+            case .medium: .executePlan
+            default: .executeTerminalCommand
+            }
+            _ = try? await ApprovalManager.shared.requestApproval(
+                operation: operationType,
+                details: "\(action.title): \(reason)",
+                previewData: action.description
+            )
+        }
     }
 
     /// Approve a pending action

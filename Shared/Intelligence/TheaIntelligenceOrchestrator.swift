@@ -170,11 +170,17 @@ final class TheaIntelligenceOrchestrator {
     func processAIResponse(
         task: String,
         response: String,
-        conversationContext: String = ""
+        conversationContext: String = "",
+        conversationID: UUID? = nil
     ) async -> String {
         guard isEnabled else { return response }
 
-// periphery:ignore - Reserved: processAIResponse(task:response:conversationContext:) instance method reserved for future feature activation
+        // U3: MemoryAugmentedChat — learn from exchange, record to conversation memory
+        await MemoryAugmentedChat.shared.processResponse(
+            userMessage: task,
+            assistantResponse: response,
+            conversationId: conversationID ?? UUID()
+        )
 
         // Run through reflexion if needed
         let reflexionResult = await ChatReflexionIntegration.shared.processResponse(
@@ -299,4 +305,27 @@ struct IntelligenceStatusReport: Sendable {
     // Fallback
     let fallbackCurrentTier: FallbackTier
     let fallbackIsOffline: Bool
+}
+
+// MARK: - Meta-AI Extension
+
+extension TheaIntelligenceOrchestrator {
+    /// Process a user query through the MetaAI coordination layer.
+    /// Routes the query via MetaAICoordinator which applies full orchestration:
+    /// classification, model selection, plan mode, decomposition, and learning.
+    /// - Parameters:
+    ///   - query: The raw user query text.
+    ///   - classification: Optional pre-computed classification result.
+    /// - Returns: The full THEA response with decision and metadata.
+    @discardableResult
+    func processWithMetaAI(
+        _ query: String,
+        classification: ClassificationResult? = nil
+    ) async throws -> THEAResponse {
+        let input = THEAInput(
+            text: query,
+            conversationId: UUID()
+        )
+        return try await MetaAICoordinator.shared.process(input)
+    }
 }

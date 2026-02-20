@@ -270,7 +270,7 @@ struct LifeTrackingView: View {
                         .font(.headline)
 
                     ForEach(insights) { insight in
-                        InsightRow(insight: insight)
+                        LifeInsightRow(insight: insight)
                     }
                 }
             }
@@ -372,7 +372,7 @@ private struct LifeStatCard: View {
     }
 }
 
-private struct InsightRow: View {
+private struct LifeInsightRow: View {
     let insight: LifeInsight
 
     var body: some View {
