@@ -711,6 +711,9 @@ targets:
           - "**/Views/MetaAI/MemoryInspectorView.swift"
           - "UI/Views/MetaAI/KnowledgeGraphViewer.swift"
           - "UI/Views/MetaAI/MemoryInspectorView.swift"
+          # MetaAIDashboardView uses macOS-only APIs (HSplitView, NSColor) — exclude from iOS
+          - "**/Views/MetaAI/MetaAIDashboardView.swift"
+          - "UI/Views/MetaAI/MetaAIDashboardView.swift"
       - path: iOS
       - path: Shared/Resources/Assets.xcassets
       - path: Shared/Resources/Localizable.xcstrings
