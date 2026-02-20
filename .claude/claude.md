@@ -49,6 +49,34 @@ git pushsync
 
 Full protocol: See `## SESSION SAFETY PROTOCOL` in THEA_SHIP_READY_PLAN_v2.md
 
+### ⚠️ tmux send-keys VERIFICATION PROTOCOL (MANDATORY — NO EXCEPTIONS)
+
+**After EVERY `tmux send-keys` command that delivers a Claude Code instruction, ALWAYS verify the session is actively processing.**
+
+Root cause of failure: `tmux send-keys` without a confirmed Enter leaves the instruction sitting in the terminal input buffer permanently. The session APPEARS normal (shell is open, no error) but processes NOTHING and idles silently — this has caused 14+ hour executor stalls.
+
+**Verification steps (run immediately after every send-keys):**
+```bash
+sleep 15  # Allow Claude Code to initialize
+PANE=$(tmux capture-pane -t SESSION_NAME -p 2>/dev/null | tail -15)
+if echo "$PANE" | grep -qE "Running\.\.\.|Bash\(|Read\(|Write\(|Edit\(|Glob\(|⏺|✳|✶|█"; then
+  echo "✅ Session active — instruction is being processed"
+else
+  echo "⚠️  Session IDLE — Enter was not delivered; sending now"
+  tmux send-keys -t SESSION_NAME "" Enter
+  sleep 10
+  # Capture again and verify
+fi
+```
+
+**Rules (non-negotiable):**
+1. **NEVER assume** send-keys delivered — always capture-pane and verify within 20s
+2. **Detection signals (Claude Code IS processing)**: `Running...`, `Bash(`, `Read(`, `Write(`, `Edit(`, `Glob(`, `Grep(`, `⏺`, `✳`, `✶`, `█`
+3. **Detection signals (session STUCK)**: Only shell prompt `❯` or `$` with no tool calls; instruction text visible but no processing below it
+4. **Emergency unstick**: `tmux send-keys -t SESSION "" Enter` (empty string + Enter clears any stuck buffer)
+5. **Multi-step launch** (send Claude Code start, then separately send the prompt): always add `sleep 5` between steps and verify after each one
+6. **All launcher scripts** must include post-launch verification — see `THEA_CAPABILITY_PLAN_v3.md` auto-spawn launcher for the canonical implementation
+
 ### 🚫 FORBIDDEN Commands
 
 **NEVER execute these commands under ANY circumstances:**
