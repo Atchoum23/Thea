@@ -275,12 +275,8 @@ packages:
   mlx-audio-swift:
     url: https://github.com/Blaizzy/mlx-audio-swift
     branch: main
-  # SwiftYNAB for YNAB budget integration (AAC3)
-  # Note: KrakenAPI (lukepistrol) removed — its CryptoSwift dep returns RawSpan on macOS 26 SDK,
-  # incompatible with Array<UInt8>. KrakenService now uses URLSession + CryptoKit instead.
-  SwiftYNAB:
-    url: https://github.com/andrebocchini/swiftynab
-    from: 1.0.0
+  # Note: KrakenAPI removed (CryptoSwift/RawSpan macOS 26 incompatibility — URLSession+CryptoKit used instead)
+  # Note: SwiftYNAB removed (v1.1.1 uses callback API, not async/await — URLSession REST used instead)
 
 # ============================================
 # Targets
