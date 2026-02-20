@@ -19,6 +19,9 @@ private let logger = Logger(subsystem: "app.thea", category: "TabularDataAnalyze
 /// Analyzes CSV files and DataFrames for financial and health insights.
 struct TabularDataAnalyzer {
 
+    /// Always true — TabularData is available on all supported Thea platforms (macOS 12+, iOS 15+).
+    static var isAvailable: Bool { true }
+
     // MARK: - CSV Loading
 
     /// Load a CSV file into a DataFrame.
@@ -85,6 +88,19 @@ struct TabularDataAnalyzer {
     static func analyzeFinancialCSV(at url: URL) throws -> FinancialAnalysisResult {
         let df = try analyzeCSV(at: url)
         return analyzeFinancialDataFrame(df)
+    }
+
+    /// Tuple overload used by FinancialIntelligenceService:
+    /// returns (DataFrame, summaryString, totalIncome, totalSpend)
+    static func analyzeFinancialCSV(at url: URL) throws -> (DataFrame, String, Double, Double) {
+        let df = try analyzeCSV(at: url)
+        let result = analyzeFinancialDataFrame(df)
+        let income = result.categoryTotals
+            .filter { $0.key.lowercased().contains("income") || $0.key.lowercased().contains("credit") }
+            .values.reduce(0, +)
+        let spend = result.totalSpend
+        let summary = "Rows: \(df.rows.count) | Income: \(String(format: "%.2f", income)) | Spend: \(String(format: "%.2f", spend)) | Categories: \(result.categoryTotals.count)"
+        return (df, summary, income, spend)
     }
 
     static func analyzeFinancialDataFrame(_ df: DataFrame) -> FinancialAnalysisResult {
