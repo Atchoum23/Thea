@@ -117,8 +117,8 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase C3: RAG / Semantic  | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
 | Phase D3: Confidence Loop | ⏳ PENDING      | Blocked by v2→v3 auto-transition |
 | Phase E3: Skills Complete | ⏳ PENDING      | Blocked by A3 |
-| Phase F3: Squads Unified  | ⏳ PENDING      | Blocked by A3 |
-| Phase G3: TaskPlanDAG+    | ⏳ PENDING      | Blocked by D3 |
+| Phase F3: Squads Unified  | ✅ DONE         | SquadDefinition+CommunicationStrategy+CoordinationMode; persistentSquads; SquadsView; MacSettingsView sidebar sha 49bc33f0 |
+| Phase G3: TaskPlanDAG+    | 🔄 IN PROGRESS  | Stream 3 |
 | Phase H3: AI System UIs   | ⏳ PENDING      | Blocked by A3 |
 | Phase I3: UI Components   | ⏳ PENDING      | Blocked by H3 |
 | Phase J3: LifeTracking UI | ⏳ PENDING      | Blocked by I3 |
