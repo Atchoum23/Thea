@@ -23,6 +23,8 @@ enum MacOSToolHandler {
 
     static func calendarListEvents(_ input: [String: Any]) async -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
+        let startStr = input["start_date"] as? String ?? ""
+        let endStr = input["end_date"] as? String ?? ""
         return await withCheckedContinuation { continuation in
             eventStore.requestFullAccessToEvents { granted, error in
                 guard granted, error == nil else {
@@ -33,8 +35,6 @@ enum MacOSToolHandler {
                     ))
                     return
                 }
-                let startStr = input["start_date"] as? String ?? ""
-                let endStr = input["end_date"] as? String ?? ""
                 let fmt = ISO8601DateFormatter()
                 let start = fmt.date(from: startStr) ?? Date()
                 let end = fmt.date(from: endStr) ?? Date().addingTimeInterval(7 * 86400)
@@ -66,6 +66,8 @@ enum MacOSToolHandler {
         let fmt = ISO8601DateFormatter()
         let start = fmt.date(from: input["start_date"] as? String ?? "") ?? Date()
         let end = fmt.date(from: input["end_date"] as? String ?? "") ?? start.addingTimeInterval(3600)
+        let notes = input["notes"] as? String
+        let location = input["location"] as? String
 
         return await withCheckedContinuation { continuation in
             eventStore.requestFullAccessToEvents { granted, error in
@@ -79,8 +81,8 @@ enum MacOSToolHandler {
                 event.title = title
                 event.startDate = start
                 event.endDate = end
-                event.notes = input["notes"] as? String
-                event.location = input["location"] as? String
+                event.notes = notes
+                event.location = location
                 event.calendar = self.eventStore.defaultCalendarForNewEvents
                 do {
                     try self.eventStore.save(event, span: .thisEvent)
@@ -98,6 +100,7 @@ enum MacOSToolHandler {
 
     static func remindersList(_ input: [String: Any]) async -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
+        let includeCompleted = input["include_completed"] as? Bool ?? false
         return await withCheckedContinuation { continuation in
             eventStore.requestFullAccessToReminders { granted, error in
                 guard granted, error == nil else {
@@ -106,7 +109,6 @@ enum MacOSToolHandler {
                     ))
                     return
                 }
-                let includeCompleted = input["include_completed"] as? Bool ?? false
                 let lists = self.eventStore.calendars(for: .reminder)
                 let predicate = self.eventStore.predicateForReminders(in: lists)
                 self.eventStore.fetchReminders(matching: predicate) { reminders in
@@ -130,6 +132,7 @@ enum MacOSToolHandler {
     static func remindersCreate(_ input: [String: Any]) async -> AnthropicToolResult {
         let id = input["_tool_use_id"] as? String ?? ""
         let title = input["title"] as? String ?? ""
+        let dueDateStr = input["due_date"] as? String
         guard !title.isEmpty else {
             return AnthropicToolResult(toolUseId: id, content: "No title provided.", isError: true)
         }
@@ -144,9 +147,9 @@ enum MacOSToolHandler {
                 let reminder = EKReminder(eventStore: self.eventStore)
                 reminder.title = title
                 reminder.calendar = self.eventStore.defaultCalendarForNewReminders()
-                if let dueDateStr = input["due_date"] as? String,
+                if let dueDateStr,
                    let dueDate = ISO8601DateFormatter().date(from: dueDateStr) {
-                    var comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: dueDate)
+                    let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: dueDate)
                     reminder.dueDateComponents = comps
                 }
                 do {
