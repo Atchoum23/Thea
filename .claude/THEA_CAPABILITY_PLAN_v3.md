@@ -123,7 +123,7 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase B3: Tool Execution  | ✅ DONE         | 8 handlers in AI/Tools/, ToolExecutionCoordinator, ChatManager+Tools.swift B3 wired sha 3848a29d |
 | Phase C3: RAG / Semantic  | ✅ DONE         | enrichSystemPromptWithSemanticContext() + indexExistingConversations() wired in ChatManager sha 3848a29d |
 | Phase D3: Confidence Loop | ✅ DONE         | recordConfidenceFeedback() wired in runPostResponseActions, feeds ModelRouter+TaskClassifier sha 3848a29d |
-| Phase E3: Skills Complete | ⏳ PENDING      | Blocked by A3 |
+| Phase E3: Skills Complete | ✅ DONE         | injectSkillsIntoSystemPrompt() in ChatManager+Tools.swift, wired after C3 in sendMessage(), SkillRegistry+SkillsRegistryService pre-init sha 473c9edd |
 | Phase F3: Squads Unified  | ✅ DONE         | SquadDefinition+CommunicationStrategy+CoordinationMode; persistentSquads; SquadsView; MacSettingsView sidebar sha 49bc33f0 |
 | Phase G3: TaskPlanDAG+    | ✅ DONE         | PlanOutcome quality scoring, planCache, createPlan cache lookup, AgentTeamOrchestrator approval gate sha 34a0083d |
 | Phase H3: AI System UIs   | ⏳ PENDING      | Blocked by A3 |
