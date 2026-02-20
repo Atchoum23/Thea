@@ -82,7 +82,7 @@ public final class MetaAICoordinator: ObservableObject {
         )
 
         // Step 7: Determine what was learned
-        let learnings = await extractLearnings(
+        _ = await extractLearnings(
             input: input,
             decision: decision,
             response: executionResult
