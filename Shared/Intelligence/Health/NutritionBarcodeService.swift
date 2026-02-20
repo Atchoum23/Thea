@@ -161,13 +161,13 @@ final class NutritionBarcodeService: NSObject, ObservableObject {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            throw NutritionError.networkError("HTTP \((response as? HTTPURLResponse)?.statusCode ?? 0)")
+            throw BarcodeLookupError.networkError("HTTP \((response as? HTTPURLResponse)?.statusCode ?? 0)")
         }
 
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let status = json["status"] as? Int, status == 1,
               let product = json["product"] as? [String: Any] else {
-            throw NutritionError.productNotFound(barcode)
+            throw BarcodeLookupError.productNotFound(barcode)
         }
 
         let nutriments = product["nutriments"] as? [String: Any] ?? [:]
@@ -203,7 +203,7 @@ final class NutritionBarcodeService: NSObject, ObservableObject {
     ///   - date: The meal time (default: now).
     func logToHealthKit(_ product: NutritionProduct, servings: Double = 1, date: Date = Date()) async throws {
         guard HKHealthStore.isHealthDataAvailable() else {
-            throw NutritionError.healthKitUnavailable
+            throw BarcodeLookupError.healthKitUnavailable
         }
 
         var samples: [HKQuantitySample] = []
@@ -251,7 +251,7 @@ final class NutritionBarcodeService: NSObject, ObservableObject {
         }
 
         guard !samples.isEmpty else {
-            throw NutritionError.noNutritionData(product.name)
+            throw BarcodeLookupError.noNutritionData(product.name)
         }
 
         try await healthStore.save(samples)
@@ -298,7 +298,7 @@ extension NutritionBarcodeService: AVCaptureMetadataOutputObjectsDelegate {
 
 // MARK: - Errors
 
-enum NutritionError: LocalizedError {
+enum BarcodeLookupError: LocalizedError {
     case productNotFound(String)
     case networkError(String)
     case healthKitUnavailable
