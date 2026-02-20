@@ -205,7 +205,7 @@ actor ToolExecutionCoordinator {
         #if os(macOS)
         // System tools (macOS)
         case "system_notification":
-            return await Task { @MainActor in SystemToolHandler.sendNotification(input) }.value
+            return await Task { @MainActor in await SystemToolHandler.sendNotification(input) }.value
         case "system_clipboard_get":
             return await Task { @MainActor in SystemToolHandler.getClipboard(input) }.value
         case "system_clipboard_set":
