@@ -137,7 +137,7 @@ actor GenericMCPClient {
     }
 
     /// Call a tool on the server with the given arguments.
-    func callTool(_ name: String, arguments: [String: Any] = [:]) async throws -> MCPToolResult {
+    func callTool(_ name: String, arguments: sending [String: Any] = [:]) async throws -> MCPToolResult {
         var params: [String: Any] = ["name": name]
         if !arguments.isEmpty {
             params["arguments"] = arguments
