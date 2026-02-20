@@ -142,8 +142,8 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase U3: AI Subsystems   | ✅ DONE         | All subsystems (Context/Adaptive/Proactive/PatternLearning/Predict/PromptEng/ResourceMgmt/Anticipatory) activated in project.yml blanket activations; macOS+iOS BUILD SUCCEEDED sha b55537b1 |
 | Phase V3: Transparency UIs| ✅ DONE         | BehavioralAnalyticsView, PrivacyTransparencyView, MessagingGatewayStatusView, NotificationIntelligenceView sha d3e98428 |
 | Phase W3: Chat Enhance    | ✅ DONE         | AgentPhaseProgressBar, CloudSyncStatusView, TokenCountBadge wired into ChatView + MacSettingsView sha d7e3b229 |
-| Phase X3: Test Coverage   | ✅ DONE         | 4046 tests pass; AG3 validated comprehensive QA |
-| Phase Y3: Periphery Clean | ⏳ PENDING      | Blocked by X3 |
+| Phase X3: Test Coverage   | ⏳ PENDING      | Blocked by A3–W3+AF3 |
+| Phase Y3: Periphery Clean | ✅ DONE         | 0 periphery warnings |
 | Phase Z3: CI Green        | ⏳ PENDING      | Blocked by Y3 |
 | Phase AA3: Re-verify       | ⏳ PENDING      | Blocked by Z3 |
 | Phase AB3: Notarization    | ⏳ PENDING      | Blocked by AA3 |
@@ -5645,6 +5645,326 @@ for ext in CallKitExtension CredentialsExtension KeyboardExtension NotificationS
 done
 xcodebuild -project Thea.xcodeproj -scheme Thea-macOS -configuration Debug -destination "platform=macOS" build -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "error:|BUILD SUCCEEDED" | tail -3
 xcodebuild -project Thea.xcodeproj -scheme Thea-iOS -configuration Debug -destination "generic/platform=iOS" build -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "error:|BUILD SUCCEEDED" | tail -3
+```
+
+---
+
+## PHASE AZ3: PHYSICAL AV TESTING — CROSS-MAC AUTOMATED MANUAL GATES
+
+**Status: ⏳ PENDING — Wave 10 (infrastructure + CI workflow)**
+
+**Goal**: Use MBAM2 and MSM3U's physical co-location on the same desk to automate multi-sensory testing:
+- **Audio round-trip**: MSM3U speaks/plays sound → MBAM2 microphone records → `hear` transcribes → verify expected words
+- **Camera visual test**: MSM3U displays UI → MBAM2 webcam photographs the screen → `ocrmac` (Apple Vision OCR) → verify expected UI elements visible
+- **Screenshot regression**: `screencapture` + SSIM (scikit-image) + `swift-snapshot-testing` for pixel-perfect baseline comparison
+- **Self-hosted CI**: Both Macs run GitHub Actions self-hosted runners; nightly `physical-av-tests.yml` (4 AM UTC = 11 PM PT)
+
+**Architecture**: MSM3U = Orchestrator (builds, triggers scenarios, analyzes). MBAM2 = Observer (mic + camera, runs `thea-test-agent` HTTP server on port 7788).
+
+**Key tools**: `ffmpeg` (avfoundation capture), `hear` (on-device STT, no rate limit), `ocrmac` (Apple Vision Python wrapper), `screencapture` (macOS built-in), `swift-snapshot-testing` (pointfreeco SPM), `opencv-python` (SSIM).
+
+---
+
+### AZ3-1: MBAM2 Observer Infrastructure
+
+Install dependencies on both Macs:
+```bash
+brew install ffmpeg sox python@3.12
+pip3 install fastapi uvicorn opencv-python scikit-image pillow imagehash ocrmac
+brew tap sveinbjornt/sveinbjornt && brew install hear
+```
+
+**File**: `/usr/local/bin/thea-test-agent.py` on MBAM2:
+```python
+from fastapi import FastAPI
+import subprocess, base64
+
+app = FastAPI()
+
+@app.post("/audio/record")
+def start_audio_record(duration: int = 8, session: str = "default"):
+    path = f"/tmp/thea-audio-{session}.wav"
+    subprocess.Popen(["ffmpeg", "-f", "avfoundation", "-i", ":0", "-t", str(duration), "-y", path])
+    return {"status": "recording", "path": path}
+
+@app.get("/audio/result")
+def get_audio_result(session: str = "default"):
+    path = f"/tmp/thea-audio-{session}.wav"
+    result = subprocess.run(["hear", "-d", path], capture_output=True, text=True, timeout=30)
+    return {"transcript": result.stdout.strip()}
+
+@app.post("/camera/capture")
+def capture_frame(session: str = "default"):
+    path = f"/tmp/thea-visual-{session}.jpg"
+    # 15 warmup frames for autofocus, then grab 1
+    subprocess.run(["ffmpeg", "-f", "avfoundation", "-i", "0", "-vframes", "15", "-y", path], capture_output=True)
+    subprocess.run(["ffmpeg", "-f", "avfoundation", "-i", "0", "-vframes", "1", "-y", path], capture_output=True)
+    with open(path, "rb") as f:
+        return {"image_base64": base64.b64encode(f.read()).decode()}
+
+@app.get("/health")
+def health(): return {"status": "ok"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=7788)
+```
+
+**LaunchAgent** `~/Library/LaunchAgents/com.alexis.thea-test-agent.plist` on MBAM2:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.alexis.thea-test-agent</string>
+  <key>ProgramArguments</key><array>
+    <string>/usr/bin/python3</string><string>/usr/local/bin/thea-test-agent.py</string>
+  </array>
+  <key>RunAtLoad</key><true/><key>KeepAlive</key><true/>
+</dict></plist>
+```
+
+One-time TCC grants (run manually from MBAM2 Terminal):
+```bash
+ffmpeg -f avfoundation -i ":0" -t 0.5 -y /tmp/mic-test.wav  # mic TCC prompt
+ffmpeg -f avfoundation -i "0" -vframes 1 -y /tmp/cam-test.jpg  # camera TCC prompt
+hear -d /tmp/mic-test.wav  # speech recognition TCC prompt
+```
+
+- Commit: `feat(AZ3): MBAM2 thea-test-agent server + LaunchAgent [1/5]`
+
+---
+
+### AZ3-2: Audio Round-Trip Test
+
+**File**: `Tests/PhysicalAV/audio_roundtrip_test.sh` (runs on MSM3U):
+```bash
+#!/bin/bash
+SESSION=${SESSION:-$(date +%s)}
+MBAM2=${MBAM2_HOST:-mbam2.local}
+
+curl -s -X POST "http://$MBAM2:7788/audio/record?duration=6&session=$SESSION" > /dev/null
+sleep 0.3
+say -v Samantha "Thea notification: task completed successfully"
+sleep 1
+afplay /System/Library/Sounds/Glass.aiff
+sleep 4
+
+TRANSCRIPT=$(curl -s "http://$MBAM2:7788/audio/result?session=$SESSION" | \
+  python3 -c "import json,sys; print(json.load(sys.stdin)['transcript'])")
+echo "Transcript: $TRANSCRIPT"
+
+python3 -c "
+t = '''$TRANSCRIPT'''.lower()
+missing = [w for w in ['thea','notification','task','completed'] if w not in t]
+print('FAIL:' + str(missing)) if missing else print('PASS: Audio round-trip ✓')
+import sys; sys.exit(1 if missing else 0)
+"
+```
+
+- Commit: `feat(AZ3): audio round-trip test (MSM3U say → MBAM2 mic → hear → verify) [2/5]`
+
+---
+
+### AZ3-3: Camera OCR Visual Test
+
+**File**: `Tests/PhysicalAV/camera_ocr_test.sh` (runs on MSM3U):
+```bash
+#!/bin/bash
+SESSION=${SESSION:-$(date +%s)}
+MBAM2=${MBAM2_HOST:-mbam2.local}
+
+open /Applications/Thea.app 2>/dev/null || true
+sleep 2  # let UI settle
+
+FRAME_B64=$(curl -s -X POST "http://$MBAM2:7788/camera/capture?session=$SESSION" | \
+  python3 -c "import json,sys; print(json.load(sys.stdin)['image_base64'])")
+echo "$FRAME_B64" | base64 -d > /tmp/thea-webcam-$SESSION.jpg
+
+python3 - << 'PYEOF'
+import sys
+from ocrmac import OCR
+result = OCR(f'/tmp/thea-webcam-{os.environ.get("SESSION","0")}.jpg', recognition_level='accurate')
+texts = [t[0] for t in result.recognize() if t[1] > 0.5]
+print(f"Visible text: {texts}")
+missing = [r for r in ['Chat','Thea'] if not any(r.lower() in t.lower() for t in texts)]
+print('FAIL: ' + str(missing)) if missing else print('PASS: Camera OCR ✓')
+sys.exit(1 if missing else 0)
+PYEOF
+```
+
+**Continuity Camera** (iPhone, higher resolution): detected automatically when iPhone is near MBAM2.
+From command line: `ffmpeg -f avfoundation -list_devices true -i ""` → look for iPhone device index.
+
+**Keystone correction** for angled webcam (one-time calibration):
+```python
+import cv2, numpy as np
+# Mark 4 screen corners in webcam image, store as JSON, apply warpPerspective before OCR
+```
+
+- Commit: `feat(AZ3): camera OCR visual test (MBAM2 webcam → ocrmac → UI element verify) [3/5]`
+
+---
+
+### AZ3-4: Screenshot Regression Tests
+
+**File**: `Tests/PhysicalAV/screenshot_regression.sh` (runs on MSM3U):
+```bash
+#!/bin/bash
+BASELINE_DIR="Tests/VisualBaselines"
+mkdir -p "$BASELINE_DIR"
+BASELINE="$BASELINE_DIR/thea-main-window.png"
+CURRENT="/tmp/thea-current-$(date +%s).png"
+
+screencapture -x -R "0,0,1440,900" "$CURRENT"
+
+python3 - << PYEOF
+import cv2, sys
+from skimage.metrics import structural_similarity as ssim
+import shutil
+
+baseline = cv2.imread('$BASELINE')
+current = cv2.imread('$CURRENT')
+if baseline is None:
+    shutil.copy('$CURRENT', '$BASELINE')
+    print("INFO: Baseline recorded")
+    sys.exit(0)
+current_r = cv2.resize(current, (baseline.shape[1], baseline.shape[0]))
+g_b = cv2.cvtColor(baseline, cv2.COLOR_BGR2GRAY)
+g_c = cv2.cvtColor(current_r, cv2.COLOR_BGR2GRAY)
+score, _ = ssim(g_b, g_c, full=True)
+print(f"SSIM: {score:.4f}")
+sys.exit(0 if score >= 0.85 else 1)
+PYEOF
+```
+
+**SwiftUI Snapshot Testing** (add `swift-snapshot-testing` via SPM in Package.swift):
+```swift
+// Tests/SnapshotTests/TheaViewSnapshotTests.swift
+import SnapshotTesting, XCTest, SwiftUI
+
+final class TheaViewSnapshotTests: XCTestCase {
+    // perceptualPrecision 0.95: handles M2 vs M3 Ultra GPU subpixel rendering deltas
+    func testChatViewSnapshot() {
+        assertSnapshot(of: ChatView().frame(width: 375, height: 812),
+                       as: .image(precision: 0.99, perceptualPrecision: 0.95),
+                       record: ProcessInfo.processInfo.environment["RECORD_SNAPSHOTS"] == "1")
+    }
+}
+```
+
+Record baselines: `RECORD_SNAPSHOTS=1 xcodebuild test ...`
+
+- Commit: `feat(AZ3): screenshot regression (SSIM + swift-snapshot-testing perceptual) [4/5]`
+
+---
+
+### AZ3-5: GitHub Actions Physical AV Workflow
+
+**File**: `.github/workflows/physical-av-tests.yml`:
+```yaml
+name: Physical AV Tests (AZ3)
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * *'  # 4 AM UTC = 11 PM PT nightly
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  group: physical-av-lock
+  cancel-in-progress: false
+
+jobs:
+  observer-ready:
+    name: MBAM2 — Observer Ready
+    runs-on: [self-hosted, mbam2]
+    if: >
+      github.event_name != 'pull_request' ||
+      contains(github.event.pull_request.labels.*.name, 'physical-av')
+    steps:
+      - name: Verify thea-test-agent
+        run: |
+          curl -s --max-time 5 http://localhost:7788/health | grep '"ok"' || \
+          { python3 /usr/local/bin/thea-test-agent.py & sleep 4; }
+          echo "Observer ready ✓"
+
+  orchestrate:
+    name: MSM3U — Orchestrate AV Tests
+    runs-on: [self-hosted, msm3u]
+    needs: observer-ready
+    steps:
+      - uses: actions/checkout@v4
+      - name: Session ID
+        id: sess
+        run: echo "id=$(date +%s)" >> "$GITHUB_OUTPUT"
+      - name: Build Thea-macOS
+        run: |
+          xcodebuild -project Thea.xcodeproj -scheme Thea-macOS \
+            -configuration Debug -destination "platform=macOS" \
+            build -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO 2>&1 | \
+            grep -E "error:|BUILD SUCCEEDED|BUILD FAILED" | tail -3
+      - name: Audio round-trip test
+        run: bash Tests/PhysicalAV/audio_roundtrip_test.sh
+        env: { SESSION: "${{ steps.sess.outputs.id }}", MBAM2_HOST: mbam2.local }
+      - name: Camera OCR test
+        run: bash Tests/PhysicalAV/camera_ocr_test.sh
+        env: { SESSION: "${{ steps.sess.outputs.id }}", MBAM2_HOST: mbam2.local }
+      - name: Screenshot regression
+        run: bash Tests/PhysicalAV/screenshot_regression.sh
+      - name: Snapshot tests
+        run: |
+          xcodebuild test -project Thea.xcodeproj -scheme Thea-macOS \
+            -destination "platform=macOS" \
+            -only-testing:TheaTests/TheaViewSnapshotTests \
+            -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO 2>&1 | tail -5
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: physical-av-${{ steps.sess.outputs.id }}
+          path: |
+            /tmp/thea-audio-*.wav
+            /tmp/thea-webcam-*.jpg
+            /tmp/thea-current-*.png
+          retention-days: 30
+          if-no-files-found: ignore
+```
+
+Self-hosted runner setup (one-time per Mac):
+```bash
+mkdir ~/actions-runner && cd ~/actions-runner
+curl -O -L "https://github.com/actions/runner/releases/download/v2.321.0/actions-runner-osx-arm64-2.321.0.tar.gz"
+tar xzf ./actions-runner-osx-arm64-2.321.0.tar.gz
+./config.sh --url https://github.com/Atchoum23/Thea --token TOKEN --labels "$(hostname -s),self-hosted,macOS,ARM64"
+./svc.sh install && ./svc.sh start
+```
+
+Add to `ci.yml` `paths-ignore`: `.github/workflows/physical-av-tests.yml`
+
+- Commit: `feat(AZ3): GitHub Actions physical-av-tests.yml + self-hosted runner docs [5/5]`
+
+---
+
+### AZ3 Verification
+```bash
+# Files exist
+ls Tests/PhysicalAV/{audio_roundtrip_test,camera_ocr_test,screenshot_regression}.sh
+ls .github/workflows/physical-av-tests.yml
+ls Tests/SnapshotTests/TheaViewSnapshotTests.swift
+
+# MBAM2 agent reachable from MSM3U
+curl -s http://mbam2.local:7788/health | grep '"ok"'
+
+# Smoke-test audio
+bash Tests/PhysicalAV/audio_roundtrip_test.sh
+
+# Smoke-test camera
+bash Tests/PhysicalAV/camera_ocr_test.sh
+
+# Record baselines (first run)
+RECORD_SNAPSHOTS=1 xcodebuild test -project Thea.xcodeproj -scheme Thea-macOS \
+  -destination "platform=macOS" -only-testing:TheaTests/TheaViewSnapshotTests \
+  -derivedDataPath /tmp/TheaBuild CODE_SIGNING_ALLOWED=NO 2>&1 | tail -5
 ```
 
 ---
