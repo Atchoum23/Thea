@@ -234,19 +234,30 @@ struct MacSettingsView: View {
     // MARK: - Sidebar
 
     private var settingsSidebar: some View {
-        List(selection: $selectedCategory) {
-            ForEach(Array(filteredGroups.enumerated()), id: \.offset) { index, group in
-                if index > 0 {
-                    Divider()
-                }
-                ForEach(group) { category in
-                    Label(category.rawValue, systemImage: category.icon)
-                        .tag(category)
+        VStack(spacing: 0) {
+            List(selection: $selectedCategory) {
+                ForEach(Array(filteredGroups.enumerated()), id: \.offset) { index, group in
+                    if index > 0 {
+                        Divider()
+                    }
+                    ForEach(group) { category in
+                        Label(category.rawValue, systemImage: category.icon)
+                            .tag(category)
+                    }
                 }
             }
+            .listStyle(.sidebar)
+            .searchable(text: $searchText, placement: .sidebar, prompt: "Search")
+
+            // Cloud sync status footer in sidebar
+            Divider()
+            HStack(spacing: TheaSpacing.sm) {
+                CloudSyncStatusView(showLabel: true)
+                Spacer()
+            }
+            .padding(.horizontal, TheaSpacing.md)
+            .padding(.vertical, TheaSpacing.sm)
         }
-        .listStyle(.sidebar)
-        .searchable(text: $searchText, placement: .sidebar, prompt: "Search")
     }
 
     private var filteredGroups: [[SettingsCategory]] {

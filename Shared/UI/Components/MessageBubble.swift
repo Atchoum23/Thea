@@ -537,3 +537,89 @@ extension MessageBubble {
             }
     }
 }
+
+// MARK: - Token Count Badge
+
+/// Compact inline token usage badge for the message metadata row.
+/// Shows "↑X ↓Y" for messages with both input and output token counts,
+/// or "Y tok" for output-only.  A tooltip (macOS) reveals cached/reasoning breakdown.
+struct TokenCountBadge: View {
+    let message: Message
+
+    private var outputTokens: Int? { message.tokenCount }
+    private var inputTokens: Int? { message.metadata?.inputTokens }
+    private var cachedTokens: Int? { message.metadata?.cachedTokens }
+    private var reasoningTokens: Int? { message.metadata?.reasoningTokens }
+
+    private var hasAnyTokens: Bool {
+        outputTokens != nil || inputTokens != nil
+    }
+
+    var body: some View {
+        if hasAnyTokens {
+            Text(displayText)
+                .font(.theaCaption2)
+                .foregroundStyle(.tertiary)
+                .help(tooltipText)
+                .accessibilityLabel(accessibilityText)
+        }
+    }
+
+    // MARK: - Display Text
+
+    private var displayText: String {
+        switch (inputTokens, outputTokens) {
+        case let (input?, output?):
+            return "↑\(format(input)) ↓\(format(output))"
+        case let (nil, output?):
+            return "\(format(output)) tok"
+        case let (input?, nil):
+            return "↑\(format(input))"
+        default:
+            return ""
+        }
+    }
+
+    // MARK: - Tooltip (macOS hover)
+
+    private var tooltipText: String {
+        var parts: [String] = []
+        if let input = inputTokens {
+            parts.append("Input: \(input) tokens")
+        }
+        if let output = outputTokens {
+            parts.append("Output: \(output) tokens")
+        }
+        if let cached = cachedTokens, cached > 0 {
+            parts.append("Cached: \(cached) tokens")
+        }
+        if let reasoning = reasoningTokens, reasoning > 0 {
+            parts.append("Reasoning: \(reasoning) tokens")
+        }
+        if let total = totalTokens {
+            parts.append("Total: \(total) tokens")
+        }
+        return parts.joined(separator: "\n")
+    }
+
+    private var accessibilityText: String {
+        var parts: [String] = []
+        if let input = inputTokens { parts.append("\(input) input tokens") }
+        if let output = outputTokens { parts.append("\(output) output tokens") }
+        return parts.isEmpty ? "Token count unavailable" : parts.joined(separator: ", ")
+    }
+
+    private var totalTokens: Int? {
+        guard let output = outputTokens else { return nil }
+        let input = inputTokens ?? 0
+        return input + output
+    }
+
+    /// Format token counts compactly: 1234 → "1.2K", 500 → "500"
+    private func format(_ count: Int) -> String {
+        if count >= 1000 {
+            return String(format: "%.1fK", Double(count) / 1000.0)
+        }
+        return "\(count)"
+    }
+}

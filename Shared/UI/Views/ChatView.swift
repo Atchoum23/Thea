@@ -115,6 +115,8 @@ struct ChatView: View {
                     selectedAgentSession = session
                 }
             }
+            // Agent phase progress bar — shown when ChatManager agent is executing
+            AgentPhaseProgressBar(agentState: chatManager.agentState)
             followUpSuggestionChips
             chatInput
         }
