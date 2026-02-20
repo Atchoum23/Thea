@@ -109,7 +109,7 @@ private struct StatCard: View {
     }
 }
 
-private struct SectionHeader: View {
+private struct MetaAISectionHeader: View {
     let title: String
     var body: some View {
         Text(title)
@@ -250,7 +250,7 @@ struct MetaAIOverviewPanel: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                SectionHeader(title: "System Status")
+                MetaAISectionHeader(title:"System Status")
 
                 LazyVGrid(
                     columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())],
@@ -296,7 +296,7 @@ struct MetaAIOverviewPanel: View {
 
                 Divider()
 
-                SectionHeader(title: "Latest Decision")
+                MetaAISectionHeader(title:"Latest Decision")
                 if let decision = coordinator.currentDecision {
                     DecisionSummaryCard(decision: decision)
                 } else {
@@ -311,7 +311,7 @@ struct MetaAIOverviewPanel: View {
 
                 Divider()
 
-                SectionHeader(title: "Identity")
+                MetaAISectionHeader(title:"Identity")
                 let identity = selfAwareness.identity
                 VStack(alignment: .leading, spacing: 4) {
                     Text(identity.fullName)
@@ -536,7 +536,7 @@ struct MetaAIConfidencePanel: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                SectionHeader(title: "Verification Sources")
+                MetaAISectionHeader(title:"Verification Sources")
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                     ToggleStatCard(
                         title: "Multi-Model Consensus",
@@ -567,7 +567,7 @@ struct MetaAIConfidencePanel: View {
 
                 Divider()
 
-                SectionHeader(title: "Source Weights")
+                MetaAISectionHeader(title:"Source Weights")
                 ForEach(sortedSources, id: \.rawValue) { source in
                     let weight = system.sourceWeights[source] ?? 0
                     HStack {
@@ -585,7 +585,7 @@ struct MetaAIConfidencePanel: View {
 
                 Divider()
 
-                SectionHeader(title: "Confidence Levels")
+                MetaAISectionHeader(title:"Confidence Levels")
                 ForEach(ConfidenceLevel.allCases, id: \.rawValue) { level in
                     HStack {
                         Image(systemName: level.icon)
@@ -1248,7 +1248,7 @@ struct MetaAISelfModelPanel: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                SectionHeader(title: "Identity")
+                MetaAISectionHeader(title:"Identity")
                 let identity = awareness.identity
                 VStack(alignment: .leading, spacing: 6) {
                     InfoRow(label: "Name", value: identity.name)
@@ -1263,7 +1263,7 @@ struct MetaAISelfModelPanel: View {
 
                 Divider()
 
-                SectionHeader(title: "System Context")
+                MetaAISectionHeader(title:"System Context")
                 let ctx = awareness.systemContext
                 LazyVGrid(
                     columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())],
@@ -1295,7 +1295,7 @@ struct MetaAISelfModelPanel: View {
 
                 Divider()
 
-                SectionHeader(title: "Self-Reported Capabilities")
+                MetaAISectionHeader(title:"Self-Reported Capabilities")
                 MetaAIFlowLayout(spacing: 6) {
                     ForEach(identity.capabilities, id: \.self) { cap in
                         HStack(spacing: 4) {
@@ -1310,7 +1310,7 @@ struct MetaAISelfModelPanel: View {
 
                 Divider()
 
-                SectionHeader(title: "Personality Statement")
+                MetaAISectionHeader(title:"Personality Statement")
                 Text(identity.personality)
                     .font(.caption).foregroundColor(.secondary)
                     .padding(12)
@@ -1338,7 +1338,7 @@ struct MetaAISelfExecutionPanel: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                SectionHeader(title: "Self-Execution Service")
+                MetaAISectionHeader(title:"Self-Execution Service")
                 Text("Enables Thea to autonomously execute phases from THEA_MASTER_SPEC.md. All operations require appropriate approvals.")
                     .font(.caption).foregroundColor(.secondary)
 
@@ -1381,7 +1381,7 @@ struct MetaAISelfExecutionPanel: View {
 
                 if let readiness = readinessResult {
                     Divider()
-                    SectionHeader(title: "Readiness Check")
+                    MetaAISectionHeader(title:"Readiness Check")
                     HStack {
                         Image(systemName: readiness.ready ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                             .foregroundColor(readiness.ready ? .green : .orange)
@@ -1409,7 +1409,7 @@ struct MetaAISelfExecutionPanel: View {
 
                 if let summary = lastSummary {
                     Divider()
-                    SectionHeader(title: "Last Execution Summary")
+                    MetaAISectionHeader(title:"Last Execution Summary")
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                         StatCard(title: "Files Created", value: "\(summary.totalFilesCreated)", icon: "doc.badge.plus", color: .green)
                         StatCard(title: "Errors Fixed", value: "\(summary.totalErrorsFixed)", icon: "wrench.fill", color: .orange)
