@@ -77,7 +77,7 @@ struct MessagingGatewayStatusView: View {
             VStack(alignment: .trailing, spacing: 4) {
                 Text("\(gateway.connectedPlatforms.count)")
                     .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundStyle(gateway.connectedPlatforms.isEmpty ? .secondary : .green)
+                    .foregroundStyle(gateway.connectedPlatforms.isEmpty ? AnyShapeStyle(.secondary) : AnyShapeStyle(Color.green))
                 Text("/ \(MessagingPlatform.allCases.count) platforms")
                     .font(.caption)
                     .foregroundStyle(.secondary)

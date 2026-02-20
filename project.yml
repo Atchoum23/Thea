@@ -444,6 +444,9 @@ targets:
           # Exclude DashboardView duplicate — same types as HealthInsightsDetailView (TimeRange, TrendDataPoint, etc.)
           - "**/Integrations/Health/Views/HealthInsightsDashboardView.swift"
       - path: macOS
+        excludes:
+          # Exclude macOS/Views duplicate — Shared/UI/Views/Analytics/ version is canonical
+          - "Views/MessagingGatewayStatusView.swift"
       - path: Shared/Resources/Assets.xcassets
       - path: Shared/Resources/Localizable.xcstrings
     settings:
