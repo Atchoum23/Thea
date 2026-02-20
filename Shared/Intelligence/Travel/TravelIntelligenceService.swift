@@ -79,16 +79,20 @@ actor TravelIntelligenceService {
 
     // MARK: - Credential Management
 
-    func configure(apiKey: String, apiSecret: String) {
-        SettingsManager.shared.setAPIKey(apiKey, for: "amadeus_key")
-        SettingsManager.shared.setAPIKey(apiSecret, for: "amadeus_secret")
+    func configure(apiKey: String, apiSecret: String) async {
+        await MainActor.run {
+            SettingsManager.shared.setAPIKey(apiKey, for: "amadeus_key")
+            SettingsManager.shared.setAPIKey(apiSecret, for: "amadeus_secret")
+        }
         logger.info("TravelIntelligenceService: credentials configured")
     }
 
-    func hasCredentials() -> Bool {
-        guard let key = SettingsManager.shared.getAPIKey(for: "amadeus_key"),
-              let secret = SettingsManager.shared.getAPIKey(for: "amadeus_secret")
-        else { return false }
+    func hasCredentials() async -> Bool {
+        let (key, secret) = await MainActor.run {
+            (SettingsManager.shared.getAPIKey(for: "amadeus_key"),
+             SettingsManager.shared.getAPIKey(for: "amadeus_secret"))
+        }
+        guard let key, let secret else { return false }
         return !key.isEmpty && !secret.isEmpty
     }
 
@@ -265,11 +269,11 @@ actor TravelIntelligenceService {
             return token
         }
 
-        guard
-            let apiKey = SettingsManager.shared.getAPIKey(for: "amadeus_key"),
-            let apiSecret = SettingsManager.shared.getAPIKey(for: "amadeus_secret"),
-            !apiKey.isEmpty, !apiSecret.isEmpty
-        else {
+        let (apiKey, apiSecret) = await MainActor.run {
+            (SettingsManager.shared.getAPIKey(for: "amadeus_key"),
+             SettingsManager.shared.getAPIKey(for: "amadeus_secret"))
+        }
+        guard let apiKey, let apiSecret, !apiKey.isEmpty, !apiSecret.isEmpty else {
             throw TravelError.missingCredentials
         }
 
