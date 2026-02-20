@@ -278,6 +278,7 @@ actor AgentOrchestrator {
     }
 
     private func shellOutput(_ executable: String, arguments: [String]) async throws -> String {
+        #if os(macOS)
         let process = Process()
         process.executableURL = URL(fileURLWithPath: executable)
         process.arguments = arguments
@@ -287,6 +288,10 @@ actor AgentOrchestrator {
         try process.run()
         process.waitUntilExit()
         return String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+        #else
+        // iOS: shell execution not available
+        return ""
+        #endif
     }
 
     // MARK: - Notifications (failure/block only — silent on success)
