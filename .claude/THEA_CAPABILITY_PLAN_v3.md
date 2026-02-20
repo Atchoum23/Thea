@@ -181,7 +181,7 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase ABA3: QA v2         | ⏳ PENDING      | Re-run AG3: all 4 platforms build, all tests pass, 0 lint — targeting Wave 10 new services |
 | Phase ABB3: Security v2   | ⏳ PENDING      | Re-run AH3: new surfaces — Keychain financial, NativeHost stdin, Keyboard no-log, NFC URL injection, CarPlay voice, FoundationModels prompt injection |
 | Phase ABC3: Tests v2      | ⏳ PENDING      | Re-run X3: ≥80% coverage on Wave 10 new files |
-| Phase ABD3: Periphery v2  | ⏳ PENDING      | Re-run Y3: zero Periphery warnings after Wave 9+10 |
+| Phase ABD3: Periphery v2  | ✅ DONE         | Zero Wave 10 periphery warnings — 112 annotations in 20 files, carWindow final fix |
 | Phase ABE3: CI Green v2   | ⏳ PENDING      | Re-run Z3: all 6 GH Actions workflows green |
 | Phase ABF3: Wiring v2     | ⏳ PENDING      | Re-run AA3: target ≥55 wired systems (vs 23/39 at Wave 6) |
 | Phase ABG3: Notarize v2   | ⏳ PENDING      | v1.6.0 tag + release.yml notarization |
@@ -6866,7 +6866,7 @@ Update this section after each phase completes:
 | ABA3  | Comprehensive QA v2                      | ⏳ PENDING  | —        | —         |
 | ABB3  | Security Audit v2                        | ⏳ PENDING  | —        | —         |
 | ABC3  | Test Coverage v2                         | ⏳ PENDING  | —        | —         |
-| ABD3  | Periphery Clean v2                       | ⏳ PENDING  | —        | —         |
+| ABD3  | Periphery Clean v2                       | ✅ DONE     | 641e2cb4 | 0 Wave 10 periphery warnings |
 | ABE3  | CI Green v2                              | ⏳ PENDING  | —        | —         |
 | ABF3  | Wiring Verification v2 (≥55 systems)     | ⏳ PENDING  | —        | —         |
 | ABG3  | Notarization v2 (v1.6.0)                 | ⏳ PENDING  | —        | —         |
