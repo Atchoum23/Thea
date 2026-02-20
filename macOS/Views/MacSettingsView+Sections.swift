@@ -90,7 +90,16 @@ extension MacSettingsView {
     // MARK: - AI & Models Settings
 
     var aiSettings: some View {
+        NavigationStack {
         Form {
+            // K3: Advanced AI configuration link — sliders for all continuous params
+            Section("Intelligence Configuration") {
+                NavigationLink("Advanced AI & Verification Config") {
+                    AdvancedAIConfigView()
+                }
+                .help("Adjust model routing weights, confidence thresholds, and learning parameters")
+            }
+
             Section("Provider & Routing") {
                 Picker("Default Provider", selection: $settingsManager.defaultProvider) {
                     ForEach(settingsManager.availableProviders, id: \.self) { provider in
@@ -166,6 +175,8 @@ extension MacSettingsView {
         }
         .formStyle(.grouped)
         .onAppear { loadAPIKeysIfNeeded() }
+        .navigationTitle("AI & Models")
+        } // NavigationStack
     }
 
     // MARK: - Providers Settings
