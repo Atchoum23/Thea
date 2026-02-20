@@ -239,11 +239,11 @@ final class ToolExecutionCoordinator {
         case "mail_check_unread":
             return await MacOSToolHandler.mailCheckUnread(input)
         case "finder_reveal":
-            return await Task { @MainActor in MacOSToolHandler.finderReveal(input) }.value
+            return await Task { @MainActor in MacOSToolHandler.finderReveal(si.dict) }.value
         case "finder_search":
             return MacOSToolHandler.finderSearch(input)
         case "safari_open_url":
-            return await Task { @MainActor in MacOSToolHandler.safariOpenURL(input) }.value
+            return await Task { @MainActor in MacOSToolHandler.safariOpenURL(si.dict) }.value
         case "safari_get_current_url":
             return await MacOSToolHandler.safariGetCurrentURL(input)
         case "music_play":
