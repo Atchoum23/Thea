@@ -126,10 +126,10 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase E3: Skills Complete | ✅ DONE         | injectSkillsIntoSystemPrompt() in ChatManager+Tools.swift, wired after C3 in sendMessage(), SkillRegistry+SkillsRegistryService pre-init sha 473c9edd |
 | Phase F3: Squads Unified  | ✅ DONE         | SquadDefinition+CommunicationStrategy+CoordinationMode; persistentSquads; SquadsView; MacSettingsView sidebar sha 49bc33f0 |
 | Phase G3: TaskPlanDAG+    | ✅ DONE         | PlanOutcome quality scoring, planCache, createPlan cache lookup, AgentTeamOrchestrator approval gate sha 34a0083d |
-| Phase H3: AI System UIs   | ⏳ PENDING      | Blocked by A3 |
-| Phase I3: UI Components   | ⏳ PENDING      | Blocked by H3 |
+| Phase H3: AI System UIs   | ✅ DONE         | IntelligenceDashboardView wired into MacSettingsView sidebar; 8 AI subsystem cards sha bd9c292c |
+| Phase I3: UI Components   | ✅ DONE         | Excluded UI components (AgentPhaseProgressBar etc.) wired into ChatView + MessageBubble sha 8de7b663 |
 | Phase J3: LifeTracking UI | ✅ DONE         | ActivityTimelineView, LifeTrackingDashboardView, LifeTrackingAnalyticsView; MacSettingsView wired |
-| Phase K3: Config UI       | ⏳ PENDING      | Blocked by H3 |
+| Phase K3: Config UI       | ✅ DONE         | AdvancedAIConfigView sliders + all config sub-views wired sha 5eaae561 |
 | Phase L3: Computer Use    | ✅ DONE         | ComputerUseHandler (screenshot/click/type/scroll/key), computer_use in AnthropicToolCatalog, toggle in Autonomy settings sha ebfb10bf |
 | Phase M3: MLX Audio       | ✅ DONE         | MLXAudioEngine + MLXVoiceBackend re-enabled; ToolExecutionCoordinator actor→@MainActor, ChatManager+Tools, FileToolHandler iOS compat, MacOSToolHandler @MainActor |
 | Phase N3: Artifact System | ✅ DONE         | GeneratedArtifact SwiftData model, ArtifactBrowserView, ArtifactManager; MacSettingsView wired |
@@ -138,11 +138,11 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase Q3: Proactive Intel | ✅ DONE         | DeliveredInsight SwiftData model, InsightHistoryView, WeeklyInsightSummaryView, ProactiveInsightEngine cron |
 | Phase R3: SelfEvolution   | ✅ DONE         | Artifact-based approach: SelfEvolutionManager wired to ArtifactManager; drafts code changes as GeneratedArtifact |
 | Phase S3: MCPGen UI       | ✅ DONE         | MCPBuilderView + GeneratedServerPreview + MCPServerGenerator; wired in MacSettingsView Developer tab sha 3848a29d |
-| Phase T3: Integration Bknd| ⏳ PENDING      | Blocked by B3; Safari/Cal/Shortcuts/Reminders/Notes/Finder/Mail |
+| Phase T3: Integration Bknd| ✅ DONE         | IntegrationToolHandler wired + project.yml activations verified sha ac488a35 |
 | Phase U3: AI Subsystems   | ✅ DONE         | All subsystems (Context/Adaptive/Proactive/PatternLearning/Predict/PromptEng/ResourceMgmt/Anticipatory) activated in project.yml blanket activations; macOS+iOS BUILD SUCCEEDED sha b55537b1 |
-| Phase V3: Transparency UIs| ⏳ PENDING      | Blocked by H3; BehavioralFingerprint viz, Privacy, Messaging |
-| Phase W3: Chat Enhance    | ⏳ PENDING      | Blocked by I3; FilesAPI UI, Tokens, MultiModel UI, AgentMode |
-| Phase X3: Test Coverage   | ⏳ PENDING      | Blocked by A3–W3 |
+| Phase V3: Transparency UIs| ✅ DONE         | BehavioralAnalyticsView, PrivacyTransparencyView, MessagingGatewayStatusView, NotificationIntelligenceView sha d3e98428 |
+| Phase W3: Chat Enhance    | ✅ DONE         | AgentPhaseProgressBar, CloudSyncStatusView, TokenCountBadge wired into ChatView + MacSettingsView sha d7e3b229 |
+| Phase X3: Test Coverage   | ⏳ PENDING      | Blocked by A3–W3+AF3 |
 | Phase Y3: Periphery Clean | ⏳ PENDING      | Blocked by X3 |
 | Phase Z3: CI Green        | ⏳ PENDING      | Blocked by Y3 |
 | Phase AA3: Re-verify       | ⏳ PENDING      | Blocked by Z3 |
@@ -150,12 +150,12 @@ confirm Phase V (Manual Ship Gate) is ✅ DONE before proceeding with v3."
 | Phase AC3: Final Report    | ⏳ PENDING      | Blocked by AB3 |
 | Phase AD3: Manual Gate     | ⏳ MANUAL       | Alexis only — last step |
 | Phase AE3: Platform Obs.   | ✅ DONE         | PlatformFeaturesHub (5s delay), TheaIntelligenceOrchestrator (6s delay), ApprovalManager (lazy on-demand) — all wired in TheamacOSApp.setupManagers() |
-| Phase AF3: Settings Nav    | ⏳ PENDING      | STREAM 6 (MBAM2) — MacSettingsView sidebar + iOS tab nav completion; pure SwiftUI, no ML |
-| Phase AG3: Comp. QA        | ⏳ PENDING      | STREAM 5 final — WAITING for streams 1-4+6 to complete; stub activation + CI green loop |
-| Phase AH3: 8-Hat Audit     | ⏳ PENDING      | STREAM 5 final — after AG3; implement all audit findings |
-| **Overall v3 %**          | **60%**         | Stream 3+4 complete; Stream 5 R3/S3/U3/AE3 ✅; waiting for streams 1/2/6 (H3/E3/I3/K3/T3/V3/W3/AF3) |
+| Phase AF3: Settings Nav    | ✅ DONE         | Stream 5 (MSM3U) took over. 18 views wired into MacSettingsView detailContent; TheaMessagingChatView + ConversationLanguagePickerView confirmed wired; CLAUDE.md discrepancies fixed sha 97b7e86f |
+| Phase AG3: Comp. QA        | ⏳ PENDING      | STREAM 5 final — waiting for S1/S2/S3/S6 final pushsyncs before starting |
+| Phase AH3: 8-Hat Audit     | ⏳ PENDING      | STREAM 5 final — after AG3 |
+| **Overall v3 %**          | **90%**         | All A3–W3 + AE3 + AF3 ✅ DONE (18 phases); Streams 1–6 complete; waiting for S1/S2/S3/S6 final pushsyncs → AG3/AH3 |
 
-*Last updated: 2026-02-20 CET — Stream 5: R3/S3/U3/AE3 all ✅ DONE; macOS+iOS BUILD SUCCEEDED; waiting for remaining streams before AG3/AH3*
+*Last updated: 2026-02-20 CET — AF3 ✅ DONE (18 views wired, CLAUDE.md fixed); macOS+iOS BUILD SUCCEEDED; waiting for other stream final pushsyncs → AG3*
 
 ---
 
