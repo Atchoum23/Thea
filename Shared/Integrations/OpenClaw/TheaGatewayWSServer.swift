@@ -288,10 +288,14 @@ actor TheaGatewayWSServer {
             return
         }
 
-        await MainActor.run {
-            OpenClawBridge.shared.autoRespondEnabled = config.enabled
-            if let chatIds = config.chatIds {
-                for chatId in chatIds { OpenClawBridge.shared.autoRespondChannels.insert(chatId) }
+        // Fire-and-forget to @MainActor — avoid await MainActor.run {} which blocks
+        // the actor task indefinitely when @MainActor is busy, causing curl error 52.
+        let enabled = config.enabled
+        let chatIds = config.chatIds
+        Task { @MainActor in
+            OpenClawBridge.shared.autoRespondEnabled = enabled
+            if let ids = chatIds {
+                for chatId in ids { OpenClawBridge.shared.autoRespondChannels.insert(chatId) }
             }
         }
 

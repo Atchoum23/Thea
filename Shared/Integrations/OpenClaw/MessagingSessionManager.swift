@@ -23,11 +23,12 @@ final class MessagingSessionManager: ObservableObject {
     }
 
     private func setupModelContext() {
-        // BUGFIX (2026-02-21): ModelConfiguration(isStoredInMemoryOnly: false) with no explicit
-        // URL fails silently for apps using App Group entitlements — the OS cannot create the
-        // default store path inside the sandboxed container, so modelContext stays nil and all
-        // gateway messages are lost. Fix: resolve store URL via the app group container, falling
-        // back to a temp file so data is at least preserved for the current session.
+        // BUGFIX (2026-02-21 v1): ModelConfiguration(isStoredInMemoryOnly: false) fails silently
+        // for App Group apps — modelContext stays nil and all gateway messages are lost.
+        // Fix: resolve store URL via app group container. Fallback to temp dir so data is
+        // preserved for the current session even if group container is unavailable.
+        // BUGFIX (2026-02-21 v2): A 0-byte SQLite placeholder left by a prior failed
+        // ModelContainer init blocks subsequent init attempts. Delete it before retrying.
         let storeURL: URL
         if let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.app.theathe") {
             let supportDir = groupURL.appendingPathComponent("Library/Application Support", isDirectory: true)
@@ -37,6 +38,14 @@ final class MessagingSessionManager: ObservableObject {
             storeURL = FileManager.default.temporaryDirectory.appendingPathComponent("messaging-sessions.store")
             logger.warning("App group container unavailable — MessagingSession using temp store")
         }
+
+        // Remove 0-byte SQLite placeholder from a failed previous init — blocks re-init
+        if let attrs = try? FileManager.default.attributesOfItem(atPath: storeURL.path),
+           (attrs[.size] as? Int64 ?? 0) == 0 {
+            try? FileManager.default.removeItem(at: storeURL)
+            logger.info("Removed zero-byte messaging-sessions.store remnant before re-init")
+        }
+
         do {
             let config = ModelConfiguration(url: storeURL)
             let container = try ModelContainer(for: MessagingSession.self, configurations: config)
@@ -45,6 +54,14 @@ final class MessagingSessionManager: ObservableObject {
             logger.info("MessagingSession store at: \(storeURL.lastPathComponent)")
         } catch {
             logger.error("Failed to set up MessagingSession SwiftData context: \(error)")
+            // Fallback: in-memory store — runtime works, data not persisted across launches
+            if let fallbackContainer = try? ModelContainer(
+                for: MessagingSession.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            ) {
+                modelContext = fallbackContainer.mainContext
+                logger.warning("MessagingSession using in-memory fallback — data will not persist")
+            }
         }
     }
 
