@@ -4,7 +4,10 @@ import OSLog
 import Security
 
 // MARK: - Messaging Session Manager
-// Per-platform-per-peer session management with SwiftData persistence.
+// Per-platform-per-peer session management. In-memory storage (plain Swift — no @Model).
+// SwiftData @Model removed: macOS 26.3 beta crashes with EXC_BREAKPOINT/SIGTRAP when
+// accessing @Model properties before context insertion (SwiftData observation machinery trap).
+// Sessions stay in-memory; use setModelContext() upgrade path for SchemaV2 persistence.
 // Implements MMR (Maximal Marginal Relevance) re-ranking from OpenClaw research:
 //   score = λ * relevance(q, m) - (1-λ) * max(similarity(m, s)) for s in selected
 // Session key format: "{platform.rawValue}:{chatId}:{senderId}"
@@ -16,38 +19,17 @@ final class MessagingSessionManager: ObservableObject {
     @Published private(set) var activeSessions: [MessagingSession] = []
 
     private let logger = Logger(subsystem: "ai.thea.app", category: "MessagingSessionManager")
-    private var modelContext: ModelContext?
 
     private init() {
-        // Use an in-memory ModelContainer as baseline — no CloudKit, no file-permission issues.
-        // Separate file-based containers conflict with the main CloudKit schema; adding MessagingSession
-        // to SchemaV1 breaks the migration plan. In-memory is reliable for session-scoped history.
-        // Call setModelContext() with a persistent context to upgrade to durable storage.
-        if let container = try? ModelContainer(
-            for: MessagingSession.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        ) {
-            modelContext = container.mainContext
-            logger.info("MessagingSessionManager initialized with in-memory store")
-        } else {
-            logger.error("MessagingSessionManager: even in-memory ModelContainer failed — sessions will not be stored")
-        }
+        logger.info("MessagingSessionManager initialized (in-memory plain Swift store)")
     }
 
-    /// Upgrade to a persistent ModelContext (e.g. main app context with MessagingSession in schema).
-    /// Called when a persistent store is available and MessagingSession is registered in its schema.
+    /// Upgrade hook: provide a persistent ModelContext once the main SwiftData store is ready.
+    /// Currently a no-op — MessagingSession is a plain Swift class, not a @Model type.
+    /// When MessagingSession is promoted to @Model and added to SchemaV2, this will be wired.
     func setModelContext(_ context: ModelContext) {
-        modelContext = context
-        loadActiveSessions()
-        logger.info("MessagingSessionManager upgraded to persistent ModelContext")
-    }
-
-    private func loadActiveSessions() {
-        guard let ctx = modelContext else { return }
-        let descriptor = FetchDescriptor<MessagingSession>(
-            sortBy: [SortDescriptor(\.lastActivity, order: .reverse)]
-        )
-        activeSessions = (try? ctx.fetch(descriptor)) ?? []
+        // Reserved: promote activeSessions to persistent SwiftData storage in SchemaV2.
+        logger.info("MessagingSessionManager.setModelContext — persistent store reserved for SchemaV2")
     }
 
     // MARK: - Message Handling
@@ -68,11 +50,8 @@ final class MessagingSessionManager: ObservableObject {
                 senderName: message.senderName
             )
             session.appendMessage(message)
-            modelContext?.insert(session)
             activeSessions.insert(session, at: 0)
         }
-
-        try? modelContext?.save()
     }
 
     /// Append an outbound (AI) response to a session.
@@ -81,7 +60,6 @@ final class MessagingSessionManager: ObservableObject {
         let entry = SessionMessageEntry(role: "assistant", content: text, timestamp: Date())
         session.appendEntry(entry)
         session.lastActivity = Date()
-        try? modelContext?.save()
     }
 
     // MARK: - Session Operations
@@ -96,24 +74,18 @@ final class MessagingSessionManager: ObservableObject {
         guard let session = activeSessions.first(where: { $0.key == key }) else { return }
         session.clearHistory()
         // periphery:ignore - Reserved: session(for:) instance method reserved for future feature activation
-        try? modelContext?.save()
     }
 
     // periphery:ignore - Reserved: resetSession(key:) instance method reserved for future feature activation
     func resetAll() {
         for session in activeSessions { session.clearHistory() }
-        try? modelContext?.save()
         logger.info("All messaging sessions reset")
     }
 
     // periphery:ignore - Reserved: deleteSession(key:) instance method — reserved for future feature activation
     func deleteSession(key: String) {
-        guard let session = activeSessions.first(where: { $0.key == key }),
-              let ctx = modelContext else { return }
-        ctx.delete(session)
-        activeSessions.removeAll(where: { $0.key == key })
         // periphery:ignore - Reserved: deleteSession(key:) instance method reserved for future feature activation
-        try? ctx.save()
+        activeSessions.removeAll(where: { $0.key == key })
     }
 
     // MARK: - MMR Memory Re-ranking
@@ -204,10 +176,13 @@ final class MessagingSessionManager: ObservableObject {
     }
 }
 
-// MARK: - SwiftData Model
+// MARK: - Session Model (plain Swift — no @Model)
 
-@Model
-final class MessagingSession {
+/// In-memory session model. NOT a SwiftData @Model — avoids macOS 26.3 beta crash
+/// (EXC_BREAKPOINT when accessing @Model properties before context insertion).
+/// Will be promoted to @Model in SchemaV2 for persistent cross-session history.
+final class MessagingSession: Identifiable {
+    var id: String { key }
     var key: String
     var platform: String
     var chatId: String
