@@ -92,6 +92,12 @@ actor TheaGatewayWSServer {
             return
         }
 
+        // Debug: enable auto-respond for specific chatIds (localhost testing only)
+        if firstLine.hasPrefix("POST /debug/autorespond") {
+            await handleDebugAutoRespond(connection: connection, request: requestString)
+            return
+        }
+
         // WebSocket upgrade
         if requestString.contains("Upgrade: websocket") || requestString.contains("Upgrade: WebSocket") {
             await handleWebSocketUpgrade(connection: connection, request: requestString)
@@ -254,6 +260,43 @@ actor TheaGatewayWSServer {
         connection.send(content: responseData, completion: .contentProcessed { _ in
             connection.cancel()
         })
+    }
+
+    // MARK: - Debug Endpoint (localhost-only testing)
+
+    /// POST /debug/autorespond — enables AI auto-respond for specific chatIds.
+    /// Body: {"enabled": true, "chatIds": ["az3-test-001"]}
+    /// This endpoint is intentionally unauthenticated because port 18789 binds to 127.0.0.1 only.
+    private func handleDebugAutoRespond(connection: NWConnection, request: String) async {
+        let bodyData: Data
+        if let sepRange = request.range(of: "\r\n\r\n"),
+           let inlineBody = request[sepRange.upperBound...].data(using: .utf8),
+           !inlineBody.isEmpty {
+            bodyData = inlineBody
+        } else {
+            await sendJSONResponse(connection: connection, statusCode: 400, body: ["success": false, "error": "Empty body"])
+            return
+        }
+
+        struct AutoRespondConfig: Codable {
+            let enabled: Bool
+            let chatIds: [String]?
+        }
+
+        guard let config = try? JSONDecoder().decode(AutoRespondConfig.self, from: bodyData) else {
+            await sendJSONResponse(connection: connection, statusCode: 400, body: ["success": false, "error": "Invalid JSON"])
+            return
+        }
+
+        await MainActor.run {
+            OpenClawBridge.shared.autoRespondEnabled = config.enabled
+            if let chatIds = config.chatIds {
+                for chatId in chatIds { OpenClawBridge.shared.autoRespondChannels.insert(chatId) }
+            }
+        }
+
+        logger.info("Debug: autoRespondEnabled=\(config.enabled), chatIds=\(config.chatIds?.joined(separator: ",") ?? "all")")
+        await sendJSONResponse(connection: connection, statusCode: 200, body: ["success": true])
     }
 
     // MARK: - WebSocket Upgrade

@@ -302,6 +302,13 @@ final class OpenClawBridge {
                 return
             }
 
+            // Persist AI response to MessagingSession BEFORE attempting platform send.
+            // This ensures the response is saved even if the connector send fails (e.g. browser
+            // platform has no connector — it's handled via POST /message HTTP response, not a
+            // reverse channel). Session key format: "{platform}:{chatId}:{senderId}".
+            let sessionKey = "\(message.platform.rawValue):\(message.chatId):\(message.senderId)"
+            await MessagingSessionManager.shared.appendOutbound(text: sanitized, toSessionKey: sessionKey)
+
             // Send back via TheaMessagingGateway (routes to correct platform connector)
             let outbound = OutboundMessagingMessage(chatId: message.chatId, content: sanitized, replyToId: message.id)
             try await TheaMessagingGateway.shared.send(outbound, via: message.platform)
