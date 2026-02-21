@@ -131,6 +131,8 @@ public class CloudKitService: ObservableObject {
     /// unsigned builds report "TeamIdentifier=not set" and must skip CKContainer.
     /// Internal (not private) so other CloudKit services can reuse this check.
     nonisolated static func hasCloudKitContainerEntitlement() -> Bool {
+        #if os(macOS)
+        // macOS: use codesign CLI to distinguish unsigned (TeamIdentifier=not set) from signed.
         guard let execPath = Bundle.main.executablePath else { return false }
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/codesign")
@@ -149,6 +151,10 @@ public class CloudKitService: ObservableObject {
         } catch {
             return false
         }
+        #else
+        // iOS/watchOS/tvOS: codesign CLI unavailable. Return false → persistent-no-sync fallback.
+        return false
+        #endif
     }
 
     // MARK: - Change Token Persistence

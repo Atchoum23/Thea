@@ -19,7 +19,8 @@ final class ModelContainerFactory {
     /// NSException bypasses Swift catch blocks and crashes. This guard lets us skip tier 1
     /// safely in unsigned / CI builds.
     nonisolated private static func hasCloudKitContainerEntitlement() -> Bool {
-        // Check TeamIdentifier via codesign CLI — the only reliable runtime distinction
+        #if os(macOS)
+        // macOS: Check TeamIdentifier via codesign CLI — the only reliable runtime distinction
         // between ad-hoc/linker-signed builds (TeamIdentifier=not set) and properly
         // Apple-developer-signed builds (TeamIdentifier=6B66PM4JLK).
         // SecTask APIs return embedded entitlements from __TEXT,__entitlements even for
@@ -45,6 +46,11 @@ final class ModelContainerFactory {
         } catch {
             return false
         }
+        #else
+        // iOS/watchOS/tvOS: codesign CLI unavailable. Return false → persistent-no-sync fallback.
+        // All non-macOS platforms use persistent local storage; CloudKit sync requires provisioning.
+        return false
+        #endif
     }
 
     // periphery:ignore - Reserved: createContainer() instance method — reserved for future feature activation

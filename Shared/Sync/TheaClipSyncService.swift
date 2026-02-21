@@ -65,6 +65,9 @@ final class TheaClipSyncService: ObservableObject {
     /// meaning it was signed with proper CloudKit entitlements. Ad-hoc and
     /// unsigned builds report "TeamIdentifier=not set" and must skip CKContainer.
     nonisolated private static func hasCloudKitContainerEntitlement() -> Bool {
+        #if os(macOS)
+        // macOS: use codesign CLI to distinguish ad-hoc/unsigned (TeamIdentifier=not set)
+        // from properly Apple-developer-signed builds. SecTask cannot make this distinction.
         guard let execPath = Bundle.main.executablePath else { return false }
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/codesign")
@@ -83,6 +86,11 @@ final class TheaClipSyncService: ObservableObject {
         } catch {
             return false
         }
+        #else
+        // iOS/watchOS/tvOS: codesign CLI unavailable. Return false → persistent-no-sync fallback.
+        // CloudKit on iOS requires proper provisioning profile; fallback is safe for all builds.
+        return false
+        #endif
     }
 
     // MARK: - Push (Local → iCloud)
