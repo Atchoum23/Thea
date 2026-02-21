@@ -313,6 +313,8 @@ actor TheaGatewayWSServer {
 
     /// GET /debug/sessions[?chatId=xxx] — returns in-memory MessagingSession state.
     /// AZ3 tests use this to verify AI responses without needing SQLite file access.
+    /// Extracts only Sendable primitive values inside MainActor.run to avoid actor-boundary issues
+    /// (MessagingSession is @Model, not Sendable, so the object itself cannot cross actor boundaries).
     private func handleDebugSessions(connection: NWConnection, request: String) async {
         // Parse optional chatId query param
         var chatIdFilter: String?
@@ -322,23 +324,36 @@ actor TheaGatewayWSServer {
             chatIdFilter = String(afterKey.prefix(while: { $0 != " " && $0 != "&" && $0 != "H" }))
         }
 
-        let sessions = await MainActor.run { MessagingSessionManager.shared.activeSessions }
-        let filtered = chatIdFilter.map { id in sessions.filter { $0.chatId == id } } ?? sessions
-
-        let sessionList = filtered.map { s -> [String: Any] in
-            let history = s.decodedHistory()
-            return [
-                "chatId": s.chatId,
-                "platform": s.platform,
-                "messageCount": history.count,
-                "historyBytes": s.historyData.count,
-                "lastActivity": ISO8601DateFormatter().string(from: s.lastActivity)
-            ]
+        struct SessionInfo: Sendable {
+            let chatId: String
+            let platform: String
+            let messageCount: Int
+            let historyBytes: Int
+            let lastActivity: String
         }
-        let body: [String: Any] = [
-            "sessionCount": sessions.count,
-            "filtered": sessionList
-        ]
+
+        let filter = chatIdFilter
+        let (totalCount, sessionInfos): (Int, [SessionInfo]) = await MainActor.run {
+            let sessions = MessagingSessionManager.shared.activeSessions
+            let filtered = sessions.filter { filter == nil || $0.chatId == filter! }
+            let infos = filtered.map { s -> SessionInfo in
+                SessionInfo(
+                    chatId: s.chatId,
+                    platform: s.platform,
+                    messageCount: s.decodedHistory().count,
+                    historyBytes: s.historyData.count,
+                    lastActivity: ISO8601DateFormatter().string(from: s.lastActivity)
+                )
+            }
+            return (sessions.count, infos)
+        }
+
+        let sessionList = sessionInfos.map { info -> [String: Any] in
+            ["chatId": info.chatId, "platform": info.platform,
+             "messageCount": info.messageCount, "historyBytes": info.historyBytes,
+             "lastActivity": info.lastActivity]
+        }
+        let body: [String: Any] = ["sessionCount": totalCount, "filtered": sessionList]
         await sendJSONResponse(connection: connection, statusCode: 200, body: body)
     }
 
