@@ -1,4 +1,5 @@
 import Foundation
+import KeychainAccess
 import Observation
 import os.log
 
@@ -80,7 +81,7 @@ final class ProviderRegistry {
     // MARK: - Setup
 
     private func setupBuiltInProviders() {
-        debugLog("🔧 Setting up built-in providers...")
+        debugLog("🔧 Setting up built-in providers (async Keychain load)...")
 
         let providerNames: [(id: String, displayName: String)] = [
             ("openai", "OpenAI"),
@@ -91,21 +92,59 @@ final class ProviderRegistry {
             ("groq", "Groq")
         ]
 
+        // Register placeholders immediately so availableProviders is populated from the start.
         for (id, displayName) in providerNames {
-            let isConfigured = checkAPIKeyConfigured(for: id)
-            debugLog("  Provider \(id): isConfigured=\(isConfigured)")
-
-            // Always register provider metadata so availableProviders is populated
-            // even when no API key is configured (e.g., first launch, test environment)
-            if isConfigured, let provider = createProvider(id: id) {
-                availableProviders.append(ProviderInfo(provider: provider, isConfigured: true))
-                providers[id] = provider
-            } else {
-                availableProviders.append(ProviderInfo(id: id, displayName: displayName, isConfigured: false))
-            }
+            availableProviders.append(ProviderInfo(id: id, displayName: displayName, isConfigured: false))
         }
 
-        debugLog("✅ Built-in providers setup complete: \(availableProviders.count) providers")
+        // DEADLOCK FIX (2026-02-21): checkAPIKeyConfigured and createProvider both call
+        // SecureStorage.shared.loadAPIKey — a @MainActor method that invokes SecItemCopyMatching
+        // synchronously on the main thread. SecItemCopyMatching blocks on Mach IPC to securityd,
+        // freezing the entire app (no gateway, no .onAppear, nothing).
+        // Fix: read Keychain on a detached background task (off @MainActor), then update
+        // @MainActor state on the main thread once keys are loaded.
+        Task { [weak self] in
+            guard let self else { return }
+
+            // Task.detached runs off the main actor — safe to call Keychain here.
+            let loadedKeys = await Task.detached { () -> [String: String] in
+                let kc = Keychain(service: "ai.thea.app")
+                    .synchronizable(false)
+                    .accessibility(.whenUnlockedThisDeviceOnly)
+                var keys: [String: String] = [:]
+                for (id, _) in providerNames {
+                    if let key = try? kc.get("apikey.\(id)"), !key.isEmpty {
+                        keys[id] = key
+                    }
+                }
+                return keys
+            }.value
+
+            // Back on @MainActor — update placeholder entries with configured providers.
+            for (index, (id, _)) in providerNames.enumerated() {
+                guard let apiKey = loadedKeys[id],
+                      let provider = self.makeProvider(id: id, apiKey: apiKey) else { continue }
+                if index < self.availableProviders.count {
+                    self.availableProviders[index] = ProviderInfo(provider: provider, isConfigured: true)
+                }
+                self.providers[id] = provider
+            }
+
+            self.debugLog("✅ Built-in providers loaded: \(self.providers.count) with API keys")
+        }
+    }
+
+    /// Creates a provider from a pre-loaded API key (no Keychain call — safe to call on @MainActor).
+    private func makeProvider(id: String, apiKey: String) -> AIProvider? {
+        switch id {
+        case "openai":     return OpenAIProvider(apiKey: apiKey)
+        case "anthropic":  return AnthropicProvider(apiKey: apiKey)
+        case "google":     return GoogleProvider(apiKey: apiKey)
+        case "perplexity": return PerplexityProvider(apiKey: apiKey)
+        case "openrouter": return OpenRouterProvider(apiKey: apiKey)
+        case "groq":       return GroqProvider(apiKey: apiKey)
+        default:           return nil
+        }
     }
 
     /// Check if API key is configured (already handles Keychain errors gracefully)
