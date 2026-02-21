@@ -33,6 +33,17 @@ final class TheaClipSyncService: ObservableObject {
         self.modelContext = modelContext
         loadChangeToken()
 
+        // CLOUDKIT NSException FIX (2026-02-21): CKContainer(identifier:) and
+        // CKContainer.default() throw an uncatchable ObjC NSException (SIGABRT)
+        // when the iCloud container entitlement is absent — e.g. in ad-hoc signed
+        // or unsigned DEBUG builds (CODE_SIGNING_ALLOWED=NO). Swift catch blocks
+        // do NOT intercept ObjC exceptions; the crash is fatal. Pre-check the
+        // TeamIdentifier via codesign to skip CloudKit init safely in such builds.
+        guard Self.hasCloudKitContainerEntitlement() else {
+            syncLogger.info("CloudKit entitlement absent — TheaClipSyncService disabled (unsigned/ad-hoc build)")
+            return
+        }
+
         // Reuse CloudKitService's container approach
         let containerID = "iCloud.app.theathe"
         if let containers = Bundle.main.object(forInfoDictionaryKey: "com.apple.developer.icloud-container-identifiers") as? [String],
@@ -48,6 +59,30 @@ final class TheaClipSyncService: ObservableObject {
         Task { await setupSubscription() }
 
         syncLogger.info("TheaClipSyncService configured")
+    }
+
+    /// Returns true when the process has a real Apple developer TeamIdentifier,
+    /// meaning it was signed with proper CloudKit entitlements. Ad-hoc and
+    /// unsigned builds report "TeamIdentifier=not set" and must skip CKContainer.
+    nonisolated private static func hasCloudKitContainerEntitlement() -> Bool {
+        guard let execPath = Bundle.main.executablePath else { return false }
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/codesign")
+        process.arguments = ["--display", "--verbose=4", execPath]
+        let pipe = Pipe()
+        process.standardError = pipe
+        process.standardOutput = Pipe()
+        do {
+            try process.run()
+            process.waitUntilExit()
+            guard process.terminationStatus == 0 else { return false }
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let output = String(data: data, encoding: .utf8) ?? ""
+            return !output.contains("TeamIdentifier=not set") &&
+                   output.contains("TeamIdentifier=")
+        } catch {
+            return false
+        }
     }
 
     // MARK: - Push (Local → iCloud)
