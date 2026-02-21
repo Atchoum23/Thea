@@ -23,11 +23,26 @@ final class MessagingSessionManager: ObservableObject {
     }
 
     private func setupModelContext() {
+        // BUGFIX (2026-02-21): ModelConfiguration(isStoredInMemoryOnly: false) with no explicit
+        // URL fails silently for apps using App Group entitlements — the OS cannot create the
+        // default store path inside the sandboxed container, so modelContext stays nil and all
+        // gateway messages are lost. Fix: resolve store URL via the app group container, falling
+        // back to a temp file so data is at least preserved for the current session.
+        let storeURL: URL
+        if let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.app.theathe") {
+            let supportDir = groupURL.appendingPathComponent("Library/Application Support", isDirectory: true)
+            try? FileManager.default.createDirectory(at: supportDir, withIntermediateDirectories: true)
+            storeURL = supportDir.appendingPathComponent("messaging-sessions.store")
+        } else {
+            storeURL = FileManager.default.temporaryDirectory.appendingPathComponent("messaging-sessions.store")
+            logger.warning("App group container unavailable — MessagingSession using temp store")
+        }
         do {
-            let config = ModelConfiguration(isStoredInMemoryOnly: false)
+            let config = ModelConfiguration(url: storeURL)
             let container = try ModelContainer(for: MessagingSession.self, configurations: config)
             modelContext = container.mainContext
             loadActiveSessions()
+            logger.info("MessagingSession store at: \(storeURL.lastPathComponent)")
         } catch {
             logger.error("Failed to set up MessagingSession SwiftData context: \(error)")
         }
