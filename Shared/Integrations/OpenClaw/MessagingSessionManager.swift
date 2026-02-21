@@ -18,15 +18,28 @@ final class MessagingSessionManager: ObservableObject {
     private let logger = Logger(subsystem: "ai.thea.app", category: "MessagingSessionManager")
     private var modelContext: ModelContext?
 
-    private init() {}
+    private init() {
+        // Use an in-memory ModelContainer as baseline — no CloudKit, no file-permission issues.
+        // Separate file-based containers conflict with the main CloudKit schema; adding MessagingSession
+        // to SchemaV1 breaks the migration plan. In-memory is reliable for session-scoped history.
+        // Call setModelContext() with a persistent context to upgrade to durable storage.
+        if let container = try? ModelContainer(
+            for: MessagingSession.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        ) {
+            modelContext = container.mainContext
+            logger.info("MessagingSessionManager initialized with in-memory store")
+        } else {
+            logger.error("MessagingSessionManager: even in-memory ModelContainer failed — sessions will not be stored")
+        }
+    }
 
-    /// Receive the app's main ModelContext (set by TheamacOSApp.setupManagers).
-    /// MessagingSession is in SchemaV1.models, so it's persisted in default.store — no
-    /// separate ModelContainer needed (separate containers conflict with CloudKit schema).
+    /// Upgrade to a persistent ModelContext (e.g. main app context with MessagingSession in schema).
+    /// Called when a persistent store is available and MessagingSession is registered in its schema.
     func setModelContext(_ context: ModelContext) {
         modelContext = context
         loadActiveSessions()
-        logger.info("MessagingSessionManager configured with main ModelContext")
+        logger.info("MessagingSessionManager upgraded to persistent ModelContext")
     }
 
     private func loadActiveSessions() {

@@ -21,8 +21,8 @@ SWIFTDATA_STORE="$HOME/Library/Group Containers/group.app.theathe/Library/Applic
 
 PASS=0; FAIL=0; SKIP=0
 
-# MessagingSession is in the main SchemaV1 schema — persisted in default.store (not a separate file)
-MESSAGING_STORE="$SWIFTDATA_STORE"
+# MessagingSessionManager uses in-memory SwiftData — state queried via /debug/sessions HTTP endpoint
+MESSAGING_STORE=""  # not used for SQLite queries anymore
 
 mkdir -p "$LOG_DIR" "$FRAMES_DIR"
 
@@ -52,19 +52,21 @@ msg_count() {
     sqlite3 "$SWIFTDATA_STORE" 'SELECT count(*) FROM ZMESSAGE;' 2>/dev/null || echo -1
 }
 
-# Check MessagingSession historyData size for a given chatId (gateway AI pipeline check)
-# Returns the length in bytes of the JSON historyData blob for the most recent session with that chatId.
-# Grows when messages + AI responses are appended.
+# Check MessagingSession historyData bytes for a chatId via HTTP debug endpoint.
+# MessagingSessionManager uses in-memory SwiftData (no SQLite file) — HTTP is the only way to verify.
+# Returns historyBytes for the most recent session matching chatId (0 if not found / no response yet).
 session_history_size() {
     local chatid="$1"
-    sqlite3 "$MESSAGING_STORE" \
-        "SELECT COALESCE(length(ZHISTORYDATA), 0) FROM ZMESSAGINGSESSION WHERE ZCHATID = '$chatid' ORDER BY ZLASTACTIVITY DESC LIMIT 1;" \
-        2>/dev/null || echo 0
+    local resp
+    resp=$(curl -sf --max-time 5 "$GATEWAY_URL/debug/sessions?chatId=$chatid" 2>/dev/null)
+    echo "$resp" | python3 -c "import sys,json; d=json.load(sys.stdin); f=d.get('filtered',[]); print(f[0]['historyBytes'] if f else 0)" 2>/dev/null || echo 0
 }
 
-# Count rows in MessagingSession (any session created = gateway received + stored a message)
+# Count in-memory MessagingSession rows via HTTP debug endpoint.
 session_count() {
-    sqlite3 "$MESSAGING_STORE" 'SELECT count(*) FROM ZMESSAGINGSESSION;' 2>/dev/null || echo 0
+    local resp
+    resp=$(curl -sf --max-time 5 "$GATEWAY_URL/debug/sessions" 2>/dev/null)
+    echo "$resp" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('sessionCount',0))" 2>/dev/null || echo 0
 }
 
 log "=== AZ3 Functional Test Suite — $(date) ==="
@@ -171,13 +173,11 @@ else
     fail "Main SwiftData store not found at expected path"
 fi
 
-# Baseline the MessagingSession table (now in main default.store via SchemaV1.models)
-if [[ -f "$MESSAGING_STORE" ]]; then
+# Baseline MessagingSession state via HTTP debug endpoint (in-memory, no SQLite file)
+if $GATEWAY_UP; then
     BASELINE_SESSIONS=$(session_count)
     BASELINE_HISTORY_AZ3=$(session_history_size "az3-test-001")
-    log "  MessagingSession table: $BASELINE_SESSIONS sessions, az3-test-001 history: $BASELINE_HISTORY_AZ3 bytes"
-else
-    log "  default.store not found — will be created on first gateway message"
+    log "  MessagingSession (in-memory): $BASELINE_SESSIONS sessions, az3-test-001 history: ${BASELINE_HISTORY_AZ3}B"
 fi
 
 # ───────────────────────────────────────────────────────────────

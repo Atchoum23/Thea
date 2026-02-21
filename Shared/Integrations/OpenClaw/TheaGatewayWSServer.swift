@@ -98,6 +98,12 @@ actor TheaGatewayWSServer {
             return
         }
 
+        // Debug: query in-memory session state (AZ3 tests use this instead of SQLite)
+        if firstLine.hasPrefix("GET /debug/sessions") {
+            await handleDebugSessions(connection: connection, request: requestString)
+            return
+        }
+
         // WebSocket upgrade
         if requestString.contains("Upgrade: websocket") || requestString.contains("Upgrade: WebSocket") {
             await handleWebSocketUpgrade(connection: connection, request: requestString)
@@ -301,6 +307,39 @@ actor TheaGatewayWSServer {
 
         logger.info("Debug: autoRespondEnabled=\(config.enabled), chatIds=\(config.chatIds?.joined(separator: ",") ?? "all")")
         await sendJSONResponse(connection: connection, statusCode: 200, body: ["success": true])
+    }
+
+    // MARK: - Debug Sessions Endpoint
+
+    /// GET /debug/sessions[?chatId=xxx] — returns in-memory MessagingSession state.
+    /// AZ3 tests use this to verify AI responses without needing SQLite file access.
+    private func handleDebugSessions(connection: NWConnection, request: String) async {
+        // Parse optional chatId query param
+        var chatIdFilter: String?
+        if let line = request.components(separatedBy: "\r\n").first,
+           let qIdx = line.range(of: "chatId=") {
+            let afterKey = line[qIdx.upperBound...]
+            chatIdFilter = String(afterKey.prefix(while: { $0 != " " && $0 != "&" && $0 != "H" }))
+        }
+
+        let sessions = await MainActor.run { MessagingSessionManager.shared.activeSessions }
+        let filtered = chatIdFilter.map { id in sessions.filter { $0.chatId == id } } ?? sessions
+
+        let sessionList = filtered.map { s -> [String: Any] in
+            let history = s.decodedHistory()
+            return [
+                "chatId": s.chatId,
+                "platform": s.platform,
+                "messageCount": history.count,
+                "historyBytes": s.historyData.count,
+                "lastActivity": ISO8601DateFormatter().string(from: s.lastActivity)
+            ]
+        }
+        let body: [String: Any] = [
+            "sessionCount": sessions.count,
+            "filtered": sessionList
+        ]
+        await sendJSONResponse(connection: connection, statusCode: 200, body: body)
     }
 
     // MARK: - WebSocket Upgrade
