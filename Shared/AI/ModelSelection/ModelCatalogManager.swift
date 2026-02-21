@@ -1,4 +1,5 @@
 import Foundation
+import KeychainAccess
 import Observation
 import OSLog
 
@@ -60,7 +61,18 @@ final class ModelCatalogManager {
 
     // MARK: - Private Methods
 
-    private func fetchModelsFromAPI() async throws -> [OpenRouterModel] {
+    // DEADLOCK FIX (2026-02-21): The previous implementation called
+    // SecureStorage.shared.loadAPIKey() — a @MainActor method — which invokes
+    // SecItemCopyMatching synchronously. SecItemCopyMatching sends Mach IPC to
+    // securityd. If securityd is slow or the item requires user presence, this
+    // blocks the main thread indefinitely, freezing the entire app (no AppleEvents,
+    // no .onAppear callbacks, no deferred Tasks — everything queues behind it).
+    //
+    // Fix: mark this function nonisolated. Swift Concurrency then runs it on the
+    // cooperative thread pool (off the main actor). A local Keychain instance
+    // (identical config to SecureStorage) reads the key on that background thread.
+    // The @MainActor caller (fetchModels) resumes on the main actor after await.
+    nonisolated private func fetchModelsFromAPI() async throws -> [OpenRouterModel] {
         guard let url = URL(string: "https://openrouter.ai/api/v1/models") else {
             throw CatalogError.invalidURL
         }
@@ -69,13 +81,15 @@ final class ModelCatalogManager {
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        // Get OpenRouter API key if available
-        do {
-            if let apiKey = try SecureStorage.shared.loadAPIKey(for: "openrouter") {
-                request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-            }
-        } catch {
-            logger.debug("No OpenRouter API key available — fetching models without auth: \(error.localizedDescription)")
+        // Read API key on this background thread (nonisolated = off main actor).
+        // Creating a new Keychain instance here is safe — the Security framework
+        // handles concurrent access to the same service/account internally.
+        // Same configuration as SecureStorage to access the same keychain item.
+        let bgKeychain = Keychain(service: "ai.thea.app")
+            .synchronizable(false)
+            .accessibility(.whenUnlockedThisDeviceOnly)
+        if let apiKey = try? bgKeychain.get("apikey.openrouter") {
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         }
 
         let (data, response) = try await URLSession.shared.data(for: request)
