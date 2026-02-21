@@ -65,7 +65,10 @@ enum SchemaV1: VersionedSchema {
             DeliveredInsight.self,
 
             // D3: Classification Outcome Learning
-            ClassificationOutcome.self
+            ClassificationOutcome.self,
+
+            // O3: Messaging Session (per-platform-per-peer conversation history)
+            MessagingSession.self
         ]
     }
 }

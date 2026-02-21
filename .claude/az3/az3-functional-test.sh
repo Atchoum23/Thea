@@ -21,8 +21,8 @@ SWIFTDATA_STORE="$HOME/Library/Group Containers/group.app.theathe/Library/Applic
 
 PASS=0; FAIL=0; SKIP=0
 
-# MessagingSession store (separate from main ZMESSAGE store — used by the gateway)
-MESSAGING_STORE="$HOME/Library/Group Containers/group.app.theathe/Library/Application Support/messaging-sessions.store"
+# MessagingSession is in the main SchemaV1 schema — persisted in default.store (not a separate file)
+MESSAGING_STORE="$SWIFTDATA_STORE"
 
 mkdir -p "$LOG_DIR" "$FRAMES_DIR"
 
@@ -171,13 +171,13 @@ else
     fail "Main SwiftData store not found at expected path"
 fi
 
-# Baseline the MessagingSession store (gateway-specific, separate file)
+# Baseline the MessagingSession table (now in main default.store via SchemaV1.models)
 if [[ -f "$MESSAGING_STORE" ]]; then
     BASELINE_SESSIONS=$(session_count)
     BASELINE_HISTORY_AZ3=$(session_history_size "az3-test-001")
-    log "  MessagingSession store: $BASELINE_SESSIONS sessions, az3-test-001 history: $BASELINE_HISTORY_AZ3 bytes"
+    log "  MessagingSession table: $BASELINE_SESSIONS sessions, az3-test-001 history: $BASELINE_HISTORY_AZ3 bytes"
 else
-    log "  MessagingSession store not yet created (will be created on first gateway message)"
+    log "  default.store not found — will be created on first gateway message"
 fi
 
 # ───────────────────────────────────────────────────────────────

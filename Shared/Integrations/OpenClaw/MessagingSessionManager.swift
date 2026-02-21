@@ -18,51 +18,15 @@ final class MessagingSessionManager: ObservableObject {
     private let logger = Logger(subsystem: "ai.thea.app", category: "MessagingSessionManager")
     private var modelContext: ModelContext?
 
-    private init() {
-        setupModelContext()
-    }
+    private init() {}
 
-    private func setupModelContext() {
-        // BUGFIX (2026-02-21 v1): ModelConfiguration(isStoredInMemoryOnly: false) fails silently
-        // for App Group apps — modelContext stays nil and all gateway messages are lost.
-        // Fix: resolve store URL via app group container. Fallback to temp dir so data is
-        // preserved for the current session even if group container is unavailable.
-        // BUGFIX (2026-02-21 v2): A 0-byte SQLite placeholder left by a prior failed
-        // ModelContainer init blocks subsequent init attempts. Delete it before retrying.
-        let storeURL: URL
-        if let groupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.app.theathe") {
-            let supportDir = groupURL.appendingPathComponent("Library/Application Support", isDirectory: true)
-            try? FileManager.default.createDirectory(at: supportDir, withIntermediateDirectories: true)
-            storeURL = supportDir.appendingPathComponent("messaging-sessions.store")
-        } else {
-            storeURL = FileManager.default.temporaryDirectory.appendingPathComponent("messaging-sessions.store")
-            logger.warning("App group container unavailable — MessagingSession using temp store")
-        }
-
-        // Remove 0-byte SQLite placeholder from a failed previous init — blocks re-init
-        if let attrs = try? FileManager.default.attributesOfItem(atPath: storeURL.path),
-           (attrs[.size] as? Int64 ?? 0) == 0 {
-            try? FileManager.default.removeItem(at: storeURL)
-            logger.info("Removed zero-byte messaging-sessions.store remnant before re-init")
-        }
-
-        do {
-            let config = ModelConfiguration(url: storeURL)
-            let container = try ModelContainer(for: MessagingSession.self, configurations: config)
-            modelContext = container.mainContext
-            loadActiveSessions()
-            logger.info("MessagingSession store at: \(storeURL.lastPathComponent)")
-        } catch {
-            logger.error("Failed to set up MessagingSession SwiftData context: \(error)")
-            // Fallback: in-memory store — runtime works, data not persisted across launches
-            if let fallbackContainer = try? ModelContainer(
-                for: MessagingSession.self,
-                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-            ) {
-                modelContext = fallbackContainer.mainContext
-                logger.warning("MessagingSession using in-memory fallback — data will not persist")
-            }
-        }
+    /// Receive the app's main ModelContext (set by TheamacOSApp.setupManagers).
+    /// MessagingSession is in SchemaV1.models, so it's persisted in default.store — no
+    /// separate ModelContainer needed (separate containers conflict with CloudKit schema).
+    func setModelContext(_ context: ModelContext) {
+        modelContext = context
+        loadActiveSessions()
+        logger.info("MessagingSessionManager configured with main ModelContext")
     }
 
     private func loadActiveSessions() {

@@ -213,6 +213,9 @@ struct TheamacOSApp: App {
         // Window management — activated (AG3)
         WindowManager.shared.setModelContext(context)
 
+        // Messaging sessions — MessagingSession is in SchemaV1.models, persisted in default.store
+        MessagingSessionManager.shared.setModelContext(context)
+
         // Privacy monitoring — auto-start network tracking and load daily snapshots
         Task {
             try? await Task.sleep(for: .milliseconds(300))
