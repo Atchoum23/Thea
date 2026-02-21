@@ -149,17 +149,24 @@ final class BackgroundServiceMonitor: ObservableObject {
 
         let syncEnabled = CloudKitService.shared.syncEnabled
         if syncEnabled {
-            let lastSync = CloudKitService.shared.lastSyncDate
-            let interval = lastSync.map { Date().timeIntervalSince($0) } ?? .infinity
-            if interval < 600 { // Within 10 minutes
-                cloudKitStatus = .healthy
-                cloudKitMsg = "Last sync \(Int(interval))s ago"
-            } else if interval < 3600 { // Within 1 hour
-                cloudKitStatus = .degraded
-                cloudKitMsg = "Last sync \(Int(interval / 60))m ago"
+            // CRASH FIX (2026-02-21): lastSyncDate is nil on first launch → interval = .infinity
+            // Int(Double.infinity) is undefined behavior → EXC_BREAKPOINT crash.
+            // Fix: use if-let to unwrap, handle "never synced" case explicitly.
+            if let lastSync = CloudKitService.shared.lastSyncDate {
+                let interval = Date().timeIntervalSince(lastSync)
+                if interval < 600 { // Within 10 minutes
+                    cloudKitStatus = .healthy
+                    cloudKitMsg = "Last sync \(Int(interval))s ago"
+                } else if interval < 3600 { // Within 1 hour
+                    cloudKitStatus = .degraded
+                    cloudKitMsg = "Last sync \(Int(interval / 60))m ago"
+                } else {
+                    cloudKitStatus = .unhealthy
+                    cloudKitMsg = "Sync stale: \(Int(interval / 3600))h since last sync"
+                }
             } else {
                 cloudKitStatus = .unhealthy
-                cloudKitMsg = "Sync stale: \(Int(interval / 3600))h since last sync"
+                cloudKitMsg = "Sync stale: never synced"
             }
         } else {
             cloudKitStatus = .unknown
