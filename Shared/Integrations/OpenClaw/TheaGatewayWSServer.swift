@@ -154,16 +154,30 @@ actor TheaGatewayWSServer {
             return
         }
 
-        // Read request body
-        let bodyData = await withCheckedContinuation { (cont: CheckedContinuation<Data, Never>) in
-            connection.receive(minimumIncompleteLength: contentLength, maximumLength: contentLength) { content, _, _, error in
-                if let error {
-                    _ = error
-                    cont.resume(returning: Data())
-                } else {
+        // BUGFIX (2026-02-21): The body was already read in handleNewConnection's initial
+        // connection.receive(maximumLength: 4096). The old code attempted a second receive()
+        // which would time out because those bytes were already consumed — POST /message
+        // always returned "000" (no response) to curl.
+        // Fix: extract body from the `request` string that was passed in. HTTP body follows
+        // the blank line separator \r\n\r\n. Only fall back to a second receive() if the
+        // body was genuinely truncated (body > 4095 bytes after headers).
+        let bodyData: Data
+        if let sepRange = request.range(of: "\r\n\r\n"),
+           let inlineBody = request[sepRange.upperBound...].data(using: .utf8),
+           inlineBody.count >= contentLength {
+            // Body fully present in the initial read — no second receive needed
+            bodyData = Data(inlineBody.prefix(contentLength))
+        } else {
+            // Body was truncated (request > 4096 bytes) — read remaining bytes
+            let alreadyRead = request.range(of: "\r\n\r\n")
+                .flatMap { request[$0.upperBound...].data(using: .utf8) } ?? Data()
+            let remaining = max(0, contentLength - alreadyRead.count)
+            let additional = await withCheckedContinuation { (cont: CheckedContinuation<Data, Never>) in
+                connection.receive(minimumIncompleteLength: remaining, maximumLength: remaining) { content, _, _, error in
                     cont.resume(returning: content ?? Data())
                 }
             }
+            bodyData = alreadyRead + additional
         }
 
         guard !bodyData.isEmpty else {
