@@ -30,7 +30,8 @@ public final class LifeMonitoringCloudSync: ObservableObject {
     // MARK: - CloudKit Configuration
 
     private let containerIdentifier = "iCloud.app.theathe"
-    private let privateDatabase: CKDatabase
+    // swiftlint:disable:next implicitly_unwrapped_optional
+    private var privateDatabase: CKDatabase!
     private let zoneName = "LifeMonitoringZone"
 
     // Record types for life monitoring
