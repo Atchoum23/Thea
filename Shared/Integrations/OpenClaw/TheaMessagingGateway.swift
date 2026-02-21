@@ -40,10 +40,19 @@ final class TheaMessagingGateway: ObservableObject {
             logger.error("Failed to start WS server: \(error)")
         }
 
-        // Start connectors for all enabled platforms
-        for platform in MessagingPlatform.allCases {
-            let creds = MessagingCredentialsStore.load(for: platform)
-            guard creds.isEnabled else { continue }
+        // DEADLOCK FIX (2026-02-21): MessagingCredentialsStore.load() calls SecItemCopyMatching
+        // synchronously on @MainActor — blocks the main thread indefinitely, preventing
+        // serveHealth()'s `await MainActor.run {}` from ever completing (health endpoint timeout).
+        // Fix: load all credentials in Task.detached (off @MainActor), then start connectors.
+        let enabledCredentials = await Task.detached { () -> [(MessagingPlatform, MessagingCredentials)] in
+            MessagingPlatform.allCases.compactMap { platform in
+                let creds = MessagingCredentialsStore.load(for: platform)
+                return creds.isEnabled ? (platform, creds) : nil
+            }
+        }.value
+
+        // Start connectors for all enabled platforms (back on @MainActor)
+        for (platform, creds) in enabledCredentials {
             await startConnector(for: platform, credentials: creds)
         }
 
@@ -104,7 +113,8 @@ final class TheaMessagingGateway: ObservableObject {
             connectors.removeValue(forKey: platform)
             connectedPlatforms.remove(platform)
         }
-        let creds = MessagingCredentialsStore.load(for: platform)
+        // DEADLOCK FIX (2026-02-21): load credentials off @MainActor
+        let creds = await Task.detached { MessagingCredentialsStore.load(for: platform) }.value
         guard creds.isEnabled else { return }
         await startConnector(for: platform, credentials: creds)
     }
