@@ -100,18 +100,54 @@ public class CloudKitService: ObservableObject {
         }
     }
 
-    /// Create a CKContainer, catching any assertion failures from misconfigured entitlements.
+    /// Create a CKContainer safely. Throws a Swift error (instead of crashing) when
+    /// the iCloud container entitlement is absent — e.g. in ad-hoc signed builds.
+    ///
+    /// IMPORTANT: Both CKContainer(identifier:) AND CKContainer.default() throw an
+    /// uncatchable ObjC NSException (SIGABRT) when entitlements are missing. Swift's
+    /// try/catch does NOT intercept ObjC exceptions. We must pre-check the TeamIdentifier
+    /// via codesign and throw a real Swift error that the caller's do/catch can handle.
     private static func createContainer(identifier: String) throws -> CKContainer {
-        // Use the default container instead of a named one if the identifier
-        // isn't present in the app's entitlements.  CKContainer(identifier:)
-        // will hit a `brk` instruction (crash) if the identifier is missing.
-        // We verify by checking the entitlements key first.
+        // TeamIdentifier pre-check: ad-hoc/unsigned builds have "TeamIdentifier=not set".
+        // Properly signed builds have "TeamIdentifier=<10-char ID>".
+        guard hasCloudKitContainerEntitlement() else {
+            throw NSError(
+                domain: "ai.thea.app.CloudKitService",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "iCloud container entitlement absent (ad-hoc/unsigned build)"]
+            )
+        }
+        // Entitlement confirmed present — safe to call CKContainer.
         guard let containers = Bundle.main.object(forInfoDictionaryKey: "com.apple.developer.icloud-container-identifiers") as? [String],
               containers.contains(identifier) else {
-            // Identifier not in Info.plist / entitlements — fall back to default container
+            // Identifier not in plist — fall back to default container (safe: entitlement confirmed)
             return CKContainer.default()
         }
         return CKContainer(identifier: identifier)
+    }
+
+    /// Returns true when the process has a real Apple developer TeamIdentifier,
+    /// meaning it was signed with proper CloudKit entitlements. Ad-hoc and
+    /// unsigned builds report "TeamIdentifier=not set" and must skip CKContainer.
+    nonisolated private static func hasCloudKitContainerEntitlement() -> Bool {
+        guard let execPath = Bundle.main.executablePath else { return false }
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/codesign")
+        process.arguments = ["--display", "--verbose=4", execPath]
+        let pipe = Pipe()
+        process.standardError = pipe
+        process.standardOutput = Pipe()
+        do {
+            try process.run()
+            process.waitUntilExit()
+            guard process.terminationStatus == 0 else { return false }
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let output = String(data: data, encoding: .utf8) ?? ""
+            return !output.contains("TeamIdentifier=not set") &&
+                   output.contains("TeamIdentifier=")
+        } catch {
+            return false
+        }
     }
 
     // MARK: - Change Token Persistence
