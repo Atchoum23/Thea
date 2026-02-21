@@ -57,7 +57,14 @@ public final class AppUpdateService: ObservableObject {
             return container
         }
 
-        // Check account status first using default container (safe, won't crash)
+        // Guard: CKContainer.default() throws NSException (SIGABRT) in ad-hoc/unsigned builds.
+        // Pre-check TeamIdentifier via CloudKitService utility before calling any CKContainer.
+        guard CloudKitService.hasCloudKitContainerEntitlement() else {
+            cloudKitAvailable = false
+            return nil
+        }
+
+        // Check account status first using default container
         let defaultContainer = CKContainer.default()
         do {
             let status = try await defaultContainer.accountStatus()

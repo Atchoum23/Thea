@@ -129,7 +129,8 @@ public class CloudKitService: ObservableObject {
     /// Returns true when the process has a real Apple developer TeamIdentifier,
     /// meaning it was signed with proper CloudKit entitlements. Ad-hoc and
     /// unsigned builds report "TeamIdentifier=not set" and must skip CKContainer.
-    nonisolated private static func hasCloudKitContainerEntitlement() -> Bool {
+    /// Internal (not private) so other CloudKit services can reuse this check.
+    nonisolated static func hasCloudKitContainerEntitlement() -> Bool {
         guard let execPath = Bundle.main.executablePath else { return false }
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/codesign")

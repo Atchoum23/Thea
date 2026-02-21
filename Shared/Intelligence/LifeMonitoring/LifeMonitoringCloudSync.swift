@@ -59,6 +59,13 @@ public final class LifeMonitoringCloudSync: ObservableObject {
     // MARK: - Initialization
 
     private init() {
+        // Guard: CKContainer(identifier:) throws NSException (SIGABRT) in ad-hoc/unsigned
+        // builds. Pre-check TeamIdentifier before any CKContainer call.
+        guard CloudKitService.hasCloudKitContainerEntitlement() else {
+            logger.info("CloudKit entitlement absent — LifeMonitoringCloudSync disabled (unsigned/ad-hoc build)")
+            return
+        }
+
         let container = CKContainer(identifier: containerIdentifier)
         privateDatabase = container.privateCloudDatabase
 
